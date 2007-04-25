@@ -2683,6 +2683,7 @@ struct encumberance_info
 #define COMBAT_FILTER		( 1 << 13 )	/* Only receives local combat messages */
 #define GROUP_CLOSED		( 1 << 14 )	/* Not accepting any other followers */
 #define QUIET_SCAN		( 1 << 15 ) /* quick and quiet scan when entering rooms */
+#define NO_BUILDERPORT		( 1 << 16 )	/* Admins w/o access to 4501 */
 
 /* char_data.guardian_flags - controls notification of PC initiated attacks */
 #define GUARDIAN_PC		( 1 << 0 )	/* 01 */

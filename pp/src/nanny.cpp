@@ -2866,6 +2866,17 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
       d->character = NULL;
       return;
     }
+  else if (port == BUILDER_PORT && IS_SET (d->character->plr_flags, NO_BUILDERPORT))
+    {
+      SEND_TO_Q
+	("\n#6Your admin login does not have builder port access privileges.#0\n",
+	 d);
+      display_main_menu (d);
+      unload_pc (d->character);
+      d->character = NULL;
+      return;
+    }
+
 
   if (d->acct->color)
     d->character->color = 1;
