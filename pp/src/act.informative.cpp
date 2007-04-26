@@ -1621,6 +1621,23 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 	      crafts_found += 1;
 	    }
 
+SUBCRAFT_HEAD_DATA *tcraft;
+	  if (!IS_MORTAL (ch))
+	  	{
+	  	for (tcraft = crafts; tcraft; tcraft = tcraft->next)
+	  		{
+	  		if (!craft_uses (tcraft, obj->nVirtual))
+		continue;
+	      if (crafts_found)
+		sprintf (buf + strlen (buf), ", ");
+	      sprintf (buf + strlen (buf), "'%s %s'",
+		       tcraft->command,
+		       tcraft->subcraft_name);
+	      crafts_found += 1;
+	  		}
+	  	}
+	  
+	  
 	  if (crafts_found && mode == 15)
 	    {
 	      sprintf (output,
