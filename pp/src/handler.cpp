@@ -3150,6 +3150,31 @@ break_delay (CHAR_DATA * ch)
       send_to_char ("You decide against making the purchase.\n\r", ch);
       break;
 
+    case DEL_CANCEL_AUCTION:
+      ch->delay_type = 0;
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0;
+      ch->delay_ch = NULL;
+      send_to_char ("You decide against cancelling the auction.\n\r", ch);
+      break;
+	  
+    case DEL_PLACE_AUCTION:
+      ch->delay_type = 0;
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0;
+      ch->delay_ch = NULL;
+      send_to_char ("You decide against placing the auction.\n\r", ch);
+      break;
+	  
+	case DEL_PLACE_BID:
+	case DEL_PLACE_BUYOUT:
+	  ch->delay_type = 0;
+	  ch->delay_ch = NULL;
+	  ch->delay_info1 = 0;
+	  ch->delay_info2 = 0;
+	  send_to_char ("You decide against placing the bid.\n\r", ch);
+	  break;
+	  
     case DEL_PITCH:
       ch->delay = 0;
       ch->delay_obj = NULL;

@@ -36,6 +36,7 @@ const struct command_data commands[] = {
   {"apply", do_apply, SIT, C_WLK},
   {"as", do_as, DEAD, C_LV3},
   {"assist", do_assist, REST, C_SUB | C_DOA | C_BLD | C_PAR | C_DEL},
+  {"auction", do_auction, SIT, C_BLD},
   {"barter", do_barter, SIT, C_MNT},
   {"behead", do_behead, STAND, C_WLK | C_MNT},
   {"bind", char__do_bind, STAND, C_WLK | C_MNT},

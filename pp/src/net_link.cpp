@@ -50,7 +50,6 @@ new_descriptor (int s)
   char ip[MAX_STRING_LENGTH];
   struct hostent *from = NULL;
 
-#ifndef MACOSX
   socklen_t size;
 
   size = sizeof (sock);
@@ -60,18 +59,7 @@ new_descriptor (int s)
       perror ("Accept");
       return (-1);
     }
-#else
-  size_t size;
-
-  size = sizeof (sock);
-
-  if ((desc = accept (s, (struct sockaddr *) &sock, &size)) < 0)
-    {
-      perror ("Accept");
-      return (-1);
-    }
-#endif
-
+	
   nonblock (desc);
   if ((maxdesc + 1) >= avail_descs)
     {

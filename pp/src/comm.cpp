@@ -54,6 +54,9 @@ int port;
 int finished_booting = 0;
 int guest_conns = 0;
 int arena_matches = 0;
+extern int new_auctions;
+extern int sold_auctions;
+extern int auction_bids;
 long starttime, crashtime;
 int count_guest_online = 0;
 long bootstart;
@@ -2112,14 +2115,20 @@ do_gstat (CHAR_DATA * ch, char *argument, int cmd)
 
   sprintf (buf, "#2Connected Descriptors:          #0%d\n", uc);
   send_to_char (buf, ch);
-  sprintf (buf, "#2Connections Since Last Boot:    #0%d\n",
+  sprintf (buf, "#2Connections Since Boot:         #0%d\n",
 	   nTotalConnections);
   send_to_char (buf, ch);
-  sprintf (buf, "#2Guest Logins Since Last Boot:   #0%d\n", guest_conns);
+  sprintf (buf, "#2Guest Logins Since Boot:        #0%d\n", guest_conns);
   send_to_char (buf, ch);
-  sprintf (buf, "#2New Accounts Since Last Boot:   #0%d\n", new_accounts);
+  sprintf (buf, "#2New Accounts Since Boot:        #0%d\n", new_accounts);
   send_to_char (buf, ch);
-  sprintf (buf, "#2Arena Matches Since Last Boot:  #0%d\n", arena_matches);
+  sprintf (buf, "#2Arena Matches Since Boot:       #0%d\n", arena_matches);
+  send_to_char (buf, ch);
+  sprintf (buf, "#2Auctions Created Since Boot:    #0%d\n", new_auctions);
+  send_to_char (buf, ch);
+  sprintf (buf, "#2Bids Placed Since Boot:         #0%d\n", auction_bids);
+  send_to_char (buf, ch);
+  sprintf (buf, "#2Auctions Sold Since Boot:       #0%d\n", sold_auctions);
   send_to_char (buf, ch);
   sprintf (buf, "#2Mother Descriptor:              #0%d\n", nMainSocket);
   send_to_char (buf, ch);

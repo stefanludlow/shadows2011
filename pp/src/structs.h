@@ -757,7 +757,7 @@ typedef signed char shortint;
 #define ACT_WILDLIFE	( 1 << 21 )	/* Wildlife doesn't attack wildlife */
 #define ACT_STAYPUT		( 1 << 22 )	/* Saves between reboots */
 #define ACT_PASSIVE		( 1 << 23 )	/* Won't assist clan members */
-#define ACT_NICE_THIEF 	( 1 << 24 )
+#define ACT_AUCTIONEER 	( 1 << 24 ) /* Mobile is an NPC auctioneer - auctions.cpp */
 #define ACT_ECONZONE	( 1 << 25 )	/* NPC uses econ zone discount/markups */
 #define ACT_JAILER	( 1 << 26 )	/* New jailer flag for NPCs */
 #define ACT_NOBIND	( 1 << 27 )
@@ -1267,6 +1267,10 @@ typedef signed char shortint;
 #define DEL_WATER_REMOVE	48
 #define DEL_ORDER_ITEM		49
 #define DEL_QUICK_SCAN_DIAG	50
+#define DEL_PLACE_AUCTION	51
+#define DEL_PLACE_BID		52
+#define DEL_PLACE_BUYOUT	53
+#define DEL_CANCEL_AUCTION	54
 
 /* Zone flags */
 
@@ -2683,7 +2687,7 @@ struct encumberance_info
 #define COMBAT_FILTER		( 1 << 13 )	/* Only receives local combat messages */
 #define GROUP_CLOSED		( 1 << 14 )	/* Not accepting any other followers */
 #define QUIET_SCAN		( 1 << 15 ) /* quick and quiet scan when entering rooms */
-#define NO_BUILDERPORT		( 1 << 16 )	/* Admins w/o access to 4501 */
+#define NO_BUILDERPORT          ( 1 << 16 )     /* Admins w/o access to 4501 */
 
 /* char_data.guardian_flags - controls notification of PC initiated attacks */
 #define GUARDIAN_PC		( 1 << 0 )	/* 01 */
@@ -2876,6 +2880,7 @@ struct social_data
 #define PLAYER_BOARD_DIR "player_boards"
 #define VIRTUAL_BOARD_DIR	"vboards"
 #define TICKET_DIR		"tickets"
+#define AUCTION_DIR		"auctions"
 #define COLDLOAD_IDS	"coldload_ids"
 #define DYNAMIC_REGISTRY REGIONS "/dynamic_registry"
 #define STAYPUT_FILE	"stayput"

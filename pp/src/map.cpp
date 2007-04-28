@@ -15,7 +15,9 @@
 #include "decl.h"
 #include "gd.h"
 
-/* Something to come back to and finish, eventually ... */
+/* 
+
+Something to come back to and finish, eventually ...
 
 void
 refresh_map (void)
@@ -68,3 +70,5 @@ refresh_map (void)
 
   gdImageDestroy (map);
 }
+
+*/

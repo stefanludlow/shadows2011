@@ -3,21 +3,10 @@
 
 CC=g++
 
-CFLAGS = -ggdb -DLINUX -Wall -O2
+CFLAGS = -ggdb -DLINUX -Wall
 LFLAGS = -lm -lmysqlclient -lcrypt -lnsl
-PFLAGS = 
 
 INSTALL_DIR = ..
-
-# Comment out above and uncomment below for OS X compilation
-#CFLAGS = -ggdb -DMACOSX -O -Wuninitialized -Wno-long-double
-#LFLAGS = -lz -lmysqlclient
-
-OPT_CFLAGS = -ggdb -DLINUX -O2 -Wuninitialized
-
-# These directory listings should be able to find the requisite libraries
-# on any *NIX-based system, including OS X and Free BSD.
-
 
 INCLUDE = -I/usr/local/mysql/include/ -I/usr/include/mysql/ -I/usr/include/openssl/ -I/usr/local/mysql/ -I/usr/local/include/mysql/
 
@@ -25,7 +14,7 @@ LIBDIRS = -L/usr/lib64/mysql
 
 OBJS = \
 account.o act.comm.o act.informative.o act.movement.o \
-act.offensive.o act.other.o arena.o clan.o comm.o \
+act.offensive.o act.other.o arena.o auctions.o clan.o comm.o \
 commands.o commerce.o constants.o control.o crafts.o \
 create_mobile.o creation.o db.o destruction.o \
 dwellings.o edit.o employment.o fight.o group.o guest.o \

@@ -530,8 +530,7 @@ nanny_check_password (DESCRIPTOR_DATA * d, char *argument)
 	"AND username != '" << escaped_name << "'";
 
       std::string ipshare_query_string = ipshare_query_stream.str ();
-      mysql_real_query (database, ipshare_query_string.c_str (),
-			ipshare_query_string.length ());
+      mysql_safe_query ((char *)ipshare_query_string.c_str ());
 
       if ((result = mysql_store_result (database)) != NULL)
 	{
@@ -579,7 +578,7 @@ nanny_check_password (DESCRIPTOR_DATA * d, char *argument)
 	"UPDATE shadows.forum_users "
 	"SET pass = MD5('" + pwd + "') "
 	"WHERE username = '" + d->acct->name + "'" ;
-  mysql_real_query (database, drupal_pass.c_str (), drupal_pass.length ());
+  mysql_safe_query ((char *)drupal_pass.c_str ());
 
   sprintf (buf,
 	   "INSERT INTO server_logs.ip "
@@ -1043,7 +1042,7 @@ setup_new_account (account  *acct)
     "(user_id, group_id, user_pending) "
     "VALUES (@next_id, LAST_INSERT_ID(), 0)";
 
-  mysql_real_query (database, insert_query.c_str (), insert_query.length ());
+  mysql_safe_query ((char *)insert_query.c_str ());
 
   do
     {
@@ -1813,15 +1812,18 @@ nanny_mail_menu (DESCRIPTOR_DATA * d, char *argument)
 	"SELECT account,flags,from_line,from_account,"
 	"sent_date, subject,message, timestamp, id,"
 	"DATE_FORMAT(FROM_UNIXTIME(timestamp + "
+#ifndef MACOSX
 			   << (timezone + (int)(d->acct->timezone * 3600)) << 
+#else
+				<<
+#endif
 	"),\"%a %b %d %T %Y\") AS sent_date,to_line "
 	" FROM hobbitmail WHERE account = '"
 			   << escaped_name << 
 	"' ORDER BY timestamp DESC";
 
       std::string message_query_string = message_query_stream.str ();
-      mysql_real_query (database, message_query_string.c_str (), 
-			message_query_string.length ());
+      mysql_safe_query ((char *)message_query_string.c_str ());
 
       if ((result = mysql_store_result (database)) == NULL)
 	{
@@ -2866,17 +2868,6 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
       d->character = NULL;
       return;
     }
-  else if (port == BUILDER_PORT && IS_SET (d->character->plr_flags, NO_BUILDERPORT))
-    {
-      SEND_TO_Q
-	("\n#6Your admin login does not have builder port access privileges.#0\n",
-	 d);
-      display_main_menu (d);
-      unload_pc (d->character);
-      d->character = NULL;
-      return;
-    }
-
 
   if (d->acct->color)
     d->character->color = 1;

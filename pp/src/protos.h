@@ -77,6 +77,9 @@ extern int global_moon_light;
 extern int moon_light[];
 extern int desc_weather[];
 extern int MAX_ZONE;
+extern int new_auctions;
+extern int sold_auctions;
+extern int auction_bids;
 
 extern int count_max_online;
 extern int arena_matches;
@@ -220,6 +223,7 @@ void do_assist (CHAR_DATA * ch, char *argument, int cmd);
 void do_ask (CHAR_DATA * ch, char *argument, int cmd);
 void do_assign (CHAR_DATA * ch, char *argument, int cmd);
 void do_at (CHAR_DATA * ch, char *argument, int cmd);
+void do_auction (CHAR_DATA * ch, char *argument, int cmd);
 void do_award (CHAR_DATA * ch, char *argument, int cmd);
 void do_ban (CHAR_DATA * ch, char *argument, int cmd);
 void char__do_bind (CHAR_DATA * ch, char *argument, int cmd);	/* wounds.c           */
@@ -669,6 +673,7 @@ void do_receipts (CHAR_DATA * ch, char *argument, int cmd);	/* objects.c */
 /* end objects.c */
 
 
+void fwrite_a_obj (OBJ_DATA * obj, FILE * fp);
 int get_user_seconds ();
 struct time_info_data mud_time_passed (time_t t2, time_t t1);
 int fread_number (FILE * fp);
@@ -924,6 +929,7 @@ void soma_ten_second_affect (CHAR_DATA * ch, AFFECTED_TYPE * af);
 void soma_rl_minute_affect (CHAR_DATA * ch, AFFECTED_TYPE * af);
 OBJ_DATA *load_colored_object (int nVirtual, char *string);
 OBJ_DATA *fread_object (int vnum, int nZone, FILE * fp);
+OBJ_DATA *fread_obj (FILE * fp);
 void death_email (CHAR_DATA * ch);
 int index_lookup (const char* const* index, const char* lookup);
 int check_climb (CHAR_DATA * ch);
@@ -1414,6 +1420,7 @@ int can_subtract_money (CHAR_DATA * ch, int farthings_to_subtract,
 			int currency_type);
 void subtract_money (CHAR_DATA * ch, int farthings_to_subtract,
 		     int currency_type);
+void keeper_money_to_char (CHAR_DATA * keeper, CHAR_DATA * ch, int money);
 int redefine_objects (OBJ_DATA * proto);
 void money_from_char_to_room (CHAR_DATA * ch, int vnum);
 float econ_markup (CHAR_DATA * keeper, OBJ_DATA * obj);

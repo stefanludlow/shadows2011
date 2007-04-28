@@ -82,8 +82,7 @@ class account
 	<< " WHERE user_id = " << id;
 
       std::string update_flag_string = update_flag_stream.str ();
-      mysql_real_query (database, update_flag_string.c_str (),
-			update_flag_string.length ());
+      mysql_safe_query ((char *)update_flag_string.c_str ());
 
       extern DESCRIPTOR_DATA *descriptor_list;
       for (DESCRIPTOR_DATA* td = descriptor_list; td; td = td->next)
@@ -106,8 +105,7 @@ class account
 	<< " WHERE user_id = " << id;
 
       std::string update_flag_string = update_flag_stream.str ();
-      mysql_real_query (database, update_flag_string.c_str (),
-			update_flag_string.length ());
+      mysql_safe_query ((char *)update_flag_string.c_str ());
 
       extern DESCRIPTOR_DATA *descriptor_list;
       for (DESCRIPTOR_DATA* td = descriptor_list; td; td = td->next)
@@ -130,8 +128,7 @@ class account
 	<< " WHERE user_id = " << id;
 
       std::string update_flag_string = update_flag_stream.str ();
-      mysql_real_query (database, update_flag_string.c_str (),
-			update_flag_string.length ());
+      mysql_safe_query ((char *)update_flag_string.c_str ());
 
       extern DESCRIPTOR_DATA *descriptor_list;
       for (DESCRIPTOR_DATA* td = descriptor_list; td; td = td->next)
@@ -150,8 +147,7 @@ class account
 	<< " WHERE user_id = " << id;
 
       std::string update_flag_string = update_flag_stream.str ();
-      mysql_real_query (database, update_flag_string.c_str (),
-			update_flag_string.length ());
+      mysql_safe_query ((char *)update_flag_string.c_str ());
 
       extern DESCRIPTOR_DATA *descriptor_list;
       for (DESCRIPTOR_DATA* td = descriptor_list; td; td = td->next)
@@ -171,8 +167,7 @@ class account
 	<< " WHERE user_id = " << id;
 
       std::string update_flag_string = update_flag_stream.str ();
-      mysql_real_query (database, update_flag_string.c_str (),
-			update_flag_string.length ());
+      mysql_safe_query ((char *)update_flag_string.c_str ());
 
       extern DESCRIPTOR_DATA *descriptor_list;
       for (DESCRIPTOR_DATA* td = descriptor_list; td; td = td->next)
@@ -194,8 +189,7 @@ class account
 	<< " WHERE user_id = " << id;
 
       std::string update_flag_string = update_flag_stream.str ();
-      mysql_real_query (database, update_flag_string.c_str (),
-			update_flag_string.length ());
+      mysql_safe_query ((char *)update_flag_string.c_str ());
 
       extern DESCRIPTOR_DATA *descriptor_list;
       for (DESCRIPTOR_DATA* td = descriptor_list; td; td = td->next)
@@ -216,8 +210,7 @@ class account
 	<< " WHERE user_id = " << id;
 
       std::string update_flag_string = update_flag_stream.str ();
-      mysql_real_query (database, update_flag_string.c_str (),
-			update_flag_string.length ());
+      mysql_safe_query ((char *)update_flag_string.c_str ());
 
       extern DESCRIPTOR_DATA *descriptor_list;
       for (DESCRIPTOR_DATA* td = descriptor_list; td; td = td->next)
@@ -363,7 +356,7 @@ class account
       timezone = 0;
       code = 0;
       last_rpp = 0;
-    }
+	}
 
   void set_name (const char *account_name)
     {

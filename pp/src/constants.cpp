@@ -491,7 +491,7 @@ const char *action_bits[] = {
   "Wildlife",			/* Mob won't attack other wildlife */
   "Stayput",			/* Mob saves and reloads after boot */
   "Passive",			/* Mob won't assist clan brother in combat */
-  "Unused",			/* PC can't petition */
+  "Auctioneer",			/* Mob is an auctioneer - auctions.cpp */
   "Econzone",			/* NPC, if keeper, uses econ zone price dis/markups */
   "Jailer",
   "\n"

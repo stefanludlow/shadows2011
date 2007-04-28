@@ -8732,41 +8732,6 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 	     ch);
 	  return;
 	}
-      else if (!str_cmp (subcmd, "nobuilderport") && GET_TRUST (ch) == 5)
-	{
-	  if (!IS_SET (edit_mob->plr_flags, NO_BUILDERPORT))
-	    {
-	      edit_mob->plr_flags |= NO_BUILDERPORT;
-	      send_to_char
-		("That admin is no longer allowed builder port access.\n", ch);
-	      return;
-	    }
-
-	  edit_mob->plr_flags &= ~NO_BUILDERPORT;
-	  send_to_char
-	    ("That admin will now be allowed to log in to the builder port.\n",
-	     ch);
-	  return;
-	}
-      else if (!str_cmp (subcmd, "testportonly") && GET_TRUST (ch) == 5)
-	{
-	  if (!IS_SET (edit_mob->plr_flags, NO_PLAYERPORT)
-	      || !IS_SET (edit_mob->plr_flags, NO_BUILDERPORT))
-	    {
-	      edit_mob->plr_flags |= NO_PLAYERPORT;
-	      edit_mob->plr_flags |= NO_BUILDERPORT;
-	      send_to_char
-		("That admin is now restricted to the test port.\n", ch);
-	      return;
-	    }
-
-	  edit_mob->plr_flags &= ~NO_PLAYERPORT;
-	  edit_mob->plr_flags &= ~NO_BUILDERPORT;
-	  send_to_char
-	    ("That admin will no longer be restricted to the test port.\n",
-	     ch);
-	  return;
-	}
 
       else if (!str_cmp (subcmd, "state"))
 	{

@@ -2325,6 +2325,9 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
   if (IS_SET (k->act, ACT_PHYSICIAN))
     strcat (buf, " Physician");
 
+  if (IS_SET (k->act, ACT_PHYSICIAN))
+    strcat (buf, " Auctioneer");
+	
   if (GET_FLAG (k, FLAG_SEE_NAME))
     strcat (buf, " See_name");
 
@@ -2347,20 +2350,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
     strcat (buf, " IsGuide");
 
   if (IS_SET (k->plr_flags, NO_PLAYERPORT))
-    {
-      if (IS_SET (k->plr_flags, NO_BUILDERPORT))
-	{
-	  strcat (buf, " TestPortOnly");
-	}
-      else
-	{
-	  strcat (buf, " NoPlayerPort");
-	}
-    }
-  else if (IS_SET (k->plr_flags, NO_BUILDERPORT))
-    {
-      strcat (buf, " NoBuilderPort");
-    }
+    strcat (buf, " NoPlayerPort");
 
   if (k->color)
     strcat (buf, " ANSI");

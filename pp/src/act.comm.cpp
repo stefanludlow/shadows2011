@@ -2087,12 +2087,15 @@ do_whisper (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (!(vict = get_char_room_vis (ch, name)))
+  if (	cmd != 83 && !(vict = get_char_room_vis (ch, name)) )
     {
       send_to_char ("No-one by that name here.\n", ch);
       return;
     }
-
+	else if ( cmd == 83 && !(vict = get_char_room (name, ch->in_room)) ) 	// Whisper used by NPC's only for the AUCTION command.
+		{
+			return;
+		}
   else if (vict == ch)
     {
       act ("$n whispers quietly to $mself.", false, ch, 0, 0, TO_ROOM);
@@ -2131,20 +2134,23 @@ do_whisper (CHAR_DATA * ch, char *argument, int cmd)
   for (tch = vtor (ch->in_room)->people; tch; tch = tch->next_in_room)
     {
 
-      if (tch == ch)		/* Don't say it to ourselves */
-	continue;
+    if (tch == ch)		/* Don't say it to ourselves */
+		continue;
 
+	if ( tch != vict && cmd == 83 ) /* Coded shopkeep whisper - skip to reduce spam */
+		continue;
+		
       sprintf (buf2, p);
 
       heard_something = 1;
 
-      if (tch != vict)
+    if (tch != vict)
 	{
 	  if (get_affect (tch, MUTE_EAVESDROP))
 	    continue;
 	  heard_something = whisper_it (tch, SKILL_LISTEN, buf2, buf2);
 	}
-      if (!heard_something)
+    if (!heard_something)
 	{
 	  act
 	    ("$n whispers something to $3, but you can't quite make out the words.",
@@ -2152,7 +2158,7 @@ do_whisper (CHAR_DATA * ch, char *argument, int cmd)
 	  continue;
 	}
 
-      if (tch == vict)
+	if (tch == vict)
 	{
 	  if (!IS_SET (ch->room->room_flags, OOC)
 	      && decipher_speaking (tch, ch->speaks, ch->skills[ch->speaks]))

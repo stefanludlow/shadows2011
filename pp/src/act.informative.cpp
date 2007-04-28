@@ -511,8 +511,8 @@ do_timeconvert (CHAR_DATA * ch, char *argument, int cmd)
 	  (hour * GAME_SECONDS_PER_HOUR)) / PULSES_PER_SEC);
 #else
       (int) temp_time =
-	GAME_SECONDS_BEGINNING + timezone +
-	(int) (ch->desc->acct->timezone * 60.0 * 60.0);
+	GAME_SECONDS_BEGINNING + 
+	  (int) (ch->desc->acct->timezone * 60.0 * 60.0);
       (int) temp_time +=
 	((((year - GAME_BASE_YEAR) * GAME_SECONDS_PER_YEAR) +
 	  ((month - 1) * GAME_SECONDS_PER_MONTH) +
@@ -6391,7 +6391,7 @@ number_of_helpfiles_available (int player_level)
 	       << player_level;
 
   std::string query = query_stream.str ();
-  if ((mysql_real_query (database, query.c_str(), query.length ())) == 0)
+  if ((mysql_safe_query ((char *)query.c_str())) == 0)
     {
       MYSQL_RES *result = 0;
       if ((result = mysql_store_result (database)) != 0)
@@ -6418,7 +6418,7 @@ number_of_helpfiles_available (int player_level)
     {
       std::string error_message = 
 	"number_of_helpfiles_available: "
-	"'mysql_real_query' failed for the following reason: ";
+	"'mysql_safe_query' failed for the following reason: ";
       error_message += mysql_error (database);
 
       std::cerr << error_message << std::endl;
@@ -6442,7 +6442,7 @@ output_categories_available (int player_level)
 	       << "GROUP BY category ASC";
   
   std::string query = query_stream.str ();
-  if ((mysql_real_query (database, query.c_str (), query.length ())) == 0)
+  if ((mysql_safe_query ((char *)query.c_str ())) == 0)
     {
       // Store a formatted table of categories
       MYSQL_RES *result = 0;
@@ -6481,7 +6481,7 @@ output_categories_available (int player_level)
     {
       std::string error_message = 
 	"output_categories_available: "
-	"'mysql_real_query' failed to query shadows.helpfiles because: ";
+	"'mysql_safe_query' failed to query shadows.helpfiles because: ";
       error_message += mysql_error (database);
       
       std::cerr << error_message << std::endl;
@@ -6552,9 +6552,9 @@ do_help (CHAR_DATA * ch, char *argument, int cmd)
 	       "ORDER BY RAND() DESC "
 	       "LIMIT 1", level_condition);
 
-      if ((mysql_real_query (database, buf, strlen (buf))) !=0)
+      if ((mysql_safe_query (buf)) !=0)
 	{
-	  std::cerr << "The library call 'mysql_real_query' failed to "
+	  std::cerr << "The library call 'mysql_safe_query' failed to "
 		    << "query shadows.helpfiles for the following reason: "
 		    << mysql_error (database) << std::endl;
 	  return;

@@ -2840,14 +2840,14 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
       if (keepers_cost < 20)
 	{
 	  strcat (buf, " This isn't worth haggling over.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
       if (IS_SET (obj->obj_flags.extra_flags, ITEM_PC_SOLD))
 	{
 	  strcat (buf, " I won't haggle over a used piece of merchandse.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
@@ -2858,7 +2858,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  strcat (buf, " I'm sorry, but I will not haggle.  My prices "
 		  "are fixed, take it or leave it.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
@@ -2866,7 +2866,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  strcat (buf, " I'm sorry, but I will not haggle over the price "
 		  "of this item.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
@@ -2885,13 +2885,13 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 	    {
 	      strcat (buf, " No, no, I cannot afford to lower the price on "
 		      "that again.");
-	      do_whisper (keeper, buf, 0);
+	      do_whisper (keeper, buf, 83);
 	      return;
 	    }
 
 	  strcat (buf, " You're persistent, aren't you?  I said no, and I "
 		  "meant no.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
@@ -2942,7 +2942,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
       if (discount == 0)
 	{
 	  strcat (buf, " The price is as stated.  Take it or leave it.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
@@ -2966,7 +2966,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 
       strcat (buf, ".");
 
-      do_whisper (keeper, buf, 0);
+      do_whisper (keeper, buf, 83);
 
       return;
     }
@@ -3156,7 +3156,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 	       "%s Your hands seem to be full, so I'll just set this down for you to pick up when you've a chance.",
 	       ch->tname);
       send_to_char ("\n", ch);
-      do_whisper (keeper, buf, 0);
+      do_whisper (keeper, buf, 83);
       one_argument (obj->name, buf2);
       send_to_char ("\n", ch);
       sprintf (buf, ": sets *%s down nearby, nodding to ~%s.", buf2,
@@ -3784,7 +3784,7 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
       if (keepers_cost < 20)
 	{
 	  strcat (buf, " This isn't worth haggling over.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
@@ -3795,14 +3795,14 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  strcat (buf, " I'm sorry, but I will not haggle.  My prices "
 		  "are fixed, take it or leave it.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
       if (IS_SET (obj->obj_flags.extra_flags, ITEM_PC_SOLD))
 	{
 	  strcat (buf, " I won't haggle over a used piece of merchandse.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
@@ -3810,7 +3810,7 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  strcat (buf, " I'm sorry, but I will not haggle over the price "
 		  "of this item.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
@@ -3828,13 +3828,13 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
 	  if (neg->price_delta > 0)
 	    {
 	      strcat (buf, " No, no, I will not pay any higher a price.");
-	      do_whisper (keeper, buf, 0);
+	      do_whisper (keeper, buf, 83);
 	      return;
 	    }
 
 	  strcat (buf, " Listen, as much as I like you, I simply cannot "
 		  "offer you what you're asking.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
@@ -3886,7 +3886,7 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  strcat (buf, " Sorry, but it's just not worth more than my "
 		  "initial offer.");
-	  do_whisper (keeper, buf, 0);
+	  do_whisper (keeper, buf, 83);
 	  return;
 	}
 
@@ -3908,7 +3908,7 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
 
       strcat (buf, ".");
 
-      do_whisper (keeper, buf, 0);
+      do_whisper (keeper, buf, 83);
 
       return;
     }
@@ -4602,7 +4602,7 @@ do_stable (CHAR_DATA * ch, char *argument, int cmd)
     {
       name_to_ident (ch, buf2);
       sprintf (buf, "%s You seem to be a bit short on coin right now.", buf2);
-      do_whisper (keeper, buf, 0);
+      do_whisper (keeper, buf, 83);
       return;
     }
 

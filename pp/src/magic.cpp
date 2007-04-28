@@ -2786,7 +2786,11 @@ do_accept (CHAR_DATA * ch, char *argument, int cmd)
   if ((ch->delay_type != DEL_APP_APPROVE &&
        ch->delay_type != DEL_INVITE &&
        ch->delay_type != DEL_PURCHASE_ITEM &&
-       ch->delay_type != DEL_ORDER_ITEM))
+       ch->delay_type != DEL_ORDER_ITEM &&
+	   ch->delay_type != DEL_PLACE_AUCTION &&
+	   ch->delay_type != DEL_CANCEL_AUCTION &&
+	   ch->delay_type != DEL_PLACE_BID &&
+	   ch->delay_type != DEL_PLACE_BUYOUT))
     {
       send_to_char ("No transaction is pending.\n\r", ch);
       return;
@@ -2812,6 +2816,26 @@ do_accept (CHAR_DATA * ch, char *argument, int cmd)
       do_order (ch, "", 2);
       return;
     }
+  else if (ch->delay_type == DEL_PLACE_AUCTION)
+    {
+	  do_auction (ch, "", 1);
+	  return;
+	}
+  else if (ch->delay_type == DEL_CANCEL_AUCTION)
+    {
+	  do_auction (ch, "", 3);
+	  return;
+	}
+  else if (ch->delay_type == DEL_PLACE_BID)
+    {
+	  do_auction (ch, "", 2);
+	  return;
+	}
+  else if (ch->delay_type == DEL_PLACE_BUYOUT)
+    {
+	  do_auction (ch, "", 3);
+	  return;
+	}
   else
     send_to_char ("No transaction is pending.\n\r", ch);
 }
@@ -2830,8 +2854,9 @@ act_black_curse (CHAR_DATA * ch)
 void
 do_decline (struct char_data *ch, char *argument, int cmd)
 {
-  if (ch->delay_type != DEL_PURCHASE_ITEM &&
-      ch->delay_type != DEL_APP_APPROVE && ch->delay_type != DEL_INVITE)
+  if (ch->delay_type != DEL_PURCHASE_ITEM && ch->delay_type != DEL_PLACE_AUCTION &&
+      ch->delay_type != DEL_APP_APPROVE && ch->delay_type != DEL_INVITE && ch->delay_type != DEL_CANCEL_AUCTION &&
+	  ch->delay_type != DEL_PLACE_BID && ch->delay_type != DEL_PLACE_BUYOUT)
     {
       send_to_char ("No transaction is pending.\n\r", ch);
       return;
@@ -2849,7 +2874,9 @@ do_decline (struct char_data *ch, char *argument, int cmd)
       return;
     }
 
-  if (ch->delay_type == DEL_PURCHASE_ITEM)
+  if (ch->delay_type == DEL_PURCHASE_ITEM || ch->delay_type == DEL_PLACE_AUCTION ||
+		ch->delay_type == DEL_PLACE_BID || ch->delay_type == DEL_PLACE_BUYOUT || 
+		ch->delay_type == DEL_CANCEL_AUCTION)
     {
       break_delay (ch);
       return;

@@ -33,6 +33,7 @@
 #define PRIMARY_DATABASE	"shadows"
 #define PFILES_DATABASE		"shadows_pfiles"
 #define LOG_DATABASE		"server_logs"
+#define AH_DATABASE			"shadows_ah"
 #define ENCRYPT_PASS		"w01fm3a7"
 
 #define STAFF_EMAIL		"staff@middle-earth.us"
