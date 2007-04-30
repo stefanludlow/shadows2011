@@ -8,9 +8,9 @@ LFLAGS = -lm -lmysqlclient -lcrypt -lnsl
 
 INSTALL_DIR = ..
 
-INCLUDE = -I/usr/local/mysql/include/ -I/usr/include/mysql/ -I/usr/include/openssl/ -I/usr/local/mysql/ -I/usr/local/include/mysql/
+INCLUDE = -I/usr/local/mysql/include/ -I/usr/include/mysql/ -I/usr/include/openssl/ -I/usr/local/mysql/ -I/usr/local/include/mysql/ -I/usr/lib/mysql
 
-LIBDIRS = -L/usr/lib64/mysql
+LIBDIRS = -L/usr/lib64/mysql -L/usr/lib/mysql
 
 OBJS = \
 account.o act.comm.o act.informative.o act.movement.o \

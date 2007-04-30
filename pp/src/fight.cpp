@@ -3166,14 +3166,46 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
     {
       if (attack_weapon->o.weapon.dice && attack_weapon->o.weapon.sides)
 	{
+  /* If it's a dual-gripped medium weapon, and has only one die, add two sides to that die,
+     If it's a dual-gripped medium weapon with something other than one die, only add one side to those dice,
+     If it's a single-gripped heavy-weapon with only one die, subtract two sides from that die,
+     If it's a single-gripped heavy weapon with more than one die, subtract one side from those dice.*/
 	  if ((attack_weapon->o.od.value[3] == SKILL_MEDIUM_EDGE
 	       || attack_weapon->o.od.value[3] == SKILL_MEDIUM_BLUNT
 	       || attack_weapon->o.od.value[3] == SKILL_MEDIUM_PIERCE)
 	      && attack_weapon->location == WEAR_BOTH)
-	    dam +=
-	      dice (attack_weapon->o.weapon.dice,
+	      {
+	      if(attack_weapon->o.weapon.dice == 1)
+	      	dam +=
+                    dice (attack_weapon->o.weapon.dice,
 		    attack_weapon->o.weapon.sides + 2);
-	  else
+
+	      else if(attack_weapon->o.weapon.dice > 1)
+                dam +=
+			dice (attack_weapon->o.weapon.dice, 
+			attack_weapon->o.weapon.sides + 1); 
+              }
+	  else if ((attack_weapon->o.od.value[3] == SKILL_HEAVY_EDGE
+	       || attack_weapon->o.od.value[3] == SKILL_HEAVY_BLUNT
+	       || attack_weapon->o.od.value[3] == SKILL_HEAVY_PIERCE)
+	      && (attack_weapon->location == WEAR_PRIM || WEAR_SEC))
+              {
+                if (attack_weapon->o.weapon.sides < 2) 
+		{
+			attack_weapon->o.weapon.sides = 2;
+		}
+
+               	if(attack_weapon->o.weapon.dice == 1)
+	      	dam +=
+                    dice (attack_weapon->o.weapon.dice,
+		    attack_weapon->o.weapon.sides - 2);
+
+	      else if(attack_weapon->o.weapon.dice > 1)
+                dam +=
+		dice (attack_weapon->o.weapon.dice, 
+		attack_weapon->o.weapon.sides - 1); 
+              }
+           else
 	    dam +=
 	      dice (attack_weapon->o.weapon.dice,
 		    attack_weapon->o.weapon.sides);
