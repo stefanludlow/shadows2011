@@ -3,7 +3,7 @@
 
 CC=g++
 
-SVN_VERS = -D'SVN_REV="$(shell svnversion -n .)"'
+SVN_VERS = -D'SVN_REV="$(shell svnversion -n . && touch comm.cpp)"'
 CFLAGS = $(SVN_VERS) -ggdb -DLINUX -Wall
 LFLAGS = -lm -lmysqlclient -lcrypt -lnsl
 
