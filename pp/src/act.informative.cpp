@@ -7173,6 +7173,7 @@ do_locate (CHAR_DATA * ch, char *argument, int cmd)
   int ind = 0;
   int nVirtual = 0;
   int zone = -1;
+  int pc_only = 0;
   CHAR_DATA *mob = NULL;
   char *arg = '\0';
   char clan_names[10][80] = { {'\0'}, {'\0'} };
@@ -7244,6 +7245,11 @@ do_locate (CHAR_DATA * ch, char *argument, int cmd)
 
 	  argument = one_argument (argument, buf);
 
+	  if ( !str_cmp (buf, "pc") ){ 
+	    argument = one_argument (argument, buf);
+	    pc_only++;
+          }
+
 	  if (num_clans >= 9)
 	    {
 	      send_to_char ("Hey, 10 clans is enough!\n", ch);
@@ -7286,6 +7292,9 @@ do_locate (CHAR_DATA * ch, char *argument, int cmd)
 
       /* Check act bits against mob's act bits.  The act bits
          specified on the command line must all be in mob->act */
+
+      if (IS_NPC(mob) && pc_only)
+	continue;
 
       if (zone != -1 && mob->room->zone != zone)
 	continue;
@@ -7564,7 +7573,7 @@ do_where (CHAR_DATA * ch, char *argument, int cmd)
 					   vtor (ch->in_room)->zone)))
 	    {
 
-	      if (IS_NPC (i))
+	      if (IS_NPC(i))
 		sprintf (buf + strlen (buf),
 			 "#5%-20.20s#0 - #2[%5d]#0 #6%s#0\n", char_short (i),
 			 vtor (i->in_room)->nVirtual,

@@ -1363,28 +1363,96 @@ r_set (CHAR_DATA * ch, char *argument)
 }
 
 
-void
-r_atecho (CHAR_DATA * ch, char *argument)
-{
-  char loc_str[MAX_INPUT_LENGTH], buf[4096];
+// void
+// r_atecho (CHAR_DATA * ch, char *argument)
+// {
+//  char loc_str[MAX_INPUT_LENGTH], buf[4096];
+//
+//  half_chop (argument, loc_str, buf);
+//
+//  if (!isdigit (*loc_str))
+//    {
+//      system_log ("ERROR: atecho location not a digit", true);
+//      return;
+//    }
+//
+//  if (!vtor (atoi (loc_str)))
+//    {
+//      system_log ("ERROR: Room not found in r_atecho", true);
+//      return;
+//    }
+//
+//  strcat (buf, "\n\r");
+//  send_to_room (buf, vtor (atoi (loc_str))->nVirtual);
+// }
 
-  half_chop (argument, loc_str, buf);
 
-  if (!isdigit (*loc_str))
-    {
-      system_log ("ERROR: atecho location not a digit", true);
-      return;
-    }
+void 
+r_atecho(CHAR_DATA *ch, char *argument) 
+{ 
+  char   loc_str[MAX_INPUT_LENGTH] = {'\0'}; 
+  char   loc_str1[MAX_INPUT_LENGTH] = {'\0'}; 
+  char    *ploc_str; 
+  char   *ploc_str1; 
+  char   buf[MAX_INPUT_LENGTH] = {'\0'}; 
+  char   test_dat[2] = "-"; 
+  char   mt1[MAX_INPUT_LENGTH] = "              "; 
+  int    room_span = 0; 
+  int    first_room = 0; 
+  int   last_room = 0; 
+    
+  half_chop(argument, loc_str, buf); 
+  ploc_str = loc_str; 
+  ploc_str1 = loc_str1; 
+  strcat(buf,"\n\r"); 
 
-  if (!vtor (atoi (loc_str)))
-    {
-      system_log ("ERROR: Room not found in r_atecho", true);
-      return;
-    }
+  // buf is ready to go.  it's the echo that gets sent out to the rooms. 
+    
+  while(1) 
+    { 
+      if (!strncmp(ploc_str, test_dat, 1)) // if it's a '-' set the room_span flag 
+	room_span = true; 
+      for (; ispunct(*ploc_str); ploc_str++); // bypass any punctuation 
+      for (; isdigit(*ploc_str1 = *ploc_str); ploc_str++, ploc_str1++); // read room # into loc_str1 
+    
+      if ( !isdigit(*loc_str1) ) { 
+	return; 
+      } 
 
-  strcat (buf, "\n\r");
-  send_to_room (buf, vtor (atoi (loc_str))->nVirtual);
-}
+      if ( !vtor (strtol(loc_str1, NULL, 10)) ) { 
+	system_log("ERROR: Room not found in r_atecho", true); 
+	//   return; 
+      } 
+      else { 
+	strcat(buf,"\n\r"); 
+	send_to_room (buf, vtor (strtol(loc_str1, NULL, 10))->nVirtual); 
+      } 
+
+
+      if(room_span) { // if room_span is set, the last room echoed to was the end of the span 
+	// go echo to the rooms in between now. 
+	last_room = strtol(loc_str1, NULL, 10); // set the last room as an integer 
+          
+	// iterate through the span of rooms 
+	while(first_room + 1 < last_room) { 
+	  if ( !vtor (first_room + 1) ) { // does the room exist? 
+	    first_room++; // increment even if the room doesn't exist 
+	  } 
+	  else { 
+	    send_to_room(buf, vtor (first_room + 1)->nVirtual); 
+	    first_room++; 
+	  } 
+	} 
+	room_span = 0;    // reset the trigger 
+      } 
+
+      first_room = strtol(loc_str1, NULL, 10); // set first_room as the last room echoed to 
+      strcpy(loc_str1, mt1); // overwrite loc_str1 
+      ploc_str1 = loc_str1; // reset the pointer 
+    } 
+  return; 
+} 
+
 
 void
 r_unlink (char *argument)
