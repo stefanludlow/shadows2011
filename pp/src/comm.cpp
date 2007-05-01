@@ -102,7 +102,7 @@ int
 main (int argc, char *argv[])
 {
   char buf[512];
-  //engine.load_config_file (".rpi_engine");
+  engine.load_config_files ();
   bootstart = time (0);
 
   if (chdir (DFLT_DIR) < 0)
@@ -2149,12 +2149,27 @@ do_gstat (CHAR_DATA * ch, char *argument, int cmd)
   send_to_char (buf, ch);
   sprintf (buf, "#2Shell Process ID:               #0%d\n", getpid ());
   send_to_char (buf, ch);
-  sprintf (buf, "#2MySQL Database Host:		#0%s\n",
+  sprintf (buf, "#2MySQL Database Host:            #0%s\n",
 	   mysql_get_host_info (database));
   send_to_char (buf, ch);
-  sprintf (buf, "#2MySQL Server Version:		#0%s\n",
+  sprintf (buf, "#2MySQL Server Version:           #0%s\n",
 	   mysql_get_server_info (database));
   send_to_char (buf, ch);
+
+  // Display the database set we are using
+  sprintf (buf, 
+	   "#2MySQL Database Set: engine      #0%s\n"
+	   "                    #2world       #0%s\n"
+	   "                    #2world_log   #0%s\n"
+	   "                    #2player      #0%s\n"
+	   "                    #2player_log  #0%s\n",
+	   (engine.get_config ("engine_db")).c_str (),
+	   (engine.get_config ("world_db")).c_str (),
+	   (engine.get_config ("world_log_db")).c_str (),
+	   (engine.get_config ("player_db")).c_str (),
+	   (engine.get_config ("player_log_db")).c_str ());
+  send_to_char (buf, ch);
+
   sprintf (buf, "#2Running on Port:                #0%d\n", port);
   send_to_char (buf, ch);
   sprintf (buf, "#2Last Reboot By:                 #0%s",

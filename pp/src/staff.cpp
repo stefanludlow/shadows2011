@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <mysql/mysql.h>
 
+#include "server.h"
 #include "structs.h"
 #include "net_link.h"
 #include "protos.h"
@@ -44,6 +45,7 @@ const char *player_bits[] = {
   "\n"
 };
 
+extern rpie::server engine;
 extern const char *skills[];
 extern const char *exit_bits[];
 
@@ -3416,9 +3418,13 @@ acctstat (CHAR_DATA * ch, char *name)
   /* Retreive the timestamp for Last Activity ( default = "" ) */
   date = (char *) alloc (256, 31);
   date[0] = '\0';
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query
-    ("SELECT lastlogon FROM %s.pfiles WHERE account = '%s' ORDER BY lastlogon DESC LIMIT 1",
-     PFILES_DATABASE, acct->name.c_str ());
+    ("SELECT lastlogon"
+     " FROM %s.pfiles"
+     " WHERE account = '%s'"
+     " ORDER BY lastlogon DESC LIMIT 1",
+     player_db.c_str (), acct->name.c_str ());
   if ((result = mysql_store_result (database)) != NULL)
     {
       row = mysql_fetch_row (result);
@@ -3514,7 +3520,11 @@ acctstat (CHAR_DATA * ch, char *name)
 	   acct->newsletter ? "Subscribed" : "Opted Out");
 
   mysql_safe_query
-    ("SELECT name,create_state,sdesc,played FROM shadows_pfiles.pfiles WHERE account = '%s' ORDER BY birth ASC",
+    ("SELECT name,create_state,sdesc,played"
+     " FROM %s.pfiles"
+     " WHERE account = '%s'"
+     " ORDER BY birth ASC",
+     player_db.c_str (),
      acct->name.c_str ());
   result = mysql_store_result (database);
 
@@ -8197,7 +8207,7 @@ SELECT name,
   SUBSTRING(skills,LOCATE('Hex',skills),20),', ',
   SUBSTRING(skills,LOCATE('Tele',skills),20),', ',
   SUBSTRING(skills,LOCATE('Pres',skills),20)) Psi
-FROM shadows_pfiles.pfiles 
+FROM player_db.pfiles 
 WHERE create_state = 2 AND level < 1
 AND ( 
   skills LIKE '%Aura%' 
@@ -9333,12 +9343,14 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+  std::string log_db = engine.get_config ("player_log_db");
+
   while (*argument == ' ')
     argument++;
 
   if (!*argument)
     {
-      mysql_safe_query ("SELECT count(*) FROM %s.mud", LOG_DATABASE);
+      mysql_safe_query ("SELECT count(*) FROM %s.mud", log_db.c_str ());
       result = mysql_store_result (database);
       if (!result)
 	{
@@ -9551,7 +9563,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   sprintf (query,
-	   "SELECT name, account, switched_into, timestamp, port, room, guest, immortal, error, command, entry FROM server_logs.mud WHERE ");
+	   "SELECT name, account, switched_into, timestamp, port, room, guest, immortal, error, command, entry FROM %s.mud WHERE ", log_db.c_str ());
 
   if (*argument)
     sprintf (query + strlen (query), "(");

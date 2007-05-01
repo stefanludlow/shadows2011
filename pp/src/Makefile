@@ -22,7 +22,8 @@ dwellings.o edit.o employment.o fight.o group.o guest.o \
 guides.o handler.o hash.o item_card.o item_tossable.o \
 limits.o magic.o mobact.o mobprogs.o mysql.o \
 nanny.o net_link.o object_damage.o objects.o olc.o \
-perception.o psionics.o roles.o roomprogs.o save.o somatics.o \
+perception.o psionics.o roles.o roomprogs.o save.o \
+server.o somatics.o \
 staff.o transformation.o utility.o weather.o wounds.o
 
 HEADERS = \

@@ -17,6 +17,7 @@
 #include <time.h>
 #include <sstream>
 
+#include "server.h"
 #include "net_link.h"
 #include "structs.h"
 #include "account.h"
@@ -24,6 +25,8 @@
 #include "utils.h"
 #include "decl.h"
 #include "utility.h"
+
+extern rpie::server engine;
 
 char echo_off_str[] = { (char) IAC, (char) WILL, (char) TELOPT_ECHO, '\0' };
 char echo_on_str[] = { (char) IAC, (char) WONT, (char) TELOPT_ECHO,
@@ -365,12 +368,15 @@ nanny_ask_password (DESCRIPTOR_DATA * d, char *argument)
    */
   if (d->acct && d->acct->is_registered () && d->acct->name.length ())
     {
-      sprintf (buf, "INSERT INTO server_logs.ip "
-	       "VALUES('%s','%s','%s',NOW(),NOW(),1,0,0,%d,0,0) "
-	       "ON DUPLICATE KEY UPDATE lasttime = NOW(),count = count + 1, has_pwd = 0, host = '%s';",
-	       d->acct->name.c_str (), d->strClientHostname, d->strClientIpAddr,
-	       port, d->strClientHostname);
-      mysql_safe_query (buf);
+      mysql_safe_query 
+	("INSERT INTO %s.ip "
+	 "  VALUES('%s','%s','%s',NOW(),NOW(),1,0,0,%d,0,0) "
+	 "  ON DUPLICATE KEY "
+	 "  UPDATE lasttime = NOW(), "
+	 "    count = count + 1, has_pwd = 0, host = '%s';",
+	 (engine.get_config ("player_log_db")).c_str (),
+	 d->acct->name.c_str (), d->strClientHostname, d->strClientIpAddr,
+	 port, d->strClientHostname);
     }
 
   bIsBanned = is_banned (d);
@@ -436,13 +442,15 @@ nanny_check_password (DESCRIPTOR_DATA * d, char *argument)
        *     1st timer: count = 1, has_pwd = 0, logins = 0, fails = 1 (this should never happen)
        *     otherwise: has_pwd = 0, fails++ (count already incremented)
        */
-      sprintf (buf,
-	       "INSERT INTO server_logs.ip "
-	       "VALUES('%s','%s','%s',NOW(),NOW(),1,0,0,%d,0,1) "
-	       "ON DUPLICATE KEY UPDATE lasttime = NOW(),fails = fails + 1, has_pwd = 0,host = '%s';",
-	       d->acct->name.c_str (), d->strClientHostname, d->strClientIpAddr,
-	       port, d->strClientHostname);
-      mysql_safe_query (buf);
+      mysql_safe_query 
+	("INSERT INTO %s.ip "
+	 "  VALUES('%s','%s','%s',NOW(),NOW(),1,0,0,%d,0,1) "
+	 "  ON DUPLICATE KEY "
+	 "  UPDATE lasttime = NOW(),fails = fails + 1,"
+	 "     has_pwd = 0,host = '%s';",
+	 (engine.get_config ("player_log_db")).c_str (),
+	 d->acct->name.c_str (), d->strClientHostname, d->strClientIpAddr,
+	 port, d->strClientHostname);
 
 
       if (str_cmp (d->acct->last_ip.c_str (), d->strClientHostname) != 0)
@@ -575,19 +583,21 @@ nanny_check_password (DESCRIPTOR_DATA * d, char *argument)
    */
   std::string pwd = argument;
   std::string drupal_pass = 
-	"UPDATE shadows.forum_users "
+	"UPDATE forum_users "
 	"SET pass = MD5('" + pwd + "') "
 	"WHERE username = '" + d->acct->name + "'" ;
   mysql_safe_query ((char *)drupal_pass.c_str ());
 
-  sprintf (buf,
-	   "INSERT INTO server_logs.ip "
-	   "VALUES('%s','%s','%s',NOW(),NOW(),1,0,1,%d,1,0) "
-	   "ON DUPLICATE KEY UPDATE lasttime = NOW(),logins = logins + 1, has_pwd = 1,host = '%s';",
-	   d->acct->name.c_str (), d->strClientHostname, d->strClientIpAddr, port,
-	   d->strClientHostname);
-  mysql_safe_query (buf);
-
+  mysql_safe_query 
+    ("INSERT INTO %s.ip "
+     "  VALUES('%s','%s','%s',NOW(),NOW(),1,0,1,%d,1,0) "
+     "  ON DUPLICATE KEY UPDATE lasttime = NOW(), "
+     "    logins = logins + 1, has_pwd = 1,host = '%s';",
+     (engine.get_config ("player_log_db")).c_str (),
+     d->acct->name.c_str (), 
+     d->strClientHostname, 
+     d->strClientIpAddr, port,
+     d->strClientHostname);
 
   d->acct->update_last_ip (d->strClientHostname);
   d->acct->password_attempt = 0;
@@ -1126,11 +1136,15 @@ nanny_account_setup (DESCRIPTOR_DATA * d, char *argument)
        *     1st timer: count = 1, is_new = 1, has_pwd = 0, logins = 0, fails = 0
        *     otherwise: not possible!
        */
-      sprintf (buf,
-	       "INSERT INTO server_logs.ip VALUES('%s','%s','%s',NOW(),NOW(),1,1,0,%d,0,0);",
-	       d->acct->name.c_str (), d->strClientHostname, d->strClientIpAddr,
-	       port);
-      mysql_safe_query (buf);
+      mysql_safe_query 
+	("INSERT INTO %s.ip "
+	 "  VALUES('%s','%s','%s',NOW(),NOW(),1,1,0,%d,0,0);",
+	 (engine.get_config ("player_log_db")).c_str (),
+	 d->acct->name.c_str (), 
+	 d->strClientHostname, 
+	 d->strClientIpAddr,
+	 port);
+
       //send_to_gods(mysql_error ( database ));
       SEND_TO_Q ("Press ENTER to disconnect from the server.\n", d);
       d->connected = CON_PENDING_DISC;
@@ -1211,10 +1225,15 @@ post_retirement (DESCRIPTOR_DATA * d)
       display_main_menu (d);
       return;
     }
-
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query
-    ("SELECT name,account FROM %s.pfiles WHERE account = '%s' AND create_state = 2 AND level = 0",
-     PFILES_DATABASE, d->acct->name.c_str ());
+    ("SELECT name,account"
+     " FROM %s.pfiles"
+     " WHERE account = '%s'"
+     " AND create_state = 2"
+     " AND level = 0",
+     player_db.c_str (), d->acct->name.c_str ());
+
   if ((result = mysql_store_result (database)) == NULL)
     {
       sprintf (buf, "Warning: post_retirement(): %s", mysql_error (database));
@@ -1228,8 +1247,11 @@ post_retirement (DESCRIPTOR_DATA * d)
   while ((row = mysql_fetch_row (result)))
     {
       mysql_safe_query
-	("UPDATE %s.pfiles SET create_state=4 WHERE name = '%s'",
-	 PFILES_DATABASE, row[0]);
+	("UPDATE %s.pfiles"
+	 " SET create_state=4"
+	 " WHERE name = '%s'",
+	 player_db.c_str (), row[0]);
+
       add_message (1, row[0], -2, d->acct->name.c_str (), date, "Retired.", "",
 		   d->pending_message->message, 0);
       add_message (1, "Retirements", -5, row[1], date, row[0], "",
@@ -1278,10 +1300,14 @@ nanny_retire (DESCRIPTOR_DATA * d, char *argument)
       display_main_menu (d);
       return;
     }
-
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query
-    ("SELECT name,account FROM %s.pfiles WHERE account = '%s' AND create_state = 2",
-     PFILES_DATABASE, d->acct->name.c_str ());
+    ("SELECT name,account"
+     " FROM %s.pfiles"
+     " WHERE account = '%s'"
+     " AND create_state = 2",
+     player_db.c_str (), d->acct->name.c_str ());
+
   if ((result = mysql_store_result (database)) == NULL)
     {
       sprintf (buf, "Warning: nanny_retire(): %s", mysql_error (database));
@@ -1377,9 +1403,9 @@ nanny_terminate (DESCRIPTOR_DATA * d, char *argument)
   id = atoi (row[0]);
   mysql_free_result (result);
   result = NULL;
-
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query ("SELECT name FROM %s.pfiles WHERE account = '%s'",
-		    PFILES_DATABASE, d->acct->name.c_str ());
+		    player_db.c_str (), d->acct->name.c_str ());
   if ((result = mysql_store_result (database)) == NULL)
     {
       sprintf (buf, "Warning: nanny_terminate(): %s", mysql_error (database));
@@ -1406,7 +1432,7 @@ nanny_terminate (DESCRIPTOR_DATA * d, char *argument)
   mysql_safe_query ("DELETE FROM forum_users WHERE username = '%s'",
 		    d->acct->name.c_str ());
   mysql_safe_query ("DELETE FROM %s.pfiles WHERE account = '%s'",
-		    PFILES_DATABASE, d->acct->name.c_str ());
+		    player_db.c_str (), d->acct->name.c_str ());
 
   sprintf (buf, "Account %s has been terminated.", d->acct->name.c_str ());
   send_to_gods (buf);
@@ -1670,9 +1696,13 @@ nanny_compose_mail_to (DESCRIPTOR_DATA * d, char *argument)
 
   if (!(tch = load_pc (argument)))
     {
+      std::string player_db = engine.get_config ("player_db");
       mysql_safe_query
-	("SELECT name FROM %s.pfiles WHERE keywords LIKE '%%%s%%' LIMIT 1",
-	 PFILES_DATABASE, argument);
+	("SELECT name"
+	 " FROM %s.pfiles"
+	 " WHERE keywords"
+	 " LIKE '%%%s%%' LIMIT 1",
+	 player_db.c_str (), argument);
       if ((result = mysql_store_result (database)) != NULL)
 	{
 	  if (mysql_num_rows (result) > 0)
@@ -1987,7 +2017,7 @@ nanny_read_message (DESCRIPTOR_DATA * d, char *argument)
     }
 }
 
-#define PFILE_QUERY	"SELECT name,create_state FROM shadows_pfiles.pfiles WHERE account = '%s' AND create_state != 4 ORDER BY birth ASC"
+#define PFILE_QUERY	"SELECT name,create_state FROM %s.pfiles WHERE account = '%s' AND create_state != 4 ORDER BY birth ASC"
 
 void
 nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
@@ -2142,11 +2172,14 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 
   else if (c == 'e' || argn == 1)
     {
-
-      mysql_safe_query ("SELECT name,create_state "
-			"FROM shadows_pfiles.pfiles "
-			"WHERE account = '%s' AND create_state = %d",
-			d->acct->name.c_str (), STATE_SUSPENDED);
+      std::string player_db = engine.get_config ("player_db");
+      mysql_safe_query ("SELECT name,create_state"
+			" FROM %s.pfiles"
+			" WHERE account = '%s'"
+			" AND create_state = %d",
+			player_db.c_str (),
+			d->acct->name.c_str (), 
+			STATE_SUSPENDED);
 
       if ((result = mysql_store_result (database)))
 	{
@@ -2166,7 +2199,9 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 	    }
 	}
 
-      mysql_safe_query (PFILE_QUERY, d->acct->name.c_str ());
+      mysql_safe_query (PFILE_QUERY, 
+			player_db.c_str (), 
+			d->acct->name.c_str ());
       result = mysql_store_result (database);
 
       if (!result || !mysql_num_rows (result))
@@ -2224,8 +2259,13 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 	     d);
 	  return;
 	}
+      std::string player_db = engine.get_config ("player_db");
       mysql_safe_query
-	("SELECT name,create_state FROM shadows_pfiles.pfiles WHERE account = '%s' AND create_state <= 1",
+	("SELECT name,create_state"
+	 " FROM %s.pfiles"
+	 " WHERE account = '%s'"
+	 " AND create_state <= 1",
+	 player_db.c_str (),
 	 d->acct->name.c_str ());
       result = mysql_store_result (database);
 
@@ -2286,10 +2326,12 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 	     d);
 	  return;
 	}
-
+      std::string player_db = engine.get_config ("player_db");
       mysql_safe_query ("SELECT name,create_state "
-			"FROM shadows_pfiles.pfiles "
-			"WHERE account = '%s' AND create_state = %d",
+			"FROM %s.pfiles "
+			"WHERE account = '%s'"
+			" AND create_state = %d",
+			player_db.c_str (),
 			d->acct->name.c_str (), STATE_SUSPENDED);
 
       if ((result = mysql_store_result (database)))
@@ -2407,9 +2449,13 @@ nanny_delete_pc (DESCRIPTOR_DATA * d, char *argument)
       display_main_menu (d);
       return;
     }
-
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query
-    ("SELECT name,create_state FROM shadows_pfiles.pfiles WHERE account = '%s' AND create_state <= 1",
+    ("SELECT name,create_state"
+     " FROM %s.pfiles"
+     " WHERE account = '%s'"
+     " AND create_state <= 1",
+     player_db.c_str (),
      d->acct->name.c_str ());
   result = mysql_store_result (database);
 
@@ -2458,8 +2504,9 @@ nanny_delete_pc (DESCRIPTOR_DATA * d, char *argument)
   unload_pc (d->character);
   d->character = NULL;
 
-  mysql_safe_query ("DELETE FROM %s.pfiles WHERE name = '%s'",
-		    PFILES_DATABASE, name);
+  mysql_safe_query ("DELETE FROM %s.pfiles"
+		    " WHERE name = '%s'",
+		    player_db.c_str (), name);
 
   SEND_TO_Q ("\n#1This pending character has been successfully deleted.#0\n",
 	     d);
@@ -2689,8 +2736,8 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
       display_main_menu (d);
       return;
     }
-
-  mysql_safe_query (PFILE_QUERY, d->acct->name.c_str ());
+  std::string player_db = engine.get_config ("player_db");
+  mysql_safe_query (PFILE_QUERY, player_db.c_str (), d->acct->name.c_str ());
   result = mysql_store_result (database);
 
   if (result && mysql_num_rows (result) > 1)
@@ -5284,9 +5331,13 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 	  SEND_TO_Q ("> ", d);
 	  return;
 	}
-
+      std::string player_db = engine.get_config ("player_db");
       mysql_safe_query
-	("SELECT name,create_state FROM shadows_pfiles.pfiles WHERE account = '%s' AND (create_state >= 1 AND create_state < 4)",
+	("SELECT name,create_state"
+	 " FROM %s.pfiles"
+	 " WHERE account = '%s'"
+	 " AND (create_state >= 1 AND create_state < 4)",
+	 player_db.c_str (),
 	 d->acct->name.c_str ());
       result = mysql_store_result (database);
 

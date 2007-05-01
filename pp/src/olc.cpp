@@ -13,6 +13,7 @@
 #include <dirent.h>
 #include <mysql/mysql.h>
 
+#include "server.h"
 #include "structs.h"
 #include "net_link.h"
 #include "account.h"
@@ -27,6 +28,7 @@
 
 #define s(a) send_to_char (a "\n", ch);
 
+extern rpie::server engine;
 extern const char *weather_states[];
 
 const char *apply_types[] = {
@@ -2806,6 +2808,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
       s ("   z           zones");
     }
 
+  std::string player_db = engine.get_config ("player_db");
   switch (*buf1)
     {
 
@@ -2890,7 +2893,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	 "FROM %s.pfiles "
 	 "WHERE create_state = 1 "
 	 "ORDER BY birth DESC",
-	 PFILES_DATABASE);
+	 player_db.c_str ());
       result = mysql_store_result (database);
 
       if (result)
@@ -3405,7 +3408,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
       for (craft = crafts; craft; craft = craft->next)
 	craft_tot++;
 
-      mysql_safe_query ("SELECT count(name) from %s.pfiles", PFILES_DATABASE);
+      mysql_safe_query ("SELECT count(name) from %s.pfiles", player_db.c_str ());
       result = mysql_store_result (database);
       if (result)
 	{
@@ -8192,6 +8195,7 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
       mob_cue c = mob_cue (index);
       typedef std::multimap<mob_cue,std::string>::const_iterator N;
       std::pair<N,N> range = mob->cues->equal_range (c);
+      std::string world_db = engine.get_config ("world_db");
 
       if (strcmp (reflex, "delete") == 0 
 	  || strcmp (reflex, "remove") == 0
@@ -8211,8 +8215,10 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 	    {
 	      mysql_safe_query 
 		( "DELETE"
-		  " FROM shadows_worldfile.cues"
-		  " WHERE mid = %d AND cue = %d ", mob->nVirtual, index);
+		  " FROM %s.cues"
+		  " WHERE mid = %d"
+		  " AND cue = %d ", 
+		  world_db.c_str (), mob->nVirtual, index);
 	    }
 	  mob->cues->erase (c);
 	}
@@ -8224,8 +8230,10 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 	    {
 	      mysql_safe_query 
 		( "INSERT"
-		  " INTO shadows_worldfile.cues (mid, cue, reflex)"
-		  " VALUES ('%d', '%d', '%s')", mob->nVirtual, index, reflex);	      
+		  " INTO %s.cues (mid, cue, reflex)"
+		  " VALUES ('%d', '%d', '%s')", 
+		  world_db.c_str (),
+		  mob->nVirtual, index, reflex);	      
 	    }
 	  mob->cues->insert (std::make_pair (c, reflex_string));
 	  reflex_string = std::string (cue) + std::string (" ") 

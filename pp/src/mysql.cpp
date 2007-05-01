@@ -39,6 +39,7 @@ MYSQL *database;
 bool mysql_logging = true;
 extern int booting;
 extern int finished_booting;
+extern rpie::server engine;
 
 void
 init_mysql (void)
@@ -51,27 +52,21 @@ init_mysql (void)
       exit (1);      
     }
 
-  if (!(mysql_real_connect
-       (database, MYSQL_HOST, MYSQL_USERNAME, MYSQL_PASS, 0, 0, 0, 0)))
+  if (!(mysql_real_connect 
+	(database, 
+	 engine.get_config ("mysql_host").c_str (), 
+	 engine.get_config ("mysql_user").c_str (), 
+	 engine.get_config ("mysql_passwd").c_str (), 
+	 0, 0, 0, 0)))
     {
-      fprintf (stderr, "The library call 'mysql_real_connect' failed "
-	       "to connect to the MySQL server for the following reason: %s\n",
-	       mysql_error (database));
-      fprintf (stderr, "Did you run 'make install'?\n"
-	       "Does 'make install-mysql' fail?\n");
+      fprintf (stderr, "mysql_real_connect: %s\n", mysql_error (database));
       exit (1);
     }
 
-  if ((mysql_select_db (database, PRIMARY_DATABASE)) != 0)
+  std::string engine_db = engine.get_config ("engine_db");
+  if ((mysql_select_db (database, engine_db.c_str ())) != 0)
     {
-      fprintf (stderr, "The library call 'mysql_select_db' failed to connect "
-	       "to the database '%s' for the following reason: %s\n",
-	       PRIMARY_DATABASE, mysql_error (database));
-      fprintf (stderr, "Did you run 'make install'?\n"
-	       "Did 'make install-mysql' fail?\n"
-	       "Does the database %s exist?\n"
-	       "Does the user '%s' have privileges on that database?\n",
-	       PRIMARY_DATABASE, MYSQL_USERNAME);
+      fprintf (stderr, "mysql_select_db: %s\n", mysql_error (database));
       exit (1);
     }
 
@@ -350,21 +345,21 @@ mysql_player_search (int search_type, char *string, int timeframe)
   char query[MAX_STRING_LENGTH];
   static MYSQL_RES *result;
   int ind = 0;
-  
+  std::string player_db = engine.get_config ("player_db");
   if (search_type == SEARCH_CLAN) 
     {
       sprintf (query, 
 	       "SELECT account, name, sdesc, create_state,"
 	       " TRIM(BOTH '\\'' FROM SUBSTRING_INDEX(LEFT(clans,LOCATE('%s',clans)-2),' ',-1)) AS rank"
 	       " FROM %s.pfiles WHERE ", 
-	       string, PFILES_DATABASE);
+	       string, player_db.c_str ());
     }
   else
     {
       sprintf (query, 
 	       "SELECT account, name, sdesc, create_state "
 	       " FROM %s.pfiles WHERE ", 
-	       PFILES_DATABASE);
+	       player_db.c_str ());
     }
 
   if (timeframe)
@@ -531,9 +526,11 @@ system_log (const char *str, bool error)
 
   sprintf (sha_buf, "%d %s", timestamp, buf);
 
+  std::string log_db = engine.get_config ("player_log_db");
   mysql_safe_query
     ("INSERT INTO %s.mud (name, timestamp, port, room, error, entry, sha_hash) "
-     "VALUES ('System', %d, %d, -1, %d, '%s', SHA('%s'))", LOG_DATABASE,
+     "VALUES ('System', %d, %d, -1, %d, '%s', SHA('%s'))", 
+     log_db.c_str (),
      timestamp, port, (int) error, buf, sha_buf);
 }
 
@@ -557,10 +554,11 @@ player_log (CHAR_DATA * ch, char *command, char *str)
 
   sprintf (sha_buf, "%d %s %s", timestamp, command, buf);
 
+  std::string log_db = engine.get_config ("player_log_db");
   mysql_safe_query
     ("INSERT INTO %s.mud (name, account, switched_into, timestamp, port, room, guest, immortal, command, entry, sha_hash) "
      "VALUES ('%s', '%s', '%s', %d, %d, %d, %d, %d, '%s', '%s', SHA('%s'))",
-     LOG_DATABASE, ch->desc
+     log_db.c_str (), ch->desc
      && ch->desc->original ? ch->desc->original->tname : ch->tname, ch->pc
      && ch->pc->account_name ? ch->pc->account_name : "", ch->desc
      && ch->desc->original ? ch->tname : "", timestamp, port, ch->in_room,
@@ -1198,10 +1196,10 @@ is_newbie (const CHAR_DATA* ch)
 
   if (IS_NPC (ch))
     return 0;
-
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query
     ("SELECT name FROM %s.pfiles WHERE account = '%s' AND create_state > 1",
-     PFILES_DATABASE, ch->pc->account_name);
+     player_db.c_str (), ch->pc->account_name);
 
   if ((result = mysql_store_result (database)) != NULL)
     {
@@ -1221,11 +1219,12 @@ is_newbie (const CHAR_DATA* ch)
 bool
 is_newbie (const char* account_name)
 {
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query ("SELECT COUNT(*) "
 		    "FROM %s.pfiles "
 		    "WHERE account = '%s' "
 		    "AND create_state > 1",
-		    PFILES_DATABASE, account_name);
+		    player_db.c_str (), account_name);
 
   MYSQL_RES *result;
   bool is_brand_newbian = false;
@@ -1292,7 +1291,11 @@ is_being_reviewed (const char *name, const char *account_name)
     return 0;
 
   mysql_safe_query
-    ("SELECT * FROM reviews_in_progress WHERE char_name = '%s' AND reviewer != '%s' AND (UNIX_TIMESTAMP() - timestamp) <= 60 * 20",
+    ("SELECT *"
+     " FROM reviews_in_progress"
+     " WHERE char_name = '%s'"
+     " AND reviewer != '%s'"
+     " AND (UNIX_TIMESTAMP() - timestamp) <= 60 * 20",
      name, account_name);
   if ((result = mysql_store_result (database)) != NULL)
     {
@@ -1317,9 +1320,13 @@ is_admin (const char *username)
   if (!username || !*username)
     return 0;
 
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query
-    ("SELECT name FROM shadows_pfiles.pfiles WHERE level > 0 AND account = '%s'",
-     username);
+    ("SELECT name"
+     " FROM %s.pfiles"
+     " WHERE level > 0"
+     " AND account = '%s'",
+     player_db.c_str (), username);
   result = mysql_store_result (database);
 
   if (!result || !mysql_num_rows (result))
@@ -1916,16 +1923,16 @@ save_dreams (CHAR_DATA * ch)
 
   if (!ch || !ch->tname)
     return;
-
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query ("DELETE FROM %s.dreams WHERE name = '%s'",
-		    PFILES_DATABASE, ch->tname);
+		    player_db.c_str (), ch->tname);
 
   if (ch->pc->dreams)
     {
       for (dream = ch->pc->dreams; dream; dream = dream->next)
 	{
 	  mysql_safe_query ("INSERT INTO %s.dreams VALUES('%s', %d, '%s')",
-			    PFILES_DATABASE, ch->tname, 0, dream->dream);
+			    player_db.c_str (), ch->tname, 0, dream->dream);
 	}
     }
 
@@ -1934,7 +1941,7 @@ save_dreams (CHAR_DATA * ch)
       for (dream = ch->pc->dreamed; dream; dream = dream->next)
 	{
 	  mysql_safe_query ("INSERT INTO %s.dreams VALUES('%s', %d, '%s')",
-			    PFILES_DATABASE, ch->tname, 1, dream->dream);
+			    player_db.c_str (), ch->tname, 1, dream->dream);
 	}
     }
 }
@@ -1948,9 +1955,9 @@ load_dreams (CHAR_DATA * ch)
 
   if (!ch || !ch->tname)
     return;
-
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query ("SELECT * FROM %s.dreams WHERE name = '%s'",
-		    PFILES_DATABASE, ch->tname);
+		    player_db.c_str (), ch->tname);
   result = mysql_store_result (database);
   if (result)
     {
@@ -2382,9 +2389,9 @@ load_char_mysql (const char *name)
 
   if (!name || !*name)
     return NULL;
-
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query ("SELECT * FROM %s.pfiles WHERE name = '%s'",
-		    PFILES_DATABASE, name);
+		    player_db.c_str (), name);
   result = mysql_store_result (database);
 
   if (!result || !mysql_num_rows (result))
@@ -2836,9 +2843,9 @@ save_char_mysql (CHAR_DATA * ch)
 	     lodged_obj->vnum);
 
   sprintf (lodged, "%s", buf);
-
+  std::string player_db = engine.get_config ("player_db");
   mysql_safe_query ("SELECT name FROM %s.pfiles WHERE name = '%s'",
-		    PFILES_DATABASE, ch->tname);
+		    player_db.c_str (), ch->tname);
   result = mysql_store_result (database);
 
   if (result && mysql_num_rows (result) >= 1)
@@ -2853,7 +2860,7 @@ save_char_mysql (CHAR_DATA * ch)
 	 "affects = '%s', age = %d, intoxication = %d, hunger = %d, thirst = %d, height = %d, frame = %d, damage = %d, lastregen = %d, lastroom = %d, harness = %d, maxharness = %d, "
 	 "lastlogon = %d, lastlogoff = %d, lastdis = %d, lastconnect = %d, lastdied = %d, hooded = %d, immenter = '%s', immleave = '%s', sitelie = '%s', voicestr = '%s', clans = '%s', skills = '%s', "
 	 "wounds = '%s', lodged = '%s', writes = %d, profession = %d, was_in_room = %d, travelstr = '%s', bmi = %d, guardian_mode = %d, hire_storeroom = %d, hire_storeobj = %d, plan = '%s', goal = '%s', role_id = %d WHERE name = '%s'",
-	 PFILES_DATABASE, ch->name, ch->pc->account_name, ch->short_descr,
+	 player_db.c_str (), ch->name, ch->pc->account_name, ch->short_descr,
 	 ch->long_descr, ch->description, ch->pc->msg,
 	 ch->pc->creation_comment, ch->pc->create_state, ch->pc->nanny_state,
 	 0, ch->pc->special_role ? ch->pc->special_role->summary : "~",
@@ -2893,7 +2900,7 @@ save_char_mysql (CHAR_DATA * ch)
       if (result)
 	mysql_free_result (result);
       mysql_safe_query ("DELETE FROM %s.pfiles WHERE name = '%s'",
-			PFILES_DATABASE, ch->tname);
+			player_db.c_str (), ch->tname);
       mysql_safe_query
 	("INSERT INTO %s.pfiles (name, keywords, account, sdesc, ldesc, description, msg, create_comment, create_state, "
 	 "nanny_state, role, role_summary, role_body, role_date, role_poster, role_cost, app_cost, level, sex, deity, "
@@ -2910,7 +2917,8 @@ save_char_mysql (CHAR_DATA * ch)
 	 "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, "
 	 "'%s', %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, "
 	 "%d, %d, %d, %d, %d, %d, '%s', '%s', '%s', '%s', '%s', '%s', "
-	 "'%s', '%s', %d, %d, %d, '%s', %d, %d, %d, '%s', '%s', %d)", PFILES_DATABASE,
+	 "'%s', '%s', %d, %d, %d, '%s', %d, %d, %d, '%s', '%s', %d)", 
+	 player_db.c_str (),
 	 ch->tname, ch->name, ch->pc->account_name, ch->short_descr,
 	 ch->long_descr, ch->description, ch->pc->msg,
 	 ch->pc->creation_comment, ch->pc->create_state, ch->pc->nanny_state,
@@ -4074,12 +4082,13 @@ get_mysql_board_listing (CHAR_DATA * ch, int board_type, char *name)
     }
   else if (board_type == 2)
     {
-
+      std::string player_db = engine.get_config ("player_db");
       mysql_safe_query
 	("SELECT CONCAT('\\'',GROUP_CONCAT(aa.name SEPARATOR '\\', \\''),'\\'') AS characters "
-	 "FROM shadows_pfiles.pfiles aa, shadows_pfiles.pfiles bb "
+	 "FROM %s.pfiles aa, %s.pfiles bb "
 	 "WHERE bb.name = '%s' and aa.account = bb.account "
-	 "GROUP BY aa.account;", name);
+	 "GROUP BY aa.account;", 
+	 player_db.c_str (), player_db.c_str (), name);
       if ((result = mysql_store_result (database)) == NULL)
 	{
 	  return 0;

@@ -28,6 +28,10 @@
 #include <sstream>
 #include <iostream>
 #include <iomanip>
+#include <vector>
+#include <string>
+#include <map>
+#include <set>
 #include <sys/time.h>
 #include <sys/resource.h>
 
@@ -38,8 +42,9 @@ namespace rpie
     private:
       static const int BOOT_DB_ABORT_THRESHOLD = 15; ///< Infinite loop test.
       static const int RUNNING_ABORT_THRESHOLD = 5; ///< Infinite loop test.
-      std::string mysql_username;
-      std::string mysql_password;
+      std::map<std::string,std::string> string_variables;
+      std::map<std::string,int> int_variables;
+      std::set<std::string> bool_variables; // (true if varname exists)
 
       bool abort_threshold_enabled;
       int abort_threshold;
@@ -56,8 +61,6 @@ namespace rpie
       static const size_t MAX_NAME_LENGTH = 15;	///< Username string length
       static const int ALARM_FREQUENCY = 20; ///< ITimer frequency in seconds
       
-      
-
       void enable_timer_abort ()
 	{
 	  abort_threshold_enabled = true;
@@ -90,63 +93,13 @@ namespace rpie
 	  return (abort_threshold_enabled 
 		  && (timeslice > abort_threshold));
 	}
-
-      /// Get the db connection info from the configuration file
-      void load_config_file (std::string config_filename)
-        {
-          std::ifstream config_file (config_filename.c_str ());
-          std::string line;
-          while (std::getline (config_file,line))
-            {
-	      // Remove comments
-	      std::string::size_type comment_start = line.find_first_of ('#');
-	      if (comment_start != std::string::npos)
-		{
-		  line.erase (comment_start, std::string::npos);
-		}
-	      if (line.empty ())
-		{
-		  continue;
-		}
-
-	      if (line.find ('=') != std::string::npos)
-		{
-		  std::istringstream input_line (line);
-		  std::string var;
-		  std::string eq;
-		  std::string value;
-		  input_line >> var >> eq >> std::ws; 
-		  std::getline (input_line, value);
-		  if (eq.compare ("=") == 0)
-		    {
-		      std::cerr << var << '=' << value << std::endl;
-		      if (var.compare ("mysql_username") == 0)
-			{
-			  if (value[0] == '"' || value[0] == '\'')
-			    {
-			      std::string::size_type start_quote, end_quote;
-			      start_quote = value.find_first_of ("'\"");
-			      end_quote = value.find_first_of ("'\"");
-				  std::cerr << start_quote << ',' << value 
-					    << ',' << end_quote << std::endl;
-			      if (start_quote != end_quote 
-				  && start_quote != std::string::npos
-				  && end_quote != std::string::npos) 
-				{
-				  value.erase (start_quote);
-				  value.erase (end_quote);
-				  std::cerr << start_quote << ',' << value 
-					    << ',' << end_quote << std::endl;
-				}
-
-			    }
-			}
-		    }
-		}
-	      
-            }
-        }
-
+      
+      void set_config (std::string &var_name, bool var_value = true);
+      void set_config (std::string &var_name, std::string &var_value);
+      std::string& get_config (std::string& var_name);
+      std::string& get_config (const char * var_name);
+      void load_config_files ();
+      void load_config_file (std::ifstream &config_file);
     };
 
 }

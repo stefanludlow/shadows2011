@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include "server.h"
 #include "structs.h"
 #include "constants.h"
 #include "account.h"
@@ -87,7 +88,7 @@ int auction_bids = 0;
 #define AUCTION_BID		1
 #define AUCTION_SALE	2
 #define AUCTION_EXPIRED	3
-
+extern rpie::server engine;
 void
 auction_notify (int id, int type)
 {
@@ -103,8 +104,9 @@ auction_notify (int id, int type)
 
 	*buf = '\0';
 	*buf2 = '\0';
-	
-	sprintf (buf, "SELECT * FROM shadows_ah.ah_auctions WHERE auction_id = %d", id);
+	std::string world_log_db = engine.get_config ("world_log_db");
+	sprintf (buf, "SELECT * FROM %s.ah_auctions WHERE auction_id = %d", 
+		 world_log_db.c_str (), id);
 	mysql_safe_query (buf);
 
 	result = mysql_store_result (database);
@@ -170,11 +172,15 @@ cancel_auction (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, bool confirmed)
 	*buf3 = '\0';
 	
 	house_id = auctioneer->mob->carcass_vnum;
-	
-	sprintf (buf,	"SELECT * FROM shadows_ah.ah_auctions WHERE (expires_at > UNIX_TIMESTAMP()) AND "
-					"auction_id = %d AND house_id = %d AND port = %d AND placed_by = '%s'", 
-					id, house_id, port, GET_NAME(ch));
-										
+	std::string world_log_db = engine.get_config ("world_log_db");	
+	sprintf (buf,	
+		 "SELECT * FROM %s.ah_auctions "
+		 "WHERE (expires_at > UNIX_TIMESTAMP()) "
+		 "AND auction_id = %d AND house_id = %d "
+		 "AND port = %d AND placed_by = '%s'",
+		 world_log_db.c_str (),
+		 id, house_id, port, GET_NAME(ch));
+
 	mysql_safe_query (buf);
 	send_to_char (mysql_error(database), ch);
 	
@@ -224,7 +230,7 @@ cancel_auction (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, bool confirmed)
 		return;
 	}
 	
-	sprintf (buf,	"UPDATE shadows_ah.ah_auctions SET expires_at = UNIX_TIMESTAMP() WHERE auction_id = %d", id);
+	sprintf (buf,	"UPDATE %s.ah_auctions SET expires_at = UNIX_TIMESTAMP() WHERE auction_id = %d", world_log_db.c_str (), id);
 	mysql_safe_query (buf);
 	
 	ch->delay_type = 0;
@@ -237,7 +243,7 @@ cancel_auction (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, bool confirmed)
 	sprintf (buf3, "%s %s", buf2, buf);
 	do_whisper (auctioneer, buf3, 83);
 	
-	sprintf (buf,	"UPDATE shadows_ah.ah_auctions SET cancelled = 1 WHERE auction_id = %d", id);
+	sprintf (buf,	"UPDATE %s.ah_auctions SET cancelled = 1 WHERE auction_id = %d", world_log_db.c_str (), id);
 	mysql_safe_query (buf);
 	
 	if ( result )
@@ -258,8 +264,9 @@ preview_auction (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id)
 	*buf3 = '\0';
 	
 	house_id = auctioneer->mob->carcass_vnum;
+	std::string world_log_db = engine.get_config ("world_log_db");
 	
-	sprintf (buf, "SELECT * FROM shadows_ah.ah_auctions WHERE (expires_at > UNIX_TIMESTAMP()) AND auction_id = %d AND house_id = %d AND port = %d", id, house_id, port);
+	sprintf (buf, "SELECT * FROM %s.ah_auctions WHERE (expires_at > UNIX_TIMESTAMP()) AND auction_id = %d AND house_id = %d AND port = %d", world_log_db.c_str (), id, house_id, port);
 	mysql_safe_query (buf);
 	
 	result = mysql_store_result (database);
@@ -308,8 +315,9 @@ retrieve_expiries (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 	char		buf [MAX_STRING_LENGTH], buf2 [MAX_STRING_LENGTH];
 	
 	/* First check for any returned bids owed to the player. */
+	std::string world_log_db = engine.get_config ("world_log_db");
 	
-	sprintf (buf,	"SELECT * FROM shadows_ah.ah_returned_bids WHERE placed_by = '%s' AND picked_up = 0 AND port = %d ORDER BY amount ASC", GET_NAME(ch), port);
+	sprintf (buf,	"SELECT * FROM %s.ah_returned_bids WHERE placed_by = '%s' AND picked_up = 0 AND port = %d ORDER BY amount ASC", world_log_db.c_str (), GET_NAME(ch), port);
 	mysql_safe_query (buf);
 	
 	result = mysql_store_result (database);
@@ -325,7 +333,7 @@ retrieve_expiries (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 		
 		keeper_money_to_char (auctioneer, ch, atoi(row[1]));
 		
-		sprintf (buf, "UPDATE shadows_ah.ah_returned_bids SET picked_up = 1 WHERE placed_by = '%s' AND amount = %d", GET_NAME(ch), atoi(row[1]));
+		sprintf (buf, "UPDATE %s.ah_returned_bids SET picked_up = 1 WHERE placed_by = '%s' AND amount = %d", world_log_db.c_str (), GET_NAME(ch), atoi(row[1]));
 		mysql_safe_query (buf);
 		
 		if ( result )
@@ -339,8 +347,14 @@ retrieve_expiries (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 	
 	/* Then we'll check for any merchandise that needs to be returned due to not selling. */
 	
-	sprintf (buf,	"SELECT * FROM shadows_ah.ah_auctions WHERE placed_by = '%s' AND high_bidder = 'none' "
-					"AND seller_pickup = FALSE AND expires_at <= UNIX_TIMESTAMP() AND port = %d ORDER BY expires_at ASC", GET_NAME(ch), port);
+	sprintf (buf, 
+		 "SELECT * FROM %s.ah_auctions"
+		 " WHERE placed_by = '%s'"
+		 " AND high_bidder = 'none' "
+		 " AND seller_pickup = FALSE"
+		 " AND expires_at <= UNIX_TIMESTAMP()"
+		 " AND port = %d ORDER BY expires_at ASC", 
+		 world_log_db.c_str (), GET_NAME(ch), port);
 	mysql_safe_query (buf);
 	
 	result = mysql_store_result (database);
@@ -373,7 +387,7 @@ retrieve_expiries (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 		do_whisper (auctioneer, buf, 83);
 		
 		/* Let's set the return record as picked up by the seller so they can't dupe the item */
-		sprintf (buf, "UPDATE shadows_ah.ah_auctions SET seller_pickup = TRUE WHERE auction_id = %d", atoi(row[0]));
+		sprintf (buf, "UPDATE %s.ah_auctions SET seller_pickup = TRUE WHERE auction_id = %d", world_log_db.c_str (), atoi(row[0]));
 		mysql_safe_query (buf);
 						
 		tobj = fread_obj(fp);
@@ -400,10 +414,15 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 	int			house_id = 0, fee = 0, net = 0, sold_for = 0;
 	
 	house_id = auctioneer->mob->carcass_vnum;
-	
-	sprintf (buf,	"SELECT * FROM shadows_ah.ah_auctions WHERE ((placed_by = '%s' AND seller_pickup = FALSE) OR "
-					"(high_bidder = '%s' AND buyer_pickup = FALSE)) AND expires_at <= UNIX_TIMESTAMP() AND house_id = %d AND port = %d", 
-					GET_NAME(ch), GET_NAME(ch), house_id, port);
+	std::string world_log_db = engine.get_config ("world_log_db");
+	sprintf (buf,	
+		 "SELECT * FROM %s.ah_auctions"
+		 " WHERE ((placed_by = '%s' AND seller_pickup = FALSE)"
+		 " OR (high_bidder = '%s' AND buyer_pickup = FALSE))"
+		 " AND expires_at <= UNIX_TIMESTAMP() AND house_id = %d"
+		 " AND port = %d", 
+		 world_log_db.c_str (), 
+		 GET_NAME(ch), GET_NAME(ch), house_id, port);
 	
 	mysql_safe_query (buf);
 	
@@ -435,7 +454,7 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 		
 		if ( atoi(row[22]) <= 0 )	// An auction won by a non-buyout, so we need to find the highest bidder.
 		{
-			sprintf (buf,	"SELECT * FROM shadows_ah.ah_bids WHERE auction_id = %d ORDER BY bid_amount DESC LIMIT 1", atoi(row[0]));
+			sprintf (buf,	"SELECT * FROM %s.ah_bids WHERE auction_id = %d ORDER BY bid_amount DESC LIMIT 1", world_log_db.c_str (), atoi(row[0]));
 			
 			mysql_safe_query(buf);
 			result2 = mysql_store_result (database);
@@ -452,7 +471,7 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 			sold_for = atoi(row2[2]);
 			mysql_free_result(result2);
 			
-			sprintf (buf,	"UPDATE shadows_ah.ah_auctions SET sold_for = %d WHERE auction_id = %d", sold_for, atoi(row[0]));
+			sprintf (buf,	"UPDATE %s.ah_auctions SET sold_for = %d WHERE auction_id = %d", world_log_db.c_str (), sold_for, atoi(row[0]));
 			mysql_safe_query (buf);
 		}
 		
@@ -467,7 +486,7 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 		do_whisper (auctioneer, buf, 83);
 		
 		/* Let's set the auction record as picked up by the seller so they can't dupe the cash */
-		sprintf (buf, "UPDATE shadows_ah.ah_auctions SET seller_pickup = TRUE WHERE auction_id = %d", atoi(row[0]));
+		sprintf (buf, "UPDATE %s.ah_auctions SET seller_pickup = TRUE WHERE auction_id = %d", world_log_db.c_str (), atoi(row[0]));
 		mysql_safe_query (buf);
 		
 		if ( result )
@@ -494,7 +513,7 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 
 		if ( atoi(row[22]) <= 0 )	// An auction won by a non-buyout, so we need to find the highest bidder.
 		{
-			sprintf (buf,	"SELECT * FROM shadows_ah.ah_bids WHERE auction_id = %d ORDER BY bid_amount DESC LIMIT 1", atoi(row[0]));
+			sprintf (buf,	"SELECT * FROM %s.ah_bids WHERE auction_id = %d ORDER BY bid_amount DESC LIMIT 1",world_log_db.c_str (), atoi(row[0]));
 			
 			mysql_safe_query(buf);
 			result2 = mysql_store_result (database);
@@ -511,7 +530,7 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 			sold_for = atoi(row2[2]);
 			mysql_free_result(result2);
 			
-			sprintf (buf,	"UPDATE shadows_ah.ah_auctions SET sold_for = %d WHERE auction_id = %d", sold_for, atoi(row[0]));
+			sprintf (buf,	"UPDATE %s.ah_auctions SET sold_for = %d WHERE auction_id = %d", world_log_db.c_str (),sold_for, atoi(row[0]));
 			mysql_safe_query (buf);
 		}
         		
@@ -531,7 +550,7 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 		do_whisper (auctioneer, buf, 83);
 		
 		/* Let's set the auction record as picked up by the buyer so they can't dupe the item */
-		sprintf (buf, "UPDATE shadows_ah.ah_auctions SET buyer_pickup = TRUE WHERE auction_id = %d", atoi(row[0]));
+		sprintf (buf, "UPDATE %s.ah_auctions SET buyer_pickup = TRUE WHERE auction_id = %d",world_log_db.c_str (), atoi(row[0]));
 		mysql_safe_query (buf);
 		
 		if ( result )
@@ -560,8 +579,8 @@ record_bid (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, int bid, bool bought_o
 	int			new_bid = 0, house_id = 0;
 
 	house_id = auctioneer->mob->carcass_vnum;
-	
-	sprintf (buf,	"SELECT bid_amount,placed_by FROM shadows_ah.ah_bids WHERE auction_id = %d AND port = %d ORDER BY bid_amount DESC LIMIT 1", id, port);
+	std::string world_log_db = engine.get_config ("world_log_db");	
+	sprintf (buf,	"SELECT bid_amount,placed_by FROM %s.ah_bids WHERE auction_id = %d AND port = %d ORDER BY bid_amount DESC LIMIT 1", world_log_db.c_str (), id, port);
 	mysql_safe_query (buf);
 	
 	result = mysql_store_result (database);
@@ -570,8 +589,9 @@ record_bid (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, int bid, bool bought_o
 	
 	if ( (row = mysql_fetch_row(result)) )
 	{
-		sprintf (buf,	"INSERT INTO shadows_ah.ah_returned_bids (auction_id, amount, placed_by, house_id, port) VALUES "
-						"(%d, %d, '%s', %d, %d)", id, atoi(row[0]), row[1], house_id, port);
+		sprintf (buf,	"INSERT INTO %s.ah_returned_bids (auction_id, amount, placed_by, house_id, port) VALUES "
+			 "(%d, %d, '%s', %d, %d)", 
+			 world_log_db.c_str (), id, atoi(row[0]), row[1], house_id, port);
 		mysql_safe_query (buf);
 		if ( result )
 			mysql_free_result (result);
@@ -579,10 +599,10 @@ record_bid (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, int bid, bool bought_o
 		
 	mysql_real_escape_string (database, buf2, char_short(ch), strlen (char_short(ch)));
 
-	sprintf (buf,	"INSERT INTO shadows_ah.ah_bids "
-					"(auction_id, bid_amount, buyout, placed_at, placed_by, placed_by_sdesc, placed_by_account, port) VALUES "
-					"(%d, %d, %s, UNIX_TIMESTAMP(), '%s', '%s', '%s', %d)",
-					id, bid, bought_out ? "TRUE" : "FALSE", GET_NAME(ch), buf2, ch->pc->account_name, port);
+	sprintf (buf,	"INSERT INTO %s.ah_bids "
+		 "(auction_id, bid_amount, buyout, placed_at, placed_by, placed_by_sdesc, placed_by_account, port) VALUES "
+		 "(%d, %d, %s, UNIX_TIMESTAMP(), '%s', '%s', '%s', %d)",
+		 world_log_db.c_str (), id, bid, bought_out ? "TRUE" : "FALSE", GET_NAME(ch), buf2, ch->pc->account_name, port);
 					
 	mysql_safe_query (buf);
 	
@@ -595,18 +615,20 @@ record_bid (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, int bid, bool bought_o
 		if ( buyout > 0 && new_bid > buyout )	// Make sure the new minimum bid doesn't exceed the buyout.
 			new_bid = buyout;
 	
-		sprintf (buf,	"UPDATE shadows_ah.ah_auctions "
-						"SET next_bid = %d, high_bidder = '%s' WHERE auction_id = %d",
-						new_bid, GET_NAME(ch), id);
+		sprintf (buf,
+			 "UPDATE %s.ah_auctions "
+			 " SET next_bid = %d, high_bidder = '%s'"
+			 " WHERE auction_id = %d",
+			 world_log_db.c_str (), new_bid, GET_NAME(ch), id);
 	}
 	else
 	{
 		/* This is a buyout; record the sale and expire the auction. */
 		
 		sold_auctions++;
-		sprintf (buf,	"UPDATE shadows_ah.ah_auctions "
+		sprintf (buf,	"UPDATE %s.ah_auctions "
 						"SET high_bidder = '%s', expires_at = UNIX_TIMESTAMP(), bought_out = TRUE, sold_for = %d WHERE auction_id = %d",
-						GET_NAME(ch), bid, id);	
+						world_log_db.c_str (), GET_NAME(ch), bid, id);	
 	}
 	
 	mysql_safe_query (buf);	
@@ -625,8 +647,8 @@ place_bid (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, int bid, bool confirmed
 	*buf3 = '\0';
 	
 	house_id = auctioneer->mob->carcass_vnum;
-	
-	sprintf (buf, "SELECT * FROM shadows_ah.ah_auctions WHERE (expires_at > UNIX_TIMESTAMP()) AND auction_id = %d AND house_id = %d AND port = %d", id, house_id, port);
+	std::string world_log_db = engine.get_config ("world_log_db");	
+	sprintf (buf, "SELECT * FROM %s.ah_auctions WHERE (expires_at > UNIX_TIMESTAMP()) AND auction_id = %d AND house_id = %d AND port = %d", world_log_db.c_str (), id, house_id, port);
 	mysql_safe_query (buf);
 	
 	result = mysql_store_result (database);
@@ -752,7 +774,7 @@ place_bid (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, int bid, bool confirmed
 		{
 			time_remaining = MIN((int) (time(0) + (60*60*6)), (time_remaining + (60*60)));
 		
-			sprintf (buf, "UPDATE shadows_ah.ah_auctions SET expires_at = %d WHERE auction_id = %d", time_remaining, id);
+			sprintf (buf, "UPDATE %s.ah_auctions SET expires_at = %d WHERE auction_id = %d", world_log_db.c_str (), time_remaining, id);
 			mysql_safe_query (buf);
 		}
 	}
@@ -790,25 +812,41 @@ list_auctions (CHAR_DATA *ch, CHAR_DATA *auctioneer, char *argument, int cmd)
 	
 
 	// Auction status.
+	std::string world_log_db = engine.get_config ("world_log_db");
 	if ( cmd == -1 )
-		sprintf (buf,	"SELECT * FROM shadows_ah.ah_auctions WHERE (expires_at - UNIX_TIMESTAMP()) > 0 "
-						"AND house_id = %d AND port = %d AND (placed_by = '%s' OR high_bidder = '%s') ORDER BY expires_at ASC", 
-						house_id, port, GET_NAME(ch), GET_NAME(ch));
+		sprintf (buf,
+			 "SELECT * FROM %s.ah_auctions"
+			 " WHERE (expires_at - UNIX_TIMESTAMP()) > 0 "
+			 " AND house_id = %d AND port = %d"
+			 " AND (placed_by = '%s' OR high_bidder = '%s')"
+			 " ORDER BY expires_at ASC", 
+			 world_log_db.c_str (),house_id, port, 
+			 GET_NAME(ch), GET_NAME(ch));
 	// List auctions by item type.
 	else if ( type > 0 )
-		sprintf (buf,	"SELECT * FROM shadows_ah.ah_auctions WHERE (expires_at - UNIX_TIMESTAMP()) > 0 "
-						"AND obj_type = %d AND house_id = %d AND port = %d ORDER BY expires_at ASC", 
-						type, house_id, port);
+		sprintf (buf,	
+			 "SELECT * FROM %s.ah_auctions"
+			 " WHERE (expires_at - UNIX_TIMESTAMP()) > 0 "
+			 " AND obj_type = %d AND house_id = %d"
+			 " AND port = %d ORDER BY expires_at ASC", 
+			 world_log_db.c_str (),type, house_id, port);
 	// List auctions by keyword.
 	else if ( type < 0 )
-		sprintf (buf,	"SELECT * FROM shadows_ah.ah_auctions WHERE (expires_at - UNIX_TIMESTAMP()) > 0 "
-						"AND (obj_short_desc LIKE '%%%s%%' OR obj_full_desc LIKE '%%%s%%') AND house_id = %d "
-						"AND port = %d ORDER BY expires_at ASC", buf2, buf2, house_id, port);
+		sprintf (buf,
+			 "SELECT * FROM %s.ah_auctions"
+			 " WHERE (expires_at - UNIX_TIMESTAMP()) > 0 "
+			 " AND (obj_short_desc LIKE '%%%s%%'"
+			 "     OR obj_full_desc LIKE '%%%s%%')"
+			 " AND house_id = %d "
+			 " AND port = %d ORDER BY expires_at ASC", 
+			 world_log_db.c_str (), buf2, buf2, house_id, port);
 	// List all auctions.
 	else
-		sprintf (buf,	"SELECT * FROM shadows_ah.ah_auctions WHERE (expires_at - UNIX_TIMESTAMP()) > 0 "
-						"AND house_id = %d AND port = %d ORDER BY expires_at ASC", 
-						house_id, port);
+		sprintf (buf,	"SELECT * FROM %s.ah_auctions"
+			 " WHERE (expires_at - UNIX_TIMESTAMP()) > 0 "
+			 " AND house_id = %d AND port = %d"
+			 " ORDER BY expires_at ASC", 
+			 world_log_db.c_str (), house_id, port);
 
 	mysql_safe_query (buf);
 	
@@ -907,14 +945,17 @@ record_auction (CHAR_DATA *ch, CHAR_DATA *auctioneer, OBJ_DATA *obj,
 	mysql_real_escape_string (database, buf3, obj_desc(obj), strlen (obj_desc(obj)));
 	mysql_real_escape_string (database, buf4, obj_short_desc(obj), strlen (obj_short_desc(obj)));
 	
+	std::string world_log_db = engine.get_config ("world_log_db");
 	sprintf (buf,
-		"INSERT INTO shadows_ah.ah_auctions "
+		"INSERT INTO %s.ah_auctions "
 		"(house_id, placed_at, auction_period, expires_at, deposit_paid, obj_real_value, "
 		"min_bid, next_bid, buyout, placed_by, placed_by_sdesc, placed_by_account, obj_type, "
 		"obj_short_desc, obj_long_desc, obj_full_desc, obj_vnum, buyer_pickup, seller_pickup, bought_out, port) VALUES "
 		"(%d, UNIX_TIMESTAMP(), %d, %d, %d, %d, %d, %d, %d, '%s', '%s', '%s', %d, '%s', '%s', '%s', %d, 0, 0, 0, %d)", 
-		house_id, length, expires_at, deposit, real_value, min_bid, min_bid, buyout, GET_NAME(ch), 
-		char_short(ch), ch->pc->account_name, GET_ITEM_TYPE(obj), buf4, buf3, buf2, obj->nVirtual, port);
+		 world_log_db.c_str (), house_id, length, expires_at, 
+		 deposit, real_value, min_bid, min_bid, buyout, GET_NAME(ch), 
+		 char_short(ch), ch->pc->account_name, GET_ITEM_TYPE(obj), 
+		 buf4, buf3, buf2, obj->nVirtual, port);
 		
 	mysql_safe_query (buf);
 	

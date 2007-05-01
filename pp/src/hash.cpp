@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "server.h"
 #include "structs.h"
 #include "protos.h"
 #include "utils.h"
@@ -19,6 +20,7 @@
 #include "decl.h"
 #include "room.h"
 
+extern rpie::server engine;
 extern struct char_data *character_list;
 extern struct obj_data *object_list;
 extern int top_of_zone_table;
@@ -28,12 +30,13 @@ void
 mobile_load_cues (MOB_DATA * mob)
 {
   std::multimap<mob_cue,std::string> * cues = new std::multimap<mob_cue,std::string>;
-  
+  std::string world_db = engine.get_config ("world_db");
   mysql_safe_query 
     ( "SELECT cue+0, reflex"
-      " FROM shadows_worldfile.cues"
+      " FROM %s.cues"
       " WHERE mid = %d "
-      " ORDER BY cue, id ASC", mob->nVirtual);
+      " ORDER BY cue, id ASC", 
+      world_db.c_str (), mob->nVirtual);
 
   MYSQL_RES *result = mysql_store_result (database);
   if (result)

@@ -15,6 +15,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+#include "server.h"
 #include "structs.h"
 #include "protos.h"
 #include "utils.h"
@@ -25,6 +26,7 @@
 #define VNPC_COPPER_PURSE		200
 #define MAX_INV_COUNT			32
 
+extern rpie::server engine;
 
 const char *standard_object_colors[] = {
   "black",
@@ -815,10 +817,11 @@ redeem_order (CHAR_DATA * ch, OBJ_DATA * ticket, CHAR_DATA * keeper)
   mysql_safe_query ("UPDATE special_orders SET redeemed = 1 WHERE id = %d",
 		    ticket->o.od.value[0]);
 
-  mysql_safe_query ("INSERT INTO server_logs.receipts "
+  mysql_safe_query ("INSERT INTO %s.receipts "
 		    "(time, shopkeep, transaction, who, customer, vnum, "
 		    "item, qty, cost, room, gametime, port) "
 		    "VALUES (NOW(),%d,'sold','%s','%s',%d,'%s',%d,%d,%d,'%d-%d-%d %d:00',%d)",
+		    (engine.get_config ("player_log_db")).c_str (),
 		    keeper->mob->nVirtual, GET_NAME (ch), char_short (ch),
 		    obj->nVirtual, obj->short_description, obj->count,
 		    atoi (row[6]), keeper->in_room, time_info.year,
@@ -1708,17 +1711,17 @@ vnpc_customer (CHAR_DATA * keeper, int purse)
 
       money_to_storeroom (keeper, item_cost);
 
-      sprintf (buf,
-	       "INSERT INTO server_logs.receipts "
-	       "(time, shopkeep, transaction, who, customer, vnum, "
-	       "item, qty, cost, room, gametime, port) "
-	       "VALUES (NOW(),%d,'sold','%s','%s',%d,'%s',%d,%d,%d,'%d-%d-%d %d:00',%d)",
-	       keeper->mob->nVirtual, "vNPC Customer",
-	       "an honest-looking person", tobj->nVirtual,
-	       tobj->short_description, 1, (int) item_cost, keeper->in_room,
-	       time_info.year, time_info.month + 1, time_info.day + 1,
-	       time_info.hour, port);
-      mysql_safe_query (buf);
+      mysql_safe_query
+	("INSERT INTO %s.receipts "
+	 "(time, shopkeep, transaction, who, customer, vnum, "
+	 "item, qty, cost, room, gametime, port) "
+	 "VALUES (NOW(),%d,'sold','%s','%s',%d,'%s',%d,%d,%d,'%d-%d-%d %d:00',%d)",
+	 (engine.get_config ("player_log_db")).c_str (),
+	 keeper->mob->nVirtual, "vNPC Customer",
+	 "an honest-looking person", tobj->nVirtual,
+	 tobj->short_description, 1, (int) item_cost, keeper->in_room,
+	 time_info.year, time_info.month + 1, time_info.day + 1,
+	 time_info.hour, port);
 
       if (keeper_makes (keeper, target_item)
 	  && !get_obj_in_list_num (target_item, room->contents))
@@ -1728,18 +1731,17 @@ vnpc_customer (CHAR_DATA * keeper, int purse)
 	      subtract_keeper_money (keeper, (int) delivery_cost);
 	      obj_to_room (load_object (target_item),
 			   keeper->shop->store_vnum);
-	      sprintf (buf,
-		       "INSERT INTO server_logs.receipts "
-		       "(time, shopkeep, transaction, who, customer, vnum, "
-		       "item, qty, cost, room, gametime, port) "
-		       "VALUES (NOW()+1,%d,'bought','%s','%s',%d,'%s',%d,%f,%d,'%d-%d-%d %d:00',%d)",
-		       keeper->mob->nVirtual, "vNPC Merchant",
-		       "an honest-looking merchant", tobj->nVirtual,
-		       tobj->short_description, 1, delivery_cost,
-		       keeper->in_room, time_info.year, time_info.month + 1,
-		       time_info.day + 1, time_info.hour, port);
-	      mysql_safe_query (buf);
-
+	      mysql_safe_query 
+		("INSERT INTO %s.receipts "
+		 "(time, shopkeep, transaction, who, customer, vnum, "
+		 "item, qty, cost, room, gametime, port) "
+		 "VALUES (NOW()+1,%d,'bought','%s','%s',%d,'%s',%d,%f,%d,'%d-%d-%d %d:00',%d)",
+		 (engine.get_config ("player_log_db")).c_str (),
+		 keeper->mob->nVirtual, "vNPC Merchant",
+		 "an honest-looking merchant", tobj->nVirtual,
+		 tobj->short_description, 1, delivery_cost,
+		 keeper->in_room, time_info.year, time_info.month + 1,
+		 time_info.day + 1, time_info.hour, port);
 	    }
 	}
       extract_obj (tobj);
@@ -3018,17 +3020,17 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
   tobj = obj;
   obj_from_room (&tobj, buy_count);
 
-  sprintf (buf,
-	   "INSERT INTO server_logs.receipts "
-	   "(time, shopkeep, transaction, who, customer, vnum, "
-	   "item, qty, cost, room, gametime, port) "
-	   "VALUES (NOW(),%d,'sold','%s','%s',%d,'%s',%d,%f,%d,'%d-%d-%d %d:00',%d)",
-	   keeper->mob->nVirtual, GET_NAME (ch), char_short (ch),
-	   tobj->nVirtual, tobj->short_description, tobj->count, keepers_cost,
-	   keeper->in_room, time_info.year, time_info.month + 1,
-	   time_info.day + 1, time_info.hour, port);
-  mysql_safe_query (buf);
-
+  mysql_safe_query 
+    ("INSERT INTO %s.receipts "
+     "(time, shopkeep, transaction, who, customer, vnum, "
+     "item, qty, cost, room, gametime, port) "
+     "VALUES (NOW(),%d,'sold','%s','%s',%d,'%s',%d,%f,%d,'%d-%d-%d %d:00',%d)",
+     (engine.get_config ("player_log_db")).c_str (),
+     keeper->mob->nVirtual, GET_NAME (ch), char_short (ch),
+     tobj->nVirtual, tobj->short_description, tobj->count, keepers_cost,
+     keeper->in_room, time_info.year, time_info.month + 1,
+     time_info.day + 1, time_info.hour, port);
+  
   if (keeper_makes (keeper, obj->nVirtual)
       && !get_obj_in_list_num (obj->nVirtual,
 			       vtor (keeper->shop->store_vnum)->contents))
@@ -3039,17 +3041,17 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  obj_to_room (load_object (obj->nVirtual), keeper->shop->store_vnum);
 	  subtract_keeper_money (keeper, (int) delivery_cost);
-	  sprintf (buf,
-		   "INSERT INTO server_logs.receipts "
-		   "(time, shopkeep, transaction, who, customer, vnum, "
-		   "item, qty, cost, room, gametime, port) "
-		   "VALUES (NOW()+1,%d,'bought','%s','%s',%d,'%s',%d,%f,%d,'%d-%d-%d %d:00',%d)",
-		   keeper->mob->nVirtual, "vNPC Merchant",
-		   "an honest-looking merchant", obj->nVirtual,
-		   obj->short_description, 1, delivery_cost, keeper->in_room,
-		   time_info.year, time_info.month + 1, time_info.day + 1,
-		   time_info.hour, port);
-	  mysql_safe_query (buf);
+	  mysql_safe_query
+	    ("INSERT INTO %s.receipts "
+	     "(time, shopkeep, transaction, who, customer, vnum, "
+	     "item, qty, cost, room, gametime, port) "
+	     "VALUES (NOW()+1,%d,'bought','%s','%s',%d,'%s',%d,%f,%d,'%d-%d-%d %d:00',%d)",
+	     (engine.get_config ("player_log_db")).c_str (),
+	     keeper->mob->nVirtual, "vNPC Merchant",
+	     "an honest-looking merchant", obj->nVirtual,
+	     obj->short_description, 1, delivery_cost, keeper->in_room,
+	     time_info.year, time_info.month + 1, time_info.day + 1,
+	     time_info.hour, port);
 	}
     }
 
@@ -3968,17 +3970,16 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
 
   obj_from_char (&obj, sell_count);
 
-  sprintf (buf,
-	   "INSERT INTO server_logs.receipts "
-	   "(time, shopkeep, transaction, who, customer, vnum, "
-	   "item, qty, cost, room, gametime, port) "
-	   "VALUES (NOW(),%d,'bought','%s','%s',%d,'%s',%d,%f,%d,'%d-%d-%d %d:00',%d)",
-	   keeper->mob->nVirtual, GET_NAME (ch), char_short (ch),
-	   obj->nVirtual, obj->short_description, obj->count, keepers_cost,
-	   keeper->in_room, time_info.year, time_info.month + 1,
-	   time_info.day + 1, time_info.hour, port);
-  mysql_safe_query (buf);
-
+  mysql_safe_query
+    ("INSERT INTO %s.receipts "
+     "(time, shopkeep, transaction, who, customer, vnum, "
+     "item, qty, cost, room, gametime, port) "
+     "VALUES (NOW(),%d,'bought','%s','%s',%d,'%s',%d,%f,%d,'%d-%d-%d %d:00',%d)",
+     (engine.get_config ("player_log_db")).c_str (),
+     keeper->mob->nVirtual, GET_NAME (ch), char_short (ch),
+     obj->nVirtual, obj->short_description, obj->count, keepers_cost,
+     keeper->in_room, time_info.year, time_info.month + 1,
+     time_info.day + 1, time_info.hour, port);
 
   money_from_char_to_room (keeper, keeper->shop->store_vnum);
 
@@ -4371,16 +4372,18 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   /* Detail */
-  sprintf (query,
-	   "SELECT time, shopkeep, transaction, who, customer, vnum, "
-	   "item, qty, cost, room, gametime, port, "
-	   "EXTRACT(YEAR FROM gametime) as year, "
-	   "EXTRACT(MONTH FROM gametime) as month, "
-	   "EXTRACT(DAY FROM gametime) as day "
-	   "FROM server_logs.receipts "
-	   "WHERE shopkeep = '%d' AND port = '%d' "
-	   "ORDER BY time DESC;", keeper->mob->nVirtual, port);
-  mysql_safe_query (query);
+  mysql_safe_query
+    ("SELECT time, shopkeep, transaction, who, customer, vnum, "
+     "item, qty, cost, room, gametime, port, "
+     "EXTRACT(YEAR FROM gametime) as year, "
+     "EXTRACT(MONTH FROM gametime) as month, "
+     "EXTRACT(DAY FROM gametime) as day "
+     "FROM %s.receipts "
+     "WHERE shopkeep = '%d' AND port = '%d' "
+     "ORDER BY time DESC;", 
+     (engine.get_config ("player_log_db")).c_str (),
+     keeper->mob->nVirtual, port);
+
   if ((result = mysql_store_result (database)) == NULL)
     {
       send_to_gods ((char *) mysql_error (database));
@@ -6513,17 +6516,17 @@ do_payroll (CHAR_DATA * ch, char *argument, int cmd)
 		}
 
 	/* Detail */
-	sprintf (query,
-	"SELECT time, shopkeep, customer, "
-	"amount, room, gametime, port, "
-	"EXTRACT(YEAR FROM gametime) as year, "
-	"EXTRACT(MONTH FROM gametime) as month, "
-	"EXTRACT(DAY FROM gametime) as day "
-	"FROM server_logs.payroll "
-	"WHERE shopkeep = '%d' AND port = '%d' "
-	"ORDER BY time DESC;", keeper->mob->nVirtual, port);
-
-	mysql_safe_query (query);
+	mysql_safe_query 
+	  ("SELECT time, shopkeep, customer, "
+	   "amount, room, gametime, port, "
+	   "EXTRACT(YEAR FROM gametime) as year, "
+	   "EXTRACT(MONTH FROM gametime) as month, "
+	   "EXTRACT(DAY FROM gametime) as day "
+	   "FROM %s.payroll "
+	   "WHERE shopkeep = '%d' AND port = '%d' "
+	   "ORDER BY time DESC;", 
+	   (engine.get_config ("player_log_db")).c_str (),
+	   keeper->mob->nVirtual, port);
 
 	if ((result = mysql_store_result (database)) == NULL)
 		{

@@ -4232,10 +4232,10 @@ craft_setup (CHAR_DATA * ch, char *argument, char *subcmd)
       if (IS_SET (craft->subcraft_flags, SCF_OBSCURE))
   {
     sprintf (output,
-       "DELETE FROM shadows.new_crafts WHERE subcraft = '%s'",
+       "DELETE FROM new_crafts WHERE subcraft = '%s'",
        craft->subcraft_name);
     mysql_safe_query (output);
-    sprintf (output, "DELETE FROM shadows.crafts WHERE subcraft = '%s'",
+    sprintf (output, "DELETE FROM crafts WHERE subcraft = '%s'",
        craft->subcraft_name);
     mysql_safe_query (output);
     send_to_char

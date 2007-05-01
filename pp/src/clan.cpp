@@ -8,11 +8,14 @@
 #include <ctype.h>
 #include <stdlib.h>
 
+#include "server.h"
 #include "net_link.h"
 #include "protos.h"
 #include "clan.h"
 #include "utils.h"
 #include "utility.h"
+
+extern rpie::server engine;
 
 NAME_SWITCH_DATA *clan_name_switch_list = NULL;
 CLAN_DATA *clan_list = NULL;
@@ -107,9 +110,9 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
   if (nGroupId > 0 && !GET_TRUST (ch) && !IS_SET (ch->flags, FLAG_ISADMIN))
     {
       sprintf (buf,
-	       "INSERT INTO shadows.forum_user_group "
+	       "INSERT INTO forum_user_group "
 	       "SELECT ( %d ), user_id, ( 0 ) "
-	       "FROM shadows.forum_users "
+	       "FROM forum_users "
 	       "WHERE username = '%s';", nGroupId, ch->pc->account_name);
       mysql_safe_query (buf);
     }
@@ -2867,13 +2870,11 @@ clan__do_update (CLAN_DATA * clan)
 void
 clan__do_remove (CLAN_DATA * clan)
 {
-  char buf[AVG_STRING_LENGTH] = "";
-
-  sprintf (buf,
-	   "DELETE FROM shadows_pfiles.clans "
-	   "WHERE name = '%s' ;", clan->name);
-
-  mysql_safe_query (buf);
+  std::string player_db = engine.get_config ("player_db");
+  mysql_safe_query 
+    ("DELETE FROM %s.clans "
+     "WHERE name = '%s' ;", 
+     player_db.c_str (), clan->name);
 }
 
 /*********************************************************************
@@ -2891,10 +2892,13 @@ clan__do_load ()
   MYSQL_ROW row;
   char buf[AVG_STRING_LENGTH] = "";
 
-  strcpy (buf,
-	  "SELECT name,long_name,zone,member_obj,leader_obj,omni_obj "
-	  "FROM shadows_pfiles.clans " "ORDER BY name ; ");
-  mysql_safe_query (buf);
+  std::string player_db = engine.get_config ("player_db");
+  mysql_safe_query 
+    ("SELECT name,long_name,zone,member_obj,leader_obj,omni_obj"
+     " FROM %s.clans"
+     " ORDER BY name ;",
+     player_db.c_str ());
+
   if (!(result = mysql_store_result (database)))
     {
       sprintf (buf, "clan__do_load: %s", mysql_error (database));
