@@ -491,7 +491,30 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 				mysql_free_result(result);
 			return 0;
 		}
-		
+
+		if ( atoi(row[22]) <= 0 )	// An auction won by a non-buyout, so we need to find the highest bidder.
+		{
+			sprintf (buf,	"SELECT * FROM shadows_ah.ah_bids WHERE auction_id = %d ORDER BY bid_amount DESC LIMIT 1", atoi(row[0]));
+			
+			mysql_safe_query(buf);
+			result2 = mysql_store_result (database);
+			
+			if ( !result2 || !mysql_num_rows (result2) )
+			{
+				if ( result2 )
+					mysql_free_result (result2);
+				sold_for = atoi(row[7]);
+			}
+			
+			row2 = mysql_fetch_row (result2);
+			
+			sold_for = atoi(row2[2]);
+			mysql_free_result(result2);
+			
+			sprintf (buf,	"UPDATE shadows_ah.ah_auctions SET sold_for = %d WHERE auction_id = %d", sold_for, atoi(row[0]));
+			mysql_safe_query (buf);
+		}
+        		
 		sprintf (buf, "%s/%s", AUCTION_DIR, row[0]);
 		fp = fopen (buf, "r");
 		
@@ -503,7 +526,7 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 		
 		name_to_ident (ch, buf2);
 		sprintf (buf,	"%s Ah, yes. I have something for you right here - #2%s#0, won at auction for a bargain "
-						"price of %s coppers. Congratulations again on your success!", buf2, row[15], row[22]); 
+						"price of %d coppers. Congratulations again on your success!", buf2, row[15], sold_for); 
 		
 		do_whisper (auctioneer, buf, 83);
 		
