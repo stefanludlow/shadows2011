@@ -2118,8 +2118,8 @@ do_gstat (CHAR_DATA * ch, char *argument, int cmd)
   sprintf (buf, "#2Subversion Revision:            #0%s\n", SVN_REV);
   send_to_char (buf, ch);
   std::string svn_url = "$HeadURL$";
-  svn_url.erase (0,10);
-  svn_url.erase (svn_url.find_last_of ('/'));
+  svn_url.erase (0,38);
+  svn_url.erase (svn_url.rfind ("/pp/src"));
   sprintf (buf, "#2Subversion URL:                 #0%s\n", svn_url.c_str ());
   send_to_char (buf, ch);
 #endif
