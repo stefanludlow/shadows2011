@@ -3,7 +3,8 @@
 
 CC=g++
 
-CFLAGS = -ggdb -DLINUX -Wall
+SVN_VERS = -D'SVN_REV="$(shell svnversion -n .)"'
+CFLAGS = $(SVN_VERS) -ggdb -DLINUX -Wall
 LFLAGS = -lm -lmysqlclient -lcrypt -lnsl
 
 INSTALL_DIR = ..

@@ -2113,6 +2113,16 @@ do_gstat (CHAR_DATA * ch, char *argument, int cmd)
   send_to_char ("\n#6Current Game Statistics#0\n", ch);
   send_to_char ("#6-----------------------#0\n", ch);
 
+  // Collects the latest Subversion Revision
+#ifdef SVN_REV
+  sprintf (buf, "#2Subversion Revision:            #0%s\n", SVN_REV);
+  send_to_char (buf, ch);
+  std::string svn_url = "$HeadURL$";
+  svn_url.erase (0,10);
+  svn_url.erase (svn_url.find_last_of ('/'));
+  sprintf (buf, "#2Subversion URL:                 #0%s\n", svn_url.c_str ());
+  send_to_char (buf, ch);
+#endif
   sprintf (buf, "#2Connected Descriptors:          #0%d\n", uc);
   send_to_char (buf, ch);
   sprintf (buf, "#2Connections Since Boot:         #0%d\n",
