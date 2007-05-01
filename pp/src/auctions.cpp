@@ -73,7 +73,7 @@
 /*
  *	To-Do List:
  *
- *	1. Add in staff version of AUCTION STATUS for detailed info about a specified auction.
+ *  1. Add in staff version of AUCTION STATUS for detailed info about a specified auction.
  *  2. Add in vNPC auction posts/sales?
  *
  */

@@ -1315,6 +1315,7 @@ void print_bit_map (void);
 int whisper_it (CHAR_DATA * ch, int skill, char *source, char *target);
 int sleep_needed_in_seconds (CHAR_DATA * ch);
 void sleep_credit (CHAR_DATA * ch);
+void outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role);
 void sleep_need (CHAR_DATA * ch);
 int would_reveal (CHAR_DATA * ch);
 void shadowers_shadow (CHAR_DATA * ch, int to_room, int move_dir);

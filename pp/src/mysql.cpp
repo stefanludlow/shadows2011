@@ -2425,6 +2425,7 @@ load_char_mysql (const char *name)
       ch->pc->special_role->date = str_dup (row[13]);
       ch->pc->special_role->poster = str_dup (row[14]);
       ch->pc->special_role->cost = atoi (row[15]);
+      ch->pc->special_role->id = atoi(row[96]);
     }
 
   ch->pc->app_cost = atoi (row[16]);
@@ -2851,7 +2852,7 @@ save_char_mysql (CHAR_DATA * ch)
 	 "speaks = %d, flags = %d, plrflags = %d, boatvnum = %d, speed = %d, mountspeed = %d, sleepneeded = %d, autotoll = %d, coldload = %d, affectedby = %d, "
 	 "affects = '%s', age = %d, intoxication = %d, hunger = %d, thirst = %d, height = %d, frame = %d, damage = %d, lastregen = %d, lastroom = %d, harness = %d, maxharness = %d, "
 	 "lastlogon = %d, lastlogoff = %d, lastdis = %d, lastconnect = %d, lastdied = %d, hooded = %d, immenter = '%s', immleave = '%s', sitelie = '%s', voicestr = '%s', clans = '%s', skills = '%s', "
-	 "wounds = '%s', lodged = '%s', writes = %d, profession = %d, was_in_room = %d, travelstr = '%s', bmi = %d, guardian_mode = %d, hire_storeroom = %d, hire_storeobj = %d, plan = '%s', goal = '%s' WHERE name = '%s'",
+	 "wounds = '%s', lodged = '%s', writes = %d, profession = %d, was_in_room = %d, travelstr = '%s', bmi = %d, guardian_mode = %d, hire_storeroom = %d, hire_storeobj = %d, plan = '%s', goal = '%s', role_id = %d WHERE name = '%s'",
 	 PFILES_DATABASE, ch->name, ch->pc->account_name, ch->short_descr,
 	 ch->long_descr, ch->description, ch->pc->msg,
 	 ch->pc->creation_comment, ch->pc->create_state, ch->pc->nanny_state,
@@ -2883,6 +2884,7 @@ save_char_mysql (CHAR_DATA * ch)
 	 ch->guardian_mode, ch->hire_storeroom, ch->hire_storeobj, 
 	 (ch->plan && !ch->plan->empty()) ? ch->plan->c_str() : "",
 	 (ch->goal && !ch->goal->empty()) ? ch->goal->c_str() : "",
+	 ch->pc->special_role ? ch->pc->special_role->id : 0,     
 	 ch->tname);
       save_dreams (ch);
     }
@@ -2900,7 +2902,7 @@ save_char_mysql (CHAR_DATA * ch)
 	 "speaks, flags, plrflags, boatvnum, speed, mountspeed, sleepneeded, autotoll, coldload, affectedby, "
 	 "affects, age, intoxication, hunger, thirst, height, frame, damage, lastregen, lastroom, harness, maxharness, "
 	 "lastlogon, lastlogoff, lastdis, lastconnect, lastdied, hooded, immenter, immleave, sitelie, voicestr, clans, skills, "
-	 "wounds, lodged, writes, profession, was_in_room, travelstr, bmi, hire_storeroom, hire_storeobj, plan, goal) VALUES "
+	 "wounds, lodged, writes, profession, was_in_room, travelstr, bmi, hire_storeroom, hire_storeobj, plan, goal, role_id) VALUES "
 	 "('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d, "
 	 "%d, %d, '%s', '%s', '%s', '%s', %d, %d, %d, %d, %d, "
 	 "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, "
@@ -2908,7 +2910,7 @@ save_char_mysql (CHAR_DATA * ch)
 	 "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, "
 	 "'%s', %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, "
 	 "%d, %d, %d, %d, %d, %d, '%s', '%s', '%s', '%s', '%s', '%s', "
-	 "'%s', '%s', %d, %d, %d, '%s', %d, %d, %d, '%s', '%s')", PFILES_DATABASE,
+	 "'%s', '%s', %d, %d, %d, '%s', %d, %d, %d, '%s', '%s', %d)", PFILES_DATABASE,
 	 ch->tname, ch->name, ch->pc->account_name, ch->short_descr,
 	 ch->long_descr, ch->description, ch->pc->msg,
 	 ch->pc->creation_comment, ch->pc->create_state, ch->pc->nanny_state,
@@ -2939,7 +2941,8 @@ save_char_mysql (CHAR_DATA * ch)
 	 ch->was_in_room, ch->travel_str, ch->bmi,
 	 ch->hire_storeroom, ch->hire_storeobj,
 	 (ch->plan && !ch->plan->empty()) ? ch->plan->c_str() : "",
-	 (ch->goal && !ch->goal->empty()) ? ch->goal->c_str() : ""
+	 (ch->goal && !ch->goal->empty()) ? ch->goal->c_str() : "",
+   	 ch->pc->special_role ? ch->pc->special_role->id : 0
 	 );
     }
 }

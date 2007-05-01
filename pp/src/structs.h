@@ -1822,6 +1822,7 @@ struct role_data
   char *date;
   int cost;
   int timestamp;
+  int id;
   ROLE_DATA *next;
 };
 

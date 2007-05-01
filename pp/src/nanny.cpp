@@ -3062,6 +3062,29 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
     }
 
   send_to_char ("\n", d->character);
+
+  if (d->character->pc->special_role)
+    {
+        outfit_new_char (d->character, d->character->pc->special_role);
+      d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+      d->pending_message->poster = str_dup (GET_NAME (d->character));
+      d->pending_message->subject =
+	str_dup ("Special Role Selected in Chargen.");
+      sprintf (buf,
+	       "Role Name: %s\n" "Role Cost: %d points\n" "Posted By: %s\n"
+	       "Posted On: %s\n" "\n" "%s\n",
+	       d->character->pc->special_role->summary,
+	       d->character->pc->special_role->cost,
+	       d->character->pc->special_role->poster,
+	       d->character->pc->special_role->date,
+	       d->character->pc->special_role->body);
+      d->pending_message->message = str_dup (buf);
+      add_message_to_mysql_player_notes (d->character->tname,
+					 d->character->tname,
+					 d->pending_message);
+      d->character->pc->special_role = NULL;
+    }
+      
   do_look (d->character, "", 15);
 
   if (!str_cmp (d->character->room->name, PREGAME_ROOM_NAME))
@@ -3098,12 +3121,6 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	}
     }
 
-  if (*buf)
-    {
-      send_to_char ("\n", d->character);
-      send_to_char (buf, d->character);
-    }
-
   show_waiting_prisoners (d->character);
   notify_captors (d->character);
 
@@ -3126,7 +3143,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 
   if (d->character->pc->level)
     show_unread_messages (d->character);
-
+    
   if (d->character->pc->creation_comment
       && strlen (d->character->pc->creation_comment) > 2
       && !d->character->pc->level)
@@ -3156,29 +3173,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 
       d->character->pc->creation_comment = NULL;
     }
-
-  if (d->character->pc->special_role)
-    {
-      d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
-      d->pending_message->poster = str_dup (GET_NAME (d->character));
-      d->pending_message->subject =
-	str_dup ("Special Role Selected in Chargen.");
-      sprintf (buf,
-	       "Role Name: %s\n" "Role Cost: %d points\n" "Posted By: %s\n"
-	       "Posted On: %s\n" "\n" "%s\n",
-	       d->character->pc->special_role->summary,
-	       d->character->pc->special_role->cost,
-	       d->character->pc->special_role->poster,
-	       d->character->pc->special_role->date,
-	       d->character->pc->special_role->body);
-      d->pending_message->message = str_dup (buf);
-      add_message_to_mysql_player_notes (d->character->tname,
-					 d->character->tname,
-					 d->pending_message);
-
-      d->character->pc->special_role = NULL;
-    }
-
+    
   online = 0;
   guest = 0;
 
@@ -4045,6 +4040,7 @@ nanny_special_role_selection (DESCRIPTOR_DATA * d, char *arg)
   d->character->pc->special_role->poster = str_dup (role->poster);
   d->character->pc->special_role->date = str_dup (role->date);
   d->character->pc->special_role->cost = role->cost;
+  d->character->pc->special_role->id = role->id;
 
   SEND_TO_Q ("\n", d);
   sprintf (buf, "#2Role Contact:#0  %s\n", role->poster);

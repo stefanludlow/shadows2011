@@ -1039,7 +1039,8 @@ do_get (CHAR_DATA * ch, char *argument, int cmd)
   *arg1 = '\0';
   *arg2 = '\0';
 
-  if (IS_MORTAL (ch) && IS_SET (ch->room->room_flags, OOC))
+  if (IS_MORTAL (ch) && IS_SET (ch->room->room_flags, OOC) 
+        && str_cmp (ch->room->name, PREGAME_ROOM_NAME))
     {
       send_to_char ("This command has been disabled in OOC zones.\n", ch);
       return;
@@ -1316,7 +1317,8 @@ do_take (CHAR_DATA * ch, char *argument, int cmd)
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
 
-  if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch))
+  if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch)
+        && str_cmp (ch->room->name, PREGAME_ROOM_NAME))
     {
       send_to_char ("This command has been disabled in OOC zones.\n", ch);
       return;
@@ -1729,7 +1731,8 @@ do_drop (CHAR_DATA * ch, char *argument, int cmd)
 
   argument = one_argument (argument, buf);
 
-  if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch))
+  if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch)
+        && str_cmp (ch->room->name, PREGAME_ROOM_NAME))
     {
       send_to_char ("This command has been disabled in OOC zones.\n", ch);
       return;
@@ -2240,7 +2243,8 @@ do_give (CHAR_DATA * ch, char *argument, int cmd)
 
   argument = one_argument (argument, obj_name);
 
-  if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch))
+  if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch)
+    && str_cmp (ch->room->name, PREGAME_ROOM_NAME))
     {
       send_to_char ("This command has been disabled in OOC zones.\n", ch);
       return;
@@ -4389,7 +4393,8 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
   int removed = 0, target_found = 0;
   int target_obj = 0, target_char = 0;
 
-  if (IS_MORTAL (ch) && IS_SET (ch->room->room_flags, OOC))
+  if (IS_MORTAL (ch) && IS_SET (ch->room->room_flags, OOC)
+        && str_cmp (ch->room->name, PREGAME_ROOM_NAME))
     {
       send_to_char ("This command has been disabled in OOC zones.\n", ch);
       return;
@@ -5750,7 +5755,8 @@ do_empty (CHAR_DATA * ch, char *argument, int cmd)
 
   argument = one_argument (argument, buf);
 
-  if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch))
+  if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch)
+        && str_cmp (ch->room->name, PREGAME_ROOM_NAME))
     {
       send_to_char ("That is not allowed in OOC areas.\n", ch);
       return;
