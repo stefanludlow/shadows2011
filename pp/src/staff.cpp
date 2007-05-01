@@ -6929,25 +6929,30 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  else if (ch->pc
-	   && (ch->pc->level || IS_NPC (ch)
-	       || IS_SET (ch->flags, FLAG_ISADMIN))
-	   && !str_cmp (subcmd, "wiznet"))
+  else if (!str_cmp (subcmd, "wiznet")
+	   && ((ch->pc && ch->pc->level) 
+	       || IS_SET (ch->flags, FLAG_ISADMIN)
+	       || (IS_NPC (ch) && ch->desc->original)))
     {
-      if (GET_FLAG (ch, FLAG_WIZNET))
+      CHAR_DATA* real_ch = 
+	(IS_NPC(ch) && ch->desc->original)
+	? ch->desc->original
+	: ch;
+
+      if (GET_FLAG (real_ch, FLAG_WIZNET))
 	{
-	  ch->flags &= ~FLAG_WIZNET;
+	  real_ch->flags &= ~FLAG_WIZNET;
 	  send_to_char ("You are no longer tuned into the wiznet.\n", ch);
-	  sprintf (buf, "%s has left the wiznet channel.\n", GET_NAME (ch));
+	  sprintf (buf, "%s has left the wiznet channel.\n", GET_NAME (real_ch));
 	  send_to_gods (buf);
 	}
 
       else
 	{
-	  ch->flags |= FLAG_WIZNET;
+	  real_ch->flags |= FLAG_WIZNET;
 	  send_to_char ("You are now tuned into the wiznet.\n", ch);
 	  sprintf (buf, "%s has rejoined the wiznet channel.\n",
-		   GET_NAME (ch));
+		   GET_NAME (real_ch));
 	  send_to_gods (buf);
 	}
       return;

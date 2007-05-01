@@ -1792,52 +1792,77 @@ do_ichat (CHAR_DATA * ch, char *argument, int cmd)
     }
   else
     {
-
-      if (!GET_FLAG (ch, FLAG_WIZNET) && !IS_NPC (ch))
+      /// Use the admin's wiznet flag (ignore the NPC's)
+      bool ch_wiznet_set = 
+	(IS_NPC(ch) && ch->desc->original)
+	? GET_FLAG (ch->desc->original, FLAG_WIZNET)
+	: GET_FLAG (ch, FLAG_WIZNET);
+      
+      if (!ch_wiznet_set)
 	{
 	  send_to_char
-	    ("You are not currently tuned into the wiznet. Type SET WIZNET to change this.\n",
-	     ch);
+	    ("You are not currently tuned into the wiznet. "
+	     "Type SET WIZNET to change this.\n", ch);
 	  return;
 	}
-
+      
       if (IS_NPC (ch) && ch->desc->original)
-	sprintf (buf1, "#1[Wiznet: %s (%s)]#0 %s\n",
-		 GET_NAME (ch->desc->original), GET_NAME (ch), argument);
+	{
+	  sprintf (buf1, "#1[Wiznet: %s (%s)]#0 %s\n",
+		   GET_NAME (ch->desc->original), 
+		   GET_NAME (ch), CAP (argument));
+	}
       else
-	sprintf (buf1, "#1[Wiznet: %s]#0 %s\n", GET_NAME (ch),
-		 CAP (argument));
-
+	{
+	  sprintf (buf1, "#1[Wiznet: %s]#0 %s\n", 
+		   GET_NAME (ch), CAP (argument));
+	}
+      
       reformat_string (buf1, &p);
       p[0] = toupper (p[0]);
-
+      
       for (i = descriptor_list; i; i = i->next)
-	if (i->character
-	    && (GET_TRUST (i->character)
-		|| IS_SET (i->character->flags, FLAG_ISADMIN)))
-	  {
-	    if (!i->connected)
-	      {
-		*s_buf = '\0';
-		if (!IS_SET (i->character->act, PLR_QUIET)
-		    && (GET_FLAG (i->character, FLAG_WIZNET) || i->original))
-		  {
-		    send_to_char (p, i->character);
-		  }
-		else
-		  {
-		    if (IS_SET (i->character->act, PLR_QUIET))
-		      sprintf (s_buf, "#2[%s is editing.]#0\n",
-			       GET_NAME (i->character));
-		    else if (!GET_FLAG (i->character, FLAG_WIZNET)
-			     && !IS_MORTAL (i->character))
-		      sprintf (s_buf,
-			       "#2[%s is not listening to the wiznet.]#0\n",
-			       GET_NAME (i->character));
-		    send_to_char (s_buf, ch);
-		  }
-	      }
-	  }
+	{
+	  if (i->character
+	      && !i->connected
+	      && (GET_TRUST (i->character)
+		  || IS_SET (i->character->flags, FLAG_ISADMIN)))
+	    {
+	      *s_buf = '\0';
+	      
+	      bool tch_wiznet_set = 
+		(i->original)
+		? GET_FLAG (i->original, FLAG_WIZNET)
+		: GET_FLAG (i->character, FLAG_WIZNET);
+	      
+	      if (IS_SET (i->character->act, PLR_QUIET))
+		{
+		  sprintf (s_buf, "#2[%s is editing.]#0\n",
+			   GET_NAME (i->character));
+		}
+	      else if (!tch_wiznet_set)
+		{
+		  if (!IS_MORTAL (i->character))
+		    {
+		      CHAR_DATA *tch = (i->original)
+			? (i->original)
+			: (i->character);
+		      sprintf 
+			(s_buf, "#2[%s is not listening to the wiznet.]#0\n",
+			 GET_NAME (tch));
+		    }
+		}
+	      else
+		{
+		  send_to_char (p, i->character);
+		}
+	      
+	      if (*s_buf)
+		{
+		  send_to_char (s_buf, ch);
+		}
+	    }
+	}
       mem_free (p); // char*
     }
 }
@@ -1876,7 +1901,7 @@ do_fivenet (CHAR_DATA * ch, char *argument, int cmd)
       reformat_string (buf1, &p);
 
       for (i = descriptor_list; i; i = i->next)
-	if (i->character && GET_TRUST (i->character) == 5)
+	if (i->character && GET_TRUST (i->character) >= 5)
 	  {
 	    if (!i->connected)
 	      {
