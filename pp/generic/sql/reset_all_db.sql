@@ -27,7 +27,6 @@ USE `shadows`;
 -- Table structure for table `account_donations`
 --
 
-DROP TABLE IF EXISTS `account_donations`;
 CREATE TABLE `account_donations` (
   `contributor` varchar(255) default NULL,
   `currency` varchar(255) default NULL,
@@ -40,7 +39,6 @@ CREATE TABLE `account_donations` (
 -- Table structure for table `account_referrals`
 --
 
-DROP TABLE IF EXISTS `account_referrals`;
 CREATE TABLE `account_referrals` (
   `account` varchar(255) default NULL,
   `referrer` varchar(255) default NULL,
@@ -51,7 +49,6 @@ CREATE TABLE `account_referrals` (
 -- Table structure for table `account_withdrawals`
 --
 
-DROP TABLE IF EXISTS `account_withdrawals`;
 CREATE TABLE `account_withdrawals` (
   `withdrawer` varchar(255) default NULL,
   `amount` float default NULL,
@@ -63,7 +60,6 @@ CREATE TABLE `account_withdrawals` (
 -- Table structure for table `announcements`
 --
 
-DROP TABLE IF EXISTS `announcements`;
 CREATE TABLE `announcements` (
   `author` varchar(255) default NULL,
   `entry` text,
@@ -74,7 +70,6 @@ CREATE TABLE `announcements` (
 -- Table structure for table `application_wait_times`
 --
 
-DROP TABLE IF EXISTS `application_wait_times`;
 CREATE TABLE `application_wait_times` (
   `wait_time` int(10) unsigned NOT NULL default '0',
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP,
@@ -85,7 +80,6 @@ CREATE TABLE `application_wait_times` (
 -- Table structure for table `banned_sites`
 --
 
-DROP TABLE IF EXISTS `banned_sites`;
 CREATE TABLE `banned_sites` (
   `site` varchar(255) NOT NULL default '',
   `banned_by` varchar(255) default NULL,
@@ -98,7 +92,6 @@ CREATE TABLE `banned_sites` (
 -- Table structure for table `boards`
 --
 
-DROP TABLE IF EXISTS `boards`;
 CREATE TABLE `boards` (
   `board_name` varchar(75) default NULL,
   `post_number` int(10) unsigned NOT NULL default '0',
@@ -115,7 +108,6 @@ CREATE TABLE `boards` (
 -- Table structure for table `building_log`
 --
 
-DROP TABLE IF EXISTS `building_log`;
 CREATE TABLE `building_log` (
   `author` varchar(255) default NULL,
   `entry` text,
@@ -126,7 +118,6 @@ CREATE TABLE `building_log` (
 -- Table structure for table `building_totals`
 --
 
-DROP TABLE IF EXISTS `building_totals`;
 CREATE TABLE `building_totals` (
   `rooms` int(11) default NULL,
   `objects` int(11) default NULL,
@@ -138,7 +129,6 @@ CREATE TABLE `building_totals` (
 -- Table structure for table `changed_helpfiles`
 --
 
-DROP TABLE IF EXISTS `changed_helpfiles`;
 CREATE TABLE `changed_helpfiles` (
   `staffer` varchar(255) default NULL,
   `change_type` varchar(255) default NULL,
@@ -150,7 +140,6 @@ CREATE TABLE `changed_helpfiles` (
 -- Table structure for table `clan_assignments`
 --
 
-DROP TABLE IF EXISTS `clan_assignments`;
 CREATE TABLE `clan_assignments` (
   `clan_name` varchar(255) default NULL,
   `imm_name` varchar(255) default NULL
@@ -160,7 +149,6 @@ CREATE TABLE `clan_assignments` (
 -- Table structure for table `code_changelog`
 --
 
-DROP TABLE IF EXISTS `code_changelog`;
 CREATE TABLE `code_changelog` (
   `file_list` text,
   `history` text,
@@ -171,7 +159,6 @@ CREATE TABLE `code_changelog` (
 -- Table structure for table `coding_log`
 --
 
-DROP TABLE IF EXISTS `coding_log`;
 CREATE TABLE `coding_log` (
   `author` varchar(255) default NULL,
   `entry` text,
@@ -182,7 +169,6 @@ CREATE TABLE `coding_log` (
 -- Table structure for table `contributions`
 --
 
-DROP TABLE IF EXISTS `contributions`;
 CREATE TABLE `contributions` (
   `name` varchar(255) default NULL,
   `id` int(11) NOT NULL auto_increment,
@@ -198,7 +184,6 @@ CREATE TABLE `contributions` (
 -- Table structure for table `copyover_aiming`
 --
 
-DROP TABLE IF EXISTS `copyover_aiming`;
 CREATE TABLE `copyover_aiming` (
   `aimer_id` int(11) default NULL,
   `target_id` int(11) default NULL
@@ -208,7 +193,6 @@ CREATE TABLE `copyover_aiming` (
 -- Table structure for table `copyover_animations`
 --
 
-DROP TABLE IF EXISTS `copyover_animations`;
 CREATE TABLE `copyover_animations` (
   `animator` int(11) default NULL,
   `target` int(11) default NULL
@@ -218,7 +202,6 @@ CREATE TABLE `copyover_animations` (
 -- Table structure for table `copyover_crafts`
 --
 
-DROP TABLE IF EXISTS `copyover_crafts`;
 CREATE TABLE `copyover_crafts` (
   `crafter_id` int(11) default NULL,
   `craft` varchar(255) default NULL,
@@ -230,7 +213,6 @@ CREATE TABLE `copyover_crafts` (
 -- Table structure for table `copyover_delays`
 --
 
-DROP TABLE IF EXISTS `copyover_delays`;
 CREATE TABLE `copyover_delays` (
   `char_id` int(11) default NULL,
   `delay` int(11) default NULL,
@@ -244,7 +226,6 @@ CREATE TABLE `copyover_delays` (
 -- Table structure for table `copyover_doors`
 --
 
-DROP TABLE IF EXISTS `copyover_doors`;
 CREATE TABLE `copyover_doors` (
   `room` int(11) default NULL,
   `direction` int(11) default NULL,
@@ -255,7 +236,6 @@ CREATE TABLE `copyover_doors` (
 -- Table structure for table `copyover_fighting`
 --
 
-DROP TABLE IF EXISTS `copyover_fighting`;
 CREATE TABLE `copyover_fighting` (
   `fighter_id` int(11) default NULL,
   `target_id` int(11) default NULL
@@ -265,7 +245,6 @@ CREATE TABLE `copyover_fighting` (
 -- Table structure for table `copyover_followers`
 --
 
-DROP TABLE IF EXISTS `copyover_followers`;
 CREATE TABLE `copyover_followers` (
   `follower_id` int(11) default NULL,
   `leader_id` int(11) default NULL
@@ -275,7 +254,6 @@ CREATE TABLE `copyover_followers` (
 -- Table structure for table `copyover_sighted_targets`
 --
 
-DROP TABLE IF EXISTS `copyover_sighted_targets`;
 CREATE TABLE `copyover_sighted_targets` (
   `sighter_id` int(11) default NULL,
   `target_id` int(11) default NULL
@@ -285,7 +263,6 @@ CREATE TABLE `copyover_sighted_targets` (
 -- Table structure for table `copyover_subduers`
 --
 
-DROP TABLE IF EXISTS `copyover_subduers`;
 CREATE TABLE `copyover_subduers` (
   `subduer` int(11) default NULL,
   `target` int(11) default NULL
@@ -295,7 +272,6 @@ CREATE TABLE `copyover_subduers` (
 -- Table structure for table `crafts`
 --
 
-DROP TABLE IF EXISTS `crafts`;
 CREATE TABLE `crafts` (
   `craft` varchar(255) default NULL,
   `subcraft` varchar(255) default NULL,
@@ -311,7 +287,6 @@ CREATE TABLE `crafts` (
 -- Table structure for table `donation_tracking`
 --
 
-DROP TABLE IF EXISTS `donation_tracking`;
 CREATE TABLE `donation_tracking` (
   `donations` float default NULL,
   `spent` float default NULL
@@ -321,7 +296,6 @@ CREATE TABLE `donation_tracking` (
 -- Table structure for table `downloads`
 --
 
-DROP TABLE IF EXISTS `downloads`;
 CREATE TABLE `downloads` (
   `host` varchar(255) default NULL,
   `account` varchar(255) default NULL,
@@ -333,7 +307,6 @@ CREATE TABLE `downloads` (
 -- Table structure for table `failed_logins`
 --
 
-DROP TABLE IF EXISTS `failed_logins`;
 CREATE TABLE `failed_logins` (
   `account_name` varchar(255) default NULL,
   `hostname` varchar(255) default NULL,
@@ -344,7 +317,6 @@ CREATE TABLE `failed_logins` (
 -- Table structure for table `forum_auth_access`
 --
 
-DROP TABLE IF EXISTS `forum_auth_access`;
 CREATE TABLE `forum_auth_access` (
   `group_id` mediumint(8) NOT NULL default '0',
   `forum_id` smallint(5) unsigned NOT NULL default '0',
@@ -368,7 +340,6 @@ CREATE TABLE `forum_auth_access` (
 -- Table structure for table `forum_banlist`
 --
 
-DROP TABLE IF EXISTS `forum_banlist`;
 CREATE TABLE `forum_banlist` (
   `ban_id` mediumint(8) unsigned NOT NULL auto_increment,
   `ban_userid` mediumint(8) NOT NULL default '0',
@@ -382,7 +353,6 @@ CREATE TABLE `forum_banlist` (
 -- Table structure for table `forum_categories`
 --
 
-DROP TABLE IF EXISTS `forum_categories`;
 CREATE TABLE `forum_categories` (
   `cat_id` mediumint(8) unsigned NOT NULL auto_increment,
   `cat_title` varchar(100) default NULL,
@@ -395,7 +365,6 @@ CREATE TABLE `forum_categories` (
 -- Table structure for table `forum_config`
 --
 
-DROP TABLE IF EXISTS `forum_config`;
 CREATE TABLE `forum_config` (
   `config_name` varchar(255) NOT NULL default '',
   `config_value` varchar(255) NOT NULL default '',
@@ -406,7 +375,6 @@ CREATE TABLE `forum_config` (
 -- Table structure for table `forum_confirm`
 --
 
-DROP TABLE IF EXISTS `forum_confirm`;
 CREATE TABLE `forum_confirm` (
   `confirm_id` char(32) NOT NULL default '',
   `session_id` char(32) NOT NULL default '',
@@ -418,7 +386,6 @@ CREATE TABLE `forum_confirm` (
 -- Table structure for table `forum_disallow`
 --
 
-DROP TABLE IF EXISTS `forum_disallow`;
 CREATE TABLE `forum_disallow` (
   `disallow_id` mediumint(8) unsigned NOT NULL auto_increment,
   `disallow_username` varchar(25) NOT NULL default '',
@@ -429,7 +396,6 @@ CREATE TABLE `forum_disallow` (
 -- Table structure for table `forum_forum_lock`
 --
 
-DROP TABLE IF EXISTS `forum_forum_lock`;
 CREATE TABLE `forum_forum_lock` (
   `lock_id` mediumint(8) unsigned NOT NULL auto_increment,
   `forum_id` smallint(5) unsigned NOT NULL default '0',
@@ -443,7 +409,6 @@ CREATE TABLE `forum_forum_lock` (
 -- Table structure for table `forum_forum_prune`
 --
 
-DROP TABLE IF EXISTS `forum_forum_prune`;
 CREATE TABLE `forum_forum_prune` (
   `prune_id` mediumint(8) unsigned NOT NULL auto_increment,
   `forum_id` smallint(5) unsigned NOT NULL default '0',
@@ -457,7 +422,6 @@ CREATE TABLE `forum_forum_prune` (
 -- Table structure for table `forum_forums`
 --
 
-DROP TABLE IF EXISTS `forum_forums`;
 CREATE TABLE `forum_forums` (
   `forum_id` smallint(5) unsigned NOT NULL default '0',
   `cat_id` mediumint(8) unsigned NOT NULL default '0',
@@ -495,7 +459,6 @@ CREATE TABLE `forum_forums` (
 -- Table structure for table `forum_groups`
 --
 
-DROP TABLE IF EXISTS `forum_groups`;
 CREATE TABLE `forum_groups` (
   `group_id` mediumint(8) NOT NULL auto_increment,
   `group_type` tinyint(4) NOT NULL default '1',
@@ -511,7 +474,6 @@ CREATE TABLE `forum_groups` (
 -- Table structure for table `forum_posts`
 --
 
-DROP TABLE IF EXISTS `forum_posts`;
 CREATE TABLE `forum_posts` (
   `post_id` mediumint(8) unsigned NOT NULL auto_increment,
   `topic_id` mediumint(8) unsigned NOT NULL default '0',
@@ -537,7 +499,6 @@ CREATE TABLE `forum_posts` (
 -- Table structure for table `forum_posts_text`
 --
 
-DROP TABLE IF EXISTS `forum_posts_text`;
 CREATE TABLE `forum_posts_text` (
   `post_id` mediumint(8) unsigned NOT NULL default '0',
   `bbcode_uid` varchar(10) NOT NULL default '',
@@ -550,7 +511,6 @@ CREATE TABLE `forum_posts_text` (
 -- Table structure for table `forum_privmsgs`
 --
 
-DROP TABLE IF EXISTS `forum_privmsgs`;
 CREATE TABLE `forum_privmsgs` (
   `privmsgs_id` mediumint(8) unsigned NOT NULL auto_increment,
   `privmsgs_type` tinyint(4) NOT NULL default '0',
@@ -572,7 +532,6 @@ CREATE TABLE `forum_privmsgs` (
 -- Table structure for table `forum_privmsgs_text`
 --
 
-DROP TABLE IF EXISTS `forum_privmsgs_text`;
 CREATE TABLE `forum_privmsgs_text` (
   `privmsgs_text_id` mediumint(8) unsigned NOT NULL default '0',
   `privmsgs_bbcode_uid` varchar(10) NOT NULL default '0',
@@ -584,7 +543,6 @@ CREATE TABLE `forum_privmsgs_text` (
 -- Table structure for table `forum_ranks`
 --
 
-DROP TABLE IF EXISTS `forum_ranks`;
 CREATE TABLE `forum_ranks` (
   `rank_id` smallint(5) unsigned NOT NULL auto_increment,
   `rank_title` varchar(50) NOT NULL default '',
@@ -598,7 +556,6 @@ CREATE TABLE `forum_ranks` (
 -- Table structure for table `forum_search_results`
 --
 
-DROP TABLE IF EXISTS `forum_search_results`;
 CREATE TABLE `forum_search_results` (
   `search_id` int(11) unsigned NOT NULL default '0',
   `session_id` varchar(32) NOT NULL default '',
@@ -611,7 +568,6 @@ CREATE TABLE `forum_search_results` (
 -- Table structure for table `forum_search_wordlist`
 --
 
-DROP TABLE IF EXISTS `forum_search_wordlist`;
 CREATE TABLE `forum_search_wordlist` (
   `word_text` varchar(50) character set latin1 collate latin1_bin NOT NULL default '',
   `word_id` mediumint(8) unsigned NOT NULL auto_increment,
@@ -624,7 +580,6 @@ CREATE TABLE `forum_search_wordlist` (
 -- Table structure for table `forum_search_wordmatch`
 --
 
-DROP TABLE IF EXISTS `forum_search_wordmatch`;
 CREATE TABLE `forum_search_wordmatch` (
   `post_id` mediumint(8) unsigned NOT NULL default '0',
   `word_id` mediumint(8) unsigned NOT NULL default '0',
@@ -637,7 +592,6 @@ CREATE TABLE `forum_search_wordmatch` (
 -- Table structure for table `forum_sessions`
 --
 
-DROP TABLE IF EXISTS `forum_sessions`;
 CREATE TABLE `forum_sessions` (
   `session_id` char(32) NOT NULL default '',
   `session_user_id` mediumint(8) NOT NULL default '0',
@@ -656,7 +610,6 @@ CREATE TABLE `forum_sessions` (
 -- Table structure for table `forum_smilies`
 --
 
-DROP TABLE IF EXISTS `forum_smilies`;
 CREATE TABLE `forum_smilies` (
   `smilies_id` smallint(5) unsigned NOT NULL auto_increment,
   `code` varchar(50) default NULL,
@@ -669,7 +622,6 @@ CREATE TABLE `forum_smilies` (
 -- Table structure for table `forum_themes`
 --
 
-DROP TABLE IF EXISTS `forum_themes`;
 CREATE TABLE `forum_themes` (
   `themes_id` mediumint(8) unsigned NOT NULL auto_increment,
   `template_name` varchar(30) NOT NULL default '',
@@ -721,7 +673,6 @@ CREATE TABLE `forum_themes` (
 -- Table structure for table `forum_themes_name`
 --
 
-DROP TABLE IF EXISTS `forum_themes_name`;
 CREATE TABLE `forum_themes_name` (
   `themes_id` smallint(5) unsigned NOT NULL default '0',
   `tr_color1_name` char(50) default NULL,
@@ -761,7 +712,6 @@ CREATE TABLE `forum_themes_name` (
 -- Table structure for table `forum_topics`
 --
 
-DROP TABLE IF EXISTS `forum_topics`;
 CREATE TABLE `forum_topics` (
   `topic_id` mediumint(8) unsigned NOT NULL auto_increment,
   `forum_id` smallint(8) unsigned NOT NULL default '0',
@@ -787,7 +737,6 @@ CREATE TABLE `forum_topics` (
 -- Table structure for table `forum_topics_watch`
 --
 
-DROP TABLE IF EXISTS `forum_topics_watch`;
 CREATE TABLE `forum_topics_watch` (
   `topic_id` mediumint(8) unsigned NOT NULL default '0',
   `user_id` mediumint(8) NOT NULL default '0',
@@ -801,7 +750,6 @@ CREATE TABLE `forum_topics_watch` (
 -- Table structure for table `forum_user_group`
 --
 
-DROP TABLE IF EXISTS `forum_user_group`;
 CREATE TABLE `forum_user_group` (
   `group_id` mediumint(8) NOT NULL default '0',
   `user_id` mediumint(8) NOT NULL default '0',
@@ -814,7 +762,6 @@ CREATE TABLE `forum_user_group` (
 -- Table structure for table `forum_users`
 --
 
-DROP TABLE IF EXISTS `forum_users`;
 CREATE TABLE `forum_users` (
   `user_id` mediumint(8) NOT NULL default '0',
   `user_active` tinyint(1) default '1',
@@ -886,7 +833,6 @@ CREATE TABLE `forum_users` (
 -- Table structure for table `forum_vote_desc`
 --
 
-DROP TABLE IF EXISTS `forum_vote_desc`;
 CREATE TABLE `forum_vote_desc` (
   `vote_id` mediumint(8) unsigned NOT NULL auto_increment,
   `topic_id` mediumint(8) unsigned NOT NULL default '0',
@@ -901,7 +847,6 @@ CREATE TABLE `forum_vote_desc` (
 -- Table structure for table `forum_vote_results`
 --
 
-DROP TABLE IF EXISTS `forum_vote_results`;
 CREATE TABLE `forum_vote_results` (
   `vote_id` mediumint(8) unsigned NOT NULL default '0',
   `vote_option_id` tinyint(4) unsigned NOT NULL default '0',
@@ -915,7 +860,6 @@ CREATE TABLE `forum_vote_results` (
 -- Table structure for table `forum_vote_voters`
 --
 
-DROP TABLE IF EXISTS `forum_vote_voters`;
 CREATE TABLE `forum_vote_voters` (
   `vote_id` mediumint(8) unsigned NOT NULL default '0',
   `vote_user_id` mediumint(8) NOT NULL default '0',
@@ -929,7 +873,6 @@ CREATE TABLE `forum_vote_voters` (
 -- Table structure for table `forum_words`
 --
 
-DROP TABLE IF EXISTS `forum_words`;
 CREATE TABLE `forum_words` (
   `word_id` mediumint(8) unsigned NOT NULL auto_increment,
   `word` char(100) NOT NULL default '',
@@ -941,7 +884,6 @@ CREATE TABLE `forum_words` (
 -- Table structure for table `helpfiles`
 --
 
-DROP TABLE IF EXISTS `helpfiles`;
 CREATE TABLE `helpfiles` (
   `name` varchar(250) NOT NULL default '',
   `category` varchar(250) NOT NULL default '',
@@ -957,7 +899,6 @@ CREATE TABLE `helpfiles` (
 -- Table structure for table `hobbitmail`
 --
 
-DROP TABLE IF EXISTS `hobbitmail`;
 CREATE TABLE `hobbitmail` (
   `account` varchar(255) default NULL,
   `flags` int(10) unsigned default '0',
@@ -977,7 +918,6 @@ CREATE TABLE `hobbitmail` (
 -- Table structure for table `massmail_messages`
 --
 
-DROP TABLE IF EXISTS `massmail_messages`;
 CREATE TABLE `massmail_messages` (
   `subject` varchar(255) default NULL,
   `type` varchar(10) default NULL,
@@ -989,7 +929,6 @@ CREATE TABLE `massmail_messages` (
 -- Table structure for table `mob_resets`
 --
 
-DROP TABLE IF EXISTS `mob_resets`;
 CREATE TABLE `mob_resets` (
   `zone` int(11) default NULL,
   `cmd_no` int(11) default NULL
@@ -999,7 +938,6 @@ CREATE TABLE `mob_resets` (
 -- Table structure for table `new_crafts`
 --
 
-DROP TABLE IF EXISTS `new_crafts`;
 CREATE TABLE `new_crafts` (
   `command` varchar(255) default NULL,
   `subcraft` varchar(255) default NULL,
@@ -1011,7 +949,6 @@ CREATE TABLE `new_crafts` (
 -- Table structure for table `newsletter_issue`
 --
 
-DROP TABLE IF EXISTS `newsletter_issue`;
 CREATE TABLE `newsletter_issue` (
   `volume` int(11) default NULL,
   `issue` int(11) default NULL
@@ -1021,7 +958,6 @@ CREATE TABLE `newsletter_issue` (
 -- Table structure for table `newsletter_stats`
 --
 
-DROP TABLE IF EXISTS `newsletter_stats`;
 CREATE TABLE `newsletter_stats` (
   `accepted_apps` int(11) NOT NULL default '0',
   `declined_apps` int(11) NOT NULL default '0',
@@ -1037,7 +973,6 @@ CREATE TABLE `newsletter_stats` (
 -- Table structure for table `newsletters`
 --
 
-DROP TABLE IF EXISTS `newsletters`;
 CREATE TABLE `newsletters` (
   `timestamp` int(11) default NULL,
   `newsletter` text
@@ -1047,7 +982,6 @@ CREATE TABLE `newsletters` (
 -- Table structure for table `player_journals`
 --
 
-DROP TABLE IF EXISTS `player_journals`;
 CREATE TABLE `player_journals` (
   `name` varchar(75) default NULL,
   `post_number` int(10) unsigned NOT NULL default '0',
@@ -1062,7 +996,6 @@ CREATE TABLE `player_journals` (
 -- Table structure for table `player_notes`
 --
 
-DROP TABLE IF EXISTS `player_notes`;
 CREATE TABLE `player_notes` (
   `name` varchar(75) default NULL,
   `post_number` int(10) unsigned NOT NULL default '0',
@@ -1079,7 +1012,6 @@ CREATE TABLE `player_notes` (
 -- Table structure for table `player_writing`
 --
 
-DROP TABLE IF EXISTS `player_writing`;
 CREATE TABLE `player_writing` (
   `db_key` int(11) default NULL,
   `author` varchar(255) default NULL,
@@ -1097,7 +1029,6 @@ CREATE TABLE `player_writing` (
 -- Table structure for table `players_online`
 --
 
-DROP TABLE IF EXISTS `players_online`;
 CREATE TABLE `players_online` (
   `account` varchar(255) default NULL,
   `name` varchar(255) default NULL,
@@ -1110,7 +1041,6 @@ CREATE TABLE `players_online` (
 -- Table structure for table `plot_log`
 --
 
-DROP TABLE IF EXISTS `plot_log`;
 CREATE TABLE `plot_log` (
   `author` varchar(255) default NULL,
   `entry` text,
@@ -1121,7 +1051,6 @@ CREATE TABLE `plot_log` (
 -- Table structure for table `professions`
 --
 
-DROP TABLE IF EXISTS `professions`;
 CREATE TABLE `professions` (
   `name` varchar(255) default NULL,
   `skill_list` varchar(255) default NULL,
@@ -1134,7 +1063,6 @@ CREATE TABLE `professions` (
 -- Table structure for table `queued_reviews`
 --
 
-DROP TABLE IF EXISTS `queued_reviews`;
 CREATE TABLE `queued_reviews` (
   `char_name` varchar(255) default NULL,
   `reviewer` varchar(255) default NULL,
@@ -1151,7 +1079,6 @@ CREATE TABLE `queued_reviews` (
 -- Table structure for table `queued_startups`
 --
 
-DROP TABLE IF EXISTS `queued_startups`;
 CREATE TABLE `queued_startups` (
   `port` varchar(255) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -1160,7 +1087,6 @@ CREATE TABLE `queued_startups` (
 -- Table structure for table `queued_submissions`
 --
 
-DROP TABLE IF EXISTS `queued_submissions`;
 CREATE TABLE `queued_submissions` (
   `account` varchar(30) default NULL,
   `type` varchar(30) default NULL,
@@ -1180,7 +1106,6 @@ CREATE TABLE `queued_submissions` (
 -- Table structure for table `race_rpp_data`
 --
 
-DROP TABLE IF EXISTS `race_rpp_data`;
 CREATE TABLE `race_rpp_data` (
   `race_name` varchar(255) default NULL,
   `point_req` int(11) default NULL
@@ -1190,7 +1115,6 @@ CREATE TABLE `race_rpp_data` (
 -- Table structure for table `races`
 --
 
-DROP TABLE IF EXISTS `races`;
 CREATE TABLE `races` (
   `name` varchar(255) default NULL,
   `id` int(11) NOT NULL auto_increment,
@@ -1241,7 +1165,6 @@ CREATE TABLE `races` (
 -- Table structure for table `reboot_mobiles`
 --
 
-DROP TABLE IF EXISTS `reboot_mobiles`;
 CREATE TABLE `reboot_mobiles` (
   `vnum` int(11) default NULL,
   `room` int(11) default NULL,
@@ -1252,7 +1175,6 @@ CREATE TABLE `reboot_mobiles` (
 -- Table structure for table `registered_characters`
 --
 
-DROP TABLE IF EXISTS `registered_characters`;
 CREATE TABLE `registered_characters` (
   `account_name` varchar(255) default NULL,
   `character_name` varchar(255) default NULL,
@@ -1263,7 +1185,6 @@ CREATE TABLE `registered_characters` (
 -- Table structure for table `resolved_hosts`
 --
 
-DROP TABLE IF EXISTS `resolved_hosts`;
 CREATE TABLE `resolved_hosts` (
   `ip` varchar(255) NOT NULL default '',
   `hostname` varchar(255) default NULL,
@@ -1275,7 +1196,6 @@ CREATE TABLE `resolved_hosts` (
 -- Table structure for table `reviews_in_progress`
 --
 
-DROP TABLE IF EXISTS `reviews_in_progress`;
 CREATE TABLE `reviews_in_progress` (
   `char_name` varchar(255) default NULL,
   `reviewer` varchar(255) default NULL,
@@ -1286,7 +1206,6 @@ CREATE TABLE `reviews_in_progress` (
 -- Table structure for table `saveroom_objs`
 --
 
-DROP TABLE IF EXISTS `saveroom_objs`;
 CREATE TABLE `saveroom_objs` (
   `room` int(11) default NULL,
   `wc` int(11) default NULL,
@@ -1328,7 +1247,6 @@ CREATE TABLE `saveroom_objs` (
 -- Table structure for table `server_statistics`
 --
 
-DROP TABLE IF EXISTS `server_statistics`;
 CREATE TABLE `server_statistics` (
   `last_crash` int(11) default NULL,
   `last_reboot` int(11) default NULL,
@@ -1340,7 +1258,6 @@ CREATE TABLE `server_statistics` (
 -- Table structure for table `skills`
 --
 
-DROP TABLE IF EXISTS `skills`;
 CREATE TABLE `skills` (
   `name` varchar(255) default NULL,
   `id` int(10) unsigned NOT NULL auto_increment,
@@ -1360,7 +1277,6 @@ CREATE TABLE `skills` (
 -- Table structure for table `special_orders`
 --
 
-DROP TABLE IF EXISTS `special_orders`;
 CREATE TABLE `special_orders` (
   `id` int(11) NOT NULL auto_increment,
   `char_name` varchar(255) default NULL,
@@ -1379,7 +1295,6 @@ CREATE TABLE `special_orders` (
 -- Table structure for table `special_roles`
 --
 
-DROP TABLE IF EXISTS `special_roles`;
 CREATE TABLE `special_roles` (
   `summary` varchar(255) default NULL,
   `poster` varchar(255) default NULL,
@@ -1396,7 +1311,6 @@ CREATE TABLE `special_roles` (
 -- Table structure for table `spells`
 --
 
-DROP TABLE IF EXISTS `spells`;
 CREATE TABLE `spells` (
   `id` int(11) NOT NULL auto_increment,
   `name` varchar(255) default NULL,
@@ -1441,7 +1355,6 @@ CREATE TABLE `spells` (
 -- Table structure for table `staff_roster`
 --
 
-DROP TABLE IF EXISTS `staff_roster`;
 CREATE TABLE `staff_roster` (
   `name` varchar(255) default NULL,
   `title` varchar(255) default NULL,
@@ -1454,7 +1367,6 @@ CREATE TABLE `staff_roster` (
 -- Table structure for table `stayput_mobiles`
 --
 
-DROP TABLE IF EXISTS `stayput_mobiles`;
 CREATE TABLE `stayput_mobiles` (
   `vnum` int(11) default NULL,
   `room` int(11) default NULL,
@@ -1466,7 +1378,6 @@ CREATE TABLE `stayput_mobiles` (
 -- Table structure for table `testimonials`
 --
 
-DROP TABLE IF EXISTS `testimonials`;
 CREATE TABLE `testimonials` (
   `quote` text,
   `name` varchar(255) default NULL
@@ -1476,7 +1387,6 @@ CREATE TABLE `testimonials` (
 -- Table structure for table `tracks`
 --
 
-DROP TABLE IF EXISTS `tracks`;
 CREATE TABLE `tracks` (
   `room` int(10) unsigned default NULL,
   `race` int(10) unsigned default NULL,
@@ -1491,7 +1401,6 @@ CREATE TABLE `tracks` (
 -- Table structure for table `unneeded_helpfiles`
 --
 
-DROP TABLE IF EXISTS `unneeded_helpfiles`;
 CREATE TABLE `unneeded_helpfiles` (
   `name` varchar(255) default NULL,
   `datestamp` int(11) default NULL
@@ -1501,7 +1410,6 @@ CREATE TABLE `unneeded_helpfiles` (
 -- Table structure for table `virtual_boards`
 --
 
-DROP TABLE IF EXISTS `virtual_boards`;
 CREATE TABLE `virtual_boards` (
   `board_name` varchar(75) NOT NULL default '',
   `post_number` int(10) unsigned NOT NULL default '0',
@@ -1519,7 +1427,6 @@ CREATE TABLE `virtual_boards` (
 -- Table structure for table `vote_notifications`
 --
 
-DROP TABLE IF EXISTS `vote_notifications`;
 CREATE TABLE `vote_notifications` (
   `ip_addr` varchar(255) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
@@ -1528,7 +1435,6 @@ CREATE TABLE `vote_notifications` (
 -- Table structure for table `vote_tracking`
 --
 
-DROP TABLE IF EXISTS `vote_tracking`;
 CREATE TABLE `vote_tracking` (
   `ip_address` varchar(255) default NULL,
   `site_id` varchar(10) default NULL,
@@ -1539,7 +1445,6 @@ CREATE TABLE `vote_tracking` (
 -- Table structure for table `website_errors`
 --
 
-DROP TABLE IF EXISTS `website_errors`;
 CREATE TABLE `website_errors` (
   `errno` int(10) unsigned NOT NULL default '0',
   `request_uri` varchar(255) default NULL,
@@ -1553,7 +1458,6 @@ CREATE TABLE `website_errors` (
 -- Table structure for table `website_links`
 --
 
-DROP TABLE IF EXISTS `website_links`;
 CREATE TABLE `website_links` (
   `url` varchar(255) default NULL,
   `name` varchar(255) default NULL,
@@ -1564,7 +1468,6 @@ CREATE TABLE `website_links` (
 -- Table structure for table `website_log`
 --
 
-DROP TABLE IF EXISTS `website_log`;
 CREATE TABLE `website_log` (
   `author` varchar(255) default NULL,
   `entry` text,
@@ -1575,7 +1478,6 @@ CREATE TABLE `website_log` (
 -- Table structure for table `website_referrals`
 --
 
-DROP TABLE IF EXISTS `website_referrals`;
 CREATE TABLE `website_referrals` (
   `site` varchar(255) default NULL,
   `page` varchar(255) default NULL,
@@ -1589,7 +1491,6 @@ CREATE TABLE `website_referrals` (
 -- Table structure for table `website_sessions`
 --
 
-DROP TABLE IF EXISTS `website_sessions`;
 CREATE TABLE `website_sessions` (
   `username` varchar(255) default NULL,
   `random_string` varchar(255) default NULL
@@ -1607,7 +1508,6 @@ USE `shadows_pfiles`;
 -- Table structure for table `clans`
 --
 
-DROP TABLE IF EXISTS `clans`;
 CREATE TABLE `clans` (
   `id` smallint(5) unsigned NOT NULL auto_increment,
   `name` varchar(32) default NULL,
@@ -1624,7 +1524,6 @@ CREATE TABLE `clans` (
 -- Table structure for table `dreams`
 --
 
-DROP TABLE IF EXISTS `dreams`;
 CREATE TABLE `dreams` (
   `name` varchar(255) NOT NULL default '',
   `dreamed` int(11) default NULL,
@@ -1635,7 +1534,6 @@ CREATE TABLE `dreams` (
 -- Table structure for table `morgul_reserves_20060401`
 --
 
-DROP TABLE IF EXISTS `morgul_reserves_20060401`;
 CREATE TABLE `morgul_reserves_20060401` (
   `name` varchar(255) NOT NULL default '',
   `account` varchar(255) default NULL
@@ -1645,7 +1543,6 @@ CREATE TABLE `morgul_reserves_20060401` (
 -- Table structure for table `pfiles`
 --
 
-DROP TABLE IF EXISTS `pfiles`;
 CREATE TABLE `pfiles` (
   `name` varchar(255) NOT NULL default '',
   `keywords` varchar(255) default NULL,
@@ -1762,7 +1659,6 @@ USE `shadows_worldfile`;
 -- Table structure for table `cues`
 --
 
-DROP TABLE IF EXISTS `cues`;
 CREATE TABLE `cues` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `mid` int(10) unsigned default NULL,
@@ -1783,7 +1679,6 @@ USE `server_logs`;
 -- Table structure for table `ip`
 --
 
-DROP TABLE IF EXISTS `ip`;
 CREATE TABLE `ip` (
   `account` varchar(32) NOT NULL default '',
   `host` varchar(255) default NULL,
@@ -1806,7 +1701,6 @@ CREATE TABLE `ip` (
 -- Table structure for table `loggers`
 --
 
-DROP TABLE IF EXISTS `loggers`;
 CREATE TABLE `loggers` (
   `timestamp` timestamp NOT NULL default '0000-00-00 00:00:00',
   `account` varchar(32) default NULL,
@@ -1821,7 +1715,6 @@ CREATE TABLE `loggers` (
 -- Table structure for table `mud`
 --
 
-DROP TABLE IF EXISTS `mud`;
 CREATE TABLE `mud` (
   `name` varchar(255) default NULL,
   `account` varchar(255) default NULL,
@@ -1845,7 +1738,6 @@ CREATE TABLE `mud` (
 -- Table structure for table `receipts`
 --
 
-DROP TABLE IF EXISTS `receipts`;
 CREATE TABLE `receipts` (
   `id` int(10) unsigned NOT NULL auto_increment,
   `time` timestamp NOT NULL default CURRENT_TIMESTAMP,
@@ -1869,7 +1761,6 @@ CREATE TABLE `receipts` (
 -- Table structure for table `shade`
 --
 
-DROP TABLE IF EXISTS `shade`;
 CREATE TABLE `shade` (
   `id` int(10) unsigned default NULL,
   `ip` int(10) unsigned default NULL,
@@ -1892,7 +1783,6 @@ USE `shadows_ah`;
 -- Table structure for table `ah_auctions`
 --
 
-DROP TABLE IF EXISTS `ah_auctions`;
 CREATE TABLE `ah_auctions` (
   `auction_id` int(11) NOT NULL auto_increment,
   `house_id` int(11) NOT NULL,
@@ -1927,7 +1817,6 @@ CREATE TABLE `ah_auctions` (
 -- Table structure for table `ah_bids`
 --
 
-DROP TABLE IF EXISTS `ah_bids`;
 CREATE TABLE `ah_bids` (
   `bid_id` int(11) NOT NULL auto_increment,
   `auction_id` int(11) NOT NULL,
@@ -1946,7 +1835,6 @@ CREATE TABLE `ah_bids` (
 -- Table structure for table `ah_returned_bids`
 --
 
-DROP TABLE IF EXISTS `ah_returned_bids`;
 CREATE TABLE `ah_returned_bids` (
   `auction_id` int(11) NOT NULL,
   `amount` int(11) NOT NULL,
