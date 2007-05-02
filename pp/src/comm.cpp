@@ -744,19 +744,26 @@ game_loop (int s)
 	}
 	
 /** TE PIT **
-* Runs on the 1 and 15 of each month, for 1 day, every hour
+* Runs on the 1 and 15 of each month, for 1 day, every half hour RL
+*/
+time_t t = time(NULL);
+struct tm* tp = localtime(&t);
+int daymonth;
 
-	  if (!(pulse % (SECOND_PULSE * 60 * 60 * 2))) //every 2 IG hour
+daymonth = tp->tm_mday;
+
+if (daymonth == 1 || daymonth == 15)
+{
+	  if (!(pulse % (SECOND_PULSE * 60 * 30))) //every 30 RL miuntes
 	   	{
-
-		if (te_day_flag && !te_pit_fight && port == PLAYER_PORT && is_te_pit_clear ())
+		if (!te_pit_fight && port == PLAYER_PORT && is_te_pit_clear ())
 	    	{
 	    	  te_pit_first ();
 	    	  te_pit_time = (int) time (0);
 	    	}
 	    }
-	    
-end te minute update pit **/
+	}  
+/* end te minute update pit **/
 
       if (!(pulse % (SECOND_PULSE * 60 * 60 * 4)))
 	{
