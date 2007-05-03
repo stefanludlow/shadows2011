@@ -1432,11 +1432,22 @@ hit_char (CHAR_DATA * ch, CHAR_DATA * victim, int strike_parm)
   if (!ch || !victim)
     return;
 
+  if (GET_FLAG (ch, FLAG_FLEE))
+    {
+      if (!ch->primary_delay && !flee_attempt(ch))
+	ch->primary_delay=16;
+
+      return;
+    }
+
+
   if (IS_SET (victim->act, ACT_FLYING)
       && !IS_SET (ch->act, ACT_FLYING)
-      && AWAKE (victim) && victim->race != 84)
+      && AWAKE (victim) && victim->race != 84
+      && victim->fighting != ch)
     {
       send_to_char ("They are flying out of reach!\n", ch);
+      stop_fighting(ch);
       return;
     }
 
@@ -1472,14 +1483,16 @@ hit_char (CHAR_DATA * ch, CHAR_DATA * victim, int strike_parm)
       return;
     }
 
-  if (GET_FLAG (ch, FLAG_FLEE))
+  /*
+    if (GET_FLAG (ch, FLAG_FLEE))
     {
 
       if (!ch->primary_delay && !flee_attempt (ch))
-	ch->primary_delay = 16;
+  	ch->primary_delay = 16;
 
-      return;
+   return;
     }
+  */
 
   guard_check (victim);
 
@@ -4636,7 +4649,6 @@ sa_rescue (SECOND_AFFECT * sa)
   rescuee = (CHAR_DATA *) sa->obj;
   result = rescue_attempt (sa->ch, rescuee);
 
-
   if (result == 2)		/* can't rescue...stop trying */
     return;
 
@@ -4730,6 +4742,9 @@ rescue_attempt (CHAR_DATA * ch, CHAR_DATA * friendPtr)
   if (!tch)
     return 2;
 
+  if (IS_SET(tch->act, ACT_FLYING))
+    return 2;
+
   agi_diff = (GET_AGI (ch) - GET_AGI (tch)) +
     /* easier to rescue if you are fighting your friend's enemy */
     /* harder to rescue if you are fighting someone else */
@@ -4798,6 +4813,12 @@ do_rescue (CHAR_DATA * ch, char *argument, int cmd)
       act ("$N doesn't need rescuing.", false, ch, 0, friendPtr, TO_CHAR);
       return;
     }
+
+  if (IS_SET(tch->act, ACT_FLYING))
+  {
+    act ("You cannot help $N.", false, ch, 0, friendPtr, TO_CHAR);
+    return;
+  }
 
   if (sa)
     {

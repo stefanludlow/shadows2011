@@ -2927,9 +2927,12 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
 	act ("You successfully ambush $N, leaping from your cover to attack!",
 	     false, ch, 0, victim, TO_CHAR | _ACT_FORMAT);
     }
+  //  sprintf (buf, "victim->fighting->short_descr = #2%s#0\n", victim->fighting->short_descr);
+  //  send_to_gods(buf);
+  // send_to_gods(ch->name);
 
   if (IS_SET (victim->act, ACT_FLYING) && !IS_SET (ch->act, ACT_FLYING)
-      && AWAKE (victim))
+      && AWAKE (victim) && !(victim->fighting)) // and victim is not fighting you
     {
       send_to_char ("They are flying out of reach!\n", ch);
       return;
@@ -3205,7 +3208,7 @@ do_strike (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   if (IS_SET (victim->act, ACT_FLYING) && !IS_SET (ch->act, ACT_FLYING)
-      && AWAKE (victim))
+      && AWAKE (victim) && !(victim->fighting))
     {
       send_to_char ("They are flying out of reach!\n", ch);
       return;
@@ -3386,7 +3389,7 @@ do_kill (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   if (IS_SET (victim->act, ACT_FLYING) && !IS_SET (ch->act, ACT_FLYING)
-      && AWAKE (victim))
+      && AWAKE (victim) && !(victim->fighting))
     {
       send_to_char ("They are flying out of reach!\n", ch);
       return;
