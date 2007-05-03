@@ -7339,8 +7339,10 @@ do_locate (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_where (CHAR_DATA * ch, char *argument, int cmd)
 {
+  char clan[MAX_INPUT_LENGTH] = "";
   char name[MAX_INPUT_LENGTH] = "";
   char buf[MAX_STRING_LENGTH] = "";
+  char buf1[MAX_STRING_LENGTH] = "";
   char strFmtName[AVG_STRING_LENGTH] = "#1No Name!#0";
   char strFmtAnim[AVG_STRING_LENGTH] = "";
   char strFmtRoom[AVG_STRING_LENGTH] = "";
@@ -7354,12 +7356,20 @@ do_where (CHAR_DATA * ch, char *argument, int cmd)
   struct descriptor_data *d = NULL;
   char chrState = ' ';
   bool check_aura = false;
+  bool check_clan = false;
 
   one_argument (argument, name);
   if (strcmp (name,"aura") == 0) 
     check_aura = true;
 
-  if (!*name || check_aura)
+  if (strcmp (name,"clan") == 0)
+    {
+      check_clan = true;  // set check_clan true if the admin wants to list a specific clan -Meth
+      half_chop (argument, name, buf1);  // chop the word 'clan' off the argument
+      one_argument(buf1, clan); // read the clanname into 'clan'
+    }
+
+  if (!*name || check_aura || check_clan)
     {
       if (IS_MORTAL (ch))
 	{
@@ -7368,24 +7378,30 @@ do_where (CHAR_DATA * ch, char *argument, int cmd)
 	}
       else
 	{
+          /* The next four lines are pointless, we set nDescriptors again just 13 lines further on -Meth
 	  for (d = descriptor_list; d; d = d->next)
 	    {
 	      nDescriptors++;
 	    }
+	  */
 
+	  // iterate through descriptors and save room numbers where there are active players -Meth
 	  for (d = descriptor_list, x = 0; d; d = d->next)
 	    {
 	      if (d->character && (d->connected == CON_PLYNG)
 		  && (d->character->in_room != NOWHERE))
 		{
 		  /* arrDesc[x++] = d; */
-		  arrRoom[x++] = d->character->in_room;
+		  if (!check_clan || is_clan_member(d->character, clan)) // store the room if we're not listing by clans or if the char is in the specified clan -Meth
+		    arrRoom[x++] = d->character->in_room;
 		}
-	      arrRoom[x] = -1;
+	      arrRoom[x] = -1;  // set the next room to -1 to show the end -Meth
 	    }
-	  /*                      arrDesc[x] = NULL; */
-	  nDescriptors = x;
 
+	  /*                      arrDesc[x] = NULL; */
+	  nDescriptors = x; // nDescriptors now equals the number of characters we'll show in the output - Meth
+
+	  // A bubble-sort to put the room numbers in order for pretty output -Meth
 	  for (y = 0; y < nDescriptors - 1; y++)
 	    {
 	      for (x = 0; x < nDescriptors - 1; x++)
@@ -7406,7 +7422,8 @@ do_where (CHAR_DATA * ch, char *argument, int cmd)
 		}
 	    }
 
-	  strcat (buf, "\n");
+	  strcat (buf, "\n"); // not sure why we're adding the newline here -Meth
+
 
 	  for (x = 0; x < nDescriptors; x++)
 	    {
@@ -7414,6 +7431,7 @@ do_where (CHAR_DATA * ch, char *argument, int cmd)
 	      /* d = arrDesc[x]; */
 	      /* ch_room = vtor(d->character->in_room); */
 
+	      // skip if room number is less than zero OR if room number is equal to the last room OR 
 	      if ((arrRoom[x] < 0) || (x > 0 && arrRoom[x] == arrRoom[x - 1])
 		  || !(ch_room = vtor (arrRoom[x])))
 		continue;
@@ -7428,12 +7446,14 @@ do_where (CHAR_DATA * ch, char *argument, int cmd)
 	      sprintf (strFmtRoom, "#2[%6d]#0 #6%s", ch_room->nVirtual,
 		       ch_room->name);
 
-	      for (d = descriptor_list; d; d = d->next)
+	      for (d = descriptor_list; d; d = d->next) // iterate through characters to find out if they are in room arrRoom[x]
 		{
 
 		  if (d->character && (d->connected == CON_PLYNG)
 		      && (d->character->in_room != NOWHERE)
-		      && (d->character->in_room == arrRoom[x]))
+		      && (d->character->in_room == arrRoom[x])
+		      && (!check_clan || is_clan_member(d->character,clan))
+                      )
 		    {
 
 
