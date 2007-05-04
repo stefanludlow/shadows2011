@@ -1184,23 +1184,23 @@ npc_evasion (CHAR_DATA * ch, int dir)
     }
 
   // grouped enforcers stand ground - often
-  else if (IS_SET (ch->act, ACT_ENFORCER))
-    {
+  //else if (IS_SET (ch->act, ACT_ENFORCER))
+    //{
       if (ch->following)
 	{
-	  if (number (1,25) <= ch->wil)
-	    {
+//	  if (number (1,25) <= ch->wil)
+//	    {
 	      return;
-	    }
+//	    }
 	}
-      else if (is_group_leader (ch))
-	{
-	  if (number (1, 25) <= ch->wil + 4)
-	    {
-	      return;
-	    }
-	}
-    }
+  //    else if (is_group_leader (ch))
+//	{
+//	  if (number (1, 25) <= ch->wil + 4)
+//	    {
+//	      return;
+//	    }
+//	}
+//    }
 
   roll = number (1, 3);
 

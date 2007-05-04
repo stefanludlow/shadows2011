@@ -2034,37 +2034,28 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 void
 npc_ranged_retaliation (CHAR_DATA * target, CHAR_DATA * ch)
 {
+  /* If the target's a NPC:
+        if they're a mount, or on a mount, add treat to both the rider and the mount.
+        otherwise, if the target is not a mount, not fleeing, not leaving, not entering, not fighting, 
+        and not following, add_threat and charge the shooter.
+  */
+
   if (IS_NPC (target) && !target->desc)
     {
-      add_threat (target, ch, 7);
+      // add_threat (target, ch, 7); -- If this is here, then evaluate_threat means the NPC charges irregardless.
       if (IS_SET (target->act, ACT_MOUNT) && target->mount)
+      {
 	add_threat (target->mount, ch, 7);
+        add_threat (target, ch, 7);
+      } 
       else if (!IS_SET (target->act, ACT_MOUNT) && !target->fighting &&
 	       !IS_SET (target->flags, FLAG_ENTERING) &&
 	       !IS_SET (target->flags, FLAG_LEAVING) &&
-	       !IS_SET (target->flags, FLAG_FLEE))
+	       !IS_SET (target->flags, FLAG_FLEE) && !(target->following))
 	{
 	  do_stand (target, "", 0);
-
-	  // grouped enforcers stand ground - often
-	  if (IS_SET (target->act, ACT_ENFORCER))
-	    {
-	      if (target->following)
-		{
-		  if (number (1,25) <= target->wil)
-		    {
-		      return;
-		    }
-		}
-	      else if (is_group_leader (target))
-		{
-		  if (number (1, 25) <= target->wil + 4)
-		    {
-		      return;
-		    }
-		}
-	    }
 	  target->speed = 4;
+          add_threat (target, ch, 7);
 	  npc_charge (target, ch);
 	}
       else if (IS_SET (target->act, ACT_MOUNT)
@@ -2078,6 +2069,7 @@ npc_ranged_retaliation (CHAR_DATA * target, CHAR_DATA * ch)
 	{
 	  do_stand (target, "", 0 ) ;
 	  target->speed = 4 ;
+          add_threat (target, ch, 7);
 	  npc_charge (target, ch);
 	}
     }
@@ -2135,7 +2127,6 @@ npc_ranged_response (CHAR_DATA * npc, CHAR_DATA * retal_ch)
   //       -OR- the victim is not aggro, an enforcer, combat ready, or following 
   // Else Retaliate
 // Unless they are under cover. IF undercover, do nothing (ie. stay undercover)
-
 
   if (morale_broken (npc)
       || (!IS_SET (npc->act, ACT_ENFORCER)
