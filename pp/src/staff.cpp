@@ -8392,7 +8392,6 @@ do_swap (CHAR_DATA * ch, char *argument, int cmd)
 				+ swap_destination + "/bin/server");
 
       system (swap_command.c_str ());
-      send_to_gods (swap_command.c_str ());
       send_to_char ("The server binary on this port has been updated.\n", ch);
     }
 }
