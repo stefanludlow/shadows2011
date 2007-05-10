@@ -817,6 +817,7 @@ redeem_order (CHAR_DATA * ch, OBJ_DATA * ticket, CHAR_DATA * keeper)
   mysql_safe_query ("UPDATE special_orders SET redeemed = 1 WHERE id = %d",
 		    ticket->o.od.value[0]);
 
+  int port = engine.get_port ();
   mysql_safe_query ("INSERT INTO %s.receipts "
 		    "(time, shopkeep, transaction, who, customer, vnum, "
 		    "item, qty, cost, room, gametime, port) "
@@ -1647,7 +1648,6 @@ vnpc_customer (CHAR_DATA * keeper, int purse)
 {
   ROOM_DATA *room;
   OBJ_DATA *tobj;
-  char buf[MAX_STRING_LENGTH];
   int items_in_list = 0, target_item = 0, i = 0;
   int required_check = 0, item_cost = 0;
   float delivery_cost = 0;
@@ -1703,6 +1703,7 @@ vnpc_customer (CHAR_DATA * keeper, int purse)
 
   required_check = 55 - (item_cost / 4);
   required_check = MAX (3, required_check);
+  int port = engine.get_port ();
 
   if (number (1, 100) <= required_check)
     {
@@ -3019,6 +3020,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 
   tobj = obj;
   obj_from_room (&tobj, buy_count);
+  int port = engine.get_port ();
 
   mysql_safe_query 
     ("INSERT INTO %s.receipts "
@@ -3969,6 +3971,7 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
   keeper_money_to_char (keeper, ch, (int) keepers_cost);
 
   obj_from_char (&obj, sell_count);
+  int port = engine.get_port ();
 
   mysql_safe_query
     ("INSERT INTO %s.receipts "
@@ -4257,10 +4260,9 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
   CHAR_DATA *keeper = NULL;
   MYSQL_RES *result;
   MYSQL_ROW row;
-  char query[AVG_STRING_LENGTH*3] = "";
   char args[3][AVG_STRING_LENGTH / 3] = { "", "", "" };
   char buf[MAX_STRING_LENGTH] = "";
-	bool sumchk = false;
+  bool sumchk = false;
   //int shopnum = 0;
 	
 	/****** begin future options test statments ***/
@@ -4372,6 +4374,8 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   /* Detail */
+  int port = engine.get_port ();
+
   mysql_safe_query
     ("SELECT time, shopkeep, transaction, who, customer, vnum, "
      "item, qty, cost, room, gametime, port, "
@@ -6485,10 +6489,8 @@ do_payroll (CHAR_DATA * ch, char *argument, int cmd)
   int payrollAmt = 0, payrollTAmt = 0;
   long day = -1, month = -1, year = -1;
   CHAR_DATA *keeper = NULL;
-  char query[AVG_STRING_LENGTH*3] = "";
   MYSQL_RES *result;
   MYSQL_ROW row;
-  bool sumchk = false;
   char buf[MAX_STRING_LENGTH];
   //int shopnum = 0;
 	
@@ -6516,6 +6518,7 @@ do_payroll (CHAR_DATA * ch, char *argument, int cmd)
 		}
 
 	/* Detail */
+	int port = engine.get_port ();
 	mysql_safe_query 
 	  ("SELECT time, shopkeep, customer, "
 	   "amount, room, gametime, port, "

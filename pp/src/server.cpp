@@ -1,35 +1,59 @@
 #include "server.h"
 
-void 
-rpie::server::set_config (std::string &var_name, bool var_value)
+rpie::server::server ()
 {
-  if (var_value)
-    {
-      bool_variables.insert (var_name);
-    }
+  // Set Defaults
+  // Override these in your config file.
+  set_config ("mysql_host", "localhost");
+  set_config ("mysql_user","rpi_engine");
+  set_config ("mysql_passwd", "rpi_engine2007");
+  
+  set_config ("engine_db", "rpi_engine");
+  set_config ("player_db", "rpi_player");
+  set_config ("player_log_db", "rpi_player_log");
+  set_config ("world_db", "rpi_world");
+  set_config ("world_log_db", "rpi_world_log");
+  
+  set_config ("server_mode", "play");
+  set_config ("server_port", "4500");
+
+  set_config ("server_path_play", "/usr/local/games/rpi_engine/pp");
+  set_config ("server_path_build", "/usr/local/games/rpi_engine/bp");
+  set_config ("server_path_test", "/usr/local/games/rpi_engine/tp");
+  return;
 }
 
 void
-rpie::server::set_config (std::string &var_name, std::string &var_value)
+rpie::server::set_config (std::string var_name, std::string var_value = "true")
 {
   if (var_value.size())
     {
-      string_variables[var_name] = var_value;
+      config_variables[var_name] = var_value;
+      if (var_name == "server_mode")
+	{
+	  if (var_value == "play")
+	    {
+	      server_mode = mode_play;
+	    }
+	  else if (var_value == "build")
+            {
+              server_mode = mode_build;
+            }
+	  else if (var_value == "test")
+            {
+              server_mode = mode_test;
+            }
+          else
+            {
+              server_mode = mode_unknown;
+            }
+	}
+      else if (var_name == "server_port")
+	{
+	  server_port = strtol (var_value.c_str (), 0, 10);
+	}
     }
 }
-
-std::string&
-rpie::server::get_config (std::string& var_name)
-{
-  return string_variables.find (var_name)->second;
-}
-
-std::string&
-rpie::server::get_config (const char * var_name)
-{
-  return string_variables.find (var_name)->second;
-}
-
 
 /// Load configuration files from the usual places
 void
@@ -90,9 +114,8 @@ rpie::server::load_config_file (std::ifstream &config_file)
 	line.find_first_of (delimiters, var_start);
       if (var_end == std::string::npos) 
 	{
-	  // add boolean: var_name with nothing else
 	  var_name.assign (line.substr (var_start));
-	  set_config (var_name,true);
+	  set_config (var_name);
 	  continue;
 	}
       else
@@ -107,8 +130,7 @@ rpie::server::load_config_file (std::ifstream &config_file)
 	line.find_first_not_of (delimiters+1, var_end);
       if (eq_start == std::string::npos)
 	{
-	  // add boolean: var_name with nothing else
-	  set_config (var_name,true);
+	  set_config (var_name);
 	  continue;
 	}
       if (line.at(eq_start) != '=')
@@ -147,4 +169,40 @@ rpie::server::load_config_file (std::ifstream &config_file)
 	  set_config (var_name, val_string);
 	}
     }
+}
+
+std::string
+rpie::server::get_config ()
+{
+  std::string output 
+    ("\n#6Current Game Configuration#0\n"
+     "#6--------------------------#0\n");
+
+  typedef std::map<std::string,std::string>::iterator Iter;
+  for (Iter i = config_variables.begin(); i != config_variables.end(); i++)
+    {
+      output += "#2";
+      output += i->first;
+      output += " = #0\"";
+      if (i->first.find("passwd") != std::string::npos)
+	{
+	  output += "********";
+	}
+      else
+	{
+	  output += i->second;
+	}
+      output += "\";\n";
+    }
+  return output;
+}
+
+std::string
+rpie::server::get_base_path (std::string req_mode)
+{
+  if (req_mode == "current")
+    {
+      req_mode = get_config ("server_mode");
+    }
+  return get_config ("server_path_" + req_mode);
 }

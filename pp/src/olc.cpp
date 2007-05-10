@@ -853,7 +853,7 @@ fwrite_object (OBJ_DATA * tobj, FILE * fp)
 {
   AFFECTED_TYPE *af;
   /*
-  if (port == BUILDER_PORT)
+  if (engine.in_build_mode ())
     {
       mysql_save_vobject (tobj, port);
     }
@@ -1254,7 +1254,7 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 {
   int num, stat, i;
 
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       send_to_char ("This command cannot be used on the player port.\n", ch);
       return;
@@ -1275,7 +1275,7 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 	    continue;
 	  save_rooms (ch, i);
 	}
-      if (port != BUILDER_PORT)
+      if (!engine.in_build_mode ())
 	{
 	  i = 99;
 	  if ((cmd != 226) && (IS_SET (zone_table[i].flags, Z_LOCKED)))
@@ -1284,7 +1284,7 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 	    save_rooms (ch, i);
 	}
 
-      if (port == BUILDER_PORT)
+      if (engine.in_build_mode ())
 	{
 	  system ("../scripts/backup");
 	}
@@ -1311,7 +1311,7 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
       return;
     }
 
-  if (num == 99 && port == BUILDER_PORT)
+  if (num == 99 && engine.in_build_mode ())
     {
       send_to_char
 	("Sorry, but this zone can't be saved on the builder port.\n", ch);
@@ -1700,7 +1700,7 @@ do_review (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (port == BUILDER_PORT)
+  if (engine.in_build_mode ())
     {
       send_to_char ("Applications may only be reviewed on the player port.\n",
 		    ch);
@@ -6634,7 +6634,7 @@ do_mobile (CHAR_DATA * ch, char *argument, int cmd)
     {
 
       if (!str_cmp (ch->pc->account_name, edit_mobile->pc->account_name)
-	  && port != TEST_PORT && edit_mobile != ch)
+	  && !engine.in_test_mode () && edit_mobile != ch)
 	{
 	  send_to_char
 	    ("Sorry, but you'll need to get another staff member to edit your character.\n"
@@ -6834,7 +6834,7 @@ update_crafts_file (void)
   int race = 0;
   int craft_tot = 0;
 
-  if (!(port == BUILDER_PORT) && !(port == TEST_PORT))
+  if (engine.in_play_mode ())
     return;
 
   mysql_safe_query ("DELETE FROM crafts");
@@ -8211,7 +8211,7 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 		  send_to_char (cue_string.c_str (), builder);
 		}
 	    }
-	  if (port == BUILDER_PORT)
+	  if (engine.in_build_mode ())
 	    {
 	      mysql_safe_query 
 		( "DELETE"
@@ -8226,7 +8226,7 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 	{
 	  std::string reflex_string (reflex);
 
-	  if (port == BUILDER_PORT)
+	  if (engine.in_build_mode ())
 	    {
 	      mysql_safe_query 
 		( "INSERT"

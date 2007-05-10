@@ -580,7 +580,7 @@ do_wclone (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_wizlock (CHAR_DATA * ch, char *argument, int cmd)
 {
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       if (maintenance_lock)
 	{
@@ -625,7 +625,7 @@ do_stayput (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (port != PLAYER_PORT)
+  if (!engine.in_play_mode ())
     {
       send_to_char ("This command is for use on the player port only.\n", ch);
       return;
@@ -655,7 +655,7 @@ do_clockout (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (port == BUILDER_PORT)
+  if (engine.in_build_mode ())
     return;
 
   if (!ch->shop)
@@ -677,7 +677,7 @@ do_clockin (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (port == BUILDER_PORT)
+  if (engine.in_build_mode ())
     return;
 
   if (!ch->shop)
@@ -1035,7 +1035,8 @@ do_award (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (!str_cmp (tch->pc->account_name, ch->pc->account_name) && port != TEST_PORT)
+  if (!str_cmp (tch->pc->account_name, ch->pc->account_name) 
+      && !engine.in_test_mode ())
     {
       delete acct;
       send_to_char
@@ -4468,7 +4469,7 @@ do_shutdown (CHAR_DATA * ch, char *argument, int cmd)
     }
   else if (!str_cmp (arg, "reboot"))
     {
-      if (port == PLAYER_PORT && GET_TRUST (ch) < 5)
+      if (engine.in_play_mode () && GET_TRUST (ch) < 5)
 	{
 	  send_to_char ("You'll need to wait for the 4 AM PST auto-reboot.\n",
 			ch);
@@ -5688,7 +5689,7 @@ _do_load (CHAR_DATA * ch, char *argument, int cmd)
 
   else if (is_abbrev (type, "player"))
     {
-      if (port != TEST_PORT)
+      if (!engine.in_test_mode ())
 	{
 	  send_to_char
 	    ("Temporarily disabled, to see if this alleviates the crashing...\n",
@@ -8302,16 +8303,9 @@ do_swap (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (port == PLAYER_PORT)
-    sprintf (portchar, "pp");
-  else if (port == TEST_PORT)
-    sprintf (portchar, "tp");
-  else
-    sprintf (portchar, "bp");
-
   if (!str_cmp (buf, "worldfile") && !*argument)
     {
-      if (port == BUILDER_PORT)
+      if (engine.in_build_mode ())
 	{
 	  send_to_char ("On the builder port?\n", ch);
 	  return;
@@ -8322,40 +8316,50 @@ do_swap (CHAR_DATA * ch, char *argument, int cmd)
 	  return;
 	}
       send_to_char ("Transferring ALL builders' changes...\n", ch);
-      sprintf (buf,
-	       "cp " PATH_TO_BP "/regions/* " PATH_TO_TOPDIR "/%s/regions/",
-	       portchar);
-      system (buf);
+
+      std::string build_source (engine.get_base_path ("build"));
+      std::string swap_destination (engine.get_base_path ());
+      std::string swap_command ("/bin/cp "
+				+ build_source + "/regions/* "
+				+ swap_destination + "/regions/");
+
+      system (swap_command.c_str ());
       sprintf (buf, "%s has just transferred ALL building changes.\n",
 	       ch->tname);
       send_to_gods (buf);
     }
   else if (!str_cmp (buf, "worldfile") && isdigit (*argument))
     {
-      if (atoi (argument) == 99)
+      int z = strtol (argument,0,0);
+      if (z == 99)
 	{
 	  send_to_char ("That's the temproom zone; no swapping allowed.\n",
 			ch);
 	  return;
 	}
-      if (str_cmp (ch->tname, zone_table[atoi (argument)].lead)
+      if (str_cmp (ch->tname, zone_table[z].lead)
 	  && GET_TRUST (ch) < 4)
 	{
 	  send_to_char ("You are not the lead for this building project.\n",
 			ch);
 	  return;
 	}
-      if (atoi (argument) >= 0 && atoi (argument) <= 98)
+      if (z >= 0 && z <= 98)
 	{
 	  sprintf (buf, "Transferring builders' changes to %s...\n",
-		   zone_table[atoi (argument)].name);
+		   zone_table[z].name);
 	  send_to_char (buf, ch);
-	  sprintf (buf,
-		   "cp " PATH_TO_BP "/regions/*.%d " PATH_TO_TOPDIR
-		   "/%s/regions/", atoi (argument), portchar);
-	  system (buf);
+	  sprintf (buf,"*.%d ", z);
+
+	  std::string build_source (engine.get_base_path ("build"));
+	  std::string swap_destination (engine.get_base_path ());
+	  std::string swap_command ("/bin/cp "
+				    + build_source + "/regions/" + std::string(buf)
+				    + swap_destination + "/regions/");
+
+	  system (swap_command.c_str ());
 	  sprintf (buf, "%s has just swapped over the changes to %s.\n",
-		   ch->tname, zone_table[atoi (argument)].name);
+		   ch->tname, zone_table[z].name);
 	  send_to_gods (buf);
 	}
       else
@@ -8371,16 +8375,24 @@ do_swap (CHAR_DATA * ch, char *argument, int cmd)
 	  send_to_char ("Please ask an implementor to do it.\n", ch);
 	  return;
 	}
-      if (port == PLAYER_PORT)
+      if (engine.in_test_mode ())
 	{
-	  system ("cp " PATH_TO_TP "/bin/server " PATH_TO_PP "/bin/dmserver");
-	  system ("mv " PATH_TO_PP "/bin/dmserver " PATH_TO_PP "/bin/server");
+	  send_to_char ("You are running the test server.\n", ch);
+	  return;
 	}
-      else if (port == BUILDER_PORT)
-	{
-	  system ("cp " PATH_TO_TP "/bin/server " PATH_TO_BP "/bin/dmserver");
-	  system ("mv " PATH_TO_BP "/bin/dmserver " PATH_TO_BP "/bin/server");
-	}
+
+      std::string swap_destination (engine.get_base_path ());
+      std::string test_source (engine.get_base_path ("test"));
+      std::string swap_command ("/bin/cp "
+				+ test_source + "/bin/server "
+				+ swap_destination + "/bin/tmp_server"
+				+ " && "
+				+ "/bin/mv " 
+				+ swap_destination + "/bin/tmp_server "
+				+ swap_destination + "/bin/server");
+
+      system (swap_command.c_str ());
+      send_to_gods (swap_command.c_str ());
       send_to_char ("The server binary on this port has been updated.\n", ch);
     }
 }
@@ -9335,7 +9347,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
   send_to_char ("Disabled.\n", ch);
   return;
 
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       send_to_char
 	("To avoid game lag, please do this on the builder port or website.\n",
@@ -9406,19 +9418,14 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
       if (!strcasecmp (buf, "port"))
 	{
 	  args = one_argument (args, buf);
-	  if (!isdigit (*buf)
-	      || (atoi (buf) != PLAYER_PORT && atoi (buf) != BUILDER_PORT
-		  && (atoi (buf) != TEST_PORT || GET_TRUST (ch) < 5)))
+	  port_num = strtol (buf, 0, 10);
+	  if (port_num <= 0 || port_num >= INT_MAX)
 	    {
-	      sprintf (buf,
-		       "Expected a port number to search on: %d, or %d.\n",
-		       PLAYER_PORT, BUILDER_PORT);
-	      send_to_char (buf, ch);
+	      send_to_char ("Expected a port number to search on. "
+			    "E.g. 4500, or 4501.\n", ch);
 	      mem_free (search_args);
 	      return;
 	    }
-	  else
-	    port_num = atoi (buf);
 	}
       else if (!strcasecmp (buf, "player"))
 	{

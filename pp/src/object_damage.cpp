@@ -8,11 +8,14 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "server.h"
 #include "structs.h"
 #include "utils.h"
 #include "protos.h"
 #include "object_damage.h"
 #include "utility.h"
+
+extern rpie::server engine;
 
 const char *unspecified_conditions[] = {
   "It has been completely destroyed, and is clearly unfit for use.\n",
@@ -71,7 +74,7 @@ object_damage__new ()
   OBJECT_DAMAGE *thisPtr = NULL;
 
   /* TODO: Remove this when we're ready to go live with damage */
-  if (port != TEST_PORT)
+  if (!engine.in_test_mode ())
     return NULL;
 
   CREATE (thisPtr, OBJECT_DAMAGE, 1);

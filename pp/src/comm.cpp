@@ -50,7 +50,7 @@ bool debug_mode = true;		/* True to enable core dumps in crash recovery. */
 
 bool bIsCopyOver = false;
 bool maintenance_lock = false;
-int port;
+
 int finished_booting = 0;
 int guest_conns = 0;
 int arena_matches = 0;
@@ -117,7 +117,8 @@ main (int argc, char *argv[])
       exit (1);
     }
 
-  if (argc < 2 || !isdigit (*argv[1]) || (port = atoi (argv[1])) <= 1024)
+  int port = 0;
+  if (argc < 2 || !isdigit (*argv[1]) || (port = strtol (argv[1],0,0)) <= 1024)
     {
       fprintf (stderr,
 	       "Please specify a port number above 1024.\n"
@@ -138,6 +139,7 @@ main (int argc, char *argv[])
 	  valgrind = true;
 	}
     }
+  engine.set_config ("server_port", std::string (argv[1]));
 
   init_mysql ();
 
@@ -213,7 +215,7 @@ run_the_game (int port)
       fclose (fp);
     }
 
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       mysql_safe_query ("UPDATE server_statistics SET last_reboot = %d",
 			(int) (time (0)));
@@ -221,7 +223,7 @@ run_the_game (int port)
 
   game_loop (nMainSocket);
 
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       save_tracks ();
       save_stayput_mobiles ();
@@ -230,14 +232,14 @@ run_the_game (int port)
       save_banned_sites ();
     }
 
-  if (port == BUILDER_PORT)
+  if (engine.in_build_mode ())
     update_crafts_file ();
 
   mysql_safe_query ("DELETE FROM players_online WHERE port = %d", port);
 
   close_sockets (nMainSocket);
 
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       fp = fopen (PATH_TO_WEBSITE "/stats.shtml", "w+");
 
@@ -624,7 +626,7 @@ game_loop (int s)
 	  knockout = 0;
 	}
 
-      if (!((pulse + 1) % PULSE_SMART_MOBS) && port != BUILDER_PORT)
+      if (!((pulse + 1) % PULSE_SMART_MOBS) && !engine.in_build_mode ())
 	mobile_routines (pulse);
 
       if (knockout)
@@ -677,7 +679,7 @@ game_loop (int s)
 	  autosave ();
 	}
 
-      if (!((pulse + 5) % PULSE_AUTOSAVE * 12) && port == PLAYER_PORT)
+      if (!((pulse + 5) % PULSE_AUTOSAVE * 12) && engine.in_play_mode ())
 	{
 	  save_stayput_mobiles ();
 	}
@@ -705,27 +707,36 @@ game_loop (int s)
 
       if (!((pulse + 9) % (PULSE_AUTOSAVE * 5)))
 	{
-	  if (port != BUILDER_PORT && !number (0, 19) && morgul_arena_fight
-	      && is_arena_clear ())
-	    morgul_arena_troll ();
-	  if (port != BUILDER_PORT && !number (0, 19) && morgul_arena_fight
-	      && is_arena_clear ())
-	    morgul_arena_wargs ();
-	    
+	  if (!engine.in_build_mode ())
+	    {
+	      if (morgul_arena_fight)
+		{
+		  if (!number (0, 19) && is_arena_clear ())
+		    {
+		      morgul_arena_troll ();
+		    }
+		  else if (!number (0, 19) && is_arena_clear ())
+		    {
+		      morgul_arena_wargs ();
+		    }
+		}
 /** TE PIT
 * 1 chance in 20 for automatic troll or wargs
 **/
-	
-	  if (port == PLAYER_PORT && !number (0, 19) && te_pit_fight
-	      && is_te_pit_clear ())
-	    te_pit_troll ();
-	  if (port == PLAYER_PORT && !number (0, 19) && te_pit_fight
-	      && is_te_pit_clear ())
-	    te_pit_wargs ();
-	  
+	      if (te_pit_fight)
+		{
+		  if (!number (0, 19) && is_te_pit_clear ())
+		    {
+		      te_pit_troll ();
+		    }
+		  if (!number (0, 19) && is_te_pit_clear ())
+		    {
+		      te_pit_wargs ();
+		    }
+		}
 /*** end te Pit **/
-
-	  if (port == BUILDER_PORT)
+	    }
+	  else  // if (engine.in_build_mode ())
 	    {
 	      update_crafts_file ();
 	    }
@@ -735,7 +746,9 @@ game_loop (int s)
 
       if (!(pulse % (SECOND_PULSE * 60 * 15))) //every IG hour
 	{
-	  if (!morgul_arena_fight && port == PLAYER_PORT && is_arena_clear())
+	  if (!morgul_arena_fight 
+	      && engine.in_play_mode () 
+	      && is_arena_clear())
 	    {
 	      morgul_arena_first ();
 	      morgul_arena_time = (int) time (0);
@@ -746,17 +759,20 @@ game_loop (int s)
 /** TE PIT **
 * Runs on the 1 and 15 of each month, for 1 day, every half hour RL
 */
-time_t t = time(NULL);
-struct tm* tp = localtime(&t);
-int daymonth;
-
-daymonth = tp->tm_mday;
-
-if (daymonth == 1 || daymonth == 15)
-{
+      ///\TODO Uh... lets not calc this every pulse, mmkay?
+      time_t t = time(NULL);
+      struct tm* tp = localtime(&t);
+      int daymonth;
+      
+      daymonth = tp->tm_mday;
+ 
+      if (daymonth == 1 || daymonth == 15)
+	{
 	  if (!(pulse % (SECOND_PULSE * 60 * 30))) //every 30 RL miuntes
-	   	{
-		if (!te_pit_fight && port == PLAYER_PORT && is_te_pit_clear ())
+	    {
+	      if (!te_pit_fight 
+		  && engine.in_play_mode () 
+		  && is_te_pit_clear ())
 	    	{
 	    	  te_pit_first ();
 	    	  te_pit_time = (int) time (0);
@@ -767,7 +783,7 @@ if (daymonth == 1 || daymonth == 15)
 
       if (!(pulse % (SECOND_PULSE * 60 * 60 * 4)))
 	{
-	  if (port != BUILDER_PORT)
+	  if (!engine.in_build_mode ())
 	    {
 	      for (tch = character_list; tch; tch = tch->next)
 		{
@@ -956,7 +972,7 @@ check_sitebans ()
 {
   SITE_INFO *site, *next_site;
 
-  if (port != PLAYER_PORT)
+  if (!engine.in_play_mode ())
     return;
 
   if (banned_site)
@@ -994,7 +1010,7 @@ check_maintenance (void)
       unlink (".mass_emailing");
     }
 
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       if ((fp = fopen ("maintenance_lock", "r")))
 	{
@@ -1019,7 +1035,7 @@ vote_notifications (void)
   MYSQL_ROW row;
   DESCRIPTOR_DATA *d;
 
-  if (port != PLAYER_PORT)
+  if (!engine.in_play_mode ())
     return;
 
   mysql_safe_query ("SELECT * FROM vote_notifications");
@@ -1061,6 +1077,7 @@ update_website (void)
   MYSQL_RES *result;
   MYSQL_ROW row;
 
+  int port = engine.get_port ();
   mysql_safe_query ("DELETE FROM players_online WHERE port = %d", port);
 
   for (d = descriptor_list; d; d = d_next)
@@ -1081,7 +1098,7 @@ update_website (void)
 	 d->strClientHostname, d->character->in_room, port);
     }
 
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       if (!(ft = fopen (PATH_TO_WEBSITE "/stats.shtml", "w+")))
 	return;
@@ -2088,6 +2105,23 @@ extern int mud_memory;
 void
 do_gstat (CHAR_DATA * ch, char *argument, int cmd)
 {
+  if (argument && *argument) 
+    {
+      if (strcmp (argument, "config") == STR_MATCH)
+	{
+	  if (GET_TRUST (ch) > 4)
+	    {
+	      send_to_char ((engine.get_config ()).c_str (), ch);
+	    }
+	  else
+	    {
+	      send_to_char ("Operation not permitted.\n", ch);
+	    }
+	  return;
+	}
+    }
+  
+
   char buf[MAX_STRING_LENGTH];
   int uc = 0;
   int con = 0;
@@ -2177,7 +2211,8 @@ do_gstat (CHAR_DATA * ch, char *argument, int cmd)
 	   (engine.get_config ("player_log_db")).c_str ());
   send_to_char (buf, ch);
 
-  sprintf (buf, "#2Running on Port:                #0%d\n", port);
+  sprintf (buf, "#2Running on Port:                #0%d\n",
+	   engine.get_port ());
   send_to_char (buf, ch);
   sprintf (buf, "#2Last Reboot By:                 #0%s",
 	   ((BOOT[0]) ? BOOT : "Startup Script\n"));
@@ -2308,7 +2343,7 @@ void
 signal_setup (void)
 {
   // No nightly reboots on the builder port.
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     signal (SIGUSR2, shutdown_request);
 
   signal (SIGUSR1, sigusr1);
@@ -2543,13 +2578,13 @@ prepare_copyover (int cmd)
   fprintf (fp, "-1\n");
   fclose (fp);
 
-  if (port == BUILDER_PORT && cmd != 1)
+  if (engine.in_build_mode () && cmd != 1)
     do_zsave (NULL, "all", 0);
 
   save_player_rooms ();
   save_dwelling_rooms ();
 
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       save_stayput_mobiles ();
       save_tracks ();
@@ -2557,10 +2592,10 @@ prepare_copyover (int cmd)
       save_world_state ();
     }
 
-  if (port == BUILDER_PORT)
+  if (engine.in_build_mode ())
     update_crafts_file ();
 
-  sprintf (buf, "%d", port);
+  sprintf (buf, "%d", engine.get_port ());
   sprintf (buf2, "%d", nMainSocket);
   chdir ("..");
   execl ("bin/server", "bin/server", buf, "-c", buf2, (char *) NULL);
@@ -2750,7 +2785,7 @@ copyover_recovery (void)
 
   fclose (fp);
 
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       mysql_safe_query ("SELECT room, direction, state "
 			"FROM copyover_doors");
@@ -2837,13 +2872,13 @@ shutdown_request (int signo)
 
   system_log ("Received USR2 - reboot request.", false);
 
-  if (port != PLAYER_PORT && port != TEST_PORT)
+  if (engine.in_build_mode ())
     {
       system_log ("Not player port, ignoring...", false);
       return;
     }
 
-  if (port == TEST_PORT)
+  if (engine.in_test_mode ())
     {
       shutd = 1;
       return;
@@ -2943,21 +2978,10 @@ gdbdump (char *strGdbCommandFile, char *strFilterScript)
   /* Get the pid of this server. */
   nServerPid = getpid ();
   sprintf (strServerPid, "%d", nServerPid);
-  sprintf (strOutfilePath, PATH_TO_TP "/crashes/gdb.%d", nServerPid);
-  switch (port)
-    {
-    case PLAYER_PORT:
-      strcat (strServerPath, PATH_TO_PP "/bin/server");
-      break;
-    case BUILDER_PORT:
-      strcat (strServerPath, PATH_TO_BP "/bin/server");
-      break;
-    case TEST_PORT:
-      strcat (strServerPath, PATH_TO_TP "/bin/server");
-      break;
-    default:
-      return;
-    }
+  sprintf (strOutfilePath, "%s/crashes/gdb.%d", 
+	   (engine.get_base_path ("test")).c_str (), nServerPid);
+  sprintf (strServerPath, "%s/bin/server", 
+	   (engine.get_base_path ()).c_str ());
 
   /* backup fds and redirect i/o for gdb */
   fdTmpStdin = dup (0);
@@ -3057,7 +3081,7 @@ sigsegv (int signo)
   char buf2[MAX_STRING_LENGTH];
 
   extern char last_command[];
-
+  int port = engine.get_port ();
 
   nLastCrash = (int) time (0);
   system_log ("Game has crashed!", true);
@@ -3109,25 +3133,10 @@ sigsegv (int signo)
     }
 
   // gdbdump(PATH_TO_TP "/src/gdbdump.ini", PERL_GDB_FILTER);
-
-  chdir (PATH_TO_TP "/crashes");
-  switch (port)
-    {
-    case PLAYER_PORT:
-      sprintf (buf, "cp " PATH_TO_PP "/bin/server server-4500.%d",
-	       nServerPid);
-      break;
-    case BUILDER_PORT:
-      sprintf (buf, "cp " PATH_TO_BP "/bin/server server-4501.%d",
-	       nServerPid);
-      break;
-    case TEST_PORT:
-      sprintf (buf, "cp " PATH_TO_TP "/bin/server server-4502.%d",
-	       nServerPid);
-      break;
-    default:
-      break;
-    }
+  sprintf (buf, "/bin/cp %s/bin/server %s/crashes/server-%d.%d",
+	   (engine.get_base_path ()).c_str (), 
+	   (engine.get_base_path ("test")).c_str (), 
+	   port, nServerPid);
 
   system (buf);
   abort ();

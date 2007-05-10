@@ -10,6 +10,8 @@
 #include <ctype.h>
 #include <string.h>
 #include <time.h>
+
+#include "server.h"
 #include "structs.h"
 #include "protos.h"
 #include "utils.h"
@@ -20,6 +22,7 @@
 
 #define s(a) send_to_char (a "\n", ch);
 
+extern rpie::server engine;
 extern const char *weather_states[];
 const char *phase_flags[] = {
   "cannot-leave-room",
@@ -2379,8 +2382,10 @@ boot_crafts ()
   FILE *fp_crafts;
   char buf[MAX_STRING_LENGTH];
 
-  if (port == BUILDER_PORT || port == TEST_PORT)
-    system ("./ordercrafts.pl ../regions/crafts");
+  if (!engine.in_play_mode ())
+    {
+      system ("./ordercrafts.pl ../regions/crafts");
+    }
 
   if (!(fp_crafts = fopen (CRAFTS_FILE, "r")))
     {
@@ -3073,8 +3078,10 @@ branch_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft)
   char buf[MAX_STRING_LENGTH];
   bool related = false;
 
-  if (get_affect (ch, MAGIC_CRAFT_BRANCH_STOP) && port != TEST_PORT)
-    return;
+  if (get_affect (ch, MAGIC_CRAFT_BRANCH_STOP) && !engine.in_test_mode ())
+    {
+      return;
+    }
 
   if (!str_cmp (craft->craft_name, "general"))
     return;
@@ -3714,7 +3721,7 @@ for (i = 0; i < MAX_ITEMS_PER_SUBCRAFT; i++)
 	  if (get_affect (mob, MAGIC_HIDDEN))
 	    remove_affect_type (mob, MAGIC_HIDDEN);
 	  			
-	  if (port == PLAYER_PORT)
+	  if (engine.in_play_mode ())
 	    {
 	      mob->act |= ACT_STAYPUT;
 	      save_stayput_mobiles ();

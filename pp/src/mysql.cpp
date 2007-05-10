@@ -527,6 +527,7 @@ system_log (const char *str, bool error)
   sprintf (sha_buf, "%d %s", timestamp, buf);
 
   std::string log_db = engine.get_config ("player_log_db");
+  int port = engine.get_port ();
   mysql_safe_query
     ("INSERT INTO %s.mud (name, timestamp, port, room, error, entry, sha_hash) "
      "VALUES ('System', %d, %d, -1, %d, '%s', SHA('%s'))", 
@@ -555,6 +556,7 @@ player_log (CHAR_DATA * ch, char *command, char *str)
   sprintf (sha_buf, "%d %s %s", timestamp, command, buf);
 
   std::string log_db = engine.get_config ("player_log_db");
+  int port = engine.get_port ();
   mysql_safe_query
     ("INSERT INTO %s.mud (name, account, switched_into, timestamp, port, room, guest, immortal, command, entry, sha_hash) "
      "VALUES ('%s', '%s', '%s', %d, %d, %d, %d, %d, '%s', '%s', SHA('%s'))",
@@ -955,7 +957,7 @@ save_banned_sites ()
   FILE *fp;
   char buf[MAX_STRING_LENGTH];
 
-  if (port != PLAYER_PORT && port != TEST_PORT)
+  if (!engine.in_play_mode ())
     return;
 
   mysql_safe_query ("DELETE FROM banned_sites");
@@ -2257,7 +2259,7 @@ process_reviews (void)
   MYSQL_RES *result = NULL;
   MYSQL_ROW row;
 
-  if (port != PLAYER_PORT)
+  if (!engine.in_play_mode ())
     return;
 
   mysql_safe_query ("SELECT * FROM queued_reviews");
@@ -3040,7 +3042,7 @@ load_stayput_mobiles ()
   CHAR_DATA *mob;
   char query[MAX_STRING_LENGTH];
 
-  if (port != PLAYER_PORT)
+  if (!engine.in_play_mode ())
     return;
 
   mysql_safe_query ("SELECT * FROM stayput_mobiles");
@@ -3148,7 +3150,7 @@ update_website_statistics (void)
   OBJ_DATA *obj;
   int craft_tot = 0, objects = 0, mobs = 0, rooms = 0, players = 0;
 
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       for (d = descriptor_list; d; d = d->next)
 	{
@@ -3237,7 +3239,7 @@ save_tracks (void)
 
   return; /// \todo Find out why this is turned off
 
-  if (port != PLAYER_PORT)
+  if (!engine.in_play_mode ())
     return;
 
   mysql_safe_query ("DELETE FROM tracks");

@@ -172,7 +172,8 @@ cancel_auction (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, bool confirmed)
 	*buf3 = '\0';
 	
 	house_id = auctioneer->mob->carcass_vnum;
-	std::string world_log_db = engine.get_config ("world_log_db");	
+	std::string world_log_db = engine.get_config ("world_log_db");
+	int port = engine.get_port ();
 	sprintf (buf,	
 		 "SELECT * FROM %s.ah_auctions "
 		 "WHERE (expires_at > UNIX_TIMESTAMP()) "
@@ -265,7 +266,8 @@ preview_auction (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id)
 	
 	house_id = auctioneer->mob->carcass_vnum;
 	std::string world_log_db = engine.get_config ("world_log_db");
-	
+	int port = engine.get_port ();
+
 	sprintf (buf, "SELECT * FROM %s.ah_auctions WHERE (expires_at > UNIX_TIMESTAMP()) AND auction_id = %d AND house_id = %d AND port = %d", world_log_db.c_str (), id, house_id, port);
 	mysql_safe_query (buf);
 	
@@ -316,7 +318,8 @@ retrieve_expiries (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 	
 	/* First check for any returned bids owed to the player. */
 	std::string world_log_db = engine.get_config ("world_log_db");
-	
+	int port = engine.get_port ();
+
 	sprintf (buf,	"SELECT * FROM %s.ah_returned_bids WHERE placed_by = '%s' AND picked_up = 0 AND port = %d ORDER BY amount ASC", world_log_db.c_str (), GET_NAME(ch), port);
 	mysql_safe_query (buf);
 	
@@ -346,7 +349,7 @@ retrieve_expiries (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 		mysql_free_result (result);
 	
 	/* Then we'll check for any merchandise that needs to be returned due to not selling. */
-	
+
 	sprintf (buf, 
 		 "SELECT * FROM %s.ah_auctions"
 		 " WHERE placed_by = '%s'"
@@ -415,6 +418,8 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 	
 	house_id = auctioneer->mob->carcass_vnum;
 	std::string world_log_db = engine.get_config ("world_log_db");
+	int port = engine.get_port ();
+
 	sprintf (buf,	
 		 "SELECT * FROM %s.ah_auctions"
 		 " WHERE ((placed_by = '%s' AND seller_pickup = FALSE)"
@@ -580,6 +585,8 @@ record_bid (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, int bid, bool bought_o
 
 	house_id = auctioneer->mob->carcass_vnum;
 	std::string world_log_db = engine.get_config ("world_log_db");	
+	int port = engine.get_port ();
+
 	sprintf (buf,	"SELECT bid_amount,placed_by FROM %s.ah_bids WHERE auction_id = %d AND port = %d ORDER BY bid_amount DESC LIMIT 1", world_log_db.c_str (), id, port);
 	mysql_safe_query (buf);
 	
@@ -648,6 +655,8 @@ place_bid (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, int bid, bool confirmed
 	
 	house_id = auctioneer->mob->carcass_vnum;
 	std::string world_log_db = engine.get_config ("world_log_db");	
+	int port = engine.get_port ();
+
 	sprintf (buf, "SELECT * FROM %s.ah_auctions WHERE (expires_at > UNIX_TIMESTAMP()) AND auction_id = %d AND house_id = %d AND port = %d", world_log_db.c_str (), id, house_id, port);
 	mysql_safe_query (buf);
 	
@@ -666,27 +675,34 @@ place_bid (CHAR_DATA *ch, CHAR_DATA *auctioneer, int id, int bid, bool confirmed
 	row = mysql_fetch_row(result);
 	
 	/* Allow bids on our own auctions on the test port, for testing purposes. */
-	
-	if ( !str_cmp (row[11], GET_NAME(ch)) && (IS_MORTAL(ch) || port != TEST_PORT) )
-	{
+
+	if (IS_MORTAL(ch) || !engine.in_test_mode ())
+	  {
+	    if ( !str_cmp (row[11], GET_NAME(ch)))
+	      {
 		name_to_ident (ch, buf2);
 		sprintf (buf, "%s %s", buf2, OWN_AUCTION);
 		do_whisper (auctioneer, buf, 83);
 		if ( result )
-			mysql_free_result (result);
+		  {
+		    mysql_free_result (result);
+		  }
 		return;
-	}
-	
-	if ( !str_cmp (row[9], GET_NAME(ch)) && (IS_MORTAL (ch) || port != TEST_PORT) )
-	{
+	      }
+	    
+	    if ( !str_cmp (row[9], GET_NAME(ch)))
+	      {
 		name_to_ident (ch, buf2);
 		sprintf (buf, "%s %s", buf2, ALREADY_WINNING);
 		do_whisper (auctioneer, buf, 83);
 		if ( result )
-			mysql_free_result (result);
+		  {
+		    mysql_free_result (result);
+		  }
 		return;	
-	}
-	
+	      }
+	  }
+
 	if ( bid == -1 )		// No bid specified, so setting it to the minimum allowable.
 		bid = atoi(row[8]);
 			
@@ -813,6 +829,7 @@ list_auctions (CHAR_DATA *ch, CHAR_DATA *auctioneer, char *argument, int cmd)
 
 	// Auction status.
 	std::string world_log_db = engine.get_config ("world_log_db");
+	int port = engine.get_port ();
 	if ( cmd == -1 )
 		sprintf (buf,
 			 "SELECT * FROM %s.ah_auctions"
@@ -946,6 +963,7 @@ record_auction (CHAR_DATA *ch, CHAR_DATA *auctioneer, OBJ_DATA *obj,
 	mysql_real_escape_string (database, buf4, obj_short_desc(obj), strlen (obj_short_desc(obj)));
 	
 	std::string world_log_db = engine.get_config ("world_log_db");
+	int port = engine.get_port ();
 	sprintf (buf,
 		"INSERT INTO %s.ah_auctions "
 		"(house_id, placed_at, auction_period, expires_at, deposit_paid, obj_real_value, "

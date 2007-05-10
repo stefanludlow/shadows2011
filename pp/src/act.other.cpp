@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include <time.h>
 
+#include "server.h"
 #include "structs.h"
 #include "net_link.h"
 #include "account.h"
@@ -19,6 +20,8 @@
 #include "decl.h"
 #include "group.h"
 #include "utility.h"
+
+extern rpie::server engine;
 
 SECOND_AFFECT *second_affect_list = NULL;
 extern int keeper_has_money (CHAR_DATA * keeper, int cost);
@@ -2455,7 +2458,7 @@ payday (CHAR_DATA * ch, CHAR_DATA * employer, AFFECTED_TYPE * af)
 	   			"VALUES (NOW(), %d, '%s','%s', %d, %d,'%d-%d-%d %d:00',%d)",
 	   			employer->mob->nVirtual, GET_NAME (ch), char_short (ch),
 	   			af->a.job.cash, ch->in_room, time_info.year,
-	   			time_info.month + 1, time_info.day + 1, time_info.hour, port);
+				 time_info.month + 1, time_info.day + 1, time_info.hour, engine.get_port ());
   			mysql_safe_query (buf);
 			
 			sprintf (buf, "$N pays you for all your hard work.");
@@ -3843,9 +3846,12 @@ do_camp (CHAR_DATA * ch, char *argument, int cmd)
 
   sector_type = ch->room->sector_type;
 
-  if (port == BUILDER_PORT || port == TEST_PORT)
+  ///\TODO Check the necessity of this code. I believe it is a relic
+  /// from a former implementation  of camp which added room progs to 
+  /// the room.
+  if (engine.in_build_mode ())
     {
-      send_to_char ("Camping is not allowed on this port.\n", ch);
+      send_to_char ("Camping is not allowed on the build server.\n", ch);
       return;
     }
 

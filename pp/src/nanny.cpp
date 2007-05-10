@@ -366,6 +366,7 @@ nanny_ask_password (DESCRIPTOR_DATA * d, char *argument)
    *     1st timer: count = 1, has_pwd = 0, logins = 0, fails = 0
    *     otherwise: has_pwd = 0, count++
    */
+  int port = engine.get_port ();
   if (d->acct && d->acct->is_registered () && d->acct->name.length ())
     {
       mysql_safe_query 
@@ -428,6 +429,7 @@ nanny_check_password (DESCRIPTOR_DATA * d, char *argument)
   MYSQL_ROW row = NULL;
   int nFailedLogins = 0, nSharedIP = 0;
 
+  int port = engine.get_port ();
   if (!*argument)
     {
       close_socket (d);
@@ -1136,6 +1138,7 @@ nanny_account_setup (DESCRIPTOR_DATA * d, char *argument)
        *     1st timer: count = 1, is_new = 1, has_pwd = 0, logins = 0, fails = 0
        *     otherwise: not possible!
        */
+      int port = engine.get_port ();
       mysql_safe_query 
 	("INSERT INTO %s.ip "
 	 "  VALUES('%s','%s','%s',NOW(),NOW(),1,1,0,%d,0,0);",
@@ -2142,7 +2145,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 	  if (!IS_MORTAL (td->character))
 	    continue;
 	  if (!str_cmp (td->acct->name.c_str (), d->acct->name.c_str ())
-	      && port == PLAYER_PORT)
+	      && engine.in_play_mode ())
 	    {
 	      SEND_TO_Q
 		("\n#1Sorry, but it is against policy to have two characters from the\n"
@@ -2829,7 +2832,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	  if ((!str_cmp (td->strClientHostname, d->strClientHostname)
 	       || !str_cmp (td->acct->name.c_str (), d->acct->name.c_str ()))
 	      && str_cmp (td->character->tname, d->character->tname)
-	      && port == PLAYER_PORT)
+	      && engine.in_play_mode ())
 	    {
 	      SEND_TO_Q
 		("\n#1Sorry, but it is against policy to have two characters from the\n"
@@ -2883,7 +2886,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
       return;
     }
 
-  if (port == PLAYER_PORT && !is_admin (d->acct->name.c_str ()) && maintenance_lock)
+  if (engine.in_play_mode () && !is_admin (d->acct->name.c_str ()) && maintenance_lock)
     {
       SEND_TO_Q
 	("\n#1Sorry, but the player port is currently closed for maintenance.#0\n",
@@ -2894,7 +2897,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
       return;
     }
 
-  if (port != PLAYER_PORT && !is_admin (d->acct->name.c_str ()))
+  if (!engine.in_play_mode () && !is_admin (d->acct->name.c_str ()))
     {
       SEND_TO_Q
 	("\n#1Sorry, but this port is for game staff only. Please log out immediately.#0\n",
@@ -2905,7 +2908,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
       return;
     }
 
-  if (port == PLAYER_PORT && IS_SET (d->character->plr_flags, NO_PLAYERPORT))
+  if (engine.in_play_mode () && IS_SET (d->character->plr_flags, NO_PLAYERPORT))
     {
       SEND_TO_Q
 	("\n#6Your admin login does not have player port access privileges.#0\n",

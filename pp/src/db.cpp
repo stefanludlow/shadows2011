@@ -19,6 +19,7 @@
 #include <mysql/mysql.h>
 #include <signal.h>
 
+#include "server.h"
 #include "structs.h"
 #include "net_link.h"
 #include "protos.h"
@@ -30,6 +31,7 @@
 *  declarations of most of the 'global' variables                         *
 ************************************************************************ */
 
+extern rpie::server engine;
 
 int MAX_MEMORY;
 int PERM_MEMORY_SIZE;
@@ -431,7 +433,7 @@ boot_db (void)
   system_log ("Reloading persistent tracks.", false);
   load_tracks ();
 
-  if (port == PLAYER_PORT)
+  if (engine.in_play_mode ())
     {
       system_log ("Loading persistent mobiles...", false);
       load_stayput_mobiles ();
@@ -455,8 +457,10 @@ boot_db (void)
       if (!zone_table[i].cmd)
 	continue;
 
-      if (port != BUILDER_PORT)
-	zone_table[i].flags &= ~Z_FROZEN;
+      if (!engine.in_build_mode ())
+	{
+	  zone_table[i].flags &= ~Z_FROZEN;
+	}
 
       if (strncmp (zone_table[i].name, "Empty Zone", 10))
 	{
@@ -522,8 +526,10 @@ stock_new_deliveries (void)
   ROOM_DATA *room;
   int i = 0;
 
-  if (port != PLAYER_PORT)
-    return;
+  if (!engine.in_play_mode ())
+    {
+      return;
+    }
 
   for (tch = character_list; tch; tch = tch->next)
     {
@@ -2783,11 +2789,6 @@ mem_free (malloc_t string)
     }
 
   strncpy (p, "----", 4);
-
-  if (memory_check && port == TEST_PORT)
-    {
-      ;
-    }
 
   free (p);
 

@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "server.h"
 #include "structs.h"
 #include "protos.h"
 #include "utils.h"
@@ -17,6 +18,7 @@
 #include "decl.h"
 #include "group.h"
 
+extern rpie::server engine;
 
 enum {
   MP_TYPE_INTEGER = 1,
@@ -1407,10 +1409,9 @@ mobprog (CHAR_DATA * ch, CHAR_DATA * mob, MOBPROG_DATA * program, int trigger,
   int i;
 
   *ret = 0;
-  
-  return;
 
-  if (port != TEST_PORT)
+  // temporary lockout
+  if (1 || !engine.in_test_mode ())
     {
       return;
     }
@@ -1420,7 +1421,8 @@ mobprog (CHAR_DATA * ch, CHAR_DATA * mob, MOBPROG_DATA * program, int trigger,
       return;
     }
 
-  if (port == BUILDER_PORT)
+  // don't want progs active on bp
+  if (engine.in_build_mode ())
     return;
 
   prog = program->prog;

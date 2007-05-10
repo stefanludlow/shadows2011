@@ -1300,7 +1300,7 @@ reset_zone (int zone)
 
 	  ZCMD.enabled = 0;
 
-	  if ( /*(port != PLAYER_PORT) && */ (mob = load_mobile (ZCMD.arg1)))
+	  if ( /*(!engine.in_play_mode ()) && */ (mob = load_mobile (ZCMD.arg1)))
 	    {
 	      mob->mob->reset_zone = zone;
 	      mob->mob->reset_cmd = cmd_no;

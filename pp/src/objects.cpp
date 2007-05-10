@@ -9,12 +9,15 @@
 #include <stdlib.h>
 #include <math.h>
 #include <ctype.h>
+
+#include "server.h"
 #include "structs.h"
 #include "protos.h"
 #include "utils.h"
 #include "utility.h"
 #include "decl.h"
 
+extern rpie::server engine;
 
 MATERIAL_TYPE object__get_material (OBJ_DATA * thisPtr);
 
@@ -62,7 +65,7 @@ do_mend (CHAR_DATA * ch, char *argument, int cmd)
   char buf[AVG_STRING_LENGTH];
 
   /* TODO: Remove this when we're ready to go live with damage */
-  if (port != TEST_PORT)
+  if (!engine.in_test_mode ())
     return;
 
   if (!*argument || strlen (argument) > AVG_STRING_LENGTH)
@@ -194,7 +197,7 @@ do_rend (CHAR_DATA * ch, char *argument, int cmd)
   };
 
   /* TODO: Remove this when we're ready to go live with damage */
-  if (port != TEST_PORT)
+  if (!engine.in_test_mode ())
     return;
 
   if (!GET_TRUST (ch))
@@ -455,7 +458,7 @@ object__examine_damage (OBJ_DATA * thisPtr)
   *buf = '\0';
 
   /* TODO: Remove this when we're ready to go live with damage */
-  if (port != TEST_PORT)
+  if (!engine.in_test_mode ())
     return buf;
 
   /* Iterate through the damage instances attached to this object */
@@ -521,7 +524,7 @@ object__add_damage (OBJ_DATA * thisPtr, DAMAGE_TYPE source,
   OBJECT_DAMAGE *damage = NULL;
 
   /* TODO: Remove this when we're ready to go live with damage */
-  if (port != TEST_PORT)
+  if (!engine.in_test_mode ())
     return NULL;
 
   if ((damage =
@@ -1000,7 +1003,7 @@ do_junk (CHAR_DATA * ch, char *argument, int cmd)
 
   obj_from_char (&obj, 0);
 /*
-	if ( port == PLAYER_PORT ) {
+	if ( engine.in_play_mode () ) {
 		obj_to_room (obj, JUNKYARD);
 		obj->obj_timer = 96;		// Junked items saved for 1 RL day.
 		obj->obj_flags.extra_flags |= ITEM_TIMER;

@@ -2744,10 +2744,6 @@ struct encumberance_info
 #define TRIG_PRISONER	11
 #define TRIG_KNOCK		12
 
-#define PLAYER_PORT		4500
-#define BUILDER_PORT		4501
-#define TEST_PORT		4502
-
 #define GAME_BASE_YEAR		2433
 #define GAME_SECONDS_BEGINNING  830928041	/* Subtr 10800 to ++gametime 12hr */
 #define GAME_SECONDS_PER_YEAR	31104000

@@ -12,6 +12,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "server.h"
 #include "structs.h"
 #include "net_link.h"
 #include "protos.h"
@@ -21,6 +22,7 @@
 #include "utility.h"
 
 extern int knockout;
+extern rpie::server engine;
 
 COMBAT_MSG_DATA *cm_list = NULL;
 
@@ -1987,16 +1989,18 @@ extract_char (CHAR_DATA * ch)
 
   extern struct timeval time_now;
 
-  if (port == PLAYER_PORT && IS_NPC (ch) && IS_SET (ch->act, ACT_STAYPUT))
+  if (engine.in_play_mode () && IS_NPC (ch))
     {
-      mysql_safe_query ("DELETE FROM stayput_mobiles WHERE coldload_id = %d",
-			ch->coldload_id);
-      sprintf (buf, "save/mobiles/%d", ch->coldload_id);
-      unlink (buf);
-    }
+      if (IS_SET (ch->act, ACT_STAYPUT))
+	{
+	  mysql_safe_query 
+	    ("DELETE FROM stayput_mobiles"
+	     " WHERE coldload_id = %d",
+	     ch->coldload_id);
+	  sprintf (buf, "save/mobiles/%d", ch->coldload_id);
+	  unlink (buf);
+	}
 
-  if (port == PLAYER_PORT && IS_NPC (ch))
-    {
       mysql_safe_query ("DELETE FROM reboot_mobiles WHERE coldload_id = %d",
 			ch->coldload_id);
       sprintf (buf, "save/reboot/%d", ch->coldload_id);

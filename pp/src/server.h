@@ -37,15 +37,24 @@
 
 namespace rpie 
 {
+  enum server_modes
+    {
+      mode_unknown,
+      mode_play,
+      mode_build,
+      mode_test,
+    };
+
   class server
     {
     private:
+      int server_port;
+      server_modes server_mode;
+      std::map<std::string,std::string> config_variables;
+
+      // checkpoint alarms
       static const int BOOT_DB_ABORT_THRESHOLD = 15; ///< Infinite loop test.
       static const int RUNNING_ABORT_THRESHOLD = 5; ///< Infinite loop test.
-      std::map<std::string,std::string> string_variables;
-      std::map<std::string,int> int_variables;
-      std::set<std::string> bool_variables; // (true if varname exists)
-
       bool abort_threshold_enabled;
       int abort_threshold;
       int last_checkpoint;
@@ -60,7 +69,10 @@ namespace rpie
     public:
       static const size_t MAX_NAME_LENGTH = 15;	///< Username string length
       static const int ALARM_FREQUENCY = 20; ///< ITimer frequency in seconds
-      
+
+      server ();
+
+      // checkpoint alarms
       void enable_timer_abort ()
 	{
 	  abort_threshold_enabled = true;
@@ -94,12 +106,23 @@ namespace rpie
 		  && (timeslice > abort_threshold));
 	}
       
-      void set_config (std::string &var_name, bool var_value = true);
-      void set_config (std::string &var_name, std::string &var_value);
-      std::string& get_config (std::string& var_name);
-      std::string& get_config (const char * var_name);
       void load_config_files ();
       void load_config_file (std::ifstream &config_file);
+
+      void set_config (std::string var_name, std::string var_value);
+      std::string get_config ();
+      std::string get_config (std::string var_name)
+	{ 
+	  return config_variables.find (var_name)->second; 
+	}
+      
+      // Mode Inquiry
+      server_modes get_mode () { return server_mode; }
+      bool in_play_mode () { return (server_mode == mode_play); }
+      bool in_build_mode () { return (server_mode == mode_build); }
+      bool in_test_mode () { return (server_mode == mode_test); }
+      int get_port () { return server_port; }
+      std::string get_base_path (std::string req_mode = "current");
     };
 
 }

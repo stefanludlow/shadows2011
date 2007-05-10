@@ -26,14 +26,6 @@
 #ifndef _rpie_constants_h_
 #define _rpie_constants_h_
 
-#define MYSQL_USERNAME		"shadows"
-#define MYSQL_PASS		"js59L!f9"
-#define MYSQL_HOST		"localhost"
-
-#define PRIMARY_DATABASE	"shadows"
-#define PFILES_DATABASE		"shadows_pfiles"
-#define LOG_DATABASE		"server_logs"
-#define AH_DATABASE			"shadows_ah"
 #define ENCRYPT_PASS		"w01fm3a7"
 
 #define STAFF_EMAIL		"staff@middle-earth.us"
@@ -52,20 +44,6 @@
 /* Be sure to define without trailing slashes! */
 
 #define PATH_TO_SENDMAIL	"/usr/sbin/sendmail"
-
-/* Define top directory containing all three ports */
-
-#ifndef MACOSX
-#define PATH_TO_TOPDIR		"/home/shadows/shadows"
-#else
-#define PATH_TO_TOPDIR		"/Users/chad/Shadows\\ of\\ Isildur/"
-#endif
-
-/* Define the individual port directories */
-
-#define PATH_TO_PP		PATH_TO_TOPDIR "/pp"
-#define PATH_TO_BP		PATH_TO_TOPDIR "/bp"
-#define PATH_TO_TP		PATH_TO_TOPDIR "/tp"
 
 /* Other miscellaneous filepath defines; absolute filepaths only! */
 

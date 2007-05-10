@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <string.h>
 
+#include "server.h"
 #include "structs.h"
 #include "protos.h"
 #include "utils.h"
@@ -104,9 +105,9 @@ delete_contiguous_rblock (ROOM_DATA * start_room, int from_dir,
   // anyone logged off in this room is set to the room just outside before we delete.
 
   // If there's no outside room designated, we'll set them to NOWHERE just to be safe.
-
+  extern rpie::server engine;
   mysql_safe_query ("UPDATE %s.pfiles SET room = %d WHERE room = %d",
-		    PFILES_DATABASE, outside_vnum, start_room->nVirtual);
+		    (engine.get_config ("player_db")).c_str (), outside_vnum, start_room->nVirtual);
 
   rdelete (start_room);
 

@@ -16,6 +16,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
+#include "server.h"
 #include "structs.h"
 #include "net_link.h"
 #include "account.h"
@@ -27,6 +28,7 @@
 #include "group.h"
 #include "utility.h"
 
+extern rpie::server engine;
 extern const char *skills[];
 BOARD_DATA *full_board_list = NULL;
 
@@ -10411,13 +10413,13 @@ do_notify (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  mysql_safe_query
 	    ("SELECT name FROM %s.pfiles WHERE keywords LIKE \'%%%s%%\'",
-	     PFILES_DATABASE, buf);
+	     (engine.get_config ("player_db")).c_str (), buf);
 	  result = mysql_store_result (database);
 	  if (!result || mysql_num_rows (result) <= 0)
 	    {
 	      mysql_safe_query
 		("SELECT name FROM %s.pfiles WHERE sdesc LIKE \'%%%s%%\'",
-		 PFILES_DATABASE, buf);
+		 (engine.get_config ("player_db")).c_str (), buf);
 	      result = mysql_store_result (database);
 	    }
 	  if (result && mysql_num_rows (result) > 0
