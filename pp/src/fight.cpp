@@ -1401,14 +1401,18 @@ if (ch->in_room == 66953 || ch->in_room == 66954 || ch->in_room == 66955 || ch->
 
       if (duration > 100)	/* Fix a bug where some players have a LARGE */
 	duration = 1;		/* number of hours */
-
-      while (ch->hour_affects)
-	affect_remove (ch, ch->hour_affects);
+/*
+      while (ch->hour_affects)   Moved this so it happens after the call to save_char, should take care of not deleting crafts from a character upon death
+      affect_remove (ch, ch->hour_affects);
+*/
 
       ch->pc->create_state = STATE_DIED;
       ch->pc->last_died = time (0);
 
       save_char (ch, true);
+
+      while (ch->hour_affects)
+	affect_remove (ch, ch->hour_affects);
     }
 
   raw_kill (ch);
