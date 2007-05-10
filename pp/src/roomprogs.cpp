@@ -59,6 +59,9 @@
 #define RP_CLAN_ECHO	37	/* send a message to clan members */
 #define RP_TRANS_GROUP	38	/* send a message to clan members */
 #define RP_SET		39	/* send a message to clan members */
+#define RP_CRIMINALIZE  40      /* criminalize a person or room */
+#define RP_STRIP        41      /* takes a person's equipment and puts it all neatly in a bag */
+#define RP_CLAN         42      /* adds people to a clan at a certain rank */
 
 
 void rxp (CHAR_DATA * ch, char *prg);
@@ -92,6 +95,9 @@ void r_system (CHAR_DATA *ch, char *argument);
 void r_clan_echo (CHAR_DATA *ch, char *argument);
 void r_trans_group (CHAR_DATA *ch, char *argument);
 void r_set (CHAR_DATA *ch, char *argument);
+void r_criminalize (CHAR_DATA *ch, char *argument);
+void r_strip (CHAR_DATA *ch, char *argument);
+void r_clan (CHAR_DATA *ch, char *argument);
 
 
 #define MAX_RPRG_NEST 10
@@ -141,6 +147,9 @@ const char *rfuncs[] = {
   "clan_echo",
   "trans_group",
   "set",
+  "criminalize",
+  "strip",
+  "clan",
   "\n"
 };
 
@@ -437,6 +446,45 @@ reval (CHAR_DATA * ch, char *arg)
 	{
 	  ifin[nNest] = 1;
 	}
+      return;
+    }
+
+/* Checks if the initiator is a NPC. If so, returns true. No arguments */
+
+ if (!strncmp (sarg, "npc", 3))
+   {
+    if(!IS_NPC(ch))
+     {
+        ifin[nNest] = 1;
+        return;
+     }
+    return;
+   }
+
+/* Checks to see if initiator is wanted in a certain zone */
+/* usage: if wanted(zone, time)                           */
+/* will return true if wanted time is equal to or greater than "time". Current zone is -1. */
+
+ if (!strncmp (sarg, "wanted", 6))
+   { 
+      int zone = atol(rbuf);
+      int test = atol(dbuf);
+
+      if(zone == -1)
+         zone = ch->room->zone;
+      
+      if (!get_affect (ch, MAGIC_CRIM_BASE + zone))
+      {
+        ifin[nNest] = 1;
+        return;
+      }
+      else
+
+      if (!((get_affect(ch, MAGIC_CRIM_BASE + zone)->a.spell.duration) >= test))
+      {
+        ifin[nNest] = 1;
+        return;
+      }
       return;
     }
 
@@ -934,6 +982,18 @@ doit (CHAR_DATA * ch, char *func, char *arg)
       if (!ifin[nNest])
 	r_purge (ch, arg);
       return 1;
+    case RP_CRIMINALIZE:
+      if (!ifin[nNest])
+        r_criminalize (ch, arg);
+       return 1;
+    case RP_STRIP:
+      if (!ifin[nNest])
+        r_strip (ch, arg);
+       return 1;
+    case RP_CLAN:
+      if (!ifin[nNest])
+        r_clan (ch, arg);
+       return 1;
     case RP_HALT:
       if (!ifin[nNest])
 	return 0;
@@ -2231,6 +2291,166 @@ r_purge (CHAR_DATA * ch, char *argument)
 
   return;
 }
+
+// strip <room>
+// room = vnum of a room -- where the bag will be dropped off. -1 is character's room.
+
+void
+r_strip (CHAR_DATA *ch, char *argument)
+{
+   int drop_room = atoi(argument);
+   OBJ_DATA *obj;
+   OBJ_DATA *bag = NULL;
+   char buf[MAX_STRING_LENGTH];
+
+   if (drop_room == -1)
+     drop_room = ch->room->nVirtual;
+
+   if (!( vtor(drop_room)))
+   {
+     system_log("ERROR: Room does not exist in r_strip", true);
+   }
+   else
+   {
+     bag = load_object (VNUM_JAILBAG);
+
+     if (bag && (ch->right_hand || ch->left_hand || ch->equip))
+     {
+       sprintf (buf, "A bag belonging to %s sits here.", ch->short_descr);
+       bag->description = str_dup (buf);
+
+       sprintf (buf, "a bag labeled '%s'", ch->short_descr);
+       bag->short_description = str_dup (buf);
+
+       if (ch->right_hand)
+ 	{
+ 	  obj = ch->right_hand;
+ 	  obj_from_char (&obj, 0);
+ 	  if (bag)
+ 	    obj_to_obj (obj, bag);
+ 	}
+
+      if (ch->left_hand)
+	{
+	  obj = ch->left_hand;
+	  obj_from_char (&obj, 0);
+	  if (bag)
+	    obj_to_obj (obj, bag);
+	}
+
+      while (ch->equip)
+	{
+	  obj = ch->equip;
+	  if (bag)
+	    obj_to_obj (unequip_char (ch, obj->location), bag);
+	}
+
+      obj_to_room (bag, drop_room);
+    }
+   }
+}
+
+// clan <clan short name> <rank>
+
+void
+r_clan (CHAR_DATA *ch, char *argument)
+{
+  size_t len = strlen (argument);
+  char *arg1 = new char [len];
+  char *arg2 = new char [len];
+  char *arg3 = new char [len];
+  arg_splitter (3, argument, arg1, arg2, arg3);
+  
+  int flags;
+
+ if((!strncmp (arg3, "remove", 6)) || (!strncmp (arg2, "remove", 6)))
+ {
+   remove_clan(ch, arg1);
+ }
+ else
+ {
+
+      if (!strncmp (arg2, "leader", 6))
+	flags = CLAN_LEADER;
+      else if (!strncmp (arg2, "memberobj", 9))
+	flags = CLAN_MEMBER_OBJ;
+      else if (!strncmp (arg2, "leaderobj", 9))
+	flags = CLAN_LEADER_OBJ;
+      else if (!strncmp (arg2, "recruit", 7))
+	flags = CLAN_RECRUIT;
+      else if (!strncmp (arg2, "private", 7))
+	flags = CLAN_PRIVATE;
+      else if (!strncmp (arg2, "corporal", 8))
+	flags = CLAN_CORPORAL;
+      else if (!strncmp (arg2, "sergeant", 8))
+	flags = CLAN_SERGEANT;
+      else if (!strncmp (arg2, "lieutenant", 10))
+	flags = CLAN_LIEUTENANT;
+      else if (!strncmp (arg2, "captain", 7))
+	flags = CLAN_CAPTAIN;
+      else if (!strncmp (arg2, "general", 7))
+	flags = CLAN_GENERAL;
+      else if (!strncmp (arg2, "commander", 9))
+	flags = CLAN_COMMANDER;
+      else if (!strncmp (arg2, "apprentice", 10))
+	flags = CLAN_APPRENTICE;
+      else if (!strncmp (arg2, "journeyman", 10))
+	flags = CLAN_JOURNEYMAN;
+      else if (!strncmp (arg2, "master", 6))
+	flags = CLAN_MASTER;
+      else 
+	flags = CLAN_MEMBER;
+
+  add_clan(ch, arg1, flags);
+  }
+
+  delete [] arg1;
+  delete [] arg2;
+  delete [] arg3;
+}
+
+
+// criminalize <target> <zone> <hours>
+// target = -1, trigger initiator, or 'all' for all initiator's room.
+// zone = game zone
+// hours = positive integer
+
+void
+r_criminalize (CHAR_DATA *ch, char *argument)
+{
+  size_t len = strlen (argument);
+  char *arg1 = new char [len];
+  char *arg2 = new char [len];
+  char *arg3 = new char [len];
+  arg_splitter (3, argument, arg1, arg2, arg3);
+  int zone = atoi(arg2);
+  int time = atoi(arg3);
+
+  CHAR_DATA* i = ch->room->people;
+
+  if (time <= 0)
+    time = 0;
+ 
+  if ((zone <= 0) || (zone > 100))
+    zone = 0;
+
+  if (!strncmp (arg1, "all", 3))
+  {
+    for (; i; i = i->next_in_room)
+      {
+        add_criminal_time (i, zone, time);
+      }
+  }
+  else
+  {
+    add_criminal_time (ch, zone, time);
+  }
+  
+  delete [] arg1;
+  delete [] arg2;
+  delete [] arg3;
+}
+
 
 // Loadobj <room> <number> <object>
 // room = -1 (trigger-puller's room) or vnum
