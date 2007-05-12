@@ -291,7 +291,7 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 	
 	if ( !result || !mysql_num_rows (result) )
 	{
-		sprintf (output + strlen(output), "\n#6Role Briefing:#0 None.\n");
+		sprintf (output + strlen(output), "\n#6Role Briefing:#0\nNone.\n");
 		if ( result )
 			mysql_free_result (result);
 	}
