@@ -216,21 +216,18 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 	}
 	else
 	{
-		sprintf (buf, "#6Starting Items:#0 ");
+		sprintf (buf, "#6Starting Items:#0\n");
 		while ( (row = mysql_fetch_row(result)) )
 		{
 			if ( !vtoo(atoi(row[3])) )
 				continue;
             if ( strlen(row[12]) > 0 || strlen(row[13]) > 0 )
-                sprintf (skills_buf, " (%s%s%s)", row[13], strlen(row[12]) > 0 ? ": " : "", row[12]);
+                sprintf (skills_buf, " (%s%s%s)", row[13], (strlen(row[12]) > 0 && strlen(row[13]) > 0) ? " && " : "", row[12]);
             else *skills_buf = '\0';
-			sprintf (buf + strlen(buf), "%d x #2%s#0 [%d]%s, ", 
+			sprintf (buf + strlen(buf), "  - %d x #2%s#0 [%d]%s\n", 
 				atoi(row[4]), obj_short_desc(vtoo(atoi(row[3]))), atoi(row[3]), skills_buf);
 		}
-		buf[strlen(buf)-2] = '.';
-		reformat_string (buf, &p);
-		sprintf (output + strlen(output), "%s", p);
-		mem_free (p);
+		sprintf (output + strlen(output), "%s", buf);
 		if ( result )
 			mysql_free_result (result);
 	}
@@ -248,17 +245,14 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 	}
 	else
 	{
-		sprintf (buf, "\n#6Starting Clanning:#0 ");
+		sprintf (buf, "#6Starting Clanning:#0\n");
 		while ( (row = mysql_fetch_row(result)) )
 		{
 			if ( !(clan = get_clandef (row[5])) )
 				continue;
-			sprintf (buf + strlen(buf), "%s in '%s' (%s), ", row[6], clan->literal, row[5]);
+			sprintf (buf + strlen(buf), "  - #B%s#0 in #B'%s'#0 (%s)\n", row[6], clan->literal, row[5]);
 		}
-		buf[strlen(buf)-2] = '.';
-		reformat_string (buf, &p);
-		sprintf (output + strlen(output), "\n%s", p);
-		mem_free (p);
+		sprintf (output + strlen(output), "\n%s", buf);
 		if ( result )
 			mysql_free_result (result);
 	}
@@ -276,19 +270,16 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 	}
 	else
 	{
-		sprintf (buf, "\n#6Starting Paydays:#0 ");
+		sprintf (buf, "#6Starting Paydays:#0\n");
 		while ( (row = mysql_fetch_row(result)) )
 		{
 			if ( !vtoo(atoi(row[8])) || !vtom(atoi(row[10])) )
 				continue;
-			sprintf (buf + strlen(buf), "%d x #2%s#0 from #5%s#0 every %d days (payday %d), ",
-				atoi(row[9]), obj_short_desc(vtoo(atoi(row[8]))), char_short(vtom(atoi(row[10]))),
-				atoi(row[11]), atoi(row[7]));
+			sprintf (buf + strlen(buf), "  %d. %d x #2%s#0 from #5%s#0 every %d days.\n",
+				atoi(row[7]), atoi(row[9]), obj_short_desc(vtoo(atoi(row[8]))), char_short(vtom(atoi(row[10]))),
+				atoi(row[11]));
 		}
-		buf[strlen(buf)-2] = '.';
-		reformat_string (buf, &p);
-		sprintf (output + strlen(output), "\n%s", p);
-		mem_free (p);
+		sprintf (output + strlen(output), "\n%s", buf);
 		if ( result )
 			mysql_free_result (result);
 	}
@@ -727,7 +718,8 @@ display_role (CHAR_DATA * ch, char *argument)
 void
 list_roles (CHAR_DATA * ch)
 {
-  char output[MAX_STRING_LENGTH];
+  MYSQL_RES *result;
+  char output[MAX_STRING_LENGTH], outfit [MAX_STRING_LENGTH];
   ROLE_DATA *role;
   int i = 1;
 
@@ -735,7 +727,14 @@ list_roles (CHAR_DATA * ch)
 
   for (role = role_list; role; role = role->next)
     {
-      sprintf (output + strlen (output), "%6d. %s\n", i, role->summary);
+      mysql_safe_query ("SELECT role_id FROM special_roles_outfit WHERE role_id = %d LIMIT 1", role->id);
+      result = mysql_store_result (database);
+      if ( result && mysql_num_rows(result) > 0 )
+        *outfit = '\0';
+      else sprintf (outfit, "#9(no outfit set)#0");
+      if ( result )
+        mysql_free_result (result);
+      sprintf (output + strlen (output), "%6d. %s %s\n", i, role->summary, outfit);
       i++;
     }
 
@@ -960,7 +959,12 @@ do_role (CHAR_DATA * ch, char *argument, int cmd)
     delete_role (ch, argument);
   else if (!str_cmp (buf, "update"))
     update_role (ch, argument);
-  else
+  else if ( !str_cmp (buf, "save"))
+  {
+    send_to_char ("Saving all roles...\n", ch);
+    save_roles();
+  }
+    else
     send_to_char
       ("Syntax: role (new|list|display|delete|update|outfit) <argument(s)>\n", ch);
 }
@@ -968,23 +972,40 @@ do_role (CHAR_DATA * ch, char *argument, int cmd)
 void
 save_roles (void)
 {
-  char text[MAX_STRING_LENGTH];
-  char date_buf[MAX_STRING_LENGTH];
-  char summary[MAX_STRING_LENGTH];
+  MYSQL_RES *result;
+  char      text[MAX_STRING_LENGTH];
+  char      date_buf[MAX_STRING_LENGTH];
+  char      summary[MAX_STRING_LENGTH];
   ROLE_DATA *role;
-
-  mysql_safe_query ("DELETE FROM special_roles");
 
   for (role = role_list; role; role = role->next)
     {
       *summary = '\0';
       *date_buf = '\0';
       *text = '\0';
+      
+      mysql_safe_query ("SELECT role_id FROM special_roles WHERE role_id = %d", role->id);
+      result = mysql_store_result (database);    
+      
+      if ( result && mysql_num_rows (result) > 0 )
+      {
+        mysql_safe_query
+        ("UPDATE special_roles SET summary = '%s', poster = '%s', date = '%s', cost = %d, body = '%s', timestamp = %d WHERE role_id = %d", 
+          role->summary, role->poster, role->date, role->cost, role->body, role->timestamp, role->id);
 
-      mysql_safe_query
-	("INSERT INTO special_roles (summary, poster, date, cost, body, timestamp) VALUES ('%s', '%s', '%s', %d, '%s', %d)",
-	 role->summary, role->poster, role->date, role->cost, role->body,
-	 role->timestamp);
+        mysql_free_result (result);
+      }
+      else
+      {
+        if ( result )
+          mysql_free_result (result);
+        mysql_safe_query
+          ("INSERT INTO special_roles (summary, poster, date, cost, body, timestamp) VALUES ('%s', '%s', '%s', %d, '%s', %d)",
+            role->summary, role->poster, role->date, role->cost, role->body,
+            role->timestamp);
+    
+        role->id = mysql_insert_id(database);
+      }
     }
 }
 
