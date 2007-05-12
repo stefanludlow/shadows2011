@@ -210,7 +210,7 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 	
 	if ( !result || !mysql_num_rows (result) )
 	{
-		sprintf (output + strlen(output), "#6Starting Items:#0 None.\n");
+		sprintf (output + strlen(output), "#6Starting Items:#0\nNone.\n");
 		if ( result )
 			mysql_free_result (result);
 	}
@@ -239,7 +239,7 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 	
 	if ( !result || !mysql_num_rows (result) )
 	{
-		sprintf (output + strlen(output), "\n#6Starting Clanning:#0 None.\n");
+		sprintf (output + strlen(output), "\n#6Starting Clanning:#0\nNone.\n");
 		if ( result )
 			mysql_free_result (result);
 	}
@@ -264,7 +264,7 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 	
 	if ( !result || !mysql_num_rows (result) )
 	{
-		sprintf (output + strlen(output), "\n#6Starting Paydays:#0 None.\n");
+		sprintf (output + strlen(output), "\n#6Starting Paydays:#0\nNone.\n");
 		if ( result )
 			mysql_free_result (result);
 	}
@@ -719,9 +719,10 @@ void
 list_roles (CHAR_DATA * ch)
 {
   MYSQL_RES *result;
-  char output[MAX_STRING_LENGTH], outfit [MAX_STRING_LENGTH];
+  char output[MAX_STRING_LENGTH];
   ROLE_DATA *role;
   int i = 1;
+  bool outfit = false;
 
   *output = '\0';
 
@@ -730,11 +731,11 @@ list_roles (CHAR_DATA * ch)
       mysql_safe_query ("SELECT role_id FROM special_roles_outfit WHERE role_id = %d LIMIT 1", role->id);
       result = mysql_store_result (database);
       if ( result && mysql_num_rows(result) > 0 )
-        *outfit = '\0';
-      else sprintf (outfit, "#9(no outfit set)#0");
+        outfit = true;
+      else outfit = false;
       if ( result )
         mysql_free_result (result);
-      sprintf (output + strlen (output), "%6d. %s %s\n", i, role->summary, outfit);
+      sprintf (output + strlen (output), "%s%5d. %s\n", (outfit == false) ? "#9*#0" : " ", i, role->summary);
       i++;
     }
 
@@ -745,6 +746,9 @@ list_roles (CHAR_DATA * ch)
       return;
     }
 
+  sprintf (output + strlen(output), "\n#9*#0 = no outfitting directives have been created for this role,\n"
+                                    "    and it will be unavailable for players to select in chargen\n");
+  
   send_to_char
     ("\n#2The following special roles have been made available in chargen:\n#0",
      ch);
