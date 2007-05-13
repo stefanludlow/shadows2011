@@ -479,6 +479,7 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 			sprintf (buf,	"UPDATE %s.ah_auctions SET sold_for = %d WHERE auction_id = %d", world_log_db.c_str (), sold_for, atoi(row[0]));
 			mysql_safe_query (buf);
 		}
+    else sold_for = atoi(row[10]);
 		
 		fee = (int) round (sold_for * .08);
 		
@@ -538,6 +539,7 @@ retrieve_winnings (CHAR_DATA *ch, CHAR_DATA *auctioneer)
 			sprintf (buf,	"UPDATE %s.ah_auctions SET sold_for = %d WHERE auction_id = %d", world_log_db.c_str (),sold_for, atoi(row[0]));
 			mysql_safe_query (buf);
 		}
+    else sold_for = atoi(row[10]);
         		
 		sprintf (buf, "%s/%s", AUCTION_DIR, row[0]);
 		fp = fopen (buf, "r");
