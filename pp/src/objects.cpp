@@ -915,6 +915,7 @@ void
 get (CHAR_DATA * ch, OBJ_DATA * obj, int count)
 {
   OBJ_DATA *container;
+  CHAR_DATA *i;
 
   if (IS_SET (obj->obj_flags.extra_flags, ITEM_TIMER)
       && obj->nVirtual != VNUM_CORPSE)
@@ -931,6 +932,22 @@ get (CHAR_DATA * ch, OBJ_DATA * obj, int count)
 	  send_to_char ("That can't be picked up at the moment.\n", ch);
 	  return;
 	}
+
+      // Mod for taking a corpse - Methuselah
+      // If someone is skinning the corpse, don't allow it to be taken
+
+      if (obj->nVirtual == VNUM_CORPSE)
+	{
+  	  for (i = ch->room->people; i; i = i->next_in_room)
+	    {
+	      if (i->delay_info1 == (long int) obj)
+	        {
+		  send_to_char ("You can't take that while it's being skinned.\n", ch);
+                  return;
+	        }
+	    }
+	}
+      // End mod for not taking an object when it's being skinned.  -Methuselah
 
       obj_from_room (&obj, count);
 
@@ -1301,7 +1318,7 @@ do_get (CHAR_DATA * ch, char *argument, int cmd)
 	act ("Your hands are full!", true, ch, 0, 0, TO_CHAR);
       return;
     }
-
+  
   if (container && container != obj)
     obj->in_obj = container;
   if (!container->contains)
@@ -5237,30 +5254,70 @@ do_skin (CHAR_DATA * ch, char *argument, int cmd)
 
   ch->delay_type = DEL_SKIN_1;
   ch->delay = 3;
+
+  // Add time to the object timer so it doesn't decay while we're skinning it.  -Methuselah
+  if ((obj_corpse->obj_timer - time(0)) < 1000)
+    obj_corpse->obj_timer = time(0) + 1000;
+
+  // Add time to the object->morphTime timer in case it's close to morphing.  -Methuselah
+  if ((obj_corpse->morphTime - time(0)) < 1000)
+    obj_corpse->morphTime = time(0) + 1000;
 }
 
 void
 delayed_skin_new1 (CHAR_DATA * ch)
 {
+  OBJ_DATA *obj_corpse;
 
-  send_to_char ("You start to cut into the corpse.\n", ch);
-  act ("$n starts to cut into the corpse.", false, ch, 0, 0,
+  // make sure the corpse is still here, if not throw an error and abort.
+  obj_corpse = (OBJ_DATA *) ch->delay_info1;
+
+  if (CAN_SEE_OBJ (ch, obj_corpse))
+    {
+      send_to_char ("You start to cut into the corpse.\n", ch);
+      act ("$n starts to cut into the corpse.", false, ch, 0, 0,
        TO_ROOM | _ACT_FORMAT);
 
-  ch->delay_type = DEL_SKIN_2;
-  ch->delay = 7;
+      ch->delay_type = DEL_SKIN_2;
+      ch->delay = 7;
+    }
+  else
+    {
+      // The corpse being skinned is gone, abort.
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0;
+      ch->delay = 0;
+      ch->delay_type = 0;
+      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+    }
 }
 
 void
 delayed_skin_new2 (CHAR_DATA * ch)
 {
-  send_to_char
-    ("You seem to be making progress as you dig into the corpse.\n", ch);
-  act ("$n seems to be making progress as $e digs into the corpse.", false,
-       ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+  OBJ_DATA *obj_corpse;
 
-  ch->delay_type = DEL_SKIN_3;
-  ch->delay = 10;
+  // make sure the corpse is still here, if not throw an error and abort.
+  obj_corpse = (OBJ_DATA *) ch->delay_info1;
+
+  if (CAN_SEE_OBJ (ch, obj_corpse))
+    {
+       send_to_char ("You seem to be making progress as you dig into the corpse.\n", ch);
+       act ("$n seems to be making progress as $e digs into the corpse.", false,
+         ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+
+       ch->delay_type = DEL_SKIN_3;
+       ch->delay = 10;
+    }
+  else
+    { 
+      // The corpse being skinned is gone, abort.
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0; 
+      ch->delay = 0;
+      ch->delay_type = 0;
+      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+    }
 }
 
 void
@@ -5273,6 +5330,17 @@ delayed_skin_new3 (CHAR_DATA * ch)
   char *p;
 
   corpse = (OBJ_DATA *) ch->delay_info1;
+
+  if (!CAN_SEE_OBJ (ch, corpse))
+    {
+      // The corpse being skinned is gone, abort.
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0;
+      ch->delay = 0;
+      ch->delay_type = 0;
+      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+      return;
+    }
 
   if (!corpse || sizeof (*corpse) < sizeof (OBJ_DATA))
     {
