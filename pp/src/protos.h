@@ -1438,7 +1438,7 @@ int carrying (CHAR_DATA * ch);
 char *tilde_eliminator (char *string);
 char *reference_ip (char *guest_name, char *host);
 int check_account_flags (char *host);
-
+char *strip_small_minor(char * wounds, CHAR_DATA * ch);
 /* Magical effect functions for spellcasting */
 
 void creation_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,

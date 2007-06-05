@@ -4071,6 +4071,8 @@ objstat (CHAR_DATA * ch, char *name)
 	sprintf (buf + strlen (buf), " Burn");
       if (IS_SET (j->o.od.value[5], TREAT_FROST))
 	sprintf (buf + strlen (buf), " Frost");
+      if (IS_SET (j->o.od.value[5], TREAT_BLEED))
+        sprintf (buf + strlen (buf), " Bleeding");
       sprintf (buf + strlen (buf), "\n");
       break;
 

@@ -4402,6 +4402,7 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
   OBJ_DATA *arrow = NULL;
   char arg1[MAX_STRING_LENGTH];
   char arg2[MAX_STRING_LENGTH];
+  char arg3[MAX_STRING_LENGTH];
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   char buffer[MAX_STRING_LENGTH];
@@ -4411,6 +4412,7 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
   OBJ_DATA *eq;
   LODGED_OBJECT_INFO *lodged;
   int removed = 0, target_found = 0;
+  int modif = 0;
   int target_obj = 0, target_char = 0;
 
   if (IS_MORTAL (ch) && IS_SET (ch->room->room_flags, OOC)
@@ -4461,6 +4463,7 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+
   if (!obj && *arg1)
     {
       if ((tch = get_char_room_vis (ch, arg1)))
@@ -4468,6 +4471,7 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 	  target_found++;
 	  target_char++;
 	}
+				
       for (obj = ch->room->contents; obj; obj = obj->next_content)
 	{
 	  if (IS_OBJ_VIS (ch, obj) && isname (arg1, obj->name))
@@ -4477,11 +4481,16 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 	      break;
 	    }
 	}
+				
       if (!tch && !obj)
 	{
 	  send_to_char ("Remove what?\n", ch);
 	  return;
 	}
+
+/**
+remove target object
+**/
       if (!target_found)
 	{
 	  tch = ch;
@@ -4490,13 +4499,15 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 	}
       else
 	{
-	  one_argument (argument, arg2);
-	}
+					argument = one_argument (argument, arg2);
+				}
+				
       if (!*arg2)
 	{
 	  send_to_char ("Remove what?\n", ch);
 	  return;
 	}
+				
       if (target_char)
 	{
 	  if (GET_POS (tch) > POSITION_RESTING && IS_MORTAL (ch))
@@ -4506,16 +4517,29 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 		 ch);
 	      return;
 	    }
+/***
+remove target object area
+***/
+					argument = one_argument (argument, arg3);
+					
 	  for (lodged = tch->lodged; lodged; lodged = lodged->next)
 	    {
 
 	      if (isname (arg2, vtoo (lodged->vnum)->name))
 		{
-		  sprintf (location, "%s", lodged->location);
+						//we have a specified location, and it doesn't match this wound so we break out and go to the next wound. If there is no specified location, then we continue with the regular code.
+									if ((*arg3) &&
+												strcmp(arg3, lodged->location))
+										continue;
+									else
+										{
+											sprintf (location, "%s", lodged->location);
+																				
 		  obj = load_object (lodged->vnum);
 		  obj->count = 1;
 
 		  int error = 0;
+											
 		  if (can_obj_to_inv (obj, ch, &error, 1))
 		    obj_to_char (obj, ch);
 		  else
@@ -4526,6 +4550,8 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 		  break;
 		}
 	    }
+						}
+						
 	  if (removed && tch == ch)
 	    {
 	      *buf = '\0';
@@ -4542,10 +4568,27 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 	      sprintf (buf2, "%s", buffer);
 	      act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	      act (buf2, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
-	      wound_to_char (tch, location,
-			     dice (obj->o.od.value[0], obj->o.od.value[1]), 0,
-			     number (1, 4), 0, 0);
-	      return;
+							
+	
+							if ((strcmp(location, "skull")) &&
+									(strcmp(location, "reye")) &&
+									(strcmp(location, "leye")) &&
+									(strcmp(location, "abdomen")) &&
+									(strcmp(location, "groin")) &&
+									(strcmp(location, "muzzle")))
+										modif = 0; //not in those loctions, so normal chance
+							else
+										modif = 20; //in a bad spot, so a penalty to healing check
+									
+								if (skill_use (ch, SKILL_HEALING, modif))
+									return; // no extra damage if you make your heal skill check
+								else
+									{
+										wound_to_char (tch, location,
+											 dice (obj->o.od.value[0], obj->o.od.value[1]), 0,
+											 number (1, 4), 0, 0);
+										return;
+									}
 	    }
 	  else if (removed && tch != ch)
 	    {
@@ -4570,18 +4613,35 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 	      sprintf (buffer, "#5%s", buf);
 	      sprintf (buf, "%s", buffer);
 	      act (buf, false, ch, 0, tch, TO_VICT | _ACT_FORMAT);
-	      wound_to_char (tch, location,
-			     dice (obj->o.od.value[0], obj->o.od.value[1]), 0,
-			     number (1, 4), 0, 0);
-	      return;
-	    }
-	  else if (!removed)
-	    {
-	      send_to_char
-		("You don't see that -- how could you remove it?\n", ch);
-	      return;
-	    }
-	}
+							
+							if ((strcmp(location, "skull")) &&
+									(strcmp(location, "reye")) &&
+									(strcmp(location, "leye")) &&
+									(strcmp(location, "abdomen")) &&
+									(strcmp(location, "groin")) &&
+									(strcmp(location, "muzzle")))
+										modif = 0; //not in those loctions, so normal chance
+							else
+										modif = 20; //in a bad spot, so a penalty to healing check
+									
+								if (skill_use (ch, SKILL_HEALING, modif))
+									return; // no extra damage if you make your heal skill check
+							else
+								{
+									wound_to_char (tch, location,
+										 dice (obj->o.od.value[0], obj->o.od.value[1]), 0,
+										 number (1, 4), 0, 0);
+									return;
+								}
+						}
+					else if (!removed)
+						{
+							send_to_char
+					("You don't see that -- how could you remove it?\n", ch);
+							return;
+						}
+				} // if (target_char)
+				
       else if (target_obj)
 	{
 
@@ -4599,6 +4659,7 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 		  break;
 		}
 	    }
+						
 	  if (removed)
 	    {
 	      sprintf (buf, "You retrieve #2%s#0 from #2%s#0's %s.",
@@ -4620,8 +4681,8 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 		("You don't see that -- how could you remove it?\n", ch);
 	      return;
 	    }
-	}
-    }
+				} //if (target_obj)
+    } //if (!obj && *arg1)
 
   if (!obj)
     {

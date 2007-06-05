@@ -3167,6 +3167,8 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
       *buf2 = '\0';
       *buf3 = '\0';
       strcpy (buf2, display_clan_ranks (i, ch));
+      
+      //examine only
       if (mode == 15 && i != ch && *buf2 && !is_hooded (i))
 	{
 	  send_to_char ("\n", ch);
@@ -3189,6 +3191,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
          }
        */
 
+			//Examine only - Hurt
       if (mode == 15 && i->damage && !IS_SET (i->act, ACT_VEHICLE)
 	  && !is_hooded (i))
 	{
@@ -3210,6 +3213,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	  send_to_char (buffer, ch);
 	}
 
+			//Look only - Hurt
       if (mode == 1)
 	{
 	  curdamage = 0;
@@ -3245,10 +3249,14 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	  p = NULL;
 	}
 
+			//Examine only - wounded
       if (mode == 15 && !IS_SET (i->act, ACT_VEHICLE)
 	  && (i->wounds || i->lodged))
 	{
 	  sprintf (buf2, "%s", show_wounds (i, 0));
+					if (ch->fighting || i->fighting)
+						strip_small_minor(buf2, ch);
+			
 	  send_to_char ("\n", ch);
 	  strcat (buf3, buf2);
 	  act (buf3, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
@@ -3268,6 +3276,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	  p = NULL;
 	}
 
+			//Examine and look
       if (i->mob &&
 	  i->mob->vehicle_type == VEHICLE_HITCH &&
 	  (troom = vtor (i->mob->nVirtual)) &&
