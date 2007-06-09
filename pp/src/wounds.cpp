@@ -1887,7 +1887,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
     {
       one_argument (argument, arg);
     }
-  else 
+  else if (!IS_MORTAL (ch))
     {
       strcat (arg, "self");
     }
