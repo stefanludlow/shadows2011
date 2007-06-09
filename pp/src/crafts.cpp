@@ -931,6 +931,7 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+//if buf is not a craft name, subcraft name, all, list, or new, it may be a PC name
   if ((tch = load_pc (buf)))
     {
       sprintf (output, "\n#6%s#0 has the following crafts on %s pfile:\n\n",
@@ -951,24 +952,29 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+//buf is something, but not a craft, subcraft
   if (!craft && *buf && !category)
     close = true;
 
+//are we editing a craft?
   if (ch->pc->edit_craft)
     craft = ch->pc->edit_craft;
 
+//no subcraft has been selected and buf is not a craft name
   if (!craft && !category)
     {
       send_to_char ("No such subcraft.\n", ch);
       return;
     }
 
+//craft has been selected and buf is a craft name, so we will now edit that craft
   if (!ch->pc->edit_craft || ch->pc->edit_craft != craft)
     {
       ch->pc->edit_craft = craft;
       send_to_char ("Craft has been opened for editing.\n", ch);
       return;
     }
+ //craft has been selected, but buf was empty, so we are closing the craft
   else if (ch->pc->edit_craft && close)
     {
       send_to_char ("Craft closed and written to memory.\n", ch);
@@ -976,7 +982,9 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+//reset b_buf and buf so we can use them again
   *b_buf = '\0';
+	*buf = '\0'; 
 
 /** displays information **/
   sprintf (b_buf, "#6Craft:#0 %s #6Subcraft:#0 %s #6Command:#0 %s\n",

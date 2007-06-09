@@ -3255,7 +3255,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	{
 	  sprintf (buf2, "%s", show_wounds (i, 0));
 					if (ch->fighting || i->fighting)
-						strip_small_minor(buf2, ch);
+						sprintf (buf2, "%s", strip_small_minor(buf2, ch));
 			
 	  send_to_char ("\n", ch);
 	  strcat (buf3, buf2);

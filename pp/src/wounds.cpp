@@ -3315,7 +3315,7 @@ strip_small_minor(char * wounds, CHAR_DATA * ch)
 						if (kdex != std::string::npos)
 							{
 								woundstr.erase(kdex);
-								woundstr.insert(kdex, " has no apparant wounds.");
+								woundstr.insert(kdex, " has no apparent wounds.");
 								return ((char *)woundstr.c_str());
 							}
 					}
