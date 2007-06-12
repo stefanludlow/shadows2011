@@ -1876,7 +1876,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   char buf3[MAX_STRING_LENGTH];
-  char arg[AVG_STRING_LENGTH];
+  char arg[AVG_STRING_LENGTH]={'\0'};
   WOUND_DATA *wound;
   CHAR_DATA *tch = NULL, *xch = NULL;
 	AFFECTED_TYPE *af, *next_affect = NULL;
@@ -1887,9 +1887,9 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
     {
       one_argument (argument, arg);
     }
-  else if (!IS_MORTAL (ch))
+  else
     {
-      strcat (arg, "self");
+      sprintf (arg, "%s", "self");
     }
 
 
@@ -2113,7 +2113,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
   else
     {				// Japheth's Diagnose Additions, originally conceived by Zapata
 
-      if (!*arg || !(tch = get_char_room_vis (ch, arg)))
+      if (!*arg || (tch != get_char_room_vis (ch, arg)))
 	{
 	  if (ch->fighting)
 	    {
@@ -2121,7 +2121,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 	    }
 	  else
 	    {
-	      tch = ch;
+              tch = get_char_room_vis (ch, "self");
 	    }
 	}
 
