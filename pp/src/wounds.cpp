@@ -901,7 +901,7 @@ A roll is made against the skill level of the PC to determine how good or bad th
 A second skill_use check is then made to give the PC a chance to increase thier skill, although the result has no bearing on the code below.
 **/
 
-	roll = number (1, SKILL_CEILING);
+	roll = number (1, (SKILL_CEILING-10));
 	if (roll <= skill_level (ch, SKILL_HEALING, 0) - 15)
 		{
     	treat_effect =  3;
