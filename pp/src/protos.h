@@ -439,7 +439,7 @@ void do_rsector (CHAR_DATA * ch, char *argument, int cmd);
 void do_rset (CHAR_DATA * ch, char *argument, int cmd);
 void do_runused (CHAR_DATA * ch, char *argument, int cmd);
 void do_rxchange (CHAR_DATA * ch, char *argument, int cmd);
-void do_sail (CHAR_DATA * ch, char *argument, int cmd);
+void do_sasil (CHAR_DATA * ch, char *argument, int cmd);
 void do_save (CHAR_DATA * ch, char *argument, int cmd);
 void do_saverooms (CHAR_DATA * ch, char *argument, int cmd);
 void do_say (CHAR_DATA * ch, char *argument, int cmd);
@@ -841,7 +841,7 @@ OBJ_DATA *get_obj_vis (CHAR_DATA * ch, char *name);
 void extract_char (CHAR_DATA * ch);
 int generic_find (char *arg, int bitvector, CHAR_DATA * ch,
 		  CHAR_DATA ** tar_ch, OBJ_DATA ** tar_obj);
-
+int swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd);
 void clear_pmote (CHAR_DATA * ch);
 void clear_voice (CHAR_DATA * ch);
 int drowned (CHAR_DATA * ch);

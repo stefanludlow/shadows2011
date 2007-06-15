@@ -3475,3 +3475,185 @@ isvowel (char c)
       return false;
     }
 }
+
+
+/*---------------------------------------------------------------------\
+| swap_xmote_target (CHAR_DATA * ch, char *argument int *is_imote)     |
+|                                                                      |
+| swaps *target @ or ~target with short_desc                           |
+| cmd = 1 (emote call) 2 (pmote call)                                  |
+\---------------------------------------------------------------------*/
+
+int
+swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd)
+{
+  char buf[MAX_STRING_LENGTH] = { '\0' };
+  char key[MAX_STRING_LENGTH] = { '\0' };
+  char copy[MAX_STRING_LENGTH] = { '\0' };
+  bool tochar = false;
+  OBJ_DATA *obj = NULL;
+  int key_e = 0;
+  char *p = '\0';
+  char *temp = NULL;
+  bool is_imote = false;
+
+  p = copy;
+  temp = argument;
+
+  if (IS_NPC(ch))
+    return 0;
+
+while (*argument)
+  {
+
+    if (*argument == '@' )
+      {
+	if (cmd == 2 ) // don't allow @ to be used in pmote
+	  {
+	    send_to_char ("You may not refer to yourself in a pmote.", ch);
+	    return 0;
+	  }
+	is_imote = true;
+	sprintf (p, "#5%s#0", char_short (ch));
+	p += strlen (p);
+	argument++;
+      }
+
+    if (*argument == '*')
+      {
+
+	argument++;
+	while (isdigit (*argument))
+	  {
+	    key[key_e++] = *(argument++);
+	  }
+	if (*argument == '.')
+	  {
+	    key[key_e++] = *(argument++);
+	  }
+	while (isalpha (*argument) || *argument == '-')
+	  {
+	    key[key_e++] = *(argument++);
+	  }
+	key[key_e] = '\0';
+	key_e = 0;
+
+	if (!get_obj_in_list_vis (ch, key, ch->room->contents) &&
+	    !get_obj_in_list_vis (ch, key, ch->right_hand) &&
+	    !get_obj_in_list_vis (ch, key, ch->left_hand) &&
+	    !get_obj_in_list_vis (ch, key, ch->equip))
+	  {
+	    sprintf (buf, "I don't see %s here.\n", key);
+	    send_to_char (buf, ch);
+	    return 0;
+	  }
+	obj = get_obj_in_list_vis (ch, key, ch->right_hand);
+
+	if (!obj)
+	  obj = get_obj_in_list_vis (ch, key, ch->left_hand);
+	if (!obj)
+	  obj = get_obj_in_list_vis (ch, key, ch->room->contents);
+	if (!obj)
+	  obj = get_obj_in_list_vis (ch, key, ch->equip);
+	sprintf (p, "#2%s#0", obj_short_desc (obj));
+	p += strlen (p);
+
+      }
+    else if (*argument == '~')
+      {
+
+	argument++;
+	while (isdigit (*argument))
+	  {
+	    key[key_e++] = *(argument++);
+	  }
+	if (*argument == '.')
+	  {
+	    key[key_e++] = *(argument++);
+	  }
+	while (isalpha (*argument) || *argument == '-')
+	  {
+	    key[key_e++] = *(argument++);
+	  }
+	key[key_e] = '\0';
+	key_e = 0;
+
+	if (!get_char_room_vis (ch, key))
+	  {
+	    sprintf (buf, "Who is %s?\n", key);
+	    send_to_char (buf, ch);
+	    return 0;
+	  }
+	if (get_char_room_vis (ch, key) == ch)
+	  {
+                  send_to_char
+                    ("You shouldn't refer to yourself using the token system.\n",
+                     ch);
+                  return 0;
+	  }
+	sprintf (p, "#5%s#0", char_short (get_char_room_vis (ch, key)));
+	p += strlen (p);
+	tochar = true;
+      }
+    else
+      *(p++) = *(argument++); 
+  }
+
+ *p = '\0';
+ if (cmd == 1)
+   {
+     if (copy[0] == '\'')
+       {
+         if (!is_imote)
+           {
+	     sprintf (buf, "#5%s#0%s", char_short (ch), copy);
+	     buf[2] = toupper (buf[2]);
+           }
+       else
+         {
+	   sprintf (buf, "%s", copy);
+	   if (buf[0] == '#')
+	     {
+	       buf[2] = toupper (buf[2]);
+	     }
+	   else
+	     {
+	       buf[0] = toupper (buf[0]);
+	     }
+         }
+     }
+   else
+     {
+       if (!is_imote)
+         {
+	   sprintf (buf, "#5%s#0 %s", char_short (ch), copy);
+	   buf[2] = toupper (buf[2]);
+         }
+       else
+         {
+	   sprintf (buf, "%s", copy);
+	   if (buf[0] == '#')
+	     {
+	       buf[2] = toupper (buf[2]);
+	     }
+	   else
+	     {
+	       buf[0] = toupper (buf[0]);
+	     }
+         }  
+      }
+   }
+ else
+   {
+     sprintf (buf, "#0%s", copy);// need to add #0 here to reset colors depending on call
+   }
+
+ if (buf[strlen (buf) - 1] != '.' && buf[strlen (buf) - 1] != '!'
+     && buf[strlen (buf) - 1] != '?')
+   strcat (buf, ".");
+ 
+ argument = temp; 
+ strcpy (argument, buf);
+
+  return 1;
+}
