@@ -176,7 +176,7 @@ do_pmote (CHAR_DATA * ch, char *argument, int cmd)
     {
       if (ch && argument)
 	{
-				result = swap_xmote_target (ch, argument, 2);
+	result = swap_xmote_target (ch, argument, 2);
           if(!result)
 	    return;
 	}
@@ -564,7 +564,7 @@ do_emote (CHAR_DATA * ch, char *argument, int cmd)
 			personalize_emote (ch, buf); //adjusts for "you" if needed
 			
       if (!strcmp(result, buf))
-        act (buf, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+        act (buf, false, ch, 0, 0, TO_ROOM | TO_CHAR | _ACT_FORMAT);
       else
       act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 

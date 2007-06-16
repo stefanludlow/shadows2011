@@ -3502,6 +3502,8 @@ swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd)
 
 while (*argument)
   {
+	if(cmd==2 && IS_NPC(ch))
+		return NULL;
 
     if (*argument == '@' )
       {
@@ -3649,8 +3651,8 @@ while (*argument)
      && buf[strlen (buf) - 1] != '?')
    strcat (buf, ".");
  
- argument = temp; 
- strcpy (argument, buf);
+ //argument = temp; 
+ sprintf (argument, "%s", buf);
 
   return (argument);
 }
