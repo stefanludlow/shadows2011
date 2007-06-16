@@ -3484,7 +3484,7 @@ isvowel (char c)
 | cmd = 1 (emote call) 2 (pmote call)                                  |
 \---------------------------------------------------------------------*/
 
-int
+char *
 swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd)
 {
   char buf[MAX_STRING_LENGTH] = { '\0' };
@@ -3500,9 +3500,6 @@ swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd)
   p = copy;
   temp = argument;
 
-  if (IS_NPC(ch))
-    return 0;
-
 while (*argument)
   {
 
@@ -3511,7 +3508,7 @@ while (*argument)
 	if (cmd == 2 ) // don't allow @ to be used in pmote
 	  {
 	    send_to_char ("You may not refer to yourself in a pmote.", ch);
-	    return 0;
+	    return NULL;
 	  }
 	is_imote = true;
 	sprintf (p, "#5%s#0", char_short (ch));
@@ -3545,7 +3542,7 @@ while (*argument)
 	  {
 	    sprintf (buf, "I don't see %s here.\n", key);
 	    send_to_char (buf, ch);
-	    return 0;
+	    return NULL;
 	  }
 	obj = get_obj_in_list_vis (ch, key, ch->right_hand);
 
@@ -3582,14 +3579,14 @@ while (*argument)
 	  {
 	    sprintf (buf, "Who is %s?\n", key);
 	    send_to_char (buf, ch);
-	    return 0;
+	    return NULL;
 	  }
 	if (get_char_room_vis (ch, key) == ch)
 	  {
                   send_to_char
                     ("You shouldn't refer to yourself using the token system.\n",
                      ch);
-                  return 0;
+                  return NULL;
 	  }
 	sprintf (p, "#5%s#0", char_short (get_char_room_vis (ch, key)));
 	p += strlen (p);
@@ -3655,5 +3652,5 @@ while (*argument)
  argument = temp; 
  strcpy (argument, buf);
 
-  return 1;
+  return (argument);
 }

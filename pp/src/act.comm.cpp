@@ -152,7 +152,7 @@ do_ooc (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_pmote (CHAR_DATA * ch, char *argument, int cmd)
 {
-
+	char * result = NULL;
   char buf[MAX_STRING_LENGTH] = { '\0' };
 
   while (isspace (*argument))
@@ -176,13 +176,14 @@ do_pmote (CHAR_DATA * ch, char *argument, int cmd)
     {
       if (ch && argument)
 	{
-          if(!swap_xmote_target (ch, argument, 2))
+				result = swap_xmote_target (ch, argument, 2);
+          if(!result)
 	    return;
 	}
      
-         sprintf (buf, "You pmote: %s", argument);
+         sprintf (buf, "You pmote: %s", result);
 
-         ch->pmote_str = add_hash (argument);
+      ch->pmote_str = add_hash (result);
 
           act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
     }
@@ -239,6 +240,7 @@ do_omote (CHAR_DATA * ch, char *argument, int cmd)
 
   char buf[AVG_STRING_LENGTH * 4] = { '\0' };
   char arg1[MAX_STRING_LENGTH] = { '\0' };
+  char * result = NULL;
   OBJ_DATA *obj = NULL;
 
   argument = one_argument (argument, arg1);
@@ -273,18 +275,19 @@ do_omote (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (!swap_xmote_target (ch, argument, 3))
+	result = swap_xmote_target (ch, argument, 3);
+  if (!result)
     return;
 
-  if (strlen (argument) >= AVG_STRING_LENGTH * 4)
+  if (strlen (result) >= AVG_STRING_LENGTH * 4)
     {
       send_to_char ("Your omote needs to be more succinct.\n", ch);
       return;
     }
 
   sprintf (buf, "%s%s%s",
-	   argument,
-	   (argument[strlen (argument) - 1] != '.') ? "." : "",
+	   result,
+	   (result[strlen (result) - 1] != '.') ? "." : "",
 	   (obj->short_description[0] == '#') ? "#0" : "");
 
   obj->omote_str = add_hash (buf);
@@ -516,12 +519,9 @@ do_emote (CHAR_DATA * ch, char *argument, int cmd)
 {
   char buf[MAX_STRING_LENGTH] = { '\0' };
   char copy[MAX_STRING_LENGTH] = { '\0' };
-  //  char key[MAX_STRING_LENGTH] = { '\0' };
+  char *result = NULL;
   CHAR_DATA *tch = NULL;
   bool tochar = false;
-  // bool is_imote = false;
-  // OBJ_DATA *obj = NULL;
-  // int key_e = 0;
   int index = 0;
   char *p = '\0';
 
@@ -555,18 +555,17 @@ do_emote (CHAR_DATA * ch, char *argument, int cmd)
       p = copy;
      
       /** Removed code and created swap_xmote_target function **/
+			result = swap_xmote_target (ch, argument, 1);
+      if (!result)
+				return;
 
-      if (!swap_xmote_target (ch, argument, 1))
-	return;
-
-        sprintf (buf, "%s", argument);  
+      sprintf (buf, "%s", result);  
 	
-
-      if (!tochar)
+			personalize_emote (ch, buf); //adjusts for "you" if needed
+			
+      if (!strcmp(result, buf))
         act (buf, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
       else
-        personalize_emote (ch, buf);
-
       act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 
 
