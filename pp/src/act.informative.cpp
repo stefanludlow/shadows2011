@@ -3284,6 +3284,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	    list_obj_to_char (troom->contents, ch, 0, true);
 	}
 
+			
       for (enchantment = i->enchantments; enchantment;
 	   enchantment = enchantment->next)
 	{
