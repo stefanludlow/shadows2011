@@ -176,6 +176,7 @@ do_pmote (CHAR_DATA * ch, char *argument, int cmd)
     {
       if (ch && argument)
 	{
+
 	result = swap_xmote_target (ch, argument, 2);
           if(!result)
 	    return;
@@ -561,6 +562,7 @@ do_emote (CHAR_DATA * ch, char *argument, int cmd)
 
       sprintf (buf, "%s", result);  
 	
+
 			personalize_emote (ch, buf); //adjusts for "you" if needed
 			
       if (!strcmp(result, buf))

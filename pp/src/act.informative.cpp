@@ -2678,8 +2678,22 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
   };
   char buf2[MAX_STRING_LENGTH] = { '\0' };
   char buf3[MAX_STRING_LENGTH] = { '\0' };
+  
+  char craft_output[AVG_STRING_LENGTH] = { '\0' };
+  char craft_buf[AVG_STRING_LENGTH] = { '\0' };
+  int jdex;
+  int crafts_found;
+  
   bool found = false;
 
+/**
+*	Mode 0 From list_char_to_char
+*	Mode 1 For regular do_look
+* Mode 3 Never used
+*	Mode 4 (Mode 0) From list_char_to_char
+* Mode 15 for do_examine
+*
+*/
   if (mode == 4)
     mode = 0;
 
@@ -2896,36 +2910,46 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 
 	  if (i->desc && i->desc->original && !IS_MORTAL (ch))
 	    strcat (buffer, " #2(animated)#0");
-	  strcat (buffer, "#0\n");
-	  reformat_string (buffer, &p);
-	  send_to_char (p, ch);
-	  mem_free (p); // char*
-	}
+					
+					strcat (buffer, "#0\n");
+					reformat_string (buffer, &p);
+					send_to_char (p, ch);
+					mem_free (p); // char*
+				} //if ((blindfold 
 
       else
 	{			/* npc with long */
 	  if (IS_SUBDUER (i))
 	    {
 	      if (IS_RIDER (i))
+	      	{
 		sprintf (buffer,
 			 "#5%s#0, mounted on #5%s#0, has #5%s#0 in tow.\n",
-			 char_short (i), char_short (i->mount),
-			 i->subdue == ch ? "you" : char_short (i->subdue));
+			 				char_short (i),
+			 				char_short (i->mount),
+			 				i->subdue == ch ? "you" : char_short (i->subdue));
+	      	}
+	      	
 	      else
-		sprintf (buffer, "#5%s#0 has #5%s#0 in tow.\n",
-			 char_short (i),
-			 i->subdue == ch ? "you" : char_short (i->subdue));
+	      	{
+						sprintf (buffer,
+							"#5%s#0 has #5%s#0 in tow.\n", 
+							char_short (i),
+							i->subdue == ch ? "you" : char_short (i->subdue));
+			 		}
+			 		
 	      buffer[2] = toupper (buffer[2]);
 	      send_to_char (buffer, ch);
-	    }
+	    }//if (IS_SUBDUER (i))
 
 	  else if (IS_RIDER (i) && !IS_SUBDUER (i))
 	    {
 
 	      sprintf (buffer, "%s#0 %s %s#5%s#0.",
-		       char_short (i), AWAKE (i) ?
-		       "sits atop" : "is asleep upon", AWAKE (i->mount) ?
-		       "" : "a sleeping mount, ", char_short (i->mount));
+		       char_short (i),
+		       AWAKE (i) ? "sits atop" : "is asleep upon",
+		       AWAKE (i->mount) ? "" : "a sleeping mount, ",
+		       char_short (i->mount));
 
 	      *buffer = toupper (*buffer);
 	      sprintf (buf2, "#5%s", buffer);
@@ -2938,8 +2962,9 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 
 	      if (ch == i->mount)
 		{
-		  sprintf (buffer, "You sit upon %s#5%s#0.\n", AWAKE (i) ?
-			   "" : "a sleeping mount, ", char_short (i));
+						sprintf (buffer, "You sit upon %s#5%s#0.\n",
+							AWAKE (i) ? "" : "a sleeping mount, ",
+							char_short (i));
 
 		  send_to_char (buffer, ch);
 		}
@@ -2949,12 +2974,16 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	    {
 
 	      if (i == ch)
+	      	{
 		sprintf (buffer, "#5You#0 ride upon #5%s#0.\n",
 			 char_short (i));
+			 		}
 	      else
+	      	{
 		sprintf (buffer, "#5%s#0 is here, hitched to #5%s#0.\n",
 			 char_short (i),
 			 i->hitcher == ch ? "you" : char_short (i->hitcher));
+			 		}
 
 	      buffer[2] = toupper (buffer[2]);
 	      send_to_char (buffer, ch);
@@ -2964,14 +2993,14 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	    {
 	      *buffer = '\0';
 
-
-	      if ((GET_FLAG (i, FLAG_ENTERING) ||
-		   GET_FLAG (i, FLAG_LEAVING)) && enter_exit_msg (i, buffer))
-		{
-		  if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
-		    strcat (buffer, " #2(new player)#0");
-
-	          if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
+	      if ((GET_FLAG (i, FLAG_ENTERING) 
+	      		|| GET_FLAG (i, FLAG_LEAVING)) && enter_exit_msg (i, buffer))
+					{
+						if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
+							strcat (buffer, " #2(new player)#0");
+	
+						if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
+								
         	    strcat (buffer, " #B(new player guide)#0");
 
 		  if (i->desc && !IS_NPC (i) && i->desc->idle)
@@ -3034,50 +3063,51 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 		{
 		  sprintf (buffer, "#5");
 		  strcat (buffer, char_long (i, GET_TRUST (ch)));
-		  if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
-		    strcat (buffer, " #2(new player)#0");
-
-	          if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
-        	    strcat (buffer, " #B(new player guide)#0");
-
-		  if (get_affect (i, MAGIC_HIDDEN))
-		    strcat (buffer, " #1(hidden)#0");
-
-		  if (are_grouped (i, ch))
-		    strcat (buffer, " #6(grouped)#0");
-
-		  if (i->desc && i->desc->idle)
-		    strcat (buffer, " #1(idle)#0");
-
-		  if (GET_FLAG (i, FLAG_WIZINVIS))
-		    strcat (buffer, " #C(wizinvis)#0");
-
-		  if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
-		    strcat (buffer, " #1(invisible)#0");
-
-		  if (get_affect (i, MAGIC_AFFECT_CONCEALMENT))
-		    strcat (buffer, " #1(blend)#0");
-
-		  if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
-		    strcat (buffer, " #1(editing)#0");
-
-		  if (i->desc && i->desc->original && !IS_MORTAL (ch))
-		    strcat (buffer, " #2(animated)#0");
-
-		  if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
-		    strcat (buffer, " #1(link dead)#0");
-
-		  if (!IS_MORTAL (ch) && !IS_NPC (i) && !i->desc
-		      && i->pc->admin_loaded)
-		    strcat (buffer, " #3(loaded)#0");
-
-		  strcat (buffer, "#0\n");
-		  reformat_string (buffer, &p);
-		  send_to_char (p, ch);
-		  mem_free (p); //char*
-		}
-	    }
-	}
+						
+						if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
+							strcat (buffer, " #2(new player)#0");
+			
+						if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
+							strcat (buffer, " #B(new player guide)#0");
+			
+						if (get_affect (i, MAGIC_HIDDEN))
+							strcat (buffer, " #1(hidden)#0");
+			
+						if (are_grouped (i, ch))
+							strcat (buffer, " #6(grouped)#0");
+			
+						if (i->desc && i->desc->idle)
+							strcat (buffer, " #1(idle)#0");
+			
+						if (GET_FLAG (i, FLAG_WIZINVIS))
+							strcat (buffer, " #C(wizinvis)#0");
+			
+						if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
+							strcat (buffer, " #1(invisible)#0");
+			
+						if (get_affect (i, MAGIC_AFFECT_CONCEALMENT))
+							strcat (buffer, " #1(blend)#0");
+			
+						if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
+							strcat (buffer, " #1(editing)#0");
+			
+						if (i->desc && i->desc->original && !IS_MORTAL (ch))
+							strcat (buffer, " #2(animated)#0");
+			
+						if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
+							strcat (buffer, " #1(link dead)#0");
+			
+						if (!IS_MORTAL (ch) && !IS_NPC (i) && !i->desc
+								&& i->pc->admin_loaded)
+							strcat (buffer, " #3(loaded)#0");
+			
+						strcat (buffer, "#0\n");
+						reformat_string (buffer, &p);
+						send_to_char (p, ch);
+						mem_free (p); //char*
+					}//end of if ((GET_FLAG (i, FLAG_ENTERING)
+	    }//end of if (IS_SUBDUER (i))
+	}//end of if ((blindfold =
 
       if (get_stink_message (i, NULL, stink_buf, ch))
 	{
@@ -3092,10 +3122,10 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	  act (buffer, true, i, 0, ch, TO_VICT);
 	}
 
-    }
-  else if (mode == 1 || mode == 15)
+    } //end of if (!mode)
+    
+  else if (mode == 1 || mode == 15) //look or examine
     {
-
       if (i->description)
 	{
 
@@ -3290,6 +3320,72 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	    list_obj_to_char (troom->contents, ch, 0, true);
 	}
 
+
+			//examine only - Crafts
+			if (mode == 15)
+				{
+					*craft_buf = '\0';
+					crafts_found = 0;
+					///PC get limited listing
+					if (IS_MORTAL (ch))
+						{
+							for (jdex = CRAFT_FIRST; jdex <= CRAFT_LAST; jdex++)
+								{
+									if (!(af = get_affect (ch, jdex)))
+										continue;
+									
+									if (!af->a.craft || !af->a.craft->subcraft)
+										continue;
+									
+									if (!craft_uses_mob (af->a.craft->subcraft, i->mob->nVirtual))
+										continue;
+									
+									if (crafts_found)
+										sprintf (craft_buf + strlen (craft_buf), ", ");
+									
+									sprintf (craft_buf + strlen (craft_buf), "'%s %s'",
+										 af->a.craft->subcraft->command,
+										 af->a.craft->subcraft->subcraft_name);
+								 
+									crafts_found += 1;
+								}
+						}
+						
+					//Imms get full listing
+					else 
+						{
+							SUBCRAFT_HEAD_DATA *tcraft;
+							*craft_buf = '\0';
+							crafts_found = 0;
+							for (tcraft = crafts; tcraft; tcraft = tcraft->next)
+									{
+										if (!craft_uses_mob (tcraft, i->mob->nVirtual))
+											continue;
+										if (crafts_found)
+											sprintf (craft_buf + strlen (craft_buf), ", ");
+											
+										sprintf (craft_buf + strlen (craft_buf), "'%s %s'",
+											 tcraft->command,
+											 tcraft->subcraft_name);
+										crafts_found += 1;
+									}
+							}
+				
+	  			//print out results if there are any
+				if (crafts_found)
+					{
+						sprintf (craft_output,
+							 "   You realize that you could make use of this item in the following craft%s: %s.",
+							 crafts_found != 1 ? "s" : "", craft_buf);
+						reformat_string (craft_output, &p);
+						sprintf (craft_output, "\n%s", p);
+						mem_free (p); // char*;
+						p = 0;
+						send_to_char(craft_output, ch);
+					}
+				
+				} //if (mode == 15) crafts display only
+			
       for (enchantment = i->enchantments; enchantment;
 	   enchantment = enchantment->next)
 	{
@@ -3328,10 +3424,14 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 		    sprintf (buf, "<carried in right hand>  ");
 		}
 	      else
-		sprintf (buf, "<carried on back>        ");
+								{
+									sprintf (buf, "<carried on back>        ");
+								}
+								
 	      send_to_char (buf, ch);
 	      show_obj_to_char (i->right_hand, ch, 1);
-	    }
+						}//if (i->right_hand)
+						
 	  if (i->left_hand)
 	    {
 	      if (!IS_SET (i->act, ACT_MOUNT))
@@ -3347,11 +3447,13 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 		    sprintf (buf, "<carried in left hand>   ");
 		}
 	      else
-		sprintf (buf, "<carried on back>        ");
+								{
+									sprintf (buf, "<carried on back>        ");
+								}
 
 	      send_to_char (buf, ch);
 	      show_obj_to_char (i->left_hand, ch, 1);
-	    }
+						} //if (i->left_hand)
 
 	  if (i->equip && (i->left_hand || i->right_hand))
 	    send_to_char ("\n", ch);
@@ -3373,10 +3475,11 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 		send_to_char ("#2something#0\n", ch);
 
 	      found = true;
-	    }
-	}
+						}//for (location = 0
+				}//else if (i != ch)
     }
 
+/**This may never be called. Not sure what it is for **/
   else if (mode == 3)
     {
       if (CAN_SEE (ch, i))
@@ -3385,6 +3488,8 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	  act ("$N", false, ch, 0, i, TO_CHAR);
 	}
     }
+ /****************/
+ return;
 }
 
 void

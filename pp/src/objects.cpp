@@ -5413,8 +5413,10 @@ delayed_skin_new3 (CHAR_DATA * ch)
 
   if (skill_use (ch, SKILL_SKIN, 0))
     {
-//A corpse taht is WILL_SKIN has a negative o.od.value[2], See make-corpse() for details . We must adjust to get a vnum we can load. 
+
+//A corpse taht is WILL_SKIN has a negative o.od.value[2], See make-corpse() for details . We must adjust to get a vnum we can load?
       if (!(skin = load_object (corpse->o.od.value[2])))
+
 	{
 	  send_to_char ("Problem...please contact an immortal.\n", ch);
 	  return;

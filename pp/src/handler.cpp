@@ -1055,8 +1055,9 @@ equip_char (CHAR_DATA * ch, OBJ_DATA * obj, int pos)
   if (ch == 0)
     {
       sprintf (buf,
-	       "#1OBJECT MORPHING BUG! NULL ch pointer. Crash averted. Object vnum %d.#0\n",
-	       obj->nVirtual);
+	       "#1OBJECT MORPHING BUG! NULL ch pointer. Crash averted. Object vnum %d in room %d.#0\n",
+	       obj->nVirtual,
+	       obj->in_room);
       send_to_gods (buf);
       system_log (buf, true);
       return;
@@ -1065,8 +1066,8 @@ equip_char (CHAR_DATA * ch, OBJ_DATA * obj, int pos)
   if (pos < 0)
     {
       sprintf (buf,
-	       "#1OBJECT MORPHING BUG! Crash averted. Position %d, vnum %d, character %s.#0\n",
-	       pos, obj->nVirtual, ch->tname);
+	       "#1OBJECT MORPHING BUG! Crash averted. Position %d, vnum %d, character %s in room %d.#0\n",
+	       pos, obj->nVirtual, ch->tname, obj->in_room);
       send_to_gods (buf);
       system_log (buf, true);
       return;
@@ -4485,16 +4486,6 @@ The new mob will take the best skill level between his old skill and the new ski
 
 /******** objects and equip for all ***/
 
-	for (jdex = 1; jdex < MAX_WEAR; jdex++)
-		{
-		if (get_equip (ch, jdex))
-			{
-			nobj = unequip_char (ch, jdex);
-			obj_to_char (nobj, newMob);
-			equip_char (newMob, nobj, jdex);
-			}
-		}
-	
 	if (ch->right_hand)
 		{
 		nobj = ch->right_hand;
@@ -4513,9 +4504,20 @@ The new mob will take the best skill level between his old skill and the new ski
 		newMob->left_hand = nobj;
 		}
 	
+	for (jdex = 1; jdex < MAX_WEAR; jdex++)
+		{
+		if (get_equip (ch, jdex))
+			{
+			nobj = unequip_char (ch, jdex);
+			obj_to_char (nobj, newMob);
+			equip_char (newMob, nobj, jdex);
+			}
+		}
+	
 	newMob->act |= ACT_STAYPUT;
-	char_to_room (newMob, troom);
 	extract_char (ch);
+	char_to_room (newMob, troom);
+	
 
 }
 

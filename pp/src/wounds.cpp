@@ -938,9 +938,11 @@ Really good healers can make any kit work better, and can heal more points than 
       {
         if (mode)
 					{
-						wound->healerskill = ch->skills[SKILL_HEALING];
-						if (kit->o.od.value[1])
-							wound->healerskill += kit->o.od.value[1]*2;
+						//wound->healerskill = ch->skills[SKILL_HEALING];
+						//if (kit->o.od.value[1])
+						//	wound->healerskill += kit->o.od.value[1]*2;
+						/** To show that this is an expertly treated wound **/
+						wound->healerskill = 71;
 						if (wound->infection)
 							wound->infection = -1;
 						if (kit->o.od.value[3])
@@ -957,9 +959,11 @@ Really good healers can make any kit work better, and can heal more points than 
 					}
         else
 					{
-						wound->healerskill = ch->skills[SKILL_HEALING];
-						if (kit->o.od.value[1])
-							wound->healerskill += kit->o.od.value[1]*2;
+						//wound->healerskill = ch->skills[SKILL_HEALING];
+						//if (kit->o.od.value[1])
+						//	wound->healerskill += kit->o.od.value[1]*2;
+						/** To show that this is an expertly treated wound **/
+						wound->healerskill = 71;
 						if (wound->infection)
 							wound->infection = -1;
 						if (kit->o.od.value[3])
@@ -978,6 +982,8 @@ Really good healers can make any kit work better, and can heal more points than 
 								sprintf (buf2,
 									 "$n treats and dresses the wound expertly.");
 							  adjust_wound (tch, wound, -2);
+							  /** To show that this is an expertly treated wound **/
+							  wound->healerskill = 71;
 							}
 						act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
 						act (buf2, false, ch, 0, tch, TO_VICT | _ACT_FORMAT);
@@ -992,9 +998,11 @@ Normal healers can use a kit and heal points back to the wound, but not as effec
       {
         if (mode)
 					{
-						wound->healerskill = ch->skills[SKILL_HEALING];
-						if (kit->o.od.value[1])
-							wound->healerskill += kit->o.od.value[1];
+						//wound->healerskill = ch->skills[SKILL_HEALING];
+						//if (kit->o.od.value[1])
+						//	wound->healerskill += kit->o.od.value[1];
+						 /** To show that this is an adroitly treated wound **/
+							  wound->healerskill = 51;
 						if (wound->infection)
 							wound->infection = -1;
 						if (kit->o.od.value[3])
@@ -1005,15 +1013,21 @@ Normal healers can use a kit and heal points back to the wound, but not as effec
 								act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
 							}
 						else
+							{
 							sprintf (buf,
 								 "You treat and dress the wound skillfully.");
+								 /** To show that this is an adroitly treated wound **/
+							  wound->healerskill = 51;
+							}
 						act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
 					}
         else
 					{
-						wound->healerskill = ch->skills[SKILL_HEALING];
-						if (kit->o.od.value[1])
-							wound->healerskill += kit->o.od.value[1];
+						//wound->healerskill = ch->skills[SKILL_HEALING];
+						//if (kit->o.od.value[1])
+						//	wound->healerskill += kit->o.od.value[1];
+						 /** To show that this is an adroitly treated wound **/
+					  wound->healerskill = 51;
 						if (wound->infection)
 							wound->infection = -1;
 						if (kit->o.od.value[3])
@@ -1027,6 +1041,8 @@ Normal healers can use a kit and heal points back to the wound, but not as effec
 		    }
 		  else
 		    {
+							 /** To show that this is an adroitly treated wound **/
+					  		wound->healerskill = 51;
 		      sprintf (buf,
 			       "You treat and dress the wound skillfully.");
 		      sprintf (buf2,
