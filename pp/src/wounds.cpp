@@ -7,9 +7,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <stdio.h>
-#include <string>
 #include <string.h>
-#include <sstream>
 #include <ctype.h>
 
 #include "structs.h"
@@ -284,7 +282,6 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 	}
 
       else
-      	{
 	for (wound = ch->wounds; wound; wound = wound->next)
 	  {
 	    if (!wound->next)
@@ -295,11 +292,9 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 		break;
 	      }
 	  }
-				}
 
       wound->location = str_dup (location);
       wound->damage = impact;
-      
       if (type == 2 || type == 4)
 	wound->type = str_dup ("slash");
       else if (type == 0 || type == 1)
@@ -319,7 +314,6 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 
       wound->name = str_dup (name);
       wound->severity = str_dup (severity);
-      
       if (!str_cmp (severity, "severe") && !bleeding)
 	wound->bleeding = number (2, 3);
       else if (!str_cmp (severity, "grievous") && !bleeding)
@@ -332,7 +326,6 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 	wound->bleeding = bleeding;
       if (IS_SET (ch->act, ACT_NOBLEED))
 	wound->bleeding = 0;
-  
       wound->poison = poison;
       wound->infection = infection;
       wound->healerskill = 0;
@@ -351,7 +344,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 	  send_to_char (p, ch);
 	  mem_free (p);
 	}
-    } // if bloodloss
+    }
   else
     ch->damage += impact;
 
@@ -387,9 +380,9 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 		      command_interpreter (ch, reflex);
 		    }
 		}
-							} // for N n
-					} //if (range.first != range.second) 
-    	} //if (IS_NPC (ch) && ch->mob->cues)
+	    }
+	}
+    }
 
 
   if ((curdamage > ch->max_hit) && (IS_MORTAL (ch) || IS_NPC (ch)))
@@ -649,13 +642,6 @@ is_proper_kit (OBJ_DATA * kit, WOUND_DATA * wound)
 	return 1;
     }
 
-	if (!str_cmp (wound->location, "bloodloss") )
-    {
-      if (!IS_SET (kit->o.od.value[5], TREAT_BLEED))
-  			return 0;
-      else
-  			return 1;
-    }
   return 0;
 }
 
@@ -841,8 +827,6 @@ delayed_treatment (CHAR_DATA * ch)
   WOUND_DATA *wound, *next_wound;
   OBJ_DATA *kit;
   int mode = 0;
-  int roll = 0;
-  int treat_effect = 0;
   char *location;
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
@@ -895,32 +879,6 @@ delayed_treatment (CHAR_DATA * ch)
       return;
     }
 
-/**
-A roll is made against the skill level of the PC to determine how good or bad they are.
-
-A second skill_use check is then made to give the PC a chance to increase thier skill, although the result has no bearing on the code below.
-**/
-
-	roll = number (1, (SKILL_CEILING-10));
-	if (roll <= skill_level (ch, SKILL_HEALING, 0) - 15)
-		{
-    	treat_effect =  3;
-    }	
-  else if (roll <= skill_level (ch, SKILL_HEALING, 0) - 0)
-		{
-			treat_effect =  2;
-		}
-  else if (roll <= skill_level (ch, SKILL_HEALING, 0) + 10)
-		{
-			treat_effect =  1;
-		}
-  else
-		{
-			treat_effect = 0;
-		}
-    
-    skill_use (ch, SKILL_HEALING, 0);
-    
   for (wound = tch->wounds; wound; wound = next_wound)
     {
       next_wound = wound->next;
@@ -931,118 +889,45 @@ A second skill_use check is then made to give the PC a chance to increase thier 
 	  ((str_cmp (wound->severity, "minor")
 	    && str_cmp (wound->severity, "small")) || wound->infection))
 	{
-/***
-Really good healers can make any kit work better, and can heal more points than a normal healer.
-**/
-    if (treat_effect == 3)
-      {
-        if (mode)
-					{
-						//wound->healerskill = ch->skills[SKILL_HEALING];
-						//if (kit->o.od.value[1])
-						//	wound->healerskill += kit->o.od.value[1]*2;
-						/** To show that this is an expertly treated wound **/
-						wound->healerskill = 71;
-						if (wound->infection)
-							wound->infection = -1;
-						if (kit->o.od.value[3])
-							{
-								sprintf (buf,
-									 "You treat the wound expertly, making it look considerably better.");
-								adjust_wound (tch, wound, kit->o.od.value[3] * -2);
-								act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
-							}
-						else
-							sprintf (buf,
-								 "You treat and dress the wound expertly.");
-						act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
-					}
-        else
-					{
-						//wound->healerskill = ch->skills[SKILL_HEALING];
-						//if (kit->o.od.value[1])
-						//	wound->healerskill += kit->o.od.value[1]*2;
-						/** To show that this is an expertly treated wound **/
-						wound->healerskill = 71;
-						if (wound->infection)
-							wound->infection = -1;
-						if (kit->o.od.value[3])
-							{
-								sprintf (buf,
-									 "You treat the wound expertly, making it look considerably better.");
-								sprintf (buf2,
-									 "$n treats the wound expertly, making it look considerably better.");
-								adjust_wound (tch, wound, kit->o.od.value[3] * -2);
-								act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
-							}
-						else
-							{
-								sprintf (buf,
-									 "You treat and dress the wound expertly.");
-								sprintf (buf2,
-									 "$n treats and dresses the wound expertly.");
-							  adjust_wound (tch, wound, -2);
-							  /** To show that this is an expertly treated wound **/
-							  wound->healerskill = 71;
-							}
-						act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
-						act (buf2, false, ch, 0, tch, TO_VICT | _ACT_FORMAT);
-					}
-        wound->lasthealed = time (0);
-      }
-      
-/***
-Normal healers can use a kit and heal points back to the wound, but not as effectively as better healers.
-**/      
-      else if (treat_effect == 2)
-      {
-        if (mode)
-					{
-						//wound->healerskill = ch->skills[SKILL_HEALING];
-						//if (kit->o.od.value[1])
-						//	wound->healerskill += kit->o.od.value[1];
-						 /** To show that this is an adroitly treated wound **/
-							  wound->healerskill = 51;
-						if (wound->infection)
-							wound->infection = -1;
-						if (kit->o.od.value[3])
-							{
-								sprintf (buf,
-									 "You treat the wound adroitly, making it look  better.");
-								adjust_wound (tch, wound, kit->o.od.value[3] * -1);
-								act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
-							}
-						else
-							{
-							sprintf (buf,
-								 "You treat and dress the wound skillfully.");
-								 /** To show that this is an adroitly treated wound **/
-							  wound->healerskill = 51;
-							}
-						act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
-					}
-        else
-					{
-						//wound->healerskill = ch->skills[SKILL_HEALING];
-						//if (kit->o.od.value[1])
-						//	wound->healerskill += kit->o.od.value[1];
-						 /** To show that this is an adroitly treated wound **/
-					  wound->healerskill = 51;
-						if (wound->infection)
-							wound->infection = -1;
-						if (kit->o.od.value[3])
-							{
-								sprintf (buf,
-									 "You treat the wound adroitly, making it look better.");
-								sprintf (buf2,
-									 "$n treats the wound adroitly, making it look better.");
+	  if (skill_use (ch, SKILL_HEALING, 0))
+	    {
+	      if (mode)
+		{
+		  wound->healerskill = ch->skills[SKILL_HEALING];
+		  if (kit->o.od.value[1])
+		    wound->healerskill += kit->o.od.value[1];
+		  if (wound->infection)
+		    wound->infection = -1;
+		  if (kit->o.od.value[3])
+		    {
+		      sprintf (buf,
+			       "You treat the wound adroitly, making it look considerably better.");
+		      adjust_wound (tch, wound, kit->o.od.value[3] * -1);
+		      act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
+		    }
+		  else
+		    sprintf (buf,
+			     "You treat and dress the wound skillfully.");
+		  act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
+		}
+	      else
+		{
+		  wound->healerskill = ch->skills[SKILL_HEALING];
+		  if (kit->o.od.value[1])
+		    wound->healerskill += kit->o.od.value[1];
+		  if (wound->infection)
+		    wound->infection = -1;
+		  if (kit->o.od.value[3])
+		    {
+		      sprintf (buf,
+			       "You treat the wound adroitly, making it look considerably better.");
+		      sprintf (buf2,
+			       "$n treats the wound adroitly, making it look considerably better.");
 		      adjust_wound (tch, wound, kit->o.od.value[3] * -1);
 		      act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
 		    }
 		  else
 		    {
-							 /** To show that this is an adroitly treated wound **/
-					  		wound->healerskill = 51;
 		      sprintf (buf,
 			       "You treat and dress the wound skillfully.");
 		      sprintf (buf2,
@@ -1053,11 +938,7 @@ Normal healers can use a kit and heal points back to the wound, but not as effec
 		}
 	      wound->lasthealed = time (0);
 	    }
-
-/**
-Poor healers try hard, but they can't do much more than stop the bleeding and sort of make the wound look better. At least they don't cause infections.
-**/
-      else if (treat_effect == 1)
+	  else
 	    {
 	      if (mode)
 		{
@@ -1078,42 +959,6 @@ Poor healers try hard, but they can't do much more than stop the bleeding and so
 		}
 	      wound->lasthealed = time (0);
 	    }
-      
-/***
-Bad healers don't know how to use the kits and cause damage instead of healing it, and preventing better healers from fixing it until the wound needs treatment again. Additionally, they have a chance to cause infections
-**/         
-    else 
-      {
-        if (mode)
-					{
-						sprintf (buf,
-							 "Your attentions seem to make the wound worse.");
-						act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
-						wound->healerskill = -1;
-					}
-        else
-					{
-						sprintf (buf,
-							 "Your attentions seem to make the wound worse.");
-						sprintf (buf2,
-							 "$n's attentions to your wound seems to make the wound worse.");
-						act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
-						act (buf2, false, ch, 0, tch, TO_VICT | _ACT_FORMAT);
-						wound->healerskill = -1;
-					}
-//Make the wound worse, but not enough to kill the player				
-					if ((ch->damage + 3) >= ch->max_hit)
-						adjust_wound (tch, wound, 2);
-					else if ((ch->damage + 2) >= ch->max_hit)
-						adjust_wound (tch, wound, 1);
-						
-//50% chance to cause infections						
-					if (!wound->infection && dice(1, 10) <= 5)
-						wound->infection = WOUND_INFECTIONS;
-						
-					wound->lasthealed = time (0);
-      }
-
 	  wound->bleeding = 0;
 	  wound->bindskill = 0;
 	  break;
@@ -1433,13 +1278,13 @@ do_treat (CHAR_DATA * ch, char *argument, int cmd)
   else
     {
       send_to_char
-  ("You need to have some sort of remedy handy to treat someone.\n", ch);
+	("You need to have a healer's kit handy to treat someone.\n", ch);
       return;
     }
 
   if (kit->o.od.value[0] <= 0)
     {
-      send_to_char ("That remedy no longer contains any useful materials.\n",
+      send_to_char ("That kit no longer contains any useful materials.\n",
 		    ch);
       return;
     }
@@ -1694,10 +1539,6 @@ expand_wound_loc (char *location)
 
 }
 
-/************************
-*  mode = 0  Shows other's wounds
-*  mode = 1  Shows self wounds
-**************************/
 char *
 show_wounds (CHAR_DATA * ch, int mode)
 {
@@ -1767,7 +1608,6 @@ show_wounds (CHAR_DATA * ch, int mode)
 	sprintf (buf4, "and a ");
       else
 	sprintf (buf4, "a ");
-  
       if (mode == 0)
 	{
 	  if (wound->bleeding > 0 && wound->bleeding <= 3)
@@ -1794,14 +1634,13 @@ show_wounds (CHAR_DATA * ch, int mode)
 		}
 	    }
 	}
-				
       strcat (buf, buf4);
       if (mode == 0 && wound->bindskill > 1)
 	{
 	  sprintf (buf4, "wound on the %s",
 		   expand_wound_loc (wound->location));
 	}
-      else //mode is not 0 or bindskill <=1
+      else
 	{
 	  sprintf (buf4, "%s %s on the %s", wound->severity, wound->name,
 		   expand_wound_loc (wound->location));
@@ -1892,24 +1731,19 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   char buf3[MAX_STRING_LENGTH];
-  char arg[AVG_STRING_LENGTH]={'\0'};
+  char arg[AVG_STRING_LENGTH];
   WOUND_DATA *wound;
   CHAR_DATA *tch = NULL, *xch = NULL;
-	AFFECTED_TYPE *af, *next_affect = NULL;
-	
-// get the target to diagnose
 
   if (argument && *argument)
     {
       one_argument (argument, arg);
     }
-  else
+  else if (!IS_MORTAL (ch))
     {
-      sprintf (arg, "%s", "self");
+      strcat (arg, "self");
     }
 
-
-//do they exist and are they visible?
   if (!IS_MORTAL (ch))
     {
       if (!(tch = get_char_room_vis (ch, arg)))
@@ -1925,34 +1759,9 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 		loaded_char = 1;
 	    }
 	}
-    }
-  else
-  	{
-  		tch = get_char_room_vis (ch, arg);
-  		if (!tch)
-  			{
-  				send_to_char ("You don't see them.\n", ch);
-          return;
-    		}
-  	}
-  
-  if (!IS_MORTAL(ch) || (ch->skills[SKILL_HEALING] && !(ch->fighting)))
-    {
-    
-//Immortals/healers see different amounts of information
-//Healers who are fighting, don't get the extra info
 
-// header info
       send_to_char ("\n", ch);
-       if (IS_MORTAL(ch))
-        {
-          sprintf (buf, "%s's wounds:", tch->short_descr);
-        }
-      else
-        {
       sprintf (buf, "%s's wounds:", tch->tname);
-        }
-        
       *buf = toupper (*buf);
       send_to_char (buf, ch);
       *buf2 = '\0';
@@ -1966,100 +1775,52 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("\n", ch);
       send_to_char (buf2, ch);
 
-//Begin wound listing
       for (wound = tch->wounds; wound; wound = wound->next)
 	{
 	  if (wound == tch->wounds)
 	    send_to_char ("\n", ch);
 	  damage = wound->damage;
 	  totdam += damage;
-          
-          sprintf (buf3, "A %s %s on the %s.",
-            wound->severity,
-            wound->name,
-            expand_wound_loc (wound->location));
-          
+	  sprintf (buf3, "A %s %s on the %s.", wound->severity, wound->name,
+		   expand_wound_loc (wound->location));
 	  pad_buffer (buf3, 45);
-
-//Immortals get to see points of damage, healers don't
-
-          if (!IS_MORTAL(ch))
-            {
 	  sprintf (buf2, "-> #1Points: %d.#0", damage);
-            }
-          else
-            {
-              sprintf (buf2, " -> ");
-            }
-          
-          if (wound->infection)
-            {
-              strcat (buf2, " #3(I)#0 ");
+	  if (wound->infection)
+	    {
+	      strcat (buf2, " #3(I)#0");
 	      infected = 1;
 	    }
-            
 	  if (wound->poison)
 	    {
-              strcat (buf2, " #2(P)#0 ");
+	      strcat (buf2, " #2(P)#0");
 	      poisoned = 1;
 	    }
-            
 	  if (wound->healerskill > 0)
 	    {
-            	if (wound->healerskill < 30)
-            		sprintf (buf2 + strlen(buf2), " #6(Poorly Tr)#0 ");
-            	else if (wound->healerskill >= 30 && wound->healerskill < 70)
-            		sprintf (buf2 + strlen(buf2), " #6(Tr)#0 ");
-            	else if (wound->healerskill >= 70)
-            		sprintf (buf2 + strlen(buf2), " #6(Expertly Tr)#0 ");
-                            
+	      sprintf (buf2, " #6(Tr:%d)#0 ", wound->healerskill);
 	      treated = 1;
 	    }
-          
-          	
-          if (wound->healerskill < 0 )
-            {
-              strcat (buf2, " #4(Tended)#0 ");
-              tended = 1;
-            }
-            
+	  if (wound->healerskill == -1)
+	    {
+	      strcat (buf2, " #4(Te)#0 ");
+	      tended = 1;
+	    }
 	  if (wound->bindskill > 0)
 	    {
-            if (wound->bindskill < 30)
-            	sprintf (buf2 + strlen(buf2), " #4(Poorly Bo)#0 ");
-            else if (wound->bindskill >= 30 && wound->bindskill < 70)
-            	sprintf (buf2 + strlen(buf2), " #4(Bo)#0 ");
-            else if (wound->bindskill >= 70)
-            	sprintf (buf2 + strlen(buf2), " #4(Expertly Bo)#0 ");
-              
-              bound = 1;
-            }
-          
-          if (wound->bindskill < 0)
-          	{
-          		sprintf (buf2 + strlen(buf2), " #4(Very Poorly Bo)#0 ");
-          	}
-            
- // only immortals get to see points of damage           
-          if (!IS_MORTAL(ch) && (wound->bleeding))
-						{
-							sprintf (buf, " #1(Bl:%d)#0 ", wound->bleeding);
-							bleeding = 1;
-							strcat (buf2, buf);
-						}
-					else if (wound->bleeding)
-						{
-							sprintf (buf, " #1(Bl)#0 ");
-							bleeding = 1;
-							strcat (buf2, buf);
-						}
-     
+	      sprintf (buf2, " #4(Bo:%d)#0 ", wound->bindskill);
+	      tended = 1;
+	    }
+	  if (wound->bleeding)
+	    {
+	      sprintf (buf, " #1(Bl:%d)#0", wound->bleeding);
+	      bleeding = 1;
+	      strcat (buf2, buf);
+	    }
 	  strcat (buf2, "\n");
 	  strcat (buf3, buf2);
 	  send_to_char (buf3, ch);
 	}
       *buf3 = '\0';
-      //extra bit of explanatin when needed
       if (infected)
 	strcat (buf3, "#3( I = Infected )#0 ");
       if (poisoned)
@@ -2072,36 +1833,17 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 	strcat (buf3, "#6( Tr = Treated )#0 ");
       if (tended)
 	strcat (buf3, "#4( Te = Tended ) #0 ");
-  
       if (infected || poisoned || bleeding || treated)
 	{
 	  send_to_char ("\n", ch);
 	  send_to_char (buf3, ch);
 	  send_to_char ("\n", ch);
 	}
-			for (af = tch->hour_affects; af; af = next_affect)
-    		{
-					if (af->type == AFFECT_LOST_CON)
-						{
-							sprintf (buf,
-								 "They have lost %d percent of their CON and will regain it in %d in-game hours.\n",
-								 (af->a.spell.sn/ch->con)*100,
-								 af->a.spell.duration);
-							send_to_char (buf, ch);
-							continue;
-						}
-					}
-  
-// Only immortals can see damage points    
-
-      if (!IS_MORTAL(ch))
-        {
       if (tch->damage)
 	{
 	  sprintf (buf3, "\n#5Bloodloss Points: %d.#0\n", tch->damage);
 	  send_to_char (buf3, ch);
 	}
-
       if (!tch->wounds && tch->damage <= 0)
 	{
 	  sprintf (buf3, "%s does not currently seem to be wounded.\n",
@@ -2119,17 +1861,13 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 		   tch->max_hit);
 	  send_to_char (buf3, ch);
 	}
-        }
-        
       if (loaded_char)
 	unload_pc (tch);
     }
-    
-//Non-healer mortals and healers who are fighting see this information    
   else
     {				// Japheth's Diagnose Additions, originally conceived by Zapata
 
-      if (!*arg || (tch != get_char_room_vis (ch, arg)))
+      if (!*arg || !(tch = get_char_room_vis (ch, arg)))
 	{
 	  if (ch->fighting)
 	    {
@@ -2137,7 +1875,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 	    }
 	  else
 	    {
-              tch = get_char_room_vis (ch, "self");
+	      tch = ch;
 	    }
 	}
 
@@ -2150,7 +1888,6 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  send_to_char (" #6(grouped)#0", ch);
 	}
-
       if (IS_SUBDUEE (tch))
 	{
 	  if (tch->subdue == ch)
@@ -2200,7 +1937,6 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 	sprintf (buf, "%s appears seriously injured.\n\n", HSSH (tch));
       else if (totdam >= tch->max_hit * .8335)
 	sprintf (buf, "%s appears close to death.\n\n", HSSH (tch));
-
       if (totdam)
 	{
 	  *buf = toupper (*buf);
@@ -2210,24 +1946,10 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
       if (tch->wounds || tch->lodged)
 	{
 	  sprintf (buf, "%s", show_wounds (tch, 0));
-/****** Japheth strip of minor and small for fighting **********/
-			if (ch->fighting)
-				{
-					sprintf(buf, strip_small_minor(buf, ch));
-					reformat_string (buf, &p);
-					send_to_char (p, ch);
-					mem_free (p);
-					p = NULL;
-				}
-			else
-				{
-					reformat_string (buf, &p);
-					send_to_char (p, ch);
-					mem_free (p);
-					p = NULL;
-				}
-/*********** end Japheth strip of minor and small ***************/
-         
+	  reformat_string (buf, &p);
+	  send_to_char (p, ch);
+	  mem_free (p);
+	  p = NULL;
 	  send_to_char ("\n", ch);
 	}
       else
@@ -2265,9 +1987,8 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 		    {		// Already a first word, but no buf2, make one
 		      sprintf (buf2, "%s", char_short (xch));
 		    }
-                }//xch->fighting == tch
-            } //for (xch = ch->room->people
-            
+		}
+	    }
 	  if (buf2[0])
 	    {
 	      sprintf (buf + strlen (buf), " and %s.#0", buf2);
@@ -2277,10 +1998,12 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 	      sprintf (buf + strlen (buf), ".#0");
 	    }
 	  send_to_char (buf, ch);
-        } //if (tch->fighting
+	}
       return;
 
-    }//end Jap and Zap additions
+/*	  	  send_to_char ("The physician code has not yet been implemented.\n", ch);
+	  	  return; */
+    }
 }
 
 char *
@@ -2945,7 +2668,31 @@ offline_healing (CHAR_DATA * ch, int since)
     }
 }
 
+/*
+	if ( ch->right_hand && GET_ITEM_TYPE (ch->right_hand) == ITEM_HEALER_KIT )
+		kit = ch->right_hand;
+	else if ( ch->left_hand && GET_ITEM_TYPE (ch->left_hand) == ITEM_HEALER_KIT )
+		kit = ch->left_hand;
+	else {
+		send_to_char ("You need to have a healer's kit handy to treat someone.\n", ch);
+		return;
+	}
 
+	if ( kit->o.od.value[0] <= 0 ) {
+		send_to_char ("That kit no longer contains any useful materials.\n", ch);
+		return;
+	}
+
+	if ( kit->o.od.value[2] && kit->o.od.value[2] > ch->skills [SKILL_HEALING] ) {
+		send_to_char ("You do not have the skill required to employ this remedy.\n", ch);
+		return;
+	}
+
+	if ( ch->right_hand && ch->left_hand ) {
+		send_to_char ("You'll need one hand free to treat someone.\n", ch);
+		return;
+	}
+*/
 
 //////////////////////////////////////////////////////////////////////
 //
@@ -2957,7 +2704,6 @@ void
 char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 {
   int time = 0;
-  int heal_adj = 1;
   short nHasClothProp = 0;
   CHAR_DATA *pTargetActor = NULL;
   WOUND_DATA *pWound = NULL;
@@ -2986,30 +2732,25 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 
   // Check for binding cloth in either hand
 
-  if ((pClothProp = thisPtr->right_hand)
-    		&& ((strstr (pClothProp->name, "TEXTILE") != NULL) ||
-    			(pClothProp->obj_flags.type_flag == ITEM_HEALER_KIT))
-      || (pClothProp = thisPtr->left_hand)
-    		&& ((strstr (pClothProp->name, "TEXTILE") != NULL) ||
-    			(pClothProp->obj_flags.type_flag == ITEM_HEALER_KIT)))
+  if (((pClothProp = thisPtr->right_hand)
+       && strstr (pClothProp->name, "TEXTILE") != NULL)
+      || ((pClothProp = thisPtr->left_hand)
+	  && strstr (pClothProp->name, "TEXTILE") != NULL))
     {
-    
-    if (GET_ITEM_TYPE (pClothProp) == ITEM_HEALER_KIT)
-    	{
-    		nHasClothProp = pClothProp->o.od.value[1];
-    	}
-    else //not healing kit, so it is TEXTILE
-    	{
-    		nHasClothProp = 1;
-    	}
-    	
+      switch (GET_ITEM_TYPE (pClothProp))
+	{
+	case ITEM_HEALER_KIT:
+	  nHasClothProp = 5 + pClothProp->o.od.value[1];
+	  break;
+	case ITEM_CLOTH:
+	case ITEM_WORN:
+	  nHasClothProp = 1;
+	  break;
+	default:
+	  nHasClothProp = 0;
+	  break;
+	}
     }
-   else  //no cloth item available
-   	{
-    	nHasClothProp = 0;
-   	}
-  
-    
 
   // Check for target N/PC keyword. If none, treat self.
 
@@ -3061,14 +2802,9 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 
   // Show everyone the binding has begun
 
-	if (IS_NPC(thisPtr)) //NPCs carry around virtual bandages
-		nHasClothProp = 1;
-		
   if (pTargetActor != thisPtr)
     {
 
-			if (nHasClothProp != 0)
-				{
       act ("You crouch beside $N, carefully beginning to bind $S wounds.",
 	   false, thisPtr, 0, pTargetActor, TO_CHAR | _ACT_FORMAT);
       act ("$n crouches beside $N, carefully beginning to bind $S wounds.",
@@ -3076,20 +2812,9 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
       act ("$n crouches beside you, carefully beginning to bind your wounds.",
 	   false, thisPtr, 0, pTargetActor, TO_VICT | _ACT_FORMAT);
     }
-     	else  //applying pressure on wound
-     	{
-     	act ("You crouch beside $N, trying to stop $S's bleeding.",
-				 false, thisPtr, 0, pTargetActor, TO_CHAR | _ACT_FORMAT);
-					act ("$n crouches beside $N, trying to stop $S's bleeding.",
-				 false, thisPtr, 0, pTargetActor, TO_NOTVICT | _ACT_FORMAT);
-					act ("$n crouches beside you, trying to stop your bleeding.",
-				 false, thisPtr, 0, pTargetActor, TO_VICT | _ACT_FORMAT);
-     	}
-    }
   else
     {
-			if (nHasClothProp != 0)
-				{
+
       act
 	("You slowly begin administering aid to your wounds, attempting to stem the bleeding.",
 	 false, thisPtr, 0, 0, TO_CHAR | _ACT_FORMAT);
@@ -3098,33 +2823,29 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 	 false, thisPtr, 0, 0, TO_ROOM | _ACT_FORMAT);
     }
 
-   	else  //applying pressure on wound
-			{
-				act
-				("You apply pressure to your wounds, attempting to stem the bleeding.",
-				 false, thisPtr, 0, 0, TO_CHAR | _ACT_FORMAT);
-						act
-				("$n apply pressure to $s wounds, attempting to stem the bleeding.",
-				 false, thisPtr, 0, 0, TO_ROOM | _ACT_FORMAT);
-			}
-    }
-
   thisPtr->flags |= FLAG_BINDING;
 
 
   // Prepare delay callback
-	if (thisPtr->skills[SKILL_HEALING]
-      || thisPtr->skills[SKILL_EMPATHIC_HEAL])
-  	heal_adj =  (number (1, 2));
-  else
-  	heal_adj =  (number (2,3));
-  	
+
   thisPtr->delay_type = DEL_BIND_WOUNDS;
   thisPtr->delay_ch = pTargetActor;
-  
-  thisPtr->delay = time * heal_adj;
-  thisPtr->delay = thisPtr->delay - nHasClothProp;
-  
+  thisPtr->delay =
+    time *
+    ((thisPtr->skills[SKILL_HEALING]
+      || thisPtr->skills[SKILL_EMPATHIC_HEAL]) ? (number (1, 2)) : (number (2,
+									    3)));
+  switch (nHasClothProp)
+    {
+    case 0:
+      break;			// no change in delay if there is no cloth
+    case 1:
+      thisPtr->delay = thisPtr->delay * 3 / 4;
+      break;			// 25% bonus to delay with regular cloth
+    default:
+      thisPtr->delay = thisPtr->delay / 2;
+      break;			// 50% bonus to bandages
+    }
   thisPtr->delay_info1 = nHasClothProp;
 }
 
@@ -3137,7 +2858,6 @@ delayed_bind (CHAR_DATA * thisPtr)
   WOUND_DATA *pWound = NULL;
   OBJ_DATA *pClothProp = NULL;
 
-	
   thisPtr->flags &= ~FLAG_BINDING;
 
   // If we reach this point without a target, bail
@@ -3153,44 +2873,37 @@ delayed_bind (CHAR_DATA * thisPtr)
       return;
     }
 
-  // Check again for binding agent in either hand
+  // Check again for binding cloth in either hand
 
-  if ((pClothProp = thisPtr->right_hand)
-    		&& ((strstr (pClothProp->name, "TEXTILE") != NULL) ||
-    			(pClothProp->obj_flags.type_flag == ITEM_HEALER_KIT))
-      || (pClothProp = thisPtr->left_hand)
-    		&& ((strstr (pClothProp->name, "TEXTILE") != NULL) ||
-    			(pClothProp->obj_flags.type_flag == ITEM_HEALER_KIT)))
+  if (((pClothProp = thisPtr->right_hand)
+       && strstr (pClothProp->name, "TEXTILE") != NULL)
+      || ((pClothProp = thisPtr->left_hand)
+	  && strstr (pClothProp->name, "TEXTILE") != NULL))
+    {
+      switch (GET_ITEM_TYPE (pClothProp))
+	{
+	case ITEM_HEALER_KIT:
+	  nHasClothProp = 5 + pClothProp->o.od.value[1];
+	  break;
+	case ITEM_CLOTH:
+	case ITEM_WORN:
+	  nHasClothProp = 1;
+	  break;
+	default:
+	  nHasClothProp = 0;
+	  break;
+	}
+    }
 
-		{
-    
-			if (GET_ITEM_TYPE (pClothProp) == ITEM_HEALER_KIT)
-				{
-					nHasClothProp = pClothProp->o.od.value[1];
-				}
-			else //not healing kit, so it is TEXTILE
-				{
-					nHasClothProp = 1;
-				}
-				
-			}
-		 else  //no cloth item available
-			{
-				nHasClothProp = 0;
-			}
+  // Go through the wounds and bind the bleeders
 
-	if (IS_NPC(thisPtr)) //NPCs carry around virtual bandages
-			nHasClothProp = 1;
-			
-  // Go through the wounds and bind the bleeders if we have a BINDING of some sort
+  for (pWound = pTargetActor->wounds; pWound; pWound = pWound->next)
+    {
 
-	if (nHasClothProp != 0)
-		{
-  		for (pWound = pTargetActor->wounds; pWound; pWound = pWound->next)
-    		{
-		      if (pWound->bleeding)
-  					{
+      if (pWound->bleeding)
+	{
 	  bIsTargetActorBound = 1;
+
 	  pWound->bleeding = 0;
 	  pWound->lastbound = time (0);
 
@@ -3200,73 +2913,40 @@ delayed_bind (CHAR_DATA * thisPtr)
 		 thisPtr->skills[SKILL_EMPATHIC_HEAL]);
 
 	  // bonus for having both helpful skills
-    					pWound->bindskill += (thisPtr->skills[SKILL_HEALING] &&
-    							thisPtr->skills[SKILL_EMPATHIC_HEAL]) 
-						      ? (((100 - pWound->bindskill) *
-						      	MIN (thisPtr->skills[SKILL_HEALING],
-             				thisPtr->skills[SKILL_EMPATHIC_HEAL])) /100)
-             			: 1;
+	  pWound->bindskill += (thisPtr->skills[SKILL_HEALING]
+				&& thisPtr->
+				skills[SKILL_EMPATHIC_HEAL])
+	    ? (((100 -
+		 pWound->bindskill) * MIN (thisPtr->skills[SKILL_HEALING],
+					   thisPtr->
+					   skills[SKILL_EMPATHIC_HEAL])) /
+	       100) : 1;
 
 	  // bonus for having cloth
 	  pWound->bindskill += nHasClothProp * 2;
 	}
     }
-			}
-			
- 
-  // Destroy the plain Cloth, if any. Deduct a use from Remedy type objects
 
-  if (nHasClothProp == 1 && (!IS_NPC(thisPtr)))
+  // Destroy the Cloth, if any
+
+  if (nHasClothProp)
     {
       extract_obj (pClothProp);
-    }
-  else if (nHasClothProp > 1 || nHasClothProp < 0)
-  	{
-  		pClothProp->o.od.value[0] -= 1;
-
-			if (pClothProp->o.od.value[0] <= 0)
-				{
-					send_to_char
-			("You realized you just used the last binding agent and resolve to get more.\n", thisPtr);
-					if (pClothProp->count > 1)
-						{
-							pClothProp->o.od.value[0] = vtoo (pClothProp->nVirtual)->o.od.value[0];
-							pClothProp->count -= 1;
-						}
-					else
-						extract_obj (pClothProp);
-				}
     }
 
   // Show the actors that binding occured
 
   if (pTargetActor != thisPtr)
     {
-    	if (nHasClothProp != 0)
-    		{
       act ("You finish your ministrations; $N's wounds are bound.", false,
 	   thisPtr, 0, pTargetActor, TO_CHAR | _ACT_FORMAT);
-					act ("$n finishes $s ministrations; $N wounds are bound.", false,
+      act ("$n finishes $s ministrations; $N's wounds are bound.", false,
 	   thisPtr, 0, pTargetActor, TO_NOTVICT | _ACT_FORMAT);
       act ("$n finishes $s ministrations; your wounds are bound.", false,
 	   thisPtr, 0, pTargetActor, TO_VICT | _ACT_FORMAT);
     }
-     	else
-				{
-						act ("You continue to apply pressure to $N's wounds.", false,
-					 thisPtr, 0, pTargetActor, TO_CHAR | _ACT_FORMAT);
-						act ("$n continues to apply pressure to $N wounds.", false,
-					 thisPtr, 0, pTargetActor, TO_NOTVICT | _ACT_FORMAT);
-						act ("$n continues to apply pressure to your wounds.", false,
-					 thisPtr, 0, pTargetActor, TO_VICT | _ACT_FORMAT);
-
-					}
-     	
-    }
 
   else
-    {
-    	if (nHasClothProp != 0)
     {
       act
 	("You finish binding your wounds, and have managed to stem the bleeding.",
@@ -3275,142 +2955,11 @@ delayed_bind (CHAR_DATA * thisPtr)
 	("$n finishes binding $s wounds, and has managed to stem the bleeding.",
 	 false, thisPtr, 0, 0, TO_ROOM | _ACT_FORMAT);
     }
-   		else
-				{
-					act
-			("You continue applying pressure to your wounds.",
-			 false, thisPtr, 0, 0, TO_CHAR | _ACT_FORMAT);
-					act
-			("$n continues to apply pressure to $s wounds.",
-			 false, thisPtr, 0, 0, TO_ROOM | _ACT_FORMAT);
-			 
-					}
-    }
-
-	if (nHasClothProp == 0)
-		{
-//they are still binding, so re-apply the flag
-			if (!IS_SET (thisPtr->flags, FLAG_BINDING))
-				thisPtr->flags |= FLAG_BINDING;
-			
-			thisPtr->delay_type = DEL_BIND_WOUNDS;
-			thisPtr->delay_ch = pTargetActor;
-			
-			thisPtr->delay = 5;
-			
-			thisPtr->delay_info1 = nHasClothProp;
-  
-		}	 		
-  // Clear delay for bind with cloth or kit
-	else
-		{
-		  thisPtr->delay_ch = NULL;
-  		thisPtr->delay_type = 0;
-  		thisPtr->delay = 0;
-  	}
-  
-}
 
 
-char * 
-strip_small_minor(char * wounds, CHAR_DATA * ch) 
-{
-	std::string woundstr, temp_string;
-    int jdex, kdex, temp_dex, rdex;
-    
-    
-    	woundstr = wounds;
-    	
-				if ((woundstr.find("moderate", 0) == std::string::npos) &&
-					(woundstr.find("severe", 0) == std::string::npos) &&
-					(woundstr.find("grievous", 0) == std::string::npos) &&
-					(woundstr.find("terrible", 0) == std::string::npos) &&
-					(woundstr.find("mortal", 0) == std::string::npos))
-					{
-						kdex = woundstr.find(" has ");
-						if (kdex != std::string::npos)
-							{
-								woundstr.erase(kdex);
-								woundstr.insert(kdex, " has no apparent wounds.");
-								return ((char *)woundstr.c_str());
-							}
-					}
-						
-				while ((woundstr.find("small", 0) != std::string::npos) || (woundstr.find("minor", 0) != std::string::npos))
-					{
-						if (woundstr.find("small", 0) == std::string::npos)
-							jdex = woundstr.find("minor", 0);
-						else
-							jdex = woundstr.find("small", 0); 		
-						
-						if (woundstr[jdex - 2] == 'a')
-							temp_dex = jdex;	//begining of substring to be removed
-						else //There may be something between the 'a' and the 'small/minor' like 'lightly bleeding' or 'gushing'
-							{
-								for (rdex = jdex; rdex > 0; rdex --)
-									{
-										if (woundstr.substr(rdex, 3) == " a ")
-											{
-												jdex = rdex + 3;
-												break;
-											}
-									}
-								temp_dex = jdex;	//begining of substring to be removed
-							}
+  // Clear delay
 
-						while (woundstr[jdex] != ',' && woundstr[jdex] != '.')
-							{
-								// Copy the sub-string into a temporary string and advance index
-								temp_string.push_back(woundstr[jdex]);
-								jdex++;
-							} // while (woundstr[jdex] != ','
-
-// deleting a string at the begining or in the middle							
-						if (woundstr[jdex] == ',')  
-							{
-								// We delete the string we don't want, including the preceding "a " and trailing space
-								temp_string.push_back(woundstr[jdex]);
-								temp_string = " a " + temp_string;
-								woundstr.erase(temp_dex - 2, temp_string.length()); 
-							}
-
-//Deleting the last segment in the string.		
-						else if (woundstr[jdex] == '.') // we are removing a string that is the end
-							{
-								// We delete the string we don't want, including the preceding "a "
-								temp_string = " a " + temp_string;
-								woundstr.erase(temp_dex - 2, temp_string.length());  
-								
-
-								kdex = woundstr.rfind(",");
-								if (kdex != std::string::npos)
-									{
-										woundstr.erase(kdex);	
-										woundstr.insert(woundstr.length(), ".");
-									}
-								
-								kdex = woundstr.rfind(",");
-								if (kdex != std::string::npos)
-									{
-										woundstr.replace(kdex, 2, ", and ");
-									}
-									
-							}
-	//Deal with two special cases							
-						kdex = woundstr.find(" has and ");
-						if (kdex != std::string::npos)
-							{
-								woundstr.erase(kdex+4, 4);	
-							}		
-						
-						kdex = woundstr.find(".");
-						if (kdex == std::string::npos)
-							{
-								woundstr.insert(woundstr.length(), ".");
-							}
-							
-						temp_string.clear();
-					}
-      
-    return ((char *)woundstr.c_str());
+  thisPtr->delay_ch = NULL;
+  thisPtr->delay_type = 0;
+  thisPtr->delay = 0;
 }

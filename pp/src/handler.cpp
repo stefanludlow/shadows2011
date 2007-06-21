@@ -1055,9 +1055,8 @@ equip_char (CHAR_DATA * ch, OBJ_DATA * obj, int pos)
   if (ch == 0)
     {
       sprintf (buf,
-	       "#1OBJECT MORPHING BUG! NULL ch pointer. Crash averted. Object vnum %d in room %d.#0\n",
-	       obj->nVirtual,
-	       obj->in_room);
+	       "#1OBJECT MORPHING BUG! NULL ch pointer. Crash averted. Object vnum %d.#0\n",
+	       obj->nVirtual);
       send_to_gods (buf);
       system_log (buf, true);
       return;
@@ -1066,8 +1065,8 @@ equip_char (CHAR_DATA * ch, OBJ_DATA * obj, int pos)
   if (pos < 0)
     {
       sprintf (buf,
-	       "#1OBJECT MORPHING BUG! Crash averted. Position %d, vnum %d, character %s in room %d.#0\n",
-	       pos, obj->nVirtual, ch->tname, obj->in_room);
+	       "#1OBJECT MORPHING BUG! Crash averted. Position %d, vnum %d, character %s.#0\n",
+	       pos, obj->nVirtual, ch->tname);
       send_to_gods (buf);
       system_log (buf, true);
       return;
@@ -4270,7 +4269,7 @@ load_dynamic_registry (void)
 void
 morph_mob (CHAR_DATA * ch)
 {
-	char nbuf[MAX_STRING_LENGTH] = {'\0'};
+	char buf[MAX_STRING_LENGTH];
 	CHAR_DATA *newMob = NULL;
 	OBJ_DATA *nobj;
 	int temp_vnum = 0;
@@ -4300,17 +4299,17 @@ morph_mob (CHAR_DATA * ch)
 	
 	if (temp_vnum <= 0) 
 		{
-		sprintf (nbuf, "Mob %d has a morph clock, but no morph Mobvnum\n",
+		sprintf (buf, "Mob %d has a morph clock, but no morph Mobvnum\n",
 ch->mob->nVirtual);
-		system_log (nbuf, true);
+		system_log (buf, true);
 		return;
 		}
 		
 		if (troom <= 0)
 		{
-		sprintf (nbuf, "Mob %d has a morph clock, and will morph to %d but there is an error with the room number\n",
+		sprintf (buf, "Mob %d has a morph clock, and will morph to %d but there is an error with the room number\n",
 ch->mob->nVirtual, ch->morphto);
-		system_log (nbuf, true);
+		system_log (buf, true);
 		return;
 		}
 		
@@ -4326,10 +4325,10 @@ ch->mob->nVirtual, ch->morphto);
 	
 	if (!newMob)
 		{
-		sprintf (nbuf, "Attempt to load target morph mob %d from mob %d failed\n",
+		sprintf (buf, "Attempt to load target morph mob %d from mob %d failed\n",
 ch->morphto, ch->mob->nVirtual);
-		system_log (nbuf, true);
-		send_to_gods(nbuf);
+		system_log (buf, true);
+		send_to_gods(buf);
 		return;
 		}
 		
@@ -4350,7 +4349,7 @@ morphtype = 2 will keep the same description, just change the skills
 		{
 			
 		newMob->flags = ch->flags;
-		
+		newMob->clans = ch->clans;
 		newMob->attack_type = ch->attack_type;
 		newMob->hit = ch->hit;
 		newMob->curse = ch->curse;
@@ -4378,6 +4377,8 @@ morphtype = 2 will keep the same description, just change the skills
 		newMob->tmp_str = ch->tmp_str;
 		newMob->tmp_wil = ch->tmp_wil;
 		
+		
+		
 		newMob->frame = ch->frame;
 		newMob->height = ch->height;
 		newMob->bmi = ch->bmi;
@@ -4391,6 +4392,8 @@ morphtype = 2 will keep the same description, just change the skills
 		newMob->cell_1 = ch->cell_1;
 		newMob->cell_2 = ch->cell_2;
 		newMob->cell_3 = ch->cell_3;
+		newMob->room = ch->room;
+  	newMob->shop = ch->shop;
   	newMob->in_room = ch->in_room;
 		newMob->was_in_room = ch->was_in_room;
 		newMob->last_room = ch->last_room;
@@ -4404,69 +4407,83 @@ morphtype = 2 will keep the same description, just change the skills
 		newMob->nightmare = ch->nightmare;
 		newMob->ppoints = ch->ppoints;
 
+		newMob->mount = ch->mount;
 		newMob->poison_type = ch->poison_type;
 		newMob->race = ch->race;
+		newMob->mob = ch->mob;
 		newMob->affected_by = ch->affected_by;
 		newMob->act = ch->act;
 					
-		if (ch->clans)
-			{
-			sprintf (nbuf, "%s", ch->clans);
-  		newMob->name = str_dup (nbuf);
-  		}		
-		
 		if (ch->name)
 			{
-			sprintf (nbuf, "%s", ch->name);
-  		newMob->name = str_dup (nbuf);
+			sprintf (buf, "%s", ch->name);
+			if (newMob->name)
+	    	mem_free (newMob->name);
+  		newMob->name = add_hash (buf);
   		}
   	
   	if (ch->tname)
 			{
-	  	sprintf (nbuf, "%s", ch->tname);
-  		newMob->tname = str_dup (nbuf);
+	  	sprintf (buf, "%s", ch->tname);
+			if (newMob->tname)
+	  	  mem_free (newMob->tname);
+  		newMob->tname = add_hash (buf);
   		}
   		
   	if (ch->short_descr)
 			{	
-  		sprintf (nbuf, "%s", ch->short_descr);
-  		newMob->short_descr = str_dup (nbuf);
+  		sprintf (buf, "%s", ch->short_descr);
+			if (newMob->short_descr)
+		    mem_free (newMob->short_descr);
+  		newMob->short_descr = add_hash (buf);
   		}
   	
   	if (ch->long_descr)
 			{	
-  		sprintf (nbuf, "%s", ch->long_descr);
-  		newMob->long_descr = str_dup (nbuf);
+  		sprintf (buf, "%s", ch->long_descr);
+			if (newMob->long_descr)
+	    	mem_free (newMob->long_descr);
+  		newMob->long_descr = add_hash (buf);
   		}
   	
   	if (ch->pmote_str)
 			{	
-  		sprintf (nbuf, "%s", ch->pmote_str);
-  		newMob->pmote_str = str_dup (nbuf);
+  		sprintf (buf, "%s", ch->pmote_str);
+			if (newMob->pmote_str)
+	    	mem_free (newMob->pmote_str);
+  		newMob->pmote_str = add_hash (buf);
 			}
 	
 		if (ch->voice_str)
 			{	
-  		sprintf (nbuf, "%s", ch->voice_str);
-  		newMob->voice_str = str_dup (nbuf);
+  		sprintf (buf, "%s", ch->voice_str);
+			if (newMob->voice_str)
+	  	  mem_free (newMob->voice_str);
+  		newMob->voice_str = add_hash (buf);
 			} 
 		
 		if (ch->description)
 			{	
-		  sprintf (nbuf, "%s", ch->description);
-  		newMob->description = str_dup (nbuf);
+		  sprintf (buf, "%s", ch->description);
+			if (newMob->description)
+	    	mem_free (newMob->description);
+  		newMob->description = add_hash (buf);
 			}
 			
 		if (ch->travel_str)
 			{	
-  		sprintf (nbuf, "%s", ch->travel_str);
-  		newMob->travel_str = str_dup (nbuf);
+  		sprintf (buf, "%s", ch->travel_str);
+			if (newMob->travel_str)
+	    	mem_free (newMob->travel_str);
+  		newMob->travel_str = add_hash (buf);
 			}
 			
 		if (ch->dmote_str)
 			{	
-  		sprintf (nbuf, "%s", ch->dmote_str);
-  		newMob->dmote_str = str_dup (nbuf);
+  		sprintf (buf, "%s", ch->dmote_str);
+			if (newMob->dmote_str)
+	    	mem_free (newMob->dmote_str);
+  		newMob->dmote_str = add_hash (buf);
 			}  	
 	
 		newMob->hour_affects = ch->hour_affects;
@@ -4486,6 +4503,16 @@ The new mob will take the best skill level between his old skill and the new ski
 
 /******** objects and equip for all ***/
 
+	for (jdex = 1; jdex < MAX_WEAR; jdex++)
+		{
+		if (get_equip (ch, jdex))
+			{
+			nobj = unequip_char (ch, jdex);
+			obj_to_char (nobj, newMob);
+			equip_char (newMob, nobj, jdex);
+			}
+		}
+	
 	if (ch->right_hand)
 		{
 		nobj = ch->right_hand;
@@ -4502,16 +4529,6 @@ The new mob will take the best skill level between his old skill and the new ski
 		nobj->equiped_by = newMob;
 		nobj->carried_by = newMob;
 		newMob->left_hand = nobj;
-		}
-	
-	for (jdex = 1; jdex < MAX_WEAR; jdex++)
-		{
-		if (get_equip (ch, jdex))
-			{
-			nobj = unequip_char (ch, jdex);
-			obj_to_char (nobj, newMob);
-			equip_char (newMob, nobj, jdex);
-			}
 		}
 	
 	newMob->act |= ACT_STAYPUT;

@@ -1298,9 +1298,11 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 	strcat (buffer, " (hidden from view)");
       if (IS_SET (obj->obj_flags.extra_flags, ITEM_VNPC))
 	strcat (buffer, " #6(vNPC)#0");
+      
       if (GET_ITEM_TYPE (obj) == ITEM_LIGHT &&
 	  obj->o.light.hours && obj->o.light.on)
 	strcat (buffer, " #1(lit)#0");
+
       strcat (buffer, "#0");
       reformat_string (buffer, &p);
       sprintf (buffer, "%s", p);
@@ -1313,6 +1315,16 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
       strcpy (buffer, "#2");
       strcat (buffer, obj_desc (obj));
       strcat (buffer, "#0");
+      if (IS_TABLE (obj))
+	{
+	  for (obj2 = obj->contains; obj2; obj2 = obj2->next_content)
+	    if (obj2->obj_flags.type_flag == ITEM_LIGHT && obj2->o.light.hours && obj2->o.light.on)
+	      {
+		strcat (buffer, " #1(Illuminated)#0");
+		continue;
+	      }
+	}
+
       reformat_string (buffer, &p);
       sprintf (buffer, "%s", p);
       mem_free (p); //char*
@@ -1722,8 +1734,16 @@ SUBCRAFT_HEAD_DATA *tcraft;
 
 		      first_seen = 0;
 
-		      sprintf (buffer + strlen (buffer), "   %s\n",
+		      sprintf (buffer + strlen (buffer), "   %s",
 			       OBJS (obj2, ch));
+			       
+			if (GET_ITEM_TYPE (obj2) == ITEM_LIGHT &&
+	  obj2->o.light.hours && obj2->o.light.on)
+				strcat (buffer + strlen (buffer), " #1(lit)#0\n");
+			else
+				strcat (buffer + strlen (buffer), "\n");
+	
+		      
 		    }
 		}
 
@@ -3249,9 +3269,6 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	  && (i->wounds || i->lodged))
 	{
 	  sprintf (buf2, "%s", show_wounds (i, 0));
-					if (ch->fighting || i->fighting)
-						sprintf (buf2, "%s", strip_small_minor(buf2, ch));
-			
 	  send_to_char ("\n", ch);
 	  strcat (buf3, buf2);
 	  act (buf3, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
@@ -3284,7 +3301,6 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	    list_obj_to_char (troom->contents, ch, 0, true);
 	}
 
-			
       for (enchantment = i->enchantments; enchantment;
 	   enchantment = enchantment->next)
 	{

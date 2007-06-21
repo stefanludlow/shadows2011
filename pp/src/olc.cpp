@@ -5808,25 +5808,9 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 		 ch);
 	      return;
 	    }
-      
-      else if (!str_cmp (argument, "bleed"))
-      {
-        if (!IS_SET (edit_obj->o.od.value[5], TREAT_BLEED))
-    {
-      edit_obj->o.od.value[5] |= TREAT_BLEED;
-      send_to_char
-        ("This healer's kit will now treat bleeding wounds.\n", ch);
-      return;
-    }
-        edit_obj->o.od.value[5] &= ~TREAT_BLEED;
-        send_to_char
-    ("This healer's kit will no longer treat bleeding wounds.\n",
-     ch);
-        return;
-      }
-    else
-      send_to_char
-        ("Please specify all, blunt, puncture, slash, burn, frost, or bleed.\n",
+	  else
+	    send_to_char
+	      ("Please specify all, blunt, puncture, slash, burn or frost.\n",
 	       ch);
 	  return;
 	}

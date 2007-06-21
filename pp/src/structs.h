@@ -107,8 +107,6 @@ typedef signed char shortint;
 #define TREAT_PUNCTURE		(1 << 3)
 #define TREAT_BURN		(1 << 6)
 #define TREAT_FROST		(1 << 7)
-#define TREAT_BLEED		(1 << 8)
-#define TREAT_INFECTION		(1 << 9) //for future expansion
 
 #define SEARCH_KEYWORD		1
 #define SEARCH_SDESC		2

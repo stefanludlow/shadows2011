@@ -263,7 +263,6 @@ point_update (void)
 
       *ch->short_descr = tolower (*ch->short_descr);
 
-//boats take damage
       if (IS_SET (ch->act, ACT_VEHICLE))
 	{
 	  if (room->sector_type == SECT_REEF)
@@ -289,7 +288,6 @@ point_update (void)
 	    }
 	}
 
-//Sleep
       if (GET_POS (ch) >= SLEEP)
 	{
 
@@ -379,7 +377,6 @@ point_update (void)
 	      MIN (GET_MOVE (ch) + move_gain (ch), GET_MAX_MOVE (ch));
 	}
 
-// Healing
       if (!ch)
 	continue;
 
@@ -414,7 +411,7 @@ point_update (void)
 	  
 	}
 
-// Stun recovery
+
       if (!ch)
 	continue;
 
@@ -435,7 +432,6 @@ point_update (void)
 	    }
 	}
 
-//regain consciousness
       if (!ch)
 	continue;
 
@@ -454,7 +450,6 @@ point_update (void)
 	    }
 	}
 
-//intoxication
       if (!ch)
 	continue;
 
@@ -470,7 +465,6 @@ point_update (void)
       else
 	reduceIntox++;
 
-//Application RPP cost
       if (!ch)
 	continue;
 
@@ -487,7 +481,6 @@ point_update (void)
 	    }
 	}
 
-//Remove New Player Flag
       if (!IS_NPC (ch) && IS_SET (ch->plr_flags, NEW_PLAYER_TAG))
 	{
 	  playing_time =
@@ -501,99 +494,74 @@ point_update (void)
 	    }
 	}
 
-// Bleeding
       if (!ch)
 	continue;
 
       for (wound = ch->wounds; wound; wound = next_wound)
 	{
 	  if (!ch->wounds)
-      			break;   // they aren't really wounded
-					
-					if (ch->delay_type == DEL_BIND_WOUNDS)
-						break;  //they are binding, so no bloodloss
-						
+	    break;
 	  next_wound = wound->next;
 	  int wound_damage = wound->damage;
 	  old_damage += wound_damage;
 	  new_damage += wound_damage;
 	  healing_time = real_time_passed (time (0) - wound->lasthealed, 0);
 	  bled_time = real_time_passed (time (0) - wound->lastbled, 0);
-    
 	  if (IS_MORTAL (ch) && bled_time.minute >= BLEEDING_INTERVAL
 	      && wound->bleeding)
 	    {
-							//ch->damage += wound->bleeding;
+	      ch->damage += wound->bleeding;
 	      wound->lastbled = time (0);
 	      if (wound->bleeding > 0 && wound->bleeding <= 3)
 		{
 		  sprintf (buf,
 			   "#1Blood continues to seep from a %s %s on your %s.#0",
-										 wound->severity,
-										 wound->name,
-										 expand_wound_loc (wound->location));
-									
+			   wound->severity, wound->name,
+			   expand_wound_loc (wound->location));
 		  sprintf (buf2,
 			   "Blood continues to seep from a %s %s on #5%s#0's %s.",
-										 wound->severity,
-										 wound->name,
-										 char_short (ch),
+			   wound->severity, wound->name, char_short (ch),
 			   expand_wound_loc (wound->location));
 		}
 	      else if (wound->bleeding > 3 && wound->bleeding <= 6)
 		{
 		  sprintf (buf, "#1Blood flows from a %s %s on your %s.#0",
-									wound->severity,
-									wound->name,
-									expand_wound_loc (wound->location));
-									
+			   wound->severity, wound->name,
+			   expand_wound_loc (wound->location));
 		  sprintf (buf2, "Blood flows from a %s %s on #5%s#0's %s.",
-									wound->severity,
-									wound->name,
-									char_short (ch),
+			   wound->severity, wound->name, char_short (ch),
 			   expand_wound_loc (wound->location));
 		}
 	      else if (wound->bleeding > 6 && wound->bleeding <= 9)
 		{
 		  sprintf (buf,
 			   "#1Blood flows heavily from a %s %s on your %s!#0",
-										 wound->severity,
-										 wound->name,
+			   wound->severity, wound->name,
 			   expand_wound_loc (wound->location));
 		  sprintf (buf2,
 			   "Blood flows heavily from a %s %s on #5%s#0's %s!",
-										 wound->severity,
-										 wound->name,
-										 char_short (ch),
+			   wound->severity, wound->name, char_short (ch),
 			   expand_wound_loc (wound->location));
 		}
 	      else if (wound->bleeding > 9)
 		{
-									sprintf (buf,
-									"#1Blood gushes from a %s %s on your %s!#0",
-									wound->severity,
-									wound->name,
-									expand_wound_loc (wound->location));
-									
-									sprintf (buf2,
-									"Blood gushes from a %s %s on #5%s#0's %s!",
-									wound->severity,
-									wound->name,
-									char_short (ch),
-									expand_wound_loc (wound->location));
-								}
-								
+		  sprintf (buf, "#1Blood gushes from a %s %s on your %s!#0",
+			   wound->severity, wound->name,
+			   expand_wound_loc (wound->location));
+		  sprintf (buf2, "Blood gushes from a %s %s on #5%s#0's %s!",
+			   wound->severity, wound->name, char_short (ch),
+			   expand_wound_loc (wound->location));
+		}
 	      act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	      act (buf2, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
-        
 	      if (IS_SET (ch->plr_flags, NEW_PLAYER_TAG))
-    						act ("#6To stop the bleeding before it's too late, type BIND.#0", false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-    						
+		act
+		  ("#6To stop the bleeding before it's too late, type BIND.#0",
+		   false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	      if (general_damage (ch, wound->bleeding))
 		continue;
 
 	    }
-      			
 	  int base = (get_affect (ch, MAGIC_AFFECT_REGENERATION)
 		      || ch->skills[SKILL_EMPATHIC_HEAL])
 	    ? BASE_SPECIAL_HEALING 
@@ -651,9 +619,11 @@ point_update (void)
 		    }
 		}
 	    }
-  }
 
-// Craft Delay
+
+
+	}
+
       if ((af = get_affect (ch, MAGIC_CRAFT_DELAY)))
 	{
 	  if (time (0) >= af->a.spell.modifier)

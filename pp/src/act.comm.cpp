@@ -152,7 +152,7 @@ do_ooc (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_pmote (CHAR_DATA * ch, char *argument, int cmd)
 {
-	char * result = NULL;
+
   char buf[MAX_STRING_LENGTH] = { '\0' };
 
   while (isspace (*argument))
@@ -174,19 +174,15 @@ do_pmote (CHAR_DATA * ch, char *argument, int cmd)
 
   else
     {
-      if (ch && argument)
-	{
 
-	result = swap_xmote_target (ch, argument, 2);
-          if(!result)
-	    return;
-	}
-     
-         sprintf (buf, "You pmote: %s", result);
+      if (*argument == '\'')
+	sprintf (buf, "You pmote: %s%s", char_short (ch), argument);
+      else
+	sprintf (buf, "You pmote: %s %s", char_short (ch), argument);
 
-      ch->pmote_str = add_hash (result);
+      ch->pmote_str = add_hash (argument);
 
-          act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+      act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
     }
 }
 
@@ -241,7 +237,6 @@ do_omote (CHAR_DATA * ch, char *argument, int cmd)
 
   char buf[AVG_STRING_LENGTH * 4] = { '\0' };
   char arg1[MAX_STRING_LENGTH] = { '\0' };
-  char * result = NULL;
   OBJ_DATA *obj = NULL;
 
   argument = one_argument (argument, arg1);
@@ -276,19 +271,15 @@ do_omote (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-	result = swap_xmote_target (ch, argument, 3);
-  if (!result)
-    return;
-
-  if (strlen (result) >= AVG_STRING_LENGTH * 4)
+  if (strlen (argument) >= AVG_STRING_LENGTH * 4)
     {
       send_to_char ("Your omote needs to be more succinct.\n", ch);
       return;
     }
 
   sprintf (buf, "%s%s%s",
-	   result,
-	   (result[strlen (result) - 1] != '.') ? "." : "",
+	   argument,
+	   (argument[strlen (argument) - 1] != '.') ? "." : "",
 	   (obj->short_description[0] == '#') ? "#0" : "");
 
   obj->omote_str = add_hash (buf);
@@ -520,9 +511,12 @@ do_emote (CHAR_DATA * ch, char *argument, int cmd)
 {
   char buf[MAX_STRING_LENGTH] = { '\0' };
   char copy[MAX_STRING_LENGTH] = { '\0' };
-  char *result = NULL;
+  char key[MAX_STRING_LENGTH] = { '\0' };
   CHAR_DATA *tch = NULL;
   bool tochar = false;
+  bool is_imote = false;
+  OBJ_DATA *obj = NULL;
+  int key_e = 0;
   int index = 0;
   char *p = '\0';
 
@@ -554,23 +548,149 @@ do_emote (CHAR_DATA * ch, char *argument, int cmd)
   else
     {
       p = copy;
-     
-      /** Removed code and created swap_xmote_target function **/
-			result = swap_xmote_target (ch, argument, 1);
-      if (!result)
-				return;
+      while (*argument)
+	{
 
-      sprintf (buf, "%s", result);  
-	
+	  if (*argument == '@')
+	    {
+	      is_imote = true;
+	      sprintf (p, "#5%s#0", char_short (ch));
+	      p += strlen (p);
+	      argument++;
+	    }
 
-			personalize_emote (ch, buf); //adjusts for "you" if needed
-			
-      if (!strcmp(result, buf))
-        act (buf, false, ch, 0, 0, TO_ROOM | TO_CHAR | _ACT_FORMAT);
+	  if (*argument == '*')
+	    {
+
+	      argument++;
+	      while (isdigit (*argument))
+		{
+		  key[key_e++] = *(argument++);
+		}
+	      if (*argument == '.')
+		{
+		  key[key_e++] = *(argument++);
+		}
+	      while (isalpha (*argument) || *argument == '-')
+		{
+		  key[key_e++] = *(argument++);
+		}
+	      key[key_e] = '\0';
+	      key_e = 0;
+
+	      if (!get_obj_in_list_vis (ch, key, ch->room->contents) &&
+		  !get_obj_in_list_vis (ch, key, ch->right_hand) &&
+		  !get_obj_in_list_vis (ch, key, ch->left_hand) &&
+		  !get_obj_in_list_vis (ch, key, ch->equip))
+		{
+		  sprintf (buf, "I don't see %s here.\n", key);
+		  send_to_char (buf, ch);
+		  return;
+		}
+	      obj = get_obj_in_list_vis (ch, key, ch->right_hand);
+	      if (!obj)
+		obj = get_obj_in_list_vis (ch, key, ch->left_hand);
+	      if (!obj)
+		obj = get_obj_in_list_vis (ch, key, ch->room->contents);
+	      if (!obj)
+		obj = get_obj_in_list_vis (ch, key, ch->equip);
+	      sprintf (p, "#2%s#0", obj_short_desc (obj));
+	      p += strlen (p);
+
+	    }
+	  else if (*argument == '~')
+	    {
+
+	      argument++;
+	      while (isdigit (*argument))
+		{
+		  key[key_e++] = *(argument++);
+		}
+	      if (*argument == '.')
+		{
+		  key[key_e++] = *(argument++);
+		}
+	      while (isalpha (*argument) || *argument == '-')
+		{
+		  key[key_e++] = *(argument++);
+		}
+	      key[key_e] = '\0';
+	      key_e = 0;
+
+	      if (!get_char_room_vis (ch, key))
+		{
+		  sprintf (buf, "Who is %s?\n", key);
+		  send_to_char (buf, ch);
+		  return;
+		}
+	      if (get_char_room_vis (ch, key) == ch)
+		{
+		  send_to_char
+		    ("You shouldn't refer to yourself using the token system.\n",
+		     ch);
+		  return;
+		}
+	      sprintf (p, "#5%s#0", char_short (get_char_room_vis (ch, key)));
+	      p += strlen (p);
+	      tochar = true;
+	    }
+	  else
+	    *(p++) = *(argument++);
+	}
+      *p = '\0';
+
+      if (copy[0] == '\'')
+	{
+	  if (!is_imote)
+	    {
+	      sprintf (buf, "#5%s#0%s", char_short (ch), copy);
+	      buf[2] = toupper (buf[2]);
+	    }
+	  else
+	    {
+	      sprintf (buf, "%s", copy);
+	      if (buf[0] == '#')
+		{
+		  buf[2] = toupper (buf[2]);
+		}
+	      else
+		{
+		  buf[0] = toupper (buf[0]);
+		}
+	    }
+	}
       else
+	{
+	  if (!is_imote)
+	    {
+	      sprintf (buf, "#5%s#0 %s", char_short (ch), copy);
+	      buf[2] = toupper (buf[2]);
+	    }
+	  else
+	    {
+	      sprintf (buf, "%s", copy);
+	      if (buf[0] == '#')
+		{
+		  buf[2] = toupper (buf[2]);
+		}
+	      else
+		{
+		  buf[0] = toupper (buf[0]);
+		}
+	    }
+	}
+
+      if (buf[strlen (buf) - 1] != '.' && buf[strlen (buf) - 1] != '!'
+	  && buf[strlen (buf) - 1] != '?')
+	strcat (buf, ".");
+
+      if (!tochar)
+	act (buf, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+      else
+	personalize_emote (ch, buf);
+
       act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-
-
+ 
  /** Theatre Begin**/
        if (ch->in_room == StageRoom)
   		{

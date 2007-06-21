@@ -2789,13 +2789,14 @@ room_light (ROOM_DATA * room)
   int light = 0;
   CHAR_DATA *tch;
   OBJ_DATA *obj;
+  OBJ_DATA *table_obj;
 
   if (!room)
     return;
 
   if (room->people != NULL)
     {
-      for (tch = room->people; tch; tch = tch->next_in_room)
+      for (tch = room->people; tch; tch = tch->next_in_room) // check to see if anyone is holding a light
 	{
 
 	  if (tch->deleted)
@@ -2824,7 +2825,8 @@ room_light (ROOM_DATA * room)
 
   if (room->contents != NULL)
     {
-      for (obj = room->contents; obj; obj = obj->next_content)
+      for (obj = room->contents; obj; obj = obj->next_content) // look to see if there are any lights in the room
+	/* Need to iterate through table objects to see if there is a lantern lit - Methuselah */
 	{
 	  if (obj->next_content && obj->next_content == obj)
 	    obj->next_content = NULL;
@@ -2832,6 +2834,16 @@ room_light (ROOM_DATA * room)
 	      obj->o.light.hours && obj->o.light.on)
 	    {
 	      light++;
+	    }
+	  if (IS_TABLE(obj))
+	    {
+	      for (table_obj = obj->contains; table_obj; table_obj = table_obj->next_content)
+		{
+		  if (table_obj->obj_flags.type_flag == ITEM_LIGHT && table_obj->o.light.hours && table_obj->o.light.on)
+		    {
+		      light++;
+		    }
+		}
 	    }
 	}
     }
@@ -3474,185 +3486,4 @@ isvowel (char c)
     default:
       return false;
     }
-}
-
-
-/*---------------------------------------------------------------------\
-| swap_xmote_target (CHAR_DATA * ch, char *argument int *is_imote)     |
-|                                                                      |
-| swaps *target @ or ~target with short_desc                           |
-| cmd = 1 (emote call) 2 (pmote call)                                  |
-\---------------------------------------------------------------------*/
-
-char *
-swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd)
-{
-  char buf[MAX_STRING_LENGTH] = { '\0' };
-  char key[MAX_STRING_LENGTH] = { '\0' };
-  char copy[MAX_STRING_LENGTH] = { '\0' };
-  bool tochar = false;
-  OBJ_DATA *obj = NULL;
-  int key_e = 0;
-  char *p = '\0';
-  char *temp = NULL;
-  bool is_imote = false;
-
-  p = copy;
-  temp = argument;
-
-while (*argument)
-  {
-	if(cmd==2 && IS_NPC(ch))
-		return NULL;
-
-    if (*argument == '@' )
-      {
-	if (cmd == 2 ) // don't allow @ to be used in pmote
-	  {
-	    send_to_char ("You may not refer to yourself in a pmote.", ch);
-	    return NULL;
-	  }
-	is_imote = true;
-	sprintf (p, "#5%s#0", char_short (ch));
-	p += strlen (p);
-	argument++;
-      }
-
-    if (*argument == '*')
-      {
-
-	argument++;
-	while (isdigit (*argument))
-	  {
-	    key[key_e++] = *(argument++);
-	  }
-	if (*argument == '.')
-	  {
-	    key[key_e++] = *(argument++);
-	  }
-	while (isalpha (*argument) || *argument == '-')
-	  {
-	    key[key_e++] = *(argument++);
-	  }
-	key[key_e] = '\0';
-	key_e = 0;
-
-	if (!get_obj_in_list_vis (ch, key, ch->room->contents) &&
-	    !get_obj_in_list_vis (ch, key, ch->right_hand) &&
-	    !get_obj_in_list_vis (ch, key, ch->left_hand) &&
-	    !get_obj_in_list_vis (ch, key, ch->equip))
-	  {
-	    sprintf (buf, "I don't see %s here.\n", key);
-	    send_to_char (buf, ch);
-	    return NULL;
-	  }
-	obj = get_obj_in_list_vis (ch, key, ch->right_hand);
-
-	if (!obj)
-	  obj = get_obj_in_list_vis (ch, key, ch->left_hand);
-	if (!obj)
-	  obj = get_obj_in_list_vis (ch, key, ch->room->contents);
-	if (!obj)
-	  obj = get_obj_in_list_vis (ch, key, ch->equip);
-	sprintf (p, "#2%s#0", obj_short_desc (obj));
-	p += strlen (p);
-
-      }
-    else if (*argument == '~')
-      {
-
-	argument++;
-	while (isdigit (*argument))
-	  {
-	    key[key_e++] = *(argument++);
-	  }
-	if (*argument == '.')
-	  {
-	    key[key_e++] = *(argument++);
-	  }
-	while (isalpha (*argument) || *argument == '-')
-	  {
-	    key[key_e++] = *(argument++);
-	  }
-	key[key_e] = '\0';
-	key_e = 0;
-
-	if (!get_char_room_vis (ch, key))
-	  {
-	    sprintf (buf, "Who is %s?\n", key);
-	    send_to_char (buf, ch);
-	    return NULL;
-	  }
-	if (get_char_room_vis (ch, key) == ch)
-	  {
-                  send_to_char
-                    ("You shouldn't refer to yourself using the token system.\n",
-                     ch);
-                  return NULL;
-	  }
-	sprintf (p, "#5%s#0", char_short (get_char_room_vis (ch, key)));
-	p += strlen (p);
-	tochar = true;
-      }
-    else
-      *(p++) = *(argument++); 
-  }
-
- *p = '\0';
- if (cmd == 1)
-   {
-     if (copy[0] == '\'')
-       {
-         if (!is_imote)
-           {
-	     sprintf (buf, "#5%s#0%s", char_short (ch), copy);
-	     buf[2] = toupper (buf[2]);
-           }
-       else
-         {
-	   sprintf (buf, "%s", copy);
-	   if (buf[0] == '#')
-	     {
-	       buf[2] = toupper (buf[2]);
-	     }
-	   else
-	     {
-	       buf[0] = toupper (buf[0]);
-	     }
-         }
-     }
-   else
-     {
-       if (!is_imote)
-         {
-	   sprintf (buf, "#5%s#0 %s", char_short (ch), copy);
-	   buf[2] = toupper (buf[2]);
-         }
-       else
-         {
-	   sprintf (buf, "%s", copy);
-	   if (buf[0] == '#')
-	     {
-	       buf[2] = toupper (buf[2]);
-	     }
-	   else
-	     {
-	       buf[0] = toupper (buf[0]);
-	     }
-         }  
-      }
-   }
- else
-   {
-     sprintf (buf, "#0%s", copy);// need to add #0 here to reset colors depending on call
-   }
-
- if (buf[strlen (buf) - 1] != '.' && buf[strlen (buf) - 1] != '!'
-     && buf[strlen (buf) - 1] != '?')
-   strcat (buf, ".");
- 
- //argument = temp; 
- sprintf (argument, "%s", buf);
-
-  return (argument);
 }
