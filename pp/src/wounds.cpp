@@ -3004,7 +3004,7 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 						}
 					else
 						{
-							nHasClothProp = 1; //just basic bandages in kit
+							nHasClothProp = 0; //no bandages in kit
 						}
 				}
 			else //not healing kit, so it is TEXTILE
