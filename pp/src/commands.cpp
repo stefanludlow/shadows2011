@@ -62,7 +62,7 @@ const struct command_data commands[] = {
   {"compact", do_compact, DEAD,
    C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR},
   {"contents", do_contents, REST,
-   C_SUB | C_DOA | C_MNT | C_PAR | C_SPL | C_NLG | C_HID},
+   C_SUB | C_DOA | C_PAR | C_SPL | C_NLG | C_HID},
   {"count", do_count, REST, C_NLG},
   {"cover", do_cover, SIT, C_WLK | C_MNT},
   {"crafts", do_crafts, DEAD,
