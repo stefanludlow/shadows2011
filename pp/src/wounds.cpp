@@ -3004,7 +3004,7 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 						}
 					else
 						{
-							nHasClothProp = 0; //no bandages in kit
+							nHasClothProp = 1; //no bandages in kit
 						}
 				}
 			else //not healing kit, so it is TEXTILE
@@ -3182,7 +3182,7 @@ delayed_bind (CHAR_DATA * thisPtr)
 						}
 					else
 						{
-							nHasClothProp = 0; //no bandages in kit
+							nHasClothProp = 1; //no bandages in kit
 						}
 				}
 			else //not healing kit, so it is TEXTILE
