@@ -1545,6 +1545,8 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 			sprintf (buffer + strlen (buffer), " Burns");
 		      if (IS_SET (obj->o.od.value[5], TREAT_FROST))
 			sprintf (buffer + strlen (buffer), " Frostbite");
+					if (IS_SET (obj->o.od.value[5], TREAT_BLEED))
+						sprintf (buffer + strlen (buffer), " Bleeding");	
 		    }
 		  sprintf (buffer + strlen (buffer),
 			   "\n   #6Uses Remaining:#0 %d\n",
@@ -3271,6 +3273,9 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	  && (i->wounds || i->lodged))
 	{
 	  sprintf (buf2, "%s", show_wounds (i, 0));
+					if (ch->fighting || i->fighting)
+						sprintf (buf2, "%s", strip_small_minor(buf2, ch));
+			
 	  send_to_char ("\n", ch);
 	  strcat (buf3, buf2);
 	  act (buf3, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);

@@ -5808,9 +5808,25 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 		 ch);
 	      return;
 	    }
-	  else
-	    send_to_char
-	      ("Please specify all, blunt, puncture, slash, burn or frost.\n",
+      
+      else if (!str_cmp (argument, "bleed"))
+      {
+        if (!IS_SET (edit_obj->o.od.value[5], TREAT_BLEED))
+    {
+      edit_obj->o.od.value[5] |= TREAT_BLEED;
+      send_to_char
+        ("This healer's kit will now treat bleeding wounds.\n", ch);
+      return;
+    }
+        edit_obj->o.od.value[5] &= ~TREAT_BLEED;
+        send_to_char
+    ("This healer's kit will no longer treat bleeding wounds.\n",
+     ch);
+        return;
+      }
+    else
+      send_to_char
+        ("Please specify all, blunt, puncture, slash, burn, frost, or bleed.\n",
 	       ch);
 	  return;
 	}
@@ -7225,7 +7241,10 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
   char output[MAX_STRING_LENGTH];
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
-  int phasenum, i, j, dice, sides, objnum = 0, fobjnum = 0;
+  int phasenum, i, j, dice, sides;
+  int objnum = 0;
+  int fobjnum = 0;
+  int mobnum = 0;
   SUBCRAFT_HEAD_DATA *craft;
   PHASE_DATA *phase;
   DEFAULT_ITEM_DATA *items;

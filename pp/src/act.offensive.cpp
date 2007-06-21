@@ -2929,12 +2929,14 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+/**** removed to allow carts to be attacked 
   if (IS_SET (victim->act, ACT_VEHICLE))
     {
       send_to_char ("How do you propose to kill an inanimate object, hmm?\n",
 		    ch);
       return;
     }
+**************/
 
   i = 0;
   for (tch = vtor (ch->in_room)->people; tch; tch = tch->next_in_room)
@@ -3205,12 +3207,14 @@ do_strike (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+/**** removed to allow carts to be attacked 
   if (IS_SET (victim->act, ACT_VEHICLE))
     {
       send_to_char ("How do you propose to kill an inanimate object, hmm?\n",
 		    ch);
       return;
     }
+**************/
 
   i = 0;
   for (tch = vtor (ch->in_room)->people; tch; tch = tch->next_in_room)
@@ -3386,12 +3390,14 @@ do_kill (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+  /**** removed to allow carts to be attacked 
   if (IS_SET (victim->act, ACT_VEHICLE))
     {
       send_to_char ("How do you propose to kill an inanimate object, hmm?\n",
 		    ch);
       return;
     }
+**************/
 
   if (IS_SET (ch->plr_flags, NEW_PLAYER_TAG)
       && IS_SET (ch->room->room_flags, LAWFUL) && *verify != '!')

@@ -915,6 +915,7 @@ void
 get (CHAR_DATA * ch, OBJ_DATA * obj, int count)
 {
   OBJ_DATA *container;
+  CHAR_DATA *i;
 
   if (IS_SET (obj->obj_flags.extra_flags, ITEM_TIMER)
       && obj->nVirtual != VNUM_CORPSE)
@@ -931,6 +932,22 @@ get (CHAR_DATA * ch, OBJ_DATA * obj, int count)
 	  send_to_char ("That can't be picked up at the moment.\n", ch);
 	  return;
 	}
+
+      // Mod for taking a corpse - Methuselah
+      // If someone is skinning the corpse, don't allow it to be taken
+
+      if (obj->nVirtual == VNUM_CORPSE)
+	{
+  	  for (i = ch->room->people; i; i = i->next_in_room)
+	    {
+	      if (i->delay_info1 == (long int) obj)
+	        {
+		  send_to_char ("You can't take that while it's being skinned.\n", ch);
+                  return;
+	        }
+	    }
+	}
+      // End mod for not taking an object when it's being skinned.  -Methuselah
 
       obj_from_room (&obj, count);
 
@@ -4392,6 +4409,7 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
   OBJ_DATA *arrow = NULL;
   char arg1[MAX_STRING_LENGTH];
   char arg2[MAX_STRING_LENGTH];
+  char arg3[MAX_STRING_LENGTH];
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   char buffer[MAX_STRING_LENGTH];
@@ -4401,6 +4419,7 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
   OBJ_DATA *eq;
   LODGED_OBJECT_INFO *lodged;
   int removed = 0, target_found = 0;
+  int modif = 0;
   int target_obj = 0, target_char = 0;
 
   if (IS_MORTAL (ch) && IS_SET (ch->room->room_flags, OOC)
@@ -4451,6 +4470,7 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+
   if (!obj && *arg1)
     {
       if ((tch = get_char_room_vis (ch, arg1)))
@@ -4458,6 +4478,7 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 	  target_found++;
 	  target_char++;
 	}
+				
       for (obj = ch->room->contents; obj; obj = obj->next_content)
 	{
 	  if (IS_OBJ_VIS (ch, obj) && isname (arg1, obj->name))
@@ -4467,11 +4488,16 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 	      break;
 	    }
 	}
+				
       if (!tch && !obj)
 	{
 	  send_to_char ("Remove what?\n", ch);
 	  return;
 	}
+
+/**
+remove target object
+**/
       if (!target_found)
 	{
 	  tch = ch;
@@ -4480,13 +4506,15 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 	}
       else
 	{
-	  one_argument (argument, arg2);
-	}
+					argument = one_argument (argument, arg2);
+				}
+				
       if (!*arg2)
 	{
 	  send_to_char ("Remove what?\n", ch);
 	  return;
 	}
+				
       if (target_char)
 	{
 	  if (GET_POS (tch) > POSITION_RESTING && IS_MORTAL (ch))
@@ -4496,16 +4524,29 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 		 ch);
 	      return;
 	    }
+/***
+remove target object area
+***/
+					argument = one_argument (argument, arg3);
+					
 	  for (lodged = tch->lodged; lodged; lodged = lodged->next)
 	    {
 
 	      if (isname (arg2, vtoo (lodged->vnum)->name))
 		{
-		  sprintf (location, "%s", lodged->location);
+						//we have a specified location, and it doesn't match this wound so we break out and go to the next wound. If there is no specified location, then we continue with the regular code.
+									if ((*arg3) &&
+												strcmp(arg3, lodged->location))
+										continue;
+									else
+										{
+											sprintf (location, "%s", lodged->location);
+																				
 		  obj = load_object (lodged->vnum);
 		  obj->count = 1;
 
 		  int error = 0;
+											
 		  if (can_obj_to_inv (obj, ch, &error, 1))
 		    obj_to_char (obj, ch);
 		  else
@@ -4516,6 +4557,8 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 		  break;
 		}
 	    }
+						}
+						
 	  if (removed && tch == ch)
 	    {
 	      *buf = '\0';
@@ -4532,10 +4575,27 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 	      sprintf (buf2, "%s", buffer);
 	      act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	      act (buf2, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
-	      wound_to_char (tch, location,
-			     dice (obj->o.od.value[0], obj->o.od.value[1]), 0,
-			     number (1, 4), 0, 0);
-	      return;
+							
+	
+							if ((strcmp(location, "skull")) &&
+									(strcmp(location, "reye")) &&
+									(strcmp(location, "leye")) &&
+									(strcmp(location, "abdomen")) &&
+									(strcmp(location, "groin")) &&
+									(strcmp(location, "muzzle")))
+										modif = 0; //not in those loctions, so normal chance
+							else
+										modif = 20; //in a bad spot, so a penalty to healing check
+									
+								if (skill_use (ch, SKILL_HEALING, modif))
+									return; // no extra damage if you make your heal skill check
+								else
+									{
+										wound_to_char (tch, location,
+											 dice (obj->o.od.value[0], obj->o.od.value[1]), 0,
+											 number (1, 4), 0, 0);
+										return;
+									}
 	    }
 	  else if (removed && tch != ch)
 	    {
@@ -4560,18 +4620,35 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 	      sprintf (buffer, "#5%s", buf);
 	      sprintf (buf, "%s", buffer);
 	      act (buf, false, ch, 0, tch, TO_VICT | _ACT_FORMAT);
-	      wound_to_char (tch, location,
-			     dice (obj->o.od.value[0], obj->o.od.value[1]), 0,
-			     number (1, 4), 0, 0);
-	      return;
-	    }
-	  else if (!removed)
-	    {
-	      send_to_char
-		("You don't see that -- how could you remove it?\n", ch);
-	      return;
-	    }
-	}
+							
+							if ((strcmp(location, "skull")) &&
+									(strcmp(location, "reye")) &&
+									(strcmp(location, "leye")) &&
+									(strcmp(location, "abdomen")) &&
+									(strcmp(location, "groin")) &&
+									(strcmp(location, "muzzle")))
+										modif = 0; //not in those loctions, so normal chance
+							else
+										modif = 20; //in a bad spot, so a penalty to healing check
+									
+								if (skill_use (ch, SKILL_HEALING, modif))
+									return; // no extra damage if you make your heal skill check
+							else
+								{
+									wound_to_char (tch, location,
+										 dice (obj->o.od.value[0], obj->o.od.value[1]), 0,
+										 number (1, 4), 0, 0);
+									return;
+								}
+						}
+					else if (!removed)
+						{
+							send_to_char
+					("You don't see that -- how could you remove it?\n", ch);
+							return;
+						}
+				} // if (target_char)
+				
       else if (target_obj)
 	{
 
@@ -4589,6 +4666,7 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 		  break;
 		}
 	    }
+						
 	  if (removed)
 	    {
 	      sprintf (buf, "You retrieve #2%s#0 from #2%s#0's %s.",
@@ -4610,8 +4688,8 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 		("You don't see that -- how could you remove it?\n", ch);
 	      return;
 	    }
-	}
-    }
+				} //if (target_obj)
+    } //if (!obj && *arg1)
 
   if (!obj)
     {
@@ -5244,12 +5322,26 @@ do_skin (CHAR_DATA * ch, char *argument, int cmd)
 
   ch->delay_type = DEL_SKIN_1;
   ch->delay = 3;
+
+  // Add time to the object timer so it doesn't decay while we're skinning it.  -Methuselah
+  if ((obj_corpse->obj_timer - time(0)) < 1000)
+    obj_corpse->obj_timer = time(0) + 1000;
+
+  // Add time to the object->morphTime timer in case it's close to morphing.  -Methuselah
+  if ((obj_corpse->morphTime - time(0)) < 1000)
+    obj_corpse->morphTime = time(0) + 1000;
 }
 
 void
 delayed_skin_new1 (CHAR_DATA * ch)
 {
+  OBJ_DATA *obj_corpse;
 
+  // make sure the corpse is still here, if not throw an error and abort.
+  obj_corpse = (OBJ_DATA *) ch->delay_info1;
+
+  if (CAN_SEE_OBJ (ch, obj_corpse))
+    {
   send_to_char ("You start to cut into the corpse.\n", ch);
   act ("$n starts to cut into the corpse.", false, ch, 0, 0,
        TO_ROOM | _ACT_FORMAT);
@@ -5257,17 +5349,43 @@ delayed_skin_new1 (CHAR_DATA * ch)
   ch->delay_type = DEL_SKIN_2;
   ch->delay = 7;
 }
+  else
+    {
+      // The corpse being skinned is gone, abort.
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0;
+      ch->delay = 0;
+      ch->delay_type = 0;
+      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+    }
+}
 
 void
 delayed_skin_new2 (CHAR_DATA * ch)
 {
-  send_to_char
-    ("You seem to be making progress as you dig into the corpse.\n", ch);
+  OBJ_DATA *obj_corpse;
+
+  // make sure the corpse is still here, if not throw an error and abort.
+  obj_corpse = (OBJ_DATA *) ch->delay_info1;
+
+  if (CAN_SEE_OBJ (ch, obj_corpse))
+    {
+       send_to_char ("You seem to be making progress as you dig into the corpse.\n", ch);
   act ("$n seems to be making progress as $e digs into the corpse.", false,
        ch, 0, 0, TO_ROOM | _ACT_FORMAT);
 
   ch->delay_type = DEL_SKIN_3;
   ch->delay = 10;
+}
+  else
+    { 
+      // The corpse being skinned is gone, abort.
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0; 
+      ch->delay = 0;
+      ch->delay_type = 0;
+      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+    }
 }
 
 void
@@ -5281,6 +5399,17 @@ delayed_skin_new3 (CHAR_DATA * ch)
 
   corpse = (OBJ_DATA *) ch->delay_info1;
 
+  if (!CAN_SEE_OBJ (ch, corpse))
+    {
+      // The corpse being skinned is gone, abort.
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0;
+      ch->delay = 0;
+      ch->delay_type = 0;
+      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+      return;
+    }
+
   if (!corpse || sizeof (*corpse) < sizeof (OBJ_DATA))
     {
       send_to_char
@@ -5292,7 +5421,9 @@ delayed_skin_new3 (CHAR_DATA * ch)
   if (skill_use (ch, SKILL_SKIN, 0))
     {
 
+//A corpse taht is WILL_SKIN has a negative o.od.value[2], See make-corpse() for details . We must adjust to get a vnum we can load?
       if (!(skin = load_object (corpse->o.od.value[2])))
+
 	{
 	  send_to_char ("Problem...please contact an immortal.\n", ch);
 	  return;
