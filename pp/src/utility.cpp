@@ -2819,9 +2819,9 @@ room_light (ROOM_DATA * room)
 		      obj->o.light.hours && obj->o.light.on)
 		    light++;
 		}
-	    }
-	}
-    }
+						}//if (tch->equip != NULL)
+				}//for (tch = room->people;
+    }//if (room->people != NULL)
 
   if (room->contents != NULL)
     {

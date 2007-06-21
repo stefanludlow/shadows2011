@@ -1734,7 +1734,9 @@ SUBCRAFT_HEAD_DATA *tcraft;
 
 		      first_seen = 0;
 
+
 		      sprintf (buffer + strlen (buffer), "   %s",
+
 			       OBJS (obj2, ch));
 			       
 			if (GET_ITEM_TYPE (obj2) == ITEM_LIGHT &&
