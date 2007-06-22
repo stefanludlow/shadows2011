@@ -172,10 +172,66 @@ display_unread_messages (DESCRIPTOR_DATA * d)
 }
 
 void
+display_login_delay (DESCRIPTOR_DATA * d)
+{
+  char buf[MAX_STRING_LENGTH];
+  MYSQL_RES *result;
+  MYSQL_ROW row;
+  int tyme_passed = 0;
+  
+  if (!d->acct || d->acct->name.empty ())
+    {
+      return;
+    }
+
+  std::string player_db = engine.get_config ("player_db");
+
+
+ mysql_safe_query
+   ("SELECT lastlogoff FROM %s.pfiles WHERE account = '%s'", player_db.c_str (), d->acct->name.c_str ());
+
+
+  if ((result = mysql_store_result (database)) == NULL)
+    {
+      sprintf (buf, "Warning: display_login_delay(): %s",
+               mysql_error (database));
+      system_log (buf, true);
+ 
+      return;
+    }
+
+  row = mysql_fetch_row (result);
+
+      tyme_passed = time (0) - atoi(row[0]);     // 21600 seconds in an in-game day
+
+      if ( tyme_passed > 100 && tyme_passed < 21600 ) // more than 100 for people logging off
+	{
+          sprintf (buf, "Less than a day has passed in Middle-Earth since your last departure.\n");
+	  SEND_TO_Q (buf, d);
+	}  
+      else if (tyme_passed > 21599 && tyme_passed < 43200)
+	{        
+          sprintf (buf, "A single day has passed in Middle-Earth since your last departure.\n" );
+          SEND_TO_Q (buf, d);
+	}
+      else if (tyme_passed > 43199 && tyme_passed < 2160000)
+	{ 
+          tyme_passed = tyme_passed / 21600;     
+          sprintf (buf, "%d days have passed in Middle-Earth since your last departure.\n", tyme_passed);
+          SEND_TO_Q (buf, d);
+	}
+
+  mysql_free_result (result);
+  result = NULL;
+
+}
+
+void
 display_main_menu (DESCRIPTOR_DATA * d)
 {
   SEND_TO_Q (get_text_buffer (NULL, text_list, "menu1"), d);
   display_unread_messages (d);
+  display_login_delay (d);
   SEND_TO_Q ("Your Selection: ", d);
   d->connected = CON_ACCOUNT_MENU;
 }
