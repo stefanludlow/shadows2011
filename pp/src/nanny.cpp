@@ -170,7 +170,7 @@ display_unread_messages (DESCRIPTOR_DATA * d)
 	   unread > 1 ? "are" : "is", unread, unread > 1 ? "s" : "");
   SEND_TO_Q (buf, d);
 }
-
+/****
 void
 display_login_delay (DESCRIPTOR_DATA * d)
 {
@@ -225,7 +225,7 @@ display_login_delay (DESCRIPTOR_DATA * d)
   result = NULL;
 
 }
-
+****/
 void
 display_main_menu (DESCRIPTOR_DATA * d)
 {
