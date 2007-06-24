@@ -5339,6 +5339,15 @@ delayed_skin_new1 (CHAR_DATA * ch)
 
   // make sure the corpse is still here, if not throw an error and abort.
   obj_corpse = (OBJ_DATA *) ch->delay_info1;
+  if (!obj_corpse)
+  	{
+      // The corpse being skinned is gone, abort.
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0;
+      ch->delay = 0;
+      ch->delay_type = 0;
+      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+    }
 
   if (CAN_SEE_OBJ (ch, obj_corpse))
     {
@@ -5351,12 +5360,12 @@ delayed_skin_new1 (CHAR_DATA * ch)
 }
   else
     {
-      // The corpse being skinned is gone, abort.
+      // Can't see the corpse anymore
       ch->delay_info1 = 0;
       ch->delay_info2 = 0;
       ch->delay = 0;
       ch->delay_type = 0;
-      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+      send_to_char ("You can't see any corpse to skin.\n", ch);
     }
 }
 
@@ -5368,6 +5377,16 @@ delayed_skin_new2 (CHAR_DATA * ch)
   // make sure the corpse is still here, if not throw an error and abort.
   obj_corpse = (OBJ_DATA *) ch->delay_info1;
 
+	if (!obj_corpse)
+  	{
+      // The corpse being skinned is gone, abort.
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0;
+      ch->delay = 0;
+      ch->delay_type = 0;
+      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+    }
+    
   if (CAN_SEE_OBJ (ch, obj_corpse))
     {
        send_to_char ("You seem to be making progress as you dig into the corpse.\n", ch);
@@ -5384,7 +5403,7 @@ delayed_skin_new2 (CHAR_DATA * ch)
       ch->delay_info2 = 0; 
       ch->delay = 0;
       ch->delay_type = 0;
-      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+      send_to_char ("You can't see any corpse to skin.\n", ch);
     }
 }
 
@@ -5399,6 +5418,16 @@ delayed_skin_new3 (CHAR_DATA * ch)
 
   corpse = (OBJ_DATA *) ch->delay_info1;
 
+	if (!corpse)
+			{
+				// The corpse being skinned is gone, abort.
+				ch->delay_info1 = 0;
+				ch->delay_info2 = 0;
+				ch->delay = 0;
+				ch->delay_type = 0;
+				send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+			}
+    
   if (!CAN_SEE_OBJ (ch, corpse))
     {
       // The corpse being skinned is gone, abort.
@@ -5406,7 +5435,7 @@ delayed_skin_new3 (CHAR_DATA * ch)
       ch->delay_info2 = 0;
       ch->delay = 0;
       ch->delay_type = 0;
-      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+      send_to_char ("You can't see the corpse you were skinning.\n", ch);
       return;
     }
 
@@ -5421,7 +5450,7 @@ delayed_skin_new3 (CHAR_DATA * ch)
   if (skill_use (ch, SKILL_SKIN, 0))
     {
 
-//A corpse taht is WILL_SKIN has a negative o.od.value[2], See make-corpse() for details . We must adjust to get a vnum we can load?
+//A corpse that is WILL_SKIN has a negative o.od.value[2], See make-corpse() for details . We must adjust to get a vnum we can load?
       if (!(skin = load_object (corpse->o.od.value[2])))
 
 	{
