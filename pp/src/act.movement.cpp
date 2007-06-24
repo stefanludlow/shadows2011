@@ -4085,8 +4085,10 @@ enter_vehicle (CHAR_DATA * ch, CHAR_DATA * ent_mob)
       return;
     }
 
-  if (ch->vehicle)
+  if (ch->mob->vehicle_type)
     {
+    	if (ch == ent_mob)
+      		return;  //you can't enter yourself if you are a vehicle
     }
 
   if (ent_mob->mob->vehicle_type == VEHICLE_HITCH)
@@ -4151,7 +4153,7 @@ do_enter (CHAR_DATA * ch, char *argument, int cmd)
 	}
     }
 
-
+/** Entering a vehicle***/
   if (*buf && (ent_mob = get_char_room_vis (ch, buf)) &&
       IS_SET (ent_mob->act, ACT_VEHICLE))
     {
@@ -4159,6 +4161,7 @@ do_enter (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+/** Enter a dwelling **/
   if (*buf && (obj = get_obj_in_list_vis (ch, buf, ch->room->contents))
       && (GET_ITEM_TYPE (obj) == ITEM_DWELLING))
     {
