@@ -170,7 +170,7 @@ display_unread_messages (DESCRIPTOR_DATA * d)
 	   unread > 1 ? "are" : "is", unread, unread > 1 ? "s" : "");
   SEND_TO_Q (buf, d);
 }
-/****
+
 void
 display_login_delay (DESCRIPTOR_DATA * d)
 {
@@ -189,6 +189,7 @@ display_login_delay (DESCRIPTOR_DATA * d)
 
  mysql_safe_query
    ("SELECT lastlogoff FROM %s.pfiles WHERE account = '%s'", player_db.c_str (), d->acct->name.c_str ());
+
 
   if ((result = mysql_store_result (database)) == NULL)
     {
@@ -224,13 +225,13 @@ display_login_delay (DESCRIPTOR_DATA * d)
   result = NULL;
 
 }
-****/
+
 void
 display_main_menu (DESCRIPTOR_DATA * d)
 {
   SEND_TO_Q (get_text_buffer (NULL, text_list, "menu1"), d);
   display_unread_messages (d);
- // display_login_delay (d);
+  display_login_delay (d);
   SEND_TO_Q ("Your Selection: ", d);
   d->connected = CON_ACCOUNT_MENU;
 }
