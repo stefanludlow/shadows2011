@@ -4085,11 +4085,9 @@ enter_vehicle (CHAR_DATA * ch, CHAR_DATA * ent_mob)
       return;
     }
 
-  if (ch->mob->vehicle_type)
-    {
     	if (ch == ent_mob)
-      		return;  //you can't enter yourself if you are a vehicle
-    }
+      		return;  //you can't enter yourself 
+    
 
   if (ent_mob->mob->vehicle_type == VEHICLE_HITCH)
     {
