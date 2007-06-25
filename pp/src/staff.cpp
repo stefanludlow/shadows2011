@@ -8339,6 +8339,11 @@ do_swap (CHAR_DATA * ch, char *argument, int cmd)
 			ch);
 	  return;
 	}
+	if (z > 99)
+		{
+		send_to_char ("Please choose a zone between 1 and 98.\n", ch);
+		return;
+		}
       if (str_cmp (ch->tname, zone_table[z].lead)
 	  && GET_TRUST (ch) < 4)
 	{
