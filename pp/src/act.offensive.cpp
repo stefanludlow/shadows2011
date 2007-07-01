@@ -235,10 +235,10 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 	troom = vtor (EXIT (ch, dir)->to_room);
 
 				/* for throwing 'out' of a dwelling */
-			if ((dir == 6) && (ch->in_room > 100000))
-				troom = vtor(ch->was_in_room);
+	//		if ((dir == 6) && (ch->in_room > 100000))
+	//			troom = vtor(ch->was_in_room);
 
-	/*** harsh way to deal with throwing things out 		
+	/*** harsh way to deal with throwing things out **/		
 	  if ((dir == 6) && (ch->in_room > 100000))
 		{
 		obj_from_char (&tobj, 0);
@@ -247,7 +247,7 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 		act (buf, false, ch, tobj, 0, TO_CHAR | _ACT_FORMAT);
 		return;
 		}
-****/
+/****/
       if (!troom)
 	{
 	  send_to_char ("There is no exit in that direction.\n", ch);
