@@ -987,16 +987,20 @@ check_sitebans ()
   for (site = banned_site; site; site = next_site)
     {
       next_site = site->next;
-      if (!site->next || site->next->banned_until == -1)
-	continue;
-      if (site->next->banned_until != -1
-	  && time (0) >= site->next->banned_until)
-	{
-	  unban_site (site->next);
-	  continue;
-	}
-    }
-}
+	if (site->next)
+	  {
+            if (site->next->banned_until == -1)
+	      continue;
+
+            if (site->next->banned_until != -1
+	       && time (0) >= site->next->banned_until)
+	      {
+	      unban_site (site->next);
+	      continue;
+	      }
+          }
+     }
+  }
 
 void
 check_maintenance (void)
