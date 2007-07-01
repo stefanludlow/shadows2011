@@ -5339,7 +5339,8 @@ delayed_skin_new1 (CHAR_DATA * ch)
       ch->delay = 0;
       ch->delay_type = 0;
       send_to_char ("The corpse you were skinning is no longer here.\n", ch);
-    }
+	return;   
+ }
 
   if (CAN_SEE_OBJ (ch, obj_corpse))
     {
@@ -5358,6 +5359,7 @@ delayed_skin_new1 (CHAR_DATA * ch)
       ch->delay = 0;
       ch->delay_type = 0;
       send_to_char ("You can't see any corpse to skin.\n", ch);
+	return;
     }
 }
 
@@ -5377,7 +5379,8 @@ delayed_skin_new2 (CHAR_DATA * ch)
       ch->delay = 0;
       ch->delay_type = 0;
       send_to_char ("The corpse you were skinning is no longer here.\n", ch);
-    }
+	return;    
+}
     
   if (CAN_SEE_OBJ (ch, obj_corpse))
     {
@@ -5396,7 +5399,8 @@ delayed_skin_new2 (CHAR_DATA * ch)
       ch->delay = 0;
       ch->delay_type = 0;
       send_to_char ("You can't see any corpse to skin.\n", ch);
-    }
+	return;    
+}
 }
 
 void
@@ -5418,7 +5422,8 @@ delayed_skin_new3 (CHAR_DATA * ch)
 				ch->delay = 0;
 				ch->delay_type = 0;
 				send_to_char ("The corpse you were skinning is no longer here.\n", ch);
-			}
+return;			
+}
     
   if (!CAN_SEE_OBJ (ch, corpse))
     {
