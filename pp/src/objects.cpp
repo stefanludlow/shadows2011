@@ -2192,23 +2192,15 @@ do_put (CHAR_DATA * ch, char *argument, int cmd)
     }
 
 
-  // temp mod by Methuselah for table_lamp
+  // mod by Methuselah for table_lamp
 
-  else if (GET_ITEM_TYPE (obj) == ITEM_LIGHT
+	if (GET_ITEM_TYPE (obj) == ITEM_LIGHT
 	   && obj->o.light.on == true
 	   && !IS_SET (obj->obj_flags.extra_flags, ITEM_MAGIC))
     {
       put_light_on_table++;
     }
-    /* bypassing for putting a lamp on a table - Methuselah 5-19-07
-  else if (GET_ITEM_TYPE (obj) == ITEM_LIGHT
-	   && obj->o.light.on == true
-	   && !IS_SET (obj->obj_flags.extra_flags, ITEM_MAGIC))
-    {
-      send_to_char ("You'll need to snuff that, first.\n", ch);
-      return;
-    }
-  */
+    
   if (!can_obj_to_container (obj, tar, &error, count))
     {
       send_to_char (error, ch);

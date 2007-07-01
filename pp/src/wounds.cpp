@@ -1889,6 +1889,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
   int poisoned = 0, bleeding = 0, treated = 0, infected = 0, tended =
     0, bound = 0;
   char *p = '\0';
+  char name_buf[MAX_STRING_LENGTH];
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   char buf3[MAX_STRING_LENGTH];
@@ -1943,10 +1944,13 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 //Healers who are fighting, don't get the extra info
 
 // header info
+			name_to_ident (tch, name_buf);
+			sprintf (name_buf, "%s person", name_buf);
+			
       send_to_char ("\n", ch);
        if (IS_MORTAL(ch))
         {
-          sprintf (buf, "%s's wounds:", tch->short_descr);
+          sprintf (buf, "%s's wounds:", name_buf);
         }
       else
         {
