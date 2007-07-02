@@ -367,6 +367,7 @@ const struct command_data commands[] = {
   {"purge", do_purge, DEAD, C_LV2},
   {"rappend", do_rappend, DEAD, C_LV2},
   {"rblock", do_rblock, DEAD, C_LV2},
+  {"rcap", do_rcap, DEAD, C_LV2},
   {"rclone", do_rclone, DEAD, C_LV4},
   {"rcret", do_rcret, DEAD, C_LV2},
   {"rddesc", do_rddesc, DEAD, C_LV2},

@@ -2144,6 +2144,13 @@ initiate_move (CHAR_DATA * ch)
 	}
     }
 
+	if (!room_avail(target_room, NULL, ch) && !(GET_TRUST(ch)))
+		{
+			send_to_char("There isn't enough room for you.", ch);
+			clear_moves (ch);
+			return;
+		}
+		
   if (IS_SET (ch->act, ACT_MOUNT) &&
       IS_SET (target_room->room_flags, NO_MOUNT))
     {
@@ -4091,6 +4098,11 @@ enter_vehicle (CHAR_DATA * ch, CHAR_DATA * ent_mob)
     	if (ch == ent_mob)
       		return;  //you can't enter yourself 
     
+		if (!room_avail(vtor (ent_mob->mob->nVirtual), NULL, ch))
+			{
+				send_to_char("There is not enough room.\n", ch);
+				return;
+			}
 
   if (ent_mob->mob->vehicle_type == VEHICLE_HITCH)
     {
@@ -4196,7 +4208,8 @@ do_enter (CHAR_DATA * ch, char *argument, int cmd)
 	}
       for (tch = room->people; tch; tch = tch->next_in_room)
 	occupants++;
-      if (obj->o.od.value[1] > 0 && occupants > obj->o.od.value[1])
+      
+      if (obj->o.od.value[1] > 0 && occupants >= obj->o.od.value[1])
 	{
 	  send_to_char ("There are already too many people inside.\n", ch);
 	  return;
@@ -6404,4 +6417,67 @@ shadowers_shadow (CHAR_DATA * ch, int to_room, int move_dir)
 	  initiate_move (tch);
 	}
     }
+}
+
+int
+room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
+{
+	int count = 0;
+	int obj_wt = 0;
+	int tot_wt = 0;
+	int temp_wt = 0;
+	float wt_count = 0.0;
+	CHAR_DATA *temp_char = NULL;
+	OBJ_DATA *temp_obj = NULL;
+	char buf[MAX_INPUT_LENGTH] = {'\0'};
+	
+	if (troom->capacity == 0)
+		return(1);
+		
+	if (tobj)
+		obj_wt = obj_mass(tobj)/100;
+	
+	if (tch && (IS_NPC (tch) || IS_MORTAL (tch)))
+		{
+			if (IS_NPC(tch))
+				tot_wt = carrying(tch)/100 + 200;
+			else	
+				tot_wt = carrying(tch)/100 + get_weight(tch);
+		}
+	
+	for (temp_obj = troom->contents; temp_obj; temp_obj = temp_obj->next_content)
+		{
+			obj_wt = obj_wt + (obj_mass(temp_obj)/100);
+		}
+		
+	for (temp_char = troom->people; temp_char; temp_char = temp_char->next_in_room)
+		{
+			if (IS_NPC (temp_char) || IS_MORTAL (temp_char))
+				{
+					if (IS_NPC(temp_char))
+						tot_wt = tot_wt + carrying(temp_char)/100 + 200;
+					else	
+						tot_wt = tot_wt + carrying(temp_char)/100 + get_weight(temp_char);
+					count++;
+				}
+		}
+		
+	wt_count = (tot_wt + obj_wt);
+
+	troom->occupants = (int)wt_count;
+	
+//sprintf(buf, "Objs in room weigh %d, characters weigh %d, and number of occupant units is %d\n", obj_wt, tot_wt, (int)wt_count/200);
+//send_to_gods(buf);
+
+	if (wt_count > (troom->capacity * 200)) 
+		{
+			return (0);
+		}
+	else
+		{
+			return (1);
+		}
+
+	return(0);
+
 }

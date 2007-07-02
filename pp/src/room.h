@@ -82,6 +82,7 @@ struct room_data
   TRACK_DATA *tracks;
   int entrance;			/// used for carrying shouts into dwellings
   int occupants;
+  int capacity; //max capacity for room
 };
 
 extern ROOM_DATA *full_room_list;

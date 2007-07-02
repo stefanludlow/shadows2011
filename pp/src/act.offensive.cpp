@@ -235,10 +235,10 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 	troom = vtor (EXIT (ch, dir)->to_room);
 
 				/* for throwing 'out' of a dwelling */
-	//		if ((dir == 6) && (ch->in_room > 100000))
-	//			troom = vtor(ch->was_in_room);
+			//if ((dir == 6) && (ch->in_room > 100000))
+			//	troom = vtor(ch->was_in_room);
 
-	/*** harsh way to deal with throwing things out **/		
+	/** harsh way to deal with throwing things out without crashing the game	**/	
 	  if ((dir == 6) && (ch->in_room > 100000))
 		{
 		obj_from_char (&tobj, 0);
@@ -278,6 +278,12 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 	    }
 	}
 
+		if (!room_avail(troom, tobj, NULL))
+			{
+	  send_to_char ("You realize there is no room.\n", ch);
+	  return;
+		}
+		
       if (!tch)
 	{
 	  sprintf (buf, "You hurl #2%s#0 %sward.", tobj->short_description,

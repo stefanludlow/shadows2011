@@ -1070,6 +1070,12 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 	}
     }
 
+  if (troom->capacity)
+    {
+      fprintf (fp, "C\n");
+      fprintf (fp, "%d\n", troom->capacity);
+    }
+
   fprintf (fp, "S\n");
 }
 
@@ -3907,7 +3913,7 @@ do_rdesc (CHAR_DATA * ch, char *argument, int cmd)
       make_quiet (ch);
     }
 
-  TOGGLE (room->room_flags, ROOM_OK);
+  //TOGGLE (room->room_flags, ROOM_OK);
   ch->desc->proc = post_rdesc;
 }
 
@@ -4231,9 +4237,9 @@ do_rflags (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (((1 << flag) == OOC) && GET_TRUST (ch) < 5)
+  if ((((1 << flag) == OOC) || ((1 << flag) == ROOM_OK)) && GET_TRUST (ch) < 5)
     {
-      send_to_char ("Only a level 5 or above can set the OOC bit.\n", ch);
+      send_to_char ("Only a level 5 or above can set the OOC or OK bit.\n", ch);
       return;
     }
 
@@ -13425,6 +13431,10 @@ rlist_show (ROOM_DATA * troom, int sector, int header)
   
   	return;  
 }
+
+/******
+* rlist +/-<keyword> z<zone number> <sector type> /$<roomflag>
+*******/
 void
 do_rlist (CHAR_DATA * ch, char *argument, int cmd)
 {
@@ -13435,7 +13445,14 @@ do_rlist (CHAR_DATA * ch, char *argument, int cmd)
   int yes_key1 = 0;
   int yes_key2 = 0;
   int yes_key3 = 0;
+  int flag_key1 = -2;
+  int flag_key2 = -2;
+  int flag_key3 = -2;
   int count = 0;
+  int yes_flag1 = 0;
+  int yes_flag2 = 0;
+  int yes_flag3 = 0;
+  int inc_flags;
   ROOM_DATA *troom;
   char key1[MAX_STRING_LENGTH] = { '\0' };
   char key2[MAX_STRING_LENGTH] = { '\0' };
@@ -13450,13 +13467,18 @@ do_rlist (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char
 	("   +/-<room keyword>       Include/exclude room keyword.\n",
 	 ch);
-      send_to_char ("   <zone>                    Rooms from zone only.\n",
+      send_to_char ("   z <zone>                Rooms from zone only.\n",
 		    ch);
       send_to_char
-	("   <sector>               Include rooms with sector-type.\n", ch);
-      send_to_char ("\nExample:   rlist +bedroom -poor city 10\n", ch);
+        ("   $<flag>                 Include rooms with rflag.\n", ch);
       send_to_char
-	("will only get bedrooms of non-poor rooms, in the city of zone 10.\n", ch);
+        ("   /<flag>                 Exclude rooms with rflag.\n", ch);
+      send_to_char
+	("   s  <sector>             Include rooms with sector-type.\n", ch);
+  
+      send_to_char ("\nExample:   rlist +bedroom -poor $scum s city z 10\n", ch);
+      send_to_char
+	("will only get bedrooms of non-poor rooms, that are scum, in the city of zone 10.\n", ch);
       return;
     }
 
@@ -13465,32 +13487,36 @@ do_rlist (CHAR_DATA * ch, char *argument, int cmd)
     {
 
       inclusive = 1;
-
-      if (strlen (buf) > 1 && isalpha (*buf) &&
-	  (sector = index_lookup (sector_types, buf)) != -1)
-	{
-	  argument = one_argument (argument, buf);
-	  continue;
-	}
+      inc_flags = 1;
+			sector = index_lookup (sector_types, buf);
+						
+      if (strlen (buf) > 1 
+      	&& isalpha (*buf) 
+      	&& (sector != -1))
+				{
+					argument = one_argument (argument, buf);
+					continue;
+				}
 
       if (isdigit (*buf))
-	{
-
-	  if ((zone = atoi (buf)) >= MAX_ZONE)
-	    {
-	      send_to_char ("Zone not in range 0..99\n", ch);
-	      return;
-	    }
-
-	  argument = one_argument (argument, buf);
-	  continue;
-	}
+				{
+			
+					if ((zone = atoi (buf)) >= MAX_ZONE)
+						{
+							send_to_char ("Zone not in range 0..99\n", ch);
+							return;
+						}
+			
+					argument = one_argument (argument, buf);
+					continue;
+				}
 
       switch (*buf)
-	{
-
-	case '-':
-	  inclusive = 0;
+				{
+			
+				case '-':
+					inclusive = 0;
+					
 	case '+':
 
 	  if (!buf[1])
@@ -13535,10 +13561,45 @@ do_rlist (CHAR_DATA * ch, char *argument, int cmd)
 	  zone = atoi (buf);
 
 	  break;
-	}
+					
+				 case '/':
+						inc_flags = 0;
+						
+				 case '$':	
+				 	//argument = one_argument (argument, buf);
+				 	
+					 if (!buf[1])
+							{
+								send_to_char ("Expected flag name after '/ or $'.\n", ch);
+								return;
+							}
+				
+						if (flag_key1 == -2)
+							{
+								yes_flag1 = inc_flags;
+								flag_key1 = index_lookup (room_bits, buf + 1);
+							}
+						else if (flag_key2 == -2)
+							{
+								yes_flag2 = inc_flags;
+								flag_key2 = index_lookup (room_bits, buf + 1);
+							}
+						else if (flag_key3 != -2)
+							{
+								send_to_char ("Sorry, at most three flags.\n", ch);
+								return;
+							}
+						else
+							{
+								yes_flag3 = inc_flags;
+								flag_key3 = index_lookup (room_bits, buf + 1);
+							}
+				
+						break;
+					}
 
       argument = one_argument (argument, buf);
-    }
+    } // while (*buf)
 
   *b_buf = '\0';
 
@@ -13551,6 +13612,30 @@ do_rlist (CHAR_DATA * ch, char *argument, int cmd)
 		if (sector != -1 && troom->sector_type != sector)
 			continue;
 		
+     if (flag_key1 != -2)
+      {
+      if (yes_flag1 && !(IS_SET (troom->room_flags, (1 << flag_key1))))
+        continue;
+      else if (!yes_flag1 && (IS_SET (troom->room_flags, (1 << flag_key1))))
+        continue;
+      }
+
+    if (flag_key2 != -2)
+      {
+      if (yes_flag2 && !(IS_SET (troom->room_flags, (1 << flag_key2))))
+        continue;
+      else if (!yes_flag2 && (IS_SET (troom->room_flags, (1 << flag_key2))))
+        continue;
+      }
+
+    if (flag_key3 != -2)
+      {
+      if (yes_flag3 && !(IS_SET (troom->room_flags, (1 << flag_key3))))
+        continue;
+      else if (!yes_flag3 && (IS_SET (troom->room_flags, (1 << flag_key3))))
+        continue;
+      }
+
 			
 		if (*key1)
 			{
@@ -13596,4 +13681,29 @@ do_rlist (CHAR_DATA * ch, char *argument, int cmd)
 	page_string (ch->desc, b_buf);
 }
 
+void
+do_rcap (CHAR_DATA * ch, char *argument, int cmd)
+{
+  char buf[MAX_INPUT_LENGTH];
+  int dir;
+  ROOM_DATA *room;
+
+ room = vtor (ch->in_room);
+ argument = one_argument (argument, buf);
+ 
+ 
+  if (!isdigit (*buf))
+    {
+      send_to_char ("Syntax:  rcap [capacity]\n", ch);
+      return;
+    }
+
+  room->capacity = atoi (buf);
+
+  *buf = '\0';
+
+  sprintf(buf, "Room capacity is now %d individuals.", room->capacity);
+
+  send_to_char (buf, ch);
+}
 

@@ -753,6 +753,7 @@ load_rooms (void)
 
 	      room->contents = 0;
 	      room->people = 0;
+	      room->capacity = 0;	
 	      room->light = 0;
 
 	      for (tmp = 0; tmp <= LAST_DIR; tmp++)
@@ -874,8 +875,14 @@ load_rooms (void)
 			  if (!strlen (room->extra->alas[i]))
 			    room->extra->alas[i] = NULL;
 			}
-		    }
+		    }//else if (*chk == 'A')
 
+			else if (*chk == 'C')
+				{	/* Capacity of room */
+					fscanf (fl, "%d\n", &tmp);
+	      	room->capacity = tmp;	
+				
+				}
 		  else if (*chk == 'S')	/* end of current room */
 		    break;
 		}

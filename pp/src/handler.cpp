@@ -734,11 +734,13 @@ char_to_room (CHAR_DATA * ch, int room_num)
 		  room->occupants++;
 		  break;
 		}
-	    }
-	}
+	    } //for (obj = troom->contents
+	} //if (room &&
+	
       else if (!room)
 	room = vtor (0);
-    }
+    } //if (ch->in_room >= 100000)
+    
   else if (!(room = vtor (room_num)))
     {
       sprintf (buf, "Room %d doesn't exist in char_to_room()! (%s)", room_num,

@@ -1869,6 +1869,13 @@ put_on_char (CHAR_DATA * ch, CHAR_DATA * victim, OBJ_DATA * obj,
 
 	  obj_from_char (&obj, count);
 
+		if (!room_avail(hitch_room, obj, NULL))
+			{
+				send_to_char("There isn't enough room.\n", ch);
+				obj_to_char (obj, ch);
+				return;
+			}
+			
 	  act ("You put $p in $N.", false, ch, obj, victim,
 	       TO_CHAR | _ACT_FORMAT);
 	  act ("$n puts $p in $N.", false, ch, obj, victim,

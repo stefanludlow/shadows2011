@@ -390,6 +390,7 @@ void do_quit (CHAR_DATA * ch, char *argument, int cmd);
 void do_qscan (CHAR_DATA * ch, char *argument, int cmd);
 void do_rappend (CHAR_DATA * ch, char *argument, int cmd);
 void do_rblock (CHAR_DATA * ch, char *argument, int cmd);
+void do_rcap (CHAR_DATA * ch, char *argument, int cmd);
 void do_rclone (CHAR_DATA * ch, char *argument, int cmd);
 void do_rcret (CHAR_DATA * ch, char *argument, int cmd);
 void do_rddesc (CHAR_DATA * ch, char *argument, int cmd);
@@ -1439,6 +1440,7 @@ char *tilde_eliminator (char *string);
 char *reference_ip (char *guest_name, char *host);
 int check_account_flags (char *host);
 char *strip_small_minor(char * wounds, CHAR_DATA * ch);
+int room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch);
 /* Magical effect functions for spellcasting */
 
 void creation_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,

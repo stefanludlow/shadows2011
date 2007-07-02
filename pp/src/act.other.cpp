@@ -4081,6 +4081,27 @@ do_cover (CHAR_DATA *ch, char *argument, int cmd)
       return;
     }
 
+	switch (dir)
+		{
+		case 0:
+			dir_word = str_dup("north");
+		  break;
+		case 1:
+			dir_word = str_dup("east");
+		  break;
+		case 2:	
+			dir_word = str_dup( "south");
+		  break;
+		case 3:		
+			dir_word = str_dup("west");
+		  break;
+		case 4:	
+			dir_word = str_dup("up");
+		  break;
+		case 5:	
+			dir_word = str_dup( "down");
+		  break;
+		}	
 /** taking cover behind an object **/
 		arg2 = add_hash(argument);
 		
@@ -4241,6 +4262,9 @@ delayed_cover (CHAR_DATA * ch)
       break;
     }
 
+		if (IS_SET (ch->room->room_flags, RUINS))
+			mod += 30;
+			
 		if (IS_ENCUMBERED (ch))
 			mod -= 5;
 			

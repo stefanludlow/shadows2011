@@ -3264,6 +3264,13 @@ roomstat (CHAR_DATA * ch, char *name)
   sprintf (buf, "Rflags[%s]\n", buf2);
   send_to_char (buf, ch);
 
+  if (rm->capacity > 0)
+  	{
+  		room_avail(rm, NULL, NULL);
+		  sprintf (buf, "Capacity: %d  Contents: %d\n", rm->capacity, rm->occupants);
+  		send_to_char (buf, ch);
+		}
+		
   send_to_char ("Description:\n", ch);
   send_to_char (rm->description, ch);
   send_to_char ("\n", ch);
