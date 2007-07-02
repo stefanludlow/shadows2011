@@ -16,6 +16,7 @@
 #include "utility.h"
 #include "decl.h"
 #include "group.h"
+/* #include "dynamicvariable.h" */
 
 /* script program commands */
 
@@ -62,11 +63,14 @@
 #define RP_CRIMINALIZE  40      /* criminalize a person or room */
 #define RP_STRIP        41      /* takes a person's equipment and puts it all neatly in a bag */
 #define RP_CLAN         42      /* adds people to a clan at a certain rank */
+#define RP_TAKEMONEY 43 /* Take money from a player's inventory TBA: Take money from room too */
+// #define RP_SETVAR 44   /* Japheth's Variable additions */
 
 
 void rxp (CHAR_DATA * ch, char *prg);
 char *next_line (char *old);
-int doit (CHAR_DATA * ch, char *func, char *arg);
+// int doit (CHAR_DATA * ch, char *func, char *arg, DynamicVariableList *Variables);
+int doit(CHAR_DATA *ch, char *func, char *arg);
 void r_link (char *argument);
 void r_unlink (char *argument);
 void r_exit (char *argument);
@@ -98,9 +102,11 @@ void r_set (CHAR_DATA *ch, char *argument);
 void r_criminalize (CHAR_DATA *ch, char *argument);
 void r_strip (CHAR_DATA *ch, char *argument);
 void r_clan (CHAR_DATA *ch, char *argument);
+void r_takemoney(CHAR_DATA *ch, char *argument);
+// void r_setvar (char *argument);
 
 
-#define MAX_RPRG_NEST 10
+#define MAX_RPRG_NEST 20
 bool ifin[MAX_RPRG_NEST];
 int nNest = 1;
 int random_number = 0;
@@ -150,6 +156,8 @@ const char *rfuncs[] = {
   "criminalize",
   "strip",
   "clan",
+  "takemoney",
+//  "setvar",
   "\n"
 };
 
@@ -227,6 +235,7 @@ rxp (CHAR_DATA * ch, char *prg)
   int i, j, n;
   char *tprog, *line;
   char tmpf[MAX_STRING_LENGTH];
+ // DynamicVariableList Variables;
 
   for (i = 0; i < MAX_RPRG_NEST; i++)
     {
@@ -241,6 +250,35 @@ rxp (CHAR_DATA * ch, char *prg)
     {
       if (*line)
 	{
+
+		/* Japheth's Room Program Variables */
+/*		std::string strLine(line);
+		while (strLine.find("&&") != std::string::npos)
+	  {
+		  std::size_type first_index = strLine.find_first_of("&&");
+		  std::size_type index = first_index + 2;
+		  std::string TempString;
+
+		  while (strLine[index] != ' ')
+		  {
+			  TempString.push_back(strLine[index]);
+			  index++;
+		  }
+
+		  if (Variables.GetNamedVariable(TempString) != NULL)
+		  {
+			  strLine.replace(first_index, (index-first_index), (Variables.GetNamedVariable(TempString))->GetVariableContents());
+		  }
+		  else
+		  {
+			  strLine.erase(first_index, 2);
+		  }
+		  
+	  }
+
+		const_to_non_const_cstr(strLine.c_str(), line);
+*/		  /* End of Japheth's Room Program Variables */
+
 	  *func = '\0';
 	  arg = strpbrk (line, " ");
 	  if (line == NULL || arg == NULL)
@@ -254,6 +292,7 @@ rxp (CHAR_DATA * ch, char *prg)
 	  for (; isspace (*(arg + n)); n--);
 	  /* *(arg + (n - 1)) = '\0'; */
 	  *(arg + n) = '\0';
+//	  if (!doit (ch, func, arg, &Variables))
 	  if (!doit (ch, func, arg))
 	    {
 	      break;
@@ -338,6 +377,35 @@ reval (CHAR_DATA * ch, char *arg)
       for (; isspace (*dbuf); dbuf++);
       strncat (rbuf, tmp2, (tsiz - dsiz));
     }
+
+  /* Check to see if you can take specified money from character */
+  /* Usage: if can_take_money(amount, currency) */
+  if (!strncmp (sarg, "can_take_money", 14))
+  {
+	  int currency = 0;
+	  if (!strncmp (dbuf, "gondorian", 9))
+	  {
+		  currency = 0;
+	  }
+	  else if (!strncmp (dbuf, "orkish", 6) || !strncmp(dbuf, "yrkish", 6) || !strncmp(dbuf, "orcish", 6))
+	  {
+		  currency = 1;
+	  }
+	  else if (!strncmp (dbuf, "numenorean", 10))
+	  {
+		  currency = 2;
+	  }
+	  else
+	  {
+		  ifin[nNest] = 1;
+		  return;
+	  }
+
+	  if (!can_subtract_money(ch, atoi(rbuf), currency))
+	  {
+		  ifin[nNest] = 1;
+	  }
+  }
 /* Check to see if a mob exists in a given room */
 /* Usage: if mexist(mobvnum,roomvnum)           */
 
@@ -807,7 +875,8 @@ reval (CHAR_DATA * ch, char *arg)
 }
 
 int
-doit (CHAR_DATA * ch, char *func, char *arg)
+//doit (CHAR_DATA * ch, char *func, char *arg, DynamicVariableList *Variables)
+doit (CHAR_DATA *ch, char *func, char *arg)
 {
   int i;
   char tmp[MAX_STRING_LENGTH];
@@ -826,6 +895,10 @@ doit (CHAR_DATA * ch, char *func, char *arg)
 	  if (!ifin[nNest])
 	     r_load_obj (ch, arg);
       return 1;
+	case RP_TAKEMONEY:
+		if (!ifin[nNest])
+			r_takemoney(ch, arg);
+		return 1;
     case RP_EXIT:
       if (!ifin[nNest])
 	r_exit (arg);
@@ -999,6 +1072,10 @@ doit (CHAR_DATA * ch, char *func, char *arg)
 	return 0;
       else
 	return 1;
+/*	case RP_SETVAR:
+	  if (!ifin[nNest])
+        r_setvar(arg, Variables);
+	  return 1;*/
     default:
       system_log ("ERROR: unknown command in program", true);
       return 0;
@@ -2523,3 +2600,224 @@ delete [] arg2;
 delete [] arg3;
 
 }
+
+void r_takemoney ( CHAR_DATA *ch, char * argument)
+{
+	std::string ArgumentList(argument);
+	std::string ThisArgument("");
+	int TargetVnum = -1, Count = 0, Currency = 0;
+
+	ArgumentList = one_argument(ArgumentList, ThisArgument);
+/*	if (!ThisArgument.empty())
+	{
+		if (is_number(ThisArgument.c_str()) && ThisArgument.c_str() == "-1") // Room target disabled, must be -1 (player) for now.
+		{
+			TargetVnum = atoi(ThisArgument.c_str());
+		}
+		else
+		{
+			send_to_gods("Error: Non supported target argument in r_takemoney");
+			return;
+		}
+	}
+	else
+	{
+		send_to_gods("Error: Missing target argument in r_takemoney");
+		return;
+	} */ // Currently unneccisary as the taking money from room functionality is not in place
+
+	ArgumentList = one_argument(ArgumentList, ThisArgument);
+	if (!ThisArgument.empty())
+	{
+		if (is_number(ThisArgument.c_str()) && atoi(ThisArgument.c_str()) > 0)
+		{
+			Count = atoi(ThisArgument.c_str());
+		}
+		else
+		{
+			send_to_gods("Error: Invalid amount argument in r_takemoney");
+			return;
+		}
+	}
+	else
+	{
+		send_to_gods("Error: Missing amount argument in r_takemoney");
+		return;
+	}
+
+	ArgumentList = one_argument(ArgumentList, ThisArgument);
+	if (!ThisArgument.empty())
+	{
+		if (ThisArgument.find("gondorian") != std::string::npos)
+			Currency = 0;
+		else if (ThisArgument.find("numenorean") != std::string::npos)
+			Currency = 2;
+		else if (ThisArgument.find("orkish") != std::string::npos || ThisArgument.find("yrkish") != std::string::npos || ThisArgument.find("orcish") != std::string::npos)
+			Currency = 1;
+		else
+		{
+			send_to_gods("Error: Invalid currency type in r_takemoney");
+			return;
+		}
+	}
+	else
+	{
+		send_to_gods("Error: Missing currency argument in r_takemoney");
+		return;
+	}
+
+	if (TargetVnum == -1)
+	{
+		subtract_money(ch, (-1*Count), Currency);
+		return;
+	}
+}
+/*
+void r_setvar (char *argument, DynamicVariableList *Variables)
+{
+	std::string ArgumentList(argument), ThisArgument;
+
+	ArgumentList = one_argument(ArgumentList, ThisArgument);
+	if (ThisArgument.find("declare")  != std::string::npos)
+	{
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		if (ThisArgument.empty() || Variables.GetNamedVariable(ThisArgument) != NULL)
+		{
+			system_log("Error: Already declared variable in setvar.", true);
+			return;
+		}
+
+		DynamicVariable NewVar(ThisArgument);
+		Variables.push_back(NewVar);
+	}
+	else if (ThisArgument.find("add")  != std::string::npos)
+	{
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		if (ThisArgument.empty())
+		{
+			system_log("Error: No argument after 'setvar arg'", true);
+			return;
+		}
+		std::string VarName(ThisArgument);
+		if (Variables.GetNamedVariable(VarName) == NULL)
+		{
+			system_log("Error: Invalid variable in setvar", true);
+			return;
+		}
+
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		if (is_number(ThisArgument.c_str()) && is_number((Variables.GetNamedVariable(VarName))->GetVariableContents()))
+		{
+			std::ostringstream conversion << atoi(Variables.GetNamedVariable(VarName)->GetVariableContent().c_str())+atoi(ThisArgument.c_str());
+			Variables.GetNamedVariable(VarName)->SetVariableContents(converstion.str());
+		}
+		else
+		{
+			Variables.GetNamedVariable(VarName)->SetVariableContents(Variables.GetNamedVariable(VarName)->GetVariableContents() + ThisArgument);
+		}
+	}
+	else if (ThisArgument.find("assign") != std::string::npos)
+	{
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		if (ThisArgument.empty())
+		{
+			system_log("Error: No argument after 'setvar arg'", true);
+			return;
+		}
+		std::string VarName(ThisArgument);
+		if (Variables.GetNamedVariable(VarName) == NULL)
+		{
+			system_log("Error: Invalid variable in setvar", true);
+			return;
+		}
+
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		Variables.GetNamedVariable(VarName)->SetVariableContent(ThisArgument);
+	}
+	else if (ThisArgument.find("reset") != std::string::npos)
+	{
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		if (ThisArgument.empty())
+		{
+			system_log("Error: No argument after 'setvar arg'", true);
+			return;
+		}
+		if (Variables.GetNamedVariable(ThisArgument) == NULL)
+		{
+			system_log("Error: Invalid variable in setvar", true);
+			return;
+		}
+		Variables.GetNamedVariable(ThisArgument)->SetVariableContent("");
+	}
+	else if (ThisArgument.find("divide") != std::string::npos)
+	{
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		if (ThisArgument.empty())
+		{
+			system_log("Error: No argument after 'setvar arg'", true);
+			return;
+		}
+		std::string VarName(ThisArgument);
+		if (Variables.GetNamedVariable(VarName) == NULL)
+		{
+			system_log("Error: Invalid variable in setvar", true);
+			return;
+		}
+
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		if (!is_number(ThisArgument.c_str()))
+		{
+			system_log("Error: Non numeric value given to divide in setvar", true);
+			return;
+		}
+		std::ostringstream conversion << (atoi(Variables.GetNamedVariable(VarName)->GetVariableContent())/atoi(ThisArgument.c_str()));
+		Variables.GetNamedVariable(VarName)->SetVariableContent(conversion.str());
+	}
+	else if (ThisArgument.find("multiply") != std::string::npos)
+	{
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		if (ThisArgument.empty())
+		{
+			system_log("Error: No argument after 'setvar arg'", true);
+			return;
+		}
+		std::string VarName(ThisArgument);
+		if (Variables.GetNamedVariable(VarName) == NULL)
+		{
+			system_log("Error: Invalid variable in setvar", true);
+			return;
+		}
+
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		if (!is_number(ThisArgument.c_str()))
+		{
+			system_log("Error: Non numeric value given to divide in setvar", true);
+			return;
+		}
+		std::ostringstream conversion << (atoi(Variables.GetNamedVariable(VarName)->GetVariableContent()) * atoi(ThisArgument.c_str()));
+		Variables.GetNamedVariable(VarName)->SetVariableContent(conversion.str());
+	}
+	else if (ThisArgument.find("addrandom") != std::string::npos)
+	{
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		if (ThisArgument.empty())
+		{
+			system_log("Error: No argument after 'setvar arg'", true);
+			return;
+		}
+
+		if (Variables.GetNamedVariable(VarName) == NULL)
+		{
+			system_log("Error: Invalid variable in setvar", true);
+			return;
+		}
+		std::ostringstream conversion << random_number;
+		Variables.GetNamedVariable(VarName)->SetVariableContent(conversion.str());
+	}
+	else
+	{
+		system_log("Unknown argument type for Setvar.", true);
+		return;
+	}
+}
+*/

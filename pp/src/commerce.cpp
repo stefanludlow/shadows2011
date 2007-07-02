@@ -5663,7 +5663,7 @@ can_subtract_money (CHAR_DATA * ch, int farthings_to_subtract,
 
   return 1;
 }
-
+// If you give the subtract_money function a negative farthings_to_subtract, it will supress all output to the player
 void
 subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
 {
@@ -5672,6 +5672,13 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
   bool change = false;
   int money = 0, location;
   bool container = false;
+  bool SupressOutput = false; // Japheth's addition
+
+  if (farthings_to_subtract < 0)
+  {
+	  farthings_to_subtract *= -1;
+	  SupressOutput = true;
+  }
 
   for (location = 0; location < MAX_WEAR; location++)
     {
@@ -5793,6 +5800,11 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
 
   money -= farthings_to_subtract;
 
+  if (money <= 0) // Serious bugfix - Japheth 10th May 2007
+  {
+	  return;
+  }
+
   obj = ch->delay_obj;
   ch->delay_obj = NULL;
 
@@ -5905,7 +5917,8 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
       tobj->count = money;
       change = true;
     }
-
+  if (!SupressOutput)
+  {
   if (container)
     send_to_char
       ("\nRifling through your belongings, you retrieve your coin.\n", ch);
@@ -5922,6 +5935,7 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
       send_to_char ("\n", ch);
       act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
     }
+  }
 
   ch->delay_obj = NULL;
 }
