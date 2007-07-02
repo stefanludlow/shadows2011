@@ -889,7 +889,7 @@ argument_interpreter (char *argument, char *first_arg, char *second_arg)
 }
 
 int
-is_number (char *str)
+is_number (const char *str)
 {
   int look_at;
 

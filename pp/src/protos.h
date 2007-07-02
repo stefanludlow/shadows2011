@@ -886,7 +886,7 @@ void renum_zone_table (void);
 void update_room_tracks (void);
 int is_tagged (char *name_str);
 void update_char_objects (CHAR_DATA * ch);
-int is_number (char *str);
+int is_number (const char *str);
 int do_simple_move (CHAR_DATA * ch, int dir, int following, int falling,
 		    int speed);
 void raw_kill (CHAR_DATA * ch);
