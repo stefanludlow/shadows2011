@@ -257,8 +257,11 @@ drowned (CHAR_DATA * ch)
   float damage = 0.0;
   int roll = 0;
 
-  if (!IS_MORTAL (ch) || IS_SET (ch->affected_by, AFF_BREATHE_WATER)
-      || number (0, 9))
+  if (!IS_MORTAL (ch) 
+      || IS_SET (ch->affected_by, AFF_BREATHE_WATER)
+      || number (0, 9)
+      || (IS_SET (ch->act, ACT_FLYING) && !(ch->room->sector_type == SECT_UNDERWATER))
+     )
     {
       return 0;
     }
@@ -5560,6 +5563,10 @@ do_track (CHAR_DATA * ch, char *argument, int cmd)
   char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
   CHAR_DATA *tch;
   bool nodded = false;
+
+  // If an npc was commanded by a player, disallow the track to succeed.
+  if (cmd > 0 && IS_NPC (ch) && ((GET_TRUST (ch)) >= (cmd - 1)))
+    return;
 
   if (!IS_NPC (ch))
     {

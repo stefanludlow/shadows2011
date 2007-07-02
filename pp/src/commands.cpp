@@ -529,7 +529,7 @@ show_to_watchers (CHAR_DATA * ch, char *command)
 }
 
 void
-command_interpreter (CHAR_DATA * ch, char *argument)
+command_interpreter (CHAR_DATA * ch, char *argument, int cmders_level)
 {
   char buf[MAX_STRING_LENGTH];
   char *command_args, *p, *social_args;
@@ -618,7 +618,7 @@ command_interpreter (CHAR_DATA * ch, char *argument)
 	  while (alias)
 	    {
 
-	      command_interpreter (ch, alias->line);
+	      command_interpreter (ch, alias->line, 9);
 
 	      if (ch->deleted)
 		return;
@@ -658,8 +658,13 @@ command_interpreter (CHAR_DATA * ch, char *argument)
       send_to_char ("Eh?\n\r", ch);
       return;
     }
+  /* 
+Need to pass the CHAR_DATA pointer for the person who made the command and modify
+the following line to test the commanding char's trust against the trust level for
+the command.  - Methuselah
+  */
 
-  if (!*commands[i].command || cmd_level > GET_TRUST (ch))
+  if (!*commands[i].command || cmd_level > GET_TRUST (ch) || cmd_level > cmders_level)
     {
       if (!social (ch, argument))
 	{
@@ -834,7 +839,7 @@ command_interpreter (CHAR_DATA * ch, char *argument)
   if (!i)			/* craft_command */
     craft_command (ch, command_args, craft_affect);
   else
-    (*commands[i].proc) (ch, command_args, 0);
+    (*commands[i].proc) (ch, command_args, cmders_level + 1); // changes zero to cmders_level
 
   last_descriptor = NULL;
 }

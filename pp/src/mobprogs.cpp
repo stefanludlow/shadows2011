@@ -1518,7 +1518,7 @@ mobprog (CHAR_DATA * ch, CHAR_DATA * mob, MOBPROG_DATA * program, int trigger,
 	  mob_string (mob, &line_ptr, command);
 
 	  if (*command)
-	    command_interpreter (mob, command);
+	    command_interpreter (mob, command, 9);
 
 	  if (mob->deleted)
 	    return;

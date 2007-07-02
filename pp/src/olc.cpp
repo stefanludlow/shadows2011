@@ -3470,7 +3470,7 @@ do_zname (CHAR_DATA * ch, char *argument, int cmd)
 
   sprintf (buf, "zset %d name %s", ch->room->zone, argument);
 
-  command_interpreter (ch, buf);
+  command_interpreter (ch, buf, 9);
 }
 
 void
@@ -11262,14 +11262,14 @@ do_outfit (CHAR_DATA * ch, char *argument, int cmd)
       one_argument (tobj->name, name);
 
       sprintf (buf, "get %s", name);
-      command_interpreter (mob, buf);
+      command_interpreter (mob, buf, 9);
 
       if (GET_ITEM_TYPE (tobj) == ITEM_WEAPON)
 	sprintf (buf, "wield %s", name);
       else
 	sprintf (buf, "wear %s", name);
 
-      command_interpreter (mob, buf);
+      command_interpreter (mob, buf, 9);
     }
 }
 

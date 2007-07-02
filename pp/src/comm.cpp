@@ -479,7 +479,7 @@ game_loop (int s)
 		  if (point->showstr_point)
 		    show_string (point, comm);
 		  else if (point->character)
-		    command_interpreter (point->character, comm);
+		    command_interpreter (point->character, comm, 9);
 		}
 	      else
 		nanny (point, comm);

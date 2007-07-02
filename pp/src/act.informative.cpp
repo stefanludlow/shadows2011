@@ -2742,7 +2742,12 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	    strcpy (buffer, "#5A nameless one#0");
 
 	  if (IS_SWIMMING (i))
-	    strcat (buffer, " is here, swimming.");
+	    {
+	      if ( IS_SET(i->act, ACT_FLYING ))
+	        strcat(buffer, " is here, flying.");
+	      else 
+	        strcat (buffer, " is here, swimming.");
+	     }
 	  else
 	    switch (GET_POS (i))
 	      {

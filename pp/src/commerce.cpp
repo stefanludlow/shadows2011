@@ -3165,7 +3165,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("\n", ch);
       sprintf (buf, ": sets *%s down nearby, nodding to ~%s.", buf2,
 	       ch->tname);
-      command_interpreter (keeper, buf);
+      command_interpreter (keeper, buf, 9);
       obj_to_room (tobj, keeper->in_room);
     }
   else
@@ -4583,7 +4583,7 @@ do_stable (CHAR_DATA * ch, char *argument, int cmd)
       name_to_ident (ch->hitchee->mount, buf2);
       sprintf (buf, "tell %s Have #5%s#0 dismount your hitch first.",
 	       buf2, char_short (ch->hitchee->mount));
-      command_interpreter (keeper, buf);
+      command_interpreter (keeper, buf, 9);
     }
 
   animal = ch->hitchee;
@@ -4730,7 +4730,7 @@ unstable (CHAR_DATA * ch, OBJ_DATA * ticket, CHAR_DATA * keeper)
     {
       name_to_ident (ch, buf2);
       sprintf (buf, "tell %s Sorry, that's not one of my tickets.", buf2);
-      command_interpreter (keeper, buf);
+      command_interpreter (keeper, buf, 9);
       return;
     }
 
@@ -4741,7 +4741,7 @@ unstable (CHAR_DATA * ch, OBJ_DATA * ticket, CHAR_DATA * keeper)
       name_to_ident (ch, buf2);
       sprintf (buf, "tell %s Yeah, that's my ticket, but I don't have "
 	       "anyting in that stall.", buf2);
-      command_interpreter (keeper, buf);
+      command_interpreter (keeper, buf, 9);
       return;
     }
 

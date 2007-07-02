@@ -3169,7 +3169,7 @@ delayed_alert (CHAR_DATA * ch)
 
   sprintf (buf, "%s", dirs[dir]);
 
-  command_interpreter (ch, buf);
+  command_interpreter (ch, buf, 9);
 
   ch->speed = save_speed;
 

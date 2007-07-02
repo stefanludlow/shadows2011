@@ -314,13 +314,14 @@ mob_wander (CHAR_DATA * ch)
       if (room_exit_zone == 76)
 	room_exit_zone = 10;
 
-      if (!IS_SET (room_exit->room_flags, NO_MOB) &&
-	  !(IS_MERCHANT (ch) &&
-	    IS_SET (room_exit->room_flags, NO_MERCHANT)) &&
-	  !(ch->mob->noaccess_flags & room_exit->room_flags) &&
-	  (!ch->mob->access_flags
-	   || ch->mob->access_flags & room_exit->room_flags)
-	  && !(IS_SET (ch->act, ACT_STAY_ZONE) && zone != room_exit_zone))
+      if (!IS_SET (room_exit->room_flags, NO_MOB) 
+          && !(IS_MERCHANT (ch) 
+          && IS_SET (room_exit->room_flags, NO_MERCHANT)) 
+          && !(ch->mob->noaccess_flags & room_exit->room_flags) 
+          && (!ch->mob->access_flags || ch->mob->access_flags & room_exit->room_flags)
+	  && !(IS_SET (ch->act, ACT_STAY_ZONE) && zone != room_exit_zone)
+	  && !(IS_SET (ch->act, ACT_FLYING) && (room_exit->sector_type == SECT_UNDERWATER))
+	  )
 	exit_tab[num_exits++] = i;
     }
 
@@ -2192,7 +2193,7 @@ target_acquisition (CHAR_DATA * ch)
 	      if (!cue.empty ())
 		{
 		  strcpy (buf, cue.c_str ());
-		  command_interpreter (ch, buf);
+		  command_interpreter (ch, buf, 9);
 		}
 	    }
 
@@ -2228,7 +2229,7 @@ target_acquisition (CHAR_DATA * ch)
 		      if (!cue.empty ())
 			{
 			  strcpy (buf, cue.c_str ());
-			  command_interpreter (ch, buf);
+			  command_interpreter (ch, buf, 9);
 			}
 		    }
 		}

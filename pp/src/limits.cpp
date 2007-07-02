@@ -646,7 +646,7 @@ point_update (void)
 			{
 			  char reflex[AVG_STRING_LENGTH] = "";
 			  strcpy (reflex, p+2);
-			  command_interpreter (ch, reflex);
+			  command_interpreter (ch, reflex, 9);
 			}
 		    }
 		}
@@ -757,7 +757,7 @@ hourly_update (void)
 		  if (!cue.empty ())
 		    {
 		      strcpy (your_buf, cue.c_str ());
-		      command_interpreter (ch, your_buf);
+		      command_interpreter (ch, your_buf, 9);
 		    }
 		}
 	    }
