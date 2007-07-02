@@ -1944,13 +1944,11 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 //Healers who are fighting, don't get the extra info
 
 // header info
-			name_to_ident (tch, name_buf);
-			sprintf (name_buf, "%s person", name_buf);
 			
       send_to_char ("\n", ch);
        if (IS_MORTAL(ch))
         {
-          sprintf (buf, "%s's wounds:", name_buf);
+          sprintf (buf, "%s's wounds:", char_short(tch));
         }
       else
         {
