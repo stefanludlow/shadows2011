@@ -990,6 +990,8 @@ do_say (CHAR_DATA * ch, char *argument, int cmd)
   char *utters[] = { "say", "sing", "tell", "murmur", "wouldbewhisper" };
   bool bIsWithGroup = false;
 
+  if (cmd == 10)
+    cmd = 0;
   
   if (ch->room->sector_type == SECT_UNDERWATER)
     {
