@@ -162,7 +162,7 @@ const struct command_data commands[] = {
   {"open", do_open, SIT, C_BLD},
   {"order", do_order, REST, C_BLD},
   {"outside", do_outside, FIGHT, C_HID | C_DOA | C_BLD},
-  {"ownership", do_ownership, REST},
+  //{"ownership", do_ownership, REST},
   {"pardon", do_pardon, REST, C_BLD},
   {"palm", do_palm, SIT, C_WLK | C_BLD | C_HID | C_MNT},
   {"pay", do_pay, REST, C_WLK | C_BLD},

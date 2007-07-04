@@ -4338,7 +4338,7 @@ under_cover (CHAR_DATA *ch)
 
 	return (0);
 }
-
+/***** non-functional ***
 // Command Ownership, for transfering ownership of mobs 
 // Syntax: OWNERSHIP TRANSFER <mob> <character> or OWNERSHIP SET <mob> <character>
 void do_ownership (CHAR_DATA *ch, char *argument, int command)
@@ -4348,6 +4348,14 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 	bool transfer = true;
 	
 	ArgumentList = one_argument(ArgumentList, ThisArgument);
+
+	if (ThisArgument.find("?", 0) != std::string::npos)
+	{
+		send_to_char("Syntax is:\n", ch);
+		send_to_char("ownership transfer <mob> <character>\n", ch);
+		send_to_char("(Staff level)\nownership set <mob> <character> \n", ch);
+		return;
+	}
 	if (ThisArgument.find("set", 0) != std::string::npos)
 	{
 		transfer = false;
@@ -4433,3 +4441,4 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 		return;
 	}
 }
+************/
