@@ -4297,6 +4297,40 @@ do_stat (CHAR_DATA * ch, char *argument, int cmd)
 
   half_chop (argument, arg1, arg2);
 
+
+	if  (GET_TRUST(ch) < 2)
+		{
+			if (*arg1 != 'o' && *arg1 != 'r')
+				{
+					s ("Usage: stat <r|o> name\n");
+    			s ("");
+					s ("    r         room");
+					s ("    o         object");
+					s ("");
+      
+      return;
+				}
+		}
+		
+	if  (GET_TRUST (ch) < 3)
+		{
+			if (*arg1 != 'o' && 
+					*arg1 != 'r' &&
+					*arg1 != 'm' &&
+					*arg1 != 'f' )
+				{
+					s ("Usage: stat <r|o> name\n");
+    			s ("");
+					s ("    r         room");
+					s ("    m         mobile");
+					s ("    o         object");
+					s ("    f         craft");
+					s ("");
+   		   return;
+				}	
+		}
+		
+		
   if (!*arg1)
     {
       s ("Usage: stat <r|c|m|o|a|e|f> name\n");
@@ -8348,7 +8382,8 @@ do_swap (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	if (z > 99)
 		{
-		send_to_char ("Please choose a zone between 1 and 98.\n", ch);
+  			send_to_char ("Please use a zone number between 1 and 99\n",
+      ch);
 		return;
 		}
       if (str_cmp (ch->tname, zone_table[z].lead)

@@ -6672,6 +6672,13 @@ do_mobile (CHAR_DATA * ch, char *argument, int cmd)
 	  return;
 	}
 
+		if (GET_TRUST(ch) < 3)
+			{
+				 send_to_char
+				("You are not authorized to work with mobiles.\n", ch);
+				return;
+			}
+
       ch->pc->edit_mob = 0;
       ch->pc->edit_player = edit_mobile;
 

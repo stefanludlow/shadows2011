@@ -238,7 +238,7 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 			//if ((dir == 6) && (ch->in_room > 100000))
 			//	troom = vtor(ch->was_in_room);
 
-	/** harsh way to deal with throwing things out without crashing the game	**/	
+	/*** harsh way to deal with throwing things out without crashing the game	**/	
 	  if ((dir == 6) && (ch->in_room > 100000))
 		{
 		obj_from_char (&tobj, 0);
