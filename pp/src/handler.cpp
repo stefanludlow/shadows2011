@@ -4488,6 +4488,16 @@ The new mob will take the best skill level between his old skill and the new ski
 
 /******** objects and equip for all ***/
 
+	for (jdex = 1; jdex < MAX_WEAR; jdex++)
+	  {
+	    if (get_equip (ch, jdex))
+		{
+		nobj = unequip_char (ch, jdex);
+		obj_to_char (nobj, newMob);
+		equip_char (newMob, nobj, jdex);
+		}
+	  }
+
 	if (ch->right_hand)
 		{
 		nobj = ch->right_hand;
@@ -4506,15 +4516,6 @@ The new mob will take the best skill level between his old skill and the new ski
 		newMob->left_hand = nobj;
 		}
 	
-	for (jdex = 1; jdex < MAX_WEAR; jdex++)
-		{
-		if (get_equip (ch, jdex))
-			{
-			nobj = unequip_char (ch, jdex);
-			obj_to_char (nobj, newMob);
-			equip_char (newMob, nobj, jdex);
-			}
-		}
 	
 	newMob->act |= ACT_STAYPUT;
 	extract_char (ch);
