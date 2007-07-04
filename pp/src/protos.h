@@ -362,6 +362,7 @@ void do_oset (CHAR_DATA * ch, char *argument, int cmd);
 void do_ounused (CHAR_DATA * ch, char *argument, int cmd);
 void do_outfit (CHAR_DATA * ch, char *argument, int cmd);
 void do_outside (CHAR_DATA * ch, char *argument, int cmd);
+void do_ownership (CHAR_DATA *ch, char *argument, int cmd);
 void do_palm (CHAR_DATA * ch, char *argument, int cmd);
 void do_pay (CHAR_DATA * ch, char *argument, int cmd);
 void do_payday (CHAR_DATA * ch, char *argument, int cmd);

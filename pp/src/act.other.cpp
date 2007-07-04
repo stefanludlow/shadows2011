@@ -4338,3 +4338,98 @@ under_cover (CHAR_DATA *ch)
 
 	return (0);
 }
+
+// Command Ownership, for transfering ownership of mobs 
+// Syntax: OWNERSHIP TRANSFER <mob> <character> or OWNERSHIP SET <mob> <character>
+void do_ownership (CHAR_DATA *ch, char *argument, int command)
+{
+	CHAR_DATA *property, *target;
+	std::string ArgumentList = argument, ThisArgument;
+	bool transfer = true;
+	
+	ArgumentList = one_argument(ArgumentList, ThisArgument);
+	if (ThisArgument.find("set", 0) != std::string::npos)
+	{
+		transfer = false;
+	}
+	ArgumentList = one_argument(ArgumentList, ThisArgument);
+	if (ThisArgument.empty())
+	{
+		send_to_char ("Which individual do you wish to transfer ownership of?\n", ch);
+	}
+	property = get_char_room_vis (ch, ThisArgument.c_str());
+	if (!property)
+	{
+		send_to_char ("Cannot find mobile with keyword \"#2", ch);
+		send_to_char (ThisArgument.c_str(), ch);
+		send_to_char ("#0\".\n", ch);
+		return;		
+	}
+	if (!IS_NPC(property))
+	{
+		send_to_char ("You have no authority to deliniate the ownership of this individual.\n", ch);
+		return;
+	}
+	if (strcmp(property->mob->owner, ch->tname) && !GET_TRUST(ch))
+	{
+		send_to_char ("You have no authority to deliniate the ownership of this individual.\n", ch);
+		return;
+	}
+	ArgumentList = one_argument(ArgumentList, ThisArgument);
+	if (ThisArgument.empty())
+	{
+		send_to_char ("Transfer the ownership to whom?\n", ch);
+		return;
+	}
+	if (!transfer && GET_TRUST(ch))
+	{
+		ThisArgument[0] = toupper(ThisArgument[0]);
+		sprintf(property->mob->owner, "%s", ThisArgument.c_str());
+		send_to_char ("Setting ownership of #5", ch);
+		send_to_char (char_short(property), ch);
+		send_to_char ("#0 to \"#2", ch);
+		send_to_char (ThisArgument.c_str(), ch);
+		send_to_char ("#0\".", ch);
+		return;
+	}
+	else
+	{
+		target = get_char_room_vis(ch, ThisArgument.c_str());
+		if (!target)
+		{
+			send_to_char ("You do not see a person with the keyword \"#2", ch);
+			send_to_char (ThisArgument.c_str(), ch);
+			send_to_char ("#0\" to transfer #5", ch);
+			send_to_char (char_short(property), ch);
+			send_to_char ("#0 to.\n", ch);
+			return;
+		}
+		ArgumentList = one_argument(ArgumentList, ThisArgument);
+		if (IS_NPC(target) && (ThisArgument.find('!') == std::string::npos))
+		{
+			send_to_char ("You are proposing to transfer ownership of #5", ch);
+			send_to_char (char_short(property), ch);
+			send_to_char ("#0 to #5", ch);
+			send_to_char (char_short(target), ch);
+			send_to_char ("#0, who is an NPC. Please confirm by typing #6OWNERSHIP TRANSFER <property> <target> !#0\n", ch);
+			return;
+		}
+		std::string Output;
+		Output.assign(target->tname);
+		Output[0] = toupper(Output[0]);
+		sprintf(property->mob->owner, "%s", Output.c_str());
+		send_to_char ("You transfer ownership of #5", ch);
+		send_to_char (char_short(property), ch);
+		send_to_char ("#0 to #5", ch);
+		send_to_char (char_short(target), ch);
+		send_to_char ("#0.\n", ch);
+		Output.assign("#5");
+		Output.append(char_short(ch));
+		Output.append("#0 transfers ownership of #5");
+		Output.append(char_short(property));
+		Output.append("#0 to you.\n");
+		Output[2] = toupper(Output[2]);
+		send_to_char (Output.c_str(), target);
+		return;
+	}
+}
