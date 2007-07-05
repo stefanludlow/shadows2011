@@ -1809,7 +1809,7 @@ sa_get (SECOND_AFFECT * sa)
 
   sprintf (buf, "get .c %d", sa->obj->coldload_id);
 
-  command_interpreter (sa->ch, buf, 9);
+  command_interpreter (sa->ch, buf);
 }
 
 void
@@ -1840,7 +1840,7 @@ sa_wear (SECOND_AFFECT * sa)
 
   if (!CAN_WEAR (sa->obj, ITEM_WEAR_SHIELD)
       && GET_ITEM_TYPE (sa->obj) != ITEM_SHIELD)
-    command_interpreter (sa->ch, buf, 9);
+    command_interpreter (sa->ch, buf);
 }
 
 void
@@ -1849,10 +1849,10 @@ sa_close_door (SECOND_AFFECT * sa)
   char buf[MAX_STRING_LENGTH];
 
   sprintf (buf, "close %s", sa->info);
-  command_interpreter (sa->ch, buf, 9);
+  command_interpreter (sa->ch, buf);
 
   sprintf (buf, "lock %s", sa->info);
-  command_interpreter (sa->ch, buf, 9);
+  command_interpreter (sa->ch, buf);
 }
 
 void
@@ -3433,9 +3433,9 @@ do_knock (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  one_argument (room->dir_option[rev_dir[door]]->keyword, key_name);
 	  sprintf (buf, "unlock %s %s", key_name, dirs[rev_dir[door]]);
-	  command_interpreter (tch, buf, 9);
+	  command_interpreter (tch, buf);
 	  sprintf (buf, "open %s %s", key_name, dirs[rev_dir[door]]);
-	  command_interpreter (tch, buf, 9);
+	  command_interpreter (tch, buf);
 	  sprintf (buf, "%s %s", key_name, dirs[rev_dir[door]]);
 	  add_second_affect (SA_CLOSE_DOOR, IS_NPC (ch) ? 5 : 10,
 			     tch, NULL, buf, 0);
@@ -3767,9 +3767,9 @@ do_nod (CHAR_DATA * ch, char *argument, int cmd)
 
 	      one_argument (EXIT (victim, dir)->keyword, key_name);
 	      sprintf (buf, "unlock %s %s", key_name, dirs[dir]);
-	      command_interpreter (victim, buf, 9);
+	      command_interpreter (victim, buf);
 	      sprintf (buf, "open %s %s", key_name, dirs[dir]);
-	      command_interpreter (victim, buf, 9);
+	      command_interpreter (victim, buf);
 	      sprintf (buf, "%s %s", key_name, dirs[dir]);
 	      add_second_affect (SA_CLOSE_DOOR, 10, victim, NULL, buf, 0);
 
@@ -3791,9 +3791,9 @@ do_nod (CHAR_DATA * ch, char *argument, int cmd)
 	    {
 	      one_argument (EXIT (victim, dir)->keyword, key_name);
 	      sprintf (buf, "unlock %s %s", key_name, dirs[dir]);
-	      command_interpreter (victim, buf, 9);
+	      command_interpreter (victim, buf);
 	      sprintf (buf, "open %s %s", key_name, dirs[dir]);
-	      command_interpreter (victim, buf, 9);
+	      command_interpreter (victim, buf);
 	      sprintf (buf, "%s %s", key_name, dirs[dir]);
 	      add_second_affect (SA_CLOSE_DOOR, 10, victim, NULL, buf, 0);
 
@@ -4372,11 +4372,12 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 		send_to_char ("#0\".\n", ch);
 		return;		
 	}
-	if (!IS_NPC(property))
+	if (!IS_NPC(property) && !property->mob->owner)
 	{
 		send_to_char ("You have no authority to deliniate the ownership of this individual.\n", ch);
 		return;
 	}
+	
 	if (strcmp(property->mob->owner, ch->tname) && !GET_TRUST(ch))
 	{
 		send_to_char ("You have no authority to deliniate the ownership of this individual.\n", ch);

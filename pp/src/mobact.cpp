@@ -2193,7 +2193,7 @@ target_acquisition (CHAR_DATA * ch)
 	      if (!cue.empty ())
 		{
 		  strcpy (buf, cue.c_str ());
-		  command_interpreter (ch, buf, 9);
+		  command_interpreter (ch, buf);
 		}
 	    }
 
@@ -2229,7 +2229,7 @@ target_acquisition (CHAR_DATA * ch)
 		      if (!cue.empty ())
 			{
 			  strcpy (buf, cue.c_str ());
-			  command_interpreter (ch, buf, 9);
+			  command_interpreter (ch, buf);
 			}
 		    }
 		}

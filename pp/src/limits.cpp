@@ -646,14 +646,16 @@ point_update (void)
 			{
 			  char reflex[AVG_STRING_LENGTH] = "";
 			  strcpy (reflex, p+2);
-			  command_interpreter (ch, reflex, 9);
+			  command_interpreter (ch, reflex);
 			}
 		    }
 		}
 	    }
-  }
 
-// Craft Delay
+
+
+	}
+
       if ((af = get_affect (ch, MAGIC_CRAFT_DELAY)))
 	{
 	  if (time (0) >= af->a.spell.modifier)
@@ -757,7 +759,7 @@ hourly_update (void)
 		  if (!cue.empty ())
 		    {
 		      strcpy (your_buf, cue.c_str ());
-		      command_interpreter (ch, your_buf, 9);
+		      command_interpreter (ch, your_buf);
 		    }
 		}
 	    }

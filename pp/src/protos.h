@@ -1070,7 +1070,7 @@ int real_skill (CHAR_DATA * ch, int skill);
 int is_in_room (CHAR_DATA * ch, CHAR_DATA * target);
 void ve_process (struct descriptor_data *c, char *buf);
 void ve_setup_screen (struct descriptor_data *c);
-void command_interpreter (CHAR_DATA * ch, char *argument, int cmders_level);
+void command_interpreter (CHAR_DATA * ch, char *argument);
 void argument_interpreter (char *argument, char *first_arg, char *second_arg);
 int fill_word (char *argument);
 void half_chop (char *string, char *arg1, char *arg2);

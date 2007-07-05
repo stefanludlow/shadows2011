@@ -384,7 +384,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 		    {
 		      char reflex[AVG_STRING_LENGTH] = "";
 		      strcpy (reflex, p+2);
-		      command_interpreter (ch, reflex, 9);
+												command_interpreter (ch, reflex);
 		    }
 		}
 							} // for N n
@@ -1181,7 +1181,7 @@ npc_treatment (CHAR_DATA * ch, CHAR_DATA * mob, char *argument)
     {
       sprintf (buf, "whisper %s I don't see any wounds on you to treat!",
 	       buf2);
-      command_interpreter (mob, buf, 9);
+      command_interpreter (mob, buf);
       return;
     }
 
@@ -1233,14 +1233,14 @@ npc_treatment (CHAR_DATA * ch, CHAR_DATA * mob, char *argument)
 	    {
 	      sprintf (buf, "whisper %s I don't see a wound there to treat.",
 		       buf2);
-	      command_interpreter (mob, buf, 9);
+	      command_interpreter (mob, buf);
 	      return;
 	    }
 	  else if (wound->healerskill)
 	    {
 	      sprintf (buf, "whisper %s That wound has already been treated.",
 		       buf2);
-	      command_interpreter (mob, buf, 9);
+	      command_interpreter (mob, buf);
 	      return;
 	    }
 	}
@@ -1253,14 +1253,14 @@ npc_treatment (CHAR_DATA * ch, CHAR_DATA * mob, char *argument)
 	  sprintf (buf,
 		   "whisper %s All your wounds have been taken care of - there's nothing I can do.",
 		   buf2);
-	  command_interpreter (mob, buf, 9);
+	  command_interpreter (mob, buf);
 	  return;
 	}
 
       sprintf (buf,
 	       "whisper %s I'll get you taken care of for a total of %d coppers.",
 	       buf2, (int) cost);
-      command_interpreter (mob, buf, 9);
+      command_interpreter (mob, buf);
       return;
     }
 
@@ -1303,14 +1303,14 @@ npc_treatment (CHAR_DATA * ch, CHAR_DATA * mob, char *argument)
 	{
 	  sprintf (buf, "whisper %s I don't see a wound there to treat.",
 		   buf2);
-	  command_interpreter (mob, buf, 9);
+	  command_interpreter (mob, buf);
 	  return;
 	}
       else if (wound->healerskill)
 	{
 	  sprintf (buf, "whisper %s That wound has already been treated.",
 		   buf2);
-	  command_interpreter (mob, buf, 9);
+	  command_interpreter (mob, buf);
 	  return;
 	}
     }
@@ -1323,7 +1323,7 @@ npc_treatment (CHAR_DATA * ch, CHAR_DATA * mob, char *argument)
       sprintf (buf,
 	       "whisper %s All your wounds have been taken care of - there's nothing I can do.",
 	       buf2);
-      command_interpreter (mob, buf, 9);
+      command_interpreter (mob, buf);
       return;
     }
 
@@ -1347,7 +1347,7 @@ npc_treatment (CHAR_DATA * ch, CHAR_DATA * mob, char *argument)
     {
       sprintf (buf, "whisper %s There is no cost to you for this treatment.",
 	       buf2);
-      command_interpreter (mob, buf, 9);
+      command_interpreter (mob, buf);
     }
 
   act ("$N promptly tends to your wounds.", true, ch, 0, mob,

@@ -532,7 +532,7 @@ show_to_watchers (CHAR_DATA * ch, char *command)
 }
 
 void
-command_interpreter (CHAR_DATA * ch, char *argument, int cmders_level)
+command_interpreter (CHAR_DATA * ch, char *argument)
 {
   char buf[MAX_STRING_LENGTH];
   char *command_args, *p, *social_args;
@@ -621,7 +621,7 @@ command_interpreter (CHAR_DATA * ch, char *argument, int cmders_level)
 	  while (alias)
 	    {
 
-	      command_interpreter (ch, alias->line, 9);
+	      command_interpreter (ch, alias->line);
 
 	      if (ch->deleted)
 		return;
@@ -667,7 +667,8 @@ the following line to test the commanding char's trust against the trust level f
 the command.  - Methuselah
   */
 
-  if (!*commands[i].command || cmd_level > GET_TRUST (ch) || cmd_level > cmders_level)
+  if ((!*commands[i].command) 
+  		|| (cmd_level > GET_TRUST (ch)))
     {
       if (!social (ch, argument))
 	{
@@ -842,7 +843,8 @@ the command.  - Methuselah
   if (!i)			/* craft_command */
     craft_command (ch, command_args, craft_affect);
   else
-    (*commands[i].proc) (ch, command_args, cmders_level + 1); // changes zero to cmders_level
+  
+    (*commands[i].proc) (ch, command_args, 0);
 
   last_descriptor = NULL;
 }

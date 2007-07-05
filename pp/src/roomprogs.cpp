@@ -1996,7 +1996,7 @@ r_force (CHAR_DATA * ch, char *argument)
 
   if (mob == -1)
     {
-      command_interpreter (ch, arg3, 9);
+      command_interpreter (ch, arg3);
       return;
     }
 
@@ -2012,7 +2012,7 @@ r_force (CHAR_DATA * ch, char *argument)
     if (tmp_ch->mob && tmp_ch->mob->nVirtual == mob)
       {
 	sprintf (buf, arg3, GET_NAME (ch));
-	command_interpreter (tmp_ch, buf, 9);
+	command_interpreter (tmp_ch, buf);
       }
 
 }

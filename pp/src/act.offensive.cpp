@@ -3563,7 +3563,7 @@ do_command (CHAR_DATA * ch, char *argument, int cmd)
       if (victim->mob)
 	{
 	  send_to_char ("Ok.\n", ch);
-	  command_interpreter (victim, command, GET_TRUST(ch));
+	  command_interpreter (victim, command);
 	}
       else
 	{
@@ -3589,7 +3589,7 @@ do_command (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char (buf, tch);
 
       if (tch->mob)
-	command_interpreter (tch, command, 9);
+	command_interpreter (tch, command);
     }
 
   send_to_char ("Ok.\n", ch);

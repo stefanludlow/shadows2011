@@ -990,9 +990,7 @@ do_say (CHAR_DATA * ch, char *argument, int cmd)
   char *utters[] = { "say", "sing", "tell", "murmur", "wouldbewhisper" };
   bool bIsWithGroup = false;
 
-  if (cmd == 10)
-    cmd = 0;
-  
+
   if (ch->room->sector_type == SECT_UNDERWATER)
     {
       send_to_char ("You can't do that underwater!\n", ch);
@@ -3171,7 +3169,7 @@ delayed_alert (CHAR_DATA * ch)
 
   sprintf (buf, "%s", dirs[dir]);
 
-  command_interpreter (ch, buf, 9);
+  command_interpreter (ch, buf);
 
   ch->speed = save_speed;
 

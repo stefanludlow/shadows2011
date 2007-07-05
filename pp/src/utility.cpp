@@ -1725,7 +1725,7 @@ get_pc_dead (const char *buf)
 CHAR_DATA *
 load_pc (const char *buf)
 {
-  CHAR_DATA *ch;
+  CHAR_DATA *ch = NULL;
   char buf2[MAX_STRING_LENGTH];
 
   if (!buf || !*buf)

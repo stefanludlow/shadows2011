@@ -979,7 +979,7 @@ do_deduct (CHAR_DATA * ch, char *argument, int cmd)
     ("Please be sure to leave a note explaining why on their pfile.#0\n", ch);
 
   sprintf (buf, "write %s Roleplay Point Deduction.", tch->tname);
-  command_interpreter (ch, buf, 9);
+  command_interpreter (ch, buf);
 
 }
 
@@ -1062,7 +1062,7 @@ do_award (CHAR_DATA * ch, char *argument, int cmd)
     ("Please be sure to leave a note explaining why on their pfile.#0\n", ch);
 
   sprintf (buf, "write %s Roleplay Point.", tch->tname);
-  command_interpreter (ch, buf, 9);
+  command_interpreter (ch, buf);
 
 }
 
@@ -1797,7 +1797,7 @@ do_at (CHAR_DATA * ch, char *argument, int cmd)
   original_loc = ch->in_room;
   char_from_room (ch);
   char_to_room (ch, location);
-  command_interpreter (ch, command, 9);
+  command_interpreter (ch, command);
 
   /* check if the guy's still there */
 
@@ -4960,7 +4960,7 @@ do_force (CHAR_DATA * ch, char *argument, int cmd)
 	  sprintf (buf, "$n has forced you to '%s'.", to_force);
 	  act (buf, false, ch, 0, vict, TO_VICT);
 	  send_to_char ("Ok.\n", ch);
-	  command_interpreter (vict, to_force, 9);
+	  command_interpreter (vict, to_force);
 	}
     }
   else if (!str_cmp ("room", name))
@@ -4968,7 +4968,7 @@ do_force (CHAR_DATA * ch, char *argument, int cmd)
       for (vict = ch->room->people; vict; vict = vict->next_in_room)
 	{
 	  if (GET_TRUST (vict) < GET_TRUST (ch))
-	    command_interpreter (vict, to_force, 9);
+	    command_interpreter (vict, to_force);
 	}
     }
   else
@@ -4984,7 +4984,7 @@ do_force (CHAR_DATA * ch, char *argument, int cmd)
 		{
 		  sprintf (buf, "$n has forced you to '%s'.", to_force);
 		  act (buf, false, ch, 0, vict, TO_VICT);
-		  command_interpreter (vict, to_force, 9);
+		  command_interpreter (vict, to_force);
 		}
 	    }
 	}
@@ -5045,7 +5045,7 @@ do_as (CHAR_DATA * ch, char *argument, int cmd)
   save_d = tch->desc;
   tch->desc = ch->desc;
 
-  command_interpreter (tch, argument, 9);
+  command_interpreter (tch, argument);
 
   tch->desc = save_d;
 }

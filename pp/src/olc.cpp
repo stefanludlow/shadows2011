@@ -2797,6 +2797,54 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	}
     }
 
+	if  (GET_TRUST (ch) < 2)
+    {
+      if (*buf1 != 'a' &&
+      		*buf1 != 'o' &&
+      		*buf1 != 'q' &&
+      		*buf1 != 'r' &&
+      		*buf1 != 'u' &&
+      		*buf1 != 'x' &&
+      		*buf1 != 'z')      
+     
+				{
+						s ("   a           per zone stats");
+						s ("   o           objects");
+						s ("   q           objects with ok flag");
+						s ("   r           rooms");
+						s ("   u           undescribed rooms");
+						s ("   x           objects without material flags");
+						s ("   z           zones");
+					return;
+				}
+    }
+    
+  if  (GET_TRUST (ch) < 3)
+    {
+      if (*buf1 != 'a' && 
+     			*buf1 != 'k' &&
+      		*buf1 != 'o' &&
+      		*buf1 != 'm' &&
+      		*buf1 != 'q' &&
+      		*buf1 != 'r' &&
+      		*buf1 != 'u' &&
+      		*buf1 != 'x' &&
+      		*buf1 != 'z')      
+     
+				{
+						s ("   a           per zone stats");
+						s ("   k           shopkeepers");
+						s ("   o           objects");
+						s ("   m           mobiles");
+						s ("   q           objects with ok flag");
+						s ("   r           rooms");
+						s ("   u           undescribed rooms");
+						s ("   x           objects without material flags");
+						s ("   z           zones");
+					return;
+				}
+    }
+    
   if (!*buf1)
     {
       s ("   a           per zone stats");
@@ -3476,7 +3524,7 @@ do_zname (CHAR_DATA * ch, char *argument, int cmd)
 
   sprintf (buf, "zset %d name %s", ch->room->zone, argument);
 
-  command_interpreter (ch, buf, 9);
+  command_interpreter (ch, buf);
 }
 
 void
@@ -11275,14 +11323,14 @@ do_outfit (CHAR_DATA * ch, char *argument, int cmd)
       one_argument (tobj->name, name);
 
       sprintf (buf, "get %s", name);
-      command_interpreter (mob, buf, 9);
+      command_interpreter (mob, buf);
 
       if (GET_ITEM_TYPE (tobj) == ITEM_WEAPON)
 	sprintf (buf, "wield %s", name);
       else
 	sprintf (buf, "wear %s", name);
 
-      command_interpreter (mob, buf, 9);
+      command_interpreter (mob, buf);
     }
 }
 
