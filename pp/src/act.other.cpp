@@ -4338,7 +4338,6 @@ under_cover (CHAR_DATA *ch)
 
 	return (0);
 }
-/***** non-functional ***
 // Command Ownership, for transfering ownership of mobs 
 // Syntax: OWNERSHIP TRANSFER <mob> <character> or OWNERSHIP SET <mob> <character>
 void do_ownership (CHAR_DATA *ch, char *argument, int command)
@@ -4441,4 +4440,3 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 		return;
 	}
 }
-************/
