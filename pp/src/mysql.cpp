@@ -953,7 +953,7 @@ reload_sitebans ()
 void
 save_banned_sites ()
 {
-  SITE_INFO *site;
+  SITE_INFO *site = NULL;
   FILE *fp;
   char buf[MAX_STRING_LENGTH];
 

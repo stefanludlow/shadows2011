@@ -70,7 +70,8 @@ const struct command_data commands[] = {
   {"credits", do_credits, DEAD,
    C_DEL | C_SUB | C_HID | C_DOA | C_BLD | C_PAR | C_SPL},
   {"down", do_down, FIGHT, C_HID | C_DOA | C_BLD},
-  {"diagnose", do_diagnose, REST, C_DEL | C_SUB | C_HID | C_DOA | C_PAR},
+  {"diagnose", do_diagnose, REST, C_DEL | C_SUB | C_HID | C_DOA |
+  C_PAR},
   {"dip", do_dip, SIT, C_WLK | C_DEL | C_HID | C_SUB | C_DOA},
   {"disband", do_disband, SIT, C_BLD},
   {"dismantle", do_dismantle, STAND, C_WLK | C_BLD | C_MNT},
@@ -412,7 +413,7 @@ const struct command_data commands[] = {
 	{"role", do_role, DEAD, C_LV4},
 	{"saverooms", do_saverooms, DEAD, C_LV4},
 	{"shutdown", do_shutdown, DEAD, C_LV4},
-	//{"stayput", do_stayput, DEAD, C_LV4},
+	{"stayput", do_stayput, DEAD, C_LV4},
 	{"swap", do_swap, DEAD, C_LV4},
 	{"te_pit", do_te_pit, DEAD, C_LV4},
 	{"unban", do_unban, DEAD, C_LV4},

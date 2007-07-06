@@ -5338,6 +5338,19 @@ delayed_skin_new1 (CHAR_DATA * ch)
 
   // make sure the corpse is still here, if not throw an error and abort.
   obj_corpse = (OBJ_DATA *) ch->delay_info1;
+  
+  // is it really a corpse?
+   if (obj_corpse->nVirtual != VNUM_CORPSE
+      && !strstr (obj_corpse->name, "corpse"))
+      {
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0;
+      ch->delay = 0;
+      ch->delay_type = 0;
+      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+	return; 
+      }
+      
   if (!obj_corpse)
   	{
       // The corpse being skinned is gone, abort.
@@ -5378,6 +5391,18 @@ delayed_skin_new2 (CHAR_DATA * ch)
   // make sure the corpse is still here, if not throw an error and abort.
   obj_corpse = (OBJ_DATA *) ch->delay_info1;
 
+// is it really a corpse?
+	if (obj_corpse->nVirtual != VNUM_CORPSE
+      && !strstr (obj_corpse->name, "corpse"))
+      {
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0;
+      ch->delay = 0;
+      ch->delay_type = 0;
+      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+	return; 
+      }
+      
 	if (!obj_corpse)
   	{
       // The corpse being skinned is gone, abort.
@@ -5421,6 +5446,18 @@ delayed_skin_new3 (CHAR_DATA * ch)
 
   corpse = (OBJ_DATA *) ch->delay_info1;
 
+	// is it really a corpse?
+	if (corpse->nVirtual != VNUM_CORPSE
+      && !strstr (corpse->name, "corpse"))
+      {
+      ch->delay_info1 = 0;
+      ch->delay_info2 = 0;
+      ch->delay = 0;
+      ch->delay_type = 0;
+      send_to_char ("The corpse you were skinning is no longer here.\n", ch);
+	return; 
+      }
+      
 	if (!corpse)
 			{
 				// The corpse being skinned is gone, abort.

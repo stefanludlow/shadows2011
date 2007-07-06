@@ -932,11 +932,13 @@ newbie_hints (void)
 void
 unban_site (SITE_INFO * site)
 {
-  SITE_INFO *tmp_site;
+  SITE_INFO *tmp_site = NULL;
   char buf[MAX_STRING_LENGTH];
 
   if (!site)
     return;
+	if (!banned_site)
+		return;
 
   if (banned_site == site)
     {
@@ -945,7 +947,8 @@ unban_site (SITE_INFO * site)
       send_to_gods (buf);
       banned_site = site->next;
     }
-
+	else
+		{
   for (tmp_site = banned_site; tmp_site; tmp_site = tmp_site->next)
     {
       if (tmp_site->next == site)
@@ -964,15 +967,22 @@ unban_site (SITE_INFO * site)
   mem_free (site);
   site = NULL;
 
+			}
+
+  
   save_banned_sites ();
 }
 
 void
 check_sitebans ()
 {
-  SITE_INFO *site, *next_site;
+  SITE_INFO *site = NULL;
+  SITE_INFO *next_site = NULL;
 
   if (!engine.in_play_mode ())
+    return;
+
+	if (!banned_site)
     return;
 
   if (banned_site)

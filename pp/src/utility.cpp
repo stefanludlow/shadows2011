@@ -108,7 +108,7 @@ const int restricted_skills[] = {
   0,				/* Apothecary */
   0,				/* Glasswork */
   0,				/* Gemcraft */
-  0,				/* Milling */
+  -2,				/* Milling */
   0,				/* Mining */
   -2,				/* Perfumery */
   -2,				/* Pottery */
@@ -152,7 +152,7 @@ const int restricted_skills[] = {
   0,				/* Gambling */
   -2,				/* Bonecarving */
   0,				/* Gardening */
-  -2,				/* Sleight */
+  0,				/* Sleight */ 
   -2				/* Astonomy */
 };
 

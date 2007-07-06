@@ -4139,6 +4139,7 @@ setup_registry (void)
 		"Numenian-Tengwar");
   add_registry (REG_SKILLS, SKILL_SPEAK_ORKISH, "Orkish");
   add_registry (REG_SKILLS, SKILL_PARRY, "Parry");
+  add_registry (REG_SKILLS, SKILL_PERFUMERY, "Perfumery");
   add_registry (REG_SKILLS, SKILL_POISONING, "Poisoning");
   add_registry (REG_SKILLS, SKILL_POLEARM, "Polearm");
   add_registry (REG_SKILLS, SKILL_POTTERY, "Pottery");
@@ -4167,6 +4168,7 @@ setup_registry (void)
   add_registry (REG_SKILLS, SKILL_SUBDUE, "Subdue");
   add_registry (REG_SKILLS, SKILL_SWIMMING, "Swim");
   add_registry (REG_SKILLS, SKILL_SPEAK_TALATHIC, "Talathic");
+  add_registry (REG_SKILLS, SKILL_TAME, "Tame");
   add_registry (REG_SKILLS, SKILL_TELEPATHY, "Telepathy");
   add_registry (REG_SKILLS, SKILL_SCRIPT_TENGWAR, "Tengwar");
   add_registry (REG_SKILLS, SKILL_TEXTILECRAFT, "Textilecraft");
@@ -4487,7 +4489,6 @@ The new mob will take the best skill level between his old skill and the new ski
 		} //flag ==2		
 
 /******** objects and equip for all ***/
-
 	for (jdex = 1; jdex < MAX_WEAR; jdex++)
 	  {
 	    if (get_equip (ch, jdex))
