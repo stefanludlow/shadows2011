@@ -4040,6 +4040,12 @@ for (i = 0; i < MAX_ITEMS_PER_SUBCRAFT; i++)
   
       } //end of old fail system
       
+    if (af->a.craft->subcraft->faildelay)
+    {
+      delay_time = time (0) + figure_craft_faildelay (ch, af->a.craft->subcraft);
+      magic_add_affect (ch, MAGIC_CRAFT_DELAY, -1, delay_time, 0, 0, 0);
+    }
+    
     af->a.craft->timer = 0;
       return;
     }
@@ -4179,11 +4185,7 @@ for (i = 0; i < MAX_ITEMS_PER_SUBCRAFT; i++)
       magic_add_affect (ch, MAGIC_CRAFT_DELAY, -1, delay_time, 0, 0, 0);
     }
   
-  if (af->a.craft->subcraft->faildelay && !af->a.craft->phase)
-    {
-      delay_time = time (0) + figure_craft_faildelay (ch, af->a.craft->subcraft);
-      magic_add_affect (ch, MAGIC_CRAFT_DELAY, -1, delay_time, 0, 0, 0);
-    }
+  
 }
 
 void
