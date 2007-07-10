@@ -2212,6 +2212,7 @@ get_char_room_vis (CHAR_DATA * ch, const char *name)
   char tmpname[MAX_STRING_LENGTH];
   char immkeys[AVG_STRING_LENGTH];
   char *tmp;
+  char *tchtemp;
 
   /* The player may use '.' to indicate last targeted n/pc. */
 
@@ -2239,12 +2240,20 @@ get_char_room_vis (CHAR_DATA * ch, const char *name)
 
       sprintf (immkeys, "%s %s person", char_names (tch), tch->name);
 
-      if (isname (tmp, IS_MORTAL (ch) ? char_names (tch) : immkeys))
-	{
-
-	  if (CAN_SEE (ch, tch) || ch == tch)
-	    {
-
+			if (are_grouped (ch, tch) && IS_MORTAL (ch))
+				tchtemp = tch->name;
+			else if (IS_MORTAL (ch))
+				tchtemp = char_names (tch);
+			else 
+				tchtemp = tch->name;
+				
+				
+     // if (isname (tmp, IS_MORTAL (ch) ? char_names (tch) : immkeys))
+     if (isname (tmp, tchtemp) || isname (tmp, char_names (tch)))
+				{
+			
+					if (CAN_SEE (ch, tch) || ch == tch)
+						{
 	      if (j == number)
 		{
 		  if (ch->pc)

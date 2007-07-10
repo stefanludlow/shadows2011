@@ -6462,7 +6462,7 @@ room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
 				}
 		}
 		
-	wt_count = (tot_wt + obj_wt);
+	wt_count = (tot_wt + obj_wt)/100;
 
 	troom->occupants = (int)wt_count;
 	
