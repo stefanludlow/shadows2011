@@ -6462,14 +6462,14 @@ room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
 				}
 		}
 		
-	wt_count = (tot_wt + obj_wt)/100;
+	wt_count = (tot_wt + obj_wt);
 
-	troom->occupants = (int)wt_count;
+	troom->occupants = (int)(wt_count); //weight in pounds
 	
-//sprintf(buf, "Objs in room weigh %d, characters weigh %d, and number of occupant units is %d\n", obj_wt, tot_wt, (int)wt_count/200);
+//sprintf(buf, "Objs in room weigh %d, characters weigh %d, and occupant weight units is %d\n", obj_wt, tot_wt, troom->occupants);
 //send_to_gods(buf);
 
-	if (wt_count > (troom->capacity * 200)) 
+	if (wt_count > ((troom->capacity+1) * 200)) 
 		{
 			return (0);
 		}
