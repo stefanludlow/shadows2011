@@ -1889,7 +1889,6 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
   int poisoned = 0, bleeding = 0, treated = 0, infected = 0, tended =
     0, bound = 0;
   char *p = '\0';
-  char name_buf[MAX_STRING_LENGTH];
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   char buf3[MAX_STRING_LENGTH];
@@ -1904,7 +1903,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
     {
       one_argument (argument, arg);
     }
-  else
+	else if (!IS_MORTAL(ch))
     {
       sprintf (arg, "%s", "self");
     }
@@ -1929,7 +1928,22 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
     }
   else
   	{
+  		if (!*arg)
+				{
+					if (ch->fighting)
+						{
+							tch = ch->fighting;
+						}
+					else
+						{
+							tch = get_char_room_vis (ch, "self");
+						}
+				}
+			else
+				{
   		tch = get_char_room_vis (ch, arg);
+  			}	
+  			
   		if (!tch)
   			{
   				send_to_char ("You don't see them.\n", ch);
