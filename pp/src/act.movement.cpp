@@ -2144,12 +2144,15 @@ initiate_move (CHAR_DATA * ch)
 	}
     }
 
+	if (!(target_room->capacity == 0))
+	{
 	if (!room_avail(target_room, NULL, ch) && !(GET_TRUST(ch)))
 		{
 			send_to_char("There isn't enough room for you.", ch);
 			clear_moves (ch);
 			return;
 		}
+	}
 		
   if (IS_SET (ch->act, ACT_MOUNT) &&
       IS_SET (target_room->room_flags, NO_MOUNT))
@@ -6442,7 +6445,7 @@ room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
 			if (IS_NPC(tch))
 				tot_wt = carrying(tch)/100 + 200;
 			else	
-				tot_wt = carrying(tch)/100 + get_weight(tch);
+				tot_wt = carrying(tch)/100 + get_weight(tch)/100;
 		}
 	
 	for (temp_obj = troom->contents; temp_obj; temp_obj = temp_obj->next_content)
@@ -6457,7 +6460,7 @@ room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
 					if (IS_NPC(temp_char))
 						tot_wt = tot_wt + carrying(temp_char)/100 + 200;
 					else	
-						tot_wt = tot_wt + carrying(temp_char)/100 + get_weight(temp_char);
+						tot_wt = tot_wt + carrying(temp_char)/100 + get_weight(temp_char)/100;
 					count++;
 				}
 		}
@@ -6469,13 +6472,13 @@ room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
 //sprintf(buf, "Objs in room weigh %d, characters weigh %d, and occupant weight units is %d\n", obj_wt, tot_wt, troom->occupants);
 //send_to_gods(buf);
 
-	if (wt_count > ((troom->capacity+1) * 200)) 
+	if (wt_count >= (troom->capacity * 200)) 
 		{
-			return (0);
+			return (0); //there is no room
 		}
 	else
 		{
-			return (1);
+			return (1); //there is room
 		}
 
 	return(0);
