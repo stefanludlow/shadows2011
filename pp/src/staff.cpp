@@ -704,7 +704,8 @@ do_roll (CHAR_DATA * ch, char *argument, int cmd)
 
       if (buf[3] == 0)
 	{
-	  int roll = dice (4, 6); // roll 4d6 vs Attribute
+	//roll 1-30 vs ATTR: attribute of 15 will have a 50% chance of sucess
+	  int roll = dice (1, 30); 
 	  int attr = 0;
 	  if (strcasecmp (buf, "str") == 0)
 	    {
