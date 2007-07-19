@@ -742,4 +742,5 @@ int num_followers (CHAR_DATA * ch)
     }
 
 	return (group_count);
+
 }

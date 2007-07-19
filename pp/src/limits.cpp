@@ -218,7 +218,6 @@ point_update (void)
 {
   int cycle_count;
   int roll, i;
-  int damage;
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   CHAR_DATA *ch;

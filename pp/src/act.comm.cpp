@@ -522,7 +522,6 @@ do_emote (CHAR_DATA * ch, char *argument, int cmd)
   char copy[MAX_STRING_LENGTH] = { '\0' };
   char *result = NULL;
   CHAR_DATA *tch = NULL;
-  bool tochar = false;
   int index = 0;
   char *p = '\0';
 

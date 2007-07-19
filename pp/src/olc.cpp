@@ -13740,7 +13740,6 @@ void
 do_rcap (CHAR_DATA * ch, char *argument, int cmd)
 {
   char buf[MAX_INPUT_LENGTH];
-  int dir;
   ROOM_DATA *room;
 
  room = vtor (ch->in_room);

@@ -690,7 +690,6 @@ do_materials (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 {
-  CHAR_DATA *tch;
   int has_a_craft = 0;
   int i = 0, j = 0;
   AFFECTED_TYPE *af;
@@ -703,13 +702,8 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
   char craft_name[MAX_STRING_LENGTH];
   char subcraft[MAX_STRING_LENGTH];
   char command[MAX_STRING_LENGTH];
-  bool racial = false;
   bool close = false;
-  bool opening = false;
   bool category = false;
-  bool sectors = false;
-  bool seasonchk = false;
-  bool weatherchk = false;
 
   if (IS_NPC (ch))
     {

@@ -6428,11 +6428,9 @@ room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
 	int count = 0;
 	int obj_wt = 0;
 	int tot_wt = 0;
-	int temp_wt = 0;
 	float wt_count = 0.0;
 	CHAR_DATA *temp_char = NULL;
 	OBJ_DATA *temp_obj = NULL;
-	char buf[MAX_INPUT_LENGTH] = {'\0'};
 	
 	if (troom->capacity == 0)
 		return(1);
