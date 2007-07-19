@@ -346,6 +346,8 @@ const struct command_data commands[] = {
 	/*Advanced Builder Level 2:  (mobs and crafts) */
 	{"classify", do_classify, DEAD, C_LV2},
 	{"clog", do_clog, DEAD, C_LV2},	/* Crafts Log */
+	{"craftspc", do_craftspc, DEAD,
+   C_DEL | C_SUB | C_HID | C_DOA | C_BLD | C_PAR | C_SPL | C_NLG},
 	{"cset", do_cset, DEAD, C_LV2},
 	{"find", do_find, DEAD, C_LV2},
 	//{"freeze", do_freeze, DEAD, C_LV2},

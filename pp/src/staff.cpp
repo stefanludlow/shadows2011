@@ -8689,7 +8689,8 @@ list_all_crafts (CHAR_DATA * ch)
 
   for (craft = crafts; craft; craft = craft->next)
     {
-      sprintf (p, "#6Craft:#0 %-12s #6Subcraft:#0 %-20s #6Command:#0 %-10s\n",
+    
+      sprintf (p, "#6Craft:#0 %-20s #6Sub:#0 %-24s #6Cmd:#0 %-10s\n",
 	       craft->craft_name, craft->subcraft_name, craft->command);
       p += strlen (p);
     }

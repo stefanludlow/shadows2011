@@ -696,8 +696,10 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
   AFFECTED_TYPE *af;
   SUBCRAFT_HEAD_DATA *craft, *tcraft;
   char buf[MAX_STRING_LENGTH];
+  char buf2[MAX_STRING_LENGTH];
   char name[MAX_STRING_LENGTH];
-  char output[MAX_STRING_LENGTH];
+  //char output[MAX_STRING_LENGTH];
+  std::string output;
   char craft_name[MAX_STRING_LENGTH];
   char subcraft[MAX_STRING_LENGTH];
   char command[MAX_STRING_LENGTH];
@@ -717,42 +719,55 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 
   argument = one_argument (argument, buf);
 
+// listing craft catagories
   if (IS_MORTAL (ch))
     {
       if (!*buf)
 	{
-	  sprintf (output,
-		   "You currently have crafts in the following areas:\n\n");
-	  for (i = CRAFT_FIRST; i <= CRAFT_LAST; i++)
-	    {
-	      if ((af = get_affect (ch, i)))
-		{
-		  if (!strstr (output, af->a.craft->subcraft->craft_name))
-		    {
-		      j++;
-		      sprintf (output + strlen (output), "   #6%-20s#0",
+					output.assign("You currently have crafts in the following areas:\n\n");
+    for (i = CRAFT_FIRST; i <= CRAFT_LAST; i++)
+      {
+        if ((af = get_affect (ch, i)))
+    			{
+    				sprintf(buf2, "  #6%-20s#0",
 			       af->a.craft->subcraft->craft_name);
+    				
+						if (output.find(buf2, 0, strlen(buf2)) == std::string::npos)
+							{
+								j++;
+								output.append(buf2);
+								
 		      if (!(j % 3))
-			sprintf (output + strlen (output), "\n");
+									output.append("\n");
 		    }
-		  has_a_craft = 1;
-		}
-	    }
+
+									has_a_craft = 1;
+								}
+						}//for (i = CRAFT_FIRST
+
 	  if ((j % 3))
-	    sprintf (output + strlen (output), "\n");
-	  if (!has_a_craft)
-	    send_to_char ("You have no knowledge of any crafts.\n", ch);
-	  else
-	    page_string (ch->desc, output);
-	}
+      output.append("\n");
+
+					if (!has_a_craft)
+						send_to_char ("You have no knowledge of any crafts.\n", ch);
+					else
+						page_string (ch->desc, output.c_str());
+				}//if (!*buf)
+
+//Listing individual crafts 
       else
 	{
 	  j = 0;
 	  if (!str_cmp (buf, "all"))
-	    sprintf (output, "You know the following crafts:\n\n");
-	  else
-	    sprintf (output, "You know the following #6%s#0 crafts:\n\n",
-		     buf);
+    	output.assign("You know the following crafts:\n\n");
+    else
+    	{
+      output.assign ("You know the following ");
+      sprintf(buf2, "#6%s#0", buf);
+      output.append (buf2);
+      output.append (" crafts:\n\n");
+      }
+	  
 	  for (i = CRAFT_FIRST; i <= CRAFT_LAST; i++)
 	    {
 	      if ((af = get_affect (ch, i)))
@@ -760,32 +775,40 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 		  if (str_cmp (buf, "all")
 		      && str_cmp (buf, af->a.craft->subcraft->craft_name))
 		    continue;
-		  j++;
-		  sprintf (name, "%s %s", af->a.craft->subcraft->command,
+
+									j++;
+									sprintf (name, "%s %s",
+										af->a.craft->subcraft->command,
 			   af->a.craft->subcraft->subcraft_name);
-		  sprintf (output + strlen (output), "   #6%-30s#0", name);
+						sprintf (buf2, "   #6%-30s#0", name);
+						output.append(buf2);
+						
 		  has_a_craft = 1;
+									
 		  if (!(j % 2))
-		    sprintf (output + strlen (output), "\n");
-		}
-	    }
+										output.append("\n");
+								}
+						}//for (i = CRAFT_FIRST
+
 	  if ((j % 2))
-	    sprintf (output + strlen (output), "\n");
-	  if (!has_a_craft)
-	    send_to_char ("You have no knowledge of any crafts.\n", ch);
-	  else
-	    page_string (ch->desc, output);
-	}
+      output.append("\n");
 
-      return;
-    }
+					if (!has_a_craft)
+						send_to_char ("You have no knowledge of any crafts.\n", ch);
+					else
+						page_string (ch->desc, output.c_str());
+				} //else (buf)
+			return;
+		} //if (IS_MORTAL (ch))
 
+// Immortal options - List
   if ((!*buf && !ch->pc->edit_craft) || !str_cmp (buf, "list"))
     {
       list_all_crafts (ch);
       return;
     }
 
+// Immortal options - new
   else if (!str_cmp (buf, "new"))
     {
       argument = one_argument (argument, buf);
@@ -798,10 +821,10 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
       if (!*buf || !*craft_name || !*subcraft || !*command)
 	{
 	  send_to_char
-	    ("The syntax is as follows: craft new <craft> <subcraft> <command>\n",
-	     ch);
-	  return;
-	}
+						("The syntax is as follows: craft new <craft> <subcraft> <command>\n", ch);
+					return;
+				}
+
       for (craft = crafts; craft; craft = craft->next)
 	{
 	  if (!craft->next)
@@ -811,6 +834,7 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 	      break;
 	    }
 	}
+
       craft->craft_name = add_hash (craft_name);
       craft->subcraft_name = add_hash (subcraft);
       craft->command = add_hash (command);
@@ -818,13 +842,18 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
       craft->key_end = -1;
       ch->pc->edit_craft = craft;
       send_to_char ("New craft initialized and opened for editing.\n", ch);
-      mysql_safe_query
-	("INSERT INTO new_crafts VALUES ('%s', '%s', '%s', '%s')",
-	 craft->command, craft->subcraft_name, craft->craft_name, ch->tname);
-      return;
-    }
 
-  if (!str_cmp (buf, "clone"))
+			mysql_safe_query
+				("INSERT INTO new_crafts VALUES ('%s', '%s', '%s', '%s')",
+					craft->command,
+					craft->subcraft_name,
+					craft->craft_name,
+					ch->tname);
+			return;
+		} //else if (!str_cmp (buf, "new"))
+
+// Immortal options - clone
+	else if (!str_cmp (buf, "clone"))
     {
       if (!ch->pc->edit_craft)
 	{
@@ -832,33 +861,33 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 	    ("You'll need to open the craft you want to clone, first.\n", ch);
 	  return;
 	}
-      argument = one_argument (argument, buf);
-      if (!*buf)
-	{
-	  send_to_char
-	    ("You'll need to specify a craft name for the cloned craft.\n",
-	     ch);
-	  return;
-	}
-      else
-	sprintf (craft_name, "%s", buf);
-      argument = one_argument (argument, buf);
-      if (!*buf)
-	{
-	  send_to_char
-	    ("You'll need to specify a subcraft name for the cloned craft.\n",
-	     ch);
+
+			argument = one_argument (argument, buf);
+			if (!*buf)
+				{
+					send_to_char
+					("You'll need to specify a craft name for the cloned craft.\n", ch);
+					return;
+				}
+			else
+				sprintf (craft_name, "%s", buf);
+
+			argument = one_argument (argument, buf);
+			if (!*buf)
+				{
+					send_to_char
+					("You'll need to specify a subcraft name for the cloned craft.\n", ch);
 	  return;
 	}
       else if (!str_cmp (buf, ch->pc->edit_craft->subcraft_name))
 	{
 	  send_to_char
-	    ("You'll need to specify a different subcraft name for the cloned craft.\n",
-	     ch);
-	  return;
-	}
-      else
-	sprintf (subcraft, "%s", buf);
+						("You'll need to specify a different subcraft name for the cloned craft.\n", ch);
+					return;
+				}
+			else
+				sprintf (subcraft, "%s", buf);
+
       argument = one_argument (argument, buf);
       if (!*buf)
 	{
@@ -868,28 +897,34 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 	}
       else
 	sprintf (command, "%s", buf);
+
       CREATE (tcraft, SUBCRAFT_HEAD_DATA, 1);
       memset (tcraft, 0, sizeof (SUBCRAFT_HEAD_DATA));
       memcpy (tcraft, ch->pc->edit_craft, sizeof (SUBCRAFT_HEAD_DATA));
+			
       CREATE (tcraft->phases, PHASE_DATA, 1);
       memset (tcraft->phases, 0, sizeof (PHASE_DATA));
-      memcpy (tcraft->phases, ch->pc->edit_craft->phases,
-	      sizeof (PHASE_DATA));
+			memcpy (tcraft->phases, ch->pc->edit_craft->phases, sizeof (PHASE_DATA));
+			
       if (ch->pc->edit_craft->obj_items)
   {
     for (i = 0; ch->pc->edit_craft->obj_items[i]; i++)
       {
         CREATE (tcraft->obj_items[i], DEFAULT_ITEM_DATA, 1);
-        memset (tcraft->obj_items[i], 0, sizeof (DEFAULT_ITEM_DATA));
-      }
+							memset (tcraft->obj_items[i], 0,
+											sizeof (DEFAULT_ITEM_DATA));
+						}
+
     memcpy (tcraft->obj_items, ch->pc->edit_craft->obj_items,
 		  sizeof (DEFAULT_ITEM_DATA));
 	}
+
       ch->pc->edit_craft = NULL;
       tcraft->craft_name = add_hash (craft_name);
       tcraft->subcraft_name = add_hash (subcraft);
       tcraft->command = add_hash (command);
       tcraft->next = NULL;
+
       for (craft = crafts; craft; craft = craft->next)
 	{
 	  if (!craft->next)
@@ -897,22 +932,26 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 	      CREATE (craft->next, SUBCRAFT_HEAD_DATA, 1);
 	      craft->next = tcraft;
 	      ch->pc->edit_craft = tcraft;
-	      send_to_char ("Craft cloned; new craft opened for editing.\n",
-			    ch);
-	      if (!IS_SET (tcraft->subcraft_flags, SCF_OBSCURE))
-		mysql_safe_query
-		  ("INSERT INTO new_crafts VALUES ('%s', '%s', '%s', '%s')",
-		   tcraft->command, tcraft->subcraft_name, tcraft->craft_name,
-		   ch->tname);
-	      return;
-	    }
-	}
-    }
+							send_to_char ("Craft cloned; new craft opened for editing.\n", ch);
 
-  for (craft = crafts; craft; craft = craft->next)
-    {
-      if (!str_cmp (craft->subcraft_name, buf))
-	break;
+	      if (!IS_SET (tcraft->subcraft_flags, SCF_OBSCURE))
+								mysql_safe_query ("INSERT INTO new_crafts VALUES 									('%s', '%s', '%s', '%s')",
+									tcraft->command,
+									tcraft->subcraft_name,
+									tcraft->craft_name,
+									ch->tname);
+
+							return;
+						}
+				}
+		} //else if (!str_cmp (buf, "clone"))
+
+//Immortal options - list by catagory
+	for (craft = crafts; craft; craft = craft->next)
+		{
+			if (!str_cmp (craft->subcraft_name, buf))
+				break;
+
       if (!str_cmp (craft->craft_name, buf))
 	{
 	  category = true;
@@ -922,38 +961,27 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 
   if (category)
     {
-      sprintf (output, "\nWe have the following #6%s#0 crafts:\n\n", buf);
-      for (craft = crafts; craft; craft = craft->next)
-	{
-	  if (!str_cmp (craft->craft_name, buf))
-	    sprintf (output + strlen (output),
-		     "#6Craft:#0 %-12s #6Subcraft:#0 %-20s #6Command:#0 %-10s\n",
-		     craft->craft_name, craft->subcraft_name, craft->command);
-	}
-      page_string (ch->desc, output);
-      return;
-    }
+      sprintf (buf2, "\nWe have the following #6%s#0 crafts:\n\n", buf);
+      output.assign(buf2);
 
-  if ((tch = load_pc (buf)))
-    {
-      sprintf (output, "\n#6%s#0 has the following crafts on %s pfile:\n\n",
-	       tch->tname, HSHR (tch));
-      for (af = tch->hour_affects; af; af = af->next)
-	{
-	  if (af->type >= CRAFT_FIRST && af->type <= CRAFT_LAST)
-	    {
-	      sprintf (output + strlen (output),
-		       "#6Craft:#0 %-12s #6Subcraft:#0 %-20s #6Command:#0 %-10s\n",
-		       af->a.craft->subcraft->craft_name,
-		       af->a.craft->subcraft->subcraft_name,
-		       af->a.craft->subcraft->command);
+			for (craft = crafts; craft; craft = craft->next)
+				{
+					if (!str_cmp (craft->craft_name, buf))
+						{
+							sprintf (buf2,
+								"#6Subcraft:#0 %-24s #6Commandd:#0 %-20s\n",
+	     					craft->subcraft_name,
+	     					craft->command);
+	     					
+	    output.append(buf2);
 	    }
 	}
-      unload_pc (tch);
-      page_string (ch->desc, output);
+      page_string (ch->desc, output.c_str());
       return;
     }
 
+
+//Immortal options - edit craft
   if (!craft && *buf && !category)
     close = true;
 
@@ -981,120 +1009,13 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 
   *b_buf = '\0';
 
-/** displays information **/
-  sprintf (b_buf, "#6Craft:#0 %s #6Subcraft:#0 %s #6Command:#0 %s\n",
-	   craft->craft_name, craft->subcraft_name, craft->command);
+//Immortal options - display craft with in edit
+	craftstat (ch, craft->subcraft_name);
+	
 
-  for (i = 0; i <= 24; i++)
-    {
-    if (craft->race[i] > 0)
-	  {
-	  racial = true;
-	  sprintf (buf + strlen (buf), " %s",
-		   lookup_race_variable (craft->race[i] - 1, RACE_NAME));
-	}
-    }
-
-  if (racial)
-    sprintf (b_buf + strlen (b_buf), "  #6Race:#0 %s\n", buf);
-
-  if (craft->clans && strlen (craft->clans) > 3)
-    sprintf (b_buf + strlen (b_buf), "  #6Clans:#0 %s\n", craft->clans);
-
-  opening = false;
-
-  *buf = '\0';
-
-  for (i = 0; i <= 24; i++)
-    {
-    if (craft->opening[i] > 0)
-	{
-	  opening = true;
-	  sprintf (buf + strlen (buf), " %s", skills[craft->opening[i]]);
-	}
-    }
-
-  if (opening)
-    sprintf (b_buf + strlen (b_buf), "  #6Base:#0  %s\n", buf);
-
-/** sectors **/
-  for (i = 0; i <= 24; i++)
-    if (craft->sectors[i] > 0)
-      sectors = true;
-
-  if (sectors)
-    {
-      sprintf (b_buf + strlen (b_buf), "  #6Sectors:#0 ");
-      for (i = 0; i <= 24; i++)
-	if (craft->sectors[i])
-	  sprintf (b_buf + strlen (b_buf), "%s ",
-		   sector_types[craft->sectors[i] - 1]);
-      sprintf (b_buf + strlen (b_buf), "\n");
-    }
-
-/** seasons **/
-  for (i = 0; i <= 5; i++)
-    if (craft->seasons[i] > 0)
-      seasonchk = true;
-
-  if (seasonchk)
-    {
-      sprintf (b_buf + strlen (b_buf), "  #6Seasons:#0 ");
-      for (i = 0; i <= 5; i++)
-	if (craft->seasons[i])
-	  sprintf (b_buf + strlen (b_buf), "%s ",
-		   seasons[craft->seasons[i] - 1]);
-      sprintf (b_buf + strlen (b_buf), "\n");
-    }
-
-/** weather **/
-  for (i = 0; i <= 8; i++)
-  	{
-    if (craft->weather[i] > 0)
-      weatherchk = true;
- 		}
- 		
- 		if (weatherchk)
-    	{
-      sprintf (b_buf + strlen (b_buf), "  #6Weather:#0 ");
-      for (i = 0; i <= 8; i++)
-				if (craft->weather[i])
-	  			sprintf (b_buf + strlen (b_buf), "%s ",
-		   						weather_states[craft->weather[i] - 1]);
-      	sprintf (b_buf + strlen (b_buf), "\n");
-    	}
-
-/** group **/
-  	if (craft->followers > 0)
-    sprintf (b_buf + strlen (b_buf), "  #6Followers:#0 %d \n",
-	     craft->followers);
-  
-/** delay **/
-  if (craft->delay)
-    sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Hours\n",
-	     craft->delay);
-
-  if (craft->faildelay)
-    sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Hours\n",
-       craft->faildelay);
-
-  if (craft->failure)
-    sprintf (b_buf + strlen (b_buf), "  #6Fail:#0 %s\n", craft->failure);
-
-  if (craft->failobjs)
-    sprintf (b_buf + strlen (b_buf), "  #6Failobjs:#0 %s\n", craft->failobjs);
-
-  if (craft->failmobs)
-    sprintf (b_buf + strlen (b_buf), "  #6Failmobs:#0 %s\n", craft->failmobs);
-
-  if (craft->key_first > 0)
-    sprintf (b_buf + strlen (b_buf), "  #6Primary Key:#0 %d\n", craft->key_first);
-    
-  if (craft->key_end > 0)
-    sprintf (b_buf + strlen (b_buf), "  #6Product Key:#0 %d\n", craft->key_end);
-
-  display_craft (ch, craft);
-
+	
+	
+	return;
 }
 
 void
@@ -1298,7 +1219,13 @@ update_crafts (CHAR_DATA * ch)
 
   for (craft = crafts; craft; craft = craft->next)
     {
-      if (!strcmp (craft->craft_name, "general") && !has_craft (ch, craft)
+      if (((!strcmp (craft->craft_name, "general-fire")) ||
+      	  (!strcmp (craft->craft_name, "general-labor")) ||
+      	  (!strcmp (craft->craft_name, "general-food")) ||
+      	  (!strcmp (craft->craft_name, "general-recreation")) ||
+      	  (!strcmp (craft->craft_name, "general-serving")) ||
+      	  (!strcmp (craft->craft_name, "general")))
+      	  && !has_craft (ch, craft)
 	  && has_required_crafting_skills (ch, craft))
 	{
 	  for (i = CRAFT_FIRST; i <= CRAFT_LAST; i++)
@@ -3085,7 +3012,12 @@ branch_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft)
       return;
     }
 
-  if (!str_cmp (craft->craft_name, "general"))
+  if ((!strcmp (craft->craft_name, "general-fire")) ||
+      	  (!strcmp (craft->craft_name, "general-labor")) ||
+      	  (!strcmp (craft->craft_name, "general-food")) ||
+      	  (!strcmp (craft->craft_name, "general-recreation")) ||
+      	  (!strcmp (craft->craft_name, "general-serving")) ||
+      	  (!strcmp (craft->craft_name, "general")))
     return;
 
   if (!(tcraft = get_related_subcraft (ch, craft)))
@@ -5205,4 +5137,47 @@ craftstat (CHAR_DATA * ch, char *argument)
 
 return;
 
+}
+
+//list the crafts of a PC
+void
+do_craftspc (CHAR_DATA * ch, char *argument, int cmd)
+{
+  CHAR_DATA *tch;
+	char buf[MAX_STRING_LENGTH];
+	char buf2[MAX_STRING_LENGTH];
+	std::string output;
+	AFFECTED_TYPE *af;
+	
+	argument = one_argument(argument, buf);
+
+	tch = load_pc(buf);	
+	if (tch)
+		{
+			sprintf (buf2,
+				"\n#6%s#0 has the following crafts on %s pfile:\n\n",
+				tch->tname,
+				HSHR (tch));
+
+			output.assign(buf2);
+
+			for (af = tch->hour_affects; af; af = af->next)
+				{
+					if (af->type >= CRAFT_FIRST && af->type <= CRAFT_LAST)
+						{
+							sprintf (buf2,
+								"  #6Craft:#0 %-20s #6Subcraft:#0 %-12s #6Command:#0 %-10s\n",
+								af->a.craft->subcraft->craft_name,
+								af->a.craft->subcraft->subcraft_name,
+								af->a.craft->subcraft->command);
+
+							output.append(buf2);
+						}
+				}
+
+			unload_pc (tch);
+			page_string (ch->desc, output.c_str());
+			return;
+		}
+	return;
 }

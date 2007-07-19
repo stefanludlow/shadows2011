@@ -253,6 +253,7 @@ void do_contents (CHAR_DATA * ch, char *argument, int cmd);
 void do_cover (CHAR_DATA * ch, char *argument, int cmd);
 void do_count (CHAR_DATA * ch, char *argument, int cmd);
 void do_crafts (CHAR_DATA * ch, char *argument, int cmd);
+void do_craftspc (CHAR_DATA * ch, char *argument, int cmd);
 void do_credits (CHAR_DATA * ch, char *argument, int cmd);
 void do_cset (CHAR_DATA * ch, char *argument, int cmd);
 void do_day (CHAR_DATA * ch, char *argument, int cmd);
