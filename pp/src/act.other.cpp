@@ -1863,31 +1863,6 @@ sa_move (SECOND_AFFECT * sa)
 
 void
 sa_command (SECOND_AFFECT * sa)
-/*{
-	std::string Command, ArgumentList;
-	ArgumentList = sa->info;
-	while (!(ArgumentList.empty()))
-	{
-		if (ArgumentList.find('|') == std::string::npos)
-		{
-			char * command_cstr;
-			const_to_non_const_cstr(ArgumentList.c_str(), command_cstr);
-			command_interpreter(sa->ch, command_cstr);
-			return;
-		}
-		else
-		{
-			Command = ArgumentList.substr(0, ArgumentList.find('|'));			
-			ArgumentList = ArgumentList.substr(ArgumentList.find('|'), ArgumentList.length()-1);
-			Command.erase(Command.length()-1, 1);
-			ArgumentList.erase(0,1);
-		}
-			                        char * command_cstr;
-                        const_to_non_const_cstr(ArgumentList.c_str(), command_cstr);
-                        command_interpreter(sa->ch, command_cstr);   
-	}
-	return;
-} */
 {
 	command_interpreter(sa->ch, sa->info);
 }
