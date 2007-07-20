@@ -447,6 +447,7 @@ void do_save (CHAR_DATA * ch, char *argument, int cmd);
 void do_saverooms (CHAR_DATA * ch, char *argument, int cmd);
 void do_say (CHAR_DATA * ch, char *argument, int cmd);
 void do_scan (CHAR_DATA * ch, char *argument, int cmd);
+void do_scommand (CHAR_DATA *ch, char *argument, int cmd);
 void do_score (CHAR_DATA * ch, char *argument, int cmd);
 void do_scribe (CHAR_DATA * ch, char *argument, int cmd);
 void do_search (CHAR_DATA * ch, char *argument, int cmd);
@@ -1205,7 +1206,7 @@ void combat_results (CHAR_DATA * src, CHAR_DATA * tar,
 		     int off_success, int def_success);
 void fix_offense (CHAR_DATA * ch);
 void add_second_affect (int type, int seconds, CHAR_DATA * ch,
-			OBJ_DATA * obj, char *info, int info2);
+			OBJ_DATA * obj, const char *info, int info2);
 void second_affect_update (void);
 void hour_affect_update (void);
 void remove_cover (CHAR_DATA *ch, int type);

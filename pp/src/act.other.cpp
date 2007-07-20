@@ -1862,8 +1862,39 @@ sa_move (SECOND_AFFECT * sa)
 }
 
 void
+sa_command (SECOND_AFFECT * sa)
+/*{
+	std::string Command, ArgumentList;
+	ArgumentList = sa->info;
+	while (!(ArgumentList.empty()))
+	{
+		if (ArgumentList.find('|') == std::string::npos)
+		{
+			char * command_cstr;
+			const_to_non_const_cstr(ArgumentList.c_str(), command_cstr);
+			command_interpreter(sa->ch, command_cstr);
+			return;
+		}
+		else
+		{
+			Command = ArgumentList.substr(0, ArgumentList.find('|'));			
+			ArgumentList = ArgumentList.substr(ArgumentList.find('|'), ArgumentList.length()-1);
+			Command.erase(Command.length()-1, 1);
+			ArgumentList.erase(0,1);
+		}
+			                        char * command_cstr;
+                        const_to_non_const_cstr(ArgumentList.c_str(), command_cstr);
+                        command_interpreter(sa->ch, command_cstr);   
+	}
+	return;
+} */
+{
+	command_interpreter(sa->ch, sa->info);
+}
+
+void
 add_second_affect (int type, int seconds, CHAR_DATA * ch, OBJ_DATA * obj,
-		   char *info, int info2)
+		  const char *info, int info2)
 {
   SECOND_AFFECT *sa;
 
@@ -1982,6 +2013,9 @@ second_affect_update (void)
 	case SA_RESCUE:
 	  sa_rescue (sa);
 	  break;
+        case SA_COMMAND:
+          sa_command (sa);
+	  break;
 	}
 
       second_affect_active = 0;
@@ -1994,6 +2028,30 @@ second_affect_update (void)
 
       mem_free (sa);
     }
+}
+
+void
+do_scommand (CHAR_DATA * ch, char * argument, int cmd)
+{
+	if (!IS_NPC(ch) && !GET_TRUST(ch) && !cmd)
+	{
+		send_to_char("You are not permitted to use this command.\n\r", ch);
+		return;
+	}
+	std::string ArgumentList = argument, ThisArgument;
+	ArgumentList = one_argument(ArgumentList, ThisArgument);
+	if (ArgumentList.empty() || ThisArgument.empty())
+	{
+		send_to_char("Correct syntax: #6scommand delay command#0.\n\r", ch);
+		return;
+	}
+	if (!(is_number(ThisArgument.c_str())))
+	{
+		send_to_char("Delay must be a number.\n\r", ch);
+		return;
+	}
+	add_second_affect(SA_COMMAND, atoi(ThisArgument.c_str()), ch, NULL, ArgumentList.c_str(), 0);
+	return;
 }
 
 void

@@ -205,6 +205,7 @@ const struct command_data commands[] = {
   {"say", do_say, REST, C_SUB | C_DOA | C_BLD | C_PAR | C_DEL},
   {"save", do_save, SLEEP,
    C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL | C_NLG},
+  {"scommand", do_scommand, FIGHT, C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL | C_NLG},
   {"score", do_score, DEAD,
    C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL | C_NLG},
   {"scan", do_scan, STAND, C_WLK},

@@ -143,6 +143,7 @@ typedef signed char shortint;
 #define SA_ESCAPE		19
 #define SA_MOVE			20
 #define SA_RESCUE		21
+#define SA_COMMAND 	 	22
 
 #define VNUM_PENNY		40
 #define VNUM_FARTHING		41
