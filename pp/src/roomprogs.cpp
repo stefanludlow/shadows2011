@@ -64,6 +64,7 @@
 #define RP_STRIP        41      /* takes a person's equipment and puts it all neatly in a bag */
 #define RP_CLAN         42      /* adds people to a clan at a certain rank */
 #define RP_TAKEMONEY 43 /* Take money from a player's inventory TBA: Take money from room too */
+#define RP_DELAY 44 /* Delayed command just like scommand */
 // #define RP_SETVAR 44   /* Japheth's Variable additions */
 
 
@@ -103,6 +104,7 @@ void r_criminalize (CHAR_DATA *ch, char *argument);
 void r_strip (CHAR_DATA *ch, char *argument);
 void r_clan (CHAR_DATA *ch, char *argument);
 void r_takemoney(CHAR_DATA *ch, char *argument);
+void r_delay (CHAR_DATA *ch, char *argument);
 // void r_setvar (char *argument);
 
 
@@ -157,6 +159,7 @@ const char *rfuncs[] = {
   "strip",
   "clan",
   "takemoney",
+  "delay",
 //  "setvar",
   "\n"
 };
@@ -1067,6 +1070,10 @@ doit (CHAR_DATA *ch, char *func, char *arg)
       if (!ifin[nNest])
         r_clan (ch, arg);
        return 1;
+    case RP_DELAY:
+      if (!ifin[nNest])
+       r_delay (ch, arg);
+      return 1;
     case RP_HALT:
       if (!ifin[nNest])
 	return 0;
@@ -2599,6 +2606,11 @@ delete [] arg1;
 delete [] arg2;
 delete [] arg3;
 
+}
+
+void r_delay (CHAR_DATA *ch, char *argument)
+{
+	do_scommand(ch, argument, 1);
 }
 
 void r_takemoney ( CHAR_DATA *ch, char * argument)
