@@ -65,6 +65,7 @@
 #define RP_CLAN         42      /* adds people to a clan at a certain rank */
 #define RP_TAKEMONEY 43 /* Take money from a player's inventory TBA: Take money from room too */
 #define RP_DELAY 44 /* Delayed command just like scommand */
+#define RP_TEACH 45 /* Teach character skill */
 // #define RP_SETVAR 44   /* Japheth's Variable additions */
 
 
@@ -105,6 +106,7 @@ void r_strip (CHAR_DATA *ch, char *argument);
 void r_clan (CHAR_DATA *ch, char *argument);
 void r_takemoney(CHAR_DATA *ch, char *argument);
 void r_delay (CHAR_DATA *ch, char *argument);
+void r_teach (CHAR_DATA *ch, char *argument);
 // void r_setvar (char *argument);
 
 
@@ -160,6 +162,7 @@ const char *rfuncs[] = {
   "clan",
   "takemoney",
   "delay",
+  "teach",
 //  "setvar",
   "\n"
 };
@@ -951,6 +954,10 @@ doit (CHAR_DATA *ch, char *func, char *arg)
 	  ref (arg, tmp);
 	  act (tmp, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
 	}
+      return 1;
+    case RP_TEACH:
+      if (!ifin[nNest])
+        r_teach (ch, arg);
       return 1;
     case RP_UNLINK:
       if (!ifin[nNest])
@@ -2833,3 +2840,19 @@ void r_setvar (char *argument, DynamicVariableList *Variables)
 	}
 }
 */
+
+void r_teach (CHAR_DATA *ch, char * argument)
+{
+	std::string ArgumentList = argument, ThisArgument;
+	int index = 0;
+	ArgumentList = one_argument (ArgumentList, ThisArgument);
+	if ((index = index_lookup(skills, ThisArgument.c_str())) == -1)
+	{
+		return;
+	}
+	if (real_skill(ch, index))
+	{
+		return;
+	}
+	open_skill(ch, index);
+}
