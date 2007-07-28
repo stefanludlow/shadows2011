@@ -749,6 +749,7 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 				}//if (!*buf)
 
 //Listing individual crafts 
+
       else
 	{
 	  j = 0;
@@ -780,11 +781,11 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 		  has_a_craft = 1;
 									
 		  if (!(j % 2))
-										output.append("\n");
+					output.append("\n");
 								}
 						}//for (i = CRAFT_FIRST
-
 	  if ((j % 2))
+
       output.append("\n");
 
 					if (!has_a_craft)
@@ -955,9 +956,9 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 
   if (category)
     {
+
       sprintf (buf2, "\nWe have the following #6%s#0 crafts:\n\n", buf);
       output.assign(buf2);
-
 			for (craft = crafts; craft; craft = craft->next)
 				{
 					if (!str_cmp (craft->craft_name, buf))
@@ -968,8 +969,12 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 	     					craft->command);
 	     					
 	    output.append(buf2);
+
+											
+							output.append(buf2);
 	    }
 	}
+
       page_string (ch->desc, output.c_str());
       return;
     }

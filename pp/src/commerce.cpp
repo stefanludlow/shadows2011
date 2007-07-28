@@ -911,8 +911,8 @@ calculate_sale_price (OBJ_DATA * obj, CHAR_DATA * keeper, CHAR_DATA * ch,
 
   if (!IS_SET (obj->obj_flags.extra_flags, ITEM_PC_SOLD) && !sell)
     markup = econ_markup (keeper, obj);
-  else
-    markup = econ_discount (keeper, obj) * econ_markup (keeper, obj);
+  else //value for selling an item
+    markup = econ_discount (keeper, obj);
 
   if (obj->obj_flags.set_cost > 0)
     {
@@ -951,8 +951,10 @@ calculate_sale_price (OBJ_DATA * obj, CHAR_DATA * keeper, CHAR_DATA * ch,
 
       if (neg && neg->price_delta)
 	val_in_farthings =
-	  val_in_farthings * 100.0 / (100.0 + neg->price_delta);
-    }
+	  val_in_farthings * (100.0 + neg->price_delta) / 100.0 ; //fixed formula
+	  
+   	}
+//ch != NULL
 
   if (round_result)
     {
@@ -3915,7 +3917,7 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
       do_whisper (keeper, buf, 83);
 
       return;
-    }
+    } //end  if (cmd == 1) bartering
 
   keepers_cost = (int) keepers_cost;
 
@@ -3937,9 +3939,6 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
       do_whisper (keeper, buf, 83);
       return;
     }
-
-  if (neg && neg->price_delta)
-    keepers_cost = keepers_cost * (100 + neg->price_delta) / 100;
 
   if (!keeper_has_money (keeper, (int) keepers_cost))
     {
