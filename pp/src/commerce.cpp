@@ -2934,6 +2934,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
       else
 	discount = 0;		/* A CF by ch */
 
+      discount = -1 * discount; //changing to a lower price
       neg = (NEGOTIATION_DATA *) alloc (sizeof (NEGOTIATION_DATA), 40);
       neg->ch_coldload_id = ch->coldload_id;
       neg->obj_vnum = obj->nVirtual;
@@ -2962,7 +2963,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 		"I'll be out of business in a week.  Here, here, take "
 		"your ill-gotten gain and begone.  Take it away for ");
 
-      keepers_cost = keepers_cost * 100 / (100 + discount);
+      keepers_cost = keepers_cost * (100 + discount) / 100;
 
       keepers_cost = (int) keepers_cost;
 

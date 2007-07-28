@@ -1963,6 +1963,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 
   if (bPCsOnly)
     {
+
       if ((k = get_char_room_vis (ch, name)) && !IS_NPC (k))
 	{
 	}
