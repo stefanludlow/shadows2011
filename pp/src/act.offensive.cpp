@@ -695,6 +695,7 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
 
   skill_use (ch, ch_skill, 0);
 
+// Weather effects 
   if (weather_info[ch->room->zone].fog == THIN_FOG)
     att_modifier += 5;
   if (weather_info[ch->room->zone].fog == THICK_FOG)
@@ -706,6 +707,27 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
   if (weather_info[ch->room->zone].state == STEADY_SNOW)
     att_modifier += 25;
 
+// Sector type effects
+	if (target->room->sector_type == SECT_ROAD)
+		att_modifier += 5; 
+ 	if (target->room->sector_type ==SECT_TRAIL) 
+		att_modifier += 5; 
+ 	if (target->room->sector_type ==SECT_FIELD)
+ 		att_modifier += 10; 
+ 	if (target->room->sector_type ==SECT_WOODS)
+ 		att_modifier += 15; 
+ 	if (target->room->sector_type ==SECT_FOREST) 
+ 		att_modifier += 25; 
+ 	if (target->room->sector_type ==SECT_HILLS)
+ 		att_modifier += 15; 
+ 	if (target->room->sector_type ==SECT_MOUNTAIN) 
+ 		att_modifier += 20; 
+ 	if (target->room->sector_type ==SECT_SWAMP)
+ 		att_modifier += -10; 
+ 	if (target->room->sector_type ==SECT_HEATH)
+ 		att_modifier += -5;
+
+// Random modifier
   roll = number (1, SKILL_CEILING);
   roll += att_modifier;
   roll = MIN (roll, SKILL_CEILING);
