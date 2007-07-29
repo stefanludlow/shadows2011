@@ -964,13 +964,9 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 					if (!str_cmp (craft->craft_name, buf))
 						{
 							sprintf (buf2,
-								"#6Subcraft:#0 %-24s #6Commandd:#0 %-20s\n",
+								"#6Subcraft:#0 %-24s #6Command:#0 %-20s\n",
 	     					craft->subcraft_name,
 	     					craft->command);
-	     					
-	    output.append(buf2);
-
-											
 							output.append(buf2);
 	    }
 	}
