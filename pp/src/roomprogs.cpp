@@ -384,6 +384,152 @@ reval (CHAR_DATA * ch, char *arg)
       strncat (rbuf, tmp2, (tsiz - dsiz));
     }
 
+  // Check to see if mudhour compares with specified logic
+  // Syntax: if (hour=x)
+  //         if (hour>x)
+  //         if (hour<x)
+  //	     if (hour!x)
+  //	     if (hour#x) - note, this is hour mod x, but % char not allowed in mud input.
+  if (!strncmp(sarg, "(hour", 5))
+  {
+	  int iTest = strtol(sarg+6, 0, 0);
+	  bool pass = false;
+	  switch (sarg[5])
+	  {
+	  case '=':
+		  pass = (iTest == time_info.hour);
+		  break;
+	  case '>':
+		  pass = (iTest < time_info.hour);
+		  break;
+	  case '<':
+		  pass = (iTest > time_info.hour);
+		  break;
+	  case '!':
+		  pass = (iTest != time_info.hour);
+		  break;
+	  case '#':
+		  pass = !(time_info.hour % iTest);
+		  break;
+	  }
+	  if (!pass)
+	  {
+		  ifin[nNest] = 1;
+	  }
+	  return;
+  }
+  if (!strncmp(sarg, "(day", 4))
+  {
+	  int iTest = strtol(sarg+5, 0, 0);
+	  bool pass = false;
+	  switch (sarg[4])
+	  {
+	  case '=':
+		  pass = (iTest == (time_info.day+1));
+		  break;
+	  case '>':
+		  pass = (iTest < (time_info.day +1));
+		  break;
+	  case '<':
+		  pass = (iTest > (time_info.day + 1));
+		  break;
+	  case '!':
+		  pass = (iTest != (time_info.day+1));
+		  break;
+	  case '#':
+		  pass = !((time_info.day+1) % iTest);
+		  break;
+	  }
+	  if (!pass)
+	  {
+		  ifin[nNest] = 1;
+	  }
+	  return;
+  }
+  // Note - first month is Midwinter
+  if (!strncmp(sarg, "(month", 6))
+  {
+	  int iTest = strtol(sarg+7, 0, 0);
+	  bool pass = false;
+	  switch (sarg[6])
+	  {
+	  case '=':
+		  pass = (iTest == (time_info.month+1));
+		  break;
+	  case '>':
+		  pass = (iTest < (time_info.month+1));
+		  break;
+	  case '<':
+		  pass = (iTest > (time_info.month+1));
+		  break;
+	  case '!':
+		  pass = (iTest != (time_info.month+1));
+		  break;
+	  case '#':
+		  pass = !((time_info.month+1) % iTest);
+		  break;
+	  }
+	  if (!pass)
+	  {
+		  ifin[nNest] = 1;
+	  }
+	  return;
+  }
+  if (!strncmp(sarg, "(year", 5))
+  {
+	  int iTest = strtol(sarg+6, 0, 0);
+	  bool pass = false;
+	  switch (sarg[5])
+	  {
+	  case '=':
+		  pass = (iTest == time_info.year);
+		  break;
+	  case '>':
+		  pass = (iTest < time_info.year);
+		  break;
+	  case '<':
+		  pass = (iTest > time_info.year);
+		  break;
+	  case '!':
+		  pass = (iTest != time_info.year);
+		  break;
+	  case '#':
+		  pass = !(time_info.year % iTest);
+		  break;
+	  }
+	  if (!pass)
+	  {
+		  ifin[nNest] = 1;
+	  }
+	  return;
+  }
+  // First season (1) is Spring
+  if (!strncmp(sarg, "(season", 7))
+  {
+	  int iTest = strtol(sarg+8, 0, 0);
+	  bool pass = false;
+	  switch (sarg[7])
+	  {
+	  case '=':
+		  pass = (iTest == (time_info.season+1));
+		  break;
+	  case '>':
+		  pass = (iTest < (time_info.season+1));
+		  break;
+	  case '<':
+		  pass = (iTest > (time_info.season+1));
+		  break;
+	  case '!':
+		  pass = (iTest != (time_info.hour+1));
+		  break;
+	  }
+	  if (!pass)
+	  {
+		  ifin[nNest] = 1;
+	  }
+	  return;
+  }
+
   /* Check to see if you can take specified money from character */
   /* Usage: if can_take_money(amount, currency) */
   if (!strncmp (sarg, "can_take_money", 14))
