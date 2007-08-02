@@ -7774,7 +7774,7 @@ do_wanted (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 void
-report_exits (CHAR_DATA * ch)
+report_exits (CHAR_DATA * ch, int zone)
 {
   int dir;
   ROOM_DATA *room;
@@ -7784,38 +7784,41 @@ report_exits (CHAR_DATA * ch)
 
   for (room = full_room_list; room; room = room->lnext)
     {
+    
+    	if (zone != -1 && room->zone != zone)
+      continue;
 
       for (dir = 0; dir <= LAST_DIR; dir++)
-	{
+  {
 
-	  if (!room->dir_option[dir])
-	    continue;
+    if (!room->dir_option[dir])
+      continue;
 
-	  if (!(troom = vtor (room->dir_option[dir]->to_room)))
-	    {
-	      sprintf (b_buf + strlen (b_buf),
-		       "Room %5d %5s doesn't go to room %d",
-		       room->nVirtual, dirs[dir],
-		       room->dir_option[dir]->to_room);
-	    }
+    if (!(troom = vtor (room->dir_option[dir]->to_room)))
+      {
+        sprintf (b_buf + strlen (b_buf),
+           "Room %5d %5s doesn't go to room %d\n",
+           room->nVirtual, dirs[dir],
+           room->dir_option[dir]->to_room);
+      }
 
-	  else if (!troom->dir_option[rev_dir[dir]])
-	    {
-	      sprintf (b_buf + strlen (b_buf),
-		       "Room %5d %5s is one-way to room %d\n",
-		       room->nVirtual, dirs[dir],
-		       room->dir_option[dir]->to_room);
-	    }
+    else if (!troom->dir_option[rev_dir[dir]])
+      {
+        sprintf (b_buf + strlen (b_buf),
+           "Room %5d %5s is one-way to room %d\n",
+           room->nVirtual, dirs[dir],
+           room->dir_option[dir]->to_room);
+      }
 
-	  else if (room->nVirtual != troom->dir_option[rev_dir[dir]]->to_room)
-	    {
-	      sprintf (b_buf + strlen (b_buf),
-		       "Room %5d %5s->%5d  BUT  %5d <- %5s %5d\n",
-		       room->nVirtual, dirs[dir], troom->nVirtual,
-		       troom->dir_option[rev_dir[dir]]->to_room,
-		       dirs[rev_dir[dir]], troom->nVirtual);
-	    }
-	}
+    else if (room->nVirtual != troom->dir_option[rev_dir[dir]]->to_room)
+      {
+        sprintf (b_buf + strlen (b_buf),
+           "Room %5d %5s->%5d  BUT  %5d <- %5s %5d\n",
+           room->nVirtual, dirs[dir], troom->nVirtual,
+           troom->dir_option[rev_dir[dir]]->to_room,
+           dirs[rev_dir[dir]], troom->nVirtual);
+      }
+  }
     }
 
   page_string (ch->desc, b_buf);
@@ -7874,6 +7877,9 @@ report_objects (CHAR_DATA * ch)
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
 
+	if (GET_TRUST (ch) < 6)
+		send_to_char("Please ask an Implementor for this information\n", ch);
+		
   if (!(fp = fopen ("objects", "w+")))
     perror ("Couldn't open objects");
 
@@ -7988,6 +7994,9 @@ report_races (CHAR_DATA * ch)
   CHAR_DATA *mob;
   char buf[MAX_STRING_LENGTH];
 
+	if (GET_TRUST (ch) < 6)
+		send_to_char("Please ask an Implementor for this information\n", ch);
+		
   if (!(fp = fopen ("races", "w+")))
     perror ("Couldn't create races");
 
@@ -8021,6 +8030,9 @@ vnum, short desc, store room, markup, discount, trades in, deliveries
 
 I'd like to give you back vnum, all the markups, discounts, and nobuy
 */
+
+	if (GET_TRUST (ch) < 6)
+		send_to_char("Please ask an Implementor for this information\n", ch);
 
   if (!(fp = fopen ("shops", "w+")))
     perror ("Couldn't create shops");
@@ -8209,6 +8221,8 @@ void
 do_report (CHAR_DATA * ch, char *argument, int cmd)
 {
   char buf[MAX_STRING_LENGTH];
+	char temp[MAX_STRING_LENGTH];
+	int zone = -1;
 
   argument = one_argument (argument, buf);
 
@@ -8217,8 +8231,25 @@ do_report (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("   objects   - object list to file 'objects'.\n", ch);
       send_to_char ("   shops     - keeper list to file 'shops'.\n", ch);
       send_to_char ("   race      - race report.\n", ch);
-      send_to_char ("   mobiles   - I don't know.\n", ch);
-      send_to_char ("   exits     - Don't remember.\n", ch);
+      send_to_char ("   mobiles   - Mob population by zone.\n", ch);
+      send_to_char ("   exits [zone]    - Faulty links in exits\n", ch);
+    }
+    
+	else if (!str_cmp (buf, "exits"))
+		{
+			argument = one_argument (argument, temp);
+			
+			if (isdigit (*temp))
+				{
+					if ((zone = atoi (temp)) >= MAX_ZONE)
+						{
+							send_to_char ("Zone not in range 0..99\n", ch);
+							return;
+						}
+					report_exits(ch, zone);
+				}
+			else
+				report_exits (ch, -1);
     }
 
   else if (!str_cmp (buf, "uobjs"))
@@ -8233,8 +8264,6 @@ do_report (CHAR_DATA * ch, char *argument, int cmd)
     report_shops (ch);
   else if (!str_cmp (buf, "objs") || !str_cmp (buf, "objects"))
     report_objects (ch);
-  else if (!str_cmp (buf, "exits"))
-    report_exits (ch);
   else if (!str_cmp (buf, "mobiles") || !str_cmp (buf, "mobs"))
     report_mobiles (ch);
   else if (!str_cmp (buf, "race") || !str_cmp (buf, "races"))
@@ -8331,7 +8360,6 @@ void
 do_swap (CHAR_DATA * ch, char *argument, int cmd)
 {
   char buf[MAX_STRING_LENGTH];
-  char portchar[4];
 
   argument = one_argument (argument, buf);
 
@@ -8692,7 +8720,6 @@ list_all_crafts (CHAR_DATA * ch)
     {
 
       sprintf (p, "#6Craft:#0 %-20s #6Sub:#0 %-24s #6Cmd:#0 %-10s\n",
-
 	       craft->craft_name, craft->subcraft_name, craft->command);
       p += strlen (p);
     }
@@ -10967,6 +10994,34 @@ csv_craft (const CHAR_DATA* ch)
   return success;
 }
 
+void
+do_becho (CHAR_DATA * ch, char *argument, int cmd)
+{
+	int i;
+  std::string output;
+	char buf[MAX_STRING_LENGTH];
+	
+  for (i = 0; *(argument + i) == ' '; i++);
+
+  if (!*(argument + i))
+    {
+      send_to_char ("What did you want to echo?\n", ch);
+      return;
+    }
+
+	output.assign ("#9<<<****************************************>>>#0\n");
+	output.append ("#B<<<---------------------------------------->>>#0\n\n");
+  
+  sprintf (buf, "%s\n\n", argument + i);
+  output.append (buf);
+  
+  output.append ("#B<<<---------------------------------------->>>#0\n");
+  output.append ("#9<<<****************************************>>>#0\n");
+
+  
+  send_to_room ((char*)output.c_str(), ch->in_room);
+
+}
 
 void
 do_csv (CHAR_DATA* ch, char *argument, int cmd)

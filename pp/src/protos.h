@@ -226,6 +226,7 @@ void do_at (CHAR_DATA * ch, char *argument, int cmd);
 void do_auction (CHAR_DATA * ch, char *argument, int cmd);
 void do_award (CHAR_DATA * ch, char *argument, int cmd);
 void do_ban (CHAR_DATA * ch, char *argument, int cmd);
+void do_becho (CHAR_DATA * ch, char *argument, int cmd);
 void char__do_bind (CHAR_DATA * ch, char *argument, int cmd);	/* wounds.c           */
 void do_blog (CHAR_DATA * ch, char *argument, int cmd);	/* staff.c            */
 void do_bolt (CHAR_DATA * ch, char *argument, int cmd);

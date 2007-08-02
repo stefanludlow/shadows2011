@@ -361,6 +361,7 @@ const struct command_data commands[] = {
 	{"outfit", do_outfit, DEAD, C_LV2},
 	{"prog", do_prog, DEAD, C_LV2},
 	{"rcap", do_rcap, DEAD, C_LV2},
+	{"report", do_report, DEAD, C_LV2},
 	{"restore", do_restore, DEAD, C_LV2},
   {"rpadd", do_rpadd, DEAD, C_LV2},
   {"rpapp", do_rpapp, DEAD, C_LV2},
@@ -379,6 +380,7 @@ const struct command_data commands[] = {
  	
  	/* Basic RPA Level 3: (players) */
 	{"addcraft", do_addcraft, DEAD, C_LV3},
+	{"becho", do_becho, DEAD, C_LV3},
  	{"clan", do_clan, DEAD, C_LV3},
  	{"echo", do_echo, DEAD, C_LV3},
  	{"job", do_job, DEAD, C_LV3},
@@ -443,7 +445,7 @@ const struct command_data commands[] = {
 	{"debug", do_debug, DEAD, C_IMP},
 	{"mysql", do_mysql, DEAD, C_IMP},
 	{"nuke", do_nuke, DEAD, C_IMP},
-	{"report", do_report, DEAD, C_IMP},
+	
 	{"rmove", do_rmove, DEAD, C_IMP},
   {"zlife", do_zlife, DEAD, C_IMP},
   {"zlock", do_zlock, DEAD, C_IMP},
