@@ -867,11 +867,10 @@ make_corpse (CHAR_DATA * ch)
   corpse = load_object (VNUM_CORPSE);
 
   if (!IS_NPC (ch))
-    sprintf (buf, "corpse pc_%s", GET_NAME (ch));
+    sprintf (buf, "corpse pc %s", GET_NAMES (ch));
   else
     {
-      one_argument (GET_NAME (ch), buf2);
-      sprintf (buf, "corpse npc_%s", buf2);
+      sprintf (buf, "corpse npc %s", GET_NAMES (ch));
     }
 
   corpse->name = str_dup (buf);

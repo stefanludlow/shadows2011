@@ -4478,16 +4478,21 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 	  target_char++;
 	}
 				
-      for (obj = ch->room->contents; obj; obj = obj->next_content)
-	{
-	  if (IS_OBJ_VIS (ch, obj) && isname (arg1, obj->name))
-	    {
-	      target_found++;
-	      target_obj++;
-	      break;
-	    }
-	}
-				
+      //for (obj = ch->room->contents; obj; obj = obj->next_content)
+	//{
+	 // if (IS_OBJ_VIS (ch, obj) && isname (arg1, obj->name))
+	   // {
+	     // target_found++;
+	     // target_obj++;
+	     // break;
+	   // }
+	//}
+	
+	if (obj = get_obj_in_list_vis (ch, arg1, ch->room->contents))
+	  {
+		target_found++;
+		target_obj++;
+	  }			
       if (!tch && !obj)
 	{
 	  send_to_char ("Remove what?\n", ch);
