@@ -181,6 +181,7 @@ Leather and scale perform very slightly better on average.
   { -1, -3, -3, -3, -3, -4  }    // lash
 
 */
+/** This system worked for a long time, but was unbalancved in ractical useage
 const int weapon_armor_table[6][6] = {
   // Q   L   R   S   M   P
   {0, 2, 0, -1, 1, 0},		// stab
@@ -190,7 +191,17 @@ const int weapon_armor_table[6][6] = {
   {0, 1, 0, 0, -1, -1},		// slash
   {0, -1, -2, -2, -2, -3}	// lash
 };
+***/
 
+const int weapon_armor_table[6][6] = {
+  // Q   L   R   S   M   P
+  {-1, +1, +1, +2, +2, +3},		// stab
+  {-1, 0, 0, +2, +1, +2},		// pierce
+  {0, +1, +2, +2, +2, +3},		// chop
+  {0, +2, +1, 0, +1, +3},		// bludgeon
+  {-1, -1, +1, +1, +4, +2},		// slash
+  {0, +1, +1, +2, +2, +3}	// lash
+};
 const int weapon_nat_attack_table[4][6] = {
   // Q   L   R   S   M   P
   {-1, -2, -1, -1, 2, 2},	// punch
@@ -861,7 +872,6 @@ make_corpse (CHAR_DATA * ch)
   LODGED_OBJECT_INFO *lodged;
   LODGED_OBJECT_INFO *clodged;
   char buf[MAX_STRING_LENGTH];
-  char buf2[MAX_STRING_LENGTH];
   int i;
 
   corpse = load_object (VNUM_CORPSE);

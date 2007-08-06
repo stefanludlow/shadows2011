@@ -31,7 +31,7 @@ const struct command_data commands[] = {
   {":", do_emote, REST, C_SUB | C_DOA | C_BLD | C_PAR | C_DEL},
   {"accept", do_accept, REST, C_DEL | C_BLD | C_HID},
   {"accuse", do_accuse, REST, C_BLD},
-  {"aim", do_aim, FIGHT, C_WLK | C_HID | C_MNT},
+  {"aim", do_aim, FIGHT, C_WLK | C_HID}, //| C_MNT
   {"alert", do_alert, FIGHT, C_BLD},
   {"apply", do_apply, SIT, C_WLK},
   {"as", do_as, DEAD, C_LV3},
@@ -146,7 +146,7 @@ const struct command_data commands[] = {
   {"leave", do_leave, STAND, C_WLK | C_BLD},
   {"light", do_light, SIT, C_HID | C_DOA},
   {"list", do_list, SIT, C_BLD},
-  {"load", do_load, FIGHT, C_WLK | C_MNT | C_HID | C_DOA},
+  {"load", do_load, FIGHT, C_WLK | C_HID | C_DOA}, //C_MNT 
   {"lock", do_lock, SIT, C_MNT},
   {"materials", do_materials, DEAD,
    C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL | C_NLG},
@@ -259,7 +259,7 @@ const struct command_data commands[] = {
   {"typo", do_typo, DEAD,
    C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL},
   {"up", do_up, FIGHT, C_HID | C_DOA | C_BLD},
-  {"unload", do_unload, SIT, C_WLK | C_MNT | C_HID | C_DOA},
+  {"unload", do_unload, SIT, C_WLK | C_HID | C_DOA}, //C_MNT |
   {"unlock", do_unlock, SIT, C_MNT},
   {"unhitch", do_unhitch, STAND, 0},
   {"value", do_value, SIT, C_BLD},

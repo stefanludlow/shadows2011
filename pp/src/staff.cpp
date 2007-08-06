@@ -5175,8 +5175,15 @@ do_load_missile (CHAR_DATA * ch, char *argument, int cmd)
       || get_equip (ch, WEAR_SEC) || get_equip (ch, WEAR_BOTH))
     {
       send_to_char
-	("You must first be wielding an unloaded bow, and only that weapon.\n",
-	 ch);
+  ("You must first be wielding an unloaded bow, and only that weapon.\n", ch);
+      return;
+    }
+
+	if (is_mounted(ch) &&
+		(ptrBow->o.weapon.use_skill == SKILL_CROSSBOW ||
+		ptrBow->o.weapon.use_skill == SKILL_LONGBOW))
+		{
+			send_to_char ("You can't load that while mounted!\n", ch);
       return;
     }
 

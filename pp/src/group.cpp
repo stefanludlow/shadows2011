@@ -445,8 +445,8 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
     {
       if (tch->following != top_leader)
 	continue;
-      if (!CAN_SEE (ch, tch))
-	continue;
+     // if (!CAN_SEE (ch, tch))
+	//continue;
       if (found != false)
 	sprintf (buf + strlen (buf), ",\n");
       *status = '\0';

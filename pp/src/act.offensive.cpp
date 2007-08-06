@@ -142,6 +142,7 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
   char buf2[MAX_STRING_LENGTH];
   char buf3[MAX_STRING_LENGTH];
   char strike_location[MAX_STRING_LENGTH];
+	bool switched_target = false;
 
   const char *verbose_dirs[] = {
     "the north",
@@ -222,6 +223,15 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+if (are_grouped (ch, tch) && is_brother (ch, tch)
+      && number (0, 9) && *argument != '!')
+    {
+      sprintf (buf,
+	       "#1You decide not to throw at $N #1who is a fellow group member!#0");
+      act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
+      return;
+    }
+    
   if (get_affect (ch, MAGIC_HIDDEN))
     {
       remove_affect_type (ch, MAGIC_HIDDEN);
@@ -341,6 +351,18 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 	calculate_missile_result (ch, SKILL_THROWN, ch->balance * -10, tch, 0,
 				  NULL, tobj, NULL, &location, &damage);
 
+//you hit the opponent of your target if you miss and you miss a second  dex roll...ie, you hit your own people, with no penalty to being off balance.
+  if ((result == CRITICAL_MISS || result == MISS) && tch->fighting
+      && tch->fighting != ch && number (1, 25) > ch->dex)
+    {
+      tch = tch->fighting;
+      result =
+	calculate_missile_result (ch, SKILL_THROWN, ch->balance* -10, tch,
+				  0, NULL, tobj, NULL, &location, &damage);
+      switched_target = true;
+ send_to_gods("SWitched\n");
+    }
+
       damage = (int) damage;
 
       wear_loc1 = body_tab[0][location].wear_loc1;
@@ -419,6 +441,7 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 	  result = MISS;
 	  damage = 0;
 	}
+	
       else if (result == MISS)
 	{
 	  sprintf (buf, "It misses completely.");
@@ -446,8 +469,16 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 	}
       else if (result == GLANCING_HIT)
 	{
+		if (switched_target)
+			{
+				sprintf (buf, "It went astray and grazes %s on the %s.", HMHR (tch),
+		   expand_wound_loc (strike_location));
+			}
+		else
+			{
 	  sprintf (buf, "It grazes %s on the %s.", HMHR (tch),
 		   expand_wound_loc (strike_location));
+		  }
 	  sprintf (buf2, "It grazes you on the %s.",
 		   expand_wound_loc (strike_location));
 
@@ -456,15 +487,33 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  if (can_lodge)
 	    {
+	    	if(switched_target)
+	    		{
+	    			sprintf (buf, "It goes astray and lodges in %s %s.", HSHR (tch),
+		       expand_wound_loc (strike_location));
+	    		}
+	    	else
+	    {
 	      sprintf (buf, "It lodges in %s %s.", HSHR (tch),
 		       expand_wound_loc (strike_location));
+		       }
+		       
 	      sprintf (buf2, "It lodges in your %s.",
 		       expand_wound_loc (strike_location));
 	    }
 	  else
 	    {
+	    	if(switched_target)
+	    		{
+	      		sprintf (buf, "It goes astray and strikes %s on the %s.", HMHR (tch),
+		       expand_wound_loc (strike_location));
+	      	}
+	      else
+	      	{
 	      sprintf (buf, "It strikes %s on the %s.", HMHR (tch),
 		       expand_wound_loc (strike_location));
+		      }
+		      
 	      sprintf (buf2, "It strikes you on the %s.",
 		       expand_wound_loc (strike_location));
 	    }
@@ -473,15 +522,32 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  if (can_lodge)
 	    {
+	    	if(switched_target)
+	    		{
+	    			sprintf (buf, "It misses badly and lodges deeply in %s %s!", HSHR (tch),
+		       expand_wound_loc (strike_location));
+	    		}
+	    	else
+	    {
 	      sprintf (buf, "It lodges deeply in %s %s!", HSHR (tch),
 		       expand_wound_loc (strike_location));
+		       }
 	      sprintf (buf2, "It lodges deeply in your %s!",
 		       expand_wound_loc (strike_location));
 	    }
 	  else
 	    {
+	    	if(switched_target)
+	    		{
+	    		sprintf (buf, "It misses badly and strikes %s solidly on the %s.", HMHR (tch),
+		       expand_wound_loc (strike_location));
+	    		}
+	    	else
+	    		{
 	      sprintf (buf, "It strikes %s solidly on the %s.", HMHR (tch),
 		       expand_wound_loc (strike_location));
+		       }
+		       
 	      sprintf (buf2, "It strikes you solidly on the %s.",
 		       expand_wound_loc (strike_location));
 	    }
@@ -1329,6 +1395,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+      
   if (!ch->aiming_at)
     {
       send_to_char ("You aren't aiming at anything.\n", ch);
@@ -1351,6 +1418,12 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+	if (is_mounted(ch) && (bow->o.weapon.use_skill == SKILL_LONGBOW))
+		{
+			send_to_char ("You can't fire that while mounted!\n", ch);
+			return;
+		}
+		
   if (!bow->loaded)
     {
       send_to_char ("Your weapon isn't loaded...\n", ch);
@@ -1567,6 +1640,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 
   attack_mod -= bow->o.od.value[2];
 
+//if you are in combat, it is harder to fire a bow
   if (ch->fighting)
     {
       if (bow->o.weapon.use_skill == SKILL_LONGBOW)
@@ -1576,6 +1650,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
       else if (bow->o.weapon.use_skill == SKILL_CROSSBOW)
 	attack_mod += 10;
     }
+//if you fire too early, you suffer a penalty
   if (!ch->delay_info1)
     {
       if (bow->o.weapon.use_skill == SKILL_LONGBOW)
@@ -1598,6 +1673,10 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 	attack_mod += 15;
     }
 
+	//if mounted you suffer a penalty
+	if (is_mounted (ch))
+		attack_mod +=15;
+	
   // adjust target if it is grouped
   int group_size = 1;
   for (CHAR_DATA *grp = target->room->people; grp; grp = grp->next_in_room)
@@ -1644,11 +1723,31 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 	}    
     }
 
+//Potentially changed target if orginal is being guarded
+	for (CHAR_DATA *tch = target->room->people; tch; tch = tch->next_in_room)
+		{
+			if (tch->fighting)
+				continue;
+			
+			af = get_affect (tch, MAGIC_GUARD);
+			if (!af)
+				continue;
+
+      if ((CHAR_DATA *) af->a.spell.t == target)
+      	{
+      	//bonus given based on aur of the shieldman
+					if (skill_use (tch, SKILL_BLOCK, -tch->aur))
+						target = tch;      	
+      	}
+		}
+	
+	
   result =
     calculate_missile_result (ch, bow->o.weapon.use_skill, attack_mod, target,
 			      0, bow, ammo, NULL, &location, &damage);
   damage = (int) damage;
 
+//you hit the opponent of your target if you miss and you miss a second  dex roll...ie, you hit your own people.
   if ((result == CRITICAL_MISS || result == MISS) && target->fighting
       && target->fighting != ch && number (1, 25) > ch->dex)
     {
@@ -3235,14 +3334,6 @@ do_strike (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-/**** removed to allow carts to be attacked 
-  if (IS_SET (victim->act, ACT_VEHICLE))
-    {
-      send_to_char ("How do you propose to kill an inanimate object, hmm?\n",
-		    ch);
-      return;
-    }
-**************/
 
   i = 0;
   for (tch = vtor (ch->in_room)->people; tch; tch = tch->next_in_room)
