@@ -142,7 +142,6 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
   char buf2[MAX_STRING_LENGTH];
   char buf3[MAX_STRING_LENGTH];
   char strike_location[MAX_STRING_LENGTH];
-	bool switched_target = false;
 
   const char *verbose_dirs[] = {
     "the north",
@@ -351,16 +350,11 @@ if (are_grouped (ch, tch) && is_brother (ch, tch)
 	calculate_missile_result (ch, SKILL_THROWN, ch->balance * -10, tch, 0,
 				  NULL, tobj, NULL, &location, &damage);
 
-//you hit the opponent of your target if you miss and you miss a second  dex roll...ie, you hit your own people, with no penalty to being off balance.
   if ((result == CRITICAL_MISS || result == MISS) && tch->fighting
       && tch->fighting != ch && number (1, 25) > ch->dex)
     {
-      tch = tch->fighting;
-      result =
-	calculate_missile_result (ch, SKILL_THROWN, ch->balance* -10, tch,
-				  0, NULL, tobj, NULL, &location, &damage);
-      switched_target = true;
- send_to_gods("SWitched\n");
+ 	send_to_char("You realize there are no safe targets.\n", ch);
+	return;
     }
 
       damage = (int) damage;
@@ -469,16 +463,8 @@ if (are_grouped (ch, tch) && is_brother (ch, tch)
 	}
       else if (result == GLANCING_HIT)
 	{
-		if (switched_target)
-			{
-				sprintf (buf, "It went astray and grazes %s on the %s.", HMHR (tch),
-		   expand_wound_loc (strike_location));
-			}
-		else
-			{
 	  sprintf (buf, "It grazes %s on the %s.", HMHR (tch),
 		   expand_wound_loc (strike_location));
-		  }
 	  sprintf (buf2, "It grazes you on the %s.",
 		   expand_wound_loc (strike_location));
 
@@ -487,32 +473,16 @@ if (are_grouped (ch, tch) && is_brother (ch, tch)
 	{
 	  if (can_lodge)
 	    {
-	    	if(switched_target)
-	    		{
-	    			sprintf (buf, "It goes astray and lodges in %s %s.", HSHR (tch),
-		       expand_wound_loc (strike_location));
-	    		}
-	    	else
-	    {
 	      sprintf (buf, "It lodges in %s %s.", HSHR (tch),
 		       expand_wound_loc (strike_location));
-		       }
 		       
 	      sprintf (buf2, "It lodges in your %s.",
 		       expand_wound_loc (strike_location));
 	    }
 	  else
 	    {
-	    	if(switched_target)
-	    		{
-	      		sprintf (buf, "It goes astray and strikes %s on the %s.", HMHR (tch),
-		       expand_wound_loc (strike_location));
-	      	}
-	      else
-	      	{
 	      sprintf (buf, "It strikes %s on the %s.", HMHR (tch),
 		       expand_wound_loc (strike_location));
-		      }
 		      
 	      sprintf (buf2, "It strikes you on the %s.",
 		       expand_wound_loc (strike_location));
@@ -522,31 +492,15 @@ if (are_grouped (ch, tch) && is_brother (ch, tch)
 	{
 	  if (can_lodge)
 	    {
-	    	if(switched_target)
-	    		{
-	    			sprintf (buf, "It misses badly and lodges deeply in %s %s!", HSHR (tch),
-		       expand_wound_loc (strike_location));
-	    		}
-	    	else
-	    {
 	      sprintf (buf, "It lodges deeply in %s %s!", HSHR (tch),
 		       expand_wound_loc (strike_location));
-		       }
 	      sprintf (buf2, "It lodges deeply in your %s!",
 		       expand_wound_loc (strike_location));
 	    }
 	  else
 	    {
-	    	if(switched_target)
-	    		{
-	    		sprintf (buf, "It misses badly and strikes %s solidly on the %s.", HMHR (tch),
-		       expand_wound_loc (strike_location));
-	    		}
-	    	else
-	    		{
 	      sprintf (buf, "It strikes %s solidly on the %s.", HMHR (tch),
 		       expand_wound_loc (strike_location));
-		       }
 		       
 	      sprintf (buf2, "It strikes you solidly on the %s.",
 		       expand_wound_loc (strike_location));
