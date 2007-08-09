@@ -195,12 +195,12 @@ const int weapon_armor_table[6][6] = {
 
 const int weapon_armor_table[6][6] = {
   // Q   L   R   S   M   P
-  {-1, +1, +1, +2, +2, +3},		// stab
-  {-1, 0, 0, +2, +1, +2},		// pierce
-  {0, +1, +2, +2, +2, +3},		// chop
-  {0, +2, +1, 0, +1, +3},		// bludgeon
-  {-1, -1, +1, +1, +4, +2},		// slash
-  {0, +1, +1, +2, +2, +3}	// lash
+  {+1, -1, -1, -2, -2, -3},		// stab
+  {+1, 0, 0, -2, -1, -2},		// pierce
+  {0, -1, -2, -2, -2, -3},		// chop
+  {0, -2, -1, 0, -1, -3},		// bludgeon
+  {+1, +1, -1, -1, -4, -2},		// slash
+  {0, -1, -1, -2, -2, -3}	// lash
 };
 const int weapon_nat_attack_table[4][6] = {
   // Q   L   R   S   M   P
