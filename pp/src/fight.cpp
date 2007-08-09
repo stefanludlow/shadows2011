@@ -181,7 +181,7 @@ Leather and scale perform very slightly better on average.
   { -1, -3, -3, -3, -3, -4  }    // lash
 
 */
-/** This system worked for a long time, but was unbalancved in ractical useage
+/** This system worked for a long time, but was unbalanced in practical useage
 const int weapon_armor_table[6][6] = {
   // Q   L   R   S   M   P
   {0, 2, 0, -1, 1, 0},		// stab
@@ -202,12 +202,21 @@ const int weapon_armor_table[6][6] = {
   {+1, +1, -1, -1, -4, -2},		// slash
   {0, -1, -1, -2, -2, -3}	// lash
 };
+/* old system
 const int weapon_nat_attack_table[4][6] = {
   // Q   L   R   S   M   P
   {-1, -2, -1, -1, 2, 2},	// punch
   {1, 1, 1, 1, -2, -2},		// bite
   {0, -1, 0, 0, 1, 2},		// claw
   {1, 1, 1, 1, 0, -1}		// peck
+};
+*/
+const int weapon_nat_attack_table[4][6]={
+  // Q   L   R   S    W    P
+  {0, -2, -1, 0,  -1,  -3}, // punch
+  {0, -1, -2, -2, -2, -3},  // bite
+  {1, 1, -1, -1, -4, -2}, //claw
+  {1, 0, 0, -2, -1, -2}  // peck
 };
 
 
