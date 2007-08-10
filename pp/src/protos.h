@@ -1445,6 +1445,7 @@ char *reference_ip (char *guest_name, char *host);
 int check_account_flags (char *host);
 char *strip_small_minor(char * wounds, CHAR_DATA * ch);
 int room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch);
+int force_enter (CHAR_DATA *tch, ROOM_DATA *troom);
 /* Magical effect functions for spellcasting */
 
 void creation_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,

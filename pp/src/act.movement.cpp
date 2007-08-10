@@ -2146,7 +2146,9 @@ initiate_move (CHAR_DATA * ch)
 
 	if (!(target_room->capacity == 0))
 	{
-	if (!room_avail(target_room, NULL, ch) && !(GET_TRUST(ch)))
+		if (!room_avail(target_room, NULL, ch) 
+			&& !(GET_TRUST(ch)) 
+			&& !force_enter(ch, target_room))
 		{
 			send_to_char("There isn't enough room for you.", ch);
 			clear_moves (ch);
@@ -6467,9 +6469,6 @@ room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
 
 	troom->occupants = (int)(wt_count); //weight in pounds
 	
-//sprintf(buf, "Objs in room weigh %d, characters weigh %d, and occupant weight units is %d\n", obj_wt, tot_wt, troom->occupants);
-//send_to_gods(buf);
-
 	if (wt_count >= (troom->capacity * 200)) 
 		{
 			return (0); //there is no room
@@ -6481,4 +6480,59 @@ room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
 
 	return(0);
 
+}
+
+
+int
+force_enter (CHAR_DATA *tch, ROOM_DATA *troom)
+{
+	int mod;
+	int attr_str;
+	int attr_agi;
+	int num_roll;
+	int check_roll;
+	float occup;
+	float capac;
+	
+	
+	
+	attr_str = GET_STR (tch);
+	attr_agi = GET_AGI (tch);
+	
+	occup = troom->occupants;
+	capac = troom->capacity;
+	
+	weaken (tch, 0, 50, "Forcing into a room");
+	
+	if (capac > 0)
+		{
+		if (occup > (capac) && (occup <= (1.25 * capac)))
+			mod = 1;
+		else if (occup > (1.25 * capac) && (occup <= (1.50 * capac)))
+			mod = 2;
+		else if (occup > (1.50 * capac) && (occup <= (1.75 * capac)))
+			mod = 3;
+		else if (occup > (1.75 * capac) && (occup <= (2.00 * capac)))
+			mod = 4;
+		else if (occup > (2.00 * capac))
+			mod = 5;
+		
+		num_roll = 12 + (mod * 3);
+		check_roll = (number (1, num_roll));
+		
+		if ( check_roll < attr_str)
+			{
+				send_to_char ("You force your way inside.\n", tch);
+				return (1); //they forced their way in
+			}
+		else if ((number (1, num_roll) < attr_agi))
+			{
+				send_to_char ("You manage to squeeze your way in.\n", tch);
+				return (1); //they squeezed their way in
+			}		
+		else
+			return (0); //they couldn't get in
+		}
+		
+	return (1); //they had no trouble getting in
 }

@@ -315,6 +315,7 @@ craft_command (CHAR_DATA * ch, char *command_args,
     }
 
 /** Sectors **/
+	pass = false;
   for (i = 0; i <= 24; i++)
     if (craft_affect->a.craft->subcraft->sectors[i])
       sectors = true;
@@ -334,6 +335,7 @@ craft_command (CHAR_DATA * ch, char *command_args,
     }
 
 /** seasons **/
+	pass = false;
   for (i = 0; i <= 5; i++)
     if (craft_affect->a.craft->subcraft->seasons[i])
       seasonchk = true;
@@ -3242,6 +3244,8 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
   int phase_failed = 0;
   int skill_value;
   int index = 0;
+  int dice_val;
+  int ch_level;
   char color[MAX_STRING_LENGTH];
   char *p;
   char *first;
@@ -3440,10 +3444,13 @@ for (i = 0; i < MAX_ITEMS_PER_SUBCRAFT; i++)
 
   if (phase->skill)
     {
-      skill_use (ch, phase->skill, 0);
-  
-      if (dice (phase->dice, phase->sides) > ch->skills[phase->skill])
-  phase_failed = 1;
+  		dice_val = dice (phase->dice, phase->sides);
+  		ch_level = skill_level (ch, phase->skill,0); //includes object effects
+ 
+  		if (dice_val > ch_level)
+  			{
+  				phase_failed = 1;
+				}
     }
 
  /* Check to see if attribute check succeeded.  This really is
