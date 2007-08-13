@@ -3992,18 +3992,59 @@ do_rappend (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_redesc (CHAR_DATA * ch, char *argument, int cmd)
 {
-  struct extra_descr_data *tmp, *newdesc;
-
-
-  for (; isspace (*argument); argument++);	/* Get rid of whitespaces */
+  EXTRA_DESCR_DATA *tmp;
+  EXTRA_DESCR_DATA *newdesc;
+	char buf[MAX_STRING_LENGTH];
+  
   if (!*argument)
     {
-      send_to_char ("No argument specified....aborting...\n", ch);
+      send_to_char ("No argument specified\n", ch);
       return;
     }
+    
+  argument = one_argument(argument, buf);
+  
+  if (!str_cmp (argument, "reformat"))
+    {
+      for (tmp = vtor (ch->in_room)->ex_description; tmp; tmp = tmp->next)
+				{
+					if (!strn_cmp (tmp->keyword, buf, strlen (buf)))
+						{
+							reformat_desc (tmp->description, &tmp->description);
+							send_to_char (tmp->description, ch);
+							return;
+						}
+				}
+      return;
+    }
+    
+ 	if (!str_cmp (argument, "delete"))
+    {
+    	if ((vtor (ch->in_room)->ex_description) 
+    		&& (!strn_cmp (vtor (ch->in_room)->ex_description->keyword, buf, strlen (buf))))
+						{
+							send_to_char("Description deleted\n", ch);							
+							vtor (ch->in_room)->ex_description = 
+									vtor (ch->in_room)->ex_description->next;
+							return;
+						}
+						
+      for (tmp = vtor (ch->in_room)->ex_description; tmp; tmp = tmp->next)
+				{
+					if ((tmp->next) 
+						&& (!strn_cmp (tmp->next->keyword, buf, strlen (buf))))
+						{
+							send_to_char("Description deleted\n", ch);
+							tmp->next = tmp->next->next;
+						}
+				}
+      return;
+    }
+    
+    
   for (tmp = vtor (ch->in_room)->ex_description; tmp; tmp = tmp->next)
     {
-      if (!strn_cmp (tmp->keyword, argument, strlen (argument)))
+      if (!strn_cmp (tmp->keyword, buf, strlen (buf)))
 	{
 	  break;
 	}
@@ -4013,7 +4054,7 @@ do_redesc (CHAR_DATA * ch, char *argument, int cmd)
     {
       CREATE (newdesc, struct extra_descr_data, 1);
       newdesc->next = vtor (ch->in_room)->ex_description;
-      newdesc->keyword = add_hash (argument);
+      newdesc->keyword = add_hash (buf);
       vtor (ch->in_room)->ex_description = newdesc;
     }
   else
