@@ -172,6 +172,11 @@ do_pmote (CHAR_DATA * ch, char *argument, int cmd)
       clear_pmote (ch);
     }
 
+	else if (IS_NPC(ch) && argument)
+		{	
+			ch->pmote_str = add_hash (argument);
+		}
+		
   else
     {
       if (ch && argument)
