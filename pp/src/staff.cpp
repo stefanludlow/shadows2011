@@ -11050,3 +11050,49 @@ do_csv (CHAR_DATA* ch, char *argument, int cmd)
       send_to_char ("Usage:\no: objects\nc: crafts\n", ch);
     }
 }
+
+void
+do_aggro (CHAR_DATA * ch, char *argument, int cmd)
+{
+  CHAR_DATA *tch;
+  char buf[MAX_STRING_LENGTH];
+
+  if (!*argument)
+    {
+      send_to_char ("Toggle who's aggro flag?\n", ch);
+      return;
+    }
+
+  argument = one_argument (argument, buf);
+
+  if (!(tch = get_char_room_vis (ch, buf)))
+    {
+      send_to_char ("They aren't here.\n", ch);
+      return;
+    }
+
+  if (!IS_NPC (tch))
+    {
+      send_to_char ("This command is for use on NPCs only.\n", ch);
+      return;
+    }
+
+  if (!engine.in_play_mode ())
+    {
+      send_to_char ("This command is for use on the player port only.\n", ch);
+      return;
+    }
+
+  if (IS_SET (tch->act, ACT_AGGRESSIVE))
+    {
+      send_to_char ("This mobile is no longer aggressive.\n", ch);
+      tch->act &= ~ACT_AGGRESSIVE;
+      return;
+    }
+  else
+    {
+      send_to_char ("This mobile is now AGGRESSIVE!\n", ch);
+      tch->act |= ACT_AGGRESSIVE;
+      return;
+    }
+}

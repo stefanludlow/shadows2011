@@ -213,6 +213,7 @@ void do_party (CHAR_DATA * ch, char *argument, int cmd);	/* act.movement.c     *
 void do_accept (CHAR_DATA * ch, char *argument, int cmd);	/* magic.c            */
 void do_addcraft (CHAR_DATA * ch, char *argument, int cmd);	/* crafts.c           */
 void do_affect (CHAR_DATA * ch, char *argument, int cmd);	/* staff.c            */
+void do_aggro (CHAR_DATA * ch, char *argument, int cmd);
 void do_aim (CHAR_DATA * ch, char *argument, int cmd);
 void do_alert (CHAR_DATA * ch, char *argument, int cmd);
 void do_alias (CHAR_DATA * ch, char *argument, int cmd);

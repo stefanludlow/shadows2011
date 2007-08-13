@@ -396,6 +396,7 @@ const struct command_data commands[] = {
 
 
 	/* Advanced RPA Level 4 (advanced players) */
+	{"aggro", do_aggro, DEAD, C_LV4},
 	{"alog", do_alog, DEAD, C_LV4},	/* Announcements */
 	{"arena", do_arena, DEAD, C_LV4},
 	{"award", do_award, DEAD, C_LV4},
