@@ -2053,7 +2053,8 @@ fread_number (FILE * fp)
   if (!isdigit (c))
     {
       system_log ("Fread_number(): bad format.", true);
-      abort ();
+      return 0;
+      //abort ();
     }
 
   while (isdigit (c))
@@ -2114,7 +2115,8 @@ fread_word (FILE * fp)
     }
 
   system_log ("Fread_word(): word too long.", true);
-  abort ();
+  return NULL;
+  //abort ();
 }
 
 void

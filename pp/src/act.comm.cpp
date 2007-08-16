@@ -2209,6 +2209,9 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
   while (isspace (*argument))
     argument++;
 
+  if ( !ch->desc )
+      return;
+
   if (!*argument)
     {
       send_to_char ("Petition what message?\n", ch);
