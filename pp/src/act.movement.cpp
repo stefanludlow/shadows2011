@@ -2781,15 +2781,18 @@ do_move (CHAR_DATA * ch, char *argument, int dir)
   if (!can_move (ch))
     return;
 
-  for (af = ch->hour_affects; af; af = af->next)
-    {
-      if (af->type >= CRAFT_FIRST && af->type <= CRAFT_LAST
-	  && af->a.craft->timer)
-	{
-	  send_to_char ("You'll need to stop crafting first.\n", ch);
-	  return;
-	}
-    }
+  if ( !IS_NPC(ch) )
+  {
+  	for (af = ch->hour_affects; af; af = af->next)
+  	  {
+  	    if (af->type >= CRAFT_FIRST && af->type <= CRAFT_LAST
+		  && af->a.craft->timer)
+		{
+		  send_to_char ("You'll need to stop crafting first.\n", ch);
+		  return;
+		}
+	    }
+  }
 
   /* If you are trying to move, bag the pmote */
   clear_pmote (ch);

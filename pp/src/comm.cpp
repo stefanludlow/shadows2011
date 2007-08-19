@@ -175,7 +175,7 @@ run_the_game (int port)
       system_log ("Lockfile found during bootup - shutting down.", false);
       fprintf (stderr, "Lockfile found during bootup - shutting down.\n");
       fclose (fp);
-      abort ();
+      exit (-1);
     }
 
   system_log ("Signal trapping.", false);

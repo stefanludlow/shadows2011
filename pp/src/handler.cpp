@@ -2114,7 +2114,7 @@ extract_char (CHAR_DATA * ch)
   if (ch->in_room == NOWHERE)
     {
       system_log ("NOWHERE extracting char. (handler.c, extract_char)", true);
-      abort ();
+      //abort ();
     }
 
   stop_followers (ch);
