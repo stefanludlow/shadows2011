@@ -586,20 +586,17 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 	    }
 	}
 
-      sprintf (buf,"\nClan Name        Full Clan Name\n", ch);
-      sprintf (buf + strlen(buf),"===============  =================================\n",
-		    ch);
+      sprintf (buf,"\nClan Name        Full Clan Name\n");
+      sprintf (buf + strlen(buf),"===============  =================================\n");
 
       for (clan = clan_list; clan; clan = clan->next)
 	{
 	  sprintf (buf + strlen(buf), "%-15s  %s\n", clan->name, clan->literal);
-	  //send_to_char (buf, ch);
 
 	  if (clan->zone)
 	    {
 	      sprintf (buf + strlen(buf), "                 Enforcement Zone %d\n\n",
 		       clan->zone);
-	    //  send_to_char (buf, ch);
 	    }
 
 	  if (clan->member_vnum)
@@ -608,7 +605,6 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 	      sprintf (buf + strlen(buf), "                 Member Object (%05d):  %s\n",
 		       clan->member_vnum,
 		       obj ? obj->short_description : "UNDEFINED");
-	      //send_to_char (buf, ch);
 	    }
 
 	  if (clan->leader_vnum)
@@ -617,7 +613,6 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 	      sprintf (buf + strlen(buf), "                 Leader Object (%05d):  %s\n",
 		       clan->leader_vnum,
 		       obj ? obj->short_description : "UNDEFINED");
-	      //send_to_char (buf, ch);
 	    }
 	}
 		page_string (ch->desc, buf);
