@@ -26,7 +26,7 @@ CLAN_DATA *clan_list = NULL;
 +----------+----------------------------+
 |     1487 | Minas Morgul               | mm_denizens
 |     1736 | Osgiliath City Watch       | osgi_watch
-|     2008 | Malred Family              | malred
+|     2008 | Malred Family              | housemalred
 |     7250 | Eastern Vanguard           | eastvanguard
 |     3899 | Gothakra Warband           | gothakra
 |     4174 | Rogues' Fellowship         | rogues
@@ -36,6 +36,7 @@ CLAN_DATA *clan_list = NULL;
 |    11723 | Ithilien Battalion         | ithilien_battalion
 |    11864 |                            | com
 |          | Shadow Cult                | shaddow_cult
+|    14121 | Nebavla Dunlendings        | nebavla_tribe
 +----------+----------------------------+
 */
 void
@@ -88,17 +89,22 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	{
 	  nGroupId = 8026;
 	}
+			else if (strcmp (clan, "nebavla_tribe") == STR_MATCH)
+				{
+					nGroupId = 14121;
+				}
 
       // Add Privates+ to Elite Orgs
       else if (strcmp (rank, "recruit") != STR_MATCH)
 	{
-	  if (strcmp (clan, "ithilien_rangers") == STR_MATCH)
-	    {
-	      nGroupId = 8494;
-	    }
-	  else if (strcmp (clan, "malred") == STR_MATCH)
+	  
+	  if (strcmp (clan, "housemalred") == STR_MATCH)
 	    {
 	      nGroupId = 2008;
+	    }
+	    else if (strcmp (clan, "ithilien_rangers") == STR_MATCH)
+	    {
+	      nGroupId = 8494;
 	    }
 	  else if (strcmp (clan, "rouges") == STR_MATCH)
 	    {
@@ -176,6 +182,10 @@ clan_forum_remove (CHAR_DATA * ch, char *clan)
     {
       nGroupId = 4174;
     }
+	else if (strcmp (clan, "nebavla_tribe") == STR_MATCH)
+			{
+				nGroupId = 14121;
+			}
   else
     {
       return;
@@ -576,41 +586,41 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 	    }
 	}
 
-      send_to_char ("\nClan Name        Full Clan Name\n", ch);
-      send_to_char ("===============  =================================\n",
+      sprintf (buf,"\nClan Name        Full Clan Name\n", ch);
+      sprintf (buf + strlen(buf),"===============  =================================\n",
 		    ch);
 
       for (clan = clan_list; clan; clan = clan->next)
 	{
-	  sprintf (buf, "%-15s  %s\n", clan->name, clan->literal);
-	  send_to_char (buf, ch);
+	  sprintf (buf + strlen(buf), "%-15s  %s\n", clan->name, clan->literal);
+	  //send_to_char (buf, ch);
 
 	  if (clan->zone)
 	    {
-	      sprintf (buf, "                 Enforcement Zone %d\n",
+	      sprintf (buf + strlen(buf), "                 Enforcement Zone %d\n\n",
 		       clan->zone);
-	      send_to_char (buf, ch);
+	    //  send_to_char (buf, ch);
 	    }
 
 	  if (clan->member_vnum)
 	    {
 	      obj = vtoo (clan->member_vnum);
-	      sprintf (buf, "                 Member Object (%05d):  %s\n",
+	      sprintf (buf + strlen(buf), "                 Member Object (%05d):  %s\n",
 		       clan->member_vnum,
 		       obj ? obj->short_description : "UNDEFINED");
-	      send_to_char (buf, ch);
+	      //send_to_char (buf, ch);
 	    }
 
 	  if (clan->leader_vnum)
 	    {
 	      obj = vtoo (clan->leader_vnum);
-	      sprintf (buf, "                 Leader Object (%05d):  %s\n",
+	      sprintf (buf + strlen(buf), "                 Leader Object (%05d):  %s\n",
 		       clan->leader_vnum,
 		       obj ? obj->short_description : "UNDEFINED");
-	      send_to_char (buf, ch);
+	      //send_to_char (buf, ch);
 	    }
 	}
-
+		page_string (ch->desc, buf);
       return;
     }
 
@@ -630,12 +640,12 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("   clan list\n", ch);
       send_to_char ("\nThe obj vnums are optional.  Specify zone 0 if no "
 		    "enforcement zone.\n\nExamples:\n", ch);
-      send_to_char ("  > clan set tashalwatch member leader\n", ch);
-      send_to_char ("  > clan remove tashalwatch\n", ch);
-      send_to_char ("  > clan register TashalWatch 10 'Tashal Watch'\n", ch);
-      send_to_char ("  > clan unregister tashalwatch\n", ch);
-      send_to_char ("  > clan rename 10 TashalWatch\n", ch);
-      send_to_char ("  > clan unrename 10 TashalWatch\n", ch);
+      send_to_char ("  > clan set osgilwatch member leader\n", ch);
+      send_to_char ("  > clan remove osgilwatch\n", ch);
+      send_to_char ("  > clan register osgilwatch 10 'Osgiliath Watch'\n", ch);
+      send_to_char ("  > clan unregister osgilwatch\n", ch);
+      send_to_char ("  > clan rename 10 osgilwatch\n", ch);
+      send_to_char ("  > clan unrename 10 osgilwatch\n", ch);
       send_to_char ("  > clan list\n", ch);
       return;
     }
@@ -1072,82 +1082,143 @@ clan_flags_to_value (char *flag_names, char *clan_name)
 	flags |= CLAN_LEADER_OBJ;
       
       else if (!str_cmp (buf, "recruit") 
-      || ((!str_cmp (buf, "snaga") || !str_cmp (buf, "snaga-uruk")) && !str_cmp (clan_name, "gothakra"))
-      || ((!str_cmp (buf, "initiate")) && !str_cmp (clan_name, "shadow-cult"))
-      || (!str_cmp (buf, "kaal") && !str_cmp (clan_name, "com"))
-      || (!str_cmp (buf, "squire") && !str_cmp (clan_name, "seekers"))
-      || (!str_cmp (buf, "push-khur") && !str_cmp (clan_name, "khagdu"))
-      || (!str_cmp (buf, "liegeman") && (!str_cmp (clan_name, "eradan_battalion") || !str_cmp (clan_name, "ithilien_battalion"))) )
+      || ((!str_cmp (buf, "snaga") || !str_cmp (buf, "snaga-uruk"))
+      	&& !str_cmp (clan_name, "gothakra"))
+      || ((!str_cmp (buf, "initiate")) 
+      	&& !str_cmp (clan_name, "shadow-cult"))
+      || (!str_cmp (buf, "kaal") 
+      	&& !str_cmp (clan_name, "com"))
+      || (!str_cmp (buf, "squire") 
+      	&& !str_cmp (clan_name, "seekers"))
+      || (!str_cmp (buf, "push-khur") 
+      	&& !str_cmp (clan_name, "khagdu"))
+      	|| (!str_cmp (buf, "roenucht") 
+      	&& !str_cmp (clan_name, "nebavla_tribe"))
+      || (!str_cmp (buf, "liegeman") 
+      	&& (!str_cmp (clan_name, "eradan_battalion") || !str_cmp (clan_name, "ithilien_battalion"))) )
 	flags |= CLAN_RECRUIT;
       
       else if (!str_cmp (buf, "private")
-      || ((!str_cmp (buf, "acolyte")) && !str_cmp (clan_name, "shadow-cult"))
-      || (!str_cmp(buf, "ohtar") && !str_cmp(clan_name, "tirithguard"))
-      || ((!str_cmp (buf, "uruk") || !str_cmp (buf, "high-snaga")) && !str_cmp (clan_name, "gothakra"))
-      || (!str_cmp (buf, "rukh-kaal") && !str_cmp (clan_name, "com"))
-      || (!str_cmp (buf, "apprentice-seeker-knight") && !str_cmp (clan_name, "seekers"))
-      || (!str_cmp (buf, "khur") && !str_cmp (clan_name, "khagdu"))
-      || (!str_cmp (buf, "footman") && (!str_cmp (clan_name, "eradan_battalion") || !str_cmp (clan_name, "ithilien_battalion"))))
+      || ((!str_cmp (buf, "acolyte")) 
+      	&& !str_cmp (clan_name, "shadow-cult"))
+      || (!str_cmp(buf, "ohtar") 
+      	&& !str_cmp(clan_name, "tirithguard"))
+      || ((!str_cmp (buf, "uruk") || !str_cmp (buf, "high-snaga")) 
+      	&& !str_cmp (clan_name, "gothakra"))
+      || (!str_cmp (buf, "rukh-kaal") 
+      	&& !str_cmp (clan_name, "com"))
+      || (!str_cmp (buf, "apprentice-seeker-knight") 
+      	&& !str_cmp (clan_name, "seekers"))
+      || (!str_cmp (buf, "khur") 
+      	&& !str_cmp (clan_name, "khagdu"))
+      	|| (!str_cmp (buf, "heggurach") 
+      	&& !str_cmp (clan_name, "nebavla_tribe"))
+      || (!str_cmp (buf, "footman") 
+      	&& (!str_cmp (clan_name, "eradan_battalion") || !str_cmp (clan_name, "ithilien_battalion"))))
 	flags |= CLAN_PRIVATE;
       
       else if (!str_cmp (buf, "corporal") 
-      || (!str_cmp(buf, "roquen") && !str_cmp(clan_name, "tirithguard"))
-      || ((!str_cmp (buf, "dark-priest")) && !str_cmp (clan_name, "shadow-cult"))
-      ||  ((!str_cmp (buf, "puruk") || !str_cmp (buf, "zuruk")) && !str_cmp (clan_name, "gothakra"))
-      || (!str_cmp (buf, "rukh") && !str_cmp (clan_name, "com"))
-      || (!str_cmp (buf, "seeker-knight") && !str_cmp (clan_name, "seekers"))
-      || (!str_cmp (buf, "gur") && !str_cmp (clan_name, "khagdu"))
-      || (!str_cmp (buf, "armsman") && (!str_cmp (clan_name, "eradan_battalion") || !str_cmp (clan_name, "ithilien_battalion"))))
+      || (!str_cmp(buf, "roquen") 
+      	&& !str_cmp(clan_name, "tirithguard"))
+      || ((!str_cmp (buf, "dark-priest")) 
+      	&& !str_cmp (clan_name, "shadow-cult"))
+      ||  ((!str_cmp (buf, "puruk") || !str_cmp (buf, "zuruk")) 
+      	&& !str_cmp (clan_name, "gothakra"))
+      || (!str_cmp (buf, "rukh") 
+      	&& !str_cmp (clan_name, "com"))
+      || (!str_cmp (buf, "seeker-knight") 
+      	&& !str_cmp (clan_name, "seekers"))
+      || (!str_cmp (buf, "gur") 
+      	&& !str_cmp (clan_name, "khagdu"))
+      || (!str_cmp (buf, "rhyfelwr") 
+      	&& !str_cmp (clan_name, "nebavla_tribe"))	
+      || (!str_cmp (buf, "armsman") 
+      	&& (!str_cmp (clan_name, "eradan_battalion") || !str_cmp (clan_name, "ithilien_battalion"))))
 	flags |= CLAN_CORPORAL;
       
       else if (!str_cmp (buf, "sergeant") 
-      || ((!str_cmp (buf, "zaak") || !str_cmp (buf, "high-puruk")) && !str_cmp (clan_name, "gothakra"))
-      || ((!str_cmp (buf, "dread-minister ")) && !str_cmp (clan_name, "shadow-cult"))
-      || ((!str_cmp (buf, "mik") || !str_cmp (buf, "mith")) && !str_cmp (clan_name, "com")) 
-      || (!str_cmp (buf, "knight-lieutenant") && !str_cmp (clan_name, "seekers"))
-      || (!str_cmp (buf, "gurash") && !str_cmp (clan_name, "khagdu")) )
+      || ((!str_cmp (buf, "zaak") || !str_cmp (buf, "high-puruk")) 
+      	&& !str_cmp (clan_name, "gothakra"))
+      || ((!str_cmp (buf, "dread-minister ")) 
+      	&& !str_cmp (clan_name, "shadow-cult"))
+      || ((!str_cmp (buf, "mik") || !str_cmp (buf, "mith"))
+      	&& !str_cmp (clan_name, "com")) 
+      || (!str_cmp (buf, "knight-lieutenant") 
+      	&& !str_cmp (clan_name, "seekers"))
+      || (!str_cmp (buf, "gurash") 
+      	&& !str_cmp (clan_name, "khagdu"))
+      	|| (!str_cmp (buf, "cloumaggen") 
+      	&& !str_cmp (clan_name, "nebavla_tribe"))	)
 	flags |= CLAN_SERGEANT;
       
       else if (!str_cmp (buf, "lieutenant") 
-      || (!str_cmp(buf, "constable") && !str_cmp(clan_name, "tirithguard"))
-      || ((!str_cmp (buf, "overlord")) && !str_cmp (clan_name, "shadow-cult"))
-      ||  ((!str_cmp (buf, "puruk-zuul") || !str_cmp (buf, "ba'zaak")) && !str_cmp (clan_name, "gothakra"))
-      || ((!str_cmp (buf, "amme") || !str_cmp (buf, "atto")) && !str_cmp (clan_name, "com"))
-      || (!str_cmp (buf, "knight-captain") && !str_cmp (clan_name, "seekers"))
-      || (!str_cmp (buf, "constable") && (!str_cmp (clan_name, "eradan_battalion")
+      || (!str_cmp(buf, "constable") 
+      	&& !str_cmp(clan_name, "tirithguard"))
+      || ((!str_cmp (buf, "overlord")) 
+      	&& !str_cmp (clan_name, "shadow-cult"))
+      ||  ((!str_cmp (buf, "puruk-zuul") || !str_cmp (buf, "ba'zaak"))
+      	&& !str_cmp (clan_name, "gothakra"))
+      || ((!str_cmp (buf, "amme") || !str_cmp (buf, "atto")) 
+      	&& !str_cmp (clan_name, "com"))
+      || (!str_cmp (buf, "knight-captain") 
+      	&& !str_cmp (clan_name, "seekers"))
+      	|| (!str_cmp (buf, "jomaa") 
+      	&& !str_cmp (clan_name, "nebavla_tribe"))
+      || (!str_cmp (buf, "constable") 
+      	&& (!str_cmp (clan_name, "eradan_battalion")
       || !str_cmp (clan_name, "ithilien_battalion"))))
 	flags |= CLAN_LIEUTENANT;
       
       else if (!str_cmp (buf, "captain")
-      || (!str_cmp (buf, "barun") && !str_cmp (clan_name, "com"))
-      || ((!str_cmp (buf, "barun-an-Nalo")) && !str_cmp (clan_name, "shadow-cult"))
-      || (!str_cmp (buf, "knight-general") && !str_cmp (clan_name, "seekers"))
-      || (!str_cmp (buf, "gurashul") && !str_cmp (clan_name, "khagdu"))
-      || (!str_cmp (buf, "lord") && (!str_cmp (clan_name, "eradan_battalion") || !str_cmp (clan_name, "ithilien_battalion"))))
+      || (!str_cmp (buf, "barun") 
+      	&& !str_cmp (clan_name, "com"))
+      || ((!str_cmp (buf, "barun-an-Nalo")) 
+      	&& !str_cmp (clan_name, "shadow-cult"))
+      || (!str_cmp (buf, "knight-general") 
+      	&& !str_cmp (clan_name, "seekers"))
+      || (!str_cmp (buf, "gurashul") 
+      	&& !str_cmp (clan_name, "khagdu"))
+      	|| (!str_cmp (buf, "clowgos") 
+      	&& !str_cmp (clan_name, "nebavla_tribe"))
+      || (!str_cmp (buf, "lord") 
+      	&& (!str_cmp (clan_name, "eradan_battalion") || !str_cmp (clan_name, "ithilien_battalion"))))
 	flags |= CLAN_CAPTAIN;
       
       else if (!str_cmp (buf, "general") 
-      || (!str_cmp(buf, "marshall") && !str_cmp(clan_name, "tirithguard")) 
-      ||  (!str_cmp (buf, "nalo-barun") && !str_cmp (clan_name, "com"))
-      || (!str_cmp (buf, "knight-commander") && !str_cmp (clan_name, "seekers")) 
-      || (!str_cmp (buf, "bughrak") && !str_cmp (clan_name, "khagdu")) )
+      || (!str_cmp(buf, "marshall") 
+      	&& !str_cmp(clan_name, "tirithguard")) 
+      ||  (!str_cmp (buf, "nalo-barun") 
+      	&& !str_cmp (clan_name, "com"))
+      || (!str_cmp (buf, "knight-commander") 
+      	&& !str_cmp (clan_name, "seekers"))
+      	|| (!str_cmp (buf, "rhi") 
+      	&& !str_cmp (clan_name, "nebavla_tribe"))
+      || (!str_cmp (buf, "bughrak") 
+      	&& !str_cmp (clan_name, "khagdu")) )
 	flags |= CLAN_GENERAL;
       
       else if (!str_cmp (buf, "commander") 
-      || (!str_cmp (buf, "daur-phazan") && !str_cmp (clan_name, "com"))
-      || (!str_cmp (buf, "knight-grand-cross") && !str_cmp (clan_name, "seekers"))
-      || (!str_cmp (buf, "duumul-bughrak") && !str_cmp (clan_name, "khagdu")) )
+      || (!str_cmp (buf, "daur-phazan") 
+      	&& !str_cmp (clan_name, "com"))
+      || (!str_cmp (buf, "knight-grand-cross") 
+      	&& !str_cmp (clan_name, "seekers"))
+      || (!str_cmp (buf, "duumul-bughrak") 
+      	&& !str_cmp (clan_name, "khagdu"))
+      	|| (!str_cmp (buf, "Jarl") 
+      	&& !str_cmp (clan_name, "nebavla_tribe")))
 	flags |= CLAN_COMMANDER;
       
       else if (!str_cmp (buf, "apprentice") || (!str_cmp (buf, "apprentice-")) )
 	flags |= CLAN_APPRENTICE;
       
       else if (!str_cmp (buf, "journeyman")
-      || (!str_cmp (buf, "yameg") && !str_cmp (clan_name, "khagdu")) )
+      || (!str_cmp (buf, "yameg") 
+      	&& !str_cmp (clan_name, "khagdu")) )
 	flags |= CLAN_JOURNEYMAN;
       
       else if (!str_cmp (buf, "master")
-      || (!str_cmp (buf, "yameg-khur") && !str_cmp (clan_name, "khagdu")) )
+      || (!str_cmp (buf, "yameg-khur") 
+      	&& !str_cmp (clan_name, "khagdu")) )
 	flags |= CLAN_MASTER;
     }
 
@@ -1533,11 +1604,16 @@ get_clan_rank_name (int flags)
 char *
 get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 {
+
+//Leader
   if (flags == CLAN_LEADER)
   {
     return "Leadership";
   }
-  
+
+
+
+//Recruit  
   else if (flags == CLAN_RECRUIT)
   {
     if (!str_cmp (clan, "gothakra"))
@@ -1563,6 +1639,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     {
 	return "Push-Khur";
     }
+		if (!str_cmp (clan, "nebavla_tribe"))
+			{
+			return "Roenucht";
+			}
     if (!str_cmp (clan, "seekers"))
     {
 	return "Squire";
@@ -1575,6 +1655,7 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     return "Recruit";
   }
   
+//Private  
   else if (flags == CLAN_PRIVATE)
   {
     if (!str_cmp (clan, "gothakra"))
@@ -1596,6 +1677,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     {
 	return "Khur";
     }
+    if (!str_cmp (clan, "nebavla_tribe"))
+			{
+			return "Heggurach";
+			}
     if (!str_cmp (clan, "com"))
     {
 	return "Rukh-Kaal";
@@ -1616,6 +1701,7 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
   	return "Private";
   }
   
+//Corporal
   else if (flags == CLAN_CORPORAL)
   {
     if (!str_cmp (clan, "gothakra"))
@@ -1637,6 +1723,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     {
 	return "Gur";
     }
+    if (!str_cmp (clan, "nebavla_tribe"))
+			{
+			return "Rhyfelwr";
+			}
     if (!str_cmp (clan, "com"))
     {
 	return "Rukh";
@@ -1657,6 +1747,7 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
   	return "Corporal";
   }
 
+//Sergeant
   else if (flags == CLAN_SERGEANT)
   {
     if (!str_cmp (clan, "gothakra"))
@@ -1678,6 +1769,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     {
 	return "Gurash";
     }
+    if (!str_cmp (clan, "nebavla_tribe"))
+			{
+			return "Cloumaggen";
+			}
     if (!str_cmp (clan, "com"))
     {
 	if (HSSH(ch) == "her")
@@ -1697,6 +1792,7 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
   	return "Sergeant";
   }
   
+//lieutenant  
   else if (flags == CLAN_LIEUTENANT)
   {
     if (!str_cmp (clan, "gothakra"))
@@ -1725,6 +1821,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 	    {
 			return "Overlord";
 	    }
+	    if (!str_cmp (clan, "nebavla_tribe"))
+			{
+			return "Jomaa";
+			}
     if (!str_cmp (clan, "seekers"))
     {
 	return "Knight-Captain";
@@ -1737,6 +1837,7 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     return "Lieutenant";
   }
 
+//Captain
   else if (flags == CLAN_CAPTAIN)
   {
     if (!str_cmp (clan, "com"))
@@ -1751,6 +1852,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     	{
 			return "Barun An-Nalo";
     	}
+    	if (!str_cmp (clan, "nebavla_tribe"))
+			{
+			return "Clowgos";
+			}
     if (!str_cmp (clan, "seekers"))
     {
 	return "Knight-General";
@@ -1763,6 +1868,7 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     return "Captain";
   }
 
+//General
   else if (flags == CLAN_GENERAL)
   {
     if (!str_cmp (clan, "com"))
@@ -1777,6 +1883,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     {
 	return "Knight-Commander";
     }
+    if (!str_cmp (clan, "nebavla_tribe"))
+			{
+			return "Rhi";
+			}
 	if (!str_cmp (clan, "tirithguard"))
 	{
 		return "Marshall";
@@ -1785,6 +1895,7 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     return "General";
   }
   
+//Commander
   else if (flags == CLAN_COMMANDER)
   {
     if (!str_cmp (clan, "com"))
@@ -1799,10 +1910,14 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     {
 	return "Knight-Grand-Cross";
     }
-  
+  if (!str_cmp (clan, "nebavla_tribe"))
+			{
+			return "Jarl";
+			}
   	return "Commander";
   }
-  
+
+//Apprentice  
   else if (flags == CLAN_APPRENTICE)
   {
 	  if (!str_cmp (clan, "mordor_char"))
@@ -1811,6 +1926,7 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
   	return "Apprentice";
   }
   
+//Journeyman  
   else if (flags == CLAN_JOURNEYMAN)
   {
     if (!str_cmp (clan, "khagdu"))
@@ -1823,6 +1939,7 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
   	return "Journeyman";
   }
   
+//Master
   else if (flags == CLAN_MASTER)
   {
     if (!str_cmp (clan, "khagdu"))
