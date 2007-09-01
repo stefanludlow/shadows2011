@@ -1252,6 +1252,7 @@ ban_host (char *host, char *banned_by, int length)
   site->name = add_hash (host);
   site->banned_by = add_hash (banned_by);
   site->banned_on = time (0);
+  site->next = NULL;
   if (length != -1 && length != -2)
     site->banned_until = time (0) + (60 * 60 * 24 * length);
   else if (length == -2)
