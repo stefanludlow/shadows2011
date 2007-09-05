@@ -1045,6 +1045,11 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 	      send_to_char ("What did you wish to palm into it?\n", ch);
 	      return;
 	    }
+	  if (GET_ITEM_TYPE (obj) != ITEM_CONTAINER)
+	    {
+	      send_to_char ("You can only palm items into containers.\n", ch);
+	      return;
+	    }
 	  if (tobj->obj_flags.weight / 100 > 3)
 	    {
 	      send_to_char
@@ -1147,6 +1152,12 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 		  send_to_char ("Which item did you want to palm?\n", ch);
 		  return;
 		}
+			if (GET_ITEM_TYPE (obj) != ITEM_CONTAINER)
+				{
+					send_to_char ("You can only palm items into containers.\n", ch);
+					return;
+				}
+	    
 	    }
 	  if (!tobj)
 	    {
