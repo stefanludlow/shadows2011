@@ -34,9 +34,10 @@ CLAN_DATA *clan_list = NULL;
 |     8026 | The Twisted Eye of Khagdu  | khagdu
 |     8494 | Rangers of the Ithilien    | ithilien_rangers
 |    11723 | Ithilien Battalion         | ithilien_battalion
-|    11864 |                            | com
-|          | Shadow Cult                | shaddow_cult
+|    11864 | Cult of Morgoth            | com
+|    12013 | Sindbar Family             | sindbar
 |    14121 | Nebavla Dunlendings        | nebavla_tribe
+|    14181 | Hawk and Dove              | hawk_dove_2
 +----------+----------------------------+
 */
 void
@@ -89,9 +90,17 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	{
 	  nGroupId = 8026;
 	}
+			else if (strcmp (clan, "sindbar") == STR_MATCH)
+				{
+					nGroupId = 12013;
+				}
 			else if (strcmp (clan, "nebavla_tribe") == STR_MATCH)
 				{
 					nGroupId = 14121;
+				}
+			else if (strcmp (clan, "hawk_dove_2") == STR_MATCH)
+				{
+					nGroupId = 14181;
 				}
 
       // Add Privates+ to Elite Orgs
@@ -182,9 +191,17 @@ clan_forum_remove (CHAR_DATA * ch, char *clan)
     {
       nGroupId = 4174;
     }
+  else if (strcmp (clan, "sindbar") == STR_MATCH)
+				{
+					nGroupId = 12013;
+				}
 	else if (strcmp (clan, "nebavla_tribe") == STR_MATCH)
 			{
 				nGroupId = 14121;
+			}
+	else if (strcmp (clan, "hawk_dove_2") == STR_MATCH)
+				{
+					nGroupId = 14181;
 			}
   else
     {
@@ -211,7 +228,7 @@ clan_forum_remove_all (CHAR_DATA * ch)
 	       "USING shadows.forum_user_group fug "
 	       "JOIN shadows.forum_users fu "
 	       "ON fug.user_id = fu.user_id "
-	       "WHERE group_id in (1487,1736,2008,7250,3899,3908,4174,4276,4903,8026,8494,11723,11864) "
+	       "WHERE group_id in (1487,1736,2008,7250,3899,3908,4174,4276,4903,8026,8494,11723,11864, 12013, 14121, 14181) "
 	       "AND username = '%s';", ch->pc->account_name);
       mysql_safe_query (buf);
     }
