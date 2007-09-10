@@ -7165,7 +7165,7 @@ update_crafts_file (void)
 			for (i = 0; i <= 8; i++)
 				{
 				if (craft->weather[i])
-					fprintf (fp, " %s", weather_states[craft->weather[i] - 1]);
+					fprintf (fp, " '%s'", weather_states[craft->weather[i] - 1]);
 				}
 
 			fprintf (fp, "\n");
