@@ -79,31 +79,62 @@ do_roster (CHAR_DATA * ch, char *argument, int cmd)
   char buf2[MAX_STRING_LENGTH];
   char admin[MAX_STRING_LENGTH];
   char title[MAX_STRING_LENGTH];
-
+  char depart[MAX_STRING_LENGTH];
+	int weight = 0;
+	MYSQL_RES *result;
+  MYSQL_ROW row;
+	
   if (!*argument)
     {
-      send_to_char ("Usage: roster (add | remove) <admin name> (<title>)\n",
-		    ch);
+      send_to_char ("Usage: roster (add | remove) <admin name> (<title> <department>)\n Usage: roster list\n",
+        ch);
       return;
     }
 
   argument = one_argument (argument, buf);
 
-  if (str_cmp (buf, "add") && str_cmp (buf, "remove"))
+  if (str_cmp (buf, "add") && str_cmp (buf, "remove") && str_cmp (buf, "list"))
     {
-      send_to_char ("Usage: roster (add | remove) <admin name> (<title>)\n",
-		    ch);
+      send_to_char ("Usage: roster (add | remove) <admin name> (<title> <department>)\n Usage: roster list\n", ch);
+      return;
+    }
+    
+	if (!str_cmp (buf, "list"))
+		{
+			sprintf(buf2, "Name: Title (Department)\n--------------------------\n");
+			send_to_char (buf2, ch);
+			mysql_safe_query
+      ("SELECT name, title, dept FROM staff_roster");
+      
+      if ((result = mysql_store_result (database)) != NULL)
+    		{
+      		//row = mysql_fetch_row (result);
+      		while (row = mysql_fetch_row (result))
+      			{
+        	 		sprintf (buf2, "%s:  %s (%s)\n", row[0], row[1], row[2]);
+        	 		send_to_char (buf2, ch);
+        	 	}
+         }
+    	
+    	mysql_free_result (result);
       return;
     }
 
   argument = one_argument (argument, admin);
-  argument = one_argument (argument, buf2);
+  argument = one_argument (argument, title);
+  argument = one_argument (argument, depart);
 
-  sprintf (title, "%s", buf2);
 
-  if (!*admin || (!*title && !str_cmp (buf, "add")))
+  if (!*admin) 
     {
-      send_to_char ("Usage: roster (add | remove) <admin name> (<title>)\n",
+      send_to_char ("Usage: roster (add | remove) <admin name> (<title> <department>)\n Usage: roster list\n",
+        ch);
+      return;
+    }
+
+	if (!*admin && !*title && !*depart && !str_cmp (buf, "add"))
+		{
+      send_to_char ("Usage: roster (add | remove) <admin name> (<title> <department>)\n Usage: roster list\n",
 		    ch);
       return;
     }
@@ -113,6 +144,9 @@ do_roster (CHAR_DATA * ch, char *argument, int cmd)
 
   if (islower (*title))
     *title = toupper (*title);
+
+  if (islower (*depart))
+    *depart = toupper (*depart);
 
   if (!str_cmp (buf, "add") && !(tch = load_pc (admin)))
     {
@@ -132,8 +166,8 @@ do_roster (CHAR_DATA * ch, char *argument, int cmd)
 
   if (!str_cmp (buf, "add"))
     {
-      mysql_safe_query ("INSERT INTO staff_roster VALUES ('%s', '%s', %d)",
-			admin, title, (int) time (0));
+      mysql_safe_query ("INSERT INTO staff_roster VALUES ('%s', '%s',  %d, '%s', %d)",
+      admin, title, (int) time (0), depart, weight);
       send_to_char
 	("The specified individual has been added to the staff roster.\n",
 	 ch);
@@ -149,7 +183,7 @@ do_roster (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  send_to_char ("Usage: roster (add | remove) <admin name> (<title>)\n", ch);
+  send_to_char ("Usage: roster (add | remove) <admin name> (<title> <department>)\n Usage: roster list\n", ch);
   return;
 }
 
@@ -1253,6 +1287,7 @@ ban_host (char *host, char *banned_by, int length)
   site->banned_by = add_hash (banned_by);
   site->banned_on = time (0);
   site->next = NULL;
+  
   if (length != -1 && length != -2)
     site->banned_until = time (0) + (60 * 60 * 24 * length);
   else if (length == -2)
