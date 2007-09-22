@@ -845,17 +845,54 @@ delayed_hide_obj (CHAR_DATA * ch)
   act ("$n hides $p.", false, ch, obj, 0, TO_ROOM);
 }
 
+/**********************************************************************
+ * CASE 1:
+ * Usage: palm <item>
+ *        will get item from room. 
+ *             Uses Sleight
+ *
+ * CASE 2:
+ * Usage: palm <item> into <container> 
+ *        will put item into container in the room, including tables
+ *              Uses Sleight
+ *
+ * CASE 3:
+ * Usage: palm <item> into <targetPC> <contaienr>
+ *        will put item into container worn by PC (target or self)
+ *             Uses Steal if PC is target
+ *             Uses Sleight if PC is self
+ *
+ * CASE 4:
+ * Usage: palm <item> from <container>
+ *        takes item from container worn by PC
+ *             Uses Sleight
+ *
+ * CASE 5:
+ * Usage: palm <item> from <targetPC> <container>
+ *        takes item from container worn by PC
+ *             Uses Sleight if PC is self
+ *
+ * Note: Must use STEAL command if taking from a container worn
+ * by targetPC.
+ *
+ **********************************************************************/
+
 void
 do_palm (CHAR_DATA * ch, char *argument, int cmd)
 {
   char buf[MAX_STRING_LENGTH];
-  char target[MAX_STRING_LENGTH];
+  char contbuf[MAX_STRING_LENGTH];
+  char msgbuf[MAX_STRING_LENGTH];
+  char objtarget[MAX_STRING_LENGTH];
   CHAR_DATA *tch;
-  OBJ_DATA *obj = NULL;
-  OBJ_DATA *tobj = NULL;
+  OBJ_DATA *cobj = NULL;  //container
+  OBJ_DATA *tobj = NULL;  //item being palmed
   AFFECTED_TYPE *af;
   int modifier = 0;
-  bool into = false, from = false;
+  bool into = false;
+  bool from = false;
+  bool targchk = false;  //is there a target PC?
+  bool contchk = false;  //is there a container?
 
   if (IS_SWIMMING (ch))
     {
@@ -875,369 +912,432 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  argument = one_argument (argument, target);
 
-  if (!*target)
+ argument = one_argument (argument, objtarget);
+
+  if (!*objtarget)
     {
       send_to_char ("What did you wish to palm?\n", ch);
       return;
     }
+    
+	if (ch->right_hand && ch->left_hand)
+				{
+					send_to_char
+						("One of your hands needs to be free before attempting to palm something.\n",
+						 ch);
+					return;
+				}
 
-  argument = one_argument (argument, buf);
+  argument = one_argument (argument, buf); //into or from
 
   if (!*buf)
-    {
-      if (ch->right_hand && ch->left_hand)
-	{
-	  send_to_char
-	    ("One of your hands needs to be free before attempting to palm something.\n",
-	     ch);
-	  return;
-	}
-	
-// object is in the room -- SLEIGHT
-      if (!(obj = get_obj_in_list_vis (ch, target, ch->room->contents)))
-	{
-	  send_to_char ("You don't see that here.\n", ch);
-	  return;
-	}
-      if (obj->obj_flags.weight / 100 > 3)
-	{
-	  send_to_char
-	    ("That's too heavy for you to pick up very stealthily.\n", ch);
-	  return;
-	}
-      if (!IS_SET (obj->obj_flags.wear_flags, ITEM_TAKE))
+    {				
+/****** CASE 1: palm <item> (from room) *******/
+			if (!(tobj = get_obj_in_list_vis (ch, objtarget, ch->room->contents)))
+				{
+					send_to_char ("You don't see that here.\n", ch);
+					return;
+				}
+
+			if (tobj->obj_flags.weight / 100 > 3)
+				{
+					send_to_char ("That's too heavy for you to pick up very stealthily.\n", ch);
+						return;
+				}
+
+			if (!IS_SET (tobj->obj_flags.wear_flags, ITEM_TAKE))
 	{
 	  send_to_char ("That cannot be picked up.\n", ch);
 	  return;
 	}
-      obj_from_room (&obj, 0);
-      clear_omote (obj);
-      act ("You carefully attempt to palm $p.", false, ch, obj, 0,
-	   TO_CHAR | _ACT_FORMAT);
+			
+			obj_from_room (&tobj, 0);
+			clear_omote (tobj);
+			act ("You carefully attempt to palm $p.", false, ch, tobj, 0, 
+			TO_CHAR | _ACT_FORMAT);
 
-      /* Alert the staff of the theft */
-      sprintf (buf, "#3[Guardian: %s%s]#0 Tries to palm %s in %d.",
-	       GET_NAME (ch),
-	       IS_SET (ch->plr_flags, NEW_PLAYER_TAG) ? " (new)" : "",
-	       obj->short_description, ch->in_room);
-      send_to_guardians (buf, 0xFF);
+			/* Alert the staff of the theft */
+			sprintf (msgbuf, "#3[Guardian: %s%s]#0 Tries to palm %s in %d.",
+			GET_NAME (ch),
+			IS_SET (ch->plr_flags, NEW_PLAYER_TAG) ? " (new)" : "",
+			tobj->short_description,
+			ch->in_room);
+			send_to_guardians (msgbuf, 0xFF);
 
-      if (!skill_use (ch, SKILL_SLEIGHT, obj->obj_flags.weight / 100))
-	act ("$n attempts to surreptitiously take $p.", false, ch, obj, 0,
-	     TO_ROOM | _ACT_FORMAT);
-      obj_to_char (obj, ch);
-    }
-  else
-//object is in PC's hand or inside a container somehwere
-    {
+			if (!skill_use (ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100))
+				{
+					act ("$n attempts to surreptitiously take $p.", false, ch, tobj, 0, TO_ROOM | _ACT_FORMAT);
+				}
+			
+			obj_to_char (tobj, ch);
+			return;
+		} //CASE 1:
+
+
+/****** CASE 2, 3, 4 & 5: 
+	palm <item> [from | into] [target?] <container>
+*****/		
       if (!str_cmp (buf, "into"))
 	{
-	  argument = one_argument (argument, buf);
+				//container/target name
+					argument = one_argument (argument, contbuf); 
 	  into = true;
 	}
       else if (!str_cmp (buf, "from"))
 	{
-	  argument = one_argument (argument, buf);
+				//container/target name
+					argument = one_argument (argument, contbuf); 
 	  from = true;
 	}
       else
 	{
-	  send_to_char ("Do you wish to palm INTO or FROM a container?\n",
-			ch);
-	  return;
-	}
+					if (!from & !into)
+						{
+							send_to_char ("Do you wish to palm INTO or FROM a container?\n", ch);
+							return;
+						}
+				}
 
-//object is in PC's hand and goes into a container worn by another -- STEAL
-      if (into && (tch = get_char_room_vis (ch, buf)))
-	{
-	  argument = one_argument (argument, buf);
-	  if (from && ch->right_hand && ch->left_hand)
-	    {
-	      send_to_char
-		("One of your hands needs to be free before attempting to palm something.\n",
-		 ch);
-	      return;
-	    }
-	  if ((!(tobj = get_obj_in_list (target, ch->right_hand)) &&
-	       !(tobj = get_obj_in_list (target, ch->left_hand))))
-	    {
-	      send_to_char ("What did you wish to palm into it?\n", ch);
-	      return;
-	    }
-	  if (!(obj = get_obj_in_list_vis (ch, buf, tch->equip)))
-	    {
-	      send_to_char
-		("What on your victim did you wish to palm it into?\n", ch);
-	      return;
-	    }
-	  if (GET_ITEM_TYPE (obj) != ITEM_CONTAINER)
-	    {
-	      send_to_char ("You can only palm items into containers.\n", ch);
-	      return;
-	    }
-	  if (tobj->obj_flags.weight / 100 > 3)
-	    {
-	      send_to_char
-		("That's too heavy for you to palm very stealthily.\n", ch);
-	      return;
-	    }
-	  modifier = tch->skills[SKILL_SCAN] / 5;
-	  modifier += tobj->obj_flags.weight / 100;
-	  modifier += 15;
-	  sprintf (buf, "You carefully slide $p into #5%s#0's $P.",
+		if (!(tch = get_char_room_vis (ch, contbuf))) //contbuf is not PC, so it may be a container CASE 2 or 4
+			{
+				if (!(cobj = get_obj_in_list (contbuf, ch->equip)) && !(cobj = get_obj_in_list_vis (ch, contbuf, ch->room->contents)))
+					{
+						send_to_char ("You don't see that here.\n", ch);
+						return;
+					}
+				
+				if (cobj == get_obj_in_list (contbuf, ch->equip))
+					{
+						tch =  get_char_room_vis (ch, "self");
+						targchk = true; //self is the target PC CASE 3 & 5
+						contchk = true;
+					}
+				
+				if (cobj == get_obj_in_list_vis (ch, contbuf, ch->room->contents))
+					{
+						targchk = false;
+						contchk = true;
+					}
+					
+				if (GET_ITEM_TYPE (cobj) != ITEM_CONTAINER)
+					{
+						send_to_char ("You can only palm items into or from containers.\n", ch);
+						return;
+					}
+				
+			}
+		else
+			{
+				targchk = true; //there is a target PC CASE 3 & 5				
+			}
+
+/*** CASE 2: palm <item> into <container> ***/
+// item is tobj
+// cobj is container
+		if (into && !targchk && contchk)
+			{
+				if (!(tobj = get_obj_in_list (objtarget, ch->right_hand))
+		       && !(tobj = get_obj_in_list (objtarget, ch->left_hand)))
+					{
+						send_to_char ("What did you wish to palm into it?\n", ch);
+						return;
+					}
+				
+				if (tobj->obj_flags.weight / 100 > 3)
+					{
+						send_to_char ("That's too heavy for you to palm very stealthily.\n", ch);
+						return;
+					}
+					
+				//Treat tables as a special container
+	      if (!IS_SET (cobj->obj_flags.extra_flags, ITEM_TABLE))
+					{
+						act ("You carefully slide $p onto $P.", false, ch, tobj,
+								 cobj, TO_CHAR | _ACT_FORMAT);
+						
+						/* Alert the staff of the theft */
+						sprintf (msgbuf,
+							 "#3[Guardian: %s%s]#0 Tries to slip %s onto %s in %d.",
+							 GET_NAME (ch),
+							 IS_SET (ch->plr_flags, NEW_PLAYER_TAG) ? " (new)" : "",
+							 tobj->short_description,
+							 cobj->short_description,
+							 ch->in_room);
+						send_to_guardians (msgbuf, 0xFF);
+			
+						if (!skill_use
+								(ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100))
+							act ("$n attempts to surreptitiously place $p atop $P.",
+						 false, ch, tobj, cobj, TO_ROOM | _ACT_FORMAT);
+					}	
+				else
+					{
+						act ("You carefully slide $p into $P.", false, ch, tobj,
+								 cobj, TO_CHAR | _ACT_FORMAT);
+						
+						/* Alert the staff of the theft */
+						sprintf (msgbuf,
+							 "#3[Guardian: %s%s]#0 Tries to slip %s into %s in %d.",
+							 GET_NAME (ch),
+							 IS_SET (ch->plr_flags, NEW_PLAYER_TAG) ? " (new)" : "",
+							 tobj->short_description,
+							 cobj->short_description,
+							 ch->in_room);
+						send_to_guardians (msgbuf, 0xFF);
+			
+						if (!skill_use
+								(ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100))
+							act ("$n attempts to surreptitiously place $p into $P.",
+						 false, ch, tobj, cobj, TO_ROOM | _ACT_FORMAT);
+					}
+				
+				//transfer any special effects
+				for (af = tobj->xaffected; af; af = af->next)
+					affect_modify (ch, af->type, af->a.spell.location,
+			       af->a.spell.modifier, tobj->obj_flags.bitvector,
+			       false, 0);
+	      
+	      if (ch->right_hand == tobj)
+					ch->right_hand = NULL;
+	      else if (ch->left_hand == tobj)
+					ch->left_hand = NULL;
+	      obj_to_obj (tobj, cobj);
+				return;		
+			}//CASE 2
+
+/*** CASE 3: palm <item> into <targetPC> <container> ***/
+// item is tobj
+// tch is targetPC 
+// cobj is container
+ 		if (into && targchk)
+ 			{
+ 				argument = one_argument (argument, contbuf);
+ 				
+ 				if (!contchk)
+ 					{
+						if (!(cobj = get_obj_in_list (contbuf, tch->equip)))
+							{
+								send_to_char ("You don't see that container.\n", ch);
+								return;
+							}
+						
+						if (GET_ITEM_TYPE (cobj) != ITEM_CONTAINER)
+							{
+								send_to_char ("You can only palm items into containers.\n", ch);
+								return;
+							}
+					}
+						
+				if (!(tobj = get_obj_in_list (objtarget, ch->right_hand))
+		       && !(tobj = get_obj_in_list (objtarget, ch->left_hand)))
+					{
+						send_to_char ("What did you wish to palm into it?\n", ch);
+						return;
+					}
+				
+				if (tobj->obj_flags.weight / 100 > 3)
+					{
+						send_to_char ("That's too heavy for you to palm very stealthily.\n", ch);
+						return;
+					}
+					
+ 				if (tch == ch)
+ 					{
+ 						act ("You carefully slide $p into $P.", false, ch, tobj, cobj, TO_CHAR | _ACT_FORMAT);
+		   
+ 						 /* Alert the staff of the theft */
+						sprintf (msgbuf,
+							 "#3[Guardian: %s%s]#0 Tries to secretly place %s into %s in %d.",
+							 GET_NAME (ch),
+							 IS_SET (ch->plr_flags, NEW_PLAYER_TAG) ? " (new)" : "",
+							 tobj->short_description,
+							 cobj->short_description,
+							 ch->in_room);
+						send_to_guardians (msgbuf, 0xFF);
+		
+						
+						if (!skill_use (ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100))
+							act ("$n attempts to surreptitiously manipulate $p.",
+								false, ch, tobj, 0, TO_ROOM | _ACT_FORMAT);
+								
+						
+ 					}
+ 				else
+ 					{
+ 						modifier = tch->skills[SKILL_SCAN] / 5;
+						modifier += tobj->obj_flags.weight / 100;
+						modifier += 15;
+						
+						sprintf (msgbuf, "You carefully slide $p into #5%s#0's $P.",
 		   char_short (tch));
-	  act (buf, false, ch, tobj, obj, TO_CHAR | _ACT_FORMAT);
+	  				act (msgbuf, false, ch, tobj, cobj, TO_CHAR | _ACT_FORMAT);
 
-	  /* Alert the staff of the theft */
-	  sprintf (buf, "#3[Guardian: %s%s]#0 Plants %s on %s in %d.",
+						/* Alert the staff of the theft */
+						sprintf (msgbuf, "#3[Guardian: %s%s]#0 Plants %s on %s in %d.",
 		   GET_NAME (ch),
 		   IS_SET (ch->plr_flags, NEW_PLAYER_TAG) ? " (new)" : "",
 		   tobj->short_description,
 		   (!IS_NPC (tch)) ? GET_NAME (tch) : (tch->short_descr),
 		   ch->in_room);
-	  send_to_guardians (buf, 0xFF);
+						send_to_guardians (msgbuf, 0xFF);
 
 	  if (!skill_use (ch, SKILL_STEAL, modifier))
 	    {
-	      sprintf (buf,
+								sprintf (msgbuf,
 		       "$n approaches you and surreptitiously slips $p into #2%s#0!",
-		       obj_short_desc (obj));
-	      act (buf, false, ch, tobj, tch, TO_VICT | _ACT_FORMAT);
-	      sprintf (buf,
+									 obj_short_desc (cobj));
+								act (msgbuf, false, ch, tobj, tch, TO_VICT | _ACT_FORMAT);
+								
+								sprintf (msgbuf,
 		       "$n approaches $N and surreptitiously slips $p into #2%s#0.",
-		       obj_short_desc (obj));
-	      act (buf, false, ch, tobj, tch, TO_NOTVICT | _ACT_FORMAT);
-	    }
-	  for (af = tobj->xaffected; af; af = af->next)
-	    affect_modify (ch, af->type, af->a.spell.location,
-			   af->a.spell.modifier, obj->obj_flags.bitvector,
-			   false, 0);
-	  if (ch->right_hand == tobj)
-	    ch->right_hand = NULL;
-	  else if (ch->left_hand == tobj)
-	    ch->left_hand = NULL;
-	  obj_to_obj (tobj, obj);
-	}
-	
-//object is in PC's hand and is going into a container in the room -- SLEIGHT
-      else if ((obj = get_obj_in_list_vis (ch, buf, ch->room->contents)))
-	{
-	  if (from && ch->right_hand && ch->left_hand)
-	    {
-	      send_to_char
-		("One of your hands needs to be free before attempting to palm something.\n",
-		 ch);
-	      return;
-	    }
-	  if (from
-	      && !(tobj = get_obj_in_list_vis (ch, target, obj->contains)))
-	    {
-	      send_to_char ("You don't see such an item in that container.\n",
-			    ch);
-	      return;
-	    }
-	  else if (into
-		   && (!(tobj = get_obj_in_list (target, ch->right_hand))
-		       && !(tobj = get_obj_in_list (target, ch->left_hand))))
-	    {
-	      send_to_char ("What did you wish to palm into it?\n", ch);
-	      return;
-	    }
-	  if (GET_ITEM_TYPE (obj) != ITEM_CONTAINER)
-	    {
-	      send_to_char ("You can only palm items into containers.\n", ch);
-	      return;
-	    }
-	  if (tobj->obj_flags.weight / 100 > 3)
-	    {
-	      send_to_char
-		("That's too heavy for you to palm very stealthily.\n", ch);
-	      return;
-	    }
-	  if (from)
-	    {
-	      act ("You carefully attempt to palm $p from $P.", false, ch,
-		   tobj, obj, TO_CHAR | _ACT_FORMAT);
-
+									 obj_short_desc (cobj));
+								act (msgbuf, false, ch, tobj, tch, TO_NOTVICT | _ACT_FORMAT);
+							}
+ 					}
+ 					
+ 				for (af = tobj->xaffected; af; af = af->next)
+								affect_modify (ch, af->type, af->a.spell.location,
+									af->a.spell.modifier, tobj->obj_flags.bitvector,
+								 false, 0);
+						
+				if (ch->right_hand == tobj)
+					ch->right_hand = NULL;
+				else if (ch->left_hand == tobj)
+					ch->left_hand = NULL;
+				obj_to_obj (tobj, cobj);	
+				return; 
+ 			} //CASE 3
+ 
+/*** CASE 4: palm <item> from <container> ***/
+// item is tobj
+// cobj is container	
+		if (from && !targchk && contchk)
+			{ 					
+				if (!(tobj = get_obj_in_list_vis (ch, objtarget, cobj->contains)))
+					{
+						send_to_char ("You don't see such an item in that container.\n",
+							ch);
+						return;
+					}
+				
+				if (tobj->obj_flags.weight / 100 > 3)
+					{
+						send_to_char ("That's too heavy for you to palm very stealthily.\n", ch);
+						return;
+					}
+				
+				if (ch->right_hand && ch->left_hand)
+					{
+						send_to_char
+							("One of your hands needs to be free before attempting to palm something.\n",
+							 ch);
+						return;
+					}
+				
+				act ("You carefully flick $p from $P into your hand.", false,
+		   ch, tobj, cobj, TO_CHAR | _ACT_FORMAT);
+	      
 	      /* Alert the staff of the theft */
-	      sprintf (buf,
-		       "#3[Guardian: %s%s]#0 Tries to palm %s from %s in %d.",
-		       GET_NAME (ch), IS_SET (ch->plr_flags,
-					      NEW_PLAYER_TAG) ? " (new)" : "",
-		       tobj->short_description, obj->short_description,
-		       ch->in_room);
-	      send_to_guardians (buf, 0xFF);
-
-	      if (!skill_use (ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100))
-		act ("$n gets $p from $P.", false, ch, tobj, obj,
-		     TO_ROOM | _ACT_FORMAT);
-	      obj_from_obj (&tobj, 0);
-	      obj_to_char (tobj, ch);
-	    }
-	  else if (into)
-	    {
-	      if (GET_ITEM_TYPE (obj) != ITEM_CONTAINER)
-		{
-		  send_to_char ("You can only palm items into containers.\n",
-				ch);
-		  return;
-		}
-//Treat tables as a special container -- SLEIGHT
-	      if (!IS_SET (obj->obj_flags.extra_flags, ITEM_TABLE))
-		{
-		  act ("You carefully slide $p into $P.", false, ch, tobj,
-		       obj, TO_CHAR | _ACT_FORMAT);
-		  /* Alert the staff of the theft */
-		  sprintf (buf,
-			   "#3[Guardian: %s%s]#0 Tries to slip %s into %s in %d.",
-			   GET_NAME (ch), IS_SET (ch->plr_flags,
-						  NEW_PLAYER_TAG) ? " (new)" :
-			   "", tobj->short_description,
-			   obj->short_description, ch->in_room);
-		  send_to_guardians (buf, 0xFF);
-
-		  if (!skill_use
-		      (ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100))
-		    act ("$n attempts to surreptitiously place $p into $P.",
-			 false, ch, tobj, obj, TO_ROOM | _ACT_FORMAT);
-		}
-	      else
-		{
-		  act ("You carefully slide $p onto $P.", false, ch, tobj,
-		       obj, TO_CHAR | _ACT_FORMAT);
-		  /* Alert the staff of the theft */
-		  sprintf (buf,
-			   "#3[Guardian: %s%s]#0 Tries to slip %s onto %s in %d.",
-			   GET_NAME (ch), IS_SET (ch->plr_flags,
-						  NEW_PLAYER_TAG) ? " (new)" :
-			   "", tobj->short_description,
-			   obj->short_description, ch->in_room);
-		  send_to_guardians (buf, 0xFF);
-
-		  if (!skill_use
-		      (ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100))
-		    act ("$n attempts to surreptitiously place $p atop $P.",
-			 false, ch, tobj, obj, TO_ROOM | _ACT_FORMAT);
-		}
-	      for (af = tobj->xaffected; af; af = af->next)
-		affect_modify (ch, af->type, af->a.spell.location,
-			       af->a.spell.modifier, obj->obj_flags.bitvector,
-			       false, 0);
-	      if (ch->right_hand == tobj)
-		ch->right_hand = NULL;
-	      else if (ch->left_hand == tobj)
-		ch->left_hand = NULL;
-	      obj_to_obj (tobj, obj);
-	    }
-	}
-	
-//container is worn by the PC -- SLEIGHT
-      else if ((obj = get_obj_in_list (buf, ch->equip)))
-	{
-	  
-	  
-	  if (!(tobj = get_obj_in_list (target, obj->contains)) && from)
-	    {
-	      send_to_char ("The specified item isn't in the container.\n",
-			    ch);
-	      return;
-	    }
-	  else if (into)
-	    {
-	      if (!(tobj = get_obj_in_list (target, ch->right_hand)) &&
-		  !(tobj = get_obj_in_list_vis (ch, target, ch->left_hand)))
-		{
-		  send_to_char ("Which item did you want to palm?\n", ch);
-		  return;
-		}
-			if (GET_ITEM_TYPE (obj) != ITEM_CONTAINER)
-				{
-					send_to_char ("You can only palm items into containers.\n", ch);
-					return;
-				}
-	    
-	    }
-	  if (!tobj)
-	    {
-	      send_to_char ("What did you wish to palm?\n", ch);
-	      return;
-	    }
-	  
-	  if (tobj->obj_flags.weight / 100 > 3)
-	    {
-	      send_to_char ("That item is too heavy for you to palm.\n",
-			    ch);
-	      return;
-	    }
-//Item is in a container worn by the PC	 -- SLEIGHT 
-	  if (from)
-	    {
-	      if (ch->right_hand && ch->left_hand)
-		{
-		  send_to_char
-		    ("One of your hands needs to be free before attempting to palm something.\n",
-		     ch);
-		  return;
-		}
-	      act ("You carefully flick $p from $P into your hand.", false,
-		   ch, tobj, obj, TO_CHAR | _ACT_FORMAT);
-	      /* Alert the staff of the theft */
-	      sprintf (buf,
+	      sprintf (msgbuf,
 		       "#3[Guardian: %s%s]#0 Tries to secretly draw %s in %d.",
-		       GET_NAME (ch), IS_SET (ch->plr_flags,
-					      NEW_PLAYER_TAG) ? " (new)" : "",
-		       tobj->short_description, ch->in_room);
-	      send_to_guardians (buf, 0xFF);
+		       GET_NAME (ch),
+		       IS_SET (ch->plr_flags, NEW_PLAYER_TAG) ? " (new)" : "",
+		       tobj->short_description,
+		       ch->in_room);
+	      send_to_guardians (msgbuf, 0xFF);
 
 	      if (!skill_use (ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100))
 		act ("$n attempts to handle $p surreptitiously.", false, ch,
 		     tobj, 0, TO_ROOM | _ACT_FORMAT);
-	      obj_from_obj (&tobj, 0);
-	      if (ch->right_hand)
-		ch->left_hand = tobj;
-	      else
-		ch->right_hand = tobj;
 	      
-	    }
-//object is going into a container worn by the PC	 --  SLEIGHT 
-	  else if (into)
-	    {
 	      
-	      /* Alert the staff of the theft */
-	      sprintf (buf,
-		       "#3[Guardian: %s%s]#0 Tries to secretly place %s in %d.",
-		       GET_NAME (ch), IS_SET (ch->plr_flags,
-					      NEW_PLAYER_TAG) ? " (new)" : "",
-		       tobj->short_description, ch->in_room);
-	      send_to_guardians (buf, 0xFF);
+	      obj_from_obj (&tobj, 0); //rmoves tobj from wherever it is
+	      obj_to_char (tobj, ch);
+	     	return; 
+		
+			}// CASE 4
+	    
+	    
+/*** CASE 5: palm <item> from <targetPC> <container> ***/
+// item is tobj
+// tch is targetPC
+// cobj is container
 
-	      act ("You carefully slide $p into $P.", false, ch, tobj, obj,
-		   TO_CHAR | _ACT_FORMAT);
-	      if (!skill_use (ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100))
-		act ("$n attempts to surreptitiously manipulate $p.", false, ch,
-		     tobj, 0, TO_ROOM | _ACT_FORMAT);
-	      for (af = tobj->xaffected; af; af = af->next)
-		affect_modify (ch, af->type, af->a.spell.location,
-			       af->a.spell.modifier, obj->obj_flags.bitvector,
-			       false, 0);
-	      if (ch->right_hand == tobj)
-		ch->right_hand = NULL;
-	      else if (ch->left_hand == tobj)
-		ch->left_hand = NULL;
-	      obj_to_obj (tobj, obj);
-	    }
-	}
-      else
-	{
-	  if (from)
-	    send_to_char ("What did you want to palm from?\n", ch);
-	  else
-	    send_to_char ("What did you wish to palm into?\n", ch);
-	}
-    }
-}
+	if (from && targchk)
+			{
+				argument = one_argument (argument, contbuf);
+				
+				if (!contchk)
+					{
+						if (!(cobj = get_obj_in_list (contbuf, tch->equip)))
+							{
+								send_to_char
+									("What did you wish to palm from?\n", ch);
+								return;
+							}
+							
+						if (GET_ITEM_TYPE (cobj) != ITEM_CONTAINER)
+							{
+								send_to_char ("You can only palm items from containers.\n", ch);
+								return;
+							}
+					}
+					
+				if (!(tobj = get_obj_in_list_vis (ch, objtarget, cobj->contains)))
+					{
+						send_to_char ("You don't see such an item in that container.\n",
+							ch);
+						return;
+					}
+	    
+	    	if (tobj->obj_flags.weight / 100 > 3)
+					{
+						send_to_char ("That's too heavy for you to palm very stealthily.\n", ch);
+						return;
+					}
+					
+				if (ch->right_hand && ch->left_hand)
+					{
+						send_to_char
+							("One of your hands needs to be free before attempting to palm something.\n",
+							 ch);
+						return;
+					}
+				
+				if (tch == ch)
+ 					{
+ 						act ("You carefully attempt to palm $p from $P.", false, ch,
+		   tobj, cobj, TO_CHAR | _ACT_FORMAT);
+
+						/* Alert the staff of the theft */
+						sprintf (msgbuf,
+							 "#3[Guardian: %s%s]#0 Tries to palm %s from %s in %d.",
+							 GET_NAME (ch),
+							 IS_SET (ch->plr_flags, NEW_PLAYER_TAG) ? " (new)" : "",
+							 tobj->short_description,
+							 cobj->short_description,
+							 ch->in_room);
+						send_to_guardians (msgbuf, 0xFF);
+		
+						if (!skill_use (ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100))
+							act ("$n gets $p from $P.", false, ch, tobj, cobj, 		     TO_ROOM | _ACT_FORMAT);
+							
+						obj_from_obj (&tobj, 0); //removes tobj from wherever it is
+						obj_to_char (tobj, ch);
+ 					} //tch = ch
+ 				else
+ 					{
+ 						//must use the steal command. Besides, you can't see the item in the other guys container
+ 						send_to_char ("You can't see into that container.\n",
+							ch);
+						return;
+ 					}
+ 				return;	
+			} // CASE 5
+			
+	return;
+}//end function
 
 void
 do_steal (CHAR_DATA * ch, char *argument, int cmd)
@@ -2875,8 +2975,6 @@ prereq_skill (CHAR_DATA * ch, CHAR_DATA * victim, int skill,
       return 0;
     }
 
-  open_skill (victim, skill);
-
   return 1;
 }
 
@@ -3012,7 +3110,7 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  /* Split off to handle teaching spells */
+//Spells 
 
   if (sn != -1)
     {
@@ -3020,6 +3118,7 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+//Regular Skills
   if (!real_skill (ch, i))
     {
       send_to_char ("You don't know that skill!\n\r", ch);
@@ -3081,26 +3180,10 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
 	  act (buf, true, victim, 0, ch, TO_CHAR | _ACT_FORMAT);
 	  return;
 	}
-
-      open_skill (victim, i);
       break;
+   
 
-    case SKILL_DISARM:
-      open_skill (victim, i);
-      break;
-
-    case SKILL_PARRY:
-    case SKILL_BLOCK:
-    case SKILL_PICK:
-    case SKILL_SEARCH:
-    case SKILL_SCAN:
-    case SKILL_CLIMB:
-    case SKILL_FORAGE:
-    case SKILL_HIDE:
-    case SKILL_LISTEN:
-      open_skill (victim, i);
-      break;
-
+//Psionics
     case SKILL_MENTAL_BOLT:
     case SKILL_PRESCIENCE:
     case SKILL_CLAIRVOYANCE:
@@ -3112,25 +3195,29 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("Psionics cannot be taught.\n", ch);
       return;
 
+//Dependant skills
     case SKILL_HERBALISM:
       if (!prereq_skill (ch, victim, SKILL_HERBALISM, SKILL_FORAGE, 0))
-	return;
+      	{
+					send_to_char ("They don't know enought about Foraging.\n\r", ch);
+					return;
+				}
       break;
 
     case SKILL_ALCHEMY:
       if (!prereq_skill (ch, victim, SKILL_ALCHEMY, SKILL_HERBALISM, 0))
-	return;
+				{
+					send_to_char ("They don't know enought about herbalism.\n\r", ch);
+					return;
+				}
       break;
 
     case SKILL_SNEAK:
       if (!prereq_skill (ch, victim, SKILL_SNEAK, SKILL_HIDE, 0))
-	return;
-      break;
-
-    case SKILL_POISONING:
-      if (!prereq_skill (ch, victim, SKILL_POISONING,
-			 SKILL_BACKSTAB, SKILL_ALCHEMY))
-	return;
+				{
+					send_to_char ("They don't know enought about hiding.\n\r", ch);
+					return;
+				}
       break;
 
     case SKILL_DUAL:
@@ -3140,27 +3227,74 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
 			"learn dual wield.\n\r", ch);
 	  return;
 	}
-      open_skill (victim, i);
+      break;
+
+    case SKILL_STEAL:
+      if (!prereq_skill (ch, victim, SKILL_STEAL, SKILL_SNEAK, SKILL_HIDE))
+				{
+					send_to_char ("They don't know enought about several things.\n\r", ch);
+					return;
+				} /// \todo Check if the above condition is always true. 
       break;
 
     case SKILL_RITUAL:
+    	{
       send_to_char ("Ritual can only be learned through conversion.\n\r", ch);
+      	return;
+      }
+      break;
+
+//Skills that are not supported at this time
+		case SKILL_DISARM:
+			return;  //not used
+      break;
+      
+		case SKILL_POISONING:
+      if (!prereq_skill (ch, victim, SKILL_POISONING,
+			 SKILL_BACKSTAB, SKILL_ALCHEMY))
+				{
+					send_to_char ("They don't know enought about several things.\n\r", ch);
+					return;
+				}
       break;
 
     case SKILL_BACKSTAB:
       if (!prereq_skill (ch, victim, SKILL_BACKSTAB,
 			 SKILL_LIGHT_PIERCE, SKILL_HIDE))
-	return;
+				{
+					send_to_char ("They don't know enought about several things.\n\r", ch);
+					return;
+				}
       break;
-
+      
+//The following skills will be taught without any checks or restrictions
+//Normal skills
+    case SKILL_PARRY:
+    case SKILL_BLOCK:
+    case SKILL_PICK:
+    case SKILL_SEARCH:
+    case SKILL_SCAN:
+    case SKILL_CLIMB:
+    case SKILL_FORAGE:
     case SKILL_SKIN:
-      if (!prereq_skill (ch, victim, SKILL_SKIN, 0, 0))
-	return;
+    case SKILL_HIDE:
+    case SKILL_LISTEN:
       break;
-    case SKILL_STEAL:
-      if (!prereq_skill (ch, victim, SKILL_STEAL, SKILL_SNEAK, SKILL_HIDE))
-	return; /// \todo Check if the above condition is always true. 
-      break;
+      
+//Scripts
+    case SKILL_SCRIPT_BELERIAND_TENGWAR:
+    case SKILL_SCRIPT_CERTHAS_DAERON:
+    case SKILL_SCRIPT_ANGERTHAS_DAERON:
+    case SKILL_SCRIPT_QUENYAN_TENGWAR:
+    case SKILL_SCRIPT_ANGERTHAS_MORIA:
+    case SKILL_SCRIPT_GONDORIAN_TENGWAR:
+    case SKILL_SCRIPT_ARNORIAN_TENGWAR:
+    case SKILL_SCRIPT_NUMENIAN_TENGWAR:
+    case SKILL_SCRIPT_NORTHERN_TENGWAR:
+    case SKILL_SCRIPT_ANGERTHAS_EREBOR:
+			break;
+
+//Langauges     
     case SKILL_SPEAK_ATLIDUK:
     case SKILL_SPEAK_ADUNAIC:
     case SKILL_SPEAK_HARADAIC:
@@ -3182,9 +3316,10 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
       break;
     }
 
+	open_skill (victim, i);	
   sprintf (buf, "$N teaches you '%s'.", skills[i]);
   act (buf, true, victim, 0, ch, TO_CHAR);
-  open_skill (victim, i);
+ 
 
   if (IS_MORTAL (victim))
     update_crafts (victim);
