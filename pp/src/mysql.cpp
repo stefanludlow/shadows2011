@@ -933,6 +933,7 @@ reload_sitebans ()
       site->banned_by = str_dup (row[1]);
       site->banned_on = atoi (row[2]);
       site->banned_until = atoi (row[3]);
+	site->next = NULL; //bug killer right here!
       if (!banned_site)
 	banned_site = site;
       else
