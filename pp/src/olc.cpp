@@ -2845,6 +2845,38 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 				}
     }
     
+    if  (GET_TRUST (ch) < 5)
+    {
+      if (*buf1 != 'a' && 
+		      *buf1 != 'c' &&
+     			*buf1 != 'k' &&
+     			*buf1 != 'l' &&
+      		*buf1 != 'm' &&
+      		*buf1 != 'o' &&
+      		*buf1 != 'p' &&
+      		*buf1 != 'q' &&
+      		*buf1 != 'r' &&
+      		*buf1 != 'u' &&
+      		*buf1 != 'x' &&
+      		*buf1 != 'z')      
+     
+				{
+						s ("   a           per zone stats");
+						s ("   c           characters matching search");
+						s ("   k           shopkeepers");
+			      s ("   l           applications");
+						s ("   o           objects");
+						s ("   m           mobiles");
+			      s ("   p           PCs with specified points");
+						s ("   q           objects with ok flag");
+						s ("   r           rooms");
+						s ("   u           undescribed rooms");
+						s ("   x           objects without material flags");
+						s ("   z           zones");
+					return;
+				}
+    }
+    
   if (!*buf1)
     {
       s ("   a           per zone stats");
@@ -2857,7 +2889,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
       s ("   q           objects with ok flag");
       s ("   r           rooms");
       s ("   u           undescribed rooms");
-      s ("   v           registry.");
+      s ("   v           registry."); //level 5
       s ("   x           objects without material flags");
       s ("   z           zones");
     }
