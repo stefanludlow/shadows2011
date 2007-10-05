@@ -937,7 +937,7 @@ unban_site (SITE_INFO * site)
 
   if (!site)
     return;
-	if (!banned_site)
+	if (!banned_site) //global value
 		return;
 
   if (banned_site == site)
@@ -1005,8 +1005,16 @@ check_sitebans ()
             if (site->next->banned_until != -1
 	       && time (0) >= site->next->banned_until)
 	      {
+							if (site->next->next) //is there another site to look at
+								{
 	      unban_site (site->next);
-	      continue;
+									continue;
+								}
+							else
+								{
+									unban_site (site->next); //last site
+									return;
+								}
 	      }
           }
      }
