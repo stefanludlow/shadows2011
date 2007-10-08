@@ -1917,10 +1917,10 @@ do_goto (CHAR_DATA * ch, char *argument, int cmd)
       if (*ch->pc->imm_leave)
 	act (ch->pc->imm_leave, true, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
       else
-	act ("$n quietly leaves.", true, ch, 0, 0, TO_ROOM);
+	act ("$n leaves the area.", true, ch, 0, 0, TO_ROOM);
     }
   else
-    act ("$n quietly leaves.", true, ch, 0, 0, TO_ROOM);
+    act ("$n leaves the area.", true, ch, 0, 0, TO_ROOM);
 
   if (!IS_SET (ch->flags, FLAG_WIZINVIS) && *argument != '!')
     {
