@@ -806,7 +806,7 @@ list_auctions (CHAR_DATA *ch, CHAR_DATA *auctioneer, char *argument, int cmd)
 {
 	MYSQL_RES	*result = NULL;
 	MYSQL_ROW	row = NULL;
-	char		buf [MAX_STRING_LENGTH], buf2 [MAX_STRING_LENGTH], buf3 [MAX_STRING_LENGTH], buf4 [MAX_STRING_LENGTH], statbuf[20];
+	char		buf [MAX_STRING_LENGTH], buf2 [(MAX_STRING_LENGTH*2)+1], buf3 [MAX_STRING_LENGTH], buf4 [MAX_STRING_LENGTH], statbuf[20];
 	int			time_remaining = 0, days = 0, hours = 0, minutes = 0, house_id = 0, type = 0;
 	
 	// Woot! Let's hear it for sloppy, lazy-ass hacks!
@@ -854,8 +854,8 @@ list_auctions (CHAR_DATA *ch, CHAR_DATA *auctioneer, char *argument, int cmd)
 		sprintf (buf,
 			 "SELECT * FROM %s.ah_auctions"
 			 " WHERE (expires_at - UNIX_TIMESTAMP()) > 0 "
-			 " AND (obj_short_desc LIKE '%%%s%%'"
-			 "     OR obj_full_desc LIKE '%%%s%%')"
+			 " AND (obj_short_desc LIKE \"%%%%%s%%%%\""
+			 " OR obj_full_desc LIKE \"%%%%%s%%%%\")"
 			 " AND house_id = %d "
 			 " AND port = %d ORDER BY expires_at ASC", 
 			 world_log_db.c_str (), buf2, buf2, house_id, port);
@@ -870,7 +870,7 @@ list_auctions (CHAR_DATA *ch, CHAR_DATA *auctioneer, char *argument, int cmd)
 	mysql_safe_query (buf);
 	
 	result = mysql_store_result (database);
-	
+
 	if ( !result )
 		return;
 
@@ -892,21 +892,21 @@ list_auctions (CHAR_DATA *ch, CHAR_DATA *auctioneer, char *argument, int cmd)
 		sprintf (buf + strlen(buf), "\nThere are no auctions currently listed in this auction house.\n");
 	else if ( !mysql_num_rows(result) )
 		sprintf (buf + strlen(buf), "\nThere are no auctions currently listed matching that criteria.\n");	
-				
+
 	while ( (row = mysql_fetch_row(result)) )
 	{
 		sprintf (buf2, "%s cp", row[8]);
 		sprintf (buf3, "%s cp", row[10]);
-		
+			
 		time_remaining = (atoi(row[4]) - time(0)) * 4;
-		
+			
 		days = time_remaining / (60*60*24);
 		time_remaining %= (60*60*24);
 		hours = time_remaining / (60*60);
 		time_remaining %= (60*60);
 		minutes = time_remaining / 60;
 		time_remaining %= 60;
-		
+			
 		if ( !days && !hours && !minutes )
 			sprintf (buf4, ">1m");
 		else 
@@ -921,14 +921,14 @@ list_auctions (CHAR_DATA *ch, CHAR_DATA *auctioneer, char *argument, int cmd)
 		}
 
 		*statbuf = '\0';
-		
+			
 		sprintf (statbuf, " ");
-		
+			
 		if ( !str_cmp (row[11], GET_NAME(ch)) )
 			sprintf (statbuf, "*");
 		if ( !str_cmp (row[9], GET_NAME(ch)) )
 			sprintf (statbuf, "^");
-			
+				
 		sprintf (buf + strlen(buf),
 			"%s%7s.   #2%-35.35s#0   %-8.8s %-8.8s %-12.12s\n", 
 			statbuf, row[0], row[15], buf2, atoi(row[10]) > atoi(row[9]) ? buf3 : "None", buf4);
