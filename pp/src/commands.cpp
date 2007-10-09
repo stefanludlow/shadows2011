@@ -49,7 +49,6 @@ const struct command_data commands[] = {
   {"buck", do_buck, FIGHT, C_BLD | C_XLS},
   {"camp", do_camp, STAND, C_WLK | C_BLD | C_MNT},
   {"cards", char__do_cards, SIT, C_BLD},
-  {"cast", do_cast, FIGHT, C_WLK | C_MNT | C_SPL},
   {"castout", do_castout, REST, C_BLD},
   {"close", do_close, SIT, C_MNT},
   {"clockout", do_clockout, SIT, C_MNT},
@@ -181,7 +180,6 @@ const struct command_data commands[] = {
   {"point", do_point, STAND, C_WLK},
   {"poison", do_poison, REST, C_WLK | C_MNT},
   {"pour", do_pour, REST, 0},
-  {"prepare", do_prepare, FIGHT, C_WLK | C_MNT | C_HID},
   {"preview", do_preview, SIT, C_BLD},
   {"prescience", do_prescience, REST, C_WLK | C_XLS},
   {"promote", do_promote, STAND, 0},
@@ -429,9 +427,11 @@ const struct command_data commands[] = {
 	/* HRPA Level 5 */
 	{"*", do_fivenet, DEAD, C_LV5},
 	{"assign", do_assign, DEAD, C_LV5},	/* Assign to Roster */
+	{"cast", do_cast, FIGHT, C_WLK | C_MNT | C_SPL, C_LV5},
 	{"fivenet", do_fivenet, DEAD, C_LV5},
 	{"gecho", do_gecho, DEAD, C_LV5},
 	{"pfile", do_pfile, DEAD, C_LV5},
+	{"prepare", do_prepare, FIGHT, C_WLK | C_MNT | C_HID, C_LV5},
 	//{"print", do_print, DEAD, C_LV5},
 	{"replace", do_replace, DEAD, C_LV5},
 	{"roster", do_roster, DEAD, C_LV5},
