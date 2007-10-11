@@ -1871,18 +1871,21 @@ olist_show (OBJ_DATA * obj, int type, int header)
       switch (obj->o.armor.armor_type)
 	{
 	case 0:
+    strcpy (armor_type, "Quilt ");
+    break;
+  case 1:
 	  strcpy (armor_type, "Leath ");
-	  break;
-	case 1:
+    break;
+  case 2:
 	  strcpy (armor_type, "Ring  ");
 	  break;
-	case 2:
+  case 3:
 	  strcpy (armor_type, "Scale ");
 	  break;
-	case 3:
+  case 4:
 	  strcpy (armor_type, "Mail  ");
 	  break;
-	case 4:
+  case 5:
 	  strcpy (armor_type, "Plate ");
 	  break;
 	default:
