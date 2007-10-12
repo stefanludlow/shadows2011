@@ -4540,7 +4540,7 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 	{
 		if (GET_TRUST(ch))
 			{
-				property = get_char (ThisArgument.c_str());
+				property = get_char ((char*)ThisArgument.c_str());
 			}
 			
 		if (!property)
@@ -4585,7 +4585,7 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 		{
 			if (GET_TRUST(ch))
 			{
-				target = get_char (ThisArgument.c_str());
+				target = get_char ((char*)ThisArgument.c_str());
 			}
 			
 			send_to_char ("You do not see a person with the keyword \"#2", ch);
