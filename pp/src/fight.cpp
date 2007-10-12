@@ -161,11 +161,11 @@ const char *break_def[] = {
   "slip past", "slips past",	/* stab */
   "avoid", "avoids",		/* pierce */
   "break down", "breaks down",	/* chop */
-  "force through", "forces through",	/* bludgeon */
+  "force", "forces",	/* bludgeon */
   "knock aside", "knocks aside",	/* slash */
   "maneuver around", "maneuvers around",	/* lash */
-  "force through", "forces through"
-};				/* natural */
+  "force", "forces"  /* natural */
+};				
 
 /* original
 
