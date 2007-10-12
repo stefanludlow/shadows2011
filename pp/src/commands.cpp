@@ -344,8 +344,7 @@ const struct command_data commands[] = {
 	/*Advanced Builder Level 2:  (mobs and crafts) */
 	{"classify", do_classify, DEAD, C_LV2},
 	{"clog", do_clog, DEAD, C_LV2},	/* Crafts Log */
-	{"craftspc", do_craftspc, DEAD,
-   C_DEL | C_SUB | C_HID | C_DOA | C_BLD | C_PAR | C_SPL | C_NLG},
+	{"craftspc", do_craftspc, DEAD, C_LV2},
 	{"cset", do_cset, DEAD, C_LV2},
 	{"find", do_find, DEAD, C_LV2},
 	//{"freeze", do_freeze, DEAD, C_LV2},
@@ -427,11 +426,11 @@ const struct command_data commands[] = {
 	/* HRPA Level 5 */
 	{"*", do_fivenet, DEAD, C_LV5},
 	{"assign", do_assign, DEAD, C_LV5},	/* Assign to Roster */
-	{"cast", do_cast, FIGHT, C_WLK | C_MNT | C_SPL, C_LV5},
+	{"cast", do_cast, FIGHT, C_LV5},
 	{"fivenet", do_fivenet, DEAD, C_LV5},
 	{"gecho", do_gecho, DEAD, C_LV5},
 	{"pfile", do_pfile, DEAD, C_LV5},
-	{"prepare", do_prepare, FIGHT, C_WLK | C_MNT | C_HID, C_LV5},
+	{"prepare", do_prepare, FIGHT, C_LV5},
 	//{"print", do_print, DEAD, C_LV5},
 	{"replace", do_replace, DEAD, C_LV5},
 	{"roster", do_roster, DEAD, C_LV5},
