@@ -10628,8 +10628,11 @@ post_writing (DESCRIPTOR_DATA * d)
     }
 
   mod =
-    (ch->skills[ch->writes] * 0.50) + (ch->skills[ch->speaks] * 0.30) +
-    (ch->skills[SKILL_LITERACY] * 0.20);
+    (skill_level(ch, ch->writes, 0) * 0.50) + 
+    (skill_level(ch, ch->speaks, 0) * 0.30) +
+    (skill_level(ch, SKILL_LITERACY, 0) * 0.20);
+
+
   mod = (float) MIN (95, (int) mod);
 
   if (GET_ITEM_TYPE (obj) == ITEM_PARCHMENT)
