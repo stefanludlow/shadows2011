@@ -5281,24 +5281,25 @@ specific_name (int race)
   switch (race)
     {
     case 0:   // commoner
-    case 94:  // renegade
-    case 9:   // northman 
     case 1:   // dunadan
-    case 101: // arnorian
-    case 5:   // dunlending
-    case 26:  // half-orc
-    case 25:  // orc
-    case 6:   // haradan
     case 3:   // bn
     case 4:   // corsair
+    case 5:   // dunlending
+    case 6:   // gondorian human
+    case 9:   // northman 
     case 13:  // woodman?
     case 16:  // noldo
     case 17:  // sinda
     case 18:  // vanya
     case 19:  // avar
+    case 25:  // orc
+    case 26:  // half-orc
     case 93:  // silvan
+    case 94:  // renegade
     case 96:  // easterling
     case 99:  // other half-orc?
+    case 101: // arnorian
+    case 102:   // gondorian human
     case 105: // generic undead
       return "medium-sized humanoid";
     case 24:  // snaga
@@ -5309,7 +5310,7 @@ specific_name (int race)
     case 23:  // dwarf
       return "small humanoid";
     case 29:  // uruk-hai
-    case 30:  // variag
+    case 104:  // variag
       return "large humanoid";
     case 27:  // half troll
     case 28:  // troll
