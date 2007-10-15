@@ -504,6 +504,7 @@ void do_toll (CHAR_DATA * ch, char *argument, int cmd);
 void char__do_toss (CHAR_DATA * ch, char *argument, int cmd);
 void char__do_cards (CHAR_DATA * ch, char *argument, int cmd);
 void do_tally (CHAR_DATA * ch, char *argument, int cmd);	/* commerce.c */
+void do_ticket (CHAR_DATA * ch, char *argument, int cmd); /* act.informative.cpp */
 void do_track (CHAR_DATA * ch, char *argument, int cmd);
 void do_transfer (CHAR_DATA * ch, char *argument, int cmd);
 void do_travel (CHAR_DATA * ch, char *argument, int cmd);	/* act.comm.c */
@@ -1447,6 +1448,11 @@ int check_account_flags (char *host);
 char *strip_small_minor(char * wounds, CHAR_DATA * ch);
 int room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch);
 int force_enter (CHAR_DATA *tch, ROOM_DATA *troom);
+
+
+void read_ticket (CHAR_DATA * ch, int tick_num);
+void search_ticket (CHAR_DATA * ch, char * chkvalue, int searchtype);
+void delete_ticket (CHAR_DATA * ch, int tick_num);
 /* Magical effect functions for spellcasting */
 
 void creation_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,

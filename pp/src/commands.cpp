@@ -388,6 +388,7 @@ const struct command_data commands[] = {
  	{"remcraft", do_remcraft, DEAD, C_LV3},
   {"snoop", do_snoop, DEAD, C_LV3},
  	{"summon", do_summon, DEAD, C_LV3},
+ 	{"ticket", do_ticket, DEAD, C_LV3},
   {"wclone", do_wclone, DEAD, C_LV3},
 	{"zecho", do_zecho, DEAD, C_LV3},
 

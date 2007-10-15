@@ -32,6 +32,8 @@ extern rpie::server engine;
 extern const char *skills[];
 BOARD_DATA *full_board_list = NULL;
 
+#define LAST_STABLE_TICKET 1000
+
 const char *month_name[12] = {
   "month of Narvinye",
   "month of Nenime",
@@ -11122,4 +11124,209 @@ do_scribe (CHAR_DATA * ch, char *argument, int cmd)
 
   ch->desc->proc = post_writing;
   ch->pc->writing_on = obj;
+}
+
+void
+do_ticket (CHAR_DATA * ch, char *argument, int cmd)
+{	
+	char buf[AVG_STRING_LENGTH];
+	char buf2[12];
+	char f_tick[12];
+	char l_tick[12];
+	int first_tick;
+	int last_tick;
+	int tick_num = 1;
+	int roomnum = 0;
+	
+	argument = one_argument(argument, buf);
+	
+	if (!*buf)
+		{
+			send_to_char ("ticket read <number>\n", ch);
+			send_to_char ("ticket browse <first number> <last number>\n\n", ch);
+			send_to_char ("Finally you may delete a ticket\n\n", ch);
+			send_to_char ("ticket delete <ticket number>\n", ch);
+			return;
+		}
+	
+	if (!strcmp(buf, "browse"))
+		{
+			argument = one_argument (argument, f_tick);
+			if (!*f_tick)
+				{
+					send_to_char ("Starting with which ticket?\n", ch);
+					return;
+				}
+			
+			if (!isdigit (*f_tick))
+				{
+					send_to_char ("You must specify the first ticket number\n", ch);
+					return;
+				}
+			
+			
+			argument = one_argument (argument, l_tick);
+			if (!*l_tick)
+			{
+				send_to_char ("ending at which ticket?\n", ch);
+				return;
+			}
+			
+			if (!isdigit (*l_tick))
+				{
+					send_to_char ("You must specify the last ticket number.\n", ch);
+					return;
+				}
+			
+			//No more than 100 tickets to be checked at a time, instead of the whole 10 million (9,999,999). May need to adjust if there really are more tickets
+			first_tick = atoi(f_tick);
+			last_tick = MIN(100, atoi(l_tick));
+			
+			if (first_tick >= last_tick)
+				{
+					send_to_char ("The last number must be larger than the first number.\n", ch);
+					return;
+				}
+				
+			//browse_ticket(ch, first_tick, last_tick);
+			for (tick_num = first_tick; tick_num <= last_tick; tick_num ++)
+		{			  	
+    	read_ticket(ch, tick_num);  	
+    };
+    
+	} //if browse
+	
+	if (!strcmp(buf, "read"))
+		{
+			argument = one_argument (argument, buf2);
+			if (!*buf2)
+				{
+					send_to_char("Which ticket did you wish to read?\n", ch);
+					return;
+				}
+			
+			if (isdigit (*buf2))
+				{
+					tick_num = atoi (buf2);
+				}
+			else
+				{
+					send_to_char("You must use the ticket number.\n", ch);
+					return;
+				}
+  		
+			read_ticket(ch, tick_num);
+		}//read
+
+
+		if (!strcmp(buf, "delete"))
+			{
+				argument = one_argument (argument, buf2);
+				if (!*buf2)
+					{
+						send_to_char("Which ticket did you wish to delete?\n", ch);
+						return;
+					}
+				
+				if (isdigit (*buf2))
+					{
+						tick_num = atoi (buf2);
+					}
+				else
+					{
+						send_to_char("You must use the ticket number.\n", ch);
+						return;
+					}
+				
+				delete_ticket(ch, tick_num);
+			}//delete
+	
+	return;
+}
+
+void
+read_ticket (CHAR_DATA * ch, int tick_num)
+{
+	
+  int nVirtual;
+  CHAR_DATA *mob;
+  FILE *fp;
+  char buf[AVG_STRING_LENGTH];
+  char buf2[AVG_STRING_LENGTH] = {'\0'};
+  char hookup[AVG_STRING_LENGTH];
+	char name[AVG_STRING_LENGTH];
+	
+  
+	sprintf (name, TICKET_DIR "/%07d", tick_num);
+	
+  if (!(fp = fopen (name, "r")))
+    {
+      return;
+    }
+
+	sprintf(buf2, "\nTicket number: %d\n", tick_num);
+	
+  while (fgets (buf, 256, fp))
+    {
+			//skip lines with blank space at start or blank lines
+			if (*buf == ' ' || *buf == '\n')
+				fgets (buf, 255, fp);
+				
+//Look for the MOB				
+			if (sscanf (buf, "%d %s", &nVirtual, hookup) != 2)
+				{
+					fclose (fp);
+					system_log ("The ticket system is broken, read_ticket() - mob", true);
+					sprintf(buf2 + strlen(buf2), "Bad file format-mob\n");
+					send_to_char(buf2, ch);
+      return;
+				}		
+				
+			mob = load_a_saved_mobile (nVirtual, fp, true);
+			
+			if (mob)
+				{
+			sprintf(buf2 + strlen(buf2), "Vnum: %d \nNamed: %s \nClans: %s \nOwner: %s \nStabled at: %s (%d) \n", mob->mob->nVirtual, mob->name, mob->clans, mob->mob->owner, vtor(mob->in_room)->name, mob->in_room);			
+			
+			save_mobile (mob, fp, "HITCH", 1);	/* Extracts the mobile */
+				}	
+			
+			fclose (fp);
+			send_to_char(buf2, ch);
+      return;
+		}
+
+  fclose (fp);
+
+  send_to_char(buf2, ch);
+      return;
+}
+
+
+void
+delete_ticket (CHAR_DATA * ch, int tick_num)
+{
+	
+  FILE *fp;
+  char buf[AVG_STRING_LENGTH];
+  char buf2[AVG_STRING_LENGTH] = {'\0'};
+	char name[AVG_STRING_LENGTH];
+	
+  
+	sprintf (name, TICKET_DIR "/%07d", tick_num);
+	
+  if (!(fp = fopen (name, "r")))
+    {
+      return;
+    }
+
+	sprintf(buf2, "\nTicket number %d deleted\n", tick_num);
+	
+	sprintf(buf, "rm %s", name);
+	system (buf);
+  
+  fclose (fp);
+
+  send_to_char(buf2, ch);
+      return;
 }
