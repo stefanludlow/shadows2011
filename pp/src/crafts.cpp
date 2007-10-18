@@ -3444,6 +3444,7 @@ for (i = 0; i < MAX_ITEMS_PER_SUBCRAFT; i++)
 
   if (phase->skill)
     {
+                skill_use(ch, phase->skill, 0);
   		dice_val = dice (phase->dice, phase->sides);
   		ch_level = skill_level (ch, phase->skill,0); //includes object effects
  
