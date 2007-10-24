@@ -3312,17 +3312,12 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (ch->skills[i] < 10)
+  if (ch->skills[i] < 15)
     {
       send_to_char ("You don't yet know that skill well enough.\n\r", ch);
       return;
     }
 
- // if (real_skill (victim, i))
- //   {
- //     send_to_char ("They already know that.\n\r", ch);
- //     return;
- //   }
 
   if (!trigger (ch, argument, TRIG_TEACH))
     return;
@@ -3503,13 +3498,8 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
       break;
     }
 
-	//open_skill (victim, i);	
 	teach_skill (victim, i, ch);
 	
-  //sprintf (buf, "$N teaches you '%s'.", skills[i]);
-  //act (buf, true, victim, 0, ch, TO_CHAR);
- 
-
   if (IS_MORTAL (victim) || !IS_NPC(victim))
     update_crafts (victim);
 
