@@ -825,6 +825,11 @@ find_ex_description (char *word, EXTRA_DESCR_DATA * list)
   return NULL;
 }
 
+/*
+Old compare command is deprecated. It is no longer used on SOI
+but will be left commented here in case it is wanted at a
+later date - Valarauka
+
 void
 do_compare (CHAR_DATA * ch, char *argument, int cmd)
 {
@@ -1099,6 +1104,251 @@ do_compare (CHAR_DATA * ch, char *argument, int cmd)
 
   act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 
+}*/
+
+/* New version of the compare command to compare objects 
+
+This function takes two object references as arguments
+and compares attributes such as weight and cost to give
+an in character comparison string. - Valarauka
+
+*/
+void
+do_compare(CHAR_DATA * ch, char *argument, int cmd)
+{
+	char		arg1 [MAX_STRING_LENGTH] = { '\0' };
+	char		arg2 [MAX_STRING_LENGTH] = { '\0' };
+	OBJ_DATA	*obj1 = NULL;
+	OBJ_DATA	*obj2 = NULL;
+	char		buffer [MAX_STRING_LENGTH] = { '\0' };
+	char		*temp_arg = NULL;
+
+/*** CHECK FOR POSTIONS AND CONDITONS FIRST ***/
+
+	if ( GET_POS (ch) < POSITION_SLEEPING ) {
+		send_to_char ("You are unconscious!\n", ch);
+		return;
+	}
+
+	if ( GET_POS (ch) == POSITION_SLEEPING ) {
+		send_to_char ("You are asleep.\n", ch);
+		return;
+	}
+
+	if ( is_blind (ch) ) {
+		send_to_char ("You are blind!\n", ch);
+		return;
+	}
+	
+/*** Make sure enough arguments are spcified***/
+
+	argument = one_argument (argument, arg1);
+
+	if ( !*arg1 ) {
+		send_to_char ("Compare what?\n", ch);
+		return;
+	}
+
+	argument = one_argument (argument, arg2);
+
+	if ( !*arg2 ) {
+		send_to_char ("Compare it with what?\n", ch);
+		return;
+	}
+
+
+/*** Find the objects being compared ***/
+
+	if ( !(obj1 = get_obj_in_dark (ch, arg1, ch->right_hand)) &&
+		 !(obj1 = get_obj_in_dark (ch, arg1, ch->left_hand)) &&
+		 !(obj1 = get_obj_in_dark (ch, arg1, ch->equip)) &&
+		 !(obj1 = get_obj_in_dark (ch, arg1, ch->room->contents))) {
+		
+		send_to_char ("You don't see that.\n", ch);
+		return;
+	}
+
+	if ( !(obj2 = get_obj_in_dark (ch, arg2, ch->right_hand)) &&
+		 !(obj2 = get_obj_in_dark (ch, arg2, ch->left_hand)) &&
+		 !(obj2 = get_obj_in_dark (ch, arg2, ch->equip)) &&
+		 !(obj2 = get_obj_in_dark (ch, arg2, ch->room->contents))) {
+		
+		send_to_char ("You don't see that.\n", ch);
+		return;
+	}
+
+/*** Compared objects must be of the same type ***/
+
+	if(GET_ITEM_TYPE(obj1)!=GET_ITEM_TYPE(obj2))
+	{
+		send_to_char("You can only compare similar objects.",ch);
+		return;
+	}
+
+/*** Cannot compare something to itself ***/
+	if(obj1==obj2)
+	{
+		send_to_char("Compare it with itself?",ch);
+		return;
+	}
+
+/*** Start Comparison Proper ***/
+
+	sprintf (buffer, "\nYou compare #2%s#0 with #2%s#0.",
+			obj1->short_description,
+			obj2->short_description);
+
+	act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	*buffer = '\0';
+	send_to_char("\n",ch);
+
+/*** Compare weights ***/
+	if((obj1->obj_flags.weight + obj1->contained_wt) >
+		(obj2->obj_flags.weight + obj2->contained_wt))
+	{
+		sprintf (buffer, "\nAfter a quick appraisal, you guess that #2%s#0 is heavier than #2%s#0\n. ",
+			obj1->short_description,
+			obj2->short_description);
+	}
+	else if((obj2->obj_flags.weight + obj2->contained_wt) >
+		(obj1->obj_flags.weight + obj1->contained_wt))
+	{
+		sprintf (buffer, "\nAfter a quick appraisal, you guess that #2%s#0 is lighter than #2%s#0\n. ",
+			obj1->short_description,
+			obj2->short_description);
+	}
+	else
+	{
+		sprintf (buffer, "\nAfter a quick appraisal, you guess that #2%s#0 weighs about the same as #2%s#0\n. ",
+			obj1->short_description,
+			obj2->short_description);
+	}
+
+	act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	*buffer = '\0';
+	send_to_char ("\n", ch);
+
+/*** Compare values ***/
+	
+	if((obj1->farthings + obj1->silver *4) >
+		(obj2->farthings + obj2->silver *4))
+	{
+		sprintf (buffer, "\nYou estimate that #2%s#0 looks to be worth more than #2%s#0\n. ",
+			obj1->short_description,
+			obj2->short_description);
+	}
+	else if((obj2->farthings + obj2->silver *4) >
+		(obj1->farthings + obj1->silver *4))
+	{
+		sprintf (buffer, "\nYou estimate that #2%s#0 looks to be worth less than #2%s#0\n. ",
+			obj1->short_description,
+			obj2->short_description);
+	}
+	else
+	{
+		sprintf (buffer, "\nYou estimate that #2%s#0 looks to be worth about the same as #2%s#0\n. ",
+			obj1->short_description,
+			obj2->short_description);
+	}
+
+	act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	*buffer = '\0';
+	send_to_char ("\n", ch);
+
+	/*** If food item compare decay timers***/
+	if(GET_ITEM_TYPE (obj1) == ITEM_FOOD)
+	{
+		if ((obj1->morphTime)&&(obj2->morphTime))
+		{
+			int time1, time2;
+			
+			time1 = obj1->morphTime - time (0);
+			time2 = obj2->morphTime - time (0);
+
+			if(time1>time2)
+			{
+				sprintf (buffer, "\nAs you look over #2%s#0 you notice that it appears fresher than #2%s#0\n. ",
+				obj1->short_description,
+				obj2->short_description);
+			}
+			else if(time2>time1)
+			{
+				sprintf (buffer, "\nAs you look over #2%s#0 you notice that it appears less fresh than #2%s#0\n. ",
+				obj1->short_description,
+				obj2->short_description);
+			}
+			else
+			{
+				sprintf (buffer, "\nAs you look over #2%s#0 you notice that it appears about as fresh as #2%s#0\n. ",
+				obj1->short_description,
+				obj2->short_description);
+			}
+
+			act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			*buffer = '\0';
+			send_to_char ("\n", ch);
+		 }
+	}
+
+/***** Compare time left in light objects ***/
+	if ( GET_ITEM_TYPE (obj1) == ITEM_LIGHT ) 
+	{
+		if ( obj1->o.light.hours > obj2->o.light.hours )
+		{
+			sprintf (buffer, "\nFrom the look of it #2%s#0 will provide light for longer than #2%s#0\n. ",
+				obj1->short_description,
+				obj2->short_description);
+		}
+		else if(obj2->o.light.hours > obj1->o.light.hours)
+		{
+			sprintf (buffer, "\nFrom the look of it #2%s#0 will provide light for less time than #2%s#0\n. ",
+				obj1->short_description,
+				obj2->short_description);
+		}
+		else
+		{
+			sprintf (buffer, "\nFrom the look of it #2%s#0 will provide light for about as long as #2%s#0\n. ",
+				obj1->short_description,
+				obj2->short_description);
+		}
+
+		act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		*buffer = '\0';
+		send_to_char ("\n", ch);
+
+	}
+
+/**** Compare capacity of containers ****/
+
+	if ((GET_ITEM_TYPE (obj1) == ITEM_CONTAINER)||
+		( GET_ITEM_TYPE (obj1) == ITEM_DRINKCON ))
+	{
+		if(obj1->o.container.capacity > obj2->o.container.capacity)
+		{
+			sprintf (buffer, "\nFrom the look of it #2%s#0 will hold more than #2%s#0\n. ",
+				obj1->short_description,
+				obj2->short_description);
+		}
+		else if(obj2->o.container.capacity > obj1->o.container.capacity)
+		{
+			sprintf (buffer, "\nFrom the look of it #2%s#0 will hold less than #2%s#0\n. ",
+				obj1->short_description,
+				obj2->short_description);
+		}
+		else
+		{
+			sprintf (buffer, "\nFrom the look of it #2%s#0 will hold about the same as #2%s#0\n. ",
+				obj1->short_description,
+				obj2->short_description);
+		}
+
+		act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		*buffer = '\0';
+		send_to_char ("\n", ch);
+	}
+
+
+	return;
 }
 
 char *
@@ -3154,6 +3404,20 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
       else
 	{
 	  act ("You see nothing special about $m.", false, i, 0, ch, TO_VICT);
+	}
+
+	/* Show name (first keyword) if mobile is owned by the character examining the mobile*/
+	if (mode == 15)
+	{
+		if(i->mob->owner)
+		{
+			if(!strcmp(i->mob->owner, ch->tname))
+			{
+				sprintf (buffer, "\nYou recognise $n to be called "
+				   "%s.", GET_NAME (i));
+				act (buffer, false, i, 0, ch, TO_VICT);
+			}
+		}
 	}
 
 	/* show dmote */
@@ -11329,4 +11593,399 @@ delete_ticket (CHAR_DATA * ch, int tick_num)
 
   send_to_char(buf2, ch);
       return;
+}
+
+/***
+do_evaluate
+
+This command provides detailed information about a held object
+including weight, cost and any skill affects, as well as other
+object specific information such as time left for light objects
+and liquid left in drinks containers. 
+
+- Valarauka
+
+***/
+void 
+do_evaluate (CHAR_DATA *ch, char *argument, int cmd)
+{
+
+
+	char		arg1 [MAX_STRING_LENGTH] = { '\0' };
+	OBJ_DATA	*obj = NULL;
+	char		buffer [MAX_STRING_LENGTH] = { '\0' };
+
+/*** CHECK FOR POSTIONS AND CONDITONS FIRST ***/
+
+	if ( GET_POS (ch) < POSITION_SLEEPING ) {
+		send_to_char ("You are unconscious!\n", ch);
+		return;
+	}
+
+	if ( GET_POS (ch) == POSITION_SLEEPING ) {
+		send_to_char ("You are asleep.\n", ch);
+		return;
+	}
+
+	if ( is_blind (ch) ) {
+		send_to_char ("You are blind!\n", ch);
+		return;
+	}
+	
+	argument = one_argument (argument, arg1);
+
+	if ( !*arg1 ) {
+		send_to_char ("Evaluate what?\n", ch);
+		return;
+	}
+
+	if ( !(obj = get_obj_in_dark (ch, arg1, ch->right_hand)) &&
+		 !(obj = get_obj_in_dark (ch, arg1, ch->left_hand)) &&
+		 !(obj = get_obj_in_dark (ch, arg1, ch->equip)) &&
+		 !(obj = get_obj_in_dark (ch, arg1, ch->room->contents))) {
+		
+		send_to_char ("You don't have that.\n", ch);
+		return;
+	}
+
+/*** Describe the object ***/	
+	if (obj) {
+		snprintf (buffer, MAX_STRING_LENGTH,  "\nIt is #2%s#0", obj->short_description); 
+		act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		*buffer = '\0';
+	}
+	else{
+		send_to_char ("You cannot evaluate something unless you have it.\n", ch);
+		return;
+	}
+
+	send_to_char ("\n", ch);
+
+	show_evaluate_information(ch, obj);
+
+	return;
+}
+
+void 
+show_evaluate_information (CHAR_DATA *ch, OBJ_DATA	*obj)
+{
+	int 		variance = 0;
+	int 		guess_weight = 0;
+	int 		guess_value = 0;
+	int			temp = 0;
+	int			i = 0;
+	char		buffer [MAX_STRING_LENGTH] = { '\0' };
+	char		*temp_arg = NULL;
+	AFFECTED_TYPE *af;
+
+/*** WEAR LOCATIONS FOR WEARABLE ITEMS ***/
+
+	if (obj->obj_flags.wear_flags)
+    {
+		temp = 0;
+		for (i = 0; (*wear_bits[i] != '\n'); i++)
+		{
+			if ((IS_SET (obj->obj_flags.wear_flags, (1 << i)))
+				&& (strcmp (wear_bits[i],"Take"))
+				&& (strcmp (wear_bits[i],"Unused"))) //dont want to show Take and Unused
+			{
+				//if found something to write and not already written inital string, write it
+				if(temp == 0)
+				{
+					sprintf (buffer, "\nYou recognise that you could wear this item in the following locations:\n");
+					temp = 1;
+				}
+				
+				sprintf (buffer + strlen (buffer), "  #6%s#0\n", wear_bits[i]);
+			}
+		}
+		
+		send_to_char (buffer, ch);
+		send_to_char ("\n", ch);
+    }
+
+/*** END WEAR LOCATIONS ***/
+
+/**** Guess at the Weight based on scan skill **/
+
+		
+	if (IS_SET (obj->obj_flags.wear_flags, ITEM_TAKE)){
+
+		/*
+		Rather than give the exact weight to the player, a random factor
+		is introduced to replicate a rough estimate. The scan
+		skill is used to determine how far from the actual weight the value given
+		may deviate so that those with a high scan skill will be fairly accurate,
+		where as those with a low scan skill might be quite far from the actual weight.
+		The heavier an item, the harder it will be to get a very accurate estimate.
+
+		In addition, a skill check must then be passed to allow the player to see the 
+		estimated weight.
+		*/
+
+		/*** Determine how far estimate may vary ***/
+		if(ch->skills[SKILL_SCAN]>70)
+		{
+			variance = number (95, 105);
+		}
+		else if(ch->skills[SKILL_SCAN]>60)
+		{
+			variance = number (92, 108);
+		}
+		else if(ch->skills[SKILL_SCAN]>50)
+		{
+			variance = number (90, 110);
+		}
+		else if(ch->skills[SKILL_SCAN]>40)
+		{
+			variance = number (87, 113);
+		}
+		else
+		{
+			variance = number (85, 115);
+		}
+	
+		/*** Calculate estimate ***/
+		guess_weight = ((obj->obj_flags.weight + obj->contained_wt)/variance);
+
+		if (skill_use(ch, SKILL_SCAN, 0)){
+			if (guess_weight <= 1){
+				snprintf (buffer, MAX_STRING_LENGTH,  "\nYou would guess that this item weighs less than a pound.");
+			}
+			else{  /** weighs more than a pound **/
+				snprintf (buffer, MAX_STRING_LENGTH,  "\nYou would guess that this item weighs about %d pounds.",guess_weight);
+			}
+		}
+		else{ /** failed skill check **/
+			snprintf (buffer, MAX_STRING_LENGTH,  "\nYou can't even begin to guess how much this weighs.");
+		}
+	}
+	else{ /** no way to check weight - message for non-takeable objects **/
+		snprintf (buffer, MAX_STRING_LENGTH,  "\nYou can't even begin to guess how much this weighs.");  
+	}
+
+	act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	*buffer = '\0';
+	send_to_char ("\n", ch);
+
+/*** end weight guess ***/
+
+/*** Guess at value based on barter skill ***/
+
+	/*
+		Rather than give the exact cost to the player, a random factor
+		is introduced to replicate a rough estimate of the cost. The barter
+		skill is used to determine how far from the actual cost the value given
+		may deviate so that those with a high barter skill will be fairly accurate,
+		where as those with a low barter skill might be quite far from the actual cost.
+		The more expensive an item, the harder it will be to get a very accurate estimate.
+
+		In addition, a skill check must then be passed to allow the player to see the cost.
+	*/
+
+	/*** Determine how far estimation may vary ***/
+	if(ch->skills[SKILL_BARTER]>70)
+	{
+		variance = number (95, 105);
+	}
+	else if(ch->skills[SKILL_BARTER]>60)
+	{
+		variance = number (92, 108);
+	}
+	else if(ch->skills[SKILL_BARTER]>50)
+	{
+		variance = number (90, 110);
+	}
+	else if(ch->skills[SKILL_BARTER]>40)
+	{
+		variance = number (87, 113);
+	}
+	else
+	{
+		variance = number (85, 115);
+	}
+
+	/*** Calculate estimate ***/
+	guess_value = (((obj->farthings + obj->silver *4)*100)/variance);
+
+	if (skill_use(ch, SKILL_BARTER, 0)){/*** Passed Skill Check ***/
+		if (guess_value <= 1){
+			snprintf (buffer, MAX_STRING_LENGTH,  "\nYou would guess that this item is worth less than 1 copper.");
+		}
+		else{
+			snprintf (buffer, MAX_STRING_LENGTH,  "\nYou would guess that this item is worth around %d coppers.", guess_value);
+		}
+	}
+	else{/*** Failed Skill Check ***/
+		snprintf (buffer, MAX_STRING_LENGTH,  "\nYou can't even begin to guess the value of this item.");
+	}
+
+	act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	*buffer = '\0';
+	send_to_char ("\n", ch);
+
+/*** end value guess ***/
+
+
+/***** Pslim lantern code ***/
+	if ( GET_ITEM_TYPE (obj) == ITEM_LIGHT ) {
+		if ( obj->o.light.hours <= 0 ){
+			snprintf (buffer, MAX_STRING_LENGTH,  "\nThe $o is empty.");
+		}
+		else {
+			temp = obj->o.light.hours;
+			snprintf (buffer, MAX_STRING_LENGTH,  "\nYou think the $o will last another %d hours.", temp);
+		}
+		act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		*buffer = '\0';
+		send_to_char ("\n", ch);
+	}
+/***** end Pslim lantern code *****/
+
+/**** SHOW CAPACITY OF CONTAINER ****/
+
+	if ((GET_ITEM_TYPE (obj) == ITEM_CONTAINER)||
+		( GET_ITEM_TYPE (obj) == ITEM_DRINKCON )){
+
+		sprintf (buffer, "\nYou estimate that it would hold around %d.%.2d lbs",
+			obj->o.container.capacity / 100,
+			obj->o.container.capacity % 100);
+		act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		*buffer = '\0';
+		send_to_char ("\n", ch);
+	}
+
+/*** END CAPACITY CODE ***/
+
+
+/**** LOOK INSIDE A DRINK CONTATINER ***/
+
+	if ( GET_ITEM_TYPE (obj) == ITEM_DRINKCON ) {
+		if ( obj->o.drinkcon.volume <= 0 ){
+			snprintf (buffer, MAX_STRING_LENGTH,  "\nYou can see that %s is empty.",
+				obj->short_description);
+		}
+		else {
+			if ( obj->o.drinkcon.capacity ) {
+				temp = (obj->o.drinkcon.volume * 3) / obj->o.drinkcon.capacity;
+			}	
+			else{
+				temp = 1;
+			}
+			temp_arg = vnum_to_liquid_name (obj->o.drinkcon.liquid);
+			snprintf (buffer, MAX_STRING_LENGTH,  "\nYou can see that %s is %sfull of %s.",
+				obj->short_description, fullness [temp], temp_arg);
+			
+		}
+		act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		*buffer = '\0';
+		send_to_char ("\n", ch);
+
+	}
+/*** END DRINK CONTAINER ***/
+
+	
+/**** LOOK INSIDE A NON-DRINK CONTAINER ***/
+
+	if ( GET_ITEM_TYPE (obj) == ITEM_CONTAINER ||
+	    GET_ITEM_TYPE (obj) == ITEM_QUIVER ||
+	  	GET_ITEM_TYPE (obj) == ITEM_SHEATH ||
+		  
+		(GET_ITEM_TYPE (obj) == ITEM_WEAPON &&
+	 	obj->o.weapon.use_skill == SKILL_SLING) ||
+		  
+		GET_ITEM_TYPE (obj) == ITEM_KEYRING ) {
+
+		if ( IS_SET (obj->o.container.flags, CONT_CLOSED) ) {
+			send_to_char ("\nIt is closed.", ch);
+			return;
+		}
+
+		send_to_char ("\nContents :\n", ch);
+
+		list_obj_to_char (obj->contains, ch, 1, true);
+	}
+	/* If not a container, no need to show any message here */
+
+/*** END NON_DRINK CONTAINER ***/
+
+/*** SHOW TIME TO DECAY FOR FOOD ***/
+
+	if(GET_ITEM_TYPE (obj) == ITEM_FOOD)
+	{
+		 if (obj->morphTime)
+		{
+		  int delta, days, hours, minutes;
+
+		  delta = obj->morphTime - time (0);
+
+		  days = delta / 86400;
+		  delta -= days * 86400;
+
+		  hours = delta / 3600;
+		  delta -= hours * 3600;
+
+		  minutes = delta / 60;
+
+		  //write appropriate message for length of time left till decay
+		  if(days > 1)
+		  {
+				sprintf (buffer,
+					"\nYou notice that %s appears fresh with no sign of decay.", obj->short_description);
+		  }
+		  else if(hours > 12)
+		  {
+				sprintf (buffer,
+					"\nYou notice that %s still appears fresh, though it is slowly beginning to lose its original unsullied appearance.", 
+						obj->short_description);
+		  }
+		  else if(hours > 1)
+		  {
+				sprintf (buffer,
+					"\nWhile still in good condition, %s no longer appears fresh.", obj->short_description);
+		  }
+		  else
+		  {
+				 sprintf (buffer,
+					 "\nYou notice that %s has already begun to decay in places and it will not be too long before it is completely rotten.",
+					 obj->short_description);
+		  }
+		 
+		  act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		  *buffer = '\0';
+		  send_to_char ("\n", ch);
+		}
+	}
+
+/*** END FOOD DECAY TIME ***/
+
+/*** DETAIL ANY SKILLS AFFECTED BY THE OBJECT ***/
+
+	for (af = obj->xaffected; af; af = af->next)
+	{
+		if (af->type == MAGIC_HIDDEN)
+			continue;
+		if (af->a.spell.location >= 10000)
+		{
+			if(af->a.spell.modifier < 0)
+			{
+				sprintf (buffer, "\nYou judge that this item would hinder your %s skill.",
+				 skills[af->a.spell.location - 10000]);
+			}
+			else
+			{
+				sprintf (buffer, "\nYou judge that this item would improve your %s skill.",
+				 skills[af->a.spell.location - 10000]);
+			}
+
+			act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			*buffer = '\0';
+		}
+	}
+
+	send_to_char ("\n", ch);
+
+/*** END SKILL AFFECTS ***/
+	
+	return;
 }
