@@ -2927,6 +2927,186 @@ do_initiate (CHAR_DATA * ch, char *argument, int cmd)
   act (buf, false, target, 0, ch, TO_CHAR);
 }
 
+/**************************************
+* mode:
+* 0 - initial learning of skill
+* 1 - know skill, learn additional points to the skill
+* 
+******************************************/
+void teach_skill (CHAR_DATA * student, int skill, CHAR_DATA * teacher)
+{
+		int mode; 	
+		int modifier = 0;
+		float multi = 0.0;
+		float percentage;
+		int multiplier = 1;
+		int learn_chance = 0;
+		int skill_diff = 100;
+		int index;
+		int min;
+		int max;
+		int char_skills = 0;
+	  char buf[MAX_STRING_LENGTH];
+		int roll;
+
+		
+		if (real_skill(student, skill) < 0)
+			{
+				student->pc->skills[skill] = 0;
+				student->skills[skill] = student->pc->skills[skill];
+			}
+
+		if (real_skill (student, skill)) // adding to existing skill
+			{
+				mode = 1;
+				skill_diff = 	real_skill (teacher, skill) - real_skill (student, skill);
+				if (skill_diff < 15)
+					{
+						send_to_char("You are not advanced enough beyond your student to educate them further.\n", teacher);
+						return;
+					}	
+			}	
+		else //learning new skill
+			{
+				mode = 0;
+			}
+			
+			//timer for skill check
+		if (get_affect (student, MAGIC_SKILL_GAIN_STOP + skill)
+     || get_affect (student, MAGIC_FLAG_NOGAIN + skill))
+     	{
+     		send_to_char
+					("Your student seems distracted and unable to pay attention to your teaching.\n",
+		 			teacher);
+		 			sprintf (buf, "$N tries to teach you something about '%s', but you are still confused.", skills[skill]);
+	  			act (buf, false, student, 0, teacher, TO_CHAR | _ACT_FORMAT);
+	  
+	  			return;
+     	}
+     	
+     	//teachers may learn a little bit from the teaching too.
+     	skill_use (teacher, skill, 0);
+
+// Chance to learn it
+	//modified by the number of skills already known
+	//and by the difficulty of the skill
+	for (index = 1; index <= LAST_SKILL; index++)
+    {
+      if (real_skill (student, index))
+	      char_skills++;
+    }
+
+  if (LAST_SKILL < char_skills)
+    char_skills = LAST_SKILL;
+
+  percentage = ((double)char_skills / (double)LAST_SKILL);
+
+  if (percentage >= 0.0 && percentage <= .10) // 12 skills
+    multiplier = 4;
+  else if (percentage > .10 && percentage <= .15) // 17 skills
+    multiplier = 3;
+  else if (percentage > .15 && percentage <= .20) // 23 skills
+    multiplier = 2;
+  else
+    multiplier = 1;
+
+	learn_chance = MIN ((int)(calc_lookup (student, REG_LV, skill) * multiplier), 65);
+			
+	learn_chance += (GET_INT (teacher) + GET_INT (student))/2;
+	learn_chance += (GET_WIL (teacher) + GET_WIL (student))/2;
+	
+		roll = number (1, 80);
+		if (roll > learn_chance)
+		{
+			send_to_char
+		("The intricacies of this skill seem to be beyond your pupil at this time.\n",
+		 teacher);
+		 	sprintf (buf, "$N tries to teach you something about '%s', but you just don't understand.", skills[skill]);
+	  	act (buf, false, student, 0, teacher, TO_CHAR | _ACT_FORMAT);
+
+			//40 to 180 minutes until they can learn this skill again
+			if (!get_affect (student, MAGIC_SKILL_GAIN_STOP + skill)
+    && !get_affect (student, MAGIC_FLAG_NOGAIN + skill))
+				{
+					min = 40;
+			
+					max = 40 + number (1, 60);
+					max = MIN (180, max);
+			
+					magic_add_affect (student, MAGIC_SKILL_GAIN_STOP + skill,
+								number (min, max), 0, 0, 0, 0);
+			
+				}
+				
+			return;
+	}
+
+// How much they learn
+	//INT/WIL bonus/penalty for teacher
+		modifier = GET_INT (teacher) - 14;
+		modifier = GET_WIL (teacher) - 14;
+		
+	//INT/WIL bonus/penalty for student
+		modifier += GET_INT (student) - 14;
+		modifier += GET_WIL (student) - 14;
+		
+		modifier *= 1;	//modifer adjustment for worth of INT/WIL
+	
+	//skill level bonus/penalty for teacher
+		modifier += (real_skill (teacher, skill) - 50);
+		
+		if(modifier > 80)
+			modifier = 80;
+			
+		if(modifier < 0)
+			modifier = 0;
+
+	//convert to a multiplier (approx range of .25 to 5)
+		multi = (double)(100/(100 - modifier));
+		
+
+		if (mode == 1) //add to existing skill
+			{
+				student->pc->skills[skill] += (int) (multi * calc_lookup (student, REG_LV, skill));
+				student->skills[skill] = student->pc->skills[skill];
+			}
+			
+		else //new skill
+			{
+				student->pc->skills[skill] = (int) (multi * calc_lookup (student, REG_OV, skill));
+				student->skills[skill] = student->pc->skills[skill];
+			}
+
+//reduce to CAP value if needed
+		if (student->pc->skills[skill] > calc_lookup (student, REG_CAP, skill))
+			{
+				student->pc->skills[skill] = calc_lookup (student, REG_CAP, skill);
+				student->skills[skill] = student->pc->skills[skill];
+			}
+			
+		//240 to 360 minutes (4 - 6 RL hours)(up to 1 day IG) (until they can learn this skill again
+			if (!get_affect (student, MAGIC_SKILL_GAIN_STOP + skill)
+    && !get_affect (student, MAGIC_FLAG_NOGAIN + skill))
+				{
+					min = 240;
+			
+					max = 240 + number (1, 60);
+					max = MIN (360, max);
+			
+					magic_add_affect (student, MAGIC_SKILL_GAIN_STOP + skill,
+								number (min, max), 0, 0, 0, 0);
+			
+					send_to_char
+						("Your student seems to have learned something.\n",
+		 				teacher);
+		 			sprintf (buf, "$N teach you something new about '%s'.", skills[skill]);
+	  			act (buf, false, student, 0, teacher, TO_CHAR | _ACT_FORMAT);
+				}	
+
+	return;
+
+}
+
 void
 open_skill (CHAR_DATA * ch, int skill)
 {
@@ -3024,6 +3204,7 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
   AFFECTED_TYPE *af;
   int sn = -1;
 
+	
   if (IS_SET (ch->room->room_flags, OOC))
     {
       send_to_char ("This is not allowed in OOC areas.\n", ch);
@@ -3050,6 +3231,12 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+	if (IS_NPC (victim))
+		{
+			send_to_char ("They are too busy being important to learn anything.\n\r", ch);
+      return;
+		}
+		
   if ((i = index_lookup (skills, arg1)) == -1)
     {
       for (craft = crafts; craft; craft = craft->next)
@@ -3125,17 +3312,17 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (ch->skills[i] < 50)
+  if (ch->skills[i] < 10)
     {
       send_to_char ("You don't yet know that skill well enough.\n\r", ch);
       return;
     }
 
-  if (real_skill (victim, i))
-    {
-      send_to_char ("They already know that.\n\r", ch);
-      return;
-    }
+ // if (real_skill (victim, i))
+ //   {
+ //     send_to_char ("They already know that.\n\r", ch);
+ //     return;
+ //   }
 
   if (!trigger (ch, argument, TRIG_TEACH))
     return;
@@ -3316,12 +3503,14 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
       break;
     }
 
-	open_skill (victim, i);	
-  sprintf (buf, "$N teaches you '%s'.", skills[i]);
-  act (buf, true, victim, 0, ch, TO_CHAR);
+	//open_skill (victim, i);	
+	teach_skill (victim, i, ch);
+	
+  //sprintf (buf, "$N teaches you '%s'.", skills[i]);
+  //act (buf, true, victim, 0, ch, TO_CHAR);
  
 
-  if (IS_MORTAL (victim))
+  if (IS_MORTAL (victim) || !IS_NPC(victim))
     update_crafts (victim);
 
   send_to_char ("Done.\n\r", ch);
@@ -4493,7 +4682,6 @@ under_cover (CHAR_DATA *ch)
 
 	return (0);
 }
-
 // Command Ownership, for transfering ownership of mobs 
 // Syntax: OWNERSHIP TRANSFER <mob> <character> or OWNERSHIP SET <mob> <character>
 
