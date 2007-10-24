@@ -564,6 +564,7 @@ bool evaluate_emote_string (CHAR_DATA *ch, std::string * first_person, std::stri
 */
 
 void list_char_to_char (CHAR_DATA * list, CHAR_DATA * ch, int mode);
+void do_evaluate (CHAR_DATA *ch, char *argument, int cmd);
 
 
 /*
@@ -677,6 +678,7 @@ void light (CHAR_DATA * ch, OBJ_DATA * obj, int on, int on_off_msg);	/* objects.
 void do_light (CHAR_DATA * ch, char *argument, int cmd);	/* objects.c */
 void do_smell (CHAR_DATA * ch, char *argument, int cmd);	/* objects.c */
 void do_receipts (CHAR_DATA * ch, char *argument, int cmd);	/* objects.c */
+void show_evaluate_information (CHAR_DATA *ch, OBJ_DATA * obj);	/* objects.c */
 /* end objects.c */
 
 

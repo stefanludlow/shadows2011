@@ -2149,6 +2149,9 @@ do_preview (CHAR_DATA * ch, char *argument, int cmd)
   send_to_char ("\n", ch);
 
   show_obj_to_char (obj, ch, 15);
+
+  //append the output of the evaluate command
+  show_evaluate_information(ch, obj);
 }
 
 int
