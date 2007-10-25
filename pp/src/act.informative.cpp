@@ -1121,7 +1121,6 @@ do_compare(CHAR_DATA * ch, char *argument, int cmd)
 	OBJ_DATA	*obj1 = NULL;
 	OBJ_DATA	*obj2 = NULL;
 	char		buffer [MAX_STRING_LENGTH] = { '\0' };
-	char		*temp_arg = NULL;
 
 /*** CHECK FOR POSTIONS AND CONDITONS FIRST ***/
 
@@ -3407,18 +3406,18 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	}
 
 	/* Show name (first keyword) if mobile is owned by the character examining the mobile*/
-	if (mode == 15)
-	{
-		if(i->mob->owner)
-		{
-			if(!strcmp(i->mob->owner, ch->tname))
-			{
-				sprintf (buffer, "\nYou recognise $n to be called "
-				   "%s.", GET_NAME (i));
-				act (buffer, false, i, 0, ch, TO_VICT);
-			}
-		}
-	}
+//	if (mode == 15)
+//	{
+//		if(i->mob->owner)
+//		{
+//			if(!strcmp(i->mob->owner, ch->tname))
+//			{
+//				sprintf (buffer, "\nYou recognise $n to be called "
+//				   "%s.", GET_NAME (i));
+//				act (buffer, false, i, 0, ch, TO_VICT);
+//			}
+//		}
+//	}
 
 	/* show dmote */
 	/* Description is formated to 65 char, so we need to use reformat_desc instead of _ACT_FORMAT*/
@@ -11746,7 +11745,7 @@ show_evaluate_information (CHAR_DATA *ch, OBJ_DATA	*obj)
 		}
 	
 		/*** Calculate estimate ***/
-		guess_weight = ((obj->obj_flags.weight + obj->contained_wt)/variance);
+		guess_weight = (int)((obj->obj_flags.weight + obj->contained_wt)/variance);
 
 		if (skill_use(ch, SKILL_SCAN, 0)){
 			if (guess_weight <= 1){
@@ -11806,7 +11805,7 @@ show_evaluate_information (CHAR_DATA *ch, OBJ_DATA	*obj)
 	}
 
 	/*** Calculate estimate ***/
-	guess_value = (((obj->farthings + obj->silver *4)*100)/variance);
+	guess_value = (int)(((obj->farthings + obj->silver *4)*100)/variance);
 
 	if (skill_use(ch, SKILL_BARTER, 0)){/*** Passed Skill Check ***/
 		if (guess_value <= 1){
