@@ -439,6 +439,7 @@ const struct command_data commands[] = {
 	{"roster", do_roster, DEAD, C_LV5},
 	{"watch", do_watch, DEAD, C_LV5},
   {"wizlock", do_wizlock, DEAD, C_LV5},
+	{"wmotd", do_wmotd, DEAD, C_LV5}, /* write the MOTD */
   {"wlog", do_wlog, DEAD, C_LV5},
 
 	/* IMP level */

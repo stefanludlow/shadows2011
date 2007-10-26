@@ -534,6 +534,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd);
 void do_wizlist (CHAR_DATA * ch, char *argument, int cmd);
 void do_wizlock (CHAR_DATA * ch, char *argument, int cmd);
 void do_wlog (CHAR_DATA * ch, char *argument, int cmd);
+void do_wmotd(CHAR_DATA * ch, char *argument, int cmd);
 void do_would (CHAR_DATA * ch, char *argument, int cmd);
 void do_write (CHAR_DATA * ch, char *argument, int cmd);
 void do_write_book (CHAR_DATA * ch, char *argument, int cmd);
@@ -565,8 +566,8 @@ bool evaluate_emote_string (CHAR_DATA *ch, std::string * first_person, std::stri
 
 void list_char_to_char (CHAR_DATA * list, CHAR_DATA * ch, int mode);
 void do_evaluate (CHAR_DATA *ch, char *argument, int cmd);
-
-
+void post_motd (DESCRIPTOR_DATA * d);
+void read_motd(DESCRIPTOR_DATA * d); //nanny.cpp
 /*
 //  arena.c Funtions --
 */

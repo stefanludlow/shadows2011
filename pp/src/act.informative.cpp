@@ -7281,7 +7281,31 @@ void
 do_news (CHAR_DATA * ch, char *argument, int cmd)
 {
 
-  page_string (ch->desc, get_text_buffer (ch, text_list, "news"));
+	std::string msg_line;
+	std::string output;
+ 
+	std::ifstream fin( "MOTD" );
+	
+	if( !fin )
+		{
+			system_log ("The MOTD could not be found", true);
+			send_to_char("The MOTD could not be found", ch);
+			return;
+ 	}
+
+ while( getline(fin, msg_line) )
+		{
+		 output.append(msg_line);
+		}
+	
+ 	fin.close();
+ 
+ 	if (!output.empty())
+    {
+      send_to_char (output.c_str(), ch);
+      send_to_char ("\n", ch);
+    }
+    
 }
 
 void

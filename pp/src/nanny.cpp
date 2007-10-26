@@ -229,6 +229,8 @@ display_login_delay (DESCRIPTOR_DATA * d)
 void
 display_main_menu (DESCRIPTOR_DATA * d)
 {
+	read_motd(d);
+	
   SEND_TO_Q (get_text_buffer (NULL, text_list, "menu1"), d);
   display_unread_messages (d);
   //display_login_delay (d);
@@ -5728,4 +5730,36 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
       break;
 
     }
+}
+
+void read_motd(DESCRIPTOR_DATA * d)
+{
+	std::string msg_line;
+	std::string output;
+ 
+	std::ifstream fin( "MOTD" );
+	
+	if( !fin )
+		{
+			system_log ("The MOTD could not be found", true);
+			return;
+ 	}
+
+	output.assign("\n\n");
+	
+	while( getline(fin, msg_line) )
+		{
+		 output.append(msg_line);
+		}
+	
+ 	fin.close();
+ 
+ 	if (!output.empty())
+    {
+			output.append("\n");
+      SEND_TO_Q (output.c_str(), d);
+
+    }
+    
+ 	return;   
 }

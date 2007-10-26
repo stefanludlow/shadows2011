@@ -11132,3 +11132,90 @@ do_aggro (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 }
+
+void do_wmotd(CHAR_DATA * ch, char *argument, int cmd)
+{
+  
+  std::string msg_line;
+	std::string output;
+ 
+	std::ifstream fin( "MOTD" );
+	
+	if( !fin )
+		{
+			system_log ("The MOTD could not be found", true);
+			send_to_char("The MOTD could not be found", ch);
+			return;
+ 	}
+
+ while( getline(fin, msg_line) )
+		{
+		 output.append(msg_line);
+		}
+	
+ 	fin.close();
+ 
+ 	if (!output.empty())
+    {
+      send_to_char ("The old MOTD was: \n", ch);
+      send_to_char (output.c_str(), ch);
+      send_to_char ("\n", ch);
+    }
+
+  	act ("$n begins editing the MOTD.", false, ch, 0, 0, TO_ROOM);
+
+		CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+		ch->desc->str = &ch->desc->pending_message->message;
+		ch->desc->max_str = MAX_STRING_LENGTH;
+		ch->delay_info1 = ch->room->nVirtual;
+	
+		send_to_char
+				("Please enter the new MOTD; terminate with an '@'\n\n", ch);
+		send_to_char
+  	("1-------10--------20--------30--------40--------50--------60---65\n",
+   ch);
+	make_quiet (ch);
+
+	ch->desc->proc = post_motd;
+
+	return;
+}
+
+
+void
+post_motd (DESCRIPTOR_DATA * d)
+{
+  CHAR_DATA *ch;
+  char buf[MAX_STRING_LENGTH];
+  char endl = {'\n'};
+  
+  std::ofstream fout ("MOTD");
+  
+  ch = d->character;
+  ch->delay_info1 = 0;
+
+  if (!*d->pending_message->message)
+    {
+      send_to_char ("No MOTD posted.\n", ch);
+      return;
+    }
+
+	
+	if( !fout )
+		{
+			system_log ("MOTD could not be found", true);
+			send_to_char("MOTD could not be found", ch);
+			return;
+ 	}
+	
+	sprintf (buf, "%s", d->pending_message->message);
+	
+	fout << buf << endl;
+ //fout.write(buf);
+	
+ fout.close();
+ 
+	d->pending_message = NULL;
+ 	
+
+}
