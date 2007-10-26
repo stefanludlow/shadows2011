@@ -6234,8 +6234,6 @@ do_behead (CHAR_DATA * ch, char *argument, int cmd)
   sprintf (buf, "the head of %s", buf2);
   head->short_description = str_dup (buf);
 
-  head->obj_flags.weight = (int)corpse/10;
-
   sprintf (buf, "You %s the head from $p.",
 	   weapon_theme[tool->o.weapon.hit_type]);
   act (buf, false, ch, corpse, 0, TO_CHAR | _ACT_FORMAT);
