@@ -5498,11 +5498,13 @@ return;
 
 //A corpse that is WILL_SKIN has a negative o.od.value[2], See make-corpse() for details . We must adjust to get a vnum we can load?
       if (!(skin = load_object (corpse->o.od.value[2])))
-
+				{
+					if (!(skin = load_object (-corpse->o.od.value[2])))
 	{
 	  send_to_char ("Problem...please contact an immortal.\n", ch);
 	  return;
 	}
+				}
 
       obj_to_room (skin, ch->in_room);
 
@@ -5542,10 +5544,12 @@ return;
 
   if (!(carcass = load_object (corpse->o.od.value[3])))
     {
-      extract_obj (corpse);
-      return;
-    }
-
+  		if (!(carcass = load_object (-corpse->o.od.value[3])))
+				{
+					extract_obj (corpse);
+					return;
+				}
+		}
   extract_obj (corpse);
 
   obj_to_room (carcass, ch->in_room);
@@ -6188,7 +6192,7 @@ do_behead (CHAR_DATA * ch, char *argument, int cmd)
       !(tool = get_equip (ch, WEAR_SEC)) &&
       !(tool = get_equip (ch, WEAR_BOTH)))
     {
-      act ("You need a slicing or chopping weapon to behead $p.",
+      act ("You need to wield a slicing or chopping weapon to behead $p.",
 	   false, ch, corpse, 0, TO_CHAR | _ACT_FORMAT);
       return;
     }
@@ -6229,6 +6233,8 @@ do_behead (CHAR_DATA * ch, char *argument, int cmd)
 
   sprintf (buf, "the head of %s", buf2);
   head->short_description = str_dup (buf);
+
+  head->obj_flags.weight = (int)corpse/10;
 
   sprintf (buf, "You %s the head from $p.",
 	   weapon_theme[tool->o.weapon.hit_type]);

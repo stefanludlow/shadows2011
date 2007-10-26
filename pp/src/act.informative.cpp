@@ -3406,18 +3406,21 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 	}
 
 	/* Show name (first keyword) if mobile is owned by the character examining the mobile*/
-//	if (mode == 15)
-//	{
-//		if(i->mob->owner)
-//		{
-//			if(!strcmp(i->mob->owner, ch->tname))
-//			{
-//				sprintf (buffer, "\nYou recognise $n to be called "
-//				   "%s.", GET_NAME (i));
-//				act (buffer, false, i, 0, ch, TO_VICT);
-//			}
-//		}
-//	}
+	if (mode == 15)
+	{
+		if(IS_NPC(i)) 
+			{
+				if(i->mob->owner)
+					{
+						if(!strcmp(i->mob->owner, ch->tname))
+							{
+								sprintf (buffer, "\nYou recognise $n to be called "
+									 "%s.", GET_NAME (i));
+								act (buffer, false, i, 0, ch, TO_VICT);
+							}
+					}
+			}
+	}
 
 	/* show dmote */
 	/* Description is formated to 65 char, so we need to use reformat_desc instead of _ACT_FORMAT*/
@@ -10181,10 +10184,9 @@ add_message (int new_message, const char *name, int nVirtual, const char *poster
   FILE *fp = NULL;
   bool found = false;
   char buf[MAX_STRING_LENGTH] = { '\0' };
-  char msg_file_name[MAX_STRING_LENGTH] =
-    { '\0' }, date_buf[MAX_STRING_LENGTH] =
-  {
-  '\0'}, *suf = '\0';
+  char msg_file_name[MAX_STRING_LENGTH] = { '\0' };
+  char date_buf[MAX_STRING_LENGTH] = { '\0'};
+  char *suf = '\0';
   time_t current_time = 0;
 
   if (!new_message)

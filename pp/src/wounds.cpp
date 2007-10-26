@@ -2101,7 +2101,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 						{
 							sprintf (buf,
 								 "They have lost %d percent of their CON and will regain it in %d in-game hours.\n",
-								 (af->a.spell.sn/ch->con)*100,
+								 (double)(af->a.spell.sn/ch->con)*100,
 								 af->a.spell.duration);
 							send_to_char (buf, ch);
 							continue;

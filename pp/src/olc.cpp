@@ -5384,6 +5384,14 @@ do_object (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+	
+	if ((edit_object->nVirtual == VNUM_HEAD) 
+			|| (edit_object->nVirtual == VNUM_CORPSE))
+    {
+      send_to_char ("You cannot make changes to this item.\n", ch);
+      return;
+    }
+    
   ch->pc->edit_obj = edit_object->nVirtual;
 
   while (*argument == ' ')
