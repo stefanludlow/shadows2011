@@ -11469,7 +11469,7 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 			
 			//No more than 100 tickets to be checked at a time, instead of the whole 10 million (9,999,999). May need to adjust if there really are more tickets
 			first_tick = atoi(f_tick);
-			last_tick = MIN(100, atoi(l_tick));
+			last_tick = MIN(500, atoi(l_tick));
 			
 			if (first_tick >= last_tick)
 				{
