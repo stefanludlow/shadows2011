@@ -38,6 +38,7 @@ CLAN_DATA *clan_list = NULL;
 |    12013 | Sindbar Family             | sindbar
 |    14121 | Nebavla Dunlendings        | nebavla_tribe
 |    14181 | Hawk and Dove              | hawk_dove_2
+|    12865 | Astirian Villeins          | astirian_villeins
 +----------+----------------------------+
 */
 void
@@ -102,7 +103,10 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 				{
 					nGroupId = 14181;
 				}
-
+			else if (strcmp (clan, "astirian_villeins") == STR_MATCH)
+				{
+					nGroupId = 12865;
+				}
       // Add Privates+ to Elite Orgs
       else if (strcmp (rank, "recruit") != STR_MATCH)
 	{
@@ -203,6 +207,10 @@ clan_forum_remove (CHAR_DATA * ch, char *clan)
 				{
 					nGroupId = 14181;
 			}
+	else if (strcmp (clan, "astirian_villeins") == STR_MATCH)
+				{
+					nGroupId = 12865;
+				}
   else
     {
       return;
