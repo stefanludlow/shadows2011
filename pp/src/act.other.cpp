@@ -126,8 +126,8 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
   act ("$n has entered Middle-earth for the very first time!", true, ch, 0, 0,
        TO_ROOM | _ACT_FORMAT);
   sprintf (buf,
-	   "#3[%s has entered Middle-earth for the first time at the %s.]#0",
-	   char_short (ch), (morgul) ? "Tur Edendor settlement" : "Wizard's Cafe");
+	   "#3[%s has entered Middle-earth for the first time in %s.]#0",
+	   char_short (ch), (morgul) ? "the Tur Edendor settlement" : "Gondor");
 
   for (td = descriptor_list; td; td = td->next)
     {
@@ -3798,6 +3798,12 @@ do_accuse (CHAR_DATA * ch, char *argument, int cmd)
 
   argument = one_argument (argument, buf);
 
+  if (!*buf)
+  	{
+  		send_to_char ("The format is: accuse { pc | mob } [hours].\nHours should be -1 for permanently wanted\n", ch);
+      return;
+  	}
+
   if (!(victim = get_char_room_vis (ch, buf)))
     {
 
@@ -3826,7 +3832,7 @@ do_accuse (CHAR_DATA * ch, char *argument, int cmd)
 
       if (IS_NPC (victim))
 	{
-	  send_to_char ("Who?\n", ch);
+	  send_to_char ("Who do you wish to accuse?\n", ch);
 	  return;
 	}
     }
@@ -3886,23 +3892,33 @@ do_accuse (CHAR_DATA * ch, char *argument, int cmd)
     {
       magic_add_affect (victim, MAGIC_CRIM_BASE + ch->room->zone,
 			hours, 0, 0, 0, 0);
-      if (ch->room->zone == 1)
-	{
-	  magic_add_affect (victim, MAGIC_CRIM_BASE + 3,
-			    hours, 0, 0, 0, 0);
-	  magic_add_affect (victim, MAGIC_CRIM_BASE + 11,
-			    hours, 0, 0, 0, 0);
-	}
-      else if (ch->room->zone == 3)
-	{
-	  magic_add_affect (victim, MAGIC_CRIM_BASE + 1,
-			    hours, 0, 0, 0, 0);
-	  magic_add_affect (victim, MAGIC_CRIM_BASE + 11,
-			    hours, 0, 0, 0, 0);
-	}
-      else if (ch->room->zone == 11)
-	{
-	  magic_add_affect (victim, MAGIC_CRIM_BASE + 3,
+      if (ch->room->zone == 1) //MT
+				{
+					magic_add_affect (victim, MAGIC_CRIM_BASE + 2,
+								hours, 0, 0, 0, 0);
+					magic_add_affect (victim, MAGIC_CRIM_BASE + 11,
+								hours, 0, 0, 0, 0);
+				}
+      else if (ch->room->zone == 2) //MT
+				{
+					magic_add_affect (victim, MAGIC_CRIM_BASE + 1,
+								hours, 0, 0, 0, 0);
+					magic_add_affect (victim, MAGIC_CRIM_BASE + 11,
+								hours, 0, 0, 0, 0);
+				}
+			else if (ch->room->zone == 3) //Pel-Anorien
+				{
+					magic_add_affect (victim, MAGIC_CRIM_BASE + 8,
+								hours, 0, 0, 0, 0);
+				}
+   	else if (ch->room->zone == 8) //Pel-Anorien
+				{
+					magic_add_affect (victim, MAGIC_CRIM_BASE + 3,
+								hours, 0, 0, 0, 0);
+				}
+      else if (ch->room->zone == 11) //MT
+				{
+					magic_add_affect (victim, MAGIC_CRIM_BASE + 2,
 			    hours, 0, 0, 0, 0);
 	  magic_add_affect (victim, MAGIC_CRIM_BASE + 1,
 			    hours, 0, 0, 0, 0);

@@ -134,7 +134,7 @@ const struct command_data commands[] = {
    C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL},
   {"identify", do_identify, STAND, C_WLK | C_MNT},
   {"inside", do_inside, FIGHT, C_HID | C_DOA | C_BLD},
-  {"invite", do_invite, STAND, 0},
+  {"invite", do_invite, SIT, 0},
   {"journal", do_journal, DEAD, C_WLK | C_BLD | C_HID | C_SPL},
   {"jerase", do_jerase, DEAD, C_WLK | C_BLD | C_HID | C_SPL},
   {"jread", do_jread, DEAD, C_WLK | C_BLD | C_HID | C_SPL},

@@ -806,8 +806,17 @@ list_auctions (CHAR_DATA *ch, CHAR_DATA *auctioneer, char *argument, int cmd)
 {
 	MYSQL_RES	*result = NULL;
 	MYSQL_ROW	row = NULL;
-	char		buf [MAX_STRING_LENGTH], buf2 [(MAX_STRING_LENGTH*2)+1], buf3 [MAX_STRING_LENGTH], buf4 [MAX_STRING_LENGTH], statbuf[20];
-	int			time_remaining = 0, days = 0, hours = 0, minutes = 0, house_id = 0, type = 0;
+  char buf [MAX_STRING_LENGTH];
+  char buf2 [MAX_STRING_LENGTH];
+  char buf3 [MAX_STRING_LENGTH];
+  char buf4 [MAX_STRING_LENGTH];
+  char statbuf[20];
+  int  time_remaining = 0;
+  int days = 0;
+  int hours = 0;
+  int minutes = 0;
+  int house_id = 0;
+  int type = 0;
 	
 	// Woot! Let's hear it for sloppy, lazy-ass hacks!
 	house_id = auctioneer->mob->carcass_vnum;
