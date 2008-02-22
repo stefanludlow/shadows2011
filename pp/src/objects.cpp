@@ -2454,12 +2454,6 @@ do_drink (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (ch->hunger + ch->thirst > 40)
-    {
-      send_to_char ("You are too full to consume anything else.\n", ch);
-      return;
-    }
-
   if (container->o.drinkcon.volume == 0)
     {
       act ("$p is empty.", false, ch, container, 0, TO_CHAR);
@@ -2539,16 +2533,26 @@ do_drink (CHAR_DATA * ch, char *argument, int cmd)
 		ch->intoxication += ((drink->o.fluid.alcohol * sips) / 2);
 	}
 
-	  if (ch->thirst != -1)
+	  if (ch->thirst != -1 && ch->thirst != 20)
 	    ch->thirst += (drink->o.fluid.water * sips);
 
-	  if (ch->hunger != -1)
+	  if (ch->hunger != -1 && ch->thirst != 20)
 	    ch->hunger += (drink->o.fluid.food * sips);
 	
 	  if (ch->thirst < 0 && IS_MORTAL (ch))
 	    ch->thirst = 0;
 	  if (ch->hunger < 0 && IS_MORTAL (ch))
 	    ch->hunger = 0;
+	  if (ch->thirst > 20)
+		  ch->thirst = 20;
+	  if (ch->hunger > 20)
+		  ch->hunger = 20;
+
+	  if (ch->thirst == 20 && drink->o.fluid.water)
+		  send_to_char("You are completely satiated.\n", ch);
+
+	  if (ch->hunger == 20 && drink->o.fluid.food)
+		  send_to_char("You are absoloutely stuffed.\n", ch);
 
 /*
 		if( ch->intoxication > 0) {
@@ -2612,10 +2616,9 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (ch->hunger + ch->thirst > 40)
+  if (ch->hunger == 20)
     {
-      act ("You are too full to eat!", false, ch, 0, 0, TO_CHAR);
-      return;
+      act ("You are absoloutely stuffed!", false, ch, 0, 0, TO_CHAR);
     }
 
   if (*argument != '(' && *argument)
@@ -2639,13 +2642,7 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	else if (!strcmp (buf, "all"))
 	{
-		bites = MAX (1, obj->o.food.bites);
-		if ((obj->o.food.food_value + ch->hunger + ch->thirst) > 45)
-		{
-			send_to_char ("You are much too full to eat that much!\n", ch);
-			return;
-		}
-			
+		bites = MAX (1, obj->o.food.bites);	
 	}
 	else 
 	{
@@ -2696,7 +2693,12 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
 
 	for (int i = 0; i < bites; i++)
 	{
-	  ch->hunger += get_bite_value (obj);
+		if (ch->hunger < 20)  
+	       ch->hunger += get_bite_value (obj);
+	  if (ch->hunger > 20)
+	    act ("You are full.", false, ch, 0, 0, TO_CHAR);
+	  if (ch->hunger > 20)
+		  ch->hunger = 20;
 	  obj->o.food.bites--;
 	  if (obj->count > 1 && obj->o.food.bites < 1)
 	    {
@@ -2712,11 +2714,6 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
 	    }
 	}
 
-	  if (ch->hunger > 40)
-	    ch->hunger = 40;
-	
-	  if (ch->hunger > 20)
-	    act ("You are full.", false, ch, 0, 0, TO_CHAR);
 	
 	  if (IS_MORTAL (ch))
 	    {
@@ -4809,7 +4806,7 @@ do_sheathe (CHAR_DATA * ch, char *argument, int cmd)
   OBJ_DATA *obj_both;
   OBJ_DATA *sheath = NULL;
   char *msg;
-  int i = 0, sheathed = 0;
+  int i = 0, sheathed = 0, count = 0;
   std::string first_person, third_person;
 
   if (*argument != '(') 
@@ -4889,6 +4886,9 @@ do_sheathe (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+  //set the number of objects to be sheathed
+  count = obj->count;
+
   if (IS_NPC (ch) && IS_SET (obj->obj_flags.wear_flags, ITEM_WEAR_BELT))
     {
       one_argument (obj->name, buf);
@@ -4903,8 +4903,8 @@ do_sheathe (CHAR_DATA * ch, char *argument, int cmd)
 	  send_to_char ("What did you want to sheathe it in?\n", ch);
 	  return;
 	}
-      if (can_obj_to_container (obj, sheath, &msg, 1))
-	sheathed++;
+      if (can_obj_to_container (obj, sheath, &msg, count))
+		sheathed++;
     }
   else if (!*arg2)
     {
@@ -4928,7 +4928,7 @@ do_sheathe (CHAR_DATA * ch, char *argument, int cmd)
 	    {
 	      continue;
 	    }
-	  if (!can_obj_to_container (obj, sheath, &msg, 1))
+	  if (!can_obj_to_container (obj, sheath, &msg, count))
 	    continue;
 	  sheathed++;
 	  break;

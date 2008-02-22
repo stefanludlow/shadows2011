@@ -3711,12 +3711,6 @@ create_menu_options (DESCRIPTOR_DATA * d)
 
   save_char (ch, false);
 
-  if (is_newbie (ch))
-    SEND_TO_Q
-      ("\nCommands:  Age, Attributes, Comment, Description, Frame, Height, Keywords, Location\n"
-       "           Long, Profession, Quit, Race, Sex, Short, and Skills.\n",
-       d);
-  else
     SEND_TO_Q
       ("\nCommands:  Age, Attributes, Classifieds, Comment, Description, Frame, Height,\n"
        "           Keywords, Location, Long, Profession, Quit, Race, Sex, Short, and Skills.\n",
@@ -5158,13 +5152,6 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 	{
 	  SEND_TO_Q
 	    ("\n#2Sorry, but there are currently no posted roles available to you.#0\n\n> ",
-	     d);
-	  return;
-	}
-      if (!d->acct->get_rpp ())
-	{
-	  SEND_TO_Q
-	    ("Sorry, but you must have at least one roleplay point first.\n\n> ",
 	     d);
 	  return;
 	}

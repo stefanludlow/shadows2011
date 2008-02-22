@@ -5477,6 +5477,16 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 		  send_to_char (buf, ch);
 		  continue;
 		}
+		  if (af->type == SA_WARNED)
+		  {
+			  send_to_char("You have been warned to surrender to an enforcer.\n", ch);
+			  continue;
+		  }
+		  if (af->type == SA_ALREADY_WARNED)
+		  {
+			  send_to_char("You will receive no warning from enforcers.\n", ch);
+			  continue;
+		  }
 
 	      p = lookup_string (af->type, REG_SPELLS);
 

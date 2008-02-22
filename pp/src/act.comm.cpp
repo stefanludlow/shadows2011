@@ -2396,8 +2396,7 @@ do_shout (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("What would you like to shout?\n", ch);
       return;
     }
-
-  argument[0] = toupper (argument[0]);
+  //argument[0] = toupper (argument[0]);
   reformat_say_string (argument, &argument, 0);
 
   sprintf (buf4, argument);	/* The intended message, sent to the player. */

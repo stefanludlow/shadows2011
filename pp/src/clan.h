@@ -80,6 +80,7 @@ int clan_flags_to_value (char *flag_names);
 int clan_flags_to_value (char *flag_names, char *clan_name); // Japheth's addition 2/8/06
 int get_next_leader (char **p, char *clan_name, int *clan_flags);
 void update_enforcement_array (CHAR_DATA * ch);
+bool outranks(char *, char *, char *);
 
 inline int is_area_enforcer (CHAR_DATA * ch)
 {

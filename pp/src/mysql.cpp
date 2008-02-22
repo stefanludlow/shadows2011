@@ -2770,6 +2770,8 @@ load_char_mysql (const char *name)
   else
     ch->flags &= ~FLAG_ISADMIN;
 
+  ch->fight_percentage = 100;
+
   return ch;
 }
 
@@ -4394,4 +4396,22 @@ add_message_to_mysql_vboard (const char *name, const char *poster, MESSAGE_DATA 
 
   if (result)
     mysql_free_result (result);
+}
+
+void update_coverage_times(int admin_time, int admin_time_active, int admin_pc_time, bool admin_found, bool admin_found_absoloute)
+{
+int no_admin_time = 0, no_admin_time_absoloute = 0;
+MYSQL_RES *result;
+MYSQL_ROW row;
+
+mysql_safe_query("SELECT * FROM admin_coverage");
+result = mysql_store_result(database);
+int week_num = mysql_num_rows(result) - 1; 
+
+if (!admin_found)
+  no_admin_time = 1;
+if (!admin_found_absoloute)
+  no_admin_time_absoloute = 1;
+
+mysql_safe_query("UPDATE admin_coverage SET coverage_time=coverage_time+%d, coverage_time_absoloute=coverage_time_absoloute+%d, admin_pc_time=admin_pc_time+%d, no_admin_time=no_admin_time+%d, no_admin_time_absoloute=no_admin_time_absoloute+%d WHERE week_num=%d", admin_time, admin_time_active, admin_pc_time, no_admin_time, no_admin_time_absoloute, week_num); 
 }

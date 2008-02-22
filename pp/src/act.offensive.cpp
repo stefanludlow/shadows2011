@@ -3717,7 +3717,7 @@ retreat (CHAR_DATA* ch, int direction, CHAR_DATA* leader)
 
   if (ch->fighting) 
     {
-      duration = 40;
+      duration = 20;
 
       // terrain penalty
       duration += movement_loss[ch->room->sector_type];

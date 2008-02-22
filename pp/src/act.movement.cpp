@@ -2797,6 +2797,41 @@ do_move (CHAR_DATA * ch, char *argument, int dir)
   /* If you are trying to move, bag the pmote */
   clear_pmote (ch);
 
+  if (get_second_affect (ch, SA_WARNED, NULL))
+  {
+	  add_second_affect(SA_FLEEING_WARNED, 3, ch, 0, 0, 0);
+	  criminalize(ch, NULL, ch->room->zone, CRIME_FLEE);
+	  for (CHAR_DATA * shoutchar = ch->room->people; shoutchar; shoutchar = shoutchar->next_in_room)
+	  {
+		  if (!IS_SET(shoutchar->act, ACT_ENFORCER))
+			  continue;
+		  if (ch == shoutchar)
+			  continue;
+		  if (shoutchar->pc)
+			  continue;
+		  if (shoutchar->desc)
+			  continue;
+
+			if (shoutchar->race == lookup_race_id("Black Numenorean"))
+			{
+				command_interpreter(shoutchar, "shout Halt now or you will not leave this place alive!");
+			}
+			else if (shoutchar->race == lookup_race_id("Orc") || shoutchar->race == lookup_race_id("Half-Orc") || shoutchar->race == lookup_race_id("Snaga") || shoutchar->race == lookup_race_id("Troll") || shoutchar->race == lookup_race_id("Half-Troll"))
+			{
+				command_interpreter(shoutchar, "shout Oi! Youse not gunna get far! After da little bitch!");
+			}
+			else
+			{
+				command_interpreter(shoutchar, "shout The fugitive is fleeing! Give chase!");
+			}
+		  break;
+	  }
+	  send_to_room("\n", ch->room->nVirtual);
+	  remove_second_affect(get_second_affect(ch, SA_WARNED, NULL));
+	  add_second_affect(SA_ALREADY_WARNED, 3600, ch, NULL, NULL, NULL);
+	  
+  }
+
   if (get_affect (ch, MAGIC_TOLL))
     stop_tolls (ch);
 
@@ -2851,6 +2886,8 @@ do_move (CHAR_DATA * ch, char *argument, int dir)
     ch = ch->mount;
 
   move (ch, argument, dir, 0);
+
+  
 }
 
 void

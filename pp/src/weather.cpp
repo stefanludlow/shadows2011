@@ -66,7 +66,7 @@ bool Weather::weather_unification (int zone)
   bool zone_updated = false;
 
   // Begin Japheth's "Weather zone unification" changes
-  if ( zone == 3 || zone == 11 || zone == 8)
+  if ( zone == 3 || zone == 11 || zone == 8 || zone == 38)
     {
       weather_info[zone] = weather_info[1];
       zone_updated = true;
@@ -81,7 +81,7 @@ bool Weather::weather_unification (int zone)
       weather_info[zone] = weather_info[64];
       zone_updated = true;
     }
-  else if ( zone >= 70 && zone <= 79)
+  else if (( zone >= 70 && zone <= 79)||(zone == 19)||(zone == 51))
     {
       weather_info[zone] = weather_info[10];
       zone_updated = true;

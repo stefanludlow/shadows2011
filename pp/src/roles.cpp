@@ -832,9 +832,10 @@ new_role (CHAR_DATA * ch, char *argument)
     }
   cost = atoi (buf);
 
-  if (cost < 1 || cost > 50)
+  if (cost < 0 || cost > 50)
     {
-      send_to_char ("Permissible costs are from 1-50, inclusive.\n", ch);
+      send_to_char ("Permissible costs are from 0-50, inclusive.\n", 
+ch);
       return;
     }
 

@@ -100,6 +100,12 @@ enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness)
   if (is_brother (ch, crim))
     return 0;
 
+  if (get_second_affect(crim, SA_WARNED,0))
+	  return 0;
+
+  if (get_second_affect(crim, SA_FLEEING_WARNED, 0))
+	  return 0;
+
   if (get_affect (crim, MAGIC_CRIM_HOODED + ch->room->zone))
     ;
   else if (is_hooded (crim) && witness &&
@@ -125,10 +131,27 @@ enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness)
   if (!will_act)
     return 1;
 
-  if (!ch->fighting && !ch->ranged_enemy && !ch->delay)
-    {
-      do_say (ch, "Surrender, now, or pay the consequences!", 0);
-    }
+  if (!get_second_affect(crim, SA_ALREADY_WARNED,0) && !get_second_affect(crim, SA_WARNED,0))
+  {
+	  add_second_affect(SA_WARNED, number(17,25), crim, NULL, NULL, NULL);
+
+      if (!ch->fighting && !ch->ranged_enemy && !ch->delay)
+      {
+		  if (ch->race == lookup_race_id("Black Numenorean"))
+		{
+			do_say(ch, "You are to surrender to the Black Watch immediately or you will be slain!", 0);
+		}
+		else if (ch->race == lookup_race_id("Orc") || ch->race == lookup_race_id("Half-Orc") || ch->race == lookup_race_id("Snaga") || ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Half-Troll"))
+		{
+			do_say(ch, "Hey you! Git yer snaga-hide over here cos youse mah prisoner now!", 0);
+		}
+		else
+		{
+			do_say (ch, "Surrender, now, or pay the consequences!", 0);
+		}
+      }
+	  return 1;
+  }
 
   if (!IS_SET (crim->act, ACT_PARIAH) &&
       !IS_SET (crim->act, ACT_AGGRESSIVE) &&
@@ -167,7 +190,21 @@ enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness)
 
       if (could_attack (ch, crim))
 	{
+		if (ch->race == lookup_race_id("Black Numenorean"))
+		{
+			do_say(ch, "Wrong choice, scum! Run the dog through!", 0);
+		}
+		else if (ch->race == lookup_race_id("Orc") || ch->race == lookup_race_id("Half-Orc") || ch->race == lookup_race_id("Snaga") || ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Half-Troll"))
+		{
+			do_say(ch, "Yuh make-a da wrong move, pushdug. Now I is gunna slice yuh up!", 0);
+		}
+		else
+		{
+			do_say(ch, "You were warned. Your time is up. Surrender or die!", 0);
+		}
+		send_to_room("\n", ch->room->nVirtual);
 	  set_fighting (ch, crim);
+	  hit_char(ch, crim, 0);
 	}
 
       return 1;
@@ -961,8 +998,10 @@ morale_broken (CHAR_DATA * ch)
 
   for (wound = ch->wounds; wound; wound = wound->next)
     {
-      if (wound)
-	damage += wound->damage;
+      if (strcmp(wound->type, "stun"))
+		  damage += wound->damage;
+	  else
+		  damage += (wound->damage / 2);
     }
 
   damage += ch->damage;
@@ -1792,8 +1831,8 @@ acquire_archer_target (CHAR_DATA * ch, int i)
     {
       for (j = 1; j <= range; j++)
 	{
-	  if (IS_SET (troom->room_flags, INDOORS))
-	    continue;
+	 // if (IS_SET (troom->room_flags, INDOORS))
+	   // continue;
 	  if (IS_SET (troom->room_flags, STIFLING_FOG))
 	    return NULL;
 	  for (tch = troom->people; tch; tch = tch->next_in_room)
@@ -2008,7 +2047,11 @@ evaluate_threats (CHAR_DATA * ch)
     {
       if (wound->bleeding)
 	bleeding = true;
-      damage += wound->damage;
+
+	  if (strcmp(wound->type, "stun"))
+		  damage += wound->damage;
+	  else
+		  damage += (wound->damage / 2);
     }
 
   damage += ch->damage;

@@ -390,6 +390,7 @@ fread_mobile (int vnum, const int *nZone, FILE * fp)
 
   mob->max_mana = mob->aur * 5;
   mob->mana = mob->max_mana;
+  mob->fight_percentage = 100;
 
   if (lookup_race_variable (mob->race, RACE_BODY_PROTO) != NULL)
     mob->body_proto =

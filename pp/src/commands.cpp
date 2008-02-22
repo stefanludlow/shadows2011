@@ -49,6 +49,7 @@ const struct command_data commands[] = {
   {"buck", do_buck, FIGHT, C_BLD | C_XLS},
   {"camp", do_camp, STAND, C_WLK | C_BLD | C_MNT},
   {"cards", char__do_cards, SIT, C_BLD},
+	{"cast", do_cast, FIGHT, C_LV5},
   {"castout", do_castout, REST, C_BLD},
   {"close", do_close, SIT, C_MNT},
   {"clockout", do_clockout, SIT, C_MNT},
@@ -83,7 +84,8 @@ const struct command_data commands[] = {
   {"drag", do_drag, STAND, C_WLK | C_MNT},
   {"dreams", do_dreams, SLEEP, C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR},
   {"drink", do_drink, REST, C_BLD},
-  {"drop", do_drop, REST, C_DOA | C_BLD},
+  {"drop", do_drop, REST, C_DOA | C_BLD},	
+  {"doitanyway", do_doitanyway, DEAD, C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL | C_NLG},
   {"east", do_east, FIGHT, C_HID | C_DOA | C_BLD},
   {"eat", do_eat, REST, C_BLD},
   {"emote", do_emote, REST, C_SUB | C_DOA | C_BLD | C_PAR | C_DEL | C_SPL},
@@ -347,7 +349,7 @@ const struct command_data commands[] = {
 	{"classify", do_classify, DEAD, C_LV2},
 	{"clog", do_clog, DEAD, C_LV2},	/* Crafts Log */
 	{"craftspc", do_craftspc, DEAD, C_LV2},
-	{"cset", do_cset, DEAD, C_LV2},
+	{"cset", do_cset, DEAD, C_LV1},//dropped for newbie crafters
 	{"find", do_find, DEAD, C_LV2},
 	//{"freeze", do_freeze, DEAD, C_LV2},
 	{"locate", do_locate, DEAD, C_LV2},
@@ -429,7 +431,6 @@ const struct command_data commands[] = {
 	/* HRPA Level 5 */
 	{"*", do_fivenet, DEAD, C_LV5},
 	{"assign", do_assign, DEAD, C_LV5},	/* Assign to Roster */
-	{"cast", do_cast, FIGHT, C_LV5},
 	{"fivenet", do_fivenet, DEAD, C_LV5},
 	{"gecho", do_gecho, DEAD, C_LV5},
 	{"pfile", do_pfile, DEAD, C_LV5},
@@ -443,7 +444,7 @@ const struct command_data commands[] = {
   {"wlog", do_wlog, DEAD, C_LV5},
 
 	/* IMP level */
-	{"compete", do_compete, DEAD, C_IMP},
+	{"compete", do_compete, DEAD, C_LV5},
 	{"csv", do_csv, DEAD, C_IMP},  /* send the user a particular chunk of data */
 	{"day", do_day, DEAD, C_IMP},
 	{"debug", do_debug, DEAD, C_IMP},
@@ -581,7 +582,7 @@ command_interpreter (CHAR_DATA * ch, char *argument)
       return;
     }
 
-  if (ch->room && ch->room->prg && r_program (ch, p))
+  if (ch->room && ch->room->prg && !get_second_affect(ch, SA_DOANYWAY, 0) && r_program (ch, p))
     {
       if (!IS_NPC (ch)
 	  || (ch->desc && (ch->pc && str_cmp (ch->pc->account_name, "Guest"))))
@@ -592,6 +593,8 @@ command_interpreter (CHAR_DATA * ch, char *argument)
 	show_to_watchers (ch, argument);
       return;
     }
+  if (get_second_affect(ch, SA_DOANYWAY, 0))
+	  remove_second_affect(get_second_affect(ch, SA_DOANYWAY, 0));
 
   if (!IS_MORTAL (ch) && !str_cmp (argument, "sho wl"))
     {

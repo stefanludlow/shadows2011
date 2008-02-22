@@ -200,6 +200,7 @@ extern time_t next_minute_update;
 extern int mp_dirty;
 extern int maxdesc;
 
+void update_coverage_times(int admin_time, int admin_time_active, int admin_pc_time, bool admin_found, bool admin_found_absoloute);
 void prepare_copyover (int cmd);
 
 /* COMMAND PROTOTYPES */
@@ -207,7 +208,7 @@ void do_mark (CHAR_DATA* ch, char *argument, int cmd); // commerce.c
 void do_csv (CHAR_DATA* ch, char *argument, int cmd); // staff.c
 void retreat (CHAR_DATA* ch, int direction, CHAR_DATA* leader);
 void do_retreat (CHAR_DATA * ch, char *argument, int cmd);
-
+void do_doitanyway (CHAR_DATA *ch, char *argument, int cmd);
 void do_accuse (CHAR_DATA * ch, char *argument, int cmd);	/* act.other.c        */
 void do_party (CHAR_DATA * ch, char *argument, int cmd);	/* act.movement.c     */
 void do_accept (CHAR_DATA * ch, char *argument, int cmd);	/* magic.c            */

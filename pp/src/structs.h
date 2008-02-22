@@ -144,6 +144,12 @@ typedef signed char shortint;
 #define SA_MOVE			20
 #define SA_RESCUE		21
 #define SA_COMMAND 	 	22
+#define SA_WARNED		23
+#define SA_ALREADY_WARNED 24
+#define SA_FLEEING_WARNED 25
+#define SA_DOANYWAY	26
+#define SA_GFOLLOW 27
+#define SA_LEAD 28
 
 #define VNUM_PENNY		40
 #define VNUM_FARTHING		41
@@ -1283,7 +1289,7 @@ typedef signed char shortint;
 /* Projectile-related defines */
 
 #define NUM_BODIES              1
-#define MAX_HITLOC              5
+#define MAX_HITLOC              7
 
 struct body_info
 {
@@ -1442,8 +1448,7 @@ struct container_data
   int flags;
   int key;
   int pick_penalty;
-  int v4;
-  int table_max_sitting;
+  int v4;  int table_max_sitting;
 };
 
 struct clan_container_data
@@ -2451,6 +2456,7 @@ struct char_data
   std::string *plan;
   std::string *goal;
   bool bleeding_prompt;
+  int fight_percentage;
 };
 
 
@@ -3177,6 +3183,9 @@ struct ibt
 #define CRIME_PICKLOCK		3	/* 1 hour */
 #define CRIME_BACKSTAB		4	/* 5 hours */
 #define CRIME_SUBDUE		5	/* 1 hour */
+#define CRIME_BRAWL         6   
+#define CRIME_RESIST_ARREST 7
+#define CRIME_FLEE          8
 
 struct memory_t
 {

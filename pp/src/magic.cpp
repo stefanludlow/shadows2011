@@ -3812,6 +3812,8 @@ delayed_heal (CHAR_DATA * ch)
     woundtype = 8;
   else if (!str_cmp (tch->wounds->type, "fist"))
     woundtype = 9;
+  else if (!str_cmp (tch->wounds->type, "stun"))
+	  woundtype = 10;
 
   sprintf (buf,
 	   "You grit your teeth in pain as a %s %s appears on your %s, and the"

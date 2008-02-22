@@ -791,7 +791,14 @@ game_loop (int s)
 		    continue;
 		  if (!IS_NPC (tch) || !IS_SET (tch->flags, FLAG_KEEPER))
 		    continue;
-		  purse = number (20, 60);
+		  if (IS_SET(tch->room->room_flags, WEALTHY))
+			  purse = number (40, 80);
+		  else if (IS_SET(tch->room->room_flags, SCUM))
+			  purse = number (10, 25);
+		  else if (IS_SET(tch->room->room_flags, POOR))
+			  purse = number (10, 50);
+		  else
+			  purse = number (20, 60);
 		  while (purse > 0)
 		    purse -= vnpc_customer (tch, purse);
 		  refresh_colors (tch);

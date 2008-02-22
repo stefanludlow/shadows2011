@@ -440,8 +440,9 @@ point_update (void)
 
       if (GET_POS (ch) == POSITION_UNCONSCIOUS)
 	{
+		int total_damage = get_damage_total(ch);
 	  healing_time = real_time_passed (time (0) - ch->knockedout, 0);
-	  if (healing_time.minute >= 5)
+	  if ((healing_time.minute >= 5 && ((ch->max_hit * 0.85) > total_damage)) || healing_time.minute > 10)
 	    {
 	      GET_POS (ch) = REST;
 	      send_to_char ("Groaning groggily, you regain consciousness.\n",
@@ -480,7 +481,7 @@ point_update (void)
 	  if (playing_time.hour >= 10 && ch->desc->acct)
 	    {
 
-	      ch->desc->acct->pay_application_cost (ch->pc->app_cost);
+	      //ch->desc->acct->pay_application_cost (ch->pc->app_cost);
 	      ch->pc->app_cost = 0;
 	      save_char (ch, true);
 	    }
@@ -514,8 +515,16 @@ point_update (void)
 						
 	  next_wound = wound->next;
 	  int wound_damage = wound->damage;
+	  if (strcmp(wound->type, "stun"))
+	  {
+		  old_damage += (wound_damage / 2);
+		  new_damage += (wound_damage / 2);
+	  }
+	  else
+	  {
 	  old_damage += wound_damage;
 	  new_damage += wound_damage;
+	  }
 	  healing_time = real_time_passed (time (0) - wound->lasthealed, 0);
 	  bled_time = real_time_passed (time (0) - wound->lastbled, 0);
     
@@ -606,12 +615,18 @@ point_update (void)
 	      if (GET_POS (ch) != POSITION_FIGHTING 
 		  && !IS_SET (ch->room->room_flags, OOC))
 		{
+			if (strcmp(wound->type, "stun"))
 		  new_damage -= wound_damage;
+			else
+				new_damage -= (wound_damage / 2);
 
 		  // returns false if wound still exists
 		  if (!natural_healing_check (ch, wound))
 		    {
-		      new_damage += wound->damage;
+				if (strcmp(wound->type, "stun"))
+					new_damage += wound->damage;
+				else
+					new_damage += (wound->damage / 2);
 		    }
 		}
 	    }
@@ -698,6 +713,9 @@ hourly_update (void)
   char room_buf[MAX_STRING_LENGTH];
   char room_msg_buf[MAX_STRING_LENGTH];
 
+int admin_time = 0, admin_time_absoloute = 0, admin_pc_time = 0;
+bool admin_found = false, admin_found_absoloute = false;
+
   current_time = time (NULL);
 
   for (ch = character_list; ch; ch = next_ch)
@@ -707,6 +725,20 @@ hourly_update (void)
 
       if (ch->deleted || !ch->room)
 	continue;
+
+if (GET_TRUST(ch) && ch->desc)
+{
+   if (!ch->desc->idle)
+      admin_time_absoloute++;
+   admin_time++;
+   admin_found = true;
+   admin_found_absoloute = true;
+}
+else if (!IS_NPC(ch) && ch->pc->level == 0 && IS_SET (ch->flags, FLAG_ISADMIN))
+{
+   admin_pc_time++;
+   admin_found_absoloute = true;
+}
 
       for (ench = ch->enchantments; ench; ench = ench->next)
 	{
@@ -1011,6 +1043,9 @@ skill_level (CHAR_DATA * ch, int skill, int diff_mod)
   int skill_lev;
   OBJ_DATA *obj;
   AFFECTED_TYPE *af;
+
+  if (!(ch->skills[skill]))
+	  return 0;
 
   skill_lev = ch->skills[skill];
 

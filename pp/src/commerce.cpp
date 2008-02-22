@@ -24,7 +24,7 @@
 
 
 #define VNPC_COPPER_PURSE		200
-#define MAX_INV_COUNT			32
+#define MAX_INV_COUNT			200
 
 extern rpie::server engine;
 
@@ -1653,6 +1653,24 @@ vnpc_customer (CHAR_DATA * keeper, int purse)
   int items_in_list = 0, target_item = 0, i = 0;
   int required_check = 0, item_cost = 0;
   float delivery_cost = 0;
+  int vnpc_max_spend = 0;
+
+  if (IS_SET(keeper->room->room_flags, WEALTHY))
+  {
+	  vnpc_max_spend = 500;
+  }
+  else if (IS_SET(keeper->room->room_flags, SCUM))
+  {
+	  vnpc_max_spend = 50;
+  }
+  else if (IS_SET(keeper->room->room_flags, POOR))
+  {
+	  vnpc_max_spend = 100;
+  }
+  else
+  {
+	  vnpc_max_spend = 250;
+  }
 
   if (!IS_NPC (keeper) || !IS_SET (keeper->flags, FLAG_KEEPER)
       || !keeper->shop)
@@ -1671,6 +1689,8 @@ vnpc_customer (CHAR_DATA * keeper, int purse)
     {
       if (GET_ITEM_TYPE (tobj) == ITEM_MONEY)
 	continue;
+	  if (tobj->farthings > vnpc_max_spend)
+		  continue;
       items_in_list++;
     }
 
@@ -1686,6 +1706,8 @@ vnpc_customer (CHAR_DATA * keeper, int purse)
     {
       if (GET_ITEM_TYPE (tobj) == ITEM_MONEY)
 	continue;
+	  if (tobj->farthings > vnpc_max_spend)
+		  continue;
       i++;
       if (i == target_item)
 	break;
@@ -1700,10 +1722,15 @@ vnpc_customer (CHAR_DATA * keeper, int purse)
   // Cost of ordering replacement item for merchant
   delivery_cost = calculate_sale_price (tobj, keeper, NULL, 1, true, true);
 
-  if (item_cost > VNPC_COPPER_PURSE)
-    return item_cost;
+  if (vnpc_max_spend == 500)
+	  required_check = 75 - (item_cost / 4);
+  else if (vnpc_max_spend == 250)
+	  required_check = 65 - (item_cost / 4);
+  else if (vnpc_max_spend == 100)
+	  required_check = 65 - (item_cost / 2);
+  else
+	  required_check = 65 - item_cost;
 
-  required_check = 55 - (item_cost / 4);
   required_check = MAX (3, required_check);
   int port = engine.get_port ();
 
@@ -2550,9 +2577,12 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
       if (*buf2 == '!')
-	regardless = 1;
+	  {
+		  argument = one_argument(argument, buf2);
+		  regardless = 1;
+	  }
 
-      else if (*buf2)
+      if (*buf2)
 	{
 
 	  size = index_lookup (sizes_named, buf2);
@@ -2756,6 +2786,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 			ch);
 	  ch->delay_type = 0;
 	  ch->delay_info1 = 0;
+	  ch->delay_info2 = 0;
 	  ch->delay_obj = NULL;
 	  ch->delay_ch = NULL;
 	  return;
@@ -2767,6 +2798,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 			ch);
 	  ch->delay_type = 0;
 	  ch->delay_info1 = 0;
+	  ch->delay_info2 = 0;
 	  ch->delay_obj = NULL;
 	  ch->delay_ch = NULL;
 	  return;
@@ -2777,6 +2809,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 			ch);
 	  ch->delay_type = 0;
 	  ch->delay_info1 = 0;
+	  ch->delay_info2 = 0;
 	  ch->delay_obj = NULL;
 	  ch->delay_ch = NULL;
 	  return;
@@ -2789,6 +2822,9 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 
       ch->delay_type = 0;
       ch->delay_info1 = 0;
+	  if (ch->delay_info2)
+		  size = ch->delay_info2;
+	  ch->delay_info2 = 0;
       ch->delay_obj = NULL;
       ch->delay_ch = NULL;
     }
@@ -3003,6 +3039,8 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
       ch->delay_info1 = buy_count;
       if (ch->delay_info1 < 1)
 	ch->delay_info1 = 1;
+	  if (wants_off_size)
+		  ch->delay_info2 = size;
       ch->delay_ch = keeper;
       obj->count = orig_count;
       if (GET_ITEM_TYPE (obj) == ITEM_NPC_OBJECT)
@@ -3139,14 +3177,14 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   if (IS_WEARABLE (tobj))
-    {
-      if (size != -1)
-	tobj->size = size;
-      else if (regardless && tobj->size)
-	;
-      else
-	tobj->size = get_size (ch);
-    }
+  {
+	  if (size != -1)
+		  tobj->size = size;
+	  else if (regardless && tobj->size)
+		  ;
+	  else
+		  tobj->size = get_size (ch);
+  }
 
   if (GET_ITEM_TYPE (tobj) == ITEM_CONTAINER && tobj->o.od.value[2] > 0
       && vtoo (tobj->o.od.value[2])
@@ -3935,6 +3973,10 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   keepers_cost = (int) keepers_cost;
+
+  argument = one_argument(argument, buf);
+  if (atoi(buf) && keepers_cost > atoi(buf))
+	  keepers_cost = atoi(buf);
 
   if (keepers_cost < 1)
     {
@@ -6296,6 +6338,7 @@ do_tally (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_mark (CHAR_DATA* ch, char *argument, int cmd)
 {
+	bool multiplication = false, subtraction = false, addition = false;
 
   // First - Assert we have a valid usage case
   if (!IS_NPC(ch) || !ch->shop)
@@ -6420,6 +6463,34 @@ do_mark (CHAR_DATA* ch, char *argument, int cmd)
     {
       new_value = 0.0f;
     }
+  else if (value_string[0] == '+' || value_string[0] == '-')
+  {
+	  if (value_string[0] == '+')
+		  addition = true;
+	  else
+		  subtraction = true;
+	  value_string[0] = '0';
+	  if (!(new_value = strtof (value_string, &ptr)) && (ptr >= value_string))
+	  {
+		  char *errmsg = "No number after +/- mark.";
+		  delete [] value_string;
+		  do_ooc (ch, errmsg, 0);
+		  return;
+	  }
+
+  }
+  else if (value_string[0] == '*')
+  {
+	  value_string[0] = '0';
+	  if (!(new_value = strtof (value_string, &ptr)) && (ptr >= value_string))
+	  {
+		  char *errmsg = "No number after * mark.";
+		  delete [] value_string;
+		  do_ooc (ch, errmsg, 0);
+		  return;
+	  }
+	  multiplication = true;
+  }
   else if (!(new_value = strtof (value_string, &ptr))
 	   && (ptr >= value_string))
     {
@@ -6483,7 +6554,29 @@ do_mark (CHAR_DATA* ch, char *argument, int cmd)
 		     && (found = true)))))
 
 	{
-	  obj->obj_flags.set_cost = (int)(100.0 * new_value);
+		if (addition)
+		{
+			if (!obj->obj_flags.set_cost)
+				obj->obj_flags.set_cost = (int) ((obj->farthings * 100) + (100 * new_value));
+			else
+				obj->obj_flags.set_cost = obj->obj_flags.set_cost + (int) (100 * new_value);
+		}
+		if (subtraction)
+		{
+			if (!obj->obj_flags.set_cost)
+				obj->obj_flags.set_cost = (int) ((obj->farthings * 100) - (100 * new_value));
+			else
+				obj->obj_flags.set_cost = obj->obj_flags.set_cost - (int) (100 * new_value);
+		}
+		if (multiplication)
+		{
+			if (!obj->obj_flags.set_cost)
+				obj->obj_flags.set_cost = (int) (obj->farthings * 100 * new_value);
+			else
+				obj->obj_flags.set_cost = (int) (obj->obj_flags.set_cost * new_value);
+		}
+		if (!multiplication && !addition && !subtraction)
+			obj->obj_flags.set_cost = (int)(100.0 * new_value);
 	  ++count;
 	}
 

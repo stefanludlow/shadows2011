@@ -53,7 +53,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 {
   WOUND_DATA *wound;
   char *p;
-  int curdamage = 0, difficulty_rating = 0;
+  int curdamage = 0, stun = 0, difficulty_rating = 0;
   float limit = 0;
   char buf[MAX_STRING_LENGTH], name[MAX_STRING_LENGTH],
     severity[MAX_STRING_LENGTH];
@@ -63,7 +63,15 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 
   if (ch->wounds)
     for (wound = ch->wounds; wound; wound = wound->next)
-      curdamage += wound->damage;
+	{
+		if (!strcmp(wound->type, "stun"))
+		{
+			stun += wound->damage;
+			curdamage += (wound->damage / 2);
+		}
+		else
+			curdamage += wound->damage;
+	}
 
   curdamage += ch->damage;
 
@@ -260,18 +268,22 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 	break;
       }
 
-  else if (type == 9)		// Natural attacks -- fist.
+  else if (type == 9)  // Natural attacks -- fist.
+  {
+	  if (number(0, 3))
+		  type = 10;
     switch (number (1, 3))
       {
       case 1:
-	sprintf (name, "bruise");
+		  sprintf (name, "bruise");
 	break;
       case 2:
-	sprintf (name, "abrasion");
+		  sprintf (name, "abrasion");
 	break;
       case 3:
-	sprintf (name, "contusion");
+		  sprintf (name, (type == 10) ? ("mark") : ("contusion"));
 	break;
+	}
       }
 
   if (str_cmp (location, "bloodloss"))
@@ -316,17 +328,19 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 	wound->type = str_dup ("claw");
       else if (type == 9)
 	wound->type = str_dup ("fist");
+	  else if (type == 10)
+		  wound->type = str_dup("stun");
 
       wound->name = str_dup (name);
       wound->severity = str_dup (severity);
       
-      if (!str_cmp (severity, "severe") && !bleeding)
+      if (!str_cmp (severity, "severe") && !bleeding && str_cmp(wound->type, "stun"))
 	wound->bleeding = number (2, 3);
-      else if (!str_cmp (severity, "grievous") && !bleeding)
+      else if (!str_cmp (severity, "grievous") && !bleeding && str_cmp(wound->type, "stun"))
 	wound->bleeding = number (3, 5);
-      else if (!str_cmp (severity, "terrible") && !bleeding)
+      else if (!str_cmp (severity, "terrible") && !bleeding && str_cmp(wound->type, "stun"))
 	wound->bleeding = number (5, 10);
-      else if (!str_cmp (severity, "mortal") && !bleeding)
+      else if (!str_cmp (severity, "mortal") && !bleeding && str_cmp(wound->type, "stun"))
 	wound->bleeding = number (10, 20);
       else if (bleeding)
 	wound->bleeding = bleeding;
@@ -356,7 +370,10 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
     ch->damage += impact;
 
   int old_damage = curdamage;
-  curdamage += impact;
+  if (type != 10)
+	  curdamage += impact;
+  else
+	  curdamage += (impact / 2);
 
   if (IS_NPC (ch) && ch->mob->cues)
     {
@@ -402,7 +419,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
   if (ch->race == 64)
     return 0;
 
-  if ((curdamage > ch->max_hit * .85) && GET_POS (ch) != POSITION_UNCONSCIOUS
+  if (((curdamage > ch->max_hit * .85) || (stun > (ch->max_hit * (0.5+GET_WIL(ch)*0.01)) && !strcmp(wound->type, "stun"))) && GET_POS (ch) != POSITION_UNCONSCIOUS
       && (IS_MORTAL (ch) || IS_NPC (ch)))
     {
       GET_POS (ch) = POSITION_UNCONSCIOUS;
@@ -420,7 +437,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
       clear_moves (ch);
       clear_current_move (ch);
       if (!IS_NPC (ch) && !IS_SET (ch->flags, FLAG_GUEST))
-	send_to_gods (buf);
+		  send_to_gods (buf);
       apply_con_penalties (ch);
       if (ch->con <= 3)
 	{
@@ -794,7 +811,12 @@ adjust_wound (CHAR_DATA * ch, WOUND_DATA * wound, int amount)
     return 0;
 
   for (twound = ch->wounds; twound; twound = twound->next)
-    curdamage += twound->damage;
+  {
+	  if (str_cmp(twound->type, "stun"))
+		  curdamage += twound->damage;
+	  else
+		  curdamage += (twound->damage / 2);
+  }
 
   curdamage += ch->damage;
 
@@ -1707,7 +1729,7 @@ show_wounds (CHAR_DATA * ch, int mode)
   char buf3[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   static char buf[MAX_STRING_LENGTH];
-  int curdamage = 0;
+  int curdamage = 0, stun_damage = 0;
 
   *buf = '\0';
   *buf2 = '\0';
@@ -1739,10 +1761,35 @@ show_wounds (CHAR_DATA * ch, int mode)
     }
 
   *buf3 = '\0';
+  if (mode == 1 && ch->wounds)
+  {
+	  for (wound = ch->wounds; wound; wound = wound->next)
+	  {
+		  if (!strcmp(wound->type, "stun"))
+			  stun_damage += wound->damage;
+	  }
+
+	  if (stun_damage > (ch->max_hit * (0.5 + (GET_WIL(ch) * 0.01))))
+		  send_to_char ("You are shaked, dazed and incredibly groggy.\n", ch);
+	  else if (stun_damage > ((ch->max_hit * (0.5 + (GET_WIL(ch) * 0.01)) * 0.66)))
+		  send_to_char ("You are getting quite dazed and groggy.\n", ch);
+	  else if (stun_damage > ((ch->max_hit * (0.5 + (GET_WIL(ch) * 0.01)) * 0.33)))
+		  send_to_char ("You are a little dazed.\n", ch);
+	  else if (stun_damage > 0)
+		  send_to_char ("You have taken a superficial beating.\n", ch);
+  }
+  *buf3 = '\0';
   if (mode == 1 && ch->damage)
     {
-      for (wound = ch->wounds; wound; wound = wound->next)
-	curdamage += wound->damage;
+		for (wound = ch->wounds; wound; wound = wound->next)
+		{
+			if (strcmp(wound->type, "stun"))
+				curdamage += wound->damage;
+			else
+			{
+				curdamage += (wound->damage /2);
+			}
+		}
       curdamage += ch->damage;
       if (curdamage > 0 && curdamage <= ch->max_hit * .25)
 	sprintf (buf3, "You feel slightly faint.\n");
@@ -1885,7 +1932,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 {
 
   unsigned int i;
-  int damage = 0, totdam = 0, loaded_char = 0;
+  int damage = 0, totdam = 0, stun = 0, loaded_char = 0;
   int poisoned = 0, bleeding = 0, treated = 0, infected = 0, tended =
     0, bound = 0;
   char *p = '\0';
@@ -1988,7 +2035,15 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 	  if (wound == tch->wounds)
 	    send_to_char ("\n", ch);
 	  damage = wound->damage;
-	  totdam += damage;
+	  if (strcmp(wound->type, "stun"))
+	  {
+		  totdam += damage;
+	  }
+	  else 
+	  {
+		  totdam += (damage / 2);
+		  stun += damage;
+	  }
           
           sprintf (buf3, "A %s %s on the %s.",
             wound->severity,
@@ -2008,6 +2063,9 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
               sprintf (buf2, " -> ");
             }
           
+		  if (!strcmp(wound->type, "stun"))
+			  strcat (buf2, " #6[stun]#0 ");
+
           if (wound->infection)
             {
               strcat (buf2, " #3(I)#0 ");
@@ -2129,10 +2187,11 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
       else
 	{
 	  totdam += tch->damage;
-	  sprintf (buf3, "\n#1Total Injury Points: %d.#0\n", totdam);
+	  int max_stun = tch->max_hit * (0.5 + 0.01 * GET_WIL(tch));
+	  sprintf (buf3, "\n#1Total Injury Points: %d [%d stun]#0\n", totdam, stun);
 	  send_to_char (buf3, ch);
-	  sprintf (buf3, "\n#1Total Injury Point Limit: %d.#0\n",
-		   tch->max_hit);
+	  sprintf (buf3, "\n#1Total Injury Point Limit: %d [%d stun]#0\n",
+		   tch->max_hit, max_stun);
 	  send_to_char (buf3, ch);
 	}
         }
@@ -2304,13 +2363,20 @@ wound_total (CHAR_DATA * ch)
 {
   WOUND_DATA *wound;
   static char buf[75];
-  int damage = 0, limit = 0;
+  int damage = 0, limit = 0, stun = 0;
 
   limit = ch->max_hit;
   ch->bleeding_prompt = false;
   for (wound = ch->wounds; wound; wound = wound->next)
     {
-      damage += wound->damage;
+		if (strcmp(wound->type, "stun"))
+			damage += wound->damage;
+		else
+		{
+			stun += wound->damage;
+			damage += (wound->damage / 2);
+		}
+
       if (wound->bleeding)
 	{
 	  ch->bleeding_prompt = true;
@@ -2337,6 +2403,22 @@ wound_total (CHAR_DATA * ch)
 
   else if (damage >= limit * .8335)
     sprintf (buf, "#1*#0     ");
+
+  if (ch->fighting || stun)
+  {
+	  if (!stun)
+		  strcat(buf, " [stun: #1**#3**#2**#0]");
+	  else if (stun >= (limit * (0.5 + (GET_WIL(ch) * 0.01))) * 0.8335)
+		  strcat(buf, " [stun: #1*#0]");
+	  else if (stun >= (limit * (0.5 + (GET_WIL(ch) * 0.01))) * 0.6666)
+		  strcat(buf, " [stun: #1**#0]");
+	  else if (stun >= (limit * (0.5 + (GET_WIL(ch) * 0.01))) * 0.3333)
+		  strcat(buf, " [stun: #1**#3*#0]");
+	  else if (stun >= (limit * (0.5 + (GET_WIL(ch) * 0.01))) * 0.1775)
+		  strcat(buf, " [stun: #1**#3**#0]");
+	  else
+		  strcat(buf, " [stun: #1**#3**#2*#0]");
+  }
 
   return buf;
 }
@@ -2837,7 +2919,7 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
   needed = hr * ch->con;
   needed = MIN (needed, 95);	// the higher needed, the better chance of healing
 
-  roll = number (1, 100);
+  roll = number (1, 120);
   switch (GET_POS (ch))
     {
     case POSITION_SLEEPING:
@@ -2847,15 +2929,17 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
       roll -= 10;
       break;
     case POSITION_SITTING:
-      roll -= 0;
+      roll -= 10;
       break;
     case POSITION_STANDING:
-      roll += 10;
+      roll += 25;
       break;
     case POSITION_FIGHTING:
-      roll += 20;
+      roll += 50;
       break;
     }
+  if (!strcmp(wound->type, "stun"))
+	  roll -= 25; // Stun wounds heal much faster
   if (wound->healerskill && wound->healerskill != -1)
     roll -= wound->healerskill / 3;
   roll = MAX (roll, 1);		// lower roll the better chance of healing
@@ -2866,42 +2950,60 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
   *woundbuf = '\0';
 
   if (roll <= needed)
-    {
-      if (roll % 5 == 0)
-	{
-	  sprintf (buf, "Critical healing success.\n");
-	  if (ch->con / 3 < 3)
-	    upper = 3;
+  {
+	  if (roll % 5 == 0)
+	  {
+		  sprintf (buf, "Critical healing success.\n");
+		  if (!strcmp(wound->type, "stun"))
+		  {
+			  wound->damage -= number (2, (GET_CON(ch) / 4) + (GET_WIL(ch) / 4));
+			  if (wound->healerskill > 0)
+				  wound->damage -= (wound->healerskill / 15);
+		  }
+		  else
+		  {
+			  if (ch->con / 3 < 3)
+				  upper = 3;
+			  else
+				  upper = number (2, ch->con / 3);
+			  wound->damage -= number (1, upper);
+			  if (wound->healerskill >= 0)
+				  wound->damage -= (wound->healerskill / 25);
+		  }
+	  }
 	  else
-	    upper = number (2, ch->con / 3);
-	  wound->damage -= number (1, upper);
-	  if (wound->healerskill >= 0)
-	    wound->damage -= (wound->healerskill / 25);
-	}
-      else
-	{
-	  sprintf (buf, "Healing success.\n");
-	  if (ch->con / 5 < 3)
-	    upper = 2;
-	  else
-	    upper = number (2, ch->con / 5);
-	  wound->damage -= number (1, upper);
-	  if (wound->healerskill >= 0)
-	    wound->damage -= (wound->healerskill / 25);
-	}
-      if (wound->healerskill == -1)
-	wound->healerskill = 0;
-      if (wound->damage > 0)
-	{
-	  sprintf (buf, "%s", downsized_wound (ch, wound));
-	  mem_free (wound->severity);
-	  wound->severity = NULL;
-	  wound->severity = str_dup (buf);
-	}
-    }
+	  {
+		  sprintf (buf, "Healing success.\n");
+		  if (!strcmp(wound->type, "stun"))
+		  {
+			  wound->damage -= (GET_CON(ch) / 5) + (GET_WIL(ch) / 5);
+			  if (wound->healerskill > 0)
+				  wound->damage -= wound->healerskill / 15;
+		  }
+		  else
+		  {
+			  if (ch->con / 5 < 3)
+				  upper = 2;
+			  else
+				  upper = number (2, ch->con / 5);
+			  wound->damage -= number (1, upper);
+			  if (wound->healerskill >= 0)
+				  wound->damage -= (wound->healerskill / 25);
+		  }
+	  }
+	  if (wound->healerskill == -1)
+		  wound->healerskill = 0;
+	  if (wound->damage > 0)
+	  {
+		  sprintf (buf, "%s", downsized_wound (ch, wound));
+		  mem_free (wound->severity);
+		  wound->severity = NULL;
+		  wound->severity = str_dup (buf);
+	  }
+  }
   else if (roll > needed && WOUND_INFECTIONS)
     {
-      if (roll % 5 == 0 && wound->healerskill <= 0 && !number (0, 19) &&
+      if (roll % 5 == 0 && wound->healerskill <= 0 && !number (0, 7) &&
 	  str_cmp (wound->severity, "minor")
 	  && str_cmp (wound->severity, "small"))
 	{
@@ -2978,6 +3080,7 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
   CHAR_DATA *pTargetActor = NULL;
   WOUND_DATA *pWound = NULL;
   OBJ_DATA *pClothProp = NULL;
+  OBJ_DATA *pClothPropTwo = NULL;
   char strTargetKeyword[AVG_STRING_LENGTH] = "\0";
 
   // Check for ACT_NOBIND Flag (usually on animals)
@@ -2994,14 +3097,62 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 
   // Check for one empty hand
 
-  if (thisPtr->right_hand && thisPtr->left_hand)
+  if ((thisPtr->right_hand && (thisPtr->right_hand->obj_flags.type_flag != ITEM_HEALER_KIT && strstr(thisPtr->right_hand->name, "TEXTILE") == NULL)) && (thisPtr->left_hand && (thisPtr->left_hand->obj_flags.type_flag != ITEM_HEALER_KIT && strstr(thisPtr->left_hand->name, "TEXTILE") == NULL)))
     {
-      send_to_char ("You'll need a free hand.\n", thisPtr);
+      send_to_char ("You'll need a free hand or to have only healing kits or cloth items held.\n", thisPtr);
       return;
     }
 
   // Check for binding cloth in either hand
 
+  if (thisPtr->right_hand && (strstr (thisPtr->right_hand->name, "TEXTILE") != NULL || thisPtr->right_hand->obj_flags.type_flag == ITEM_HEALER_KIT))
+  {
+	  pClothProp = thisPtr->right_hand;
+	  if (GET_ITEM_TYPE (pClothProp) == ITEM_HEALER_KIT && thisPtr->skills[SKILL_HEALING])
+	  {
+		  if (IS_SET (pClothProp->o.od.value[5], TREAT_BLEED))
+			  nHasClothProp = pClothProp->o.od.value[1];
+		  else
+			  nHasClothProp = 1;
+	  }
+	  else
+		  nHasClothProp = 1;
+  }
+  if (thisPtr->left_hand && (strstr (thisPtr->left_hand->name, "TEXTILE") != NULL || thisPtr->left_hand->obj_flags.type_flag == ITEM_HEALER_KIT))
+  {
+	  pClothPropTwo = thisPtr->left_hand;
+	  if (GET_ITEM_TYPE (pClothPropTwo) == ITEM_HEALER_KIT && thisPtr->skills[SKILL_HEALING])
+	  {
+		  if (IS_SET (pClothPropTwo->o.od.value[5], TREAT_BLEED))
+		  {
+			  if (pClothPropTwo->o.od.value[5] > nHasClothProp)
+			  {
+				  nHasClothProp = pClothPropTwo->o.od.value[5];
+				  if (pClothProp)
+					  pClothProp = pClothPropTwo;
+			  }
+		  }
+		  else
+		  {
+			  if (!nHasClothProp)
+			  {
+				  nHasClothProp = 1;
+				  if (pClothProp)
+					  pClothProp = pClothPropTwo;
+			  }
+		  }
+	  }
+	  else
+	  {
+			  if (!nHasClothProp)
+			  {
+				  nHasClothProp = 1;
+				  if (pClothProp)
+					  pClothProp = pClothPropTwo;
+			  }
+	  }
+  }
+  /*
   if ((pClothProp = thisPtr->right_hand)
     		&& ((strstr (pClothProp->name, "TEXTILE") != NULL) ||
     			(pClothProp->obj_flags.type_flag == ITEM_HEALER_KIT))
@@ -3033,7 +3184,7 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 			{
 				nHasClothProp = 0;
 			}
-    
+    */
 
   // Check for target N/PC keyword. If none, treat self.
 
@@ -3085,8 +3236,8 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 
   // Show everyone the binding has begun
 
-	if (IS_NPC(thisPtr)) //NPCs carry around virtual bandages
-		nHasClothProp = 1;
+	if (IS_NPC(thisPtr) && IS_NPC(pTargetActor)) //NPCs carry around virtual bandages
+		nHasClothProp = 1; // NPCs cannot bind PCs unless they follow PC rules
 		
   if (pTargetActor != thisPtr)
     {
@@ -3160,6 +3311,7 @@ delayed_bind (CHAR_DATA * thisPtr)
   CHAR_DATA *pTargetActor = NULL;
   WOUND_DATA *pWound = NULL;
   OBJ_DATA *pClothProp = NULL;
+  OBJ_DATA *pClothPropTwo = NULL;
 
 	
   thisPtr->flags &= ~FLAG_BINDING;
@@ -3179,7 +3331,7 @@ delayed_bind (CHAR_DATA * thisPtr)
 
   // Check again for binding agent in either hand
 
-  if ((pClothProp = thisPtr->right_hand)
+  /*if ((pClothProp = thisPtr->right_hand)
     		&& ((strstr (pClothProp->name, "TEXTILE") != NULL) ||
     			(pClothProp->obj_flags.type_flag == ITEM_HEALER_KIT))
       || (pClothProp = thisPtr->left_hand)
@@ -3210,9 +3362,59 @@ delayed_bind (CHAR_DATA * thisPtr)
 		 else  //no cloth item available
 			{
 				nHasClothProp = 0;
-			}
+			} */
 
-	if (IS_NPC(thisPtr)) //NPCs carry around virtual bandages
+  // Japh's addition
+
+    if (thisPtr->right_hand && (strstr (thisPtr->right_hand->name, "TEXTILE") != NULL || thisPtr->right_hand->obj_flags.type_flag == ITEM_HEALER_KIT))
+  {
+	  pClothProp = thisPtr->right_hand;
+	  if (GET_ITEM_TYPE (pClothProp) == ITEM_HEALER_KIT && thisPtr->skills[SKILL_HEALING])
+	  {
+		  if (IS_SET (pClothProp->o.od.value[5], TREAT_BLEED))
+			  nHasClothProp = pClothProp->o.od.value[1];
+		  else
+			  nHasClothProp = 1;
+	  }
+	  else
+		  nHasClothProp = 1;
+  }
+  if (thisPtr->left_hand && (strstr (thisPtr->left_hand->name, "TEXTILE") != NULL || thisPtr->left_hand->obj_flags.type_flag == ITEM_HEALER_KIT))
+  {
+	  pClothPropTwo = thisPtr->left_hand;
+	  if (GET_ITEM_TYPE (pClothPropTwo) == ITEM_HEALER_KIT && thisPtr->skills[SKILL_HEALING])
+	  {
+		  if (IS_SET (pClothPropTwo->o.od.value[5], TREAT_BLEED))
+		  {
+			  if (pClothPropTwo->o.od.value[5] > nHasClothProp)
+			  {
+				  nHasClothProp = pClothPropTwo->o.od.value[5];
+				  if (pClothProp)
+					  pClothProp = pClothPropTwo;
+			  }
+		  }
+		  else
+		  {
+			  if (!nHasClothProp)
+			  {
+				  nHasClothProp = 1;
+				  if (pClothProp)
+					  pClothProp = pClothPropTwo;
+			  }
+		  }
+	  }
+	  else
+	  {
+			  if (!nHasClothProp)
+			  {
+				  nHasClothProp = 1;
+				  if (pClothProp)
+					  pClothProp = pClothPropTwo;
+			  }
+	  }
+  } // Japh's Addition
+
+	if (IS_NPC(thisPtr) && IS_NPC(pTargetActor)) //NPCs carry around virtual bandages
 			nHasClothProp = 1;
 			
   // Go through the wounds and bind the bleeders if we have a BINDING of some sort
@@ -3269,7 +3471,10 @@ delayed_bind (CHAR_DATA * thisPtr)
   		
   	else if (pClothProp && nHasClothProp == 1)
     {
-      extract_obj (pClothProp);
+		if (pClothProp->count > 1)
+			pClothProp->count--;
+		else
+			extract_obj (pClothProp);
     }
 
   // Show the actors that binding occured

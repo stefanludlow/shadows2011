@@ -727,6 +727,16 @@ fread_obj (FILE * fp)
   if (!IS_SET (obj->obj_flags.extra_flags, ITEM_NEWSKILLS))
     update_weapon_skills (obj);
 
+  /* Weapons and Armour should default to prototype values at loadtime */
+
+  if (GET_ITEM_TYPE (obj) == ITEM_ARMOR || GET_ITEM_TYPE (obj) == ITEM_WEAPON || GET_ITEM_TYPE(obj) == ITEM_MISSILE)
+  {
+	for (int index = 0; index < 6; index++)
+	{
+		  obj->o.od.value[index] = vtoo (obj->nVirtual)->o.od.value[index];
+	}
+  }
+
   /* Record what object previously was */
 
   if (obj->nVirtual == 666 && !obj->o.od.value[0])

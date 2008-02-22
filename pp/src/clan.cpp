@@ -1636,6 +1636,14 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 //Recruit  
   else if (flags == CLAN_RECRUIT)
   {
+	  if (!str_cmp (clan, "bar_caged"))
+	  {
+		  return "Fightah";
+	  }
+	  if (!str_cmp (clan, "ralan-salvage"))
+	  {
+		  return "Boot";
+	  }
     if (!str_cmp (clan, "gothakra"))
     {
 	if (ch->race == lookup_race_id("Orc"))
@@ -1678,6 +1686,14 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 //Private  
   else if (flags == CLAN_PRIVATE)
   {
+	  if (!str_cmp (clan, "bar_caged"))
+	  {
+		  return "Respected Fightah";
+	  }
+	  if (!str_cmp (clan, "ralan-salvage"))
+	  {
+		  return "Veteran";
+	  }
     if (!str_cmp (clan, "gothakra"))
     {
 	if (ch->race == lookup_race_id("Orc"))
@@ -1724,6 +1740,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 //Corporal
   else if (flags == CLAN_CORPORAL)
   {
+	  if (!str_cmp (clan, "bar_caged"))
+	  {
+		  return "Fist";
+	  }
     if (!str_cmp (clan, "gothakra"))
     {
 	if (ch->race == lookup_race_id("Orc"))
@@ -1770,6 +1790,22 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 //Sergeant
   else if (flags == CLAN_SERGEANT)
   {
+	  if (!str_cmp (clan, "bar_caged"))
+	  {
+		  return "Respected Fist";
+	  }
+	  if (!str_cmp (clan, "ralan-salvage"))
+	  {
+		  for (OBJ_DATA *obj = ch->equip; obj; obj = obj->next_content)
+		  {
+			  if (obj->nVirtual == 66743)
+				  return "Quartermaster";
+
+			  if (obj->nVirtual == 66744)
+				  return "Master of Horse";
+		  }
+		  return "Sergeant";
+	  }
     if (!str_cmp (clan, "gothakra"))
     {
 	if (ch->race == lookup_race_id("Orc"))
@@ -1815,6 +1851,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 //lieutenant  
   else if (flags == CLAN_LIEUTENANT)
   {
+	  if (!str_cmp (clan, "bar_caged"))
+	  {
+		  return "Warleader";
+	  }
     if (!str_cmp (clan, "gothakra"))
     {
 	if (ch->race == lookup_race_id("Orc"))
@@ -1860,6 +1900,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 //Captain
   else if (flags == CLAN_CAPTAIN)
   {
+	  if (!str_cmp (clan, "bar_caged"))
+	  {
+		  return "Great Lord";
+	  }
     if (!str_cmp (clan, "com"))
     {
 	return "Barun";
@@ -1918,6 +1962,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 //Commander
   else if (flags == CLAN_COMMANDER)
   {
+	  if (!str_cmp(clan, "ralan-salvage"))
+	  {
+		  return "Patron";
+	  }
     if (!str_cmp (clan, "com"))
     {
 	return "Daur-Phazan";
@@ -2341,7 +2389,7 @@ do_promote (CHAR_DATA * ch, char *argument, int cmd)
 
   if (pLackey == ch)
     {
-      switch (number (1, 100))
+      switch (number (1, 3))
 	{
 	case 1:
 	  send_to_char ("Your delusions of grandeur go largely unnoticed.\n",
@@ -2442,6 +2490,53 @@ do_promote (CHAR_DATA * ch, char *argument, int cmd)
        TO_NOTVICT | _ACT_FORMAT);
 
   add_clan (pLackey, strClan, nLackeyRank);
+}
+
+bool
+outranks (char *has_rank, char *compared_rank, char *clan)
+{
+	int rank, compare;
+	rank = clan_flags_to_value(has_rank, clan);
+	compare = clan_flags_to_value(compared_rank, clan);
+
+	if (rank >= CLAN_RECRUIT && rank <= CLAN_COMMANDER)
+	{
+		if (rank == CLAN_RECRUIT)
+			return false;
+
+		if (compare == CLAN_MEMBER)
+			return true;
+
+		if (compare < CLAN_RECRUIT || compare > CLAN_COMMANDER)
+			return false;
+
+		if (rank > compare)
+			return true;
+	}
+
+	if (rank == CLAN_LEADER)
+	{
+		if (compare == CLAN_MEMBER)
+			return true;
+		return false;
+	}
+
+	if (rank >= CLAN_APPRENTICE && rank <= CLAN_MASTER)
+	{
+		if (rank == CLAN_APPRENTICE)
+			return false;
+
+		if (compare == CLAN_MEMBER)
+			return true;
+
+		if (compare < CLAN_APPRENTICE || compare > CLAN_MASTER)
+			return false;
+
+		if (rank > compare)
+			return true; 
+	}
+	return false;
+
 }
 
 void

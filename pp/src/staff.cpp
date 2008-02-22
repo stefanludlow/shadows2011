@@ -2583,7 +2583,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	  vobj = vtoo (af->a.job.object_vnum);
 
 	  if (!vobj)
-		value_pay = 0;
+	  	value_pay = af->a.job.cash;
 	  else
 		{
 		value_pay = vobj->farthings * af->a.job.count;
@@ -6810,6 +6810,37 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
 
   argument = one_argument (argument, subcmd);
 
+  if (!str_cmp (subcmd, "effort"))
+    {
+      if (!is_number(argument))
+        {
+        send_to_char("You must give a percentage between 1-100 to set your combat effort to.\n", ch);
+        return;
+        }
+      else
+        {
+          if (atoi(argument) < 1 || atoi(argument) > 100)
+            {
+            send_to_char("You must give a percentage between 1-100 to set your combat effort to.\n", ch);
+            return;
+            }
+          ch->fight_percentage = atoi(argument);
+          sprintf(buf, "You will now fight at ");
+          if (atoi(argument) == 100)
+            sprintf(buf+strlen(buf), "#F");
+          else if (atoi(argument) > 75)
+            sprintf(buf+strlen(buf),"#2");
+          else if (atoi(argument) > 30)
+            sprintf(buf+strlen(buf),"#B");
+          else
+            sprintf(buf+strlen(buf),"#1");
+          
+		  sprintf(buf+strlen(buf), "%d%%#0 of your combat ability.\n", ch->fight_percentage);
+		  send_to_char(buf, ch);
+		  return;
+       
+        }
+    }
   if (!str_cmp (subcmd, "scan"))
     {
 	  if (!IS_SET (ch->plr_flags, QUIET_SCAN))
@@ -7424,6 +7455,7 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
       s ("   #6Combat Flags:#0");
       s ("   Autoflee   - Run away immediately if someone attacks");
       s ("   Pacifist   - Forego all attacks, for a defensive bonus");
+	  s ("   Effort     - Change percentage of combat skill employed");
       s ("");
       s ("   #6Informative:#0");
       s ("   Combat     - Toggle filtering of non-local combat messages");
