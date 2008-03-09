@@ -8350,10 +8350,17 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
       "on_health", "on_moves",
       "on_command", "on_receive", "on_hear", "on_nod",
       "on_theft", "on_witness",
-      "on_engage", "on_flee", "on_scan", "on_hit"
+      "on_engage", "on_flee", "on_scan", "on_hit",
+      "\n"
     };
 
   int index =  index_lookup (cues, cue);
+  if (index < 0)
+    {
+     send_to_char("Options avaiable are: notes, on_hour, on_health, on_scan\n", builder);
+    send_to_char("To remove all cues of one type, use mset <cue type> clear", builder);
+    return;
+    }
   if (index >= 0)
     {
       mob_cue c = mob_cue (index);
@@ -8403,8 +8410,8 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 	  reflex_string = std::string (cue) + std::string (" ") 
 	    + reflex_string + " #6installed#0\n";
 	  send_to_char (reflex_string.c_str (), builder);
-	}
-      else // list
+	}// if (*reflex)
+    else // list
 	{
 	  for (N n = range.first; n != range.second; n++)
 	    {
@@ -8417,7 +8424,7 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 		}
 	    }
 	}
-    }
+     }
 }
 
 void
