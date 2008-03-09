@@ -2552,7 +2552,7 @@ do_drink (CHAR_DATA * ch, char *argument, int cmd)
 		  send_to_char("You are completely satiated.\n", ch);
 
 	  if (ch->hunger == 20 && drink->o.fluid.food)
-		  send_to_char("You are absoloutely stuffed.\n", ch);
+		  send_to_char("You are absoluletly stuffed.\n", ch);
 
 /*
 		if( ch->intoxication > 0) {
@@ -2618,7 +2618,7 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
 
   if (ch->hunger == 20)
     {
-      act ("You are absoloutely stuffed!", false, ch, 0, 0, TO_CHAR);
+      act ("You are absolutely stuffed!", false, ch, 0, 0, TO_CHAR);
     }
 
   if (*argument != '(' && *argument)
