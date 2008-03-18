@@ -2917,9 +2917,9 @@ randomize_mobile (CHAR_DATA * mob)
 	else if (is_name_in_list("plebe", mob->short_descr))
 		type_bonus = 10;
 
-  // if ((mob->race >= 0 && mob->race <= 29) || !strcmp(lookup_race_variable(mob->race, RACE_NAME), "Mordorian Human"))
-	if (race_table[mob->race].pc_race)
-    {
+   if ((mob->race >= 0 && mob->race <= 29) || 
+!strcmp(lookup_race_variable(mob->race, RACE_NAME), "Mordorian Human"))    
+{
       for (i = 0; i <= 6; i++)
 	{
 	  roll = number (0, 6);
