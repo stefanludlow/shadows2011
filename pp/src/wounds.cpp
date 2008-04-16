@@ -268,17 +268,17 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 	break;
       }
 
-  else if (type == 9)  // Natural attacks -- fist.
+  else if (type == 9)		// Natural attacks -- fist.
   {
 	  if (number(0, 3))
 		  type = 10;
     switch (number (1, 3))
       {
       case 1:
-		  sprintf (name, "bruise");
+	sprintf (name, "bruise");
 	break;
       case 2:
-		  sprintf (name, "abrasion");
+	sprintf (name, "abrasion");
 	break;
       case 3:
 		  sprintf (name, (type == 10) ? ("mark") : ("contusion"));
@@ -371,7 +371,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 
   int old_damage = curdamage;
   if (type != 10)
-	  curdamage += impact;
+  curdamage += impact;
   else
 	  curdamage += (impact / 2);
 
@@ -437,7 +437,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
       clear_moves (ch);
       clear_current_move (ch);
       if (!IS_NPC (ch) && !IS_SET (ch->flags, FLAG_GUEST))
-		  send_to_gods (buf);
+	send_to_gods (buf);
       apply_con_penalties (ch);
       if (ch->con <= 3)
 	{
@@ -813,7 +813,7 @@ adjust_wound (CHAR_DATA * ch, WOUND_DATA * wound, int amount)
   for (twound = ch->wounds; twound; twound = twound->next)
   {
 	  if (str_cmp(twound->type, "stun"))
-		  curdamage += twound->damage;
+    curdamage += twound->damage;
 	  else
 		  curdamage += (twound->damage / 2);
   }
@@ -1781,7 +1781,7 @@ show_wounds (CHAR_DATA * ch, int mode)
   *buf3 = '\0';
   if (mode == 1 && ch->damage)
     {
-		for (wound = ch->wounds; wound; wound = wound->next)
+      for (wound = ch->wounds; wound; wound = wound->next)
 		{
 			if (strcmp(wound->type, "stun"))
 				curdamage += wound->damage;
@@ -2037,7 +2037,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 	  damage = wound->damage;
 	  if (strcmp(wound->type, "stun"))
 	  {
-		  totdam += damage;
+	  totdam += damage;
 	  }
 	  else 
 	  {
@@ -2950,10 +2950,10 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
   *woundbuf = '\0';
 
   if (roll <= needed)
-  {
-	  if (roll % 5 == 0)
-	  {
-		  sprintf (buf, "Critical healing success.\n");
+    {
+      if (roll % 5 == 0)
+	{
+	  sprintf (buf, "Critical healing success.\n");
 		  if (!strcmp(wound->type, "stun"))
 		  {
 			  wound->damage -= number (2, (GET_CON(ch) / 4) + (GET_WIL(ch) / 4));
@@ -2962,18 +2962,18 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
 		  }
 		  else
 		  {
-			  if (ch->con / 3 < 3)
-				  upper = 3;
-			  else
-				  upper = number (2, ch->con / 3);
-			  wound->damage -= number (1, upper);
-			  if (wound->healerskill >= 0)
-				  wound->damage -= (wound->healerskill / 25);
-		  }
-	  }
+	  if (ch->con / 3 < 3)
+	    upper = 3;
 	  else
-	  {
-		  sprintf (buf, "Healing success.\n");
+	    upper = number (2, ch->con / 3);
+	  wound->damage -= number (1, upper);
+	  if (wound->healerskill >= 0)
+	    wound->damage -= (wound->healerskill / 25);
+	}
+	  }
+      else
+	{
+	  sprintf (buf, "Healing success.\n");
 		  if (!strcmp(wound->type, "stun"))
 		  {
 			  wound->damage -= (GET_CON(ch) / 5) + (GET_WIL(ch) / 5);
@@ -2982,25 +2982,25 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
 		  }
 		  else
 		  {
-			  if (ch->con / 5 < 3)
-				  upper = 2;
-			  else
-				  upper = number (2, ch->con / 5);
-			  wound->damage -= number (1, upper);
-			  if (wound->healerskill >= 0)
-				  wound->damage -= (wound->healerskill / 25);
-		  }
+	  if (ch->con / 5 < 3)
+	    upper = 2;
+	  else
+	    upper = number (2, ch->con / 5);
+	  wound->damage -= number (1, upper);
+	  if (wound->healerskill >= 0)
+	    wound->damage -= (wound->healerskill / 25);
+	}
 	  }
-	  if (wound->healerskill == -1)
-		  wound->healerskill = 0;
-	  if (wound->damage > 0)
-	  {
-		  sprintf (buf, "%s", downsized_wound (ch, wound));
-		  mem_free (wound->severity);
-		  wound->severity = NULL;
-		  wound->severity = str_dup (buf);
-	  }
-  }
+      if (wound->healerskill == -1)
+	wound->healerskill = 0;
+      if (wound->damage > 0)
+	{
+	  sprintf (buf, "%s", downsized_wound (ch, wound));
+	  mem_free (wound->severity);
+	  wound->severity = NULL;
+	  wound->severity = str_dup (buf);
+	}
+    }
   else if (roll > needed && WOUND_INFECTIONS)
     {
       if (roll % 5 == 0 && wound->healerskill <= 0 && !number (0, 7) &&
@@ -3474,7 +3474,7 @@ delayed_bind (CHAR_DATA * thisPtr)
 		if (pClothProp->count > 1)
 			pClothProp->count--;
 		else
-			extract_obj (pClothProp);
+      extract_obj (pClothProp);
     }
 
   // Show the actors that binding occured

@@ -1457,6 +1457,10 @@ int force_enter (CHAR_DATA *tch, ROOM_DATA *troom);
 void read_ticket (CHAR_DATA * ch, int tick_num);
 void search_ticket (CHAR_DATA * ch, char * chkvalue, int searchtype);
 void delete_ticket (CHAR_DATA * ch, int tick_num);
+
+void load_weather_obj(ROOM_DATA *troom);
+int weather_object_exists(OBJ_DATA * list, int vnum);
+
 /* Magical effect functions for spellcasting */
 
 void creation_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,

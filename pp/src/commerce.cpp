@@ -2579,7 +2579,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
       if (*buf2 == '!')
 	  {
 		  argument = one_argument(argument, buf2);
-		  regardless = 1;
+	regardless = 1;
 	  }
 
       if (*buf2)
@@ -3177,14 +3177,14 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   if (IS_WEARABLE (tobj))
-  {
-	  if (size != -1)
-		  tobj->size = size;
-	  else if (regardless && tobj->size)
-		  ;
-	  else
-		  tobj->size = get_size (ch);
-  }
+    {
+      if (size != -1)
+	tobj->size = size;
+      else if (regardless && tobj->size)
+	;
+      else
+	tobj->size = get_size (ch);
+    }
 
   if (GET_ITEM_TYPE (tobj) == ITEM_CONTAINER && tobj->o.od.value[2] > 0
       && vtoo (tobj->o.od.value[2])
@@ -6576,7 +6576,7 @@ do_mark (CHAR_DATA* ch, char *argument, int cmd)
 				obj->obj_flags.set_cost = (int) (obj->obj_flags.set_cost * new_value);
 		}
 		if (!multiplication && !addition && !subtraction)
-			obj->obj_flags.set_cost = (int)(100.0 * new_value);
+	  obj->obj_flags.set_cost = (int)(100.0 * new_value);
 	  ++count;
 	}
 

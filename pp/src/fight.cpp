@@ -194,7 +194,7 @@ const int weapon_armor_table[6][6] = {
 ***/
 
 const int weapon_armor_table[6][6] = {
- // Q   L   R   S   M   P
+  // Q   L   R   S   M   P
   {0,  -1, -1, -2, -1, -4},		// stab
   {0,   0,  0, -2, -1, -3},		// pierce
   {0,  -1, -2, -2, -2, -2},		// chop
@@ -212,7 +212,7 @@ const int weapon_nat_attack_table[4][6] = {
 };
 */
 const int weapon_nat_attack_table[4][6]={
-// Q   L   R   S   W   P
+  // Q   L   R   S    W    P
   {-1, -2, -3, -3, -3, -4}, // punch
   { 0, -1, -1, -3, -1, -3},  // bite
   { 0,  0, -2, -3, -3, -3}, //claw
@@ -233,7 +233,7 @@ get_damage_total (CHAR_DATA* ch)
   for (; wound; wound = wound->next)
     {
 		if (strcmp(wound->type, "stun"))
-			damage += wound->damage;
+      damage += wound->damage;
 		else
 			damage += (wound->damage / 2);
     }
@@ -3330,18 +3330,18 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
   
   if (number(0,1))  
   {
-	  eq = get_equip (tar, wear_loc2);
+  eq = get_equip (tar, wear_loc2);
 
 	  if (attack_weapon && eq  && eq->obj_flags.type_flag == ITEM_ARMOR)
 		  if (attack_weapon || !shock)
 			  dam -= eq->o.armor.armor_value;
 
 	  if (attack_weapon && eq  && eq->obj_flags.type_flag == ITEM_ARMOR)
-		  dam += weapon_armor_table[attack_weapon->o.weapon.hit_type]
-	  [eq->o.armor.armor_type];
+    dam += weapon_armor_table[attack_weapon->o.weapon.hit_type]
+      [eq->o.armor.armor_type];
 	  else if (!attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
-		  dam += weapon_nat_attack_table[src->nat_attack_type]
-	  [eq->o.armor.armor_type];
+    dam += weapon_nat_attack_table[src->nat_attack_type]
+      [eq->o.armor.armor_type];
   }
 
   /* Multiply by hit location multiplier */
@@ -4704,50 +4704,50 @@ compete (CHAR_DATA * ch, CHAR_DATA * src, CHAR_DATA * tar, int iterations)
 void
 sa_rescue (SECOND_AFFECT * sa)
 {
-	int result;
-	CHAR_DATA *tch, *rescuee;
+  int result;
+  CHAR_DATA *tch, *rescuee;
 
-	if (!is_he_somewhere (sa->ch))
-		return;
+  if (!is_he_somewhere (sa->ch))
+    return;
 
-	rescuee = (CHAR_DATA *) sa->obj;
-	result = rescue_attempt (sa->ch, rescuee);
+  rescuee = (CHAR_DATA *) sa->obj;
+  result = rescue_attempt (sa->ch, rescuee);
 
-	if (result == 2)		/* can't rescue...stop trying */
-		return;
+  if (result == 2)		/* can't rescue...stop trying */
+    return;
 
-	else if (result == 0)
-	{				/* Failed, try again */
+  else if (result == 0)
+    {				/* Failed, try again */
 
-		act ("$n makes another failed attempt at rescuing $N.",
-			false, sa->ch, 0, rescuee, TO_NOTVICT);
-		act ("$N tries again, but fails to rescue you.",
-			false, rescuee, 0, sa->ch, TO_CHAR);
-		act ("You try again, but fail to rescue $n.",
-			false, rescuee, 0, sa->ch, TO_VICT);
+      act ("$n makes another failed attempt at rescuing $N.",
+	   false, sa->ch, 0, rescuee, TO_NOTVICT);
+      act ("$N tries again, but fails to rescue you.",
+	   false, rescuee, 0, sa->ch, TO_CHAR);
+      act ("You try again, but fail to rescue $n.",
+	   false, rescuee, 0, sa->ch, TO_VICT);
 
 		add_second_affect (SA_RESCUE, number(3,10-GET_INT(sa->ch)/4), sa->ch, sa->obj, NULL, 0);
 
-		return;
-	}
+      return;
+    }
 
-	else if (result == 1)		/* Couldn't try...try asap */
-		add_second_affect (SA_RESCUE, 1, sa->ch, sa->obj, NULL, 0);
+  else if (result == 1)		/* Couldn't try...try asap */
+    add_second_affect (SA_RESCUE, 1, sa->ch, sa->obj, NULL, 0);
 
-	else if (result == 3)
-	{
+  else if (result == 3)
+    {
 
-		for (tch = sa->ch->room->people; tch; tch = tch->next_in_room)
-			if (tch->fighting == rescuee)
-				break;
+      for (tch = sa->ch->room->people; tch; tch = tch->next_in_room)
+	if (tch->fighting == rescuee)
+	  break;
 
-		if (!tch)
-			return;
+      if (!tch)
+	return;
 
-		if (!sa->ch->fighting)
-			set_fighting (sa->ch, tch);
-		else
-			sa->ch->fighting = tch;
+      if (!sa->ch->fighting)
+	set_fighting (sa->ch, tch);
+      else
+	sa->ch->fighting = tch;
 
 		tch->fighting = sa->ch;
 
@@ -4830,19 +4830,19 @@ sa_rescue (SECOND_AFFECT * sa)
 	  }
 
 /*		if (tch->fighting)
-		{
-			stop_fighting (tch);
-			if (rescuee->fighting)
-				stop_fighting (rescuee);
+	{
+	  stop_fighting (tch);
+	  if (rescuee->fighting)
+	    stop_fighting (rescuee);
 		} */
-		set_fighting (tch, sa->ch);
+      set_fighting (tch, sa->ch);
 
 	}
 	else if (result == 4) // Has too many people fighting them
 	{
 		add_second_affect (SA_RESCUE, 3, sa->ch, sa->obj, NULL, 0);
 		return;
-	}
+    }
 }
 
 	/* Rescue results:
@@ -5048,18 +5048,18 @@ do_rescue (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   else if (result == 3)
-  {
-	  act ("You draw $N's attention.", false, ch, 0, tch, TO_CHAR);
-	  act ("$N draws your attention.", false, tch, 0, ch, TO_CHAR);
-	  act ("$N draws $n's attention.", false, tch, 0, ch, TO_NOTVICT);
+    {
+      act ("You draw $N's attention.", false, ch, 0, tch, TO_CHAR);
+      act ("$N draws your attention.", false, tch, 0, ch, TO_CHAR);
+      act ("$N draws $n's attention.", false, tch, 0, ch, TO_NOTVICT);
 
-	  if (GET_POS (ch) != POSITION_DEAD && GET_POS (tch) != POSITION_DEAD)
-		  criminalize (ch, tch, ch->room->zone, CRIME_KILL);
+      if (GET_POS (ch) != POSITION_DEAD && GET_POS (tch) != POSITION_DEAD)
+	criminalize (ch, tch, ch->room->zone, CRIME_KILL);
 
-	  if (!tch->fighting)
-		  set_fighting (tch, ch);
-	  else
-		  tch->fighting = ch;
+      if (!tch->fighting)
+	set_fighting (tch, ch);
+      else
+	tch->fighting = ch;
 
 	  bool still_fighting = false;
 	  CHAR_DATA *still_fighting_char = NULL;
@@ -5134,7 +5134,7 @@ do_rescue (CHAR_DATA * ch, char *argument, int cmd)
 			  }
 		  }
 	  }
-  }
+    }
 
   else if (result == 1)
     {

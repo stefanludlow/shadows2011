@@ -98,6 +98,7 @@ weather (int moon_setting, int moon_rise, int moon_set)
   int roll = 0, chance_of_rain = 0, last_fog = 0, i = 0;
   char buf[MAX_STRING_LENGTH];
   char storm[MAX_STRING_LENGTH];
+  char wind[20] = { '\0' };
 
   for (i = 0; i <= 99; i++)
     {
@@ -119,30 +120,531 @@ weather (int moon_setting, int moon_rise, int moon_set)
 
       weather_info[i].temperature += weather_info[i].trend;
 
-      if ((weather_info[i].wind_speed < STORMY)
+  /*** If there is a wind there is a chance it will change direction ***/
+  /*
+		I do not claim to be knowledgeable in meteorology so this
+		code is going to be far from scientific. I am working on
+		the following principle, however:
+
+		The wind is more likely to change direction a little than
+		to completely turn around and blow in the opposite direction.
+		That assumption made, whatever the current direction of the wind,
+		the chance of it moving to another direction gets lower as the
+		directions get further from the current one, with the least
+		likely being the absolute opposite direction.
+
+		- Valarauka
+  */
+    if ((weather_info[i].wind_speed < STORMY)
 	  && (weather_info[i].wind_speed > CALM))
 	{
-	  if (weather_info[i].wind_dir == WEST_WIND)
-	    {
-	      if (!number (0, 47))
+	  if (weather_info[i].wind_dir == WEST_WIND) //currently westerly
+	  {
+	    /* Check for changes: most likely -> least likely */
+
+		/* Southwest and Northwest are most likely */
+		if (!number (0, 5))
 		{
-		  send_outside_zone
-		    ("The westerly winds wane and colder air descends out of the north.\n\r",
+			send_outside_zone
+		    ("The westerly winds veer a little, coming more now from the southwest.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHWEST_WIND;
+		}
+		else if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The westerly winds veer a little, coming more now from the northwest.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHWEST_WIND;
+		}
+
+		/* Next most likely are North and South */
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The westerly wind turns and begins to blow more from the north.\n\r",
 		     i);
 		  weather_info[i].wind_dir = NORTH_WIND;
 		}
-	    }
-	  else
-	    {
-	      if (!number (0, 23))
+		else if (!number (0, 10))
 		{
-		  send_outside_zone
-		    ("The warmer prevailing winds rise up out of the west, driving off the chill northerlies.\n\r",
+			send_outside_zone
+		    ("The westerly wind turns and begins to blow more from the south.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTH_WIND;
+		}
+
+		/* Next most likely are Northeast and Southeast */
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The westerly wind turns dramatically, moving almost back on itself to blow from the southeast.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHEAST_WIND;
+		}
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The westerly wind turns dramatically, moving almost back on itself to blow from the northeast.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHEAST_WIND;
+		}
+
+		/* Least likely is an Easterly wind*/
+		else if (!number (0, 25))
+		{
+			send_outside_zone
+		    ("The westerly wind suddenly reverses, blowing back on itself now from the east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = EAST_WIND;
+		}
+
+		/* If none of these happen, wind remains in the current direction for now */
+
+	  }
+	  else if (weather_info[i].wind_dir == SOUTHWEST_WIND) //currently southwesterly
+	  {
+		/* Check for changes: most likely -> least likely */
+
+		/* South and west are most likely */
+		if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The south westerly winds veer a little, coming more now from the south.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTH_WIND;
+		}
+		else if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The south westerly winds veer a little, coming more now from the west.\n\r",
 		     i);
 		  weather_info[i].wind_dir = WEST_WIND;
 		}
-	    }
+
+		/* Next most likely are Northwest and Southeast */
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The south westerly wind turns and begins to blow more from the north west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHWEST_WIND;
+		}
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The south westerly wind turns and begins to blow more from the south east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHEAST_WIND;
+		}
+
+		/* Next most likely are North and East */
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The south westerly wind turns dramatically, moving almost back on itself to blow from the north.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTH_WIND;
+		}
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The south westerly wind turns dramatically, moving almost back on itself to blow from the east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = EAST_WIND;
+		}
+
+		/* Least likely is a northeasterly wind*/
+		else if (!number (0, 25))
+		{
+			send_outside_zone
+		    ("The south westerly wind suddenly reverses, blowing back on itself now from the north east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHEAST_WIND;
+		}
+
+		/* If none of these happen, wind remains in the current direction for now */
+	  }
+	  else if (weather_info[i].wind_dir == SOUTH_WIND) //currently southerly
+	  {
+		/* Check for changes: most likely -> least likely */
+
+		/* Southeast and Southwest are most likely */
+		if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The southerly winds veer a little, coming more now from the south east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHEAST_WIND;
+		}
+		else if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The southerly winds veer a little, coming more now from the south west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHWEST_WIND;
+		}
+
+		/* Next most likely are west and east */
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The southerly wind turns and begins to blow more from the west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = WEST_WIND;
+		}
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The southerly wind turns and begins to blow more from the east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = EAST_WIND;
+		}
+
+		/* Next most likely are Northwest and Northeast */
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The southerly wind turns dramatically, moving almost back on itself to blow from the north west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHWEST_WIND;
+		}
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The southerly wind turns dramatically, moving almost back on itself to blow from the north east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHEAST_WIND;
+		}
+
+		/* Least likely is a northerly wind*/
+		else if (!number (0, 25))
+		{
+			send_outside_zone
+		    ("The southerly wind suddenly reverses, blowing back on itself now from the north.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTH_WIND;
+		}
+
+		/* If none of these happen, wind remains in the current direction for now */
+	  }
+	  else if (weather_info[i].wind_dir == SOUTHEAST_WIND) //currently southeasterly
+	  {
+		/* Check for changes: most likely -> least likely */
+
+		/* East and South are most likely */
+		if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The south easterly winds veer a little, coming more now from the east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = EAST_WIND;
+		}
+		else if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The south easterly winds veer a little, coming more now from the south.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTH_WIND;
+		}
+
+		/* Next most likely are southwest and northeast */
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The south easterly wind turns and begins to blow more from the south west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHWEST_WIND;
+		}
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The south easterly wind turns and begins to blow more from the north east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHEAST_WIND;
+		}
+
+		/* Next most likely are West and North */
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The south easterly wind turns dramatically, moving almost back on itself to blow from the west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = WEST_WIND;
+		}
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The south easterly wind turns dramatically, moving almost back on itself to blow from the north.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTH_WIND;
+		}
+
+		/* Least likely is a northwesterly wind*/
+		else if (!number (0, 25))
+		{
+			send_outside_zone
+		    ("The westerly wind suddenly reverses, blowing back on itself now from the north west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHWEST_WIND;
+		}
+
+		/* If none of these happen, wind remains in the current direction for now */
+	  }
+	  else if (weather_info[i].wind_dir == EAST_WIND) //currently easterly
+	  {
+		/* Check for changes: most likely -> least likely */
+
+		/* Northeast and Southeast are most likely */
+		if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The easterly winds veer a little, coming more now from the north east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHEAST_WIND;
+		}
+		else if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The easterly winds veer a little, coming more now from the south east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHEAST_WIND;
+		}
+
+		/* Next most likely are north and south */
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The easterly wind turns and begins to blow more from the north.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTH_WIND;
+		}
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The easterly wind turns and begins to blow more from the south.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTH_WIND;
+		}
+
+		/* Next most likely are Northwest and Southwest */
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The easterly wind turns dramatically, moving almost back on itself to blow from the north west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHWEST_WIND;
+		}
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The easterly wind turns dramatically, moving almost back on itself to blow from the south west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHWEST_WIND;
+		}
+
+		/* Least likely is a westerly wind*/
+		else if (!number (0, 25))
+		{
+			send_outside_zone
+		    ("The easterly wind suddenly reverses, blowing back on itself now from the west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = WEST_WIND;
+		}
+
+		/* If none of these happen, wind remains in the current direction for now */
+	  }
+	  else if (weather_info[i].wind_dir == NORTHEAST_WIND) //currently northeasterly
+	  {
+		/* Check for changes: most likely -> least likely */
+
+		/* North and East are most likely */
+		if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The north easterly winds veer a little, coming more now from the north.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTH_WIND;
+		}
+		else if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The north easterly winds veer a little, coming more now from the east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = EAST_WIND;
+		}
+
+		/* Next most likely are northwest and southeast */
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The north easterly wind turns and begins to blow more from the north west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHWEST_WIND;
+		}
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The north easterly wind turns and begins to blow more from the south east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHEAST_WIND;
+		}
+
+		/* Next most likely are West and South */
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The north easterly wind turns dramatically, moving almost back on itself to blow from the west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = WEST_WIND;
+		}
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The north easterly wind turns dramatically, moving almost back on itself to blow from the south.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTH_WIND;
+		}
+
+		/* Least likely is a southwesterly wind*/
+		else if (!number (0, 25))
+		{
+			send_outside_zone
+		    ("The north easterly wind suddenly reverses, blowing back on itself now from the south west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHWEST_WIND;
+		}
+
+		/* If none of these happen, wind remains in the current direction for now */
+	  }
+	  else if (weather_info[i].wind_dir == NORTH_WIND) //currently northerly
+	  {
+		/* Check for changes: most likely -> least likely */
+
+		/* Northeast and Northwest are most likely */
+		if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The northerly winds veer a little, coming more now from the north east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHEAST_WIND;
+		}
+		else if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The northerly winds veer a little, coming more now from the north north west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHWEST_WIND;
+		}
+
+		/* Next most likely are west and east */
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The northerly wind turns and begins to blow more from the west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = WEST_WIND;
+		}
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The northerly wind turns and begins to blow more from the east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = EAST_WIND;
+		}
+
+		/* Next most likely are Southeast and Southwest */
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The northerly wind turns dramatically, moving almost back on itself to blow from the south east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHEAST_WIND;
+		}
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The northerly wind turns dramatically, moving almost back on itself to blow from the south west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHWEST_WIND;
+		}
+
+		/* Least likely is a southerly wind*/
+		else if (!number (0, 25))
+		{
+			send_outside_zone
+		    ("The northerly wind suddenly reverses, blowing back on itself now from the south.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTH_WIND;
+		}
+
+		/* If none of these happen, wind remains in the current direction for now */
+	  }
+	  else if (weather_info[i].wind_dir == NORTHWEST_WIND) //currently northwesterly
+	  {
+		/* Check for changes: most likely -> least likely */
+
+		/* North and West are most likely */
+		if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The north westerly winds veer a little, coming more now from the north.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTH_WIND;
+		}
+		else if (!number (0, 5))
+		{
+			send_outside_zone
+		    ("The north westerly winds veer a little, coming more now from the west.\n\r",
+		     i);
+		  weather_info[i].wind_dir = WEST_WIND;
+		}
+
+		/* Next most likely are southwest and northeast */
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The north westerly wind turns and begins to blow more from the southwest.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHWEST_WIND;
+		}
+		else if (!number (0, 10))
+		{
+			send_outside_zone
+		    ("The north westerly wind turns and begins to blow more from the northeast.\n\r",
+		     i);
+		  weather_info[i].wind_dir = NORTHEAST_WIND;
+		}
+
+		/* Next most likely are east and South */
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The north westerly wind turns dramatically, moving almost back on itself to blow from the east.\n\r",
+		     i);
+		  weather_info[i].wind_dir = EAST_WIND;
+		}
+		else if (!number (0, 20))
+		{
+			send_outside_zone
+		    ("The north westerly wind turns dramatically, moving almost back on itself to blow from the south.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTH_WIND;
+		}
+
+		/* Least likely is a southeasterly wind*/
+		else if (!number (0, 25))
+		{
+			send_outside_zone
+		    ("The north westerly wind suddenly reverses, blowing back on itself now from the southeast.\n\r",
+		     i);
+		  weather_info[i].wind_dir = SOUTHEAST_WIND;
+		}
+
+		/* If none of these happen, wind remains in the current direction for now */
+	  }
 	}
+	/*** End wind direction code ***/
 
       if (!number (0, 15) && weather_info[i].wind_speed)
 	{
@@ -214,82 +716,93 @@ weather (int moon_setting, int moon_rise, int moon_set)
 	    }
 	}
 
+	  if (weather_info[i].wind_dir == NORTH_WIND)
+	  {
+		  sprintf (wind, "northerly");
+	  }
+	  else if(weather_info[i].wind_dir == NORTHEAST_WIND)
+	  {
+		  sprintf (wind, "north easterly");
+	  }
+	  else if(weather_info[i].wind_dir == EAST_WIND)
+	  {
+		  sprintf (wind, "easterly");
+	  }
+	  else if(weather_info[i].wind_dir == SOUTHEAST_WIND)
+	  {
+		  sprintf (wind, "south easterly");
+	  }
+	  else if(weather_info[i].wind_dir == SOUTH_WIND)
+	  {
+		  sprintf (wind, "southerly");
+	  }
+	  else if(weather_info[i].wind_dir == SOUTHWEST_WIND)
+	  {
+		  sprintf (wind, "south westerly");
+	  }
+	  else if(weather_info[i].wind_dir == NORTHWEST_WIND)
+	  {
+		  sprintf (wind, "north westerly");
+	  }
+	  else
+	  {
+		  sprintf (wind, "westerly");
+	  }
+
       if (weather_info[i].fog < THICK_FOG)
 	{
 	  if ((weather_info[i].clouds == CLEAR_SKY)
 	      && (weather_info[i].clouds != last_clouds))
 	    {
-	      if (weather_info[i].wind_dir == WEST_WIND)
-		send_outside_zone
-		  ("The clouds are born away upon the prevailing winds and clear skies open up above.\n",
-		   i);
-	      if (weather_info[i].wind_dir == NORTH_WIND)
-		send_outside_zone
-		  ("The northern winds carry away the cloud cover, leaving the sky clear.\n\r",
-		   i);
+			sprintf (buf,
+			       "The clouds are born away upon the prevailing %s winds and clear skies open up above.\n\r",
+			       wind);
+		    send_outside_zone (buf, i);
+
 	    }
 
 	  if ((weather_info[i].clouds == LIGHT_CLOUDS)
 	      && (weather_info[i].clouds != last_clouds))
 	    {
-	      if (weather_info[i].wind_dir == WEST_WIND)
-		{
+	      
 		  if (last_clouds > weather_info[i].clouds)
-		    send_outside_zone
-		      ("The cloud cover begins to clear, carried eastward upon the prevailing winds.\n\r",
-		       i);
+		  {
+			  sprintf (buf,
+			       "The cloud cover begins to clear, carried away upon the prevailing %s winds.\n\r",
+			       wind);
+			  send_outside_zone (buf, i);
+		  }
 		  if (last_clouds < weather_info[i].clouds)
-		    send_outside_zone
-		      ("Wisplike clouds drift out of the west upon the prevailing winds.\n\r",
-		       i);
-		}
-
-	      if (weather_info[i].wind_dir == NORTH_WIND)
-		{
-		  if (last_clouds > weather_info[i].clouds)
-		    send_outside_zone
-		      ("The cloud cover begins to clear, carried southward upon the chill northern winds.\n\r",
-		       i);
-		  if (last_clouds < weather_info[i].clouds)
-		    send_outside_zone
-		      ("Threadlike clouds begin to drift overhead upon the chill northern winds.\n\r",
-		       i);
-		}
+		  {
+			  sprintf (buf,
+			       "Wisplike clouds drift in overhead, carried upon the prevailing %s winds.\n\r",
+			       wind);
+			  send_outside_zone (buf, i);
+		  }  
 	    }
 
 	  if ((weather_info[i].clouds == HEAVY_CLOUDS)
 	      && (weather_info[i].clouds != last_clouds))
 	    {
-	      if (weather_info[i].wind_dir == WEST_WIND)
-		{
 		  if (last_clouds < weather_info[i].clouds)
-		    send_outside_zone
-		      ("A host of clouds marches out of the west upon the prevailing winds.\n\r",
-		       i);
+		  {
+			  sprintf (buf,
+			       "A host of clouds marches overhead upon the prevailing %s winds.\n\r",
+			       wind);
+			  send_outside_zone (buf, i);
+		  }
 		  if (last_clouds > weather_info[i].clouds)
-		    send_outside_zone
-		      ("Small patches of sky open up as the storm clouds drift eastward.\n\r",
-		       i);
-		}
-
-	      if (weather_info[i].wind_dir == NORTH_WIND)
-		{
-		  if (last_clouds > weather_info[i].clouds)
-		    send_outside_zone
-		      ("Small patches of sky peek through the cloud cover as the storm clouds move southward.\n\r",
-		       i);
-		  if (last_clouds < weather_info[i].clouds)
-		    send_outside_zone
-		      ("The chill northerly winds bring heavy clouds in their wake.\n\r",
-		       i);
-		}
+		  {
+			  sprintf (buf,
+			       "Small patches of sky open up as the storm clouds drift away on the prevailing %s winds.\n\r",
+			       wind);
+			  send_outside_zone (buf, i);
+		  }
 	    }
 
 	  if ((weather_info[i].clouds == OVERCAST)
 	      && (weather_info[i].clouds != last_clouds))
 	    {
-	      if (weather_info[i].wind_dir == WEST_WIND)
-		{
 		  if (sun_light == 1)
 		    send_outside_zone
 		      ("The prevailing winds bring a blanket of thick storm clouds to obscure Anor.\n\r",
@@ -298,19 +811,6 @@ weather (int moon_setting, int moon_rise, int moon_set)
 		    send_outside_zone
 		      ("The prevailing winds bring a blanket of thick storm clouds into the sky.\n\r",
 		       i);
-		}
-
-	      if (weather_info[i].wind_dir == NORTH_WIND)
-		{
-		  if (sun_light == 1)
-		    send_outside_zone
-		      ("A thick veil of storm clouds sweeps out of the north, plunging the land into twilight.\n\r",
-		       i);
-		  else
-		    send_outside_zone
-		      ("A thick veil of storm clouds sweeps out of the north.\n\r",
-		       i);
-		}
 	    }
 	}
 
@@ -930,3 +1430,245 @@ weather_and_time (int mode)
 
   weather (moon_setting, moon_rising, moon_set);
 }
+
+int
+weather_object_exists(OBJ_DATA * list, int vnum)
+{
+  for (; list; list = list->next_content)
+    if (list->nVirtual == vnum)
+      return 1;
+
+  return 0;
+}
+
+
+/*
+load_weather_obj()
+
+This function is called every time do_look is called for a room
+and checks the weather in room being looked at to see if the appropriate
+objects for the current weather are present and if not loads them as required.
+
+The objects
+
+*/
+void
+load_weather_obj(ROOM_DATA *troom)
+{
+	OBJ_DATA *obj = NULL;
+	int number = 0;
+
+	/* If it is raining */
+	if((weather_info[troom->zone].state > CHANCE_RAIN)
+		&&(weather_info[troom->zone].state < LIGHT_SNOW))
+	{
+		//if there is snow in the room replace it with slush
+		if((weather_object_exists(troom->contents, weather_objects[0]))||
+			(weather_object_exists(troom->contents, weather_objects[1])))
+		{
+			//remove snow from room
+			if((obj = get_obj_in_list_num (weather_objects[0], troom->contents)))
+				extract_obj(obj);
+			if((obj = get_obj_in_list_num (weather_objects[1], troom->contents)))
+				extract_obj(obj);
+
+			//load slush in room
+			obj = load_object(weather_objects[2]);
+			obj_to_room (obj, troom->nVirtual);
+		}
+		else
+		{
+			//if there is ash, replace it with muddy ash
+			if((weather_object_exists(troom->contents, weather_objects[5]))||
+				(weather_object_exists(troom->contents, weather_objects[6])))
+			{
+				//remove ash
+				if((obj = get_obj_in_list_num (weather_objects[5], troom->contents)))
+					extract_obj(obj);
+				if((obj = get_obj_in_list_num (weather_objects[6], troom->contents)))
+					extract_obj(obj);
+
+				//if not already muddy ash in the room load some
+				if(!(obj = get_obj_in_list_num (weather_objects[0], troom->contents)))
+				{
+					obj = load_object(weather_objects[9]);
+					obj_to_room (obj, troom->nVirtual);
+				}
+			}
+			else
+			{
+				//if there are old puddles replace them with new ones
+				if(weather_object_exists(troom->contents, weather_objects[4]))
+				{
+					//remove old puddles from room
+					if((obj = get_obj_in_list_num (weather_objects[4], troom->contents)))
+						extract_obj(obj);
+
+					//load fresh puddles in room
+					obj = load_object(weather_objects[3]);
+					obj_to_room (obj, troom->nVirtual);
+				}
+				else
+				{
+					//if there are no puddles or slush or muddy ash load puddles
+					if((!weather_object_exists(troom->contents, weather_objects[3]))&&
+						(!weather_object_exists(troom->contents, weather_objects[2]))&&
+						(!weather_object_exists(troom->contents, weather_objects[9])))
+					{
+						//load fresh puddles in room
+						obj = load_object(weather_objects[3]);
+						obj_to_room (obj, troom->nVirtual);
+					}
+				}
+			}
+		}
+	}
+	
+	/* If it is snowing */
+	else if(weather_info[troom->zone].state > HEAVY_RAIN)
+	{
+		//if there is rain in the room replace it with slush
+		if((weather_object_exists(troom->contents, weather_objects[3]))||
+			(weather_object_exists(troom->contents, weather_objects[4])))
+		{
+			//remove rain from room
+			if((obj = get_obj_in_list_num (weather_objects[3], troom->contents)))
+				extract_obj(obj);
+			if((obj = get_obj_in_list_num (weather_objects[4], troom->contents)))
+				extract_obj(obj);
+
+			//load slush in room
+			obj = load_object(weather_objects[2]);
+			obj_to_room (obj, troom->nVirtual);
+		}
+		else
+		{
+			//if there is ash, replace it with muddy ash
+			if((weather_object_exists(troom->contents, weather_objects[5]))||
+				(weather_object_exists(troom->contents, weather_objects[6])))
+			{
+				//remove ash
+				if((obj = get_obj_in_list_num (weather_objects[5], troom->contents)))
+					extract_obj(obj);
+				if((obj = get_obj_in_list_num (weather_objects[6], troom->contents)))
+					extract_obj(obj);
+
+				//if not already muddy ash in the room load some
+				if(!(obj = get_obj_in_list_num (weather_objects[9], troom->contents)))
+				{
+					obj = load_object(weather_objects[9]);
+					obj_to_room (obj, troom->nVirtual);
+				}
+			}
+			else
+			{
+				//if there is old snow replace it with new snow
+				if(weather_object_exists(troom->contents, weather_objects[1]))
+				{
+					//remove old snow from room
+					if((obj = get_obj_in_list_num (weather_objects[1], troom->contents)))
+						extract_obj(obj);
+
+					//load fresh snow in room
+					obj = load_object(weather_objects[0]);
+					obj_to_room (obj, troom->nVirtual);
+				}
+				else
+				{
+					//if there is no snow or slush or muddy ash load fresh snow
+					if((!weather_object_exists(troom->contents, weather_objects[2]))&&
+						(!weather_object_exists(troom->contents, weather_objects[0]))&&
+						(!weather_object_exists(troom->contents, weather_objects[9])))
+					{
+						//load fresh snow in room
+						obj = load_object(weather_objects[0]);
+						obj_to_room (obj, troom->nVirtual);
+					}
+				}
+			}
+		}
+	}
+
+	/* If volcanic smoke is set */
+	if(weather_info[troom->zone].special_effect == VOLCANIC_SMOKE)
+	{
+		//if there is snow or rain or slush, replace it with muddy ash
+		if((weather_object_exists(troom->contents, weather_objects[0]))||
+			(weather_object_exists(troom->contents, weather_objects[1]))||
+			(weather_object_exists(troom->contents, weather_objects[2]))||
+			(weather_object_exists(troom->contents, weather_objects[3]))||
+			(weather_object_exists(troom->contents, weather_objects[4])))
+		{
+				//remove snow/rain/slush
+				if((obj = get_obj_in_list_num (weather_objects[0], troom->contents)))
+					extract_obj(obj);
+				if((obj = get_obj_in_list_num (weather_objects[1], troom->contents)))
+					extract_obj(obj);
+				if((obj = get_obj_in_list_num (weather_objects[2], troom->contents)))
+					extract_obj(obj);
+				if((obj = get_obj_in_list_num (weather_objects[3], troom->contents)))
+					extract_obj(obj);
+				if((obj = get_obj_in_list_num (weather_objects[4], troom->contents)))
+					extract_obj(obj);
+
+				//if not already muddy ash in the room load some
+				if(!(obj = get_obj_in_list_num (weather_objects[9], troom->contents)))
+				{
+					obj = load_object(weather_objects[9]);
+					obj_to_room (obj, troom->nVirtual);
+				}
+		}
+		else
+		{
+			//if there is old ash replace it with new ash
+			if(weather_object_exists(troom->contents, weather_objects[6]))
+			{
+				//remove old ash from room
+				if((obj = get_obj_in_list_num (weather_objects[6], troom->contents)))
+					extract_obj(obj);
+
+				//load fresh ash in room
+				obj = load_object(weather_objects[5]);
+				obj_to_room (obj, troom->nVirtual);
+			}
+			else
+			{
+				//if there is no ash or muddy ash load it
+				if((!weather_object_exists(troom->contents, weather_objects[5]))&&
+					(!weather_object_exists(troom->contents, weather_objects[9])))
+				{
+					//load fresh ash in room
+					obj = load_object(weather_objects[5]);
+					obj_to_room (obj, troom->nVirtual);
+				}
+			}
+		}
+	}
+
+	/* If foul stench is set */
+	if(weather_info[troom->zone].special_effect == FOUL_STENCH)
+	{
+		//if there is old stench replace it with new stench
+		if(weather_object_exists(troom->contents, weather_objects[8]))
+		{
+			//remove old stench from room
+			if((obj = get_obj_in_list_num (weather_objects[8], troom->contents)))
+				extract_obj(obj);
+
+			//load fresh stench in room
+			obj = load_object(weather_objects[7]);
+			obj_to_room (obj, troom->nVirtual);
+		}
+		else
+		{
+			//if there is no stench load it
+			if((!weather_object_exists(troom->contents, weather_objects[7])))
+			{
+				//load fresh stench in room
+				obj = load_object(weather_objects[7]);
+				obj_to_room (obj, troom->nVirtual);
+			}
+		}
+	}
+}
+

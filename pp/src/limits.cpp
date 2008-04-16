@@ -624,7 +624,7 @@ point_update (void)
 		  if (!natural_healing_check (ch, wound))
 		    {
 				if (strcmp(wound->type, "stun"))
-					new_damage += wound->damage;
+		      new_damage += wound->damage;
 				else
 					new_damage += (wound->damage / 2);
 		    }

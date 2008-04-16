@@ -2628,7 +2628,7 @@ payday (CHAR_DATA * ch, CHAR_DATA * employer, AFFECTED_TYPE * af)
 	  		act (buf, true, ch, 0, employer, TO_CHAR | _ACT_FORMAT);
 	  		act ("$N pays $n some coins.", false, ch, 0, employer, 	       TO_NOTVICT | _ACT_FORMAT);
                         paid = true;
-			} //employer/keeper has the coin
+	  		} //employer/keeper has the coin
 	  	else
 	  		{
 	  		sprintf (buf, "$N whispers to you that they do not have the funds available. Try again later.");
@@ -2675,12 +2675,12 @@ payday (CHAR_DATA * ch, CHAR_DATA * employer, AFFECTED_TYPE * af)
     {
 	    t = time_info.year * 12 * 30 + time_info.month * 30 + time_info.day;
 	    af->a.job.pay_date = t + af->a.job.days;
-	    sprintf (buf, "\nYour next payday is in %d days.\n", af->a.job.days);
+  sprintf (buf, "\nYour next payday is in %d days.\n", af->a.job.days);
   send_to_char (buf, ch);
     }
 
   return;
-} 
+}
 
 void
 do_payday (CHAR_DATA * ch, char *argument, int cmd)
@@ -4101,32 +4101,32 @@ store 1 ig month
 void
 do_nod (CHAR_DATA * ch, char *argument, int cmd)
 {
-	int opened_a_door = 0;
-	int dir;
-	char buf[MAX_STRING_LENGTH];
-	char key_name[MAX_STRING_LENGTH];
+  int opened_a_door = 0;
+  int dir;
+  char buf[MAX_STRING_LENGTH];
+  char key_name[MAX_STRING_LENGTH];
 	CHAR_DATA *victim = NULL;
 
-	argument = one_argument (argument, buf);
+  argument = one_argument (argument, buf);
 
-	if (ch->room->nVirtual == AMPITHEATRE && IS_MORTAL (ch))
+  if (ch->room->nVirtual == AMPITHEATRE && IS_MORTAL (ch))
+    {
+      if (!get_obj_in_list_num (VNUM_SPEAKER_TOKEN, ch->right_hand) &&
+	  !get_obj_in_list_num (VNUM_SPEAKER_TOKEN, ch->left_hand))
 	{
-		if (!get_obj_in_list_num (VNUM_SPEAKER_TOKEN, ch->right_hand) &&
-			!get_obj_in_list_num (VNUM_SPEAKER_TOKEN, ch->left_hand))
-		{
-			send_to_char
-				("You decide against making a commotion. PETITION to request to speak.\n",
-				ch);
-			return;
-		}
+	  send_to_char
+	    ("You decide against making a commotion. PETITION to request to speak.\n",
+	     ch);
+	  return;
 	}
+    }
 
-	if (!*buf)
-	{
-		act ("You nod.", false, ch, 0, 0, TO_CHAR);
-		act ("$n nods.", false, ch, 0, 0, TO_ROOM);
-		return;
-	}
+  if (!*buf)
+    {
+      act ("You nod.", false, ch, 0, 0, TO_CHAR);
+      act ("$n nods.", false, ch, 0, 0, TO_ROOM);
+      return;
+    }
 
 	if (!strcmp(buf, "doorman") || !strcmp(buf, "doorkeep") || !strcmp(buf, "gatekeep"))
 	{
@@ -4152,91 +4152,91 @@ do_nod (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	if (!victim && !(victim = get_char_room_vis (ch, buf)))
+    {
+      send_to_char ("You don't see that person.\n\r", ch);
+      return;
+    }
+
+  if (IS_NPC (victim) &&
+      AWAKE (victim) &&
+      !victim->fighting &&
+      CAN_SEE (victim, ch) &&
+      is_brother (ch, victim) && has_a_key (victim) && !victim->desc)
+    {
+      if ((get_affect (ch, MAGIC_CRIM_BASE + ch->room->zone) 
+	   || get_affect (ch, MAGIC_CRIM_HOODED + ch->room->zone)) 
+	  && is_area_enforcer(victim)) 
 	{
-		send_to_char ("You don't see that person.\n\r", ch);
-		return;
+	  if (is_hooded(ch))
+	    {
+	      do_say (victim, "(sternly) Show yer face.", 0);
+	    }
+	  else 
+	    {
+	      do_alert (victim, "", 0);
+	      do_say (victim, "(sourly) You ain't gettin' away so easy, you lout.", 0);
+	    }
+	  return;
+	}
+      argument = one_argument (argument, buf);
+      
+      if (!*buf)
+	{
+	  for (dir = 0; dir <= LAST_DIR; dir++)
+	    {
+
+	      if (!EXIT (ch, dir))
+		continue;
+
+	      if (IS_SET (EXIT (ch, dir)->exit_info, EX_LOCKED)
+		  && !has_key (victim, NULL, EXIT (ch, dir)->key))
+		continue;
+
+	      one_argument (EXIT (victim, dir)->keyword, key_name);
+	      sprintf (buf, "unlock %s %s", key_name, dirs[dir]);
+	      command_interpreter (victim, buf);
+	      sprintf (buf, "open %s %s", key_name, dirs[dir]);
+	      command_interpreter (victim, buf);
+	      sprintf (buf, "%s %s", key_name, dirs[dir]);
+	      add_second_affect (SA_CLOSE_DOOR, 10, victim, NULL, buf, 0);
+
+	      opened_a_door = 1;
+	    }
+	}
+      else
+	{
+	  dir = is_direction (buf);
+	  if (dir == -1 || !EXIT (ch, dir))
+	    {
+	      send_to_char ("There is no exit in that direction.\n", ch);
+	      return;
+	    }
+	  if (IS_SET (EXIT (ch, dir)->exit_info, EX_LOCKED)
+	      && !has_key (victim, NULL, EXIT (ch, dir)->key))
+	    ;
+	  else
+	    {
+	      one_argument (EXIT (victim, dir)->keyword, key_name);
+	      sprintf (buf, "unlock %s %s", key_name, dirs[dir]);
+	      command_interpreter (victim, buf);
+	      sprintf (buf, "open %s %s", key_name, dirs[dir]);
+	      command_interpreter (victim, buf);
+	      sprintf (buf, "%s %s", key_name, dirs[dir]);
+	      add_second_affect (SA_CLOSE_DOOR, 10, victim, NULL, buf, 0);
+
+	      opened_a_door = 1;
+	    }
 	}
 
-	if (IS_NPC (victim) &&
-		AWAKE (victim) &&
-		!victim->fighting &&
-		CAN_SEE (victim, ch) &&
-		is_brother (ch, victim) && has_a_key (victim) && !victim->desc)
-	{
-		if ((get_affect (ch, MAGIC_CRIM_BASE + ch->room->zone) 
-			|| get_affect (ch, MAGIC_CRIM_HOODED + ch->room->zone)) 
-			&& is_area_enforcer(victim)) 
-		{
-			if (is_hooded(ch))
-			{
-				do_say (victim, "(sternly) Show yer face.", 0);
-			}
-			else 
-			{
-				do_alert (victim, "", 0);
-				do_say (victim, "(sourly) You ain't gettin' away so easy, you lout.", 0);
-			}
-			return;
-		}
-		argument = one_argument (argument, buf);
+      if (opened_a_door)
+	return;
+    }
 
-		if (!*buf)
-		{
-			for (dir = 0; dir <= LAST_DIR; dir++)
-			{
+  sprintf (buf, "You nod to #5%s#0.", char_short (victim));
+  act (buf, false, ch, 0, victim, TO_CHAR | _ACT_FORMAT);
 
-				if (!EXIT (ch, dir))
-					continue;
-
-				if (IS_SET (EXIT (ch, dir)->exit_info, EX_LOCKED)
-					&& !has_key (victim, NULL, EXIT (ch, dir)->key))
-					continue;
-
-				one_argument (EXIT (victim, dir)->keyword, key_name);
-				sprintf (buf, "unlock %s %s", key_name, dirs[dir]);
-				command_interpreter (victim, buf);
-				sprintf (buf, "open %s %s", key_name, dirs[dir]);
-				command_interpreter (victim, buf);
-				sprintf (buf, "%s %s", key_name, dirs[dir]);
-				add_second_affect (SA_CLOSE_DOOR, 10, victim, NULL, buf, 0);
-
-				opened_a_door = 1;
-			}
-		}
-		else
-		{
-			dir = is_direction (buf);
-			if (dir == -1 || !EXIT (ch, dir))
-			{
-				send_to_char ("There is no exit in that direction.\n", ch);
-				return;
-			}
-			if (IS_SET (EXIT (ch, dir)->exit_info, EX_LOCKED)
-				&& !has_key (victim, NULL, EXIT (ch, dir)->key))
-				;
-			else
-			{
-				one_argument (EXIT (victim, dir)->keyword, key_name);
-				sprintf (buf, "unlock %s %s", key_name, dirs[dir]);
-				command_interpreter (victim, buf);
-				sprintf (buf, "open %s %s", key_name, dirs[dir]);
-				command_interpreter (victim, buf);
-				sprintf (buf, "%s %s", key_name, dirs[dir]);
-				add_second_affect (SA_CLOSE_DOOR, 10, victim, NULL, buf, 0);
-
-				opened_a_door = 1;
-			}
-		}
-
-		if (opened_a_door)
-			return;
-	}
-
-	sprintf (buf, "You nod to #5%s#0.", char_short (victim));
-	act (buf, false, ch, 0, victim, TO_CHAR | _ACT_FORMAT);
-
-	act ("$n nods to you.", true, ch, 0, victim, TO_VICT | _ACT_FORMAT);
-	act ("$n nods to $N.", true, ch, 0, victim, TO_NOTVICT | _ACT_FORMAT);
+  act ("$n nods to you.", true, ch, 0, victim, TO_VICT | _ACT_FORMAT);
+  act ("$n nods to $N.", true, ch, 0, victim, TO_NOTVICT | _ACT_FORMAT);
 }
 
 void

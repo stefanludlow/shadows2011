@@ -135,8 +135,8 @@ enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness)
   {
 	  add_second_affect(SA_WARNED, number(17,25), crim, NULL, NULL, NULL);
 
-      if (!ch->fighting && !ch->ranged_enemy && !ch->delay)
-      {
+  if (!ch->fighting && !ch->ranged_enemy && !ch->delay)
+    {
 		  if (ch->race == lookup_race_id("Black Numenorean"))
 		{
 			do_say(ch, "You are to surrender to the Black Watch immediately or you will be slain!", 0);
@@ -147,8 +147,8 @@ enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness)
 		}
 		else
 		{
-			do_say (ch, "Surrender, now, or pay the consequences!", 0);
-		}
+      do_say (ch, "Surrender, now, or pay the consequences!", 0);
+    }
       }
 	  return 1;
   }

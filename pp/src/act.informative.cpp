@@ -137,6 +137,26 @@ const char *wind_speeds[] = {
   "\n"
 };
 
+const char *wind_directions[] = {
+  "westerly",
+  "north westerly",
+  "northerly",
+  "north easterly",
+  "easterly",
+  "south easterly",
+  "southerly",
+  "south westerly",
+  "\n"
+};
+
+const char *special_effects[] = {
+  "no effect",
+  "volcanic smoke",
+  "foul stench",
+  "low mist",
+  "\n"
+};
+
 
 const char *holiday_names[] = {
   "(null)",
@@ -4526,6 +4546,17 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 	  send_to_char (room__get_description (ch->room), ch);
 	}
 
+	  
+  /*** Every time a room is looked at, check for weather objects that need be loaded.
+	   To avoid uneccessary memory use this will not be done on the Builder Port. ***/
+	if(!(engine.in_build_mode ()))
+	{
+	  if(IS_OUTSIDE (ch))
+	  {
+		load_weather_obj(ch->room);
+	  }
+	}
+
       for (obj = ch->room->contents; obj; obj = obj->next_content)
 	if (CAN_SEE_OBJ (ch, obj))
 	  contents = true;
@@ -4573,6 +4604,26 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 	  else if (weather_info[ch->room->zone].state == CHANCE_RAIN)
 	    sprintf (buf + strlen (buf),
 		     "#6The air here carries the subtle aroma of impending rain.\n#0");
+	  /*** Special effects set by IMMs***/
+	  if (weather_info[ch->room->zone].special_effect != NO_EFFECT)
+	  {
+		  //show effect specific message
+		  if (weather_info[ch->room->zone].special_effect == VOLCANIC_SMOKE)	
+		  {
+			   sprintf (buf + strlen (buf),
+				   "#6A cloud of thick, dust filled volcanic smoke drifts through the air.\n#0");
+		  }
+		  else if (weather_info[ch->room->zone].special_effect == FOUL_STENCH)	
+		  {
+			sprintf (buf + strlen (buf),
+				"#6A foul stench permeates the area.\n#0");
+		  }
+		  else if (weather_info[ch->room->zone].special_effect == LOW_MIST)	
+		  {
+			sprintf (buf + strlen (buf),
+				"#6A low, eerie mist sits heavily upon the land.\n#0");
+		  }
+	  }
 	  if (contents)
 	    sprintf (buf + strlen (buf), "\n");
 	  if (strlen (buf) > 2)
@@ -6072,47 +6123,129 @@ do_weather (CHAR_DATA * ch, char *argument, int cmd)
   int high_sun = 0;
   AFFECTED_TYPE *room_af = NULL;
   extern AFFECTED_TYPE *world_affects;
+  int i = 0;
 
+  
   argument = one_argument (argument, buf);
 
+/*** Start set weather ***/
+  if(!strcmp("set", buf))
+  {
+	  argument = one_argument (argument, buf);
+	  
+	  if(!strcmp("?", buf))
+	  {
+		  send_to_char("The following weather states are available:\n\n", ch);
 
-  if (!IS_MORTAL (ch) && GET_TRUST (ch) > 4 && *buf)
-    {
-      if ((ind = index_lookup (weather_states, buf)) != -1)
-	{
-	  sprintf (buf, "You have changed the weather state to #6%s#0.\n",
-		   weather_states[ind]);
-	  send_to_char (buf, ch);
-	  weather_info[ch->room->zone].state = ind;
-	  return;
-	}
-      else if ((ind = index_lookup (weather_clouds, buf)) != -1)
-	{
-	  sprintf (buf, "You have changed cloud state to #6%s#0.\n",
-		   weather_clouds[ind]);
-	  send_to_char (buf, ch);
-	  weather_info[ch->room->zone].clouds = ind;
-	  return;
-	}
-      else if ((ind = index_lookup (wind_speeds, buf)) != -1)
-	{
-	  sprintf (buf, "You have changed wind speed to #6%s#0.\n",
-		   wind_speeds[ind]);
-	  send_to_char (buf, ch);
-	  weather_info[ch->room->zone].wind_speed = ind;
-	  return;
-	}
-      else if ((ind = index_lookup (fog_states, buf)) != -1)
-	{
-	  sprintf (buf, "You have changed the fog level to #6%s#0.\n",
-		   fog_states[ind]);
-	  send_to_char (buf, ch);
-	  weather_info[ch->room->zone].fog = ind;
-	  return;
-	}
-      send_to_char ("That is not a recognized weather state.\n", ch);
-      return;
-    }
+		  /* Cycle through each struct and show options */
+		  sprintf (buf,"     Fog States\n");
+		  for (i = 0; *fog_states[i] != '\n'; i++)
+		  {
+				sprintf (buf + strlen (buf),"     #6%s#0\n",
+				fog_states[i]);
+		  }
+		  sprintf (buf + strlen (buf),"\n");
+
+		  sprintf (buf + strlen (buf),"     Precipitation States\n");
+		  for (i = 0; *weather_states[i] != '\n'; i++)
+		  {
+				sprintf (buf + strlen (buf),"     #6%s#0\n",
+				weather_states[i]);
+		  }
+		  sprintf (buf + strlen (buf),"\n");
+
+		  sprintf (buf + strlen (buf),"     Cloud Covers\n");
+		  for (i = 0; *weather_clouds[i] != '\n'; i++)
+		  {
+				sprintf (buf + strlen (buf),"     #6%s#0\n",
+				weather_clouds[i]);
+		  }
+		  sprintf (buf + strlen (buf),"\n");
+
+		  sprintf (buf + strlen (buf),"     Wind Speeds\n");
+		  for (i = 0; *wind_speeds[i] != '\n'; i++)
+		  {
+				sprintf (buf + strlen (buf),"     #6%s#0\n",
+				wind_speeds[i]);
+		  }
+		  sprintf (buf + strlen (buf),"\n");
+
+		  sprintf (buf + strlen (buf),"     Wind Directions\n");
+		  for (i = 0; *wind_directions[i] != '\n'; i++)
+		  {
+				sprintf (buf + strlen (buf),"     #6%s#0\n",
+				wind_directions[i]);
+		  }
+		  sprintf (buf + strlen (buf),"\n");
+
+		  sprintf (buf + strlen (buf),"     Special Effects\n");
+		  for (i = 0; *special_effects[i] != '\n'; i++)
+		  {
+				sprintf (buf + strlen (buf),"     #6%s#0\n",
+				special_effects[i]);
+		  }
+		  sprintf (buf + strlen (buf),"\n");
+
+		  page_string(ch->desc, buf);
+	      
+		  return;
+	  }
+
+	  if (!IS_MORTAL (ch) && GET_TRUST (ch) > 3 && *buf)
+		{
+		  if ((ind = index_lookup (weather_states, buf)) != -1)
+		{
+		  sprintf (buf, "You have changed the precipitation state to #6%s#0.\n",
+			   weather_states[ind]);
+		  send_to_char (buf, ch);
+		  weather_info[ch->room->zone].state = ind;
+		  return;
+		}
+		  else if ((ind = index_lookup (weather_clouds, buf)) != -1)
+		{
+		  sprintf (buf, "You have changed cloud state to #6%s#0.\n",
+			   weather_clouds[ind]);
+		  send_to_char (buf, ch);
+		  weather_info[ch->room->zone].clouds = ind;
+		  return;
+		}
+		  else if ((ind = index_lookup (wind_speeds, buf)) != -1)
+		{
+		  sprintf (buf, "You have changed wind speed to #6%s#0.\n",
+			   wind_speeds[ind]);
+		  send_to_char (buf, ch);
+		  weather_info[ch->room->zone].wind_speed = ind;
+		  return;
+		}
+		  else if ((ind = index_lookup (fog_states, buf)) != -1)
+		{
+		  sprintf (buf, "You have changed the fog level to #6%s#0.\n",
+			   fog_states[ind]);
+		  send_to_char (buf, ch);
+		  weather_info[ch->room->zone].fog = ind;
+		  return;
+		}
+		  else if((ind = index_lookup (wind_directions, buf)) != -1)
+		{
+		  sprintf (buf, "You have changed the wind direction to #6%s#0.\n",
+			   wind_directions[ind]);
+		  send_to_char (buf, ch);
+		  weather_info[ch->room->zone].wind_dir = ind;
+		  return;
+		}
+		   else if((ind = index_lookup (special_effects, buf)) != -1)
+		{
+		  sprintf (buf, "You have changed the special effect to #6%s#0.\n",
+			   special_effects[ind]);
+		  send_to_char (buf, ch);
+		  weather_info[ch->room->zone].special_effect = ind;
+		  return;
+		}
+		  send_to_char ("That is not a recognized weather state.\n", ch);
+		  return;
+		}
+  }
+/*** End set weather***/
 
   if (IS_OUTSIDE (ch))
     {
@@ -6388,6 +6521,18 @@ do_weather (CHAR_DATA * ch, char *argument, int cmd)
 
 	  if (weather_info[ch->room->zone].wind_dir == NORTH_WIND)
 	    sprintf (wind, "%s northerly", buf);
+	  else if(weather_info[ch->room->zone].wind_dir == NORTHEAST_WIND)
+		sprintf (wind, "%s north easterly", buf);
+	  else if(weather_info[ch->room->zone].wind_dir == EAST_WIND)
+		sprintf (wind, "%s easterly", buf);
+	  else if(weather_info[ch->room->zone].wind_dir == SOUTHEAST_WIND)
+		sprintf (wind, "%s south easterly", buf);
+	  else if(weather_info[ch->room->zone].wind_dir == SOUTH_WIND)
+		sprintf (wind, "%s southerly", buf);
+	  else if(weather_info[ch->room->zone].wind_dir == SOUTHWEST_WIND)
+		sprintf (wind, "%s south westerly", buf);
+	  else if(weather_info[ch->room->zone].wind_dir == NORTHWEST_WIND)
+		sprintf (wind, "%s north westerly", buf);
 	  else
 	    sprintf (wind, "%s westerly", buf);
 	}
@@ -6490,6 +6635,30 @@ do_weather (CHAR_DATA * ch, char *argument, int cmd)
 	    ("Looming black clouds cover the sky, blotting out the sun.\n",
 	     ch);
 	}
+
+	  /*** Special effects set by IMMs***/
+	  if (weather_info[ch->room->zone].special_effect != NO_EFFECT)
+	  {
+		  //show effect specific message
+		  if (weather_info[ch->room->zone].special_effect == VOLCANIC_SMOKE)	
+		  {
+			send_to_char
+				("A cloud of thick, dust filled volcanic smoke drifts through the air.\n",
+				ch);
+		  }
+		  else if (weather_info[ch->room->zone].special_effect == FOUL_STENCH)	
+		  {
+			send_to_char
+				("A foul stench permeates the area.\n",
+				ch);
+		  }
+		  else if (weather_info[ch->room->zone].special_effect == LOW_MIST)	
+		  {
+			send_to_char
+				("A low, eerie mist sits heavily upon the land.\n",
+				ch);
+		  }
+	  }
 
       if (moon_light[ch->room->zone] >= 1)
 	{

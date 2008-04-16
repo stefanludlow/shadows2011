@@ -38,7 +38,10 @@ enum wind_dir_type {
   NORTHWEST_WIND,
   NORTH_WIND,
   NORTHEAST_WIND,
-  EAST_WIND
+  EAST_WIND,
+  SOUTHEAST_WIND,
+  SOUTH_WIND,
+  SOUTHWEST_WIND
 };
 
 enum wind_str_type {
@@ -67,6 +70,28 @@ enum rain_type {
   HEAVY_SNOW
 };
 
+enum special_effect {
+  NO_EFFECT,
+  VOLCANIC_SMOKE,
+  FOUL_STENCH,
+  LOW_MIST
+};
+
+/* Objects loaded by weather code */
+#define NUM_WEATHER_OBJECTS 10 
+const int weather_objects[NUM_WEATHER_OBJECTS] = { 
+  95083, // Fresh snow
+  95084, // Old snow
+  95085, // Slush (snow + rain)
+  95086, // fresh puddles
+  95087, // old puddles
+  95088, // fresh ash
+  95089, // old ash
+  95090, // fresh stench
+  95091, // old stench
+  95092 // Muddy Ash puddles (ash + snow/rain)
+};
+
 class Weather
 {
  private:
@@ -81,6 +106,7 @@ class Weather
   int lightning;
   int wind_dir;
   int wind_speed;
+  int special_effect;
 
   static bool weather_unification (int zone);
 };

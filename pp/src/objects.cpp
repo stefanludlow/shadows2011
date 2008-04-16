@@ -2642,7 +2642,7 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	else if (!strcmp (buf, "all"))
 	{
-		bites = MAX (1, obj->o.food.bites);	
+		bites = MAX (1, obj->o.food.bites);
 	}
 	else 
 	{
@@ -2694,7 +2694,7 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
 	for (int i = 0; i < bites; i++)
 	{
 		if (ch->hunger < 20)  
-	       ch->hunger += get_bite_value (obj);
+	  ch->hunger += get_bite_value (obj);
 	  if (ch->hunger > 20)
 	    act ("You are full.", false, ch, 0, 0, TO_CHAR);
 	  if (ch->hunger > 20)
@@ -4904,7 +4904,7 @@ do_sheathe (CHAR_DATA * ch, char *argument, int cmd)
 	  return;
 	}
       if (can_obj_to_container (obj, sheath, &msg, count))
-		sheathed++;
+	sheathed++;
     }
   else if (!*arg2)
     {
