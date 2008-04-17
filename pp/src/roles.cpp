@@ -1,8 +1,68 @@
-/*------------------------------------------------------------------------\
-|  roles.c : coded support for the Role OLC system    www.middle-earth.us | 
-|  Copyright (C) 2005, Shadows of Isildur: Traithe                        |
-|  Derived under license from DIKU GAMMA (0.0).                           |
-\------------------------------------------------------------------------*/
+//////////////////////////////////////////////////////////////////////////////
+//
+/// roles.c : coded support for the Role OLC system
+//
+/// Shadows of Isildur RPI Engine++
+/// Copyright (C) 2005-2007 C. W. McHenry
+/// Authors: C. W. McHenry (traithe@middle-earth.us)
+///          Jonathan W. Webb (sighentist@middle-earth.us)
+///          Mary C. Huston (bristlecone@middle-earth.us)
+/// URL: http://www.middle-earth.us
+//
+/// May includes portions derived from Harshlands
+/// Authors: Charles Rand (Rassilon)
+/// URL: http://www.harshlands.net
+//
+/// May include portions derived under license from DikuMUD Gamma (0.0)
+/// which are Copyright (C) 1990, 1991 DIKU
+/// Authors: Hans Henrik Staerfeldt (bombman@freja.diku.dk)
+///          Tom Madson (noop@freja.diku.dk)
+///          Katja Nyboe (katz@freja.diku.dk)
+///          Michael Seifert (seifert@freja.diku.dk)
+///          Sebastian Hammer (quinn@freja.diku.dk)
+//
+//////////////////////////////////////////////////////////////////////////////
+/*----------------------------------------------------------------------
+-- Table structure for table `special_roles`
+--
+
+CREATE TABLE IF NOT EXISTS `special_roles` (
+  `summary` varchar(255) default NULL,
+  `poster` varchar(255) default NULL,
+  `date` varchar(255) default NULL,
+  `cost` int(10) unsigned default NULL,
+  `body` text,
+  `timestamp` int(10) unsigned NOT NULL default '0'
+) TYPE=MyISAM;
+
+--
+-- Table structure for table `special_roles_outfit`
+-- 
+
+CREATE TABLE IF NOT EXISTS `special_roles_outfit` (
+`role_id` int(11) NOT NULL,
+`outfit_id` int(11) auto_increment,
+`role_desc` text,
+`obj_vnum` int(11) NOT NULL default '0',
+`obj_qty` int(11) NOT NULL default '1',
+`clan_string` varchar(255) NOT NULL, 
+`clan_rank` varchar(255)NOT NULL,
+`payday_num` int(11)  NOT NULL default '0',
+`payday_obj_vnum` int(11) NOT NULL default '0',
+`payday_obj_qty` int(11) NOT NULL default '1',
+`payday_employer` int(11) NOT NULL default '0',
+`payday_days` int(11) NOT NULL default '0',
+`req_skill` varchar(255) NOT NULL,
+`req_race` varchar(255) NOT NULL,
+`skill_string` varchar(255) NOT NULL,
+`skill_value` int(11)  NOT NULL default '0',
+`craft` varchar(255) NOT NULL,
+KEY `role_id` (`role_id`),
+PRIMARY KEY  (`outfit_id`)  
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+\------------------------------------------------------------------*/
+
+
 
 #include <stdlib.h>
 #include <ctype.h>
@@ -18,15 +78,10 @@
 #include "utils.h"
 #include "utility.h"
 
-/*
- *	To-Do List:
- *
- *	1. Add an outfit_new_char() call in nanny.cpp for new RPP chars.
- *	2. Add skill bonuses/penalties to outfitting table.
- *	3. Add individual crafts to outfitting table.
- *
- */
 
+extern void do_addcraft (CHAR_DATA * ch, char *argument, int cmd);
+
+void delete_role (CHAR_DATA * ch, char *argument);
 #define	NEW_PLAYER_TRUNK	945
 #define OOC_BRIEFING_SIGN	965
 
@@ -35,12 +90,22 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
 {
 	MYSQL_RES       *result = NULL;
 	MYSQL_ROW       row = NULL;
-	OBJ_DATA        *obj = NULL, *tobj = NULL;
+	OBJ_DATA        *obj = NULL;
+	OBJ_DATA				*tobj = NULL;
 	CLAN_DATA       *clan;
-    AFFECTED_TYPE   *af;
+	SUBCRAFT_HEAD_DATA *craft;
+  AFFECTED_TYPE   *af;
 	char            buf[MAX_STRING_LENGTH];
-    int             clan_flags = 0, pay_date = 0, job = 0, ind = 0;
-    
+	char            craft_name[AVG_STRING_LENGTH];
+	char            skill_name[AVG_STRING_LENGTH];
+  int             clan_flags = 0;
+  int							skill_level = 0;
+  int							pay_date = 0;
+  int							job = 0;
+  int							ind = 0;
+  int							index = 0;
+ 	
+ //Load Items
 	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND obj_vnum > 0 ORDER BY obj_vnum ASC", role->id);
 	mysql_safe_query (buf);
 	
@@ -74,6 +139,7 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
 	if ( result )
 		mysql_free_result (result);
 		
+//Add Clanning to PC		
 	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND clan_string != '' ORDER BY clan_string ASC", role->id);
 	mysql_safe_query (buf);
 	
@@ -148,6 +214,7 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
 	if ( result )
 		mysql_free_result (result);
 
+//Add Paydays
 	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND payday_num > 0 ORDER BY payday_num ASC", role->id);
 	mysql_safe_query (buf);
 	
@@ -171,6 +238,73 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
     if ( result )
         mysql_free_result (result);
 
+//Add crafts
+	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND craft != '' ORDER BY craft ASC", role->id);
+	mysql_safe_query (buf);
+
+	result = mysql_store_result (database);
+
+	if (result && mysql_num_rows(result) > 0 )
+	{
+		while ( (row = mysql_fetch_row(result)) )
+        {
+         	sprintf (craft_name, "%s", row[16]);
+         	for (craft = crafts; craft; craft = craft->next)
+						{
+							if (!str_cmp (craft->subcraft_name, craft_name))
+								break;     
+						}
+
+					if (craft)
+						{
+						//find an empty affect location
+							for (index = CRAFT_FIRST; index <= CRAFT_LAST; index++)
+    						if (!get_affect (ch, index))
+      						break; 
+      						
+							magic_add_affect (ch, index, -1, 0, 0, 0, 0);
+							af = get_affect (ch, index);
+							af->a.craft =
+					(struct affect_craft_type *) alloc (sizeof (struct affect_craft_type),
+											23);
+							af->a.craft->subcraft = craft;
+				 			send_to_char ("Craft added.\n", ch);
+							continue;
+						}		
+        }//end while
+    }
+    
+    if ( result )
+        mysql_free_result (result);
+        
+//Add Skills
+	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND skill_string != '' ORDER BY skill_string ASC", role->id);
+	mysql_safe_query (buf);
+	
+	result = mysql_store_result (database);
+	
+	if ( result && mysql_num_rows(result) > 0 )
+	{
+		while ( (row = mysql_fetch_row(result)) )
+		{
+			sprintf(skill_name, row[14]); 
+			skill_level = atoi(row[15]);
+			
+			if ( (ind = index_lookup (skills, skill_name)) != -1 )
+				{
+					if (ch->skills[ind] < skill_level) //they need the boost
+						ch->skills[ind] = skill_level; 
+							
+					continue;
+				}
+		}//end while
+	
+	}
+    
+    if ( result )
+        mysql_free_result (result);
+ 
+//Display the Role Briefing
     sprintf (buf, "SELECT role_desc FROM special_roles_outfit WHERE role_id = %d AND role_desc != ''", role->id);
 	mysql_safe_query (buf);
 	
@@ -185,8 +319,7 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
 		obj_to_room (tobj, ch->room->nVirtual);
 	}
 	
-	if ( result )
-		mysql_free_result (result);
+	
 }
 
 void
@@ -195,12 +328,17 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 	MYSQL_RES	*result = NULL;
 	MYSQL_ROW	row = NULL;
 	CLAN_DATA	*clan;
-	char		*p;
-	char		buf[MAX_STRING_LENGTH], output[MAX_STRING_LENGTH], skills_buf[MAX_STRING_LENGTH];
+	SUBCRAFT_HEAD_DATA *craft;
+	char	skill_name[AVG_STRING_LENGTH];
+	char	buf[MAX_STRING_LENGTH];
+	char	output[MAX_STRING_LENGTH];
+	char	skills_buf[MAX_STRING_LENGTH];
+	int 	ind = -1;
 	
 	sprintf (output, "\n#6%s:#0\n"
 					 "\n", role->summary);
 					 	
+//Starting Items					 	
 	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND obj_vnum > 0 ORDER BY obj_vnum ASC", role->id);
 	mysql_safe_query (buf);
 	
@@ -232,6 +370,7 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 			mysql_free_result (result);
 	}
 
+//Starting Clanning
 	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND clan_string != '' ORDER BY clan_string ASC", role->id);
 	mysql_safe_query (buf);
 	
@@ -257,6 +396,7 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 			mysql_free_result (result);
 	}
 
+//Starting Jobs and Paydays
 	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND payday_num > 0 ORDER BY payday_num ASC", role->id);
 	mysql_safe_query (buf);
 	
@@ -284,6 +424,73 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 			mysql_free_result (result);
 	}
 
+//Starting Skill Boosts
+	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND skill_string != '' ORDER BY skill_string ASC", role->id);
+	mysql_safe_query (buf);
+	
+	result = mysql_store_result (database);
+	
+	if ( !result || !mysql_num_rows (result) )
+	{
+		sprintf (output + strlen(output), "\n#6Starting Skill Boosts:#0\nNone.\n");
+		if ( result )
+			mysql_free_result (result);
+	}
+	else
+	{
+		sprintf (buf, "#6Starting Skill Boosts:#0\n");
+		while ( (row = mysql_fetch_row(result)) )
+		{
+			sprintf(skill_name, row[14]); 
+			
+			if ( (ind = index_lookup (skills, skill_name)) != -1 )
+				{
+				sprintf (buf + strlen(buf), "  - #B%s#0 boosted to #B%d#0\n", skill_name, atoi(row[15]));				
+				continue;
+				}
+		}//end while
+	
+		sprintf (output + strlen(output), "\n%s", buf);
+		if ( result )
+			mysql_free_result (result);
+	}
+
+//Starting Crafts
+	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND craft != '' ORDER BY craft ASC", role->id);
+	mysql_safe_query (buf);
+	
+	result = mysql_store_result (database);
+	
+	if ( !result || !mysql_num_rows (result) )
+	{
+		sprintf (output + strlen(output), "\n#6Starting Crafts:#0\nNone.\n");
+		if ( result )
+			mysql_free_result (result);
+	}
+	else
+	{
+		sprintf (buf, "#6Starting Crafts:#0\n");
+		while ( (row = mysql_fetch_row(result)) )
+		{
+			for (craft = crafts; craft; craft = craft->next)
+				{
+					if (!str_cmp (craft->subcraft_name, row[16]))
+						break;     
+				}
+
+			if (craft)
+				{
+					sprintf (buf + strlen(buf), "  - #B%s#0\n", row[16]);
+					continue;
+				}		
+		}
+		
+		sprintf (output + strlen(output), "\n%s", buf);
+		if ( result )
+			mysql_free_result (result);
+	}
+
+//Additional Briefing for PC
 	sprintf (buf, "SELECT role_desc FROM special_roles_outfit WHERE role_id = %d AND role_desc != ''", role->id);
 	mysql_safe_query (buf);
 	
@@ -339,40 +546,101 @@ post_brief (DESCRIPTOR_DATA * d)
 }
 
 void
-outfit_role (CHAR_DATA * ch, char *argument)
+post_body (DESCRIPTOR_DATA * d)
 {
-	CLAN_DATA	*clan = NULL;
-	char		buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH], skills_buf [MAX_STRING_LENGTH], races_buf[MAX_STRING_LENGTH];
-	int			i = 1, vnum = 0, qty = 1, jobnum = 0, days = 0, employer = 0, ind = 0;
-	ROLE_DATA	*role;
-	bool		remove = false;
+  CHAR_DATA *ch;
+  ROLE_DATA *role;
+	
+  ch = d->character;
 
-	argument = one_argument (argument, buf);
-
-	if (!is_number (buf))
-	{
-		send_to_char ("Syntax: role outfit <role number>\n", ch);
-		return;
+  if (!*ch->pc->msg)
+    {
+      send_to_char ("Body update aborted.\n", ch);
+      return;
     }
 
 	for (role = role_list; role; role = role->next)
-    {
-		if (i == atoi (buf))
-			break;
-		i++;
-    }
+      {
+				if (role->id == ch->delay_info1)
+	  			break;
+      }
 
-	if (!role)
-    {
-		send_to_char ("That role number was not found.\n", ch);
+  role->body = str_dup (ch->pc->msg);
+
+  save_roles ();
+}
+
+void
+outfit_role (CHAR_DATA * ch, char *argument)
+{
+	CLAN_DATA	*clan = NULL;
+	SUBCRAFT_HEAD_DATA *craft;
+	char	buf[MAX_STRING_LENGTH];
+	char	buf2[MAX_STRING_LENGTH];
+	char	skills_buf [AVG_STRING_LENGTH];
+	char	races_buf[AVG_STRING_LENGTH];
+	char	level_buf[AVG_STRING_LENGTH];
+	char	skill_name[AVG_STRING_LENGTH];
+	char	craft_buf[AVG_STRING_LENGTH];
+	char	craft_name[AVG_STRING_LENGTH];
+	int		vnum = 0;
+	int		qty = 1;
+	int		jobnum = 0;
+	int		days = 0;
+	int		employer = 0;
+	int		ind = 0;
+	int		skill_level = 0;
+	ROLE_DATA	*role;
+	bool		remove = false;
+	char		role_num[AVG_STRING_LENGTH];
+	char		cmd[AVG_STRING_LENGTH];
+
+	argument = one_argument (argument, role_num);
+
+//Find Role	
+	if (!is_number (role_num))
+	{
+		send_to_char ("Syntax: role outfit <role number> <cmd>\n", ch);
+		send_to_char ("<cmd> can be any of the following:\n", ch);
+		send_to_char ("delete - deletes the entire outfit entry\n", ch);
+		send_to_char ("brief  - A briefing for the PC taking the role.\n", ch);
+		send_to_char ("payday - set up to 3 paydays.\n", ch);
+		send_to_char ("object - Items loaded for new PC.\n", ch);
+		send_to_char ("clan   - Clan and ranks\n", ch);
+		send_to_char ("skill  - Skills and boosts\n", ch);
+		send_to_char ("craft  - Extra starting crafts\n", ch);
 		return;
     }
-	
-	argument = one_argument (argument, buf);
 
-	if ( !str_cmp (buf, "brief") )
+	ind = atoi(role_num);
+	
+	for (role = role_list; role; role = role->next)
+    {
+      if (role->id == ind)
+				break;
+    }
+
+  if (!role)
+    {
+      send_to_char ("That role had no outfit table listed.\n", ch);
+      return;
+    }
+
+argument = one_argument (argument, cmd);
+
+//Delete the outfitting table
+if ( !str_cmp (cmd, "delete") )
 	{
-		send_to_char ("\n#2Enter a brief for this role you'd like to appear to starting characters:#0\n",ch);
+			sprintf (buf, "DELETE FROM special_roles_outfit WHERE role_id = %d", ind);
+			mysql_safe_query (buf);
+			return;
+	}
+	
+	
+//Briefing for Role
+	if ( !str_cmp (cmd, "brief") )
+	{
+		send_to_char ("\n#2Enter a briefing for this role that you'd like to appear to starting characters:#0\n",ch);
 		CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
 		ch->desc->str = &ch->desc->pending_message->message;
 		ch->desc->max_str = MAX_STRING_LENGTH;
@@ -382,19 +650,24 @@ outfit_role (CHAR_DATA * ch, char *argument)
 		return;
 	}
 	
-	if ( !str_cmp (buf, "outfittest") )
+//Outfitting test	
+	if ( !str_cmp (cmd, "outfittest") )
 	{
 		outfit_new_char (ch, role);
 		send_to_char ("Done.\n", ch);
 		return;
 	}
 	
-	if ( !str_cmp (buf, "payday") )
+//Paydays	
+//role outfit X payday <jobnum> <qty> <obj. vnum> <days> <employer>
+//role outfit X payday <jobnum> remove
+	if ( !str_cmp (cmd, "payday") )
 	{
 		argument = one_argument (argument, buf);
 		if ( !*buf || !is_number(buf) )
 		{
 			send_to_char ("Usage: role outfit X payday <jobnum> <qty> <obj. vnum> <days> <employer>\n", ch);
+			send_to_char ("Usage: role outfit X payday <jobnum> remove\n", ch);
 			return;
 		}
 		jobnum = atoi(buf);
@@ -481,18 +754,28 @@ outfit_role (CHAR_DATA * ch, char *argument)
 		return;
 	}
 	
-	if ( !str_cmp (buf, "object") )
+//Starting items
+//role outfit X object <vnum> <qty> <skill>
+//role outfit X object <vnum> <qty> <race>
+//role outfit X object <vnum> remove
+	if ( !str_cmp (cmd, "object") )
 	{
         *skills_buf = '\0';
         *races_buf = '\0';
-		argument = one_argument (argument, buf);
+        
+		argument = one_argument (argument, buf); //vnum
 		if ( !*buf || !is_number(buf) )
 		{
-			send_to_char ("Which object VNUM did you wish to outfit this role with?\n", ch);
+			send_to_char ("Usage:  role outfit X object <vnum> <qty> \n", ch);
+			send_to_char ("Usage:  role outfit X object <vnum> remove \n", ch);
+			send_to_char ("Usage:  role outfit X object <vnum> <qty>  <skill>\n", ch);
+			send_to_char ("Usage:  role outfit X object <vnum> <qty> <race> \n", ch);
+			send_to_char ("Usage:  role outfit X object <vnum> remove\n", ch);
 			return;
 		}
 		vnum = atoi(buf);
-		argument = one_argument (argument, buf);
+		
+		argument = one_argument (argument, buf);//qty or remove
 		if ( *buf )
 		{
 			if ( is_number(buf) )
@@ -516,21 +799,13 @@ outfit_role (CHAR_DATA * ch, char *argument)
 			return;
 		}
         
-        argument = one_argument (argument, buf);
-        if ( *buf )
-        {
-            if ( (ind = index_lookup (skills, buf)) != -1 )
-                sprintf (skills_buf, "%s", buf);
-            else if ( (ind = lookup_race_id (buf)) != -1 )
-                sprintf (races_buf, "%s", buf);
-            argument = one_argument (argument, buf);
-            if ( *buf )
-            {
-                if ( (ind = index_lookup (skills, buf)) != -1 )
-                    sprintf (skills_buf, "%s", buf);
-                else if ( (ind = lookup_race_id (buf)) != -1 )
-                    sprintf (races_buf, "%s", buf);
-            }
+		argument = one_argument (argument, buf); //skill or race
+		if ( *buf )
+		{
+				if ( (ind = index_lookup (skills, buf)) != -1 )
+						sprintf (skills_buf, "%s", buf);
+				else if ( (ind = lookup_race_id (buf)) != -1 )
+						sprintf (races_buf, "%s", buf);
         }
         
 		if ( remove )
@@ -566,12 +841,14 @@ outfit_role (CHAR_DATA * ch, char *argument)
 		}
 	}
 
-	if ( !str_cmp (buf, "clan") )
+//Clans
+	if ( !str_cmp (cmd, "clan") )
 	{
 		argument = one_argument (argument, buf);
 		if ( !*buf )
 		{
-			send_to_char ("What clan did you wish to add to the outfitting tables for this role?\n", ch);
+			send_to_char ("Usage:  role outfit X clan <shortname> <rank> \n", ch);
+			send_to_char ("Usage:  role outfit X clan <shortname> remove \n", ch);
 			return;
 		}
 		if ( !(clan = get_clandef (buf)) )
@@ -614,23 +891,146 @@ outfit_role (CHAR_DATA * ch, char *argument)
 		return;
 	}
 	
-	display_outfitting_table (ch, role);
+//Skill Boost
+//role outfit X skill <skillname> <value>
+//role outfit X skill <skillname> remove
+	if ( !str_cmp (cmd, "skill") )
+	{
+    *skills_buf = '\0';
+
+		argument = one_argument (argument, skill_name); //skillname
+		if ( !*skill_name || is_number(skill_name) )
+		{
+			send_to_char ("Usage:  role outfit X skill <skillname> <value> \n", ch);
+			send_to_char ("Usage:  role outfit X skill <skillname> remove \n", ch);
+			return;
+		}
+		
+		argument = one_argument (argument, level_buf);//skill_level or remove
+		if ( *level_buf )
+		{
+			if ( is_number(level_buf) )
+				skill_level = atoi(level_buf);
+				
+			else if ( !str_cmp (level_buf, "remove") )
+				remove = true;
+			else
+			{
+				send_to_char ("You must specify a skill name, and either a level or REMOVE.\n", ch);
+				return;
+			}
+		}
+		
+		if ( (ind = index_lookup (skills, skill_name)) != -1 )
+			sprintf (skills_buf, "%s", skill_name);
+		else
+			{
+				send_to_char ("That skill is not in out database.\n", ch);
+				return;
+			}
+						
+			
+		if ( remove )
+		{
+			sprintf (buf, "DELETE FROM special_roles_outfit WHERE role_id = %d AND skill_string = '%s'",
+				role->id, skills_buf);	
+			mysql_safe_query (buf);
+			sprintf (buf, "All instances of #2%s#0 have been removed from the outfitting tables for the role of #6'%s'#0.",
+				skills_buf, role->summary);
+			act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			return;
+		}
+		else
+		{
+			sprintf (buf,   "INSERT INTO special_roles_outfit (role_id, skill_string, skill_value) VALUES (%d, '%s', %d)", role->id, skills_buf, skill_level);
+			mysql_safe_query (buf);
+            
+            sprintf (buf, "'%s' boosted to a level of %d has been added to the outfitting tables for the role of #6'%s'#0.",                   skills_buf, skill_level, role->summary); 
+			act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);			
+			return;
+		}
+	} //end skill	
+
+//Crafts
+//role outfit X craft <craftname> 
+//role outfit X craft <craftname> remove
+	if ( !str_cmp (cmd, "craft") )
+	{
+    *craft_buf = '\0';
+
+		argument = one_argument (argument, craft_name); //subcraft name
+		if ( !*craft_name || is_number(craft_name) )
+		{
+			send_to_char ("Usage:  role outfit X craft <craftname>\n", ch);
+			send_to_char ("Usage:  role outfit X craft <craftname> remove \n", ch);
+			return;
+		}
+		
+		argument = one_argument (argument, buf);// remove
+		if (!str_cmp (buf, "remove"))
+			remove = true;
+		else if (*buf)
+			{
+				send_to_char ("Usage:  role outfit X craft <craftname>\n", ch);
+				send_to_char ("Usage:  role outfit X craft <craftname> remove \n", ch);
+				return;
+			}
+			
+		
+		for (craft = crafts; craft; craft = craft->next)
+			{
+				if (!str_cmp (craft->subcraft_name, craft_name))
+					break;     
+			}
+
+		if (!craft)
+			{
+				send_to_char
+		("No such craft.  Type 'crafts' for a listing.\n", ch);
+				return;
+			}
+    
+			
+		if ( remove )
+			{
+				sprintf (buf, "DELETE FROM special_roles_outfit WHERE role_id = %d AND craft = '%s'",
+					role->id, craft_name);	
+				mysql_safe_query (buf);
+				sprintf (buf, "All instances of #2%s#0 have been removed from the outfitting tables for the role of #6'%s'#0.",
+					craft_name, role->summary);
+				act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+				return;
+			}
+		else
+			{
+				sprintf (buf,   "INSERT INTO special_roles_outfit (role_id, craft) VALUES (%d, '%s')", role->id, craft_name);
+				mysql_safe_query (buf);
+							
+				sprintf (buf, "'%s' has been added to the outfitting tables for the role of #6'%s'#0.", craft_name, role->summary); 
+				act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);	
+				return;
+			}
+	}// craft
+	
+
+	display_outfitting_table(ch, role);	//default command if there are no arguments
 }
 
 void
 delete_role (CHAR_DATA * ch, char *argument)
 {
-  int i = 1;
-  ROLE_DATA *role;
+  ROLE_DATA *role = NULL;
+  ROLE_DATA *temp_role = NULL;
   bool deleted = false;
+ 	char	buf[MAX_STRING_LENGTH];
+
+
 
   if (!isdigit (*argument))
     {
       send_to_char ("Syntax: role delete <role number>\n", ch);
       return;
     }
-
-  // Note: creates small mem leak, but I'm too lazy to bother free'ing right now.
 
   if (atoi (argument) == 1)
     {
@@ -642,15 +1042,46 @@ delete_role (CHAR_DATA * ch, char *argument)
 	  return;
 	}
       if (!role_list->next)
-	role_list = NULL;
-      else
-	role_list = role_list->next;
-      deleted = true;
+      	{
+      		sprintf (buf, "DELETE FROM special_roles_outfit WHERE role_id = %d", atoi (argument));
+					mysql_safe_query (buf);
+					
+					sprintf (buf, "DELETE FROM special_roles WHERE role_id = %d", atoi (argument));
+					mysql_safe_query (buf);
+			
+      		mem_free (role_list->summary);
+					mem_free (role_list->poster);
+					mem_free (role_list->body);	
+					role_list = NULL;
+					send_to_char
+    				("The specified special role has been removed as an option from chargen.\n", ch);
+     			return;
+				}
+			else
+				{
+			 	temp_role = role_list->next;
+				role_list->next = role_list->next->next;
+				
+				sprintf (buf, "DELETE FROM special_roles_outfit WHERE role_id = %d", temp_role->id);
+					mysql_safe_query (buf);
+					
+					sprintf (buf, "DELETE FROM special_roles WHERE role_id = %d", temp_role->id);
+					mysql_safe_query (buf);
+					
+      		mem_free (temp_role->summary);
+					mem_free (temp_role->poster);
+					mem_free (temp_role->body);	
+					temp_role = NULL;
+					send_to_char
+    				("The specified special role has been removed as an option from chargen.\n", ch);
+     			return;
+				}
     }
   else
-    for (role = role_list, i = 1; role && role->next; role = role->next, i++)
+  	{
+    for (role = role_list; role && role->next; role = role->next)
       {
-	if (i + 1 == atoi (argument))
+			if (role->next->id == atoi (argument))
 	  {
 	    if (GET_TRUST (ch) == 4
 		&& str_cmp (role->next->poster, ch->tname))
@@ -660,18 +1091,32 @@ delete_role (CHAR_DATA * ch, char *argument)
 		   ch);
 		return;
 	      }
+					temp_role = role->next;
 	    role->next = role->next->next;
-	    deleted = true;
-	    break;
-	  }
-      }
-
+					deleted = true;
+					break;
+				}
+      }//for
+     
+      
+		}
   if (!deleted)
     {
       send_to_char ("That role number was not found.\n", ch);
       return;
     }
-
+	else
+		{
+			sprintf (buf, "DELETE FROM special_roles_outfit WHERE role_id = %d", temp_role->id);
+					mysql_safe_query (buf);
+			sprintf (buf, "DELETE FROM special_roles WHERE role_id = %d", temp_role->id);
+					mysql_safe_query (buf);
+		
+			mem_free (temp_role->summary);
+			mem_free (temp_role->poster);
+			mem_free (temp_role->body);			
+			temp_role = NULL;
+		}
   send_to_char
     ("The specified special role has been removed as an option from chargen.\n",
      ch);
@@ -682,7 +1127,6 @@ void
 display_role (CHAR_DATA * ch, char *argument)
 {
   char output[MAX_STRING_LENGTH];
-  int i = 1;
   ROLE_DATA *role;
 
   if (!isdigit (*argument))
@@ -693,9 +1137,8 @@ display_role (CHAR_DATA * ch, char *argument)
 
   for (role = role_list; role; role = role->next)
     {
-      if (i == atoi (argument))
-	break;
-      i++;
+      if (role->id == atoi (argument))
+				break;
     }
 
   if (!role)
@@ -703,14 +1146,21 @@ display_role (CHAR_DATA * ch, char *argument)
       send_to_char ("That role number was not found.\n", ch);
       return;
     }
-
-  sprintf (output, "\n#2Role Summary:#0  %s\n"
-	   "#2Posting Admin:#0 %s\n"
-	   "#2Posted On:#0     %s\n"
-	   "#2Point Cost:#0    %d\n"
-	   "\n"
-	   "%s", role->summary, role->poster, role->date, role->cost,
-	   role->body);
+	
+	sprintf (output, 
+		"\n"
+		"#2Role Summary:#0         %s\n"
+	  "#2Posting Admin:#0        %s\n"
+	  "#2Posted On:#0            %s\n"
+	  "#2Point Cost:#0           %d\n"
+	  "\n%s"
+	  "\n",
+	  role->summary,
+	  role->poster,
+	  role->date,
+	  role->cost,
+	  role->body);
+	   	
 
   page_string (ch->desc, output);
 }
@@ -721,7 +1171,6 @@ list_roles (CHAR_DATA * ch)
   MYSQL_RES *result;
   char output[MAX_STRING_LENGTH];
   ROLE_DATA *role;
-  int i = 1;
   bool outfit = false;
 
   *output = '\0';
@@ -735,8 +1184,7 @@ list_roles (CHAR_DATA * ch)
       else outfit = false;
       if ( result )
         mysql_free_result (result);
-      sprintf (output + strlen (output), "%s%5d. %s\n", (outfit == false) ? "#9*#0" : " ", i, role->summary);
-      i++;
+      sprintf (output + strlen (output), "%s%5d. %s\n", (outfit == false) ? "#9*#0" : " ", role->id, role->summary);
     }
 
   if (!*output)
@@ -746,8 +1194,7 @@ list_roles (CHAR_DATA * ch)
       return;
     }
 
-  sprintf (output + strlen(output), "\n#9*#0 = no outfitting directives have been created for this role,\n"
-                                    "    and it will be unavailable for players to select in chargen\n");
+  sprintf (output + strlen(output), "\n#9*#0 = no outfitting directives have been created for this role,\n");
   
   send_to_char
     ("\n#2The following special roles have been made available in chargen:\n#0",
@@ -762,6 +1209,7 @@ post_role (DESCRIPTOR_DATA * d)
   ROLE_DATA *role;
   time_t current_time;
   char *date;
+	int index_id = 0;
 
   ch = d->character;
 
@@ -774,6 +1222,7 @@ post_role (DESCRIPTOR_DATA * d)
   if (!role_list)
     {
       CREATE (role_list, ROLE_DATA, 1);
+      index_id = 0;
       role = role_list;
     }
   else
@@ -782,6 +1231,7 @@ post_role (DESCRIPTOR_DATA * d)
 	if (!role->next)
 	  {
 	    CREATE (role->next, ROLE_DATA, 1);
+						index_id = role->id; //get the id before we move the pointer
 	    role = role->next;
 	    break;
 	  }
@@ -802,6 +1252,7 @@ post_role (DESCRIPTOR_DATA * d)
   role->date = str_dup (date);
   role->poster = str_dup (ch->pc->account_name);
   role->timestamp = (int) time (0);
+	role->id = index_id + 1;
 
   ch->delay_who = NULL;
   ch->delay_info1 = 0;
@@ -834,8 +1285,7 @@ new_role (CHAR_DATA * ch, char *argument)
 
   if (cost < 0 || cost > 50)
     {
-      send_to_char ("Permissible costs are from 0-50, inclusive.\n", 
-ch);
+      send_to_char ("Permissible costs are from 0-50, inclusive.\n", ch);
       return;
     }
 
@@ -865,24 +1315,19 @@ update_role (CHAR_DATA * ch, char *argument)
 {
   ROLE_DATA *role = NULL;
   char buf[MAX_STRING_LENGTH];
-  int i = 0;
 
   argument = one_argument (argument, buf);
 
   if (!*buf || !isdigit (*buf))
     {
       send_to_char ("Please specify a role number to update.\n", ch);
+       send_to_char ("Syntax: role update <number> <cmd>.\n", ch);
       return;
     }
 
-  if (atoi (buf) == 1)
-    {
-      role = role_list;
-    }
-  else
-    for (role = role_list, i = 1; role; role = role->next, i++)
+	for (role = role_list; role; role = role->next)
       {
-	if (i == atoi (buf))
+				if (role->id == atoi (buf))
 	  break;
       }
 
@@ -896,8 +1341,11 @@ update_role (CHAR_DATA * ch, char *argument)
 
   if (!*buf)
     {
-      send_to_char ("Please specify which field in the role to update.\n",
-		    ch);
+      send_to_char ("Please specify which field in the role to update\n", ch);
+		    send_to_char ("Syntax: role update <number> contact <new name>\n", ch);
+		    send_to_char ("Syntax: role update <number> cost <new point cost>\n", ch);
+		    send_to_char ("Syntax: role update <number> summary <new summary string>\n", ch);
+		    send_to_char ("Syntax: role update <number> body\n", ch);
       return;
     }
   else if (!str_cmp (buf, "contact"))
@@ -937,6 +1385,42 @@ update_role (CHAR_DATA * ch, char *argument)
       send_to_char ("The cost for that role has been updated.\n", ch);
       save_roles ();
     }
+ 
+ else if (!str_cmp (buf, "summary"))
+    {
+      argument = one_argument (argument, buf);
+      if (!*buf)
+				{
+					send_to_char
+						("Please specify the summary for this role.\n", ch);
+					return;
+				}
+      role->summary = str_dup (buf);
+      save_roles ();
+    }
+    
+ else if (!str_cmp (buf, "body"))
+    {
+    send_to_char("\nThe previous body was:\n", ch);
+    sprintf(buf, "%s\n", role->body);
+    send_to_char(buf, ch);
+    
+    send_to_char
+    ("\n#2Enter a detailed summary of the role you wish to post, to\n"
+     "give prospective players a better idea as to what sort of RP\n"
+     "will be required to successfully portray it.#0\n", ch);
+
+		make_quiet (ch);
+		ch->delay_info1 = role->id;
+		ch->pc->msg = (char *) alloc (sizeof (char), 1);
+		*ch->pc->msg = '\0';
+		ch->desc->str = &ch->pc->msg;
+		ch->desc->max_str = MAX_STRING_LENGTH;
+		ch->desc->proc = post_body;
+  }
+  
+	
+
 }
 
 void
@@ -971,7 +1455,7 @@ do_role (CHAR_DATA * ch, char *argument, int cmd)
   }
     else
     send_to_char
-      ("Syntax: role (new|list|display|delete|update|outfit) <argument(s)>\n", ch);
+      ("Syntax: role (new|list|display|delete|update|outfit|save) <argument(s)>\n", ch);
 }
 
 void
@@ -989,13 +1473,14 @@ save_roles (void)
       *date_buf = '\0';
       *text = '\0';
       
-      mysql_safe_query ("SELECT role_id FROM special_roles WHERE role_id = %d", role->id);
-      result = mysql_store_result (database);    
+      mysql_safe_query ("SELECT role_id FROM special_roles WHERE role_id = %d ORDER BY role_id ASC", role->id);
+      result = mysql_store_result (database);   
       
+         
       if ( result && mysql_num_rows (result) > 0 )
       {
         mysql_safe_query
-        ("UPDATE special_roles SET summary = '%s', poster = '%s', date = '%s', cost = %d, body = '%s', timestamp = %d WHERE role_id = %d", 
+        ("UPDATE special_roles SET summary = '%s', poster = '%s', date = '%s', cost = %d, body = '%s', timestamp = %d, WHERE role_id = %d", 
           role->summary, role->poster, role->date, role->cost, role->body, role->timestamp, role->id);
 
         mysql_free_result (result);
@@ -1004,13 +1489,12 @@ save_roles (void)
       {
         if ( result )
           mysql_free_result (result);
-        mysql_safe_query
-          ("INSERT INTO special_roles (summary, poster, date, cost, body, timestamp) VALUES ('%s', '%s', '%s', %d, '%s', %d)",
+      mysql_safe_query
+	("INSERT INTO special_roles (summary, poster, date, cost, body, timestamp, role_id) VALUES ('%s', '%s', '%s', %d, '%s', %d, %d)",
             role->summary, role->poster, role->date, role->cost, role->body,
-            role->timestamp);
-    
-        role->id = mysql_insert_id(database);
+	 role->timestamp, role->id);
       }
+
     }
 }
 
@@ -1021,7 +1505,7 @@ reload_roles (void)
   MYSQL_RES *result;
   MYSQL_ROW row;
 
-  mysql_safe_query ("SELECT * FROM special_roles");
+  mysql_safe_query ("SELECT * FROM special_roles ORDER BY role_id ASC");
   result = mysql_store_result (database);
 
   if (!result || !mysql_num_rows (result))
@@ -1050,9 +1534,10 @@ reload_roles (void)
       role->cost = atoi (row[3]);
       role->body = str_dup (row[4]);
       role->timestamp = atoi (row[5]);
-	  role->id = atoi(row[6]);
+	  	role->id = atoi(row[6]);
       role->next = NULL;
     }
 
   mysql_free_result (result);
 }
+
