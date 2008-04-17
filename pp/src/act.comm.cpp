@@ -3242,17 +3242,18 @@ void
 do_travel (CHAR_DATA * ch, char *argument, int cmd)
 {
   char buf[MAX_STRING_LENGTH] = { '\0' };
+  char *result = NULL;
 
   while (isspace (*argument))
     argument++;
 
-  if (strchr (argument, '~'))
+  /*if (strchr (argument, '~'))
     {
       send_to_char
 	("Sorry, but you can't use tildae when setting a travel string.\n",
 	 ch);
       return;
-    }
+    }*/
 
   if (!*argument)
     {
@@ -3275,9 +3276,21 @@ do_travel (CHAR_DATA * ch, char *argument, int cmd)
 	}
       else
 	{
-	  sprintf (buf, "Your travel string has been set to: (#2%s#0)",
-		   argument);
-	  ch->travel_str = add_hash (argument);
+		//filter string to process use of tokens such as * and ~
+		result = swap_xmote_target (ch, argument, 3);
+  
+		if (!result)
+		{
+			  return;
+		}
+
+		// We don't want the full top (period) that the code adds at the end of
+		// this string so we remove it here
+		result[strlen(result) - 1] = 0;
+		
+		sprintf (buf, "Your travel string has been set to: (%s)",
+		   result);
+		ch->travel_str = add_hash (result);
 	}
       act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
     }
