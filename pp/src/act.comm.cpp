@@ -1957,7 +1957,7 @@ whisper_it (CHAR_DATA * ch, int skill, char *source, char *target)
 void
 do_whisper (CHAR_DATA * ch, char *argument, int cmd)
 {
-  int heard_something = 0;
+  int heard_something = 0, key_e = 0;
   CHAR_DATA *vict = NULL;
   CHAR_DATA *tch = NULL;
   AFFECTED_TYPE *tongues = NULL;
@@ -1967,6 +1967,11 @@ do_whisper (CHAR_DATA * ch, char *argument, int cmd)
   char buf2[MAX_STRING_LENGTH] = { '\0' };
   char buf3[MAX_STRING_LENGTH] = { '\0' };
   char buf4[MAX_STRING_LENGTH] = { '\0' };
+  char voice[MAX_STRING_LENGTH] = { '\0' };
+  int i = 1;
+  OBJ_DATA *obj = NULL;
+  char key[MAX_STRING_LENGTH] = { '\0' };
+
 
   if (ch->room->sector_type == SECT_UNDERWATER)
     {
@@ -2022,14 +2027,122 @@ do_whisper (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+  //set voice string to character voice string if set
+  if (ch->voice_str && ch->voice_str[0])
+  {
+      strcpy (voice, ch->voice_str);
+  }
+
+  /* Process bracketed emote if present */
+  
+   //check for a bracket at the start of the message
+  if (*message == '(')
+  {
+	// To begin with, set the voice string to be the entire message
+	// we will then parse this until we find the end of the emote and
+	// cut the remaining characters
+	strcpy (voice, message);
+
+	//result = swap_xmote_target (ch, argument, 1)
+    *buf = '\0';
+    sprintf (buf, "%s", voice);
+    i = 1;
+    *buf2 = '\0';
+    while (buf[i] != ')')
+	{
+		if (buf[i] == '\0')
+	    {
+	      send_to_char ("What did you wish to say?\n", ch);
+	      return;
+	    }
+		if (buf[i] == '*')
+	    {
+	      i++;
+	      while (isalpha (buf[i]))
+		  key[key_e++] = buf[i++];
+	      key[key_e] = '\0';
+	      key_e = 0;
+
+	      if (!get_obj_in_list_vis (ch, key, ch->room->contents) &&
+			!get_obj_in_list_vis (ch, key, ch->right_hand) &&
+			!get_obj_in_list_vis (ch, key, ch->left_hand) &&
+			!get_obj_in_list_vis (ch, key, ch->equip))
+		  {
+			sprintf (buf, "I don't see %s here.\n", key);
+			send_to_char (buf, ch);
+			return;
+		  }
+
+	      obj = get_obj_in_list_vis (ch, key, ch->right_hand);
+	      if (!obj)
+			obj = get_obj_in_list_vis (ch, key, ch->left_hand);
+	      if (!obj)
+			obj = get_obj_in_list_vis (ch, key, ch->room->contents);
+	      if (!obj)
+			obj = get_obj_in_list_vis (ch, key, ch->equip);
+	      sprintf (buf2 + strlen (buf2), "#2%s#0", obj_short_desc (obj));
+	      *key = '\0';
+	      continue;
+		}
+		if (buf[i] == '~')
+	    {
+	      i++;
+	      while (isalpha (buf[i]))
+		  key[key_e++] = buf[i++];
+	      key[key_e] = '\0';
+	      key_e = 0;
+
+	      if (!get_char_room_vis (ch, key))
+		  {
+			sprintf (buf, "I don't see %s here.\n", key);
+			send_to_char (buf, ch);
+			 return;
+		  }
+
+	      sprintf (buf2 + strlen (buf2), "#5%s#0",
+		       char_short (get_char_room_vis (ch, key)));
+	      *key = '\0';
+	      continue;
+	    }
+		sprintf (buf2 + strlen (buf2), "%c", buf[i]);
+		i++;
+	
+		
+	}
+
+	//copy the string to the voice
+	strcpy (voice, buf2);
+		
+	//incriment up to and then past the ending bracket
+	i = i+2;
+
+	//strip the emote from the start of the message
+	strcpy (message, message + i);
+	
+	*message = toupper (*message);
+	
+  }
+  /* End processing of emote */
+
   char *p = '\0';
   reformat_say_string (message, &p, 0);
 
-  if (!IS_SET (ch->room->room_flags, OOC))
-    sprintf (buf, "You whisper to $N in %s,\n   \"%s\"",
-	     skills[ch->speaks], p);
+  if (voice && *voice) //add voice string if one is set (either explicitly or via bracketed emote)
+  {
+	  if (!IS_SET (ch->room->room_flags, OOC))
+		sprintf (buf, "You whisper to $N in %s, %s,\n   \"%s\"",
+			 skills[ch->speaks], voice, p);
+	  else
+		sprintf (buf, "You whisper to $N, %s,\n   \"%s\"", voice, p);
+  }
   else
-    sprintf (buf, "You whisper to $N,\n   \"%s\"", p);
+  {
+	if (!IS_SET (ch->room->room_flags, OOC))
+		sprintf (buf, "You whisper to $N in %s,\n   \"%s\"",
+			 skills[ch->speaks], p);
+	  else
+		sprintf (buf, "You whisper to $N,\n   \"%s\"", p);
+  }
 
   act (buf, true, ch, 0, vict, TO_CHAR);
 
@@ -2061,83 +2174,166 @@ do_whisper (CHAR_DATA * ch, char *argument, int cmd)
 	}
     if (!heard_something)
 	{
-	  act
-	    ("$n whispers something to $3, but you can't quite make out the words.",
-	     true, ch, (OBJ_DATA *) vict, tch, TO_VICT | _ACT_FORMAT);
+		if (voice && *voice) //add voice string if one is set (either explicitly or via bracketed emote)
+		{
+			sprintf (buf, "$n whispers something to $3, %s, but you can't quite make out the words.", voice);
+		}
+		else
+		{
+			sprintf (buf, "$n whispers something to $3, but you can't quite make out the words.");
+		}
+	  act(buf, true, ch, (OBJ_DATA *) vict, tch, TO_VICT | _ACT_FORMAT);
 	  continue;
 	}
 
-	if (tch == vict)
+	if (tch == vict)//send message to target of whisper
 	{
-	  if (!IS_SET (ch->room->room_flags, OOC)
-	      && decipher_speaking (tch, ch->speaks, ch->skills[ch->speaks]))
-	    {
-	      sprintf (buf, "$3 whispers to you in %s,",
-		       (tch->skills[ch->speaks] || tongues) ?
-		       skills[ch->speaks] : "an unknown tongue");
-	      if (tch->skills[ch->speaks] >= 50
-		  && ch->skills[ch->speaks] < 50)
-		sprintf (buf + strlen (buf), " %s,",
-			 accent_desc (ch, ch->skills[ch->speaks]));
-	      act (buf, false, tch, (OBJ_DATA *) ch, 0,
-		   TO_CHAR | _ACT_FORMAT);
-	      sprintf (buf, "   \"%s\"", buf3);
-	      act (buf, false, tch, 0, 0, TO_CHAR);
-	    }
-	  else if (!IS_SET (ch->room->room_flags, OOC))
-	    {
-	      sprintf (buf,
-		       "$3 whispers something to you in %s, but you cannot decipher %s words.",
-		       (tch->skills[ch->speaks]
-			|| tongues) ? skills[ch->
-					     speaks] : "an unknown tongue",
-		       HSHR (ch));
-	      act (buf, false, tch, (OBJ_DATA *) ch, 0,
-		   TO_CHAR | _ACT_FORMAT);
-	    }
-	  else
-	    {
-	      sprintf (buf, "$3 whispers to you,\n   \"%s\"", buf4);
-	      act (buf, false, tch, (OBJ_DATA *) ch, 0, TO_CHAR);
-	    }
-	  if (IS_NPC (vict))
-	    reply_reset (ch, vict, buf2, 4);	/* 4 = whisper */
+		if (voice && *voice) //add voice string if one is set (either explicitly or via bracketed emote)
+		{
+		  if (!IS_SET (ch->room->room_flags, OOC)
+			  && decipher_speaking (tch, ch->speaks, ch->skills[ch->speaks]))
+			{
+			  sprintf (buf, "$3 whispers to you in %s, %s,",
+				   (tch->skills[ch->speaks] || tongues) ?
+				   skills[ch->speaks] : "an unknown tongue", voice);
+			  if (tch->skills[ch->speaks] >= 50
+			  && ch->skills[ch->speaks] < 50)
+			sprintf (buf + strlen (buf), " %s,",
+				 accent_desc (ch, ch->skills[ch->speaks]));
+			  act (buf, false, tch, (OBJ_DATA *) ch, 0,
+			   TO_CHAR | _ACT_FORMAT);
+			  sprintf (buf, "   \"%s\"", buf3);
+			  act (buf, false, tch, 0, 0, TO_CHAR);
+			}
+		  else if (!IS_SET (ch->room->room_flags, OOC))
+			{
+			  sprintf (buf,
+				   "$3 whispers something to you in %s, %s, but you cannot decipher %s words.",
+				   (tch->skills[ch->speaks]
+				|| tongues) ? skills[ch->
+							 speaks] : "an unknown tongue", voice,
+				   HSHR (ch));
+			  act (buf, false, tch, (OBJ_DATA *) ch, 0,
+			   TO_CHAR | _ACT_FORMAT);
+			}
+		  else
+			{
+			  sprintf (buf, "$3 whispers to you, %s,\n   \"%s\"", voice, buf4);
+			  act (buf, false, tch, (OBJ_DATA *) ch, 0, TO_CHAR);
+			}
+		  if (IS_NPC (vict))
+			reply_reset (ch, vict, buf2, 4);	/* 4 = whisper */
+		}
+		else
+		{
+			if (!IS_SET (ch->room->room_flags, OOC)
+			  && decipher_speaking (tch, ch->speaks, ch->skills[ch->speaks]))
+			{
+			  sprintf (buf, "$3 whispers to you in %s,",
+				   (tch->skills[ch->speaks] || tongues) ?
+				   skills[ch->speaks] : "an unknown tongue");
+			  if (tch->skills[ch->speaks] >= 50
+			  && ch->skills[ch->speaks] < 50)
+			sprintf (buf + strlen (buf), " %s,",
+				 accent_desc (ch, ch->skills[ch->speaks]));
+			  act (buf, false, tch, (OBJ_DATA *) ch, 0,
+			   TO_CHAR | _ACT_FORMAT);
+			  sprintf (buf, "   \"%s\"", buf3);
+			  act (buf, false, tch, 0, 0, TO_CHAR);
+			}
+		  else if (!IS_SET (ch->room->room_flags, OOC))
+			{
+			  sprintf (buf,
+				   "$3 whispers something to you in %s, but you cannot decipher %s words.",
+				   (tch->skills[ch->speaks]
+				|| tongues) ? skills[ch->
+							 speaks] : "an unknown tongue",
+				   HSHR (ch));
+			  act (buf, false, tch, (OBJ_DATA *) ch, 0,
+			   TO_CHAR | _ACT_FORMAT);
+			}
+		  else
+			{
+			  sprintf (buf, "$3 whispers to you,\n   \"%s\"", buf4);
+			  act (buf, false, tch, (OBJ_DATA *) ch, 0, TO_CHAR);
+			}
+		  if (IS_NPC (vict))
+			reply_reset (ch, vict, buf2, 4);	/* 4 = whisper */
+		}
 	}
 
-      else
+    else //overhear listeners who passed the listen check
 	{
-	  if (!IS_SET (ch->room->room_flags, OOC)
-	      && decipher_speaking (tch, ch->speaks, ch->skills[ch->speaks]))
-	    {
-	      sprintf (buf, "You overhear $3 whispering in %s to $N,",
-		       (tch->skills[ch->speaks] || tongues) ?
-		       skills[ch->speaks] : "an unknown tongue");
-	      if (tch->skills[ch->speaks] >= 50
-		  && ch->skills[ch->speaks] < 50)
-		sprintf (buf + strlen (buf), " %s,",
-			 accent_desc (ch, ch->skills[ch->speaks]));
-	      act (buf, false, tch, (OBJ_DATA *) ch, vict,
-		   TO_CHAR | _ACT_FORMAT);
-	      sprintf (buf, "   \"%s\"", buf2);
-	      act (buf, false, tch, 0, 0, TO_CHAR);
-	    }
-	  else if (!IS_SET (ch->room->room_flags, OOC))
-	    {
-	      sprintf (buf,
-		       "You overhear $3 whispering something in %s to $N, but you cannot decipher %s words.",
-		       (tch->skills[ch->speaks]
-			|| tongues) ? skills[ch->
-					     speaks] : "an unknown tongue",
-		       HSHR (ch));
-	      act (buf, false, tch, (OBJ_DATA *) ch, vict,
-		   TO_CHAR | _ACT_FORMAT);
-	    }
-	  else
-	    {
-	      sprintf (buf, "You overhear $3 whisper to $N,\n   \"%s\"",
-		       buf2);
-	      act (buf, false, tch, (OBJ_DATA *) ch, vict, TO_CHAR);
-	    }
+		if (voice && *voice) //add voice string if one is set (either explicitly or via bracketed emote)
+		{
+		  if (!IS_SET (ch->room->room_flags, OOC)
+			  && decipher_speaking (tch, ch->speaks, ch->skills[ch->speaks]))
+			{
+			  sprintf (buf, "You overhear $3 whispering in %s to $N, %s,",
+				   (tch->skills[ch->speaks] || tongues) ?
+				   skills[ch->speaks] : "an unknown tongue", voice);
+			  if (tch->skills[ch->speaks] >= 50
+			  && ch->skills[ch->speaks] < 50)
+			sprintf (buf + strlen (buf), " %s,",
+				 accent_desc (ch, ch->skills[ch->speaks]));
+			  act (buf, false, tch, (OBJ_DATA *) ch, vict,
+			   TO_CHAR | _ACT_FORMAT);
+			  sprintf (buf, "   \"%s\"", buf2);
+			  act (buf, false, tch, 0, 0, TO_CHAR);
+			}
+		  else if (!IS_SET (ch->room->room_flags, OOC))
+			{
+			  sprintf (buf,
+				   "You overhear $3 whispering something in %s to $N, %s, but you cannot decipher %s words.",
+				   (tch->skills[ch->speaks]
+				|| tongues) ? skills[ch->
+							 speaks] : "an unknown tongue", voice,
+				   HSHR (ch));
+			  act (buf, false, tch, (OBJ_DATA *) ch, vict,
+			   TO_CHAR | _ACT_FORMAT);
+			}
+		  else
+			{
+			  sprintf (buf, "You overhear $3 whisper to $N, %s,\n   \"%s\"", voice,
+				   buf2);
+			  act (buf, false, tch, (OBJ_DATA *) ch, vict, TO_CHAR);
+			}
+		}
+		else
+		{
+			if (!IS_SET (ch->room->room_flags, OOC)
+			  && decipher_speaking (tch, ch->speaks, ch->skills[ch->speaks]))
+			{
+			  sprintf (buf, "You overhear $3 whispering in %s to $N,",
+				   (tch->skills[ch->speaks] || tongues) ?
+				   skills[ch->speaks] : "an unknown tongue");
+			  if (tch->skills[ch->speaks] >= 50
+			  && ch->skills[ch->speaks] < 50)
+			sprintf (buf + strlen (buf), " %s,",
+				 accent_desc (ch, ch->skills[ch->speaks]));
+			  act (buf, false, tch, (OBJ_DATA *) ch, vict,
+			   TO_CHAR | _ACT_FORMAT);
+			  sprintf (buf, "   \"%s\"", buf2);
+			  act (buf, false, tch, 0, 0, TO_CHAR);
+			}
+		  else if (!IS_SET (ch->room->room_flags, OOC))
+			{
+			  sprintf (buf,
+				   "You overhear $3 whispering something in %s to $N, but you cannot decipher %s words.",
+				   (tch->skills[ch->speaks]
+				|| tongues) ? skills[ch->
+							 speaks] : "an unknown tongue",
+				   HSHR (ch));
+			  act (buf, false, tch, (OBJ_DATA *) ch, vict,
+			   TO_CHAR | _ACT_FORMAT);
+			}
+		  else
+			{
+			  sprintf (buf, "You overhear $3 whisper to $N,\n   \"%s\"",
+				   buf2);
+			  act (buf, false, tch, (OBJ_DATA *) ch, vict, TO_CHAR);
+			}
+		}
 	}
 
       sprintf (p, buf3);
