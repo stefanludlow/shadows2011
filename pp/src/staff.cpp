@@ -1505,6 +1505,7 @@ do_echo (CHAR_DATA * ch, char *argument, int cmd)
 {
   int i;
   char buf[MAX_STRING_LENGTH];
+  char *result = NULL;
 
   for (i = 0; *(argument + i) == ' '; i++);
 
@@ -1514,7 +1515,16 @@ do_echo (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  sprintf (buf, "%s\n", argument + i);
+  //filter string to process use of tokens such as * and ~
+  result = swap_xmote_target (ch, argument, 3);
+  
+  if (!result)
+  {
+	  return;
+  }
+
+  sprintf (buf, "%s", result);
+  
   send_to_room (buf, ch->in_room);
 }
 
