@@ -695,11 +695,12 @@ game_loop (int s)
       if (!((pulse + 5) % PULSE_AUTOSAVE * 15))
 	{
 	  save_player_rooms ();
-	  save_dwelling_rooms ();
+	  //save_dwelling_rooms ();
 	}
       if (!(pulse % (120 * SECOND_PULSE)))
 	{
 	  newbie_hints ();
+	  save_dwelling_rooms();
 	}
 
       if (!((pulse + 5) % (PULSE_ZONE * 3)))
