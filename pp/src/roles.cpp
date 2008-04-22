@@ -1480,7 +1480,7 @@ save_roles (void)
       if ( result && mysql_num_rows (result) > 0 )
       {
         mysql_safe_query
-        ("UPDATE special_roles SET summary = '%s', poster = '%s', date = '%s', cost = %d, body = '%s', timestamp = %d, WHERE role_id = %d", 
+        ("UPDATE special_roles SET summary = '%s', poster = '%s', date = '%s', cost = %d, body = '%s', timestamp = %d WHERE role_id = %d", 
           role->summary, role->poster, role->date, role->cost, role->body, role->timestamp, role->id);
 
         mysql_free_result (result);
