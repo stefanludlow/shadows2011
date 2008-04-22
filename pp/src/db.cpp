@@ -315,7 +315,8 @@ boot_db (void)
 
   mob_start_stat = 16;
   MAX_MEMORY =       24000000;
-  PERM_MEMORY_SIZE = 12900000;
+  //PERM_MEMORY_SIZE = 12900000;
+  PERM_MEMORY_SIZE = 25600000;
   MAX_OVERHEAD =     22048000;
   
 

@@ -4617,7 +4617,8 @@ do_shutdown (CHAR_DATA * ch, char *argument, int cmd)
 	     ch);
 	  system_log ("Error creating copyover file.", true);
 	}
-      fclose (fs);
+	  if (fs)
+		fclose (fs);
       if (!(fs = fopen (".reboot", "w")))
 	{
 	  system_log ("Error creating reboot file.", true);
