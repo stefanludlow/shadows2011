@@ -396,7 +396,8 @@ r_program (CHAR_DATA * ch, char *argument)
 				rxp (ch, p->prog, cmd, "", argument);
 				return (1);
 			}
-			argument = one_argument(argument, arg);
+			if (arg[0] == '\0' && !argument[0] == '\0')
+				argument = one_argument(argument, arg);
 			if (!arg || r_isname (arg, p->keys))
 			{
 				rxp (ch, p->prog, cmd, arg, argument);
