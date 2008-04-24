@@ -1530,11 +1530,12 @@ add_to_default_list (DEFAULT_ITEM_DATA * items, char *flag_vnum)
 	  items->items[i] = ovnum;
 	  break;
 	}
-
+/** removed to allow duplicate items in object lists
       if (items->items[i] == ovnum)
 	{
 	  break;
 	}
+****/
     }
 
   if (i >= MAX_DEFAULT_ITEMS)
