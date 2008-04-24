@@ -4775,6 +4775,7 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 	std::string ThisArgument;
 	std::string Output;
 	bool transfer = true;
+	int loaded_char = 0;
 	
 	ArgumentList = one_argument(ArgumentList, ThisArgument);
 	
@@ -4849,22 +4850,30 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 		send_to_char ("Transfer the ownership to whom?\n", ch);
 		return;
 	}
-		
-	target = get_char_room_vis(ch, ThisArgument.c_str());
+//new owner must be in the room and visible since get_char checks online PC only
+////so we use load_pc to get around this
+//
+//	target = get_char_room_vis(ch, ThisArgument.c_str());
+	target = load_pc((char*)ThisArgument.c_str());
+	loaded_char = 1;
 	
 		if (!target)
 		{
 			if (GET_TRUST(ch))
 			{
-				target = get_char ((char*)ThisArgument.c_str());
+				//target = get_char ((char*)ThisArgument.c_str());
+				target = load_pc ((char*)ThisArgument.c_str());
+				loaded_char = 1;
 			}
-			
+			if (!loaded_char)
+			{	
 			send_to_char ("You do not see a person with the keyword \"#2", ch);
 			send_to_char (ThisArgument.c_str(), ch);
 			send_to_char ("#0\" to transfer #5", ch);
 			send_to_char (char_short(property), ch);
 			send_to_char ("#0 to.\n", ch);
 			return;
+			}
 		}
 	
 	if (!transfer && GET_TRUST(ch))
@@ -4914,6 +4923,9 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 		send_to_char (Output.c_str(), target);
 		return;
 	}
+	if (loaded_char)
+		unload_pc(target);
+
 	return;
 }
 
