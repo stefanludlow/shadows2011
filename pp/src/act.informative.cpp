@@ -11445,7 +11445,11 @@ do_dip (CHAR_DATA * ch, char *argument, int cmd)
   sprintf (buf,
 	   "You dip #2%s#0 carefully into #2%s#0, liberally coating its tip.",
 	   quill->short_description, ink->short_description);
-  quill->ink_color = ink->ink_color;
+  if (ink->var_color)
+	quill->ink_color = ink->var_color;
+  else
+	quill->ink_color = ink->ink_color;
+
   act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
   ink->o.od.value[0]--;
 }
