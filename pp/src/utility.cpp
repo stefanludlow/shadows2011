@@ -111,7 +111,7 @@ const int restricted_skills[] = {
   -2,				/* Milling */
   0,				/* Mining */
   -2,				/* Perfumery */
-  -2,				/* Pottery */
+  0,				/* Pottery */
   0,				/* Tracking */
   0,				/* Farming */
   -7,				/* Healing */
