@@ -204,6 +204,7 @@ void update_coverage_times(int admin_time, int admin_time_active, int admin_pc_t
 void prepare_copyover (int cmd);
 
 /* COMMAND PROTOTYPES */
+void do_wound (CHAR_DATA *ch, char *argument, int cmd); // wounds.cpp
 void do_mark (CHAR_DATA* ch, char *argument, int cmd); // commerce.c
 void do_csv (CHAR_DATA* ch, char *argument, int cmd); // staff.c
 void retreat (CHAR_DATA* ch, int direction, CHAR_DATA* leader);

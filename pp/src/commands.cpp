@@ -425,6 +425,7 @@ const struct command_data commands[] = {
 	{"te_pit", do_te_pit, DEAD, C_LV4},
 	{"unban", do_unban, DEAD, C_LV4},
 	{"whap", do_whap, STAND, C_LV4},	/* Joke command */
+	{"wound", do_wound, DEAD, C_LV4},
 	{"writings", do_writings, DEAD, C_LV4},
 	{"zset", do_zset, DEAD, C_LV4},
 

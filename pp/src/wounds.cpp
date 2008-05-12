@@ -268,17 +268,17 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 	break;
       }
 
-  else if (type == 9)		// Natural attacks -- fist.
+  else if (type == 9)  // Natural attacks -- fist.
   {
 	  if (number(0, 3))
 		  type = 10;
     switch (number (1, 3))
       {
       case 1:
-	sprintf (name, "bruise");
+		  sprintf (name, "bruise");
 	break;
       case 2:
-	sprintf (name, "abrasion");
+		  sprintf (name, "abrasion");
 	break;
       case 3:
 		  sprintf (name, (type == 10) ? ("mark") : ("contusion"));
@@ -330,6 +330,8 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 	wound->type = str_dup ("fist");
 	  else if (type == 10)
 		  wound->type = str_dup("stun");
+	  else if (!str_cmp(location, "bloodloss"))
+		  wound->type = str_dup("bloodloss");
 
       wound->name = str_dup (name);
       wound->severity = str_dup (severity);
@@ -371,7 +373,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 
   int old_damage = curdamage;
   if (type != 10)
-  curdamage += impact;
+	  curdamage += impact;
   else
 	  curdamage += (impact / 2);
 
@@ -437,7 +439,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
       clear_moves (ch);
       clear_current_move (ch);
       if (!IS_NPC (ch) && !IS_SET (ch->flags, FLAG_GUEST))
-	send_to_gods (buf);
+		  send_to_gods (buf);
       apply_con_penalties (ch);
       if (ch->con <= 3)
 	{
@@ -813,7 +815,7 @@ adjust_wound (CHAR_DATA * ch, WOUND_DATA * wound, int amount)
   for (twound = ch->wounds; twound; twound = twound->next)
   {
 	  if (str_cmp(twound->type, "stun"))
-    curdamage += twound->damage;
+		  curdamage += twound->damage;
 	  else
 		  curdamage += (twound->damage / 2);
   }
@@ -1781,7 +1783,7 @@ show_wounds (CHAR_DATA * ch, int mode)
   *buf3 = '\0';
   if (mode == 1 && ch->damage)
     {
-      for (wound = ch->wounds; wound; wound = wound->next)
+		for (wound = ch->wounds; wound; wound = wound->next)
 		{
 			if (strcmp(wound->type, "stun"))
 				curdamage += wound->damage;
@@ -2037,7 +2039,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 	  damage = wound->damage;
 	  if (strcmp(wound->type, "stun"))
 	  {
-	  totdam += damage;
+		  totdam += damage;
 	  }
 	  else 
 	  {
@@ -2950,10 +2952,10 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
   *woundbuf = '\0';
 
   if (roll <= needed)
-    {
-      if (roll % 5 == 0)
-	{
-	  sprintf (buf, "Critical healing success.\n");
+  {
+	  if (roll % 5 == 0)
+	  {
+		  sprintf (buf, "Critical healing success.\n");
 		  if (!strcmp(wound->type, "stun"))
 		  {
 			  wound->damage -= number (2, (GET_CON(ch) / 4) + (GET_WIL(ch) / 4));
@@ -2962,18 +2964,18 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
 		  }
 		  else
 		  {
-	  if (ch->con / 3 < 3)
-	    upper = 3;
-	  else
-	    upper = number (2, ch->con / 3);
-	  wound->damage -= number (1, upper);
-	  if (wound->healerskill >= 0)
-	    wound->damage -= (wound->healerskill / 25);
-	}
+			  if (ch->con / 3 < 3)
+				  upper = 3;
+			  else
+				  upper = number (2, ch->con / 3);
+			  wound->damage -= number (1, upper);
+			  if (wound->healerskill >= 0)
+				  wound->damage -= (wound->healerskill / 25);
+		  }
 	  }
-      else
-	{
-	  sprintf (buf, "Healing success.\n");
+	  else
+	  {
+		  sprintf (buf, "Healing success.\n");
 		  if (!strcmp(wound->type, "stun"))
 		  {
 			  wound->damage -= (GET_CON(ch) / 5) + (GET_WIL(ch) / 5);
@@ -2982,25 +2984,25 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
 		  }
 		  else
 		  {
-	  if (ch->con / 5 < 3)
-	    upper = 2;
-	  else
-	    upper = number (2, ch->con / 5);
-	  wound->damage -= number (1, upper);
-	  if (wound->healerskill >= 0)
-	    wound->damage -= (wound->healerskill / 25);
-	}
+			  if (ch->con / 5 < 3)
+				  upper = 2;
+			  else
+				  upper = number (2, ch->con / 5);
+			  wound->damage -= number (1, upper);
+			  if (wound->healerskill >= 0)
+				  wound->damage -= (wound->healerskill / 25);
+		  }
 	  }
-      if (wound->healerskill == -1)
-	wound->healerskill = 0;
-      if (wound->damage > 0)
-	{
-	  sprintf (buf, "%s", downsized_wound (ch, wound));
-	  mem_free (wound->severity);
-	  wound->severity = NULL;
-	  wound->severity = str_dup (buf);
-	}
-    }
+	  if (wound->healerskill == -1)
+		  wound->healerskill = 0;
+	  if (wound->damage > 0)
+	  {
+		  sprintf (buf, "%s", downsized_wound (ch, wound));
+		  mem_free (wound->severity);
+		  wound->severity = NULL;
+		  wound->severity = str_dup (buf);
+	  }
+  }
   else if (roll > needed && WOUND_INFECTIONS)
     {
       if (roll % 5 == 0 && wound->healerskill <= 0 && !number (0, 7) &&
@@ -3474,7 +3476,7 @@ delayed_bind (CHAR_DATA * thisPtr)
 		if (pClothProp->count > 1)
 			pClothProp->count--;
 		else
-      extract_obj (pClothProp);
+			extract_obj (pClothProp);
     }
 
   // Show the actors that binding occured
@@ -3652,4 +3654,252 @@ strip_small_minor(char * wounds, CHAR_DATA * ch)
 					}
       
     return ((char *)woundstr.c_str());
+}
+
+void
+do_wound (CHAR_DATA *ch, char * arg, int cmd)
+{
+	std::string argument = arg, buffer;
+	argument = one_argument(argument, buffer);
+
+	if (buffer.empty())
+	{
+		send_to_char("Who do you wish to wound?\n", ch);
+		return;
+	}
+
+	if (buffer[0] == '?')
+	{
+		command_interpreter(ch, "help staff wound");
+		return;
+	}
+
+	CHAR_DATA * target = '\0';
+	if (!(target = get_char_room_vis(ch, buffer.c_str())))
+	{
+		send_to_char("You do not see anyone with the keyword [#2", ch);
+		send_to_char(buffer.c_str(), ch);
+		send_to_char("#0] to wound.\n", ch);
+		return;
+	}
+
+	argument = one_argument(argument, buffer);
+	if (buffer.empty())
+	{
+		send_to_char("How much damage do you wish to do?\n", ch);
+		return;
+	}
+
+	int damage = 0;
+	if (is_number(buffer.c_str()))
+	{
+		damage = atoi(buffer.c_str());
+	}
+	else
+	{
+		if (buffer.find('d') == std::string::npos)
+		{
+			send_to_char("Damage is either a number, or xdy / xdy+i. (error 1)\n", ch);
+			return;
+		}
+		std::stringstream streambuf;
+		streambuf << buffer;
+		std::getline(streambuf, buffer, 'd');
+
+		if (!is_number(buffer.c_str()))
+		{
+			send_to_char("Damage is either a number, or xdy / xdy+i. (error 2)\n", ch);
+			return;
+		}
+
+		int number = atoi(buffer.c_str());
+		int sides = 0;
+		int mod = 0;
+		// Work out whether or not it's xdy or xdy+i
+		//buffer = streambuf.str();
+		std::getline(streambuf, buffer, '\0');
+		bool subtract_dam = false;
+		if (buffer.find('+') == std::string::npos && buffer.find('-') == std::string::npos)
+		{
+			if (!is_number(buffer.c_str()))
+			{
+				send_to_char("Damage is either a number, or xdy / xdy+i. (error 3)\n", ch);
+				return;
+			}
+
+			sides = atoi(buffer.c_str());
+		}
+		else
+		{
+			std::stringstream secondstream;
+			secondstream << buffer;
+			if (buffer.find('+') == std::string::npos)
+			{
+				subtract_dam = true;
+				std::getline(secondstream, buffer, '-');
+			}
+			else
+				std::getline(secondstream, buffer, '+');
+
+			if (!is_number(buffer.c_str()))
+			{
+				send_to_char("Damage is either a number, or xdy / xdy+i. (error 4)\n", ch);
+				return;
+			}
+
+			sides = atoi(buffer.c_str());
+			//buffer = streambuf.str();
+			std::getline(secondstream, buffer, '\0');
+
+			if (!is_number(buffer.c_str()))
+			{
+				send_to_char("Damage is either a number, or xdy / xdy+i. (error 5)\n", ch);
+				return;
+			}
+
+			// mod = atoi(buffer.c_str());
+			mod = atoi(buffer.c_str()) * (subtract_dam) ? (-1) : (1);
+		}
+
+		damage = dice(number, sides) + mod;
+	}
+
+	if (damage < 0)
+		damage = 0;
+
+	argument = one_argument(argument, buffer);
+	if (buffer.empty())
+	{
+		send_to_char("What type of damage are you intending to do?\n", ch);
+		return;
+	}
+
+	int type = -1;
+	std::string verbose_type = buffer;
+	if (!buffer.compare("pierce"))
+		type = 0;
+	else if (!buffer.compare("stab"))
+		type = 1;
+	else if (!buffer.compare("chop"))
+		type = 2;
+	else if (!buffer.compare("blunt"))
+		type = 3;
+	else if (!buffer.compare("slash"))
+		type = 4;
+	else if (!buffer.compare("frost"))
+		type = 5;
+	else if (!buffer.compare("fire"))
+		type = 6;
+	else if (!buffer.compare("bite"))
+		type = 7;
+	else if (!buffer.compare("claw"))
+		type = 8;
+	else if (!buffer.compare("fist"))
+		type = 9;
+	else if (!buffer.compare("stun"))
+		type = 10;
+
+	if (type == -1)
+	{
+		send_to_char("Invalid damage type.\n", ch);
+		return;
+	}
+
+	std::string location;
+	int bleeding = 0, lodged = 0;
+	bool infected = false, echo = false;
+
+	argument = one_argument(argument, buffer);
+	if (!buffer.empty())
+	{
+		for ( ; ;)
+		{
+			if (!buffer.compare("location"))
+			{
+				argument = one_argument(argument, location);
+				if (location.empty())
+				{
+					send_to_char("Which location?\n", ch);
+					return;
+				}
+			}
+			else if (!buffer.compare("bleeding"))
+			{
+				argument = one_argument(argument, buffer);
+				if (!is_number(buffer.c_str()) || buffer.empty())
+				{
+					send_to_char("How much bleeding?\n", ch);
+					return;
+				}
+
+				bleeding = atoi(buffer.c_str());
+			}
+			else if (!buffer.compare("lodged"))
+			{
+				argument = one_argument(argument, buffer);
+				if (!is_number(buffer.c_str()) || buffer.empty())
+				{
+					send_to_char("Lodge what?\n", ch);
+					return;
+				}
+				if (!(vtoo(atoi(buffer.c_str()))))
+				{
+					send_to_char("Object does not exist.\n", ch);
+					return;
+				}
+
+				lodged = atoi(buffer.c_str());
+			}
+			else if (!buffer.compare("infected"))
+			{
+				infected = true;
+			}
+			else if (!buffer.compare("echo"))
+			{
+				echo = true;
+			}
+			else
+			{
+				break;
+			}
+			argument = one_argument(argument, buffer);
+		}
+	}
+
+	if (location.empty())
+	{
+		int location_number = -1;
+		int roll = number(1, 100);
+
+		while (roll > 0)
+			roll = roll - body_tab[0][++location_number].percent;
+
+		location = figure_location(target, location_number);
+	}
+
+	std::string output;
+	std::ostringstream conversion;
+	conversion << damage;
+	output = "Giving a";
+	if (infected)
+		output = output + "n infected";
+	output = output + " [#6" + verbose_type + "#0] wound of damage [#1" + conversion.str() + "#0] on the #6" + expand_wound_loc((char *) location.c_str()) + "#0 to #5" + char_short(target) + "#0";
+	if (bleeding)
+	{
+		std::stringstream secondconv;
+		secondconv << bleeding;
+		output = output + " #1bleeding for " + secondconv.str() + "#0";
+	}
+	if (lodged)
+		output = output + " with #2" + obj_short_desc(vtoo(lodged)) + "#0 lodged";
+	if (echo)
+		output = output + " (echoed to the player)";
+
+	output = output + ".\n";
+
+	send_to_char (output.c_str(), ch);
+	if (lodged)
+		lodge_missile (target, vtoo(lodged), (char *) location.c_str());
+	wound_to_char (target, (char *) location.c_str(), damage, type, bleeding, 0, (int) infected);
+	return;
 }
