@@ -428,6 +428,7 @@ if (ch->in_room == 66955 || ch->in_room == 66956 || ch->in_room == 66954 || ch->
   if (!d)
     return;
 
+	character_list.remove(ch);
   d->character = NULL;
 
   if (!d->acct || str_cmp(d->acct->name.c_str (), "Guest") == 0)
@@ -2325,8 +2326,10 @@ rl_minute_affect_update (void)
 
   next_minute_update += 60;	/* This is a RL minute */
 
-  for (ch = character_list; ch; ch = ch->next)
+  //for (ch = character_list; ch; ch = ch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
 
       if (ch->deleted)
 	continue;
@@ -2470,10 +2473,12 @@ ten_second_update (void)
   AFFECTED_TYPE *next_af;
   AFFECTED_TYPE *room_stink;
 
-  for (ch = character_list; ch; ch = ch_next)
+  //for (ch = character_list; ch; ch = ch_next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
 
-      ch_next = ch->next;
+      //ch_next = ch->next;
 
       if (ch->deleted)
 	continue;
@@ -2787,8 +2792,10 @@ hour_affect_update (void)
 
   t = time_info.year * 12 * 30 + time_info.month * 30 + time_info.day;
 
-  for (ch = character_list; ch; ch = ch->next)
+  //for (ch = character_list; ch; ch = ch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
 
       if (ch->deleted || !ch->room)
 	continue;
@@ -4242,6 +4249,10 @@ do_nod (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_camp (CHAR_DATA * ch, char *argument, int cmd)
 {
+  send_to_char("This command has been temporarily disabled, please find a place to quit instead.\n", 
+ch);
+return;
+
   int sector_type, block = 0;
   struct room_prog *p;
 

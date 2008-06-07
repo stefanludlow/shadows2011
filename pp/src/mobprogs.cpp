@@ -1928,8 +1928,10 @@ delayed_trigger_activity ()
 {
   CHAR_DATA *ch;
 
-  for (ch = character_list; ch; ch = ch->next)
+  //for (ch = character_list; ch; ch = ch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
 
       if (ch->deleted)
 	continue;

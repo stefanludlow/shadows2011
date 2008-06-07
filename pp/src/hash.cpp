@@ -21,7 +21,8 @@
 #include "room.h"
 
 extern rpie::server engine;
-extern struct char_data *character_list;
+//extern struct char_data *character_list;
+extern std::list<char_data*> character_list;
 extern struct obj_data *object_list;
 extern int top_of_zone_table;
 extern struct zone_data *zone_table;
@@ -435,8 +436,10 @@ load_mobile (int vnum)
   new_mobile->coldload_id = get_next_coldload_id (0);
   new_mobile->deleted = 0;
 
-  new_mobile->next = character_list;
-  character_list = new_mobile;
+  //new_mobile->next = character_list;
+  //character_list = new_mobile;
+  if (new_mobile)
+	character_list.push_back(new_mobile);
 
   new_mobile->time.birth = time (0);
 
@@ -1576,8 +1579,11 @@ list_validate (char *name)
   sprintf (buf, "List validate:  %s entered.\n", name);
   system_log (buf, false);
 
-  for (ch = character_list, cycle_count = 0; ch; ch = ch->next)
+  //for (ch = character_list, cycle_count = 0; ch; ch = ch->next)
+  cycle_count = 0;
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
       if (cycle_count++ > 10000)
 	{
 	  system_log ("Character list cycle failed.", true);
@@ -1605,26 +1611,30 @@ cleanup_the_dead (int mode)
   OBJ_DATA *next_obj = NULL;
   OBJ_DATA *prev_obj = NULL;
   CHAR_DATA *ch;
-  CHAR_DATA *next_ch;
-  CHAR_DATA *prev_ch = NULL;
+  //CHAR_DATA *next_ch;
+  //CHAR_DATA *prev_ch = NULL;
 
   if (mode == 1 || mode == 0)
     {
-      for (ch = character_list; ch; ch = next_ch)
+      //for (ch = character_list; ch; ch = next_ch)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
-
-	  next_ch = ch->next;
+	  ch = *tch_iterator;
+	  //next_ch = ch->next;
 
 	  if (!ch->deleted)
 	    {
-	      prev_ch = ch;
+	  //    prev_ch = ch;
 	      continue;
 	    }
 
-	  if (ch == character_list)
+	  /*if (ch == character_list)
 	    character_list = next_ch;
 	  else
-	    prev_ch->next = next_ch;
+	    prev_ch->next = next_ch;*/
+		
+	character_list.remove(ch);
+	tch_iterator = character_list.begin();
 
 	  if (!IS_NPC (ch))
 	    {

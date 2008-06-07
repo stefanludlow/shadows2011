@@ -120,8 +120,10 @@ check_linkdead (void)
 {
   CHAR_DATA *tch;
 
-  for (tch = character_list; tch; tch = tch->next)
+  //for (tch = character_list; tch; tch = tch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	tch = *tch_iterator;
       if (tch->deleted)
 	continue;
       if (IS_NPC (tch) || tch->desc || !IS_MORTAL (tch) || !tch->room)
@@ -241,13 +243,15 @@ point_update (void)
   for (i = 0; i <= 99; i++)
     zone_table[i].player_in_zone = 0;
 
-  for (ch = character_list; ch; ch = next_ch)
+  //for (ch = character_list; ch; ch = next_ch)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
 
       if (!ch)
 	continue;
 
-      next_ch = ch->next;
+      //next_ch = ch->next;
 
       if (ch->deleted)
 	continue;
@@ -268,8 +272,10 @@ point_update (void)
 	  if (room->sector_type == SECT_REEF)
 	    {
 
-	      for (tch = character_list; tch; tch = tch->next)
+	      //for (tch = character_list; tch; tch = tch->next)
+		  for (std::list<char_data*>::iterator tch_iterator_two = character_list.begin(); tch_iterator_two != character_list.end(); tch_iterator_two++)
 		{
+		tch = *tch_iterator_two;
 
 		  if (tch->deleted)
 		    continue;
@@ -718,10 +724,12 @@ bool admin_found = false, admin_found_absoloute = false;
 
   current_time = time (NULL);
 
-  for (ch = character_list; ch; ch = next_ch)
+  //for (ch = character_list; ch; ch = next_ch)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
 
-      next_ch = ch->next;
+      //next_ch = ch->next;
 
       if (ch->deleted || !ch->room)
 	continue;

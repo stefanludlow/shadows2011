@@ -1271,8 +1271,10 @@ get_char_id (int coldload_id)
 {
   CHAR_DATA *ch;
 
-  for (ch = character_list; ch; ch = ch->next)
+  //for (ch = character_list; ch; ch = ch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
       if (ch->deleted)
 	continue;
       if (ch->coldload_id == coldload_id)
@@ -1356,8 +1358,11 @@ get_char (char *name)
   if (!(number = get_number (&tmp)))
     return 0;
 
-  for (i = character_list, j = 1; i && (j <= number); i = i->next)
+  //for (i = character_list, j = 1; i && (j <= number); i = i->next)
+  j = 1;
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); (tch_iterator != character_list.end()) && (j <= number); tch_iterator++)
     {
+	i = *tch_iterator;
 
       if (i->deleted)
 	continue;
@@ -1379,8 +1384,10 @@ get_mob_vnum (int nVirtual)
 {
   CHAR_DATA *i;
 
-  for (i = character_list; i; i = i->next)
+  //for (i = character_list; i; i = i->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	i = *tch_iterator;
 
       if (i->deleted)
 	continue;
@@ -1411,8 +1418,11 @@ get_char_nomask (char *name)
   if (!(number = get_number (&tmp)))
     return 0;
 
-  for (i = character_list, j = 1; i && (j <= number); i = i->next)
+  //for (i = character_list, j = 1; i && (j <= number); i = i->next)
+  j = 1;
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); (tch_iterator != character_list.end()) && (j <= number); tch_iterator++)
     {
+	i = *tch_iterator;
 
       if (i->deleted)
 	continue;
@@ -2061,8 +2071,10 @@ extract_char (CHAR_DATA * ch)
 
   /* Clear out guarders */
 
-  for (k = character_list; k; k = k->next)
+  //for (k = character_list; k; k = k->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	k = *tch_iterator;
       if (k->deleted)
 	continue;
       if ((af = get_affect (k, MAGIC_GUARD)) &&
@@ -2070,8 +2082,10 @@ extract_char (CHAR_DATA * ch)
 	affect_remove (k, af);
     }
 
-  for (k = character_list; k; k = k->next)
+  //for (k = character_list; k; k = k->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	k = *tch_iterator;
       if (k->deleted)
 	continue;
       if (k->ranged_enemy == ch)
@@ -2349,8 +2363,11 @@ get_char_vis (CHAR_DATA * ch, char *name)
   if (!(number = get_number (&tmp)))
     return (0);
 
-  for (i = character_list, j = 1; i && (j <= number); i = i->next)
+  //for (i = character_list, j = 1; i && (j <= number); i = i->next)
+  j = 1;
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end() && (j <= number); tch_iterator++)
     {
+	i = *tch_iterator;
 
       if (i->deleted)
 	continue;
@@ -2861,10 +2878,12 @@ update_delays (void)
   arena__update_delays ();
   te_pit_update_delays ();
 
-  for (ch = character_list; ch; ch = ch_next)
+  //for (ch = character_list; ch; ch = ch_next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
 
-      ch_next = ch->next;
+      //ch_next = ch->next;
 
       if (!ch || ch->deleted || !ch->room || ch->in_room == NOWHERE)
 	continue;
@@ -4541,8 +4560,10 @@ can_learn (CHAR_DATA * ch)
 	CHAR_DATA * src = NULL;
 	int flag = 0;
 	
-	for (src = character_list; src; src = src->next)
+	//for (src = character_list; src; src = src->next)
+	for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	src = *tch_iterator;
 		if (src->morphto == ch->mob->nVirtual)
 			{
 			flag = 1;

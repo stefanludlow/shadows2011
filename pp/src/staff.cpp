@@ -57,8 +57,10 @@ is_switched (CHAR_DATA * ch)
 {
   CHAR_DATA *tch;
 
-  for (tch = character_list; tch; tch = tch->next)
+  //for (tch = character_list; tch; tch = tch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	tch = *tch_iterator;
       if (tch->deleted)
 	continue;
       if (!tch->desc)
@@ -2081,8 +2083,10 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
     {
       loads = 0;
 
-      for (tch = character_list; tch; tch = tch->next)
+      //for (tch = character_list; tch; tch = tch->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
+	tch = *tch_iterator;
 	  if (tch->deleted || !IS_NPC (tch))
 	    continue;
 
@@ -4643,8 +4647,10 @@ clear_watch (CHAR_DATA * ch)
   CHAR_DATA *tch;
   AFFECTED_TYPE *af;
 
-  for (tch = character_list; tch; tch = tch->next)
+  //for (tch = character_list; tch; tch = tch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	tch = *tch_iterator;
 
       if (tch->deleted || IS_NPC (tch))
 	continue;
@@ -6159,8 +6165,10 @@ fix_shops (CHAR_DATA * ch)
   OBJ_DATA *obj;
   char buf[MAX_STRING_LENGTH];
 
-  for (sch = character_list; sch; sch = sch->next)
+  //for (sch = character_list; sch; sch = sch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	sch = *tch_iterator;
 
       if (sch->deleted)
 	continue;
@@ -7778,8 +7786,10 @@ do_wanted (CHAR_DATA * ch, char *argument, int cmd)
   if (IS_MORTAL (ch))
     zone = ch->room->zone;
 
-  for (tch = character_list; tch; tch = tch->next)
+  //for (tch = character_list; tch; tch = tch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	tch = *tch_iterator;
 
       if (tch->deleted)
 	continue;
@@ -7924,8 +7934,10 @@ report_mobiles (CHAR_DATA * ch)
   for (i = 0; i < 100; i++)
     zone_counts[i] = 0;
 
-  for (tch = character_list; tch; tch = tch->next)
+  //for (tch = character_list; tch; tch = tch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	tch = *tch_iterator;
 
       if (tch->deleted || !IS_NPC (tch))
 	continue;
@@ -9415,8 +9427,10 @@ do_pfile (CHAR_DATA * ch, char *argument, int cmd)
   if (!str_cmp (buf, "archive"))
     {
 
-      for (tch = character_list; tch; tch = tch->next)
+      //for (tch = character_list; tch; tch = tch->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
+	tch = *tch_iterator;
 
 	  if (tch->deleted || !tch->pc)
 	    continue;

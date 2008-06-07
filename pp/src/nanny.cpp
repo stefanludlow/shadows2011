@@ -5481,8 +5481,13 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 	  ch->pc->creation_comment = tilde_eliminator (buf);
 	}
 
-      for (tch = character_list; tch; tch = tch->next)
+      //for (tch = character_list; tch; tch = tch->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
+	tch = *tch_iterator;
+	
+	  if (!tch)
+	    continue;
 
 	  if (tch->deleted)
 	    continue;

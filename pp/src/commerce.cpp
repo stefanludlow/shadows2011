@@ -4405,8 +4405,10 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
     }
   else
     {
-      for (keeper = character_list; keeper; keeper = keeper->next)
+      //for (keeper = character_list; keeper; keeper = keeper->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
+	keeper = *tch_iterator;
 	  if (IS_NPC (keeper) && keeper->shop
 	      && keeper->shop->store_vnum == ch->in_room)
 	    break;
@@ -6612,8 +6614,10 @@ do_payroll (CHAR_DATA * ch, char *argument, int cmd)
 		}
 	else
 		{
-		for (keeper = character_list; keeper; keeper = keeper->next)
+		//for (keeper = character_list; keeper; keeper = keeper->next)
+		for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 			{
+			keeper = *tch_iterator;
 			if (IS_NPC (keeper) &&
 				keeper->shop &&
 				keeper->shop->store_vnum == ch->in_room)

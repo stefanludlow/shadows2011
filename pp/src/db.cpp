@@ -48,7 +48,8 @@ CHAR_DATA *mob_tab[ZONE_SIZE];
 
 ROLE_DATA *role_list = NULL;
 OBJ_DATA *object_list = NULL;
-CHAR_DATA *character_list = NULL;
+//CHAR_DATA *character_list = NULL;
+std::list<char_data*> character_list;
 CHAR_DATA *full_mobile_list = NULL;
 ROOM_DATA *full_room_list = NULL;
 OBJ_DATA *full_object_list = NULL;
@@ -532,8 +533,10 @@ stock_new_deliveries (void)
       return;
     }
 
-  for (tch = character_list; tch; tch = tch->next)
+  //for (tch = character_list; tch; tch = tch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	tch = *tch_iterator;
       if (tch->deleted)
 	continue;
       if (!IS_NPC (tch) || !IS_SET (tch->flags, FLAG_KEEPER) || !tch->shop)
@@ -1257,8 +1260,10 @@ autosave (void)
   int save_count = 0;
   CHAR_DATA *t;
 
-  for (t = character_list; t; t = t->next)
+  //for (t = character_list; t; t = t->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	t = *tch_iterator;
 
       if (t->deleted || IS_NPC (t))
 	continue;
@@ -1283,8 +1288,10 @@ autosave_stayputs (void)
       return;
     }
 
-  for (ch = character_list; ch; ch = ch->next)
+  //for (ch = character_list; ch; ch = ch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
 
       if (ch->deleted)
 	continue;
@@ -2756,8 +2763,12 @@ check_memory ()
   for (o = object_list; o; o = o->next)
     objects_in_list++;
 
-  for (tch = character_list; tch; tch = tch->next)
+  //for (tch = character_list; tch; tch = tch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
+  {
+    tch = *tch_iterator;
     characters_in_list++;
+  }
 }
 
 #else /* NOVELL */

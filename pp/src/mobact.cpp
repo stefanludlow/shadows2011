@@ -2315,8 +2315,10 @@ mobile_routines (int pulse)
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
 
-  for (ch = character_list; ch; ch = ch->next)
+  //for (ch = character_list; ch; ch = ch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
 
       if (ch->deleted)
 	continue;

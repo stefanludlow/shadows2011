@@ -111,7 +111,7 @@ const int restricted_skills[] = {
   -2,				/* Milling */
   0,				/* Mining */
   -2,				/* Perfumery */
-  0,				/* Pottery */
+  -2,				/* Pottery */
   0,				/* Tracking */
   0,				/* Farming */
   -7,				/* Healing */
@@ -1574,9 +1574,12 @@ is_he_somewhere (CHAR_DATA * he)
   if (!he)
     return 0;
 
-  for (tch = character_list; tch; tch = tch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
+  {
+   tch = *tch_iterator;
     if (!tch->deleted && tch == he)
       return 1;
+  }
 
   return 0;
 }
@@ -1688,8 +1691,9 @@ get_pc (char *buf)
   if (!buf || !*buf)
     return NULL;
 
-  for (ch = character_list; ch; ch = ch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
 
       if (ch->deleted || IS_NPC (ch) || !GET_NAME (ch))
 	continue;
@@ -1709,8 +1713,9 @@ get_pc_dead (const char *buf)
   if (!*buf)
     return NULL;
 
-  for (ch = character_list; ch; ch = ch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
       if (ch->deleted)
 	continue;
       if (!GET_NAME (ch))
@@ -1754,8 +1759,9 @@ load_pc (const char *buf)
 	}
     }
 
-  for (ch = character_list; ch; ch = ch->next)
+   for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	  ch = *tch_iterator;
 
       if (ch->deleted)
 	continue;
@@ -1861,7 +1867,8 @@ unload_pc (CHAR_DATA * ch)
 	}
     }
 
-  free_char (ch);
+   character_list.remove(ch);
+   free_char (ch);
 }
 
 void
@@ -1886,8 +1893,7 @@ pc_to_game (CHAR_DATA * ch)
 	}
     }
 
-  ch->next = character_list;
-  character_list = ch;
+  character_list.push_back(ch);
 
   if (!ch->writes)
     {

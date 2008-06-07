@@ -22,7 +22,6 @@
 //
 //////////////////////////////////////////////////////////////////////////////
 
-
 #ifndef _rpie_protos_h_
 #define _rpie_protos_h_
 
@@ -35,7 +34,7 @@
 
 #include <sys/time.h>
 #include <mysql/mysql.h>
-
+#include <list>
 #include "clan.h"
 
 #ifndef uint16
@@ -138,7 +137,8 @@ extern REGISTRY_DATA *registry[];
 extern SPELL_DATA spell_table[];
 extern RACE_TABLE_ENTRY *race_table;
 extern CHAR_DATA *assist_queue;
-extern CHAR_DATA *character_list;
+//extern CHAR_DATA *character_list;
+extern std::list<char_data*> character_list;
 extern ROLE_DATA *role_list;
 extern OBJ_DATA *object_list;
 extern struct zone_data *zone_table;

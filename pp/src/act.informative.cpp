@@ -7789,8 +7789,10 @@ do_locate (CHAR_DATA * ch, char *argument, int cmd)
 
   *b_buf = '\0';
 
-  for (mob = character_list; mob; mob = mob->next)
+  //for (mob = character_list; mob; mob = mob->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	mob = *tch_iterator;
 
       if (mob->deleted)
 	continue;
@@ -8081,8 +8083,10 @@ do_where (CHAR_DATA * ch, char *argument, int cmd)
 
   *buf = '\0';
 
-  for (i = character_list; i; i = i->next)
+  //for (i = character_list; i; i = i->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	i = *tch_iterator;
 
       if (i->deleted)
 	continue;
@@ -10890,8 +10894,10 @@ do_notify (CHAR_DATA * ch, char *argument, int cmd)
 		  get_clandef_long (buf)) != NULL) ? clan->literal : buf));
       buf2[3] = toupper (buf2[3]);
 
-      for (tch = character_list; tch; tch = tch->next)
+      //for (tch = character_list; tch; tch = tch->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
+	tch = *tch_iterator;
 
 	  if (ch == tch || tch->deleted || IS_NPC (tch))
 	    continue;

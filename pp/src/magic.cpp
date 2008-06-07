@@ -2698,8 +2698,10 @@ answer_application (CHAR_DATA * ch, char *argument, int cmd)
   while (tch->pc->load_count > 1)
     unload_pc (tch);
 
-  for (tmp_ch = character_list; tmp_ch; tmp_ch = tmp_ch->next)
+  //for (tmp_ch = character_list; tmp_ch; tmp_ch = tmp_ch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	tmp_ch = *tch_iterator;
       if (tmp_ch->deleted)
 	continue;
       if (tmp_ch->pc && tmp_ch->pc->edit_player

@@ -786,8 +786,10 @@ game_loop (int s)
 	{
 	  if (!engine.in_build_mode ())
 	    {
-	      for (tch = character_list; tch; tch = tch->next)
+	      //for (tch = character_list; tch; tch = tch->next)
+		  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 		{
+		tch = *tch_iterator;
 		  if (tch->deleted)
 		    continue;
 		  if (!IS_NPC (tch) || !IS_SET (tch->flags, FLAG_KEEPER))
@@ -858,16 +860,18 @@ game_loop (int s)
 
       tics++;			/* tics since last checkpoint signal */
 
-      if (first_loop)
+      /*if (first_loop)
 	{
-	  for (tch = character_list; tch; tch = next_ch)
+	  //for (tch = character_list; tch; tch = next_ch)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	    {
-	      next_ch = tch->next;
+		tch_iterator++;
+		tch = *tch_iterator;
 	      if (tch->deleted)
 		continue;
 	      trigger (tch, "", TRIG_HOUR);
 	    }
-	}
+	}*/
 
       first_loop = false;
     }
@@ -1133,8 +1137,10 @@ update_website (void)
       if (!(ft = fopen (PATH_TO_WEBSITE "/stats.shtml", "w+")))
 	return;
 
-      for (tch = character_list; tch; tch = tch->next)
+      //for (tch = character_list; tch; tch = tch->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
+	tch = *tch_iterator;
 	  if (tch->deleted)
 	    continue;
 	  if (tch->desc && IS_MORTAL (tch))

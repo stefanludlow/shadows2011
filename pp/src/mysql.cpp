@@ -2084,8 +2084,10 @@ process_queued_review (MYSQL_ROW row)
       return;
     }
 
-  for (tmp_ch = character_list; tmp_ch; tmp_ch = tmp_ch->next)
+  //for (tmp_ch = character_list; tmp_ch; tmp_ch = tmp_ch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	tmp_ch = *tch_iterator;
       if (tmp_ch->deleted)
 	continue;
       if (tmp_ch->pc && tmp_ch->pc->edit_player
@@ -3066,6 +3068,29 @@ load_stayput_mobiles ()
       fclose (fp);
     }
 
+		CHAR_DATA *temp_mob;
+        for (ROOM_DATA *temp_room = full_room_list; temp_room; temp_room = temp_room->lnext)
+                {
+                        for (CHAR_DATA *temp_mob = temp_room->people; temp_mob; temp_mob = temp_mob->next_in_room)
+                        {
+                                bool mob_found = false;
+                                //for (CHAR_DATA *temp_mob_from_list = character_list; temp_mob_from_list; temp_mob_from_list = temp_mob_from_list->next)
+								for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
+                                {
+                                        if (temp_mob == *tch_iterator)
+                                                mob_found = true;
+                                }
+                                if (!mob_found)
+                                {
+                                        //temp_mob->next = character_list;
+                                        //character_list = temp_mob;
+										if (temp_mob)
+											character_list.push_back(temp_mob);
+                                }
+                        }
+                }
+
+
   mysql_free_result (result);
 }
 
@@ -3079,8 +3104,10 @@ save_reboot_mobiles ()
   if (!finished_booting)
     return;
 
-  for (mob = character_list; mob; mob = mob->next)
+  //for (mob = character_list; mob; mob = mob->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	mob = *tch_iterator;
       if (mob->deleted)
 	continue;
       if (!IS_NPC (mob) && mob->desc && !mob->desc->original)
@@ -3114,8 +3141,10 @@ save_stayput_mobiles ()
   if (!finished_booting)
     return;
 
-  for (mob = character_list; mob; mob = mob->next)
+  //for (mob = character_list; mob; mob = mob->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	mob = *tch_iterator;
       if (mob->deleted)
 	continue;
       if (!IS_SET (mob->act, ACT_STAYPUT))
@@ -3584,6 +3613,31 @@ do_mysql (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+	if (!str_cmp (argument, "listfix"))
+	{
+		CHAR_DATA *temp_mob;
+        for (ROOM_DATA *temp_room = full_room_list; temp_room; temp_room = temp_room->lnext)
+                {
+                        for (CHAR_DATA *temp_mob = temp_room->people; temp_mob; temp_mob = temp_mob->next_in_room)
+                        {
+                                bool mob_found = false;
+                                //for (CHAR_DATA *temp_mob_from_list = character_list; temp_mob_from_list; temp_mob_from_list = temp_mob_from_list->next)
+								for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
+                                {
+                                        if (temp_mob == *tch_iterator)
+                                                mob_found = true;
+                                }
+                                if (!mob_found)
+                                {
+                                        //temp_mob->next = character_list;
+                                        //character_list = temp_mob;
+										if (temp_mob)
+											character_list.push_back(temp_mob);
+                                }
+                        }
+                }
+	}
+
   if (!str_cmp (argument, "host"))
     {
       sprintf (buf, "Host: %s\nServer: %s\n Status: %s\n",
@@ -3750,8 +3804,10 @@ do_mysql (CHAR_DATA * ch, char *argument, int cmd)
 
   if (!str_cmp (argument, "sell"))
     {
-      for (tch = character_list; tch; tch = tch->next)
+      //for (tch = character_list; tch; tch = tch->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
+	tch = *tch_iterator;
 	  if (tch->deleted)
 	    continue;
 	  if (!IS_NPC (tch) || !IS_SET (tch->flags, FLAG_KEEPER))
@@ -3817,8 +3873,10 @@ do_mysql (CHAR_DATA * ch, char *argument, int cmd)
 
   if (!str_cmp (argument, "pc-sold"))
     {
-      for (tch = character_list; tch; tch = tch->next)
+      //for (tch = character_list; tch; tch = tch->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
+	tch = *tch_iterator;
 	  if (tch->deleted)
 	    continue;
 

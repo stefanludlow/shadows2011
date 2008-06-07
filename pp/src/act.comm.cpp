@@ -350,8 +350,10 @@ do_think (CHAR_DATA * ch, char *argument, int cmd)
   act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 
   /* Send thoughts to global Imm telepaths */
-  for (tch = character_list; tch; tch = tch->next)
+  //for (tch = character_list; tch; tch = tch->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	tch = *tch_iterator;
       if (tch->deleted)
 	continue;
       if (IS_MORTAL (tch))
@@ -2437,8 +2439,10 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 	       IS_NPC (ch) ? ch->short_descr : GET_NAME (ch), CAP (argument));
       reformat_string (buf, &p);
 
-      for (admin = character_list; admin; admin = admin->next)
+      //for (admin = character_list; admin; admin = admin->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
+	admin = *tch_iterator;
 
 	  if (admin->deleted)
 	    continue;

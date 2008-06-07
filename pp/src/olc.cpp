@@ -2071,9 +2071,11 @@ mlist_show (std::string *output_string, CHAR_DATA *mob, bool header)
 
       int loads = 0;
 
-      for (CHAR_DATA *ch = character_list; ch; ch = ch->next)
+      //for (CHAR_DATA *ch = character_list; ch; ch = ch->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 
         {
+		CHAR_DATA *ch = *tch_iterator;
 
 			if (ch->deleted || !IS_NPC(ch))
 
@@ -3442,8 +3444,10 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	      sprintf (tmp + strlen (tmp), "%10d/%-4d", count, n);
 	      count = 0;
 	      count2 = 0;
-	      for (j = character_list; j; j = j->next)
+	      //for (j = character_list; j; j = j->next)
+		  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 		{
+		j = *tch_iterator;
 
 		  if (!IS_NPC (j))
 		    continue;
@@ -3451,9 +3455,13 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 		  if (j->in_room / 1000 == i)
 		    count++;
 		}
-	      for (j = character_list; j; j = j->next)
-		if (!IS_NPC (j) && j->room && j->room->zone == i)
+	      //for (j = character_list; j; j = j->next)
+		  for (std::list<char_data*>::iterator tch_iterator_two = character_list.begin(); tch_iterator_two != character_list.end(); tch_iterator_two++)
+		  {
+		  j = *tch_iterator_two;
+			if (!IS_NPC (j) && j->room && j->room->zone == i)
 		  count2++;
+		  }
 	      sprintf (tmp + strlen (tmp), "%6d%10d", count2, count);
 	      count = 0;
 
@@ -3486,8 +3494,10 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	if (!j->deleted && IS_NPC (j))
 	  mtop++;
 
-      for (j = character_list; j; j = j->next)
+      //for (j = character_list; j; j = j->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
+	j = *tch_iterator;
 	  if (j->deleted)
 	    continue;
 	  if (IS_NPC (j) && IS_SET (j->act, ACT_STAYPUT))
@@ -5483,8 +5493,10 @@ redefine_mobiles (CHAR_DATA * proto)
   int change_count = 0;
   CHAR_DATA *mob;
 
-  for (mob = character_list; mob; mob = mob->next)
+  //for (mob = character_list; mob; mob = mob->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	mob = *tch_iterator;
 
       if (mob->deleted ||
 	  !IS_NPC (mob) || mob->mob->nVirtual != proto->mob->nVirtual)
@@ -10479,8 +10491,10 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 	      break;
 	    }
 
-	  for (tch = character_list; tch; tch = tch->next)
+	  //for (tch = character_list; tch; tch = tch->next)
+	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	    {
+		tch = *tch_iterator;
 
 	      if (tch->deleted)
 		continue;
@@ -11444,10 +11458,12 @@ purge_zone (int zone, int *obj_count, int *mob_count, int *stray_count)
   *mob_count = 0;
   *stray_count = 0;
 
-  for (ch = character_list; ch; ch = next_ch)
+  //for (ch = character_list; ch; ch = next_ch)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	ch = *tch_iterator;
 
-      next_ch = ch->next;
+      //next_ch = ch->next;
 
       if (ch->deleted || !IS_NPC (ch))
 	continue;
@@ -11743,8 +11759,10 @@ replace_mobile (int src, int tar, CHAR_DATA * ch)
 
   replace_count = 0;
 
-  for (mob = character_list; mob; mob = mob->next)
+  //for (mob = character_list; mob; mob = mob->next)
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
+	mob = *tch_iterator;
       if (mob->deleted)
 	continue;
       if (IS_NPC (mob) && mob->mob->nVirtual == src)
