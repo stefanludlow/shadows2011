@@ -39,6 +39,7 @@ CLAN_DATA *clan_list = NULL;
 |    14121 | Nebavla Dunlendings        | nebavla_tribe
 |    14181 | Hawk and Dove              | hawk_dove_2
 |    12865 | Astirian Villeins          | astirian_villeins
+|    15283 | Military Recruits          | militaryrecruits
 +----------+----------------------------+
 */
 void
@@ -107,6 +108,10 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 				{
 					nGroupId = 12865;
 				}
+else if (strcmp (clan, "militaryrecruits") == STR_MATCH)
+{
+nGroupId = 15283;
+}
       // Add Privates+ to Elite Orgs
       else if (strcmp (rank, "recruit") != STR_MATCH)
 	{
@@ -187,6 +192,10 @@ clan_forum_remove (CHAR_DATA * ch, char *clan)
     {
       nGroupId = 8494;
     }
+else if (strcmp (clan, "militaryrecruits") == STR_MATCH)
+{
+nGroupId = 15283;
+}
   else if (strcmp (clan, "malred") == STR_MATCH)
     {
       nGroupId = 2008;
@@ -236,7 +245,7 @@ clan_forum_remove_all (CHAR_DATA * ch)
 	       "USING shadows.forum_user_group fug "
 	       "JOIN shadows.forum_users fu "
 	       "ON fug.user_id = fu.user_id "
-	       "WHERE group_id in (1487,1736,2008,7250,3899,3908,4174,4276,4903,8026,8494,11723,11864, 12013, 14121, 14181) "
+	       "WHERE group_id in (1487,1736,2008,7250,3899,3908,4174,4276,4903,8026,8494,11723,11864, 12013, 14121, 14181,15283) "
 	       "AND username = '%s';", ch->pc->account_name);
       mysql_safe_query (buf);
     }
