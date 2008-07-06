@@ -20,6 +20,7 @@
 DESCRIPTOR_DATA *last_descriptor;
 char full_last_command[MAX_STRING_LENGTH];
 char last_command[MAX_STRING_LENGTH];
+extern std::multimap<int, room_prog> mob_prog_list;
 
 const struct command_data commands[] = {
 
@@ -357,6 +358,14 @@ const struct command_data commands[] = {
 	{"mcopy", do_mcopy, DEAD, C_LV2},
 	{"minit", do_minit, DEAD, C_LV2},
 	{"mlist", do_mlist, DEAD, C_LV2},
+  {"mpadd", do_mpadd, DEAD, C_LV2},
+  {"mpapp", do_mpapp, DEAD, C_LV2},
+  {"mpcmd", do_mpcmd, DEAD, C_LV2},
+  {"mpdel", do_mpdel, DEAD, C_LV2},
+  {"mpkey", do_mpkey, DEAD, C_LV2},
+  {"mpprg", do_mpprg, DEAD, C_LV2},
+  {"mpstat", do_mpstat, DEAD, C_LV2},
+  {"mptype", do_mptype, DEAD, C_LV2},
 	{"munused", do_munused, DEAD, C_LV2},
 	{"notes", do_notes, DEAD, C_LV2},
 	{"outfit", do_outfit, DEAD, C_LV2},
@@ -582,6 +591,38 @@ command_interpreter (CHAR_DATA * ch, char *argument)
       send_to_char ("Input with the '$' character is not permitted.\n", ch);
       return;
     }
+
+  std::multimap<int, room_prog>::iterator it;
+  if (IS_NPC(ch))
+	  it = mob_prog_list.find(ch->mob->nVirtual); 
+  if (IS_NPC(ch) && !get_second_affect (ch, SA_DOANYWAY, 0) && it != mob_prog_list.end())
+  {
+	  if (m_prog(ch, p))
+	  {
+		  return;
+	  }
+  }
+
+  std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> pair;
+  for (CHAR_DATA *temp_char = ch->room->people; temp_char; temp_char = temp_char->next_in_room)
+  {
+	  if (get_second_affect (ch, SA_DOANYWAY, 0))
+		  break;
+
+	  if (temp_char == ch)
+		  continue;
+
+	  if (!IS_NPC(temp_char))
+		  continue;
+
+	  pair = mob_prog_list.equal_range(temp_char->mob->nVirtual);
+
+	  for (it = pair.first; it != pair.second; ++it)
+	  {
+		  if (m_prog(ch, p, it->second))
+			  return;
+	  }
+  }
 
   if (ch->room && ch->room->prg && !get_second_affect(ch, SA_DOANYWAY, 0) && r_program (ch, p))
     {

@@ -1683,6 +1683,7 @@ struct room_prog
   char *prog;			/* The program itself */
   struct prog_vars *vars;
   struct room_prog *next;	/* next program for this room */
+  int type;			/* Only used for mprogs. 1 is personal, 0 is whole-room */
 };
 
 struct secret
@@ -2285,6 +2286,9 @@ struct mob_data
 
   // Mob Triggers
   std::multimap<mob_cue,std::string> *cues;
+
+  // Mob Progs (Room Prog Hack)
+  room_prog *prg;
 };
 
 #include "room.h"

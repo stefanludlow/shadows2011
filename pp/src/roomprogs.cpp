@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -22,7 +23,8 @@
 #include "group.h"
 
 /* script program commands */
-
+#define MAKE_STRING(msg) \  
+(((std::ostringstream&) (std::ostringstream() << std::boolalpha << msg)).str())  
 #define RP_ATECHO 	0
 #define RP_GIVE		1
 #define RP_TAKE		2
@@ -72,6 +74,10 @@
 #define RP_DOITANYWAY 46
 #define RP_DOOR 47
 #define RP_MATH 48
+#define RP_NOOP 49 /* Do nothing - i.e. for comments */
+#define RP_TRANSOBJ 50
+
+extern std::multimap<int, room_prog> mob_prog_list;
 
 struct room_prog_var
 {
@@ -121,6 +127,7 @@ void r_teach (CHAR_DATA *ch, char *argument);
 void r_doitanyway (CHAR_DATA *ch, char *argument, char *, char *, char *);
 void r_door (CHAR_DATA *ch, char *argument);
 void r_math (CHAR_DATA *ch, char *argument, room_prog_var *&);
+void r_transobj (CHAR_DATA *ch, char *argument);
 
 
 #define MAX_RPRG_NEST 30
@@ -179,6 +186,8 @@ const char *rfuncs[] = {
 	"doitanyway",
 	"door",
 	"math",
+	"noop",
+	"transobj",
 	"\n"
 };
 
@@ -384,6 +393,9 @@ r_program (CHAR_DATA * ch, char *argument)
 	char arg[MAX_STRING_LENGTH] = {'\0'};
 	argument = one_argument(argument, cmd);
 
+	if (!cmd || !*cmd)
+		return 0;
+
 	for (struct room_prog *p = ch->room->prg; p; p = p->next)
 	{
 		if (!p->prog || !*p->prog)
@@ -407,6 +419,72 @@ r_program (CHAR_DATA * ch, char *argument)
 	}
 
 	return (0);
+}
+
+int
+m_prog (CHAR_DATA * ch, char * argument)
+{
+	std::string cmd, keys, strArgument = argument;
+	strArgument = one_argument (strArgument, cmd);
+	strArgument = one_argument (strArgument, keys);
+
+	if (cmd.empty())
+		return 0;
+
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range;
+	range = mob_prog_list.equal_range(ch->mob->nVirtual); 
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (!it->second.type)
+			continue;
+		if (!cmd.empty() && r_isname((char *) cmd.c_str(), it->second.command))
+		{
+			if (!it->second.keys || !*it->second.keys)
+			{
+				strArgument = keys + strArgument;
+				rxp(ch, it->second.prog, (char *) cmd.c_str(), "", (char *) strArgument.c_str());
+				return 1;
+			}
+
+			if (!keys.empty() && r_isname ((char *) keys.c_str(), it->second.keys))
+			{
+				rxp (ch, it->second.prog, (char *) cmd.c_str(), (char *) keys.c_str(), (char *) strArgument.c_str());
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
+
+int
+m_prog (CHAR_DATA *ch, char *argument, room_prog prog)
+{
+	std::string cmd, keys, strArgument = argument;
+	strArgument = one_argument (strArgument, cmd);
+	strArgument = one_argument (strArgument, keys);
+
+	if (cmd.empty())
+		return 0;
+
+	if (prog.type)
+		return 0;
+
+	if (!cmd.empty() && r_isname((char *) cmd.c_str(), prog.command))
+	{
+		if (!prog.keys || !*prog.keys)
+		{
+			strArgument = keys + strArgument;
+			rxp (ch, prog.prog, (char *) cmd.c_str(), "", (char *) strArgument.c_str());
+			return 1;
+		}
+
+		if (!keys.empty() && r_isname ((char *) keys.c_str(), prog.keys))
+		{
+			rxp (ch, prog.prog, (char *) cmd.c_str(), (char *) keys.c_str(), (char *) strArgument.c_str());
+			return 1;
+		}
+	}
+	return 0;
 }
 
 void
@@ -462,6 +540,42 @@ rxp (CHAR_DATA *ch, char *prg, char *command, char *keyword, char *argument)
 						line.erase(first_index, index-first_index+1);
 					else
 						line.replace(first_index, index-first_index+1, ThisArgument);
+				}
+			}
+			else if (!strncmp(TempString.c_str(), "count", 5))
+			{
+				if (TempString.length() == 5)
+					line.replace(first_index, index-first_index+1, ((std::ostringstream&) (std::ostringstream() << std::boolalpha << count_number[0])).str());
+				else if (TempString.length() == 6)
+				{
+					if (is_number(((std::ostringstream&) (std::ostringstream() << std::boolalpha << TempString[5])).str().c_str()))
+					{
+						std::ostringstream conversion;
+						conversion << TempString[5];
+						line.replace(first_index, index-first_index+1, ((std::ostringstream&) (std::ostringstream() << std::boolalpha << count_number[atoi((conversion.str()).c_str())])).str());
+					}
+				}
+				else
+				{
+					line.erase(first_index, index-first_index+1);
+				}
+			}
+			else if (!strncmp(TempString.c_str(), "random", 6))
+			{
+				if (TempString.length() == 6)
+					line.replace(first_index, index-first_index+1, ((std::ostringstream&) (std::ostringstream() << std::boolalpha << random_number[0])).str());
+				else if (TempString.length() == 7)
+				{
+					if (is_number(((std::ostringstream&) (std::ostringstream() << std::boolalpha << TempString[6])).str().c_str()))
+					{
+						std::ostringstream conversion;
+						conversion << TempString[6];
+						line.replace(first_index, index-first_index+1, ((std::ostringstream&) (std::ostringstream() << std::boolalpha << random_number[atoi((conversion.str()).c_str())])).str());
+					}
+				}
+				else
+				{
+					line.erase(first_index, index-first_index+1);
 				}
 			}
 			else if (is_variable_in_list(local_variables, TempString))
@@ -1577,6 +1691,8 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 
 	switch (i)
 	{
+	case RP_NOOP: // Comment
+		return 1;
 	case RP_MATH:
 		if (!ifin[nNest])
 			r_math(ch, arg, variable_list);
@@ -1834,15 +1950,450 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 			r_door (ch, arg);
 		
 		return 1;
-		/*	case RP_SETVAR:
+	case RP_TRANSOBJ:
 		if (!ifin[nNest])
-		r_setvar(arg, Variables);
-		return 1;*/
+			r_transobj(ch, arg);
+
+		return 1;
 	default:
 		system_log ("ERROR: unknown command in program", true);
 		
 		return 0;
 	}
+}
+
+// mplist
+// mplist Vnum [num]
+// mplist zZone
+
+void
+do_mpstat (CHAR_DATA *ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, ThisArgument, output = "";
+	strArgument = one_argument(strArgument, ThisArgument);
+	int lastVnum = -1, counter = 1;
+
+	if (ThisArgument.empty())
+	{
+		for (std::multimap<int, room_prog>::iterator it = mob_prog_list.begin(); it != mob_prog_list.end(); it++)
+		{
+			if (lastVnum == -1 || lastVnum != it->first)
+			{
+				output += "\nMobile #2" + MAKE_STRING(it->first) + "#0:\n";
+				counter = 1;
+			}
+			lastVnum = it->first;
+			output += "[#B" + MAKE_STRING(counter) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + MAKE_STRING(it->second.type) + "#0]\n";
+		}
+		page_string (ch->desc, output.c_str());
+		return;
+	}
+
+	if (ThisArgument[0] == '*')
+	{
+		ThisArgument.erase(0, 1);
+		if (!is_number(ThisArgument.c_str()))
+		{
+			send_to_char ("Correct usage: #6mplist#0, #6mplist <vnum>#0, or #6mplist *<zone>#0.\n", ch);
+			return;
+		}
+		int zone = atoi(ThisArgument.c_str());
+		output += "Zone \"#F" + MAKE_STRING(zone_table[zone].name) + "#0\" [Zone " + ThisArgument + "]\n";
+		for (std::multimap<int, room_prog>::iterator it = mob_prog_list.begin(); it != mob_prog_list.end(); it++)
+		{
+			if ((it->first/1000) != zone)
+				continue;
+			if (lastVnum == -1 || lastVnum != it->first)
+				output += "\nMobile #2" + MAKE_STRING(it->first) + "#0:\n";
+			lastVnum = it->first;
+			output += "[#B" + MAKE_STRING(counter) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + MAKE_STRING(it->second.type) + "#0]\n";
+		}
+		page_string (ch->desc, output.c_str());
+		return;
+	}
+
+	if (!is_number(ThisArgument.c_str()))
+	{
+		send_to_char ("Correct usage: #6mplist#0, #6mplist <vnum> [number]#0, or #6mplist *<zone>#0.\n", ch);
+		return;
+	}
+	int vnum = atoi(ThisArgument.c_str());
+	strArgument = one_argument(strArgument, ThisArgument);
+	bool SingleProg = false;
+	if (!ThisArgument.empty() && is_number(ThisArgument.c_str()))
+	{
+		SingleProg = true;
+	}
+	std::pair<std::multimap<int, room_prog>::iterator,std::multimap<int, room_prog>::iterator> pair = mob_prog_list.equal_range(vnum);
+	output += "Mobile #2" + MAKE_STRING(vnum);
+	if (SingleProg)
+		output += "#0 Program Number #6" + ThisArgument + "#0:\n\n";
+	else
+		output += "#0:\n";
+	counter = 1;
+	for (std::multimap<int, room_prog>::iterator it = pair.first; it != pair.second; ++it)
+	{
+		if (!SingleProg)
+			output += "[#B" + MAKE_STRING(counter) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + MAKE_STRING(it->second.type) + "#0]\n";
+		else
+		{
+			if (counter == atoi(ThisArgument.c_str()))
+			{
+				output += it->second.prog;
+			}
+		}
+		counter++;
+	}
+	page_string (ch->desc, output.c_str());
+	return;
+}
+
+void
+do_mpadd (CHAR_DATA *ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum;
+
+	strArgument = one_argument (strArgument, vnum);
+	if (vnum.empty() || atoi(vnum.c_str()) < 1 || atoi(vnum.c_str()) > 99999)
+	{
+		send_to_char ("You must specify a valid vnum of the mob to initialize a new mprog for.\n", ch);
+		return;
+	}
+
+	room_prog prog;
+	prog.prog = "";
+	prog.keys = "";
+	prog.command = "";
+	prog.type = 1;
+
+	mob_prog_list.insert(std::pair<int, room_prog>(atoi(vnum.c_str()), prog));
+	int prog_num = 0;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = mob_prog_list.equal_range(atoi(vnum.c_str()));
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		prog_num++;
+	}
+	send_to_char("Inserted blank mob prog for mobile vnum [#2", ch);
+	send_to_char(vnum.c_str(), ch);
+	send_to_char("#0] at position #6", ch);
+	send_to_char(((std::ostringstream&) (std::ostringstream() << std::boolalpha << prog_num)).str().c_str(), ch);
+	send_to_char("#0.\n", ch);
+	return;
+}
+
+void
+do_mpdel (CHAR_DATA *ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is MPDEL <vnum> <prognum>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = mob_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			delete &it->second;
+			mob_prog_list.erase(it);
+			std::string output;
+			output = "Erasing mob prog number #6" + prognum + "#0 from mobile vnum [#2" + vnum + "#0].\n";
+			send_to_char(output.c_str(), ch);
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Mobile number [#2" + vnum + "#0] does not have a mob program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
+}
+
+void
+do_mpcmd (CHAR_DATA * ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is MPCMD <vnum> <prognum> <cmd>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	if (strArgument.empty())
+	{
+		send_to_char("What command would you like to install?\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = mob_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			it->second.command = add_hash((char *) strArgument.c_str());
+			std::string output;
+			output = "Installed command(s) [#6" + strArgument + "#0] for mob prog number #6" + prognum + "#0 for mobile vnum [#2" + vnum + "#0].\n";
+			send_to_char(output.c_str(), ch);
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Mobile number [#2" + vnum + "#0] does not have a mob program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
+}
+
+void
+do_mpkey (CHAR_DATA * ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is MPKEY <vnum> <prognum> <key>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	if (strArgument.empty())
+	{
+		send_to_char("What keyword would you like to install?\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = mob_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			it->second.keys = add_hash((char *) strArgument.c_str());
+			std::string output;
+			output = "Installed keyword(s) [#6" + strArgument + "#0] for mob prog number #6" + prognum + "#0 for mobile vnum [#2" + vnum + "#0].\n";
+			send_to_char(output.c_str(), ch);
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Mobile number [#2" + vnum + "#0] does not have a mob program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
+}
+
+void
+do_mptype (CHAR_DATA * ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is MPTYPE <vnum> <prognum> <key>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	if (strArgument.empty())
+	{
+		send_to_char("What type are you setting this program to (0 or 1)?\n", ch);
+		return;
+	}
+
+	if (strArgument[0] != '1' && strArgument[0] != '0')
+	{
+		send_to_char("Type is either 0 (like a room program) or 1 (only for the mob itself).\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = mob_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			if (strArgument[0] == '1')
+			{
+				it->second.type = 1;
+				send_to_char("Set type to 1.\n", ch);
+			}
+			else
+			{
+				it->second.type = 0;
+				send_to_char("Set type to 0.\n", ch);
+			}
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Mobile number [#2" + vnum + "#0] does not have a mob program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
+}
+
+
+void
+do_mpprg (CHAR_DATA * ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is MPPRG <vnum> <prognum>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = mob_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			make_quiet (ch);
+			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
+			ch->desc->str = &it->second.prog;
+			it->second.prog = 0;
+			ch->desc->max_str = MAX_STRING_LENGTH;
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Mobile number [#2" + vnum + "#0] does not have a mob program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
+}
+
+void
+do_mpapp (CHAR_DATA * ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is MPAPP <vnum> <prognum>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = mob_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			make_quiet (ch);
+			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
+			ch->desc->str = &it->second.prog;
+			ch->desc->max_str = MAX_STRING_LENGTH;
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Mobile number [#2" + vnum + "#0] does not have a mob program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
 }
 
 void
@@ -4026,6 +4577,65 @@ r_doitanyway (CHAR_DATA *ch, char *argument, char *command, char *keyword, char 
 	}
 	do_doitanyway(ch, argument, 1);
 	return;
+}
+
+// transobj keyword/vnum source destination [count]
+void
+r_transobj (CHAR_DATA *ch, char *argument)
+{
+	std::string strArgument = argument, strKeyword, strSource, strDestination, strCount;
+	int iCount = 0, iVnum = 0, iSource = 0, iDestination = 0;
+
+	strArgument = one_argument(strArgument, strKeyword);
+
+	if (strKeyword.empty())
+		return;
+
+	if (atoi(strKeyword.c_str()) != 0)
+		iVnum = atoi(strKeyword.c_str());
+
+	strArgument = one_argument(strArgument, strSource);
+	if (strSource.empty() || atoi(strSource.c_str()) == 0)
+		return;
+
+	if (!strSource.compare("-1"))
+		iSource = ch->in_room;
+	else
+		iSource = atoi(strSource.c_str());
+
+	strArgument = one_argument(strArgument, strDestination);
+	if (strDestination.empty() || atoi(strDestination.c_str()) == 0)
+		return;
+
+	if (!strDestination.compare("-1"))
+		iDestination = ch->in_room;
+	else
+		iDestination = atoi(strDestination.c_str());
+
+	strArgument = one_argument(strArgument, strCount);
+	if (!strCount.empty() && atoi(strCount.c_str()) != 0)
+		iCount = atoi(strCount.c_str());
+
+	if (iDestination == iSource)
+		return;
+
+	if (!(vtor(iDestination)) || !(vtor(iSource)))
+		return;
+
+	OBJ_DATA *obj = NULL;
+	if (iVnum)
+		obj = get_obj_in_list_num(iVnum, vtor(iSource)->contents);
+	else
+		obj = get_obj_in_list((char *) strKeyword.c_str(), vtor(iSource)->contents);
+
+	if (!obj)
+		return;
+
+	if (iCount < 0 && obj->count > (-1 * iCount))
+		iCount = obj->count + iCount;
+
+	obj_from_room(&obj, iCount);
+	obj_to_room(obj, iDestination);
 }
 
 // Supported Operations:

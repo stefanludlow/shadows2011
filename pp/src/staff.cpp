@@ -661,7 +661,7 @@ do_stayput (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (!engine.in_play_mode ())
+  if (!engine.in_play_mode () && !engine.in_test_mode())
     {
       send_to_char ("This command is for use on the player port only.\n", ch);
       return;

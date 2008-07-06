@@ -1260,7 +1260,7 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 {
   int num, stat, i;
 
-  if (engine.in_play_mode ())
+  if (engine.in_play_mode () && !engine.in_test_mode())
     {
       send_to_char ("This command cannot be used on the player port.\n", ch);
       return;
@@ -1295,6 +1295,7 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 	  system ("../scripts/backup");
 	}
 
+	  save_mob_progs();
       update_crafts_file ();
 
       send_to_char ("All in-game zones have been saved.\n", ch);
@@ -1335,6 +1336,7 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
       send_to_char ("The zone must be between 0 and 99.\n", ch);
       return;
     }
+  save_mob_progs();
   stat = save_rooms (ch, num);
   if (!stat)
     send_to_char ("Saved.\n", ch);

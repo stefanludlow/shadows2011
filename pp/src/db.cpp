@@ -50,6 +50,7 @@ ROLE_DATA *role_list = NULL;
 OBJ_DATA *object_list = NULL;
 //CHAR_DATA *character_list = NULL;
 std::list<char_data*> character_list;
+std::multimap<int, room_prog> mob_prog_list;
 CHAR_DATA *full_mobile_list = NULL;
 ROOM_DATA *full_room_list = NULL;
 OBJ_DATA *full_object_list = NULL;
@@ -445,6 +446,10 @@ boot_db (void)
     }
 
   mm ("post load_save_rooms");
+
+  load_mob_progs();
+
+  mm ("post load mob progs");
 
   mem_free (overhead_base);
 

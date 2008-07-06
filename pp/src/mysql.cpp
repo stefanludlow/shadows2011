@@ -30,6 +30,7 @@
 #include "decl.h"
 
 extern RACE_TABLE_ENTRY *entry;
+extern std::multimap<int, room_prog> mob_prog_list;
 
 RACE_TABLE_ENTRY *race_table = NULL;
 
@@ -150,6 +151,40 @@ mysql_safe_query (char *fmt, ...)
 //    }
   return (result);
 }
+
+void load_mob_progs (void)
+{
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
+	mysql_safe_query ("SELECT vnum,cmd,key,prog,type FROM mob_progs");
+
+	if (!(result = mysql_store_result (database)))
+		return;
+
+	while (row = mysql_fetch_row(result))
+	{
+		room_prog prog;
+		prog.command = row[1];
+		prog.keys = row[2];
+		prog.prog = row[3];
+		prog.type = atoi(row[4]);
+		mob_prog_list.insert (std::pair<int, room_prog>(atoi(row[0]), prog));
+	}
+}
+
+void save_mob_progs (void)
+{
+	if (!engine.in_build_mode())
+		return;
+	mysql_safe_query ("INSERT INTO mob_progs_backup SELECT * FROM MOB_PROGS");
+	mysql_safe_query ("DELETE FROM mob_progs");
+	for (std::multimap<int, room_prog>::iterator it = mob_prog_list.begin(); it != mob_prog_list.end(); it++)
+	{
+		mysql_safe_query ("INSERT INTO mob_progs (vnum, cmd, key, prog, type) VALUES('%d', \"%s\", \"%s\", \"%s\", '%d')", it->first, it->second.command, it->second.keys, it->second.prog, it->second.type);
+	}
+}
+
 
 // Loads the master race table containing all race defines at boot
 
