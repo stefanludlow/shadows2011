@@ -492,7 +492,37 @@ criminalize (CHAR_DATA * ch, CHAR_DATA * vict, int zone, int crime)
   /* Immediate guard response */
 
   for (tch = ch->room->people; tch; tch = tch->next_in_room)
+  {
     enforcer (tch, ch, 1, 1);
+	if (!IS_NPC(tch))
+		continue;
+	typedef std::multimap<mob_cue,std::string>::const_iterator N;
+	std::pair<N,N> range = tch->mob->cues->equal_range (cue_on_witness);
+	for (N n = range.first; n != range.second; n++)
+	{
+		std::string cue = n->second;
+		if (!cue.empty())
+		{
+			if (cue[0]== '(' && cue.find(')') != std::string::npos)
+				{
+					std::string detail = "";
+					for (int index = 1; cue[index] != ')'; )
+					{
+						detail.push_back(cue[index++]);
+					}
+					if ((crime == CRIME_BRAWL && !detail.compare("brawl")) || (crime == CRIME_KILL && !detail.compare("kill")) || (crime == CRIME_STEAL && !detail.compare("steal")) || (crime == CRIME_PICKLOCK && !detail.compare("picklock")) || (crime == CRIME_FLEE && !detail.compare("flee")) || (crime == CRIME_RESIST_ARREST && !detail.compare("resist arrest")))
+					{
+						cue.erase(0, detail.length()+3);
+						command_interpreter(ch, (char *) cue.c_str());
+						continue;
+					}
+					else
+						continue;
+				}
+			command_interpreter(ch, (char *) cue.c_str());
+		}
+	}
+  }
 }
 
 

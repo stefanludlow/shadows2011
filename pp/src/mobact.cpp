@@ -133,7 +133,7 @@ enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness)
 
   if (!get_second_affect(crim, SA_ALREADY_WARNED,0) && !get_second_affect(crim, SA_WARNED,0))
   {
-	  add_second_affect(SA_WARNED, number(17,25), crim, NULL, NULL, NULL);
+	  add_second_affect(SA_WARNED, number(17,25), crim, NULL, NULL, 0);
 
   if (!ch->fighting && !ch->ranged_enemy && !ch->delay)
     {
@@ -2271,6 +2271,22 @@ target_acquisition (CHAR_DATA * ch)
 		      std::string cue = n->second;
 		      if (!cue.empty ())
 			{
+				if (cue[0]=='(' && cue.find(')') != std::string::npos)
+				{
+					std::string detail = "";
+					for (int index = 1; cue[index] != ')'; )
+					{
+						detail.push_back(cue[index++]);
+					}
+					if (isname((char *) detail.c_str(), tch->name))
+					{
+						cue.erase(0, detail.length()+3);
+						command_interpreter(ch, (char *) cue.c_str());
+						continue;
+					}
+					else
+						continue;
+				}
 			  strcpy (buf, cue.c_str ());
 			  command_interpreter (ch, buf);
 			}

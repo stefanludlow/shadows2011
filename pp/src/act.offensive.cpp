@@ -3066,6 +3066,18 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
 
       hit_char (ch, victim, 0);
 
+	  typedef std::multimap<mob_cue,std::string>::const_iterator N;
+	  if (IS_NPC(victim))
+	  {
+		  std::pair<N,N> range = victim->mob->cues->equal_range (cue_on_hit);
+		  for (N n = range.first; n != range.second; n++)
+		  {
+			  std::string cue = n->second;
+			  if (!cue.empty())
+				  command_interpreter(victim, (char *) cue.c_str());
+		  }
+	  }
+
       WAIT_STATE (ch, 9);
 
       if (victim->deleted)

@@ -76,6 +76,7 @@
 #define RP_MATH 48
 #define RP_NOOP 49 /* Do nothing - i.e. for comments */
 #define RP_TRANSOBJ 50
+#define RP_OBR 51
 
 extern std::multimap<int, room_prog> mob_prog_list;
 
@@ -188,6 +189,7 @@ const char *rfuncs[] = {
 	"math",
 	"noop",
 	"transobj",
+	"obr",
 	"\n"
 };
 
@@ -1764,6 +1766,11 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 		if (!ifin[nNest])
 			send_to_char ("\n", ch);
 		
+		return 1;
+	case RP_OBR:
+		if (!ifin[nNest])
+			send_to_not_char ("\n", ch);
+
 		return 1;
 	case RP_OSTR:
 		if (!ifin[nNest])

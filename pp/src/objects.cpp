@@ -2395,6 +2395,36 @@ do_give (CHAR_DATA * ch, char *argument, int cmd)
 
   obj_to_char (obj, vict);
 
+  typedef std::multimap<mob_cue,std::string>::const_iterator N;
+  if (IS_NPC(vict))
+  {
+	  std::pair<N,N> range = vict->mob->cues->equal_range (cue_on_receive);
+	  for (N n = range.first; n != range.second; n++)
+	  {
+		  std::string cue = n->second;
+		  if (!cue.empty())
+		  {
+			  if (cue[0]== '(' && cue.find(')') != std::string::npos)
+				{
+					std::string detail = "";
+					for (int index = 1; cue[index] != ')'; )
+					{
+						detail.push_back(cue[index++]);
+					}
+					if (isname((char *) detail.c_str(), obj->name) || (is_number(detail.c_str()) && atoi(detail.c_str()) == obj->nVirtual))
+					{
+						cue.erase(0, detail.length()+3);
+						command_interpreter(vict, (char *) cue.c_str());
+						continue;
+					}
+					else
+						continue;
+				}
+			  command_interpreter(vict, (char *) cue.c_str());
+		  }
+	  }
+  }
+
 }
 
 OBJ_DATA *
