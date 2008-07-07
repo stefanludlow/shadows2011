@@ -157,7 +157,7 @@ void load_mob_progs (void)
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 
-	mysql_safe_query ("SELECT vnum,cmd,key,prog,type FROM mob_progs");
+	mysql_safe_query ("SELECT vnum, cmd, keywords, prog, type FROM mob_progs");
 
 	if (!(result = mysql_store_result (database)))
 		return;
@@ -177,11 +177,11 @@ void save_mob_progs (void)
 {
 	if (!engine.in_build_mode())
 		return;
-	mysql_safe_query ("INSERT INTO mob_progs_backup SELECT * FROM MOB_PROGS");
+	mysql_safe_query ("INSERT INTO mob_progs_backup SELECT * FROM mob_progs");
 	mysql_safe_query ("DELETE FROM mob_progs");
 	for (std::multimap<int, room_prog>::iterator it = mob_prog_list.begin(); it != mob_prog_list.end(); it++)
 	{
-		mysql_safe_query ("INSERT INTO mob_progs (vnum, cmd, key, prog, type) VALUES('%d', \"%s\", \"%s\", \"%s\", '%d')", it->first, it->second.command, it->second.keys, it->second.prog, it->second.type);
+		mysql_safe_query ("INSERT INTO mob_progs (vnum, cmd, keywords, prog, type) VALUES('%d', '%s', '%s', '%s', '%d')", it->first, it->second.command, it->second.keys, it->second.prog, it->second.type);
 	}
 }
 
