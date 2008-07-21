@@ -2120,7 +2120,6 @@ do_mpdel (CHAR_DATA *ch, char *argument, int cmd)
 	{
 		if (count == iprognum)
 		{
-			delete &it->second;
 			mob_prog_list.erase(it);
 			std::string output;
 			output = "Erasing mob prog number #6" + prognum + "#0 from mobile vnum [#2" + vnum + "#0].\n";
@@ -3793,6 +3792,10 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 		char * formatted;
 		ROOM_DATA *room = vtor(atoi(buf));
 		argument = one_argument(argument, buf);
+		std::string strReplacement = argument;
+		if (strReplacement.find("$n") != std::string::npos)
+			strReplacement.replace(strReplacement.find("$n"), 2,  char_short(ch));
+		argument = (char *) strReplacement.c_str();
 		reformat_string(argument, &formatted);
 		for (tch = room->people; tch; tch = tch->next_in_room)
 		{
@@ -3808,6 +3811,10 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 	{
 		char * formatted;
 		argument = one_argument(argument, buf);
+		std::string strReplacement = argument;
+		if (strReplacement.find("$n") != std::string::npos)
+			strReplacement.replace(strReplacement.find("$n"), 2,  char_short(ch));
+		argument = (char *) strReplacement.c_str();
 		reformat_string(argument, &formatted);
 		for (tch = ch->room->people; tch; tch = tch->next_in_room)
 		{
@@ -3829,6 +3836,10 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 		if (!strncmp(buf, "zone_outside", 12))
 			outside = true;
 		argument = one_argument(argument, buf);
+		std::string strReplacement = argument;
+		if (strReplacement.find("$n") != std::string::npos)
+			strReplacement.replace(strReplacement.find("$n"), 2,  char_short(ch));
+		argument = (char *) strReplacement.c_str();
 		reformat_string(argument, &formatted);
 		for (d = descriptor_list; d; d = d->next)
 		{
@@ -3856,6 +3867,10 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 		if (!strncmp(buf, "all_outside", 11))
 			outside = true;
 		argument = one_argument(argument, buf);
+		std::string strReplacement = argument;
+		if (strReplacement.find("$n") != std::string::npos)
+			strReplacement.replace(strReplacement.find("$n"), 2,  char_short(ch));
+		argument = (char *) strReplacement.c_str();
 		reformat_string(argument, &formatted);
 		for (d = descriptor_list; d; d = d->next)
 		{
