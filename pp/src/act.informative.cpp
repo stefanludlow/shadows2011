@@ -6110,571 +6110,602 @@ do_time (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_weather (CHAR_DATA * ch, char *argument, int cmd)
 {
-  int sunrise[] = { 6, 6, 6, 6, 5, 5, 4, 4, 5, 6, 6, 7 };
-  int sunset[] = { 18, 18, 19, 19, 20, 21, 22, 22, 21, 20, 19, 18 };
-  int ind = 0;
-  char w_phrase[50] = { '\0' };
-  char buf[MAX_STRING_LENGTH] = { '\0' };
-  char buf2[MAX_STRING_LENGTH] = { '\0' };
-  char imm_buf[MAX_STRING_LENGTH];
-  int wind_case = 0;
-  int temp_case = 0;
-  char wind[20] = { '\0' };
-  int high_sun = 0;
-  AFFECTED_TYPE *room_af = NULL;
-  extern AFFECTED_TYPE *world_affects;
-  int i = 0;
+	int sunrise[] = { 6, 6, 6, 6, 5, 5, 4, 4, 5, 6, 6, 7 };
+	int sunset[] = { 18, 18, 19, 19, 20, 21, 22, 22, 21, 20, 19, 18 };
+	int ind = 0;
+	char w_phrase[50] = { '\0' };
+	char buf[MAX_STRING_LENGTH] = { '\0' };
+	char buf2[MAX_STRING_LENGTH] = { '\0' };
+	char imm_buf[MAX_STRING_LENGTH];
+	int wind_case = 0;
+	int temp_case = 0;
+	char wind[20] = { '\0' };
+	int high_sun = 0;
+	AFFECTED_TYPE *room_af = NULL;
+	extern AFFECTED_TYPE *world_affects;
+	int i = 0;
 
-  
-  argument = one_argument (argument, buf);
 
-/*** Start set weather ***/
-  if(!strcmp("set", buf))
-  {
-	  argument = one_argument (argument, buf);
-	  
-	  if(!strcmp("?", buf))
-	  {
-		  send_to_char("The following weather states are available:\n\n", ch);
+	argument = one_argument (argument, buf);
 
-		  /* Cycle through each struct and show options */
-		  sprintf (buf,"     Fog States\n");
-		  for (i = 0; *fog_states[i] != '\n'; i++)
-		  {
+	/*** Start set weather ***/
+	if(!strcmp("set", buf))
+	{
+		argument = one_argument (argument, buf);
+
+		if(!strcmp("?", buf))
+		{
+			send_to_char("The following weather states are available:\n\n", ch);
+
+			/* Cycle through each struct and show options */
+			sprintf (buf,"     Fog States\n");
+			for (i = 0; *fog_states[i] != '\n'; i++)
+			{
 				sprintf (buf + strlen (buf),"     #6%s#0\n",
-				fog_states[i]);
-		  }
-		  sprintf (buf + strlen (buf),"\n");
+					fog_states[i]);
+			}
+			sprintf (buf + strlen (buf),"\n");
 
-		  sprintf (buf + strlen (buf),"     Precipitation States\n");
-		  for (i = 0; *weather_states[i] != '\n'; i++)
-		  {
+			sprintf (buf + strlen (buf),"     Precipitation States\n");
+			for (i = 0; *weather_states[i] != '\n'; i++)
+			{
 				sprintf (buf + strlen (buf),"     #6%s#0\n",
-				weather_states[i]);
-		  }
-		  sprintf (buf + strlen (buf),"\n");
+					weather_states[i]);
+			}
+			sprintf (buf + strlen (buf),"\n");
 
-		  sprintf (buf + strlen (buf),"     Cloud Covers\n");
-		  for (i = 0; *weather_clouds[i] != '\n'; i++)
-		  {
+			sprintf (buf + strlen (buf),"     Cloud Covers\n");
+			for (i = 0; *weather_clouds[i] != '\n'; i++)
+			{
 				sprintf (buf + strlen (buf),"     #6%s#0\n",
-				weather_clouds[i]);
-		  }
-		  sprintf (buf + strlen (buf),"\n");
+					weather_clouds[i]);
+			}
+			sprintf (buf + strlen (buf),"\n");
 
-		  sprintf (buf + strlen (buf),"     Wind Speeds\n");
-		  for (i = 0; *wind_speeds[i] != '\n'; i++)
-		  {
+			sprintf (buf + strlen (buf),"     Wind Speeds\n");
+			for (i = 0; *wind_speeds[i] != '\n'; i++)
+			{
 				sprintf (buf + strlen (buf),"     #6%s#0\n",
-				wind_speeds[i]);
-		  }
-		  sprintf (buf + strlen (buf),"\n");
+					wind_speeds[i]);
+			}
+			sprintf (buf + strlen (buf),"\n");
 
-		  sprintf (buf + strlen (buf),"     Wind Directions\n");
-		  for (i = 0; *wind_directions[i] != '\n'; i++)
-		  {
+			sprintf (buf + strlen (buf),"     Wind Directions\n");
+			for (i = 0; *wind_directions[i] != '\n'; i++)
+			{
 				sprintf (buf + strlen (buf),"     #6%s#0\n",
-				wind_directions[i]);
-		  }
-		  sprintf (buf + strlen (buf),"\n");
+					wind_directions[i]);
+			}
+			sprintf (buf + strlen (buf),"\n");
 
-		  sprintf (buf + strlen (buf),"     Special Effects\n");
-		  for (i = 0; *special_effects[i] != '\n'; i++)
-		  {
+			sprintf (buf + strlen (buf),"     Special Effects\n");
+			for (i = 0; *special_effects[i] != '\n'; i++)
+			{
 				sprintf (buf + strlen (buf),"     #6%s#0\n",
-				special_effects[i]);
-		  }
-		  sprintf (buf + strlen (buf),"\n");
+					special_effects[i]);
+			}
+			sprintf (buf + strlen (buf),"\n");
 
-		  page_string(ch->desc, buf);
-	      
-		  return;
-	  }
+			page_string(ch->desc, buf);
 
-	  if (!IS_MORTAL (ch) && GET_TRUST (ch) > 3 && *buf)
-		{
-		  if ((ind = index_lookup (weather_states, buf)) != -1)
-		{
-		  sprintf (buf, "You have changed the precipitation state to #6%s#0.\n",
-			   weather_states[ind]);
-		  send_to_char (buf, ch);
-		  weather_info[ch->room->zone].state = ind;
-		  return;
+			return;
 		}
-		  else if ((ind = index_lookup (weather_clouds, buf)) != -1)
+
+		if (!IS_MORTAL (ch) && GET_TRUST (ch) > 3 && *buf)
 		{
-		  sprintf (buf, "You have changed cloud state to #6%s#0.\n",
-			   weather_clouds[ind]);
-		  send_to_char (buf, ch);
-		  weather_info[ch->room->zone].clouds = ind;
-		  return;
+			if ((ind = index_lookup (weather_states, buf)) != -1)
+			{
+				sprintf (buf, "You have changed the precipitation state to #6%s#0.\n",
+					weather_states[ind]);
+				send_to_char (buf, ch);
+				weather_info[ch->room->zone].state = ind;
+				return;
+			}
+			else if ((ind = index_lookup (weather_clouds, buf)) != -1)
+			{
+				sprintf (buf, "You have changed cloud state to #6%s#0.\n",
+					weather_clouds[ind]);
+				send_to_char (buf, ch);
+				weather_info[ch->room->zone].clouds = ind;
+				return;
+			}
+			else if ((ind = index_lookup (wind_speeds, buf)) != -1)
+			{
+				sprintf (buf, "You have changed wind speed to #6%s#0.\n",
+					wind_speeds[ind]);
+				send_to_char (buf, ch);
+				weather_info[ch->room->zone].wind_speed = ind;
+				return;
+			}
+			else if ((ind = index_lookup (fog_states, buf)) != -1)
+			{
+				sprintf (buf, "You have changed the fog level to #6%s#0.\n",
+					fog_states[ind]);
+				send_to_char (buf, ch);
+				weather_info[ch->room->zone].fog = ind;
+				return;
+			}
+			else if((ind = index_lookup (wind_directions, buf)) != -1)
+			{
+				sprintf (buf, "You have changed the wind direction to #6%s#0.\n",
+					wind_directions[ind]);
+				send_to_char (buf, ch);
+				weather_info[ch->room->zone].wind_dir = ind;
+				return;
+			}
+			else if((ind = index_lookup (special_effects, buf)) != -1)
+			{
+				sprintf (buf, "You have changed the special effect to #6%s#0.\n",
+					special_effects[ind]);
+				send_to_char (buf, ch);
+				weather_info[ch->room->zone].special_effect = ind;
+				return;
+			}
+			send_to_char ("That is not a recognized weather state.\n", ch);
+			return;
 		}
-		  else if ((ind = index_lookup (wind_speeds, buf)) != -1)
+	}
+	/*** End set weather***/
+
+	int weather_echo_state = 0; // 0 = outdoors, 1 = indoors, 2 = deep indoors
+	if (!IS_OUTSIDE(ch))
+	{
+		for (int exit = 0; exit < 6; exit++)
 		{
-		  sprintf (buf, "You have changed wind speed to #6%s#0.\n",
-			   wind_speeds[ind]);
-		  send_to_char (buf, ch);
-		  weather_info[ch->room->zone].wind_speed = ind;
-		  return;
+			if (EXIT(ch, exit) && (EXIT(ch, exit)->to_room != -1))
+			{
+				ROOM_DATA * room = vtor(EXIT(ch, exit)->to_room);
+				if (!room)
+					continue;
+
+				if (!IS_SET(room->room_flags, INDOORS) && room->sector_type != SECT_INSIDE && room->sector_type != SECT_UNDERWATER)
+				{
+					weather_echo_state = 1;
+					break;
+				}
+			}
 		}
-		  else if ((ind = index_lookup (fog_states, buf)) != -1)
-		{
-		  sprintf (buf, "You have changed the fog level to #6%s#0.\n",
-			   fog_states[ind]);
-		  send_to_char (buf, ch);
-		  weather_info[ch->room->zone].fog = ind;
-		  return;
-		}
-		  else if((ind = index_lookup (wind_directions, buf)) != -1)
-		{
-		  sprintf (buf, "You have changed the wind direction to #6%s#0.\n",
-			   wind_directions[ind]);
-		  send_to_char (buf, ch);
-		  weather_info[ch->room->zone].wind_dir = ind;
-		  return;
-		}
-		   else if((ind = index_lookup (special_effects, buf)) != -1)
-		{
-		  sprintf (buf, "You have changed the special effect to #6%s#0.\n",
-			   special_effects[ind]);
-		  send_to_char (buf, ch);
-		  weather_info[ch->room->zone].special_effect = ind;
-		  return;
-		}
-		  send_to_char ("That is not a recognized weather state.\n", ch);
-		  return;
-		}
-  }
-/*** End set weather***/
+		if (!weather_echo_state)
+			weather_echo_state = 2;
+	}
 
-  if (IS_OUTSIDE (ch))
-    {
+	if (GET_TRUST(ch))
+		weather_echo_state = 0;
 
-      if (weather_info[ch->room->zone].temperature < 120)
+	if (weather_info[ch->room->zone].temperature < 120)
 	{
-	  wind_case = 0;
-	  temp_case = 1;
+		wind_case = 0;
+		temp_case = 1;
 	}
-      if (weather_info[ch->room->zone].temperature < 110)
+	if (weather_info[ch->room->zone].temperature < 110)
 	{
-	  temp_case = 2;
-	  wind_case = 1;
+		temp_case = 2;
+		wind_case = 1;
 	}
-      if (weather_info[ch->room->zone].temperature < 100)
+	if (weather_info[ch->room->zone].temperature < 100)
 	{
-	  wind_case = 2;
-	  temp_case = 3;
+		wind_case = 2;
+		temp_case = 3;
 	}
-      if (weather_info[ch->room->zone].temperature < 94)
+	if (weather_info[ch->room->zone].temperature < 94)
 	{
-	  wind_case = 3;
-	  temp_case = 3;
+		wind_case = 3;
+		temp_case = 3;
 	}
-      if (weather_info[ch->room->zone].temperature < 90)
-	temp_case = 4;
-      if (weather_info[ch->room->zone].temperature < 80)
+	if (weather_info[ch->room->zone].temperature < 90)
+		temp_case = 4;
+	if (weather_info[ch->room->zone].temperature < 80)
 	{
-	  wind_case = 4;
-	  temp_case = 5;
+		wind_case = 4;
+		temp_case = 5;
 	}
-      if (weather_info[ch->room->zone].temperature < 75)
-	temp_case = 5;
-      if (weather_info[ch->room->zone].temperature < 65)
+	if (weather_info[ch->room->zone].temperature < 75)
+		temp_case = 5;
+	if (weather_info[ch->room->zone].temperature < 65)
 	{
-	  wind_case = 5;
-	  temp_case = 6;
+		wind_case = 5;
+		temp_case = 6;
 	}
-      if (weather_info[ch->room->zone].temperature < 55)
+	if (weather_info[ch->room->zone].temperature < 55)
 	{
-	  temp_case = 7;
-	  wind_case = 6;
+		temp_case = 7;
+		wind_case = 6;
 	}
-      if (weather_info[ch->room->zone].temperature < 47)
+	if (weather_info[ch->room->zone].temperature < 47)
 	{
-	  wind_case = 7;
-	  temp_case = 8;
+		wind_case = 7;
+		temp_case = 8;
 	}
-      if (weather_info[ch->room->zone].temperature < 38)
-	temp_case = 9;
-      if (weather_info[ch->room->zone].temperature < 33)
+	if (weather_info[ch->room->zone].temperature < 38)
+		temp_case = 9;
+	if (weather_info[ch->room->zone].temperature < 33)
 	{
-	  wind_case = 8;
-	  temp_case = 10;
+		wind_case = 8;
+		temp_case = 10;
 	}
-      if (weather_info[ch->room->zone].temperature < 21)
+	if (weather_info[ch->room->zone].temperature < 21)
 	{
-	  wind_case = 9;
-	  temp_case = 11;
+		wind_case = 9;
+		temp_case = 11;
 	}
-      if (weather_info[ch->room->zone].temperature < 11)
-	temp_case = 12;
-      if (weather_info[ch->room->zone].temperature < 1)
+	if (weather_info[ch->room->zone].temperature < 11)
+		temp_case = 12;
+	if (weather_info[ch->room->zone].temperature < 1)
 	{
-	  wind_case = 10;
-	  temp_case = 13;
+		wind_case = 10;
+		temp_case = 13;
 	}
-      if (weather_info[ch->room->zone].temperature < -10)
-	temp_case = 14;
+	if (weather_info[ch->room->zone].temperature < -10)
+		temp_case = 14;
 
-      *buf = '\0';
-      *buf2 = '\0';
+	*buf = '\0';
+	*buf2 = '\0';
 
-      high_sun = ((sunrise[time_info.month] + sunset[time_info.month]) / 2);
+	high_sun = ((sunrise[time_info.month] + sunset[time_info.month]) / 2);
 
-      if (time_info.hour >= sunrise[time_info.month]
-	  && time_info.hour <= high_sun - 2)
-	sprintf (w_phrase, "morning");
-      else if (time_info.hour > high_sun - 2
-	       && time_info.hour <= high_sun + 1)
-	sprintf (w_phrase, "day");
-      else if (time_info.hour > high_sun + 1
-	       && time_info.hour < sunset[time_info.month])
-	sprintf (w_phrase, "afternoon");
-      else if (time_info.hour >= sunset[time_info.month]
-	       && time_info.hour < 21)
-	sprintf (w_phrase, "evening");
-      else
-	sprintf (w_phrase, "night");
+	if (time_info.hour >= sunrise[time_info.month]
+	&& time_info.hour <= high_sun - 2)
+		sprintf (w_phrase, "morning");
+	else if (time_info.hour > high_sun - 2
+		&& time_info.hour <= high_sun + 1)
+		sprintf (w_phrase, "day");
+	else if (time_info.hour > high_sun + 1
+		&& time_info.hour < sunset[time_info.month])
+		sprintf (w_phrase, "afternoon");
+	else if (time_info.hour >= sunset[time_info.month]
+	&& time_info.hour < 21)
+		sprintf (w_phrase, "evening");
+	else
+		sprintf (w_phrase, "night");
 
-      if (time_info.season == SPRING)
-	sprintf (buf2, "spring");
-      if (time_info.season == SUMMER)
-	sprintf (buf2, "summer");
-      if (time_info.season == AUTUMN)
-	sprintf (buf2, "autumn");
-      if (time_info.season == WINTER)
-	sprintf (buf2, "winter");
+	if (time_info.season == SPRING)
+		sprintf (buf2, "spring ");
+	if (time_info.season == SUMMER)
+		sprintf (buf2, "summer ");
+	if (time_info.season == AUTUMN)
+		sprintf (buf2, "autumn ");
+	if (time_info.season == WINTER)
+		sprintf (buf2, "winter ");
+	if (weather_echo_state != 0)
+		buf2[0] = '\0';
 
-      *imm_buf = '\0';
+	*imm_buf = '\0';
 
-      if (!IS_MORTAL (ch))
-	sprintf (imm_buf, " [%d F]",
-		 weather_info[ch->room->zone].temperature);
+	if (!IS_MORTAL (ch))
+		sprintf (imm_buf, " [%d F]",
+		weather_info[ch->room->zone].temperature);
 
-      switch (temp_case)
+	switch (temp_case)
 	{
 	case 0:
-	  sprintf (buf, "It is a dangerously searing %s %s%s.\n", buf2,
-		   w_phrase, imm_buf);
-	  break;
+		sprintf (buf, "It is a dangerously searing %s%s%s.\n", buf2,
+			w_phrase, imm_buf);
+		break;
 	case 1:
-	  sprintf (buf, "It is a painfully blazing %s %s%s.\n", buf2,
-		   w_phrase, imm_buf);
-	  break;
+		sprintf (buf, "It is a painfully blazing %s%s%s.\n", buf2,
+			w_phrase, imm_buf);
+		break;
 	case 2:
-	  sprintf (buf, "It is a blistering %s %s%s.\n", buf2, w_phrase,
-		   imm_buf);
-	  break;
+		sprintf (buf, "It is a blistering %s%s%s.\n", buf2, w_phrase,
+			imm_buf);
+		break;
 	case 3:
-	  sprintf (buf, "It is a sweltering %s %s%s.\n", buf2, w_phrase,
-		   imm_buf);
-	  break;
+		sprintf (buf, "It is a sweltering %s%s%s.\n", buf2, w_phrase,
+			imm_buf);
+		break;
 	case 4:
-	  sprintf (buf, "It is a hot %s %s%s.\n", buf2, w_phrase, imm_buf);
-	  break;
+		sprintf (buf, "It is a hot %s%s%s.\n", buf2, w_phrase, imm_buf);
+		break;
 	case 5:
-	  sprintf (buf, "It is a temperate %s %s%s.\n", buf2, w_phrase,
-		   imm_buf);
-	  break;
+		sprintf (buf, "It is a temperate %s%s%s.\n", buf2, w_phrase,
+			imm_buf);
+		break;
 	case 6:
-	  sprintf (buf, "It is a cool %s %s%s.\n", buf2, w_phrase, imm_buf);
-	  break;
+		sprintf (buf, "It is a cool %s%s%s.\n", buf2, w_phrase, imm_buf);
+		break;
 	case 7:
-	  sprintf (buf, "It is a chill %s %s%s.\n", buf2, w_phrase, imm_buf);
-	  break;
+		sprintf (buf, "It is a chill %s%s%s.\n", buf2, w_phrase, imm_buf);
+		break;
 	case 8:
-	  sprintf (buf, "It is a cold %s %s%s.\n", buf2, w_phrase, imm_buf);
-	  break;
+		sprintf (buf, "It is a cold %s%s%s.\n", buf2, w_phrase, imm_buf);
+		break;
 	case 9:
-	  sprintf (buf, "It is a very cold %s %s%s.\n", buf2, w_phrase,
-		   imm_buf);
-	  break;
+		sprintf (buf, "It is a very cold %s%s%s.\n", buf2, w_phrase,
+			imm_buf);
+		break;
 	case 10:
-	  sprintf (buf, "It is a frigid %s %s%s.\n", buf2, w_phrase, imm_buf);
-	  break;
+		sprintf (buf, "It is a frigid %s%s%s.\n", buf2, w_phrase, imm_buf);
+		break;
 	case 11:
-	  sprintf (buf, "It is a freezing %s %s%s.\n", buf2, w_phrase,
-		   imm_buf);
-	  break;
+		sprintf (buf, "It is a freezing %s%s%s.\n", buf2, w_phrase,
+			imm_buf);
+		break;
 	case 12:
-	  sprintf (buf, "It is a numbingly frigid %s %s%s.\n", buf2, w_phrase,
-		   imm_buf);
-	  break;
+		sprintf (buf, "It is a numbingly frigid %s%s%s.\n", buf2, w_phrase,
+			imm_buf);
+		break;
 	case 13:
-	  sprintf (buf, "It is a painfully freezing %s %s%s.\n", buf2,
-		   w_phrase, imm_buf);
-	  break;
+		sprintf (buf, "It is a painfully freezing %s%s%s.\n", buf2,
+			w_phrase, imm_buf);
+		break;
 	case 14:
-	  sprintf (buf, "It is a dangerously freezing %s %s%s.\n", buf2,
-		   w_phrase, imm_buf);
-	  break;
+		sprintf (buf, "It is a dangerously freezing %s%s%s.\n", buf2,
+			w_phrase, imm_buf);
+		break;
 
 	default:
-	  sprintf (buf, "It is a cool %s %s%s.\n", buf2, w_phrase, imm_buf);
-	  break;
+		sprintf (buf, "It is a cool %s%s%s.\n", buf2, w_phrase, imm_buf);
+		break;
 	}
 
-      send_to_char (buf, ch);
+	send_to_char (buf, ch);
 
-      *buf = '\0';
-      *buf2 = '\0';
+	*buf = '\0';
+	*buf2 = '\0';
 
-      if (weather_info[ch->room->zone].state >= LIGHT_RAIN)
+	if (weather_info[ch->room->zone].state >= LIGHT_RAIN)
 	{
-	  if (weather_info[ch->room->zone].wind_speed == STORMY)
-	    sprintf (w_phrase, "rolling");
-	  else if (weather_info[ch->room->zone].wind_speed > BREEZE)
-	    sprintf (w_phrase, "flowing");
-	  else
-	    sprintf (w_phrase, "brooding");
+		if (weather_info[ch->room->zone].wind_speed == STORMY)
+			sprintf (w_phrase, "rolling");
+		else if (weather_info[ch->room->zone].wind_speed > BREEZE)
+			sprintf (w_phrase, "flowing");
+		else
+			sprintf (w_phrase, "brooding");
 
-	  switch (weather_info[ch->room->zone].clouds)
-	    {
-	    case LIGHT_CLOUDS:
-	      sprintf (buf2, "a scattering of grey clouds.\n");
-	      break;
-	    case HEAVY_CLOUDS:
-	      sprintf (buf2, "dark, %s clouds.\n", w_phrase);
-	      break;
-	    case OVERCAST:
-	      sprintf (buf2, "a thick veil of %s storm clouds.\n", w_phrase);
-	      break;
-	    }
+		switch (weather_info[ch->room->zone].clouds)
+		{
+		case LIGHT_CLOUDS:
+			sprintf (buf2, "a scattering of grey clouds.\n");
+			break;
+		case HEAVY_CLOUDS:
+			sprintf (buf2, "dark, %s clouds.\n", w_phrase);
+			break;
+		case OVERCAST:
+			sprintf (buf2, "a thick veil of %s storm clouds.\n", w_phrase);
+			break;
+		}
 
-	  if (weather_info[ch->room->zone].fog == THICK_FOG)
-	    sprintf (buf2, " the fog-shrouded sky.\n");
+		if (weather_info[ch->room->zone].fog == THICK_FOG)
+			sprintf (buf2, " the fog-shrouded sky.\n");
 
-	  switch (weather_info[ch->room->zone].state)
-	    {
-	    case LIGHT_RAIN:
-	      sprintf (buf, "A light drizzle is falling from %s", buf2);
-	      break;
-	    case STEADY_RAIN:
-	      sprintf (buf, "A steady rain is falling from %s", buf2);
-	      break;
-	    case HEAVY_RAIN:
-	      sprintf (buf, "A shower of rain is pouring from %s", buf2);
-	      break;
-	    case LIGHT_SNOW:
-	      sprintf (buf, "A light snow is falling from %s", buf2);
-	      break;
-	    case STEADY_SNOW:
-	      sprintf (buf, "Snow is falling from %s", buf2);
-	      break;
-	    case HEAVY_SNOW:
-	      sprintf (buf,
-		       "Blinding snow swarms down from an obscured white sky.\n");
-	      break;
-	    }
-	  send_to_char (buf, ch);
+		switch (weather_info[ch->room->zone].state)
+		{
+		case LIGHT_RAIN:
+			sprintf (buf, "A light drizzle is falling from %s", buf2);
+			break;
+		case STEADY_RAIN:
+			sprintf (buf, "A steady rain is falling from %s", buf2);
+			break;
+		case HEAVY_RAIN:
+			sprintf (buf, "A shower of rain is pouring from %s", buf2);
+			break;
+		case LIGHT_SNOW:
+			sprintf (buf, "A light snow is falling from %s", buf2);
+			break;
+		case STEADY_SNOW:
+			sprintf (buf, "Snow is falling from %s", buf2);
+			break;
+		case HEAVY_SNOW:
+			sprintf (buf,
+				"Blinding snow swarms down from an obscured white sky.\n");
+			break;
+		}
+		if (!weather_echo_state)
+			send_to_char (buf, ch);
 	}
 
-      *buf = '\0';
-      *buf2 = '\0';
+	*buf = '\0';
+	*buf2 = '\0';
 
-      if (weather_info[ch->room->zone].wind_speed)
+	if (weather_info[ch->room->zone].wind_speed)
 	{
-	  if (weather_info[ch->room->zone].wind_dir == NORTH_WIND)
-	    wind_case++;
+		if (weather_info[ch->room->zone].wind_dir == NORTH_WIND)
+			wind_case++;
 
-	  switch (wind_case)
-	    {
+		switch (wind_case)
+		{
 
-	    case 0:
-	      sprintf (buf, "searing");
-	      break;
-	    case 1:
-	      sprintf (buf, "scorching");
-	      break;
-	    case 2:
-	      sprintf (buf, "sweltering");
-	      break;
-	    case 3:
-	      sprintf (buf, "hot");
-	      break;
-	    case 4:
-	      sprintf (buf, "warm");
-	      break;
-	    case 5:
-	      sprintf (buf, "cool");
-	      break;
-	    case 6:
-	      sprintf (buf, "chill");
-	      break;
-	    case 7:
-	      sprintf (buf, "cold");
-	      break;
-	    case 8:
-	      sprintf (buf, "frigid");
-	      break;
-	    case 9:
-	      sprintf (buf, "freezing");
-	      break;
-	    case 10:
-	      sprintf (buf, "arctic");
-	      break;
+		case 0:
+			sprintf (buf, "searing");
+			break;
+		case 1:
+			sprintf (buf, "scorching");
+			break;
+		case 2:
+			sprintf (buf, "sweltering");
+			break;
+		case 3:
+			sprintf (buf, "hot");
+			break;
+		case 4:
+			sprintf (buf, "warm");
+			break;
+		case 5:
+			sprintf (buf, "cool");
+			break;
+		case 6:
+			sprintf (buf, "chill");
+			break;
+		case 7:
+			sprintf (buf, "cold");
+			break;
+		case 8:
+			sprintf (buf, "frigid");
+			break;
+		case 9:
+			sprintf (buf, "freezing");
+			break;
+		case 10:
+			sprintf (buf, "arctic");
+			break;
 
-	    default:
-	      sprintf (buf, "cool");
-	      break;
-	    }
+		default:
+			sprintf (buf, "cool");
+			break;
+		}
 
-	  if (weather_info[ch->room->zone].wind_dir == NORTH_WIND)
-	    sprintf (wind, "%s northerly", buf);
-	  else if(weather_info[ch->room->zone].wind_dir == NORTHEAST_WIND)
-		sprintf (wind, "%s north easterly", buf);
-	  else if(weather_info[ch->room->zone].wind_dir == EAST_WIND)
-		sprintf (wind, "%s easterly", buf);
-	  else if(weather_info[ch->room->zone].wind_dir == SOUTHEAST_WIND)
-		sprintf (wind, "%s south easterly", buf);
-	  else if(weather_info[ch->room->zone].wind_dir == SOUTH_WIND)
-		sprintf (wind, "%s southerly", buf);
-	  else if(weather_info[ch->room->zone].wind_dir == SOUTHWEST_WIND)
-		sprintf (wind, "%s south westerly", buf);
-	  else if(weather_info[ch->room->zone].wind_dir == NORTHWEST_WIND)
-		sprintf (wind, "%s north westerly", buf);
-	  else
-	    sprintf (wind, "%s westerly", buf);
+		if (weather_echo_state == 1)
+			sprintf (wind, "%s", buf);
+		else if (weather_info[ch->room->zone].wind_dir == NORTH_WIND)
+			sprintf (wind, "%s northerly", buf);
+		else if(weather_info[ch->room->zone].wind_dir == NORTHEAST_WIND)
+			sprintf (wind, "%s north easterly", buf);
+		else if(weather_info[ch->room->zone].wind_dir == EAST_WIND)
+			sprintf (wind, "%s easterly", buf);
+		else if(weather_info[ch->room->zone].wind_dir == SOUTHEAST_WIND)
+			sprintf (wind, "%s south easterly", buf);
+		else if(weather_info[ch->room->zone].wind_dir == SOUTH_WIND)
+			sprintf (wind, "%s southerly", buf);
+		else if(weather_info[ch->room->zone].wind_dir == SOUTHWEST_WIND)
+			sprintf (wind, "%s south westerly", buf);
+		else if(weather_info[ch->room->zone].wind_dir == NORTHWEST_WIND)
+			sprintf (wind, "%s north westerly", buf);
+		else
+			sprintf (wind, "%s westerly", buf);
 	}
 
-      *buf = '\0';
-      *buf2 = '\0';
+	*buf = '\0';
+	*buf2 = '\0';
 
-      if (weather_info[ch->room->zone].state >= LIGHT_RAIN
-	  || !weather_info[ch->room->zone].clouds
-	  || weather_info[ch->room->zone].fog == THICK_FOG)
+	if (weather_echo_state == 1 || weather_info[ch->room->zone].state >= LIGHT_RAIN
+		|| !weather_info[ch->room->zone].clouds
+		|| weather_info[ch->room->zone].fog == THICK_FOG)
 	{
-	  switch (weather_info[ch->room->zone].wind_speed)
-	    {
-	    case CALM:
-	      sprintf (buf, "The air is calm and quiet.\n");
-	      break;
-	    case BREEZE:
-	      sprintf (buf, "There is a %s breeze.\n", wind);
-	      break;
-	    case WINDY:
-	      sprintf (buf, "There is a %s wind.\n", wind);
-	      break;
-	    case GALE:
-	      sprintf (buf, "A %s gale is blowing.\n", wind);
-	      break;
-	    case STORMY:
-	      sprintf (buf, "A %s wind whips and churns in a stormy fury.\n",
-		       wind);
-	      break;
-	    }
-	  send_to_char (buf, ch);
+		switch (weather_info[ch->room->zone].wind_speed)
+		{
+		case CALM:
+			sprintf (buf, "The air is calm and quiet");
+			break;
+		case BREEZE:
+			sprintf (buf, "There is a %s breeze", wind);
+			break;
+		case WINDY:
+			sprintf (buf, "There is a %s wind", wind);
+			break;
+		case GALE:
+			sprintf (buf, "A %s gale is blowing", wind);
+			break;
+		case STORMY:
+			sprintf (buf, "A %s wind whips and churns in a stormy fury",
+				wind);
+			break;
+		}
+		if (weather_echo_state == 1)
+			sprintf (buf+strlen(buf), " outside");
+		sprintf(buf+strlen(buf), ".\n");
+		if (weather_echo_state < 2)
+			send_to_char (buf, ch);
 	}
 
-      *buf = '\0';
-      *buf2 = '\0';
+	*buf = '\0';
+	*buf2 = '\0';
 
-      if (weather_info[ch->room->zone].state < LIGHT_RAIN
-	  && weather_info[ch->room->zone].clouds
-	  && weather_info[ch->room->zone].fog < THICK_FOG)
+	if (weather_info[ch->room->zone].state < LIGHT_RAIN
+		&& weather_info[ch->room->zone].clouds
+		&& weather_info[ch->room->zone].fog < THICK_FOG)
 	{
-	  if (weather_info[ch->room->zone].state == NO_RAIN)
-	    sprintf (w_phrase, "rain");
-	  else
-	    sprintf (w_phrase, "white");
+		if (weather_info[ch->room->zone].state == NO_RAIN)
+			sprintf (w_phrase, "rain");
+		else
+			sprintf (w_phrase, "white");
 
-	  switch (weather_info[ch->room->zone].clouds)
-	    {
-	    case LIGHT_CLOUDS:
-	      sprintf (buf2, "Wispy %s clouds", w_phrase);
-	      break;
-	    case HEAVY_CLOUDS:
-	      sprintf (buf2, "Heavy %s clouds", w_phrase);
-	      break;
-	    case OVERCAST:
-	      sprintf (buf2, "A veil of thick %s clouds", w_phrase);
-	      break;
-	    }
+		switch (weather_info[ch->room->zone].clouds)
+		{
+		case LIGHT_CLOUDS:
+			sprintf (buf2, "Wispy %s clouds", w_phrase);
+			break;
+		case HEAVY_CLOUDS:
+			sprintf (buf2, "Heavy %s clouds", w_phrase);
+			break;
+		case OVERCAST:
+			sprintf (buf2, "A veil of thick %s clouds", w_phrase);
+			break;
+		}
 
-	  switch (weather_info[ch->room->zone].wind_speed)
-	    {
-	    case CALM:
-	      sprintf (buf, "%s hang motionless in the sky.\n", buf2);
-	      break;
-	    case BREEZE:
-	      sprintf (buf, "%s waft overhead upon a %s breeze.\n", buf2,
-		       wind);
-	      break;
-	    case WINDY:
-	      sprintf (buf, "%s waft overhead upon the %s winds.\n", buf2,
-		       wind);
-	      break;
-	    case GALE:
-	      sprintf (buf, "%s rush overhead upon a %s gale.\n", buf2, wind);
-	      break;
-	    case STORMY:
-	      sprintf (buf,
-		       "%s churn violently in the sky upon the %s winds.\n",
-		       buf2, wind);
-	      break;
-	    }
-	  send_to_char (buf, ch);
+		switch (weather_info[ch->room->zone].wind_speed)
+		{
+		case CALM:
+			sprintf (buf, "%s hang motionless in the sky.\n", buf2);
+			break;
+		case BREEZE:
+			sprintf (buf, "%s waft overhead upon a %s breeze.\n", buf2,
+				wind);
+			break;
+		case WINDY:
+			sprintf (buf, "%s waft overhead upon the %s winds.\n", buf2,
+				wind);
+			break;
+		case GALE:
+			sprintf (buf, "%s rush overhead upon a %s gale.\n", buf2, wind);
+			break;
+		case STORMY:
+			sprintf (buf,
+				"%s churn violently in the sky upon the %s winds.\n",
+				buf2, wind);
+			break;
+		}
+		if (!weather_echo_state)
+			send_to_char (buf, ch);
 	}
 
-      *buf = '\0';
-      *buf2 = '\0';
-      if (weather_info[ch->room->zone].fog
-	  && !(weather_info[ch->room->zone].state >= LIGHT_RAIN
-	       && weather_info[ch->room->zone].fog == THICK_FOG))
+	*buf = '\0';
+	*buf2 = '\0';
+	if (!weather_echo_state && weather_info[ch->room->zone].fog
+		&& !(weather_info[ch->room->zone].state >= LIGHT_RAIN
+		&& weather_info[ch->room->zone].fog == THICK_FOG))
 	{
-	  if (weather_info[ch->room->zone].fog == THIN_FOG)
-	    send_to_char ("A patchy fog floats in the air.\n", ch);
-	  else
-	    send_to_char ("A thick fog lies heavy upon the land.\n", ch);
+		if (weather_info[ch->room->zone].fog == THIN_FOG)
+			send_to_char ("A patchy fog floats in the air.\n", ch);
+		else
+			send_to_char ("A thick fog lies heavy upon the land.\n", ch);
 	}
 
-      if ((room_af = is_room_affected (world_affects, MAGIC_WORLD_CLOUDS)) &&
-	  (IS_OUTSIDE (ch) || !IS_MORTAL (ch)))
+	if (!weather_echo_state && (room_af = is_room_affected (world_affects, MAGIC_WORLD_CLOUDS)) &&
+		(IS_OUTSIDE (ch) || !IS_MORTAL (ch)))
 	{
-	  send_to_char
-	    ("Looming black clouds cover the sky, blotting out the sun.\n",
-	     ch);
+		send_to_char
+			("Looming black clouds cover the sky, blotting out the sun.\n",
+			ch);
 	}
 
-	  /*** Special effects set by IMMs***/
-	  if (weather_info[ch->room->zone].special_effect != NO_EFFECT)
-	  {
-		  //show effect specific message
-		  if (weather_info[ch->room->zone].special_effect == VOLCANIC_SMOKE)	
-		  {
+	/*** Special effects set by IMMs***/
+	if (weather_info[ch->room->zone].special_effect != NO_EFFECT)
+	{
+		//show effect specific message
+		if (weather_info[ch->room->zone].special_effect == VOLCANIC_SMOKE)	
+		{
 			send_to_char
 				("A cloud of thick, dust filled volcanic smoke drifts through the air.\n",
 				ch);
-		  }
-		  else if (weather_info[ch->room->zone].special_effect == FOUL_STENCH)	
-		  {
+		}
+		else if (weather_info[ch->room->zone].special_effect == FOUL_STENCH)	
+		{
 			send_to_char
 				("A foul stench permeates the area.\n",
 				ch);
-		  }
-		  else if (weather_info[ch->room->zone].special_effect == LOW_MIST)	
-		  {
+		}
+		else if (!weather_echo_state && weather_info[ch->room->zone].special_effect == LOW_MIST)	
+		{
 			send_to_char
 				("A low, eerie mist sits heavily upon the land.\n",
 				ch);
-		  }
-	  }
-
-      if (moon_light[ch->room->zone] >= 1)
-	{
-	  if (!sun_light)
-	    send_to_char
-	      ("A full and gleaming Ithil limns the area in ghostly argent radiance.\n",
-	       ch);
-	  else
-	    send_to_char
-	      ("Ithil's ethereal silhouette is barely visible in the daylight.\n",
-	       ch);
+		}
 	}
 
-    }
-  else
-    send_to_char ("You can not see outside from here.\n", ch);
+	if (!weather_echo_state && moon_light[ch->room->zone] >= 1)
+	{
+		if (!sun_light)
+			send_to_char
+			("A full and gleaming Ithil limns the area in ghostly argent radiance.\n",
+			ch);
+		else
+			send_to_char
+			("Ithil's ethereal silhouette is barely visible in the daylight.\n",
+			ch);
+	}
+
+	if (weather_echo_state == 2)
+		send_to_char("You can glean no further details as you are too far from the outside world.\n", ch);
 }
 
 HELP_DATA *
