@@ -30,6 +30,7 @@
 #include "decl.h"
 
 extern RACE_TABLE_ENTRY *entry;
+extern CHAR_DATA *loaded_list;
 extern std::multimap<int, room_prog> mob_prog_list;
 
 RACE_TABLE_ENTRY *race_table = NULL;
@@ -3634,6 +3635,45 @@ do_mysql (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("MySQL logging is enabled.\n", ch);
       return;
     }
+
+  if (!strn_cmp (argument, "loaded_list", 11))
+  {
+	  for (tch = loaded_list; tch; tch = tch->next)
+	  {
+		  sprintf(buf, "%s\n", tch->tname);
+		  send_to_char(buf, ch);
+	  }
+  }
+
+  if (!strn_cmp(argument, "pc_list", 7))
+  {
+	  std::string output;
+	  for (std::list<char_data*>::iterator it = character_list.begin(); it != character_list.end(); it++)
+	  {
+		  tch = *it;
+		  if (IS_NPC(tch))
+			  continue;
+		  else
+			  sprintf(buf, "[PC] #5%s#0 (%s) (%d)\n", char_short(tch), tch->tname, tch->coldload_id);
+		  output += buf;
+	  }
+	  page_string(ch->desc, (char *) output.c_str());
+  }
+
+  if (!strn_cmp (argument, "character_list", 14))
+  {
+	  std::string output;
+	  for (std::list<char_data*>::iterator it = character_list.begin(); it != character_list.end(); it++)
+	  {
+		  tch = *it;
+		  if (IS_NPC(tch))
+			  sprintf(buf, "[%d] #5%s#0 (%d)\n", tch->mob->nVirtual, char_short(tch), tch->coldload_id);
+		  else
+			  sprintf(buf, "[PC] #5%s#0 (%s) (%d)\n", char_short(tch), tch->tname, tch->coldload_id);
+		  output += buf;
+	  }
+	  page_string(ch->desc, (char *) output.c_str());
+  }
 
   if (!str_cmp (argument, "keepers"))
     {

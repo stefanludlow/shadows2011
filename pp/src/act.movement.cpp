@@ -2797,6 +2797,9 @@ do_move (CHAR_DATA * ch, char *argument, int dir)
   /* If you are trying to move, bag the pmote */
   clear_pmote (ch);
 
+  if ((af = get_affect(ch, MAGIC_GUARD)) && af->a.spell.modifier == 1)
+	  affect_remove(ch, af);
+
   if (get_second_affect (ch, SA_WARNED, NULL))
   {
 	  add_second_affect(SA_FLEEING_WARNED, 3, ch, 0, 0, 0);
@@ -3622,182 +3625,188 @@ do_lock (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_unlock (CHAR_DATA * ch, char *argument, int cmd)
 {
-  int door, other_room;
-  char type[MAX_INPUT_LENGTH], dir[MAX_INPUT_LENGTH];
-  char buf[MAX_STRING_LENGTH];
-  struct room_direction_data *back;
-  OBJ_DATA *obj = NULL, *key = NULL;
-  CHAR_DATA *victim;
+	int door, other_room;
+	char type[MAX_INPUT_LENGTH], dir[MAX_INPUT_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+	struct room_direction_data *back;
+	OBJ_DATA *obj = NULL, *key = NULL;
+	CHAR_DATA *victim;
 
 
-  argument_interpreter (argument, type, dir);
+	argument_interpreter (argument, type, dir);
 
-  if (!*type)
-    send_to_char ("Unlock what?\n", ch);
+	if (!*type)
+		send_to_char ("Unlock what?\n", ch);
 
-  else if (generic_find (type, FIND_OBJ_INV | FIND_OBJ_ROOM,
-			 ch, &victim, &obj))
-    {
-
-      /* this is an object */
-
-      if (obj->obj_flags.type_flag == ITEM_DWELLING)
+	else if (generic_find (type, FIND_OBJ_INV | FIND_OBJ_ROOM,
+		ch, &victim, &obj))
 	{
-	  if (obj->o.od.value[3] <= 0)
-	    {
-	      send_to_char ("That cannot be unlocked.\n", ch);
-	      return;
-	    }
-	  else if (!IS_SET (obj->o.od.value[2], CONT_LOCKED))
-	    {
-	      send_to_char ("I'm afraid that isn't locked.\n", ch);
-	      return;
-	    }
-	  else if (!(key = has_key (ch, obj, obj->o.od.value[3])))
-	    {
-	      send_to_char ("You don't seem to have the proper key.\n", ch);
-	      return;
-	    }
-	  if (key && !key->o.od.value[1])
-	    key->o.od.value[1] = obj->coldload_id;
-	  obj->o.od.value[2] &= ~CONT_LOCKED;
-	  act ("You unlock $p.", false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
-	  act ("$n unlocks $p.", false, ch, obj, 0, TO_ROOM | _ACT_FORMAT);
-	  if (obj->o.od.value[0] > 0) {
-	    send_to_room ("The entryway is unlocked from the other side.",
-			  obj->o.od.value[0]);
-	    vtor (obj->o.od.value[0])->dir_option[OUTSIDE]->exit_info &= 
-	      ~EX_LOCKED;
-	  }
-	  return;
-	}
-      else if (obj->obj_flags.type_flag != ITEM_CONTAINER)
-	send_to_char ("That's not a container.\n", ch);
-      else if (!IS_SET (obj->o.container.flags, CONT_CLOSED))
-	send_to_char ("It isn't closed.\n", ch);
-      else if (obj->o.container.key <= 0)
-	send_to_char ("Odd - you can't seem to find a keyhole.\n", ch);
-      else if (!(key = has_key (ch, obj, obj->o.container.key)))
-	send_to_char ("You don't have the proper key.\n", ch);
-      else if (!IS_SET (obj->o.container.flags, CONT_LOCKED))
-	send_to_char ("Oh.. it wasn't locked, after all.\n", ch);
-      else
-	{
-	  if (key && !key->o.od.value[1])
-	    key->o.od.value[1] = obj->coldload_id;
-	  obj->o.container.flags &= ~CONT_LOCKED;
-	  act ("You unlock $p.", false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
-	  act ("$n unlocks $p.", false, ch, obj, 0, TO_ROOM | _ACT_FORMAT);
-	}
 
-    }
-  else if ((door = find_door (ch, type, dir)) >= 0)
-    {
+		/* this is an object */
 
-      /* it is a door */
-
-      if ((obj = find_dwelling_obj (ch->room->nVirtual)))
-	{
-	  if (!IS_SET (obj->o.od.value[2], CONT_LOCKED))
-	    {
-	      send_to_char ("I'm afraid that isn't locked.\n", ch);
-	      return;
-	    }
-	  else if (!(key = has_key (ch, obj, obj->o.od.value[3])))
-	    {
-	      send_to_char ("You don't seem to have the proper key.\n", ch);
-	      return;
-	    }
-	  if (key && !key->o.od.value[1])
-	    key->o.od.value[1] = obj->coldload_id;
-	  obj->o.od.value[2] &= ~CONT_LOCKED;
-	  sprintf (buf, "#2%s#0 is unlocked from the other side.",
-		   obj_short_desc (obj));
-	  buf[2] = toupper (buf[2]);
-	  send_to_room (buf, obj->in_room);
-	}
-
-      if (!IS_SET (EXIT (ch, door)->exit_info, EX_ISDOOR)
-      		&& !IS_SET (EXIT (ch, door)->exit_info, EX_ISGATE))
-	send_to_char ("That's absurd.\n", ch);
-      else if (!IS_SET (EXIT (ch, door)->exit_info, EX_CLOSED))
-	send_to_char ("Heck.. it ain't even closed!\n", ch);
-      else if (EXIT (ch, door)->key < 0)
-	send_to_char ("You can't seem to spot any keyholes.\n", ch);
-      else if (!has_key (ch, NULL, EXIT (ch, door)->key))
-	send_to_char ("You do not have the proper key for that.\n", ch);
-      else if (!IS_SET (EXIT (ch, door)->exit_info, EX_LOCKED))
-	send_to_char ("It's already unlocked, it seems.\n", ch);
-      else
-	{
-	  EXIT (ch, door)->exit_info &= ~EX_LOCKED;
-	  if (EXIT (ch, door)->keyword && strlen (EXIT (ch, door)->keyword))
-	    {
-	    //dwellings don't have directions for door
-				if (ch->in_room < 100000)
-	      sprintf (buf, "You unlock the %s $T.", relative_dirs[door]);
-	      else
-	      	sprintf (buf, "You unlock the $T.");
-	      	
-	      act (buf, 0, ch, 0, EXIT (ch, door)->keyword,
-		   TO_CHAR | _ACT_FORMAT);
-	      sprintf (buf, "$n unlocks the %s $T.", relative_dirs[door]);
-	      act (buf, 0, ch, 0, EXIT (ch, door)->keyword,
-		   TO_ROOM | _ACT_FORMAT);
-	    }
-	  else
-	    {
-	    	    //dwellings don't have directions for doors
-	    	if (ch->in_room < 100000)
-	      sprintf (buf, "You unlock the %s door.", relative_dirs[door]);
-	      else
-	      	sprintf (buf, "You unlock the door.");
-	      	
-	      act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-	      sprintf (buf, "$n unlocks the %s door.", relative_dirs[door]);
-	      act (buf, false, ch, 0, 0, TO_ROOM);
-	    }
-	  /* now for unlocking the other side, too */
-	  if ((other_room = EXIT (ch, door)->to_room) != NOWHERE)
-	    if ((back = vtor (other_room)->dir_option[rev_dir[door]]))
-	      if (back->to_room == ch->in_room)
+		if (obj->obj_flags.type_flag == ITEM_DWELLING)
 		{
-		  back->exit_info &= ~EX_LOCKED;
-		  if (!get_affect (ch, MAGIC_HIDDEN))
-		    {
-		      if (back->keyword && strlen (back->keyword))
+			if (obj->o.od.value[3] <= 0)
+			{
+				send_to_char ("That cannot be unlocked.\n", ch);
+				return;
+			}
+			else if (!IS_SET (obj->o.od.value[2], CONT_LOCKED))
+			{
+				send_to_char ("I'm afraid that isn't locked.\n", ch);
+				return;
+			}
+			else if (!(key = has_key (ch, obj, obj->o.od.value[3])))
+			{
+				send_to_char ("You don't seem to have the proper key.\n", ch);
+				return;
+			}
+			if (key && !key->o.od.value[1])
+				key->o.od.value[1] = obj->coldload_id;
+			obj->o.od.value[2] &= ~CONT_LOCKED;
+			sprintf(buf, "You open $p with %s.", key->short_description);
+			act (buf, false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
+			sprintf(buf, "You open $p with %s.", key->short_description);
+			act (buf, false, ch, obj, 0, TO_ROOM | _ACT_FORMAT);
+			if (obj->o.od.value[0] > 0) {
+				send_to_room ("The entryway is unlocked from the other side.",
+					obj->o.od.value[0]);
+				vtor (obj->o.od.value[0])->dir_option[OUTSIDE]->exit_info &= 
+					~EX_LOCKED;
+			}
+			return;
+		}
+		else if (obj->obj_flags.type_flag != ITEM_CONTAINER)
+			send_to_char ("That's not a container.\n", ch);
+		else if (!IS_SET (obj->o.container.flags, CONT_CLOSED))
+			send_to_char ("It isn't closed.\n", ch);
+		else if (obj->o.container.key <= 0)
+			send_to_char ("Odd - you can't seem to find a keyhole.\n", ch);
+		else if (!(key = has_key (ch, obj, obj->o.container.key)))
+			send_to_char ("You don't have the proper key.\n", ch);
+		else if (!IS_SET (obj->o.container.flags, CONT_LOCKED))
+			send_to_char ("Oh.. it wasn't locked, after all.\n", ch);
+		else
+		{
+			if (key && !key->o.od.value[1])
+				key->o.od.value[1] = obj->coldload_id;
+			obj->o.container.flags &= ~CONT_LOCKED;
+			sprintf(buf, "You open $p with %s.", key->short_description);
+			act (buf, false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
+			sprintf(buf, "You open $p with %s.", key->short_description);
+			act (buf, false, ch, obj, 0, TO_ROOM | _ACT_FORMAT);
+		}
+
+	}
+	else if ((door = find_door (ch, type, dir)) >= 0)
+	{
+
+		/* it is a door */
+
+		if ((obj = find_dwelling_obj (ch->room->nVirtual)))
+		{
+			if (!IS_SET (obj->o.od.value[2], CONT_LOCKED))
+			{
+				send_to_char ("I'm afraid that isn't locked.\n", ch);
+				return;
+			}
+			else if (!(key = has_key (ch, obj, obj->o.od.value[3])))
+			{
+				send_to_char ("You don't seem to have the proper key.\n", ch);
+				return;
+			}
+			if (key && !key->o.od.value[1])
+				key->o.od.value[1] = obj->coldload_id;
+			obj->o.od.value[2] &= ~CONT_LOCKED;
+			sprintf (buf, "#2%s#0 is unlocked from the other side.",
+				obj_short_desc (obj));
+			buf[2] = toupper (buf[2]);
+			send_to_room (buf, obj->in_room);
+		}
+
+		if (!IS_SET (EXIT (ch, door)->exit_info, EX_ISDOOR)
+			&& !IS_SET (EXIT (ch, door)->exit_info, EX_ISGATE))
+			send_to_char ("That's absurd.\n", ch);
+		else if (!IS_SET (EXIT (ch, door)->exit_info, EX_CLOSED))
+			send_to_char ("Heck.. it ain't even closed!\n", ch);
+		else if (EXIT (ch, door)->key < 0)
+			send_to_char ("You can't seem to spot any keyholes.\n", ch);
+		else if (!(key = has_key(ch, NULL, EXIT(ch, door)->key)))
+			send_to_char ("You do not have the proper key for that.\n", ch);
+		else if (!IS_SET (EXIT (ch, door)->exit_info, EX_LOCKED))
+			send_to_char ("It's already unlocked, it seems.\n", ch);
+		else
+		{
+			EXIT (ch, door)->exit_info &= ~EX_LOCKED;
+			if (EXIT (ch, door)->keyword && strlen (EXIT (ch, door)->keyword))
+			{
+				//dwellings don't have directions for door
+				if (ch->in_room < 100000) {
+					sprintf (buf, "You unlock the %s $T with %s.", relative_dirs[door], key->short_description);
+				}
+				else {
+					sprintf (buf, "You unlock the $T with %s.", key->short_description);
+				}
+
+				act (buf, 0, ch, 0, EXIT (ch, door)->keyword,
+					TO_CHAR | _ACT_FORMAT);
+				sprintf (buf, "$n unlocks the %s $T with %s.", relative_dirs[door], key->short_description);
+				act (buf, 0, ch, 0, EXIT (ch, door)->keyword,
+					TO_ROOM | _ACT_FORMAT);
+			}
+			else
 			{
 				//dwellings don't have directions for doors
-	    	if (ch->in_room < 100000)
-			  sprintf (buf,
-				   "The %s %s is unlocked from the other side.\n",
-				   relative_dirs[rev_dir[door]],
-				   back->keyword);
+				if (ch->in_room < 100000)
+					sprintf (buf, "You unlock the %s door with %s.", relative_dirs[door], key->short_description);
 				else
-				  sprintf (buf,
-				   "The %s is unlocked from the other side.\n",
-				   back->keyword);
-				   
-			  send_to_room (buf, EXIT (ch, door)->to_room);
-			}
-		      else
-			{
-								//dwellings don't have directions for doors
-	    	if (ch->in_room < 100000)
-			  sprintf (buf,
-				   "The %s door is unlocked from the other side.\n",
-				   relative_dirs[rev_dir[door]]);
-				else
-					sprintf (buf,
-				  	 "The door is unlocked from the other side.\n");
-				  	 
-			  send_to_room (buf, EXIT (ch, door)->to_room);
-			}
-		    }
+					sprintf (buf, "You unlock the door with %s.", key->short_description);
 
+				act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+				sprintf (buf, "$n unlocks the %s door with %s.", relative_dirs[door], key->short_description);
+				act (buf, false, ch, 0, 0, TO_ROOM);
+			}
+			/* now for unlocking the other side, too */
+			if ((other_room = EXIT (ch, door)->to_room) != NOWHERE)
+				if ((back = vtor (other_room)->dir_option[rev_dir[door]]))
+					if (back->to_room == ch->in_room)
+					{
+						back->exit_info &= ~EX_LOCKED;
+						if (!get_affect (ch, MAGIC_HIDDEN))
+						{
+							if (back->keyword && strlen (back->keyword))
+							{
+								//dwellings don't have directions for doors
+								if (ch->in_room < 100000)
+									sprintf (buf,
+									"The %s %s is unlocked from the other side.\n",
+									relative_dirs[rev_dir[door]],
+									back->keyword);
+								else
+									sprintf (buf,
+									"The %s is unlocked from the other side.\n",
+									back->keyword);
+
+								send_to_room (buf, EXIT (ch, door)->to_room);
+							}
+							else
+							{
+								//dwellings don't have directions for doors
+								if (ch->in_room < 100000)
+									sprintf (buf,
+									"The %s door is unlocked from the other side.\n",
+									relative_dirs[rev_dir[door]]);
+								else
+									sprintf (buf,
+									"The door is unlocked from the other side.\n");
+
+								send_to_room (buf, EXIT (ch, door)->to_room);
+							}
+						}
+
+					}
 		}
 	}
-    }
 }
 
 void
@@ -4132,6 +4141,15 @@ enter_vehicle (CHAR_DATA * ch, CHAR_DATA * ent_mob)
       return;
     }
 
+  for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+  {
+	  AFFECTED_TYPE *af;
+	  if (!(af = get_affect(tch, MAGIC_GUARD)) || af->a.spell.modifier || (CHAR_DATA *) af->a.spell.t != ent_mob)
+		  continue;
+	  act ("You cannot enter that as $N is guarding it.", true, ch, 0, tch, TO_CHAR);
+	  return;
+  }
+
   if (!vtor (ent_mob->mob->nVirtual))
     {
       send_to_char ("A note on the entrance says, 'broken'\n", ch);
@@ -4230,6 +4248,14 @@ do_enter (CHAR_DATA * ch, char *argument, int cmd)
 	  send_to_char ("You'll need to pitch it first.\n", ch);
 	  return;
 	}
+	  for (tch = ch->room->people; tch; tch = tch->next_in_room)
+	  {
+		  AFFECTED_TYPE *af;
+		  if (!(af = get_affect(tch, MAGIC_GUARD)) || !af->a.spell.modifier || (OBJ_DATA *) af->a.spell.t != obj)
+			  continue;
+		  act ("You cannot enter $p as $N is guarding it.", true, ch, obj, tch, TO_CHAR | _ACT_FORMAT);
+		  return;
+	  }
       if (IS_SET (obj->o.od.value[2], CONT_CLOSED)
 	  && !(!IS_MORTAL (ch) && *argument == '!'))
 	{

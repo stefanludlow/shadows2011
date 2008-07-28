@@ -2008,7 +2008,7 @@ return_adj1 (CHAR_DATA * mob)
   static char adj[MAX_STRING_LENGTH];
 
   if (!str_cmp
-      (lookup_race_variable (mob->race, RACE_NAME), "Gondorian Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Renegade Human"))
+      (lookup_race_variable (mob->race, RACE_NAME), "Gondorian Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Mordorian Human"))
     {
       for (limit = 0; *human_adj1[limit] != '\n'; limit++)
 	;
@@ -2899,58 +2899,98 @@ void
 randomize_mobile (CHAR_DATA * mob)
 {
   CHAR_DATA *proto;
-  int attr_starters[] = { 16, 15, 12, 12, 11, 10, 8 };
-  int attr_priorities[] = { -1, -1, -1, -1, -1, -1, 1 };
-  int slots_taken[] = { 0, 0, 0, 0, 0, 0, 0 };
-  int i, roll, bonus;
+	int attr_starters[] = {mob->str, mob->dex, mob->con, mob->wil, mob->intel, mob->aur, mob->agi}; //Fill an array with the stat values from the prototype
+	int attr_modifiers[] = {atoi(lookup_race_variable(mob->race, RACE_STR_MOD)),atoi(lookup_race_variable(mob->race, RACE_DEX_MOD)),
+	  atoi(lookup_race_variable(mob->race, RACE_CON_MOD)),atoi(lookup_race_variable(mob->race, RACE_WIL_MOD)),
+	  atoi(lookup_race_variable(mob->race, RACE_INT_MOD)),atoi(lookup_race_variable(mob->race, RACE_AUR_MOD)),
+	  atoi(lookup_race_variable(mob->race, RACE_AGI_MOD))}; //Fill an array with the stat modifiers for the mob's race
+	int attr_startersUnset[] = { 16, 15, 12, 12, 11, 10, 8 }; //Starters if values begin lower than 92
+  
+	int i, roll;
 	int type_bonus = 0;
+	int swapUnsetStatCount = 24;
 
-	if (is_name_in_list("elite", mob->short_descr))
+	if (is_name_in_list("legendary", mob->short_descr)) {
+		type_bonus = 50;
+	}
+
+	else if (is_name_in_list("epic", mob->short_descr)) {
+		type_bonus = 40;
+	}
+
+	else if (is_name_in_list("elite", mob->short_descr)) {
 		type_bonus = 30;
+	}
 
-	else if (is_name_in_list("plebe", mob->short_descr))
+	else if (is_name_in_list("plebe", mob->short_descr)) {
 		type_bonus = 10;
-
-  if (mob->race >= 0 && mob->race <= 29)
-    {
-      for (i = 0; i <= 6; i++)
-	{
-	  roll = number (0, 6);
-	  if (slots_taken[roll])
-	    {
-	      i--;
-	      continue;
-	    }
-
-	  slots_taken[roll] = 1;
-	  attr_priorities[i] = roll;
 	}
 
-      for (bonus = 8; bonus;)
-	{
-	  roll = number (0, 6);
-	  if (attr_starters[attr_priorities[roll]] < 18)
-	    {
-	      attr_starters[attr_priorities[roll]]++;
-	      bonus--;
-	    }
-	}
+   if ((mob->race >= 0 && mob->race <= 29) || 
+	   !strcmp(lookup_race_variable(mob->race, RACE_NAME), "Mordorian Human")) {
+		   int statTotal = 0;
+		   for (i = 0; i < 7; i++) {
+			   statTotal += attr_starters[i];
+		   }
+		   
+		   // Segment to somewhat randomise stats
+		   if (statTotal < 92) {
+			   for(;swapUnsetStatCount; swapUnsetStatCount--){
+				   int rollSecond = 0;
+				   int temporaryStat = 0;
+				   
+				   roll = number (0, 6);
+				   rollSecond = number (0, 6);
+				   temporaryStat = attr_startersUnset[roll];
+				   attr_startersUnset[roll] = attr_startersUnset[rollSecond];
+				   attr_startersUnset[rollSecond] = temporaryStat;
+			   }
+			   for(i = 0; i < 7; i++) {
+				   attr_starters[i] = attr_startersUnset[i];
+			   }
+			   int bonus = 8;
+			   while (bonus) {
+				   roll = number (0, 6);
+				   if ((attr_starters[roll] + 1) < 18) {
+					   attr_starters[roll]++;
+					   bonus--;
+				   }
+			   }
+		   }
 
-      mob->str = attr_starters[attr_priorities[0]];
-      mob->dex = attr_starters[attr_priorities[1]];
-      mob->con = attr_starters[attr_priorities[2]];
-      mob->wil = attr_starters[attr_priorities[3]];
-      mob->intel = attr_starters[attr_priorities[4]];
-      mob->aur = attr_starters[attr_priorities[5]];
-      mob->agi = attr_starters[attr_priorities[6]];
+		   for (i = 0; i < 7; i++) {
+			   if ((attr_starters[i] + attr_modifiers[i]) > 25) {
+				   attr_starters[i] = 25;
+			   }
+			   else if ((attr_starters[i] + attr_modifiers[i]) < 3) {
+				   attr_starters[i] = 3;
+			   }
+			   else {
+				   attr_starters[i] = attr_starters[i] + attr_modifiers[i];
+			   }
+		   }
+		   
+		   if (statTotal < 92) {
+			   mob->max_hit = 80 + (attr_starters[2]-10)*3;
+		   }
 
-      mob->tmp_str = mob->str;
-      mob->tmp_dex = mob->dex;
-      mob->tmp_intel = mob->intel;
-      mob->tmp_aur = mob->aur;
-      mob->tmp_agi = mob->agi;
-      mob->tmp_con = mob->con;
-      mob->tmp_wil = mob->wil;
+		   mob->str = attr_starters[0];
+		   mob->dex = attr_starters[1];
+		   mob->con = attr_starters[2];
+		   mob->wil = attr_starters[3];
+		   mob->intel = attr_starters[4];
+		   mob->aur = attr_starters[5];
+		   mob->agi = attr_starters[6];
+
+		   mob->tmp_str = mob->str;
+		   mob->tmp_dex = mob->dex;
+		   mob->tmp_intel = mob->intel;
+		   mob->tmp_aur = mob->aur;
+		   mob->tmp_agi = mob->agi;
+		   mob->tmp_con = mob->con;
+		   mob->tmp_wil = mob->wil;
+
+
 
       for (i = 1; i <= LAST_SKILL; i++)
 	mob->skills[i] = 0;
@@ -2960,7 +3000,7 @@ randomize_mobile (CHAR_DATA * mob)
 
 
 		mob->skills[SKILL_SCAN] = 10 + number (40, 60) + type_bonus;
-		mob->skills[SKILL_LISTEN] = 10 + number (1, 40) + type_bonus;
+		mob->skills[SKILL_LISTEN] = 50 + number (1, 40) + type_bonus;
 		mob->skills[SKILL_HIDE] = 30 + number (1, 30) + type_bonus;
 		mob->skills[SKILL_SNEAK] = 30 + number (1, 30) + type_bonus;
 
@@ -2998,30 +3038,37 @@ randomize_mobile (CHAR_DATA * mob)
 	{
 	  mob->speaks =
 	    atoi (lookup_race_variable (mob->race, RACE_NATIVE_TONGUE));
+		 
+	  if (!strcmp(lookup_race_variable(mob->race, RACE_NAME), "Mordorian Human"))
+	  {
+		  mob->skills[SKILL_SPEAK_WESTRON] = number (0, MIN(40, calc_lookup (mob, REG_CAP, SKILL_SPEAK_WESTRON)));
+		  mob->speaks = SKILL_SPEAK_BLACK_SPEECH;
+	  }
 			
 	  switch (mob->speaks)
 	    {
 	    case SKILL_SPEAK_ORKISH:
-	      mob->skills[SKILL_SPEAK_WESTRON] =
-		number (0,
-			MIN (25,
-			     calc_lookup (mob, REG_CAP,
-					  SKILL_SPEAK_WESTRON)));
-					break;
-				
+	      mob->skills[SKILL_SPEAK_WESTRON] = number (0, MIN (35, calc_lookup (mob, REG_CAP, SKILL_SPEAK_WESTRON)));
+		  mob->skills[SKILL_SPEAK_ORKISH] = number (0, MIN (45, calc_lookup (mob, REG_CAP, SKILL_SPEAK_ORKISH)));
+		  mob->speaks = SKILL_SPEAK_BLACK_SPEECH;
+				break;
 	    case SKILL_SPEAK_ADUNAIC:
+			mob->skills[SKILL_SPEAK_WESTRON] = number (0, MIN (35, calc_lookup (mob, REG_CAP, SKILL_SPEAK_WESTRON)));
+			mob->skills[SKILL_SPEAK_ADUNAIC] = number (0, MIN (35, calc_lookup (mob, REG_CAP, SKILL_SPEAK_ADUNAIC)));
+			mob->speaks = SKILL_SPEAK_BLACK_SPEECH;
+			break;
 	    case SKILL_SPEAK_HARADAIC:
-	      mob->skills[SKILL_SPEAK_BLACK_SPEECH] =
-		number (15,
-			MIN (40,
+	      mob->skills[SKILL_SPEAK_HARADAIC] =
+		number (50,
+			MIN (50,
 			     calc_lookup (mob, REG_CAP,
-					  SKILL_SPEAK_BLACK_SPEECH)));
+					  SKILL_SPEAK_HARADAIC)));
+		  mob->speaks = SKILL_SPEAK_BLACK_SPEECH;
 					break;
 					
 				default:
 					break;
 				}
-
 	  mob->skills[mob->speaks] = calc_lookup (mob, REG_CAP, mob->speaks);
 	}
 
@@ -3043,15 +3090,14 @@ randomize_mobile (CHAR_DATA * mob)
       fix_offense (mob);
       fix_offense (proto);
 		}  //if (mob->race >= 0 && mob->race <= 29)
-  else
-    {
-      mob->str = 16;
-      mob->dex = 16;
-      mob->con = 16;
-      mob->wil = 16;
-      mob->intel = 16;
-      mob->aur = 16;
-      mob->agi = 16;
+  else {
+      mob->str = 12;
+      mob->dex = 12;
+      mob->con = 12;
+      mob->wil = 12;
+      mob->intel = 12;
+      mob->aur = 12;
+      mob->agi = 12;
 
       mob->tmp_str = mob->str;
       mob->tmp_dex = mob->dex;

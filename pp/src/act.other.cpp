@@ -965,6 +965,20 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 	  send_to_char ("That cannot be picked up.\n", ch);
 	  return;
 	}
+
+			for (tch = ch->room->people; tch; tch = tch->next_in_room)
+			{
+				AFFECTED_TYPE *af;
+				if (!(af = get_affect(tch, MAGIC_GUARD)) || !af->a.spell.modifier || (OBJ_DATA *) af->a.spell.t != tobj)
+					continue;
+				if (!skill_use (ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100) || skill_use (tch, SKILL_SCAN, 20))
+				{
+					act ("You try to palm $p, but are spotted by $N before you can get your hands on it!", true, ch, tobj, tch, TO_CHAR | _ACT_FORMAT);
+					act ("You catch $n trying to take $p beneath your notice, but stop the rogue in the act!", true, ch, tobj, tch, TO_VICT | _ACT_FORMAT);
+					act ("$N catches $n trying to take $p beneath $S notice, but prevents them from doing so.", true, ch, tobj, tch, TO_NOTVICT | _ACT_FORMAT);
+					return;
+				}
+			}
 			
 			obj_from_room (&tobj, 0);
 			clear_omote (tobj);
@@ -1063,6 +1077,21 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 						send_to_char ("That's too heavy for you to palm very stealthily.\n", ch);
 						return;
 					}
+
+				for (tch = ch->room->people; tch; tch = tch->next_in_room)
+			{
+				AFFECTED_TYPE *af;
+				if (!(af = get_affect(tch, MAGIC_GUARD)) || !af->a.spell.modifier || (OBJ_DATA *) af->a.spell.t != cobj)
+					continue;
+				if (!skill_use (ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100) || skill_use (tch, SKILL_SCAN, 20))
+				{
+					sprintf(buf, "You try to palm $p into $P, but are spotted by #5%s#0 before you can get to it!", char_short(tch)); 
+					act (buf, true, ch, tobj, cobj, TO_CHAR | _ACT_FORMAT);
+					act ("You catch $n trying to get near $p beneath your notice, but stop the rogue in the act!", true, ch, tobj, tch, TO_VICT | _ACT_FORMAT);
+					act ("$N catches $n trying to get near $p beneath $S notice, but prevents them from doing so.", true, ch, tobj, tch, TO_NOTVICT | _ACT_FORMAT);
+					return;
+				}
+			}
 					
 				//Treat tables as a special container
 	      if (!IS_SET (cobj->obj_flags.extra_flags, ITEM_TABLE))

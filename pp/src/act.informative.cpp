@@ -2953,749 +2953,750 @@ worn_third_loc (CHAR_DATA * ch, OBJ_DATA * obj)
 void
 show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 {
-  int percent = 0;
-  int curdamage = 0;
-  int location = 0;
-  OBJ_DATA *eq = NULL;
-  OBJ_DATA *blindfold = NULL;
-  OBJ_DATA *tobj = NULL;
-  AFFECTED_TYPE *af = NULL;
-  ROOM_DATA *troom = NULL;
-  WOUND_DATA *wound = NULL;
-  ENCHANTMENT_DATA *enchantment = NULL;
-  char *p = '\0';
-  char stink_buf[MAX_STRING_LENGTH] = { '\0' };
-  char buf[MAX_STRING_LENGTH] = { '\0' };
-  char buffer[MAX_STRING_LENGTH] = { '\0' };
-  char *dir_names[] = {
-    "to the north", "to the east", "to the south",
-    "to the west", "above", "below"
-  };
-  char buf2[MAX_STRING_LENGTH] = { '\0' };
-  char buf3[MAX_STRING_LENGTH] = { '\0' };
-  bool found = false;
+	int percent = 0;
+	int curdamage = 0;
+	int location = 0;
+	OBJ_DATA *eq = NULL;
+	OBJ_DATA *blindfold = NULL;
+	OBJ_DATA *tobj = NULL;
+	AFFECTED_TYPE *af = NULL;
+	ROOM_DATA *troom = NULL;
+	WOUND_DATA *wound = NULL;
+	ENCHANTMENT_DATA *enchantment = NULL;
+	char *p = '\0';
+	char stink_buf[MAX_STRING_LENGTH] = { '\0' };
+	char buf[MAX_STRING_LENGTH] = { '\0' };
+	char buffer[MAX_STRING_LENGTH] = { '\0' };
+	char *dir_names[] = {
+		"to the north", "to the east", "to the south",
+		"to the west", "above", "below"
+	};
+	char buf2[MAX_STRING_LENGTH] = { '\0' };
+	char buf3[MAX_STRING_LENGTH] = { '\0' };
+	bool found = false;
 
-  if (mode == 4)
-    mode = 0;
+	if (mode == 4)
+		mode = 0;
 
-  if (!mode)
-    {
-
-      if (IS_SUBDUEE (i))
+	if (!mode)
 	{
-	  if (i->subdue == ch)
-	    act ("You have #5$N#0 in tow.", false, ch, 0, i, TO_CHAR);
-	  return;
-	}
 
-      if (!CAN_SEE (ch, i))
-	{
-	  if (!GET_FLAG (i, FLAG_WIZINVIS) &&
-	      get_affect (ch, MAGIC_AFFECT_SENSE_LIFE))
-	    send_to_char ("\nYou sense a hidden life form in the room.\n\n",
-			  ch);
-	  return;
-	}
+		if (IS_SUBDUEE (i))
+		{
+			if (i->subdue == ch)
+				act ("You have #5$N#0 in tow.", false, ch, 0, i, TO_CHAR);
+			return;
+		}
 
-      if ((blindfold = get_equip (i, WEAR_BLINDFOLD)) ||
-	  !char_long (i, 0) || GET_POS (i) != i->default_pos ||
-	  IS_SWIMMING (i))
-	{
-	  if (char_short (i))
-	    {
-	      strcpy (buffer, "#5");
-	      strcat (buffer, char_short (i));
-	      strcat (buffer, "#0");
-	      buffer[2] = toupper (buffer[2]);
+		if (!CAN_SEE (ch, i))
+		{
+			if (!GET_FLAG (i, FLAG_WIZINVIS) &&
+				get_affect (ch, MAGIC_AFFECT_SENSE_LIFE))
+				send_to_char ("\nYou sense a hidden life form in the room.\n\n",
+				ch);
+			return;
+		}
 
-	    }
-	  else
-	    strcpy (buffer, "#5A nameless one#0");
+		if ((blindfold = get_equip (i, WEAR_BLINDFOLD)) ||
+			!char_long (i, 0) || GET_POS (i) != i->default_pos ||
+			IS_SWIMMING (i))
+		{
+			if (char_short (i))
+			{
+				strcpy (buffer, "#5");
+				strcat (buffer, char_short (i));
+				strcat (buffer, "#0");
+				buffer[2] = toupper (buffer[2]);
 
-	  if (IS_SWIMMING (i))
-	    {
-	      if ( IS_SET(i->act, ACT_FLYING ))
-	        strcat(buffer, " is here, flying.");
-	      else 
-	        strcat (buffer, " is here, swimming.");
-	     }
-	  else
-	    switch (GET_POS (i))
-	      {
-	      case POSITION_STUNNED:
-		if (blindfold)
-		  strcat (buffer, " is here, stunned and blindfolded.");
-		else
-		  strcat (buffer, " is here, stunned.");
-		break;
-	      case POSITION_UNCONSCIOUS:
-		if (blindfold)
-		  strcat (buffer,
-			  " is lying here, unconscious and blindfolded.");
-		else
-		  strcat (buffer, " is lying here, unconscious.");
-		break;
-	      case POSITION_MORTALLYW:
-		if (blindfold)
-		  strcat (buffer,
-			  " is lying here, mortally wounded and blindfolded.");
-		else
-		  strcat (buffer, " is lying here, mortally wounded.");
-		break;
-	      case POSITION_DEAD:
-		strcat (buffer, " is lying here, dead.");
-		break;
-	      case POSITION_STANDING:
-		if (blindfold)
-		  strcat (buffer, " is standing here, blindfolded.");
-		else
-		  strcat (buffer, " is standing here.");
-		break;
-	      case POSITION_SITTING:
-		if (blindfold)
-		  strcat (buffer, " is sitting here, blindfolded");
-		if (i->pmote_str)
-		  {
-		    sprintf (buffer, "#5");
-		    strcat (buffer, char_long (i, GET_TRUST (ch)));
-		    strcat (buffer, "#0");
-		    break;
-		  }
-		else
-		  strcat (buffer, " is sitting here");
-
-		if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
-		    is_obj_in_list (af->a.table.obj, i->room->contents))
-		  {
-		    tobj = af->a.table.obj;
-		    sprintf (buffer + strlen (buffer), " at #2%s#0.",
-			     OBJS (tobj, i));
-		  }
-		else
-		  strcat (buffer, ".");
-		break;
-	      case POSITION_RESTING:
-		if (blindfold)
-		  strcat (buffer, " is resting here, blindfolded");
-		else
-		  {
-		    if (i->pmote_str)
-		      {
-			sprintf (buffer, "#5");
-			strcat (buffer, char_long (i, GET_TRUST (ch)));
-			strcat (buffer, "#0");
-			break;
-		      }
-		    else
-		      strcat (buffer, " is resting here");
-		  }
-		if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
-		    is_obj_in_list (af->a.table.obj, i->room->contents))
-		  {
-		    tobj = af->a.table.obj;
-		    sprintf (buffer + strlen (buffer), " at #2%s#0.",
-			     OBJS (tobj, i));
-		  }
-		else
-		  strcat (buffer, ".");
-		break;
-	      case POSITION_SLEEPING:
-		if (blindfold)
-		  strcat (buffer, " is sleeping here, blindfolded");
-		else
-		  strcat (buffer, " is sleeping here");
-
-		if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
-		    is_obj_in_list ((OBJ_DATA *) af->a.spell.t,
-				    i->room->contents))
-		  {
-		    tobj = (OBJ_DATA *) af->a.spell.t;
-		    sprintf (buffer + strlen (buffer), " at #2%s#0.",
-			     OBJS (tobj, i));
-		  }
-		else
-		  strcat (buffer, ".");
-
-		break;
-	      case POSITION_FIGHTING:
-		if (i->fighting)
-		  {
-
-		    if (IS_SET (i->flags, FLAG_SUBDUING))
-		      {
-			if (blindfold)
-			  strcat (buffer,
-				  " is here, #1wrestling blindfolded#0 against ");
+			}
 			else
-			  strcat (buffer, " is here, #1wrestling#0 ");
-		      }
-		    else
-		      {
-			if (blindfold)
-			  strcat (buffer,
-				  " is here, #1fighting blindfolded#0 against ");
+				strcpy (buffer, "#5A nameless one#0");
+
+			if (IS_SWIMMING (i))
+			{
+				if ( IS_SET(i->act, ACT_FLYING ))
+					strcat(buffer, " is here, flying.");
+				else 
+					strcat (buffer, " is here, swimming.");
+			}
 			else
-			  strcat (buffer, " is here, #1fighting#0 ");
-		      }
+				switch (GET_POS (i))
+			{
+				case POSITION_STUNNED:
+					if (blindfold)
+						strcat (buffer, " is here, stunned and blindfolded.");
+					else
+						strcat (buffer, " is here, stunned.");
+					break;
+				case POSITION_UNCONSCIOUS:
+					if (blindfold)
+						strcat (buffer,
+						" is lying here, unconscious and blindfolded.");
+					else
+						strcat (buffer, " is lying here, unconscious.");
+					break;
+				case POSITION_MORTALLYW:
+					if (blindfold)
+						strcat (buffer,
+						" is lying here, mortally wounded and blindfolded.");
+					else
+						strcat (buffer, " is lying here, mortally wounded.");
+					break;
+				case POSITION_DEAD:
+					strcat (buffer, " is lying here, dead.");
+					break;
+				case POSITION_STANDING:
+					if (blindfold)
+						strcat (buffer, " is standing here, blindfolded.");
+					else
+						strcat (buffer, " is standing here.");
+					break;
+				case POSITION_SITTING:
+					if (blindfold)
+						strcat (buffer, " is sitting here, blindfolded");
+					if (i->pmote_str)
+					{
+						sprintf (buffer, "#5");
+						strcat (buffer, char_long (i, GET_TRUST (ch)));
+						strcat (buffer, "#0");
+						break;
+					}
+					else
+						strcat (buffer, " is sitting here");
 
-		    if (i->fighting == ch)
-		      strcat (buffer, " you!");
-		    else
-		      {
-			if (i->in_room == i->fighting->in_room)
-			  {
-			    strcat (buffer, char_short (i->fighting));
-			    strcat (buffer, ".");
-			  }
+					if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
+						is_obj_in_list (af->a.table.obj, i->room->contents))
+					{
+						tobj = af->a.table.obj;
+						sprintf (buffer + strlen (buffer), " at #2%s#0.",
+							OBJS (tobj, i));
+					}
+					else
+						strcat (buffer, ".");
+					break;
+				case POSITION_RESTING:
+					if (blindfold)
+						strcat (buffer, " is resting here, blindfolded");
+					else
+					{
+						if (i->pmote_str)
+						{
+							sprintf (buffer, "#5");
+							strcat (buffer, char_long (i, GET_TRUST (ch)));
+							strcat (buffer, "#0");
+							break;
+						}
+						else
+							strcat (buffer, " is resting here");
+					}
+					if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
+						is_obj_in_list (af->a.table.obj, i->room->contents))
+					{
+						tobj = af->a.table.obj;
+						sprintf (buffer + strlen (buffer), " at #2%s#0.",
+							OBJS (tobj, i));
+					}
+					else
+						strcat (buffer, ".");
+					break;
+				case POSITION_SLEEPING:
+					if (blindfold)
+						strcat (buffer, " is sleeping here, blindfolded");
+					else
+						strcat (buffer, " is sleeping here");
+
+					if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
+						is_obj_in_list ((OBJ_DATA *) af->a.spell.t,
+						i->room->contents))
+					{
+						tobj = (OBJ_DATA *) af->a.spell.t;
+						sprintf (buffer + strlen (buffer), " at #2%s#0.",
+							OBJS (tobj, i));
+					}
+					else
+						strcat (buffer, ".");
+
+					break;
+				case POSITION_FIGHTING:
+					if (i->fighting)
+					{
+
+						if (IS_SET (i->flags, FLAG_SUBDUING))
+						{
+							if (blindfold)
+								strcat (buffer,
+								" is here, #1wrestling blindfolded#0 against ");
+							else
+								strcat (buffer, " is here, #1wrestling#0 ");
+						}
+						else
+						{
+							if (blindfold)
+								strcat (buffer,
+								" is here, #1fighting blindfolded#0 against ");
+							else
+								strcat (buffer, " is here, #1fighting#0 ");
+						}
+
+						if (i->fighting == ch)
+							strcat (buffer, " you!");
+						else
+						{
+							if (i->in_room == i->fighting->in_room)
+							{
+								strcat (buffer, char_short (i->fighting));
+								strcat (buffer, ".");
+							}
+							else
+								strcat (buffer, "someone who has already left.");
+						}
+					}
+					else		/* NIL fighting pointer */
+						strcat (buffer, " is here struggling with thin air.");
+					break;
+				default:
+					strcat (buffer, " is floating here.");
+					break;
+			}
+			if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
+				strcat (buffer, " #2(new player)#0");
+
+			if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
+				strcat (buffer, " #B(new player guide)#0");
+
+			if (i->desc && i->desc->idle)
+				strcat (buffer, " #1(idle)#0");
+
+			if ((GET_TRUST (i) || get_affect (ch, MAGIC_AFFECT_SENSE_LIFE))
+				&& get_affect (i, MAGIC_HIDDEN))
+				strcat (buffer, " #1(hidden)#0");
+
+			if (are_grouped (i, ch))
+				strcat (buffer, " #6(grouped)#0");
+
+			if (GET_FLAG (i, FLAG_WIZINVIS))
+				strcat (buffer, " #C(wizinvis)#0");
+
+			if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
+				strcat (buffer, " #1(invisible)#0");
+
+			if (get_affect (i, MAGIC_AFFECT_CONCEALMENT) &&
+				(i == ch || GET_TRUST (i) ||
+				get_affect (ch, MAGIC_AFFECT_SENSE_LIFE)))
+				strcat (buffer, " #1(blend)#0");
+
+			if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
+				strcat (buffer, " #1(editing)#0");
+
+			if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
+				strcat (buffer, " #1(link dead)#0");
+
+			if (!IS_MORTAL (ch) && i->pc && !i->desc && i->pc->admin_loaded)
+				strcat (buffer, " #3(loaded)#0");
+
+			if (i->desc && i->desc->original && !IS_MORTAL (ch))
+				strcat (buffer, " #2(animated)#0");
+
+			strcat (buffer, "#0\n");
+			reformat_string (buffer, &p);
+			send_to_char (p, ch);
+			mem_free (p); // char*
+		}
+
+		else
+		{			/* npc with long */
+			if (IS_SUBDUER (i))
+			{
+				if (IS_RIDER (i))
+					sprintf (buffer,
+					"#5%s#0, mounted on #5%s#0, has #5%s#0 in tow.\n",
+					char_short (i), char_short (i->mount),
+					i->subdue == ch ? "you" : char_short (i->subdue));
+				else
+					sprintf (buffer, "#5%s#0 has #5%s#0 in tow.\n",
+					char_short (i),
+					i->subdue == ch ? "you" : char_short (i->subdue));
+				buffer[2] = toupper (buffer[2]);
+				send_to_char (buffer, ch);
+			}
+
+			else if (IS_RIDER (i) && !IS_SUBDUER (i))
+			{
+
+				sprintf (buffer, "%s#0 %s %s#5%s#0.",
+					char_short (i), AWAKE (i) ?
+					"sits atop" : "is asleep upon", AWAKE (i->mount) ?
+					"" : "a sleeping mount, ", char_short (i->mount));
+
+				*buffer = toupper (*buffer);
+				sprintf (buf2, "#5%s", buffer);
+				sprintf (buffer, "%s", buf2);
+				act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			}
+
+			else if (IS_RIDEE (i))
+			{
+
+				if (ch == i->mount)
+				{
+					sprintf (buffer, "You sit upon %s#5%s#0.\n", AWAKE (i) ?
+						"" : "a sleeping mount, ", char_short (i));
+
+					send_to_char (buffer, ch);
+				}
+			}
+
+			else if (IS_HITCHEE (i))
+			{
+
+				if (i == ch)
+					sprintf (buffer, "#5You#0 ride upon #5%s#0.\n",
+					char_short (i));
+				else
+					sprintf (buffer, "#5%s#0 is here, hitched to #5%s#0.\n",
+					char_short (i),
+					i->hitcher == ch ? "you" : char_short (i->hitcher));
+
+				buffer[2] = toupper (buffer[2]);
+				send_to_char (buffer, ch);
+			}
+
 			else
-			  strcat (buffer, "someone who has already left.");
-		      }
-		  }
-		else		/* NIL fighting pointer */
-		  strcat (buffer, " is here struggling with thin air.");
-		break;
-	      default:
-		strcat (buffer, " is floating here.");
-		break;
-	      }
-	  if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
-	    strcat (buffer, " #2(new player)#0");
+			{
+				*buffer = '\0';
 
-          if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
-            strcat (buffer, " #B(new player guide)#0");
 
-	  if (i->desc && i->desc->idle)
-	    strcat (buffer, " #1(idle)#0");
+				if ((GET_FLAG (i, FLAG_ENTERING) ||
+					GET_FLAG (i, FLAG_LEAVING)) && enter_exit_msg (i, buffer))
+				{
+					if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
+						strcat (buffer, " #2(new player)#0");
 
-	  if ((GET_TRUST (i) || get_affect (ch, MAGIC_AFFECT_SENSE_LIFE))
-	      && get_affect (i, MAGIC_HIDDEN))
-	    strcat (buffer, " #1(hidden)#0");
+					if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
+						strcat (buffer, " #B(new player guide)#0");
 
-	  if (are_grouped (i, ch))
-	    strcat (buffer, " #6(grouped)#0");
+					if (i->desc && !IS_NPC (i) && i->desc->idle)
+						strcat (buffer, "#1(idle)#0 ");
 
-	  if (GET_FLAG (i, FLAG_WIZINVIS))
-	    strcat (buffer, " #C(wizinvis)#0");
+					if (GET_FLAG (i, FLAG_WIZINVIS))
+						strcat (buffer, " #C(wizinvis)#0");
 
-	  if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
-	    strcat (buffer, " #1(invisible)#0");
+					if (get_affect (i, MAGIC_HIDDEN))
+						strcat (buffer, " #1(hidden)#0");
 
-	  if (get_affect (i, MAGIC_AFFECT_CONCEALMENT) &&
-	      (i == ch || GET_TRUST (i) ||
-	       get_affect (ch, MAGIC_AFFECT_SENSE_LIFE)))
-	    strcat (buffer, " #1(blend)#0");
+					if (are_grouped (i, ch))
+						strcat (buffer, " #6(grouped)#0");
 
-	  if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
-	    strcat (buffer, " #1(editing)#0");
+					if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
+						strcat (buffer, " #1(invisible)#0");
 
-	  if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
-	    strcat (buffer, " #1(link dead)#0");
+					if (get_affect (i, MAGIC_AFFECT_CONCEALMENT))
+						strcat (buffer, " #1(blend)#0");
 
-	  if (!IS_MORTAL (ch) && i->pc && !i->desc && i->pc->admin_loaded)
-	    strcat (buffer, " #3(loaded)#0");
+					if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
+						strcat (buffer, " #1(editing)#0");
 
-	  if (i->desc && i->desc->original && !IS_MORTAL (ch))
-	    strcat (buffer, " #2(animated)#0");
-	  strcat (buffer, "#0\n");
-	  reformat_string (buffer, &p);
-	  send_to_char (p, ch);
-	  mem_free (p); // char*
+					if (i->desc && i->desc->original && !IS_MORTAL (ch))
+						strcat (buffer, " #2(animated)#0");
+
+					if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
+						strcat (buffer, " #1(link dead)#0");
+
+					if (!IS_MORTAL (ch) && !IS_NPC (i) && !i->desc
+						&& i->pc->admin_loaded)
+						strcat (buffer, " #3(loaded)#0");
+
+					strcat (buffer, "#0\n");
+					reformat_string (buffer, &p);
+					send_to_char (p, ch);
+					mem_free (p); // char*
+				}
+				else if ((af = get_affect (i, AFFECT_SHADOW)) &&
+					af->a.shadow.edge != -1)
+				{
+					sprintf (buf, "%s", char_short (i));
+					*buf = toupper (*buf);
+					sprintf (buffer + strlen (buffer),
+						"#5%s is here, #0standing %s.", buf,
+						dir_names[af->a.shadow.edge]);
+					act (buffer, false, ch, 0, i, TO_CHAR | _ACT_FORMAT);
+				}
+				else if ((af = get_affect (i, AFFECT_GUARD_DIR)) &&
+					af->a.shadow.edge != -1)
+				{
+					sprintf (buf, "%s", char_short (i));
+					*buf = toupper (*buf);
+					sprintf (buffer + strlen (buffer),
+						"#5%s#0 is here, guarding the %s exit.", buf,
+						dirs[af->a.shadow.edge]);
+					act (buffer, false, ch, 0, i, TO_CHAR | _ACT_FORMAT);
+				}
+				else
+				{
+					sprintf (buffer, "#5");
+					strcat (buffer, char_long (i, GET_TRUST (ch)));
+					if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
+						strcat (buffer, " #2(new player)#0");
+
+					if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
+						strcat (buffer, " #B(new player guide)#0");
+
+					if (get_affect (i, MAGIC_HIDDEN))
+						strcat (buffer, " #1(hidden)#0");
+
+					if (are_grouped (i, ch))
+						strcat (buffer, " #6(grouped)#0");
+
+					if (i->desc && i->desc->idle)
+						strcat (buffer, " #1(idle)#0");
+
+					if (GET_FLAG (i, FLAG_WIZINVIS))
+						strcat (buffer, " #C(wizinvis)#0");
+
+					if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
+						strcat (buffer, " #1(invisible)#0");
+
+					if (get_affect (i, MAGIC_AFFECT_CONCEALMENT))
+						strcat (buffer, " #1(blend)#0");
+
+					if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
+						strcat (buffer, " #1(editing)#0");
+
+					if (i->desc && i->desc->original && !IS_MORTAL (ch))
+						strcat (buffer, " #2(animated)#0");
+
+					if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
+						strcat (buffer, " #1(link dead)#0");
+
+					if (!IS_MORTAL (ch) && !IS_NPC (i) && !i->desc
+						&& i->pc->admin_loaded)
+						strcat (buffer, " #3(loaded)#0");
+
+					strcat (buffer, "#0\n");
+					reformat_string (buffer, &p);
+					send_to_char (p, ch);
+					mem_free (p); //char*
+				}
+			}
+		}
+
+		if (get_stink_message (i, NULL, stink_buf, ch))
+		{
+			act (stink_buf, false, i, 0, ch, TO_VICT);
+		}
+
+		if ((af = get_affect (i, MAGIC_TOLL)) &&
+			af->a.toll.room_num == i->in_room)
+		{
+			sprintf (buffer, "$n #Dis collecting tolls from people leaving "
+				"%s.#0", dirs[af->a.toll.dir]);
+			act (buffer, true, i, 0, ch, TO_VICT);
+		}
+
 	}
-
-      else
-	{			/* npc with long */
-	  if (IS_SUBDUER (i))
-	    {
-	      if (IS_RIDER (i))
-		sprintf (buffer,
-			 "#5%s#0, mounted on #5%s#0, has #5%s#0 in tow.\n",
-			 char_short (i), char_short (i->mount),
-			 i->subdue == ch ? "you" : char_short (i->subdue));
-	      else
-		sprintf (buffer, "#5%s#0 has #5%s#0 in tow.\n",
-			 char_short (i),
-			 i->subdue == ch ? "you" : char_short (i->subdue));
-	      buffer[2] = toupper (buffer[2]);
-	      send_to_char (buffer, ch);
-	    }
-
-	  else if (IS_RIDER (i) && !IS_SUBDUER (i))
-	    {
-
-	      sprintf (buffer, "%s#0 %s %s#5%s#0.",
-		       char_short (i), AWAKE (i) ?
-		       "sits atop" : "is asleep upon", AWAKE (i->mount) ?
-		       "" : "a sleeping mount, ", char_short (i->mount));
-
-	      *buffer = toupper (*buffer);
-	      sprintf (buf2, "#5%s", buffer);
-	      sprintf (buffer, "%s", buf2);
-	      act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-	    }
-
-	  else if (IS_RIDEE (i))
-	    {
-
-	      if (ch == i->mount)
-		{
-		  sprintf (buffer, "You sit upon %s#5%s#0.\n", AWAKE (i) ?
-			   "" : "a sleeping mount, ", char_short (i));
-
-		  send_to_char (buffer, ch);
-		}
-	    }
-
-	  else if (IS_HITCHEE (i))
-	    {
-
-	      if (i == ch)
-		sprintf (buffer, "#5You#0 ride upon #5%s#0.\n",
-			 char_short (i));
-	      else
-		sprintf (buffer, "#5%s#0 is here, hitched to #5%s#0.\n",
-			 char_short (i),
-			 i->hitcher == ch ? "you" : char_short (i->hitcher));
-
-	      buffer[2] = toupper (buffer[2]);
-	      send_to_char (buffer, ch);
-	    }
-
-	  else
-	    {
-	      *buffer = '\0';
-
-
-	      if ((GET_FLAG (i, FLAG_ENTERING) ||
-		   GET_FLAG (i, FLAG_LEAVING)) && enter_exit_msg (i, buffer))
-		{
-		  if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
-		    strcat (buffer, " #2(new player)#0");
-
-	          if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
-        	    strcat (buffer, " #B(new player guide)#0");
-
-		  if (i->desc && !IS_NPC (i) && i->desc->idle)
-		    strcat (buffer, "#1(idle)#0 ");
-
-		  if (GET_FLAG (i, FLAG_WIZINVIS))
-		    strcat (buffer, " #C(wizinvis)#0");
-
-		  if (get_affect (i, MAGIC_HIDDEN))
-		    strcat (buffer, " #1(hidden)#0");
-
-		  if (are_grouped (i, ch))
-		    strcat (buffer, " #6(grouped)#0");
-
-		  if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
-		    strcat (buffer, " #1(invisible)#0");
-
-		  if (get_affect (i, MAGIC_AFFECT_CONCEALMENT))
-		    strcat (buffer, " #1(blend)#0");
-
-		  if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
-		    strcat (buffer, " #1(editing)#0");
-
-		  if (i->desc && i->desc->original && !IS_MORTAL (ch))
-		    strcat (buffer, " #2(animated)#0");
-
-		  if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
-		    strcat (buffer, " #1(link dead)#0");
-
-		  if (!IS_MORTAL (ch) && !IS_NPC (i) && !i->desc
-		      && i->pc->admin_loaded)
-		    strcat (buffer, " #3(loaded)#0");
-
-		  strcat (buffer, "#0\n");
-		  reformat_string (buffer, &p);
-		  send_to_char (p, ch);
-		  mem_free (p); // char*
-		}
-	      else if ((af = get_affect (i, AFFECT_SHADOW)) &&
-		       af->a.shadow.edge != -1)
-		{
-		  sprintf (buf, "%s", char_short (i));
-		  *buf = toupper (*buf);
-		  sprintf (buffer + strlen (buffer),
-			   "#5%s is here, #0standing %s.", buf,
-			   dir_names[af->a.shadow.edge]);
-		  act (buffer, false, ch, 0, i, TO_CHAR | _ACT_FORMAT);
-		}
-	      else if ((af = get_affect (i, AFFECT_GUARD_DIR)) &&
-		       af->a.shadow.edge != -1)
-		{
-		  sprintf (buf, "%s", char_short (i));
-		  *buf = toupper (*buf);
-		  sprintf (buffer + strlen (buffer),
-			   "#5%s#0 is here, guarding the %s exit.", buf,
-			   dirs[af->a.shadow.edge]);
-		  act (buffer, false, ch, 0, i, TO_CHAR | _ACT_FORMAT);
-		}
-	      else
-		{
-		  sprintf (buffer, "#5");
-		  strcat (buffer, char_long (i, GET_TRUST (ch)));
-		  if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
-		    strcat (buffer, " #2(new player)#0");
-
-	          if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
-        	    strcat (buffer, " #B(new player guide)#0");
-
-		  if (get_affect (i, MAGIC_HIDDEN))
-		    strcat (buffer, " #1(hidden)#0");
-
-		  if (are_grouped (i, ch))
-		    strcat (buffer, " #6(grouped)#0");
-
-		  if (i->desc && i->desc->idle)
-		    strcat (buffer, " #1(idle)#0");
-
-		  if (GET_FLAG (i, FLAG_WIZINVIS))
-		    strcat (buffer, " #C(wizinvis)#0");
-
-		  if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
-		    strcat (buffer, " #1(invisible)#0");
-
-		  if (get_affect (i, MAGIC_AFFECT_CONCEALMENT))
-		    strcat (buffer, " #1(blend)#0");
-
-		  if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
-		    strcat (buffer, " #1(editing)#0");
-
-		  if (i->desc && i->desc->original && !IS_MORTAL (ch))
-		    strcat (buffer, " #2(animated)#0");
-
-		  if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
-		    strcat (buffer, " #1(link dead)#0");
-
-		  if (!IS_MORTAL (ch) && !IS_NPC (i) && !i->desc
-		      && i->pc->admin_loaded)
-		    strcat (buffer, " #3(loaded)#0");
-
-		  strcat (buffer, "#0\n");
-		  reformat_string (buffer, &p);
-		  send_to_char (p, ch);
-		  mem_free (p); //char*
-		}
-	    }
-	}
-
-      if (get_stink_message (i, NULL, stink_buf, ch))
-	{
-	  act (stink_buf, false, i, 0, ch, TO_VICT);
-	}
-
-      if ((af = get_affect (i, MAGIC_TOLL)) &&
-	  af->a.toll.room_num == i->in_room)
-	{
-	  sprintf (buffer, "$n #Dis collecting tolls from people leaving "
-		   "%s.#0", dirs[af->a.toll.dir]);
-	  act (buffer, true, i, 0, ch, TO_VICT);
-	}
-
-    }
-  else if (mode == 1 || mode == 15)
-    {
-
-      if (i->description)
+	else if (mode == 1 || mode == 15)
 	{
 
-	  if (((eq = get_equip (i, WEAR_HEAD))
-	       && IS_SET (eq->obj_flags.extra_flags, ITEM_MASK))
-	      || ((eq = get_equip (i, WEAR_FACE))
-		  && IS_SET (eq->obj_flags.extra_flags, ITEM_MASK))
-	      || ((eq = get_equip (i, WEAR_NECK_1))
-		  && IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
-		  && IS_SET (i->affected_by, AFF_HOODED))
-	      || ((eq = get_equip (i, WEAR_NECK_2))
-		  && IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
-		  && IS_SET (i->affected_by, AFF_HOODED))
-	      || ((eq = get_equip (i, WEAR_ABOUT))
-		  && IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
-		  && IS_SET (i->affected_by, AFF_HOODED)))
-	    {
-	      send_to_char ("This person's features are not visible.\n", ch);
-	    }
-	  else
-	    {
-	      send_to_char (i->description, ch);
-	    }
-	}
-      else
-	{
-	  act ("You see nothing special about $m.", false, i, 0, ch, TO_VICT);
-	}
+		if (i->description)
+		{
 
-	/* Show name (first keyword) if mobile is owned by the character examining the mobile*/
-	if (mode == 15)
-	{
-		if(IS_NPC(i)) 
+			if (((eq = get_equip (i, WEAR_HEAD))
+				&& IS_SET (eq->obj_flags.extra_flags, ITEM_MASK))
+				|| ((eq = get_equip (i, WEAR_FACE))
+				&& IS_SET (eq->obj_flags.extra_flags, ITEM_MASK))
+				|| ((eq = get_equip (i, WEAR_NECK_1))
+				&& IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
+				&& IS_SET (i->affected_by, AFF_HOODED))
+				|| ((eq = get_equip (i, WEAR_NECK_2))
+				&& IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
+				&& IS_SET (i->affected_by, AFF_HOODED))
+				|| ((eq = get_equip (i, WEAR_ABOUT))
+				&& IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
+				&& IS_SET (i->affected_by, AFF_HOODED)))
+			{
+				send_to_char ("This person's features are not visible.\n", ch);
+			}
+			else
+			{
+				send_to_char (i->description, ch);
+			}
+		}
+		else
+		{
+			act ("You see nothing special about $m.", false, i, 0, ch, TO_VICT);
+		}
+
+		/* Show name (first keyword) if mobile is owned by the character examining the mobile*/
+		if (mode == 15)
+		{
+			if(IS_NPC(i)) 
 			{
 				if(i->mob->owner)
+				{
+					if(!strcmp(i->mob->owner, ch->tname))
 					{
-						if(!strcmp(i->mob->owner, ch->tname))
-							{
-								sprintf (buffer, "\nYou recognise $n to be called "
-									 "%s.", GET_NAME (i));
-								act (buffer, false, i, 0, ch, TO_VICT);
-							}
+						sprintf (buffer, "\nYou recognise $n to be called "
+							"%s.", GET_NAME (i));
+						act (buffer, false, i, 0, ch, TO_VICT);
 					}
+				}
 			}
-	}
-
-	/* show dmote */
-	/* Description is formated to 65 char, so we need to use reformat_desc instead of _ACT_FORMAT*/
-	 if (i->dmote_str)
-	   {
-		reformat_desc (i->dmote_str, &i->dmote_str);
-		sprintf(buffer, "\n%s", i->dmote_str);
-		 send_to_char (buffer, ch);
-       }
-       
-      /* Show a character to another */
-
-      if (GET_MAX_HIT (i) > 0)
-	percent = (100 * GET_HIT (i)) / GET_MAX_HIT (i);
-      else
-	percent = -1;		/* How could MAX_HIT be < 1?? */
-
-      strcpy (buffer, char_short (i));
-      *buffer = toupper (*buffer);
-
-      if (IS_SET (i->act, ACT_VEHICLE))
-	{
-	  if (percent >= 100)
-	    strcat (buffer, " is in pristine condition.\n");
-	  else if (percent >= 90)
-	    strcat (buffer, " is slightly damaged.\n");
-	  else if (percent >= 70)
-	    strcat (buffer, " is damaged, but still functional.\n");
-	  else if (percent >= 50)
-	    strcat (buffer, " is badly damaged.\n");
-	  else if (percent >= 25)
-	    strcat (buffer, " is barely functional.\n");
-	  else if (percent >= 10)
-	    strcat (buffer, " has sustained a great deal of damage!\n");
-	  else if (percent >= 0)
-	    strcat (buffer, " is about ready to collapse inward!\n");
-	  send_to_char ("\n", ch);
-	  send_to_char (buffer, ch);
-	}
-
-      *buf2 = '\0';
-      *buf3 = '\0';
-      strcpy (buf2, display_clan_ranks (i, ch));
-      if (mode == 15 && i != ch && *buf2 && !is_hooded (i))
-	{
-	  send_to_char ("\n", ch);
-	  *buf2 = toupper (*buf2);
-	  reformat_string (buf2, &p);
-	  send_to_char (p, ch);
-	  mem_free (p); //char*
-	  p = NULL;
-	}
-
-      /*
-         if ( (mode == 1 || mode == 15) && !IS_NPC(i) ) {
-         send_to_char ("\n", ch);
-         sprintf (buffer, "%s is approximately %d inches in height, and appears to be of %s build.", HSSH(i), i->height, frames[i->frame]);
-         buffer[0] = toupper(buffer[0]);
-         reformat_string (buffer, &p);
-         send_to_char (p, ch);
-         mem_free (p); // char*
-         p = NULL;
-         }
-       */
-
-      if (mode == 15 && i->damage && !IS_SET (i->act, ACT_VEHICLE)
-	  && !is_hooded (i))
-	{
-	  curdamage = i->damage;
-	  if (curdamage > 0 && curdamage <= i->max_hit * .25)
-	    sprintf (buffer, "%s face looks slightly pale.\n",
-		     char_short (i));
-	  else if (curdamage > i->max_hit * .25
-		   && curdamage < i->max_hit * .50)
-	    sprintf (buffer, "%s face looks rather pallid.\n",
-		     char_short (i));
-	  else if (curdamage > i->max_hit * .50
-		   && curdamage < i->max_hit * .75)
-	    sprintf (buffer, "%s face looks quite ashen.\n", char_short (i));
-	  else if (curdamage > i->max_hit * .75)
-	    sprintf (buffer, "%s face looks deathly pale.\n", char_short (i));
-	  *buffer = toupper (*buffer);
-	  send_to_char ("\n", ch);
-	  send_to_char (buffer, ch);
-	}
-
-      if (mode == 1)
-	{
-	  curdamage = 0;
-	  for (wound = i->wounds; wound; wound = wound->next)
-	    curdamage += wound->damage;
-	  curdamage += i->damage;
-
-	  if (curdamage <= 0)
-	    sprintf (buffer, "%s appears to be in excellent condition.\n",
-		     char_short (i));
-	  else if (curdamage <= i->max_hit * .1667)
-	    sprintf (buffer,
-		     "%s appears to be slightly the worse for wear.\n",
-		     char_short (i));
-	  else if (curdamage > i->max_hit * .1667
-		   && curdamage <= i->max_hit * .3333)
-	    sprintf (buffer, "%s appears injured.\n", char_short (i));
-	  else if (curdamage > i->max_hit * .3333
-		   && curdamage <= i->max_hit * .6667)
-	    sprintf (buffer, "%s appears moderately injured.\n",
-		     char_short (i));
-	  else if (curdamage > i->max_hit * .6667
-		   && curdamage <= i->max_hit * .8335)
-	    sprintf (buffer, "%s appears severely injured.\n",
-		     char_short (i));
-	  else if (curdamage >= i->max_hit * .8335)
-	    sprintf (buffer, "%s appears close to death.\n", char_short (i));
-	  send_to_char ("\n", ch);
-	  *buffer = toupper (*buffer);
-	  reformat_string (buffer, &p);
-	  send_to_char (p, ch);
-	  mem_free (p); // char*
-	  p = NULL;
-	}
-
-      if (mode == 15 && !IS_SET (i->act, ACT_VEHICLE)
-	  && (i->wounds || i->lodged))
-	{
-	  sprintf (buf2, "%s", show_wounds (i, 0));
-					if (ch->fighting || i->fighting)
-						sprintf (buf2, "%s", strip_small_minor(buf2, ch));
-			
-	  send_to_char ("\n", ch);
-	  strcat (buf3, buf2);
-	  act (buf3, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-	  *buf3 = '\0';
-	}
-
-      if (mode == 15 && (!i->damage || is_hooded (i))
-	  && !IS_SET (i->act, ACT_VEHICLE) && !i->wounds && !i->lodged)
-	{
-	  send_to_char ("\n", ch);
-	  sprintf (buf2, "%s appears to be in excellent condition.",
-		   char_short (i));
-	  *buf2 = toupper (*buf2);
-	  reformat_string (buf2, &p);
-	  send_to_char (p, ch);
-	  mem_free (p); //char*
-	  p = NULL;
-	}
-
-      if (i->mob &&
-	  i->mob->vehicle_type == VEHICLE_HITCH &&
-	  (troom = vtor (i->mob->nVirtual)) &&
-	  (troom->people || troom->contents) && i->room != troom)
-	{
-	  sprintf (buf, "\nOn board, you see:\n");
-	  send_to_char (buf, ch);
-	  if (troom->people)
-	    list_char_to_char (troom->people, ch, 0);
-	  if (troom->contents)
-	    list_obj_to_char (troom->contents, ch, 0, true);
-	}
-
-      for (enchantment = i->enchantments; enchantment;
-	   enchantment = enchantment->next)
-	{
-	  if (*show_enchantment (enchantment))
-	    sprintf (buf3 + strlen (buf3), "%s",
-		     show_enchantment (enchantment));
-	}
-
-      if (*buf3)
-	{
-	  act (buf3, false, ch, 0, 0, TO_CHAR);
-	}
-
-      *buf3 = '\0';
-      if (i == ch)
-	{
-	  send_to_char ("\n", i);
-	  do_equipment (i, "", 0);
-	}
-      else
-	{
-	  if (i->equip || i->right_hand || i->left_hand)
-	    send_to_char ("\n", ch);
-	  if (i->right_hand)
-	    {
-	      if (!IS_SET (i->act, ACT_MOUNT))
-		{
-		  if (i->right_hand->location == WEAR_PRIM
-		      || i->right_hand->location == WEAR_SEC)
-		    sprintf (buf, "<wielded in right hand>  ");
-		  else if (i->right_hand->location == WEAR_BOTH)
-		    sprintf (buf, "<wielded in both hands>  ");
-		  else if (i->right_hand->location == WEAR_SHIELD)
-		    sprintf (buf, "<gripped in right hand>  ");
-		  else
-		    sprintf (buf, "<carried in right hand>  ");
 		}
-	      else
-		sprintf (buf, "<carried on back>        ");
-	      send_to_char (buf, ch);
-	      show_obj_to_char (i->right_hand, ch, 1);
-	    }
-	  if (i->left_hand)
-	    {
-	      if (!IS_SET (i->act, ACT_MOUNT))
+
+		/* show dmote */
+		/* Description is formated to 65 char, so we need to use reformat_desc instead of _ACT_FORMAT*/
+		if (i->dmote_str)
 		{
-		  if (i->left_hand->location == WEAR_PRIM
-		      || i->left_hand->location == WEAR_SEC)
-		    sprintf (buf, "<wielded in left hand>   ");
-		  else if (i->left_hand->location == WEAR_BOTH)
-		    sprintf (buf, "<wielded in both hands>  ");
-		  else if (i->left_hand->location == WEAR_SHIELD)
-		    sprintf (buf, "<gripped in left hand>   ");
-		  else
-		    sprintf (buf, "<carried in left hand>   ");
+			reformat_desc (i->dmote_str, &i->dmote_str);
+			sprintf(buffer, "\n%s", i->dmote_str);
+			send_to_char (buffer, ch);
 		}
-	      else
-		sprintf (buf, "<carried on back>        ");
 
-	      send_to_char (buf, ch);
-	      show_obj_to_char (i->left_hand, ch, 1);
-	    }
+		/* Show a character to another */
 
-	  if (i->equip && (i->left_hand || i->right_hand))
-	    send_to_char ("\n", ch);
+		if (GET_MAX_HIT (i) > 0)
+			percent = (100 * GET_HIT (i)) / GET_MAX_HIT (i);
+		else
+			percent = -1;		/* How could MAX_HIT be < 1?? */
 
-	  for (location = 0; location < MAX_WEAR; location++)
-	    {
+		strcpy (buffer, char_short (i));
+		*buffer = toupper (*buffer);
 
-	      if (!(eq = get_equip (i, loc_order[location])))
-		continue;
+		if (IS_SET (i->act, ACT_VEHICLE))
+		{
+			if (percent >= 100)
+				strcat (buffer, " is in pristine condition.\n");
+			else if (percent >= 90)
+				strcat (buffer, " is slightly damaged.\n");
+			else if (percent >= 70)
+				strcat (buffer, " is damaged, but still functional.\n");
+			else if (percent >= 50)
+				strcat (buffer, " is badly damaged.\n");
+			else if (percent >= 25)
+				strcat (buffer, " is barely functional.\n");
+			else if (percent >= 10)
+				strcat (buffer, " has sustained a great deal of damage!\n");
+			else if (percent >= 0)
+				strcat (buffer, " is about ready to collapse inward!\n");
+			send_to_char ("\n", ch);
+			send_to_char (buffer, ch);
+		}
 
-	      if (eq == i->right_hand || eq == i->left_hand)
-		continue;
+		*buf2 = '\0';
+		*buf3 = '\0';
+		strcpy (buf2, display_clan_ranks (i, ch));
+		if (mode == 15 && i != ch && *buf2 && !is_hooded (i))
+		{
+			send_to_char ("\n", ch);
+			*buf2 = toupper (*buf2);
+			reformat_string (buf2, &p);
+			send_to_char (p, ch);
+			mem_free (p); //char*
+			p = NULL;
+		}
 
-	      send_to_char (where[loc_order[location]], ch);
+		/*
+		if ( (mode == 1 || mode == 15) && !IS_NPC(i) ) {
+		send_to_char ("\n", ch);
+		sprintf (buffer, "%s is approximately %d inches in height, and appears to be of %s build.", HSSH(i), i->height, frames[i->frame]);
+		buffer[0] = toupper(buffer[0]);
+		reformat_string (buffer, &p);
+		send_to_char (p, ch);
+		mem_free (p); // char*
+		p = NULL;
+		}
+		*/
 
-	      if (location == WEAR_BLINDFOLD || IS_OBJ_VIS (ch, eq))
-		show_obj_to_char (eq, ch, 1);
-	      else
-		send_to_char ("#2something#0\n", ch);
+		if (mode == 15 && i->damage && !IS_SET (i->act, ACT_VEHICLE)
+			&& !is_hooded (i))
+		{
+			curdamage = i->damage;
+			if (curdamage > 0 && curdamage <= i->max_hit * .25)
+				sprintf (buffer, "%s face looks slightly pale.\n",
+				char_short (i));
+			else if (curdamage > i->max_hit * .25
+				&& curdamage < i->max_hit * .50)
+				sprintf (buffer, "%s face looks rather pallid.\n",
+				char_short (i));
+			else if (curdamage > i->max_hit * .50
+				&& curdamage < i->max_hit * .75)
+				sprintf (buffer, "%s face looks quite ashen.\n", char_short (i));
+			else if (curdamage > i->max_hit * .75)
+				sprintf (buffer, "%s face looks deathly pale.\n", char_short (i));
+			*buffer = toupper (*buffer);
+			send_to_char ("\n", ch);
+			send_to_char (buffer, ch);
+		}
 
-	      found = true;
-	    }
+		if (mode == 1)
+		{
+			curdamage = 0;
+			for (wound = i->wounds; wound; wound = wound->next)
+				curdamage += wound->damage;
+			curdamage += i->damage;
+
+			if (curdamage <= 0)
+				sprintf (buffer, "%s appears to be in excellent condition.\n",
+				char_short (i));
+			else if (curdamage <= i->max_hit * .1667)
+				sprintf (buffer,
+				"%s appears to be slightly the worse for wear.\n",
+				char_short (i));
+			else if (curdamage > i->max_hit * .1667
+				&& curdamage <= i->max_hit * .3333)
+				sprintf (buffer, "%s appears injured.\n", char_short (i));
+			else if (curdamage > i->max_hit * .3333
+				&& curdamage <= i->max_hit * .6667)
+				sprintf (buffer, "%s appears moderately injured.\n",
+				char_short (i));
+			else if (curdamage > i->max_hit * .6667
+				&& curdamage <= i->max_hit * .8335)
+				sprintf (buffer, "%s appears severely injured.\n",
+				char_short (i));
+			else if (curdamage >= i->max_hit * .8335)
+				sprintf (buffer, "%s appears close to death.\n", char_short (i));
+			send_to_char ("\n", ch);
+			*buffer = toupper (*buffer);
+			reformat_string (buffer, &p);
+			send_to_char (p, ch);
+			mem_free (p); // char*
+			p = NULL;
+		}
+
+		if (mode == 15 && !IS_SET (i->act, ACT_VEHICLE)
+			&& (i->wounds || i->lodged))
+		{
+			sprintf (buf2, "%s", show_wounds (i, 0));
+			if (ch->fighting || i->fighting)
+				sprintf (buf2, "%s", strip_small_minor(buf2, ch));
+
+			send_to_char ("\n", ch);
+			strcat (buf3, buf2);
+			act (buf3, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			*buf3 = '\0';
+		}
+
+		if (mode == 15 && (!i->damage || is_hooded (i))
+			&& !IS_SET (i->act, ACT_VEHICLE) && !i->wounds && !i->lodged)
+		{
+			send_to_char ("\n", ch);
+			sprintf (buf2, "%s appears to be in excellent condition.",
+				char_short (i));
+			*buf2 = toupper (*buf2);
+			reformat_string (buf2, &p);
+			send_to_char (p, ch);
+			mem_free (p); //char*
+			p = NULL;
+		}
+
+		if (i->mob &&
+			i->mob->vehicle_type == VEHICLE_HITCH &&
+			(troom = vtor (i->mob->nVirtual)) &&
+			(troom->people || troom->contents) && i->room != troom)
+		{
+			sprintf (buf, "\nOn board, you see:\n");
+			send_to_char (buf, ch);
+			if (troom->people)
+				list_char_to_char (troom->people, ch, 0);
+			if (troom->contents)
+				list_obj_to_char (troom->contents, ch, 0, true);
+		}
+
+		for (enchantment = i->enchantments; enchantment;
+			enchantment = enchantment->next)
+		{
+			if (*show_enchantment (enchantment))
+				sprintf (buf3 + strlen (buf3), "%s",
+				show_enchantment (enchantment));
+		}
+
+		if (*buf3)
+		{
+			act (buf3, false, ch, 0, 0, TO_CHAR);
+		}
+
+		*buf3 = '\0';
+		if (i == ch)
+		{
+			send_to_char ("\n", i);
+			do_equipment (i, "", 0);
+		}
+		else
+		{
+			if (i->equip || i->right_hand || i->left_hand)
+				send_to_char ("\n", ch);
+			if (i->right_hand)
+			{
+				if (!IS_SET (i->act, ACT_MOUNT))
+				{
+					if (i->right_hand->location == WEAR_PRIM
+						|| i->right_hand->location == WEAR_SEC)
+						sprintf (buf, "<wielded in right hand>  ");
+					else if (i->right_hand->location == WEAR_BOTH)
+						sprintf (buf, "<wielded in both hands>  ");
+					else if (i->right_hand->location == WEAR_SHIELD)
+						sprintf (buf, "<gripped in right hand>  ");
+					else
+						sprintf (buf, "<carried in right hand>  ");
+				}
+				else
+					sprintf (buf, "<carried on back>        ");
+				send_to_char (buf, ch);
+				show_obj_to_char (i->right_hand, ch, 1);
+			}
+			if (i->left_hand)
+			{
+				if (!IS_SET (i->act, ACT_MOUNT))
+				{
+					if (i->left_hand->location == WEAR_PRIM
+						|| i->left_hand->location == WEAR_SEC)
+						sprintf (buf, "<wielded in left hand>   ");
+					else if (i->left_hand->location == WEAR_BOTH)
+						sprintf (buf, "<wielded in both hands>  ");
+					else if (i->left_hand->location == WEAR_SHIELD)
+						sprintf (buf, "<gripped in left hand>   ");
+					else
+						sprintf (buf, "<carried in left hand>   ");
+				}
+				else
+					sprintf (buf, "<carried on back>        ");
+
+				send_to_char (buf, ch);
+				show_obj_to_char (i->left_hand, ch, 1);
+			}
+
+			if (i->equip && (i->left_hand || i->right_hand))
+				send_to_char ("\n", ch);
+
+			for (location = 0; location < MAX_WEAR; location++)
+			{
+
+				if (!(eq = get_equip (i, loc_order[location])))
+					continue;
+
+				if (eq == i->right_hand || eq == i->left_hand)
+					continue;
+
+				send_to_char (where[loc_order[location]], ch);
+
+				if (location == WEAR_BLINDFOLD || IS_OBJ_VIS (ch, eq))
+					show_obj_to_char (eq, ch, 1);
+				else
+					send_to_char ("#2something#0\n", ch);
+
+				found = true;
+			}
+		}
 	}
-    }
 
-  else if (mode == 3)
-    {
-      if (CAN_SEE (ch, i))
+	else if (mode == 3)
 	{
-	  send_to_char ("   ", ch);
-	  act ("$N", false, ch, 0, i, TO_CHAR);
+		if (CAN_SEE (ch, i))
+		{
+			send_to_char ("   ", ch);
+			act ("$N", false, ch, 0, i, TO_CHAR);
+		}
 	}
-    }
 }
 
 void
@@ -5338,7 +5339,7 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 
   for (rch = ch->room->people; rch; rch = rch->next_in_room)
     {
-      if ((af = get_affect (rch, MAGIC_GUARD)) && af->a.spell.t == (long int) ch)
+      if ((af = get_affect (rch, MAGIC_GUARD)) && !af->a.spell.modifier && af->a.spell.t == (long int) ch)
 	{
 	  if (first)
 	    send_to_char ("\n", ch);
@@ -12089,13 +12090,24 @@ show_evaluate_information (CHAR_DATA *ch, OBJ_DATA	*obj)
 
 /**** SHOW CAPACITY OF CONTAINER ****/
 
-	if ((GET_ITEM_TYPE (obj) == ITEM_CONTAINER)||
-		( GET_ITEM_TYPE (obj) == ITEM_DRINKCON )){
+	if (GET_ITEM_TYPE (obj) == ITEM_CONTAINER)
+	{
 
 		sprintf (buffer, "\nYou estimate that it would hold around %d.%.2d lbs",
 			obj->o.container.capacity / 100,
 			obj->o.container.capacity % 100);
 		act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		*buffer = '\0';
+		send_to_char ("\n", ch);
+	}
+
+	if ((GET_ITEM_TYPE(obj) == ITEM_DRINKCON))
+	{
+		if (obj->o.drinkcon.capacity > 150)
+			sprintf(buffer, "\nYou estimate that it would hold around %d gallons of fluid.", obj->o.drinkcon.capacity / 50);
+		else
+			sprintf(buffer, "\nYou estimate that it would hold around %d fluid ounces.", obj->o.drinkcon.capacity * 12 / 5);
+		act(buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 		*buffer = '\0';
 		send_to_char ("\n", ch);
 	}

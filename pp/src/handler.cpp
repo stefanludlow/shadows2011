@@ -1657,6 +1657,13 @@ obj_from_room (OBJ_DATA ** obj, int count)	/* STACKing */
 
   room_light (room);
 
+  for (CHAR_DATA *tch = room->people; tch; tch = tch->next_in_room)
+  {
+	  AFFECTED_TYPE *af;
+	  if ((af = get_affect(tch, MAGIC_GUARD)) && af->a.spell.modifier == 1 && (OBJ_DATA *) af->a.spell.t == *obj)
+		  affect_remove(tch, af);
+  }
+
   remove_obj_affect (*obj, MAGIC_HIDDEN);
 }
 
@@ -2077,7 +2084,7 @@ extract_char (CHAR_DATA * ch)
 	k = *tch_iterator;
       if (k->deleted)
 	continue;
-      if ((af = get_affect (k, MAGIC_GUARD)) &&
+      if ((af = get_affect (k, MAGIC_GUARD)) && af->a.spell.modifier == 1 && 
 	  (CHAR_DATA *) af->a.spell.t == ch)
 	affect_remove (k, af);
     }

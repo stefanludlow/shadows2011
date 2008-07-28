@@ -1684,7 +1684,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 				continue;
 			
 			af = get_affect (tch, MAGIC_GUARD);
-			if (!af)
+			if (!af || af->a.spell.modifier == 1)
 				continue;
 
       if ((CHAR_DATA *) af->a.spell.t == target)
@@ -3932,7 +3932,7 @@ guard_check (CHAR_DATA * victim)
   for (tch = victim->room->people; tch; tch = tch->next_in_room)
     {
 
-      if (!(af = get_affect (tch, MAGIC_GUARD)))
+      if (!(af = get_affect (tch, MAGIC_GUARD)) || af->a.spell.modifier == 1)
 	continue;
 
       if ((CHAR_DATA *) af->a.spell.t == victim &&
@@ -3945,6 +3945,7 @@ void
 do_guard (CHAR_DATA * ch, char *argument, int cmd)
 {
   CHAR_DATA *target = NULL, *tch = NULL;
+  OBJ_DATA *obj = NULL;
   AFFECTED_TYPE *af;
   char buf[MAX_STRING_LENGTH];
   int dir;
@@ -3956,11 +3957,17 @@ do_guard (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   if ((af = get_affect (ch, AFFECT_GUARD_DIR)))
+  {
+	 sprintf (buf, "You cease to guard the %s exit.", dirs[af->a.shadow.edge]);
+	 act(buf, true, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	 sprintf (buf, "$n ceases to guard the %s exit.", dirs[af->a.shadow.edge]);
+	 act(buf, true, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
     affect_remove (ch, af);
+  }
 
   argument = one_argument (argument, buf);
 
-  if (*buf && !(target = get_char_room_vis (ch, buf)))
+  if (*buf && !(target = get_char_room_vis (ch, buf)) && !(obj = get_obj_in_list_vis(ch, buf, ch->room->contents)))
     {
       if ((dir = index_lookup (dirs, buf)) == -1)
 	{
@@ -3975,6 +3982,26 @@ do_guard (CHAR_DATA * ch, char *argument, int cmd)
 
       af->a.shadow.shadow = NULL;
       af->a.shadow.edge = dir;
+
+	  if ((af = get_affect (ch, MAGIC_GUARD))
+		  && (tch = (CHAR_DATA *) af->a.spell.t) != NULL)
+	  {
+		  if (af->a.spell.modifier == 0)
+		  {
+			  act ("You cease to guard $N.", true, ch, 0, tch,
+				  TO_CHAR | _ACT_FORMAT);
+			  act ("$n ceases to guard you.", false, ch, 0, tch,
+				  TO_VICT | _ACT_FORMAT);
+			  act ("$n ceases to guard $N.", false, ch, 0, tch,
+				  TO_NOTVICT | _ACT_FORMAT);
+		  }
+		  else
+		  {
+			  act ("You cease to guard $p.", true, ch, (OBJ_DATA *) af->a.spell.t, 0, TO_CHAR | _ACT_FORMAT);
+			  act ("$n ceases to guard $p.", true, ch, (OBJ_DATA *) af->a.spell.t, 0, TO_ROOM | _ACT_FORMAT);
+		  }
+		  remove_affect_type (ch, MAGIC_GUARD);
+	  }
 
       sprintf (buf, "You will now guard the %s exit.\n", dirs[dir]);
       send_to_char (buf, ch);
@@ -3995,18 +4022,29 @@ do_guard (CHAR_DATA * ch, char *argument, int cmd)
       else if ((af = get_affect (ch, MAGIC_GUARD))
 	       && (tch = (CHAR_DATA *) af->a.spell.t) != NULL)
 	{
-	  act ("You cease guarding $N.", true, ch, 0, tch,
+		if (af->a.spell.modifier == 0)
+		{
+	  act ("You cease to guard $N.", true, ch, 0, tch,
 	       TO_CHAR | _ACT_FORMAT);
-	  act ("$n ceases guarding you.", false, ch, 0, tch,
+	  act ("$n ceases to guard you.", false, ch, 0, tch,
 	       TO_VICT | _ACT_FORMAT);
-	  act ("$n ceases guarding $N.", false, ch, 0, tch,
+	  act ("$n ceases to guard $N.", false, ch, 0, tch,
 	       TO_NOTVICT | _ACT_FORMAT);
+		}
+		else
+		{
+			act ("You cease to guard $p.", true, ch, (OBJ_DATA *) af->a.spell.t, 0, TO_CHAR | _ACT_FORMAT);
+			act ("$n ceases to guard $p.", true, ch, (OBJ_DATA *) af->a.spell.t, 0, TO_ROOM | _ACT_FORMAT);
+		}
 	  remove_affect_type (ch, MAGIC_GUARD);
 	  return;
 	}
       else if ((af = get_affect (ch, AFFECT_GUARD_DIR)))
 	{
-	  act ("You cease guarding the exit.", true, ch, 0, 0, TO_CHAR);
+	  sprintf (buf, "You cease to guard the %s exit.", dirs[af->a.shadow.edge]);
+	 act(buf, true, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	 sprintf (buf, "$n ceases to guard the %s exit.", dirs[af->a.shadow.edge]);
+	 act(buf, true, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
 	  remove_affect_type (ch, AFFECT_GUARD_DIR);
 	  return;
 	}
@@ -4019,8 +4057,8 @@ do_guard (CHAR_DATA * ch, char *argument, int cmd)
 	}
     }
 
-  if (get_affect (target, MAGIC_GUARD)
-      || get_affect (target, AFFECT_GUARD_DIR))
+  if (target && (get_affect (target, MAGIC_GUARD)
+      || get_affect (target, AFFECT_GUARD_DIR)))
     {
       send_to_char ("They're already trying to guard something themselves!\n",
 		    ch);
@@ -4039,11 +4077,20 @@ do_guard (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  af->a.spell.t = (long int) target;
-
-  act ("You will now guard $N.", false, ch, 0, target, TO_CHAR | _ACT_FORMAT);
+  if (target)
+  {
+	  af->a.spell.t = (long int) target;
+	  act ("You will now guard $N.", false, ch, 0, target, TO_CHAR | _ACT_FORMAT);
   act ("$n moves into position to guard you.", false, ch, 0, target,
        TO_VICT | _ACT_FORMAT);
   act ("$n moves into position to guard $N.", false, ch, 0, target,
        TO_NOTVICT | _ACT_FORMAT);
+  }
+  else
+  {
+	  af->a.spell.t = (long int) obj;
+	  af->a.spell.modifier = 1;
+	  act ("You will now guard #2$p#0.", false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
+	  act ("$n moves into position to guard #2$p#0.", false, ch, obj, 0, TO_ROOM | _ACT_FORMAT);
+  }
 }

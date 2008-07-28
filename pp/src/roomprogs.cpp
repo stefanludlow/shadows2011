@@ -3376,7 +3376,8 @@ r_loadmob (CHAR_DATA * ch, char *argument)
 	char arg1[80], arg2[80];
 	int mob_vnum, room_vnum;
 
-	half_chop (argument, arg1, arg2);
+	argument = one_argument(argument, arg1);
+	argument = one_argument(argument, arg2);
 
 	if (!strcmp(arg1, "-1"))
 	{
@@ -3399,7 +3400,13 @@ r_loadmob (CHAR_DATA * ch, char *argument)
 		return;
 	}
 
-	char_to_room (load_mobile (mob_vnum), room_vnum);
+	CHAR_DATA * loaded_mob = load_mobile (mob_vnum);
+	char_to_room (loaded_mob, room_vnum);
+	if (!strn_cmp(argument, "stayput", 7))
+	{
+		loaded_mob->act |= ACT_STAYPUT;
+		save_stayput_mobiles ();
+	}
 }
 
 void
@@ -4203,10 +4210,14 @@ r_load_obj (CHAR_DATA *ch, char *argument)
 	bool exit = false;
 	OBJ_DATA *obj = NULL;
 	int rvnum = 0, ovnum = 0, count = 0;
-	arg_splitter (3, argument, arg1, arg2, arg3);
+	argument = one_argument(argument, arg1);
+	argument = one_argument(argument, arg2);
+	argument = one_argument(argument, arg3);
 	rvnum = atoi(arg1);
 	count = atoi(arg2);
 	ovnum = atoi(arg3);
+	argument = one_argument(argument, arg1);
+	std::string buf = arg1;
 
 	if ( rvnum == -1)
 	{
@@ -4223,16 +4234,38 @@ r_load_obj (CHAR_DATA *ch, char *argument)
 		system_log("ERROR: Negative count specified in r_load_obj", true);
 		exit = true;
 	}
-	if (count == 1)
+
+	std::string color;
+	if (!buf.empty())
 	{
-		sprintf(arg2, "%d %d", ovnum, rvnum);
-		r_put(ch, arg2);
-		exit = true;
+		int index = 0;
+		if ((index = index_lookup (standard_object_colors, arg1)) != -1)
+			color = standard_object_colors[index];
+		else if ((index = index_lookup (fine_object_colors, arg1)) != -1)
+			color = fine_object_colors[index];
+		else if ((index = index_lookup (drab_object_colors, arg1)) != -1)
+			color = drab_object_colors[index];
+		else if ((index = index_lookup (fine_gem_colors, arg1)) != -1)
+			color = fine_gem_colors[index];
+		else if ((index = index_lookup (gem_colors, arg1)) != -1)
+			color = gem_colors[index];
 	}
-	if (!exit && !(obj = load_object (ovnum)))
+
+	if (!color.empty())
+	{
+		if (!exit && !(obj = load_colored_object (ovnum, (char *) color.c_str())))
+		{
+			system_log("ERROR: item does not exist in r_load_obj", true);
+			exit = true;
+		}
+	}
+	else
+	{
+		if (!exit && !(obj = load_object (ovnum)))
 	{
 		system_log("ERROR: Item does not exist in r_load_obj", true);
 		exit = true;
+	}
 	}
 
 	if ( !exit)
@@ -4242,7 +4275,12 @@ r_load_obj (CHAR_DATA *ch, char *argument)
 			obj_to_room (obj, rvnum);
 			for (int i = 1; i < count; i++)
 			{
-				obj = load_object(ovnum);
+				if (!color.empty())
+					obj = load_colored_object(ovnum, (char *) color.c_str());
+				else
+				{
+					obj = load_object(ovnum);
+				}
 				obj_to_room (obj, rvnum);
 			}
 		}

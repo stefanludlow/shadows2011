@@ -836,6 +836,7 @@ can_obj_to_container (OBJ_DATA * obj, OBJ_DATA * container, char **msg,
 #define NO_CANT_TAKE	3
 #define NO_CANT_SEE		4
 #define NO_HANDS_FULL	5
+#define NO_GUARDED      6
 
 int
 can_obj_to_inv (OBJ_DATA * obj, CHAR_DATA * ch, int *error, int count)
@@ -852,8 +853,8 @@ can_obj_to_inv (OBJ_DATA * obj, CHAR_DATA * ch, int *error, int count)
       return 0;
     }
 
-  if (!CAN_WEAR (obj, ITEM_TAKE)
-      || IS_SET (obj->obj_flags.extra_flags, ITEM_PITCHED))
+  if ((!CAN_WEAR (obj, ITEM_TAKE) && IS_MORTAL(ch)) 
+|| IS_SET (obj->obj_flags.extra_flags, ITEM_PITCHED))
     {
       *error = NO_CANT_TAKE;
       return 0;
@@ -886,6 +887,16 @@ can_obj_to_inv (OBJ_DATA * obj, CHAR_DATA * ch, int *error, int count)
 	}
 
     }
+
+  for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+  {
+	  AFFECTED_TYPE *af;
+	  if ((af = get_affect(tch, MAGIC_GUARD)) && af->a.spell.modifier == 1 && (OBJ_DATA *) af->a.spell.t == obj)
+	  {
+		  *error = NO_GUARDED;
+		  return 0;
+	  }
+  }
 
   return 1;
 }
@@ -1044,287 +1055,349 @@ do_junk (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_get (CHAR_DATA * ch, char *argument, int cmd)
 {
-  CHAR_DATA *hitch;
-  ROOM_DATA *hitch_room;
-  OBJ_DATA *obj = NULL;
-  OBJ_DATA *container = NULL;
-  int container_loc = CONTAINER_LOC_UNKNOWN;
-  int count = 0;
-  int error;
-  SECOND_AFFECT *sa;
-  char arg1[MAX_STRING_LENGTH];
-  char arg2[MAX_STRING_LENGTH];
-  bool coldload_id = false;
+	CHAR_DATA *hitch;
+	ROOM_DATA *hitch_room;
+	OBJ_DATA *obj = NULL;
+	OBJ_DATA *container = NULL;
+	int container_loc = CONTAINER_LOC_UNKNOWN;
+	int count = 0;
+	int error;
+	SECOND_AFFECT *sa;
+	char arg1[MAX_STRING_LENGTH];
+	char arg2[MAX_STRING_LENGTH];
+	bool coldload_id = false;
 
-  *arg1 = '\0';
-  *arg2 = '\0';
+	*arg1 = '\0';
+	*arg2 = '\0';
 
-  if (IS_MORTAL (ch) && IS_SET (ch->room->room_flags, OOC) 
-        && str_cmp (ch->room->name, PREGAME_ROOM_NAME))
-    {
-      send_to_char ("This command has been disabled in OOC zones.\n", ch);
-      return;
-    }
-
-  argument = one_argument (argument, arg1);
-
-  if (just_a_number (arg1))
-    {
-      count = atoi (arg1);
-      argument = one_argument (argument, arg1);
-    }
-  else if (!str_cmp (arg1, ".c"))
-    {
-      coldload_id = true;
-      argument = one_argument (argument, arg1);
-    }
-
-  argument = one_argument (argument, arg2);
-
-  if (!str_cmp (arg2, "from") || !str_cmp (arg2, "in"))
-    argument = one_argument (argument, arg2);
-
-  if (!str_cmp (arg2, "ground") || !str_cmp (arg2, "room"))
-    {
-      argument = one_argument (argument, arg2);
-      container_loc = CONTAINER_LOC_ROOM;
-    }
-
-  else if (!str_cmp (arg2, "worn") || !str_cmp (arg2, "my"))
-    {
-      argument = one_argument (argument, arg2);
-      container_loc = CONTAINER_LOC_WORN;
-    }
-
-  else if (!strn_cmp (arg2, "inventory", 3))
-    {
-      argument = one_argument (argument, arg2);
-      container_loc = CONTAINER_LOC_INVENTORY;
-    }
-
-  if (*arg2 &&
-      container_loc == CONTAINER_LOC_UNKNOWN &&
-      (hitch = get_char_room_vis (ch, arg2)) &&
-      hitch->mob &&
-      hitch->mob->vehicle_type == VEHICLE_HITCH &&
-      (hitch_room = vtor (hitch->mob->nVirtual)))
-    {
-
-      if (!(obj = get_obj_in_list_vis (ch, arg1, hitch_room->contents)))
+	if (IS_MORTAL (ch) && IS_SET (ch->room->room_flags, OOC) 
+		&& str_cmp (ch->room->name, PREGAME_ROOM_NAME))
 	{
-	  act ("You don't see that in $N.", false, ch, 0, hitch,
-	       TO_CHAR | _ACT_FORMAT);
-	  return;
+		send_to_char ("This command has been disabled in OOC zones.\n", ch);
+		return;
 	}
 
-      if (!can_obj_to_inv (obj, ch, &error, count))
-	{
+	argument = one_argument (argument, arg1);
 
-	  if (error == NO_CANT_TAKE)
-	    act ("You can't take $o.", true, ch, obj, 0, TO_CHAR);
-	  else if (error == NO_TOO_MANY)
-	    act ("You can't handle so much.", true, ch, 0, 0, TO_CHAR);
-	  else if (error == NO_TOO_HEAVY)
-	    act ("You can't carry so much weight.", true, ch, 0, 0, TO_CHAR);
-	  else if (error == NO_CANT_SEE)
-	    act ("You don't see it.", true, ch, 0, 0, TO_CHAR);
-	  else if (error == NO_HANDS_FULL)
-	    act ("Your hands are full!", true, ch, 0, 0, TO_CHAR);
-	  return;
+	if (just_a_number (arg1))
+	{
+		count = atoi (arg1);
+		argument = one_argument (argument, arg1);
+	}
+	else if (!str_cmp (arg1, ".c"))
+	{
+		coldload_id = true;
+		argument = one_argument (argument, arg1);
 	}
 
-      obj_from_room (&obj, count);
+	argument = one_argument (argument, arg2);
 
-      act ("You take $p from $N.", false, ch, obj, hitch,
-	   TO_CHAR | _ACT_FORMAT);
-      act ("$n takes $p from $N.", false, ch, obj, hitch,
-	   TO_NOTVICT | _ACT_FORMAT);
+	if (!str_cmp (arg2, "from") || !str_cmp (arg2, "in"))
+		argument = one_argument (argument, arg2);
 
-      char_from_room (ch);
-      char_to_room (ch, hitch->mob->nVirtual);
-
-      act ("$n reaches in and takes $p.", false, ch, obj, hitch,
-	   TO_NOTVICT | _ACT_FORMAT);
-
-      char_from_room (ch);
-      char_to_room (ch, hitch->in_room);
-
-      obj_to_char (obj, ch);
-
-      return;
-    }
-
-  else if (*arg2)
-    {
-
-      if (container_loc == CONTAINER_LOC_UNKNOWN &&
-	  !(container = get_obj_in_dark (ch, arg2, ch->right_hand)) &&
-	  !(container = get_obj_in_dark (ch, arg2, ch->left_hand)) &&
-	  !(container = get_obj_in_dark (ch, arg2, ch->equip)) &&
-	  !(container = get_obj_in_list_vis (ch, arg2, ch->room->contents)))
-	container_loc = CONTAINER_LOC_NOT_FOUND;
-
-      else if (container_loc == CONTAINER_LOC_ROOM &&
-	       !(container =
-		 get_obj_in_list_vis (ch, arg2, ch->room->contents)))
+	if (!str_cmp (arg2, "ground") || !str_cmp (arg2, "room"))
 	{
-	  container_loc = CONTAINER_LOC_NOT_FOUND;
+		argument = one_argument (argument, arg2);
+		container_loc = CONTAINER_LOC_ROOM;
 	}
 
-      else if (container_loc == CONTAINER_LOC_INVENTORY &&
-	       !(container = get_obj_in_dark (ch, arg2, ch->right_hand)) &&
-	       !(container = get_obj_in_dark (ch, arg2, ch->left_hand)))
-	container_loc = CONTAINER_LOC_NOT_FOUND;
-
-      else if (container_loc == CONTAINER_LOC_WORN &&
-	       !(container = get_obj_in_dark (ch, arg2, ch->equip)))
-	container_loc = CONTAINER_LOC_NOT_FOUND;
-
-      if (container_loc == CONTAINER_LOC_NOT_FOUND)
+	else if (!str_cmp (arg2, "worn") || !str_cmp (arg2, "my"))
 	{
-	  send_to_char ("You neither have nor see such a container.\n", ch);
-	  return;
+		argument = one_argument (argument, arg2);
+		container_loc = CONTAINER_LOC_WORN;
 	}
 
-      if (GET_ITEM_TYPE (container) != ITEM_CONTAINER &&
-	  GET_ITEM_TYPE (container) != ITEM_QUIVER &&
-	  (GET_ITEM_TYPE (container) != ITEM_WEAPON &&
-	   container->o.weapon.use_skill != SKILL_SLING) &&
-	  GET_ITEM_TYPE (container) != ITEM_SHEATH &&
-	  GET_ITEM_TYPE (container) != ITEM_KEYRING)
+	else if (!strn_cmp (arg2, "inventory", 3))
 	{
-	  act ("$o isn't a container.", true, ch, container, 0, TO_CHAR);
-	  return;
-	}
-      /*
-         if ( GET_ITEM_TYPE (container) != ITEM_QUIVER
-         && ( bow = get_equip (ch, WEAR_PRIM) ) 
-         && ( bow->o.weapon.use_skill == SKILL_SHORTBOW
-         || bow->o.weapon.use_skill == SKILL_LONGBOW
-         || bow->o.weapon.use_skill == SKILL_CROSSBOW ) ) {
-         send_to_char ("You'll have to stop using the bow first.\n", ch);
-         return;                
-         }
-       */
-      if (IS_SET (container->o.container.flags, CONT_CLOSED))
-	{
-	  send_to_char ("That's closed!\n", ch);
-	  return;
+		argument = one_argument (argument, arg2);
+		container_loc = CONTAINER_LOC_INVENTORY;
 	}
 
-      if (container_loc == CONTAINER_LOC_UNKNOWN)
-	{
-	  if (container->carried_by)
-	    container_loc = CONTAINER_LOC_INVENTORY;
-	  else if (container->equiped_by)
-	    container_loc = CONTAINER_LOC_WORN;
-	  else
-	    container_loc = CONTAINER_LOC_ROOM;
-	}
-    }
-
-  if (!*arg1)
-    {
-      send_to_char ("Get what?\n", ch);
-      return;
-    }
-
-  if (!str_cmp (arg1, "all"))
-    {
-
-      for (obj = (container ? container->contains : ch->room->contents);
-	   obj && !can_obj_to_inv (obj, ch, &error, 1);
-	   obj = obj->next_content)
-	;
-
-      if (!obj)
-	{
-	  send_to_char ("There is nothing left you can take.\n", ch);
-	  return;
-	}
-
-      ch->delay_type = DEL_GET_ALL;
-      ch->delay_who = (char *) container;
-      ch->delay_info1 = container_loc;
-      ch->delay = 4;
-    }
-
-  else if (*arg2 && !str_cmp (arg2, "all"))
-    {
-      send_to_char ("You'll have to get things one at a time.\n", ch);
-      return;
-    }
-
-  if (!container)
-    {
-
-      if (!obj && isdigit (*arg1) && coldload_id)
-	{
-	  if (!(obj = get_obj_in_list_id (atoi (arg1), ch->room->contents))
-	      || obj->in_room != ch->in_room)
-	    {
-	      send_to_char ("You don't see that here.\n", ch);
-	      return;
-	    }
-	}
-
-      if (!obj && !(obj = get_obj_in_list_vis (ch, arg1, ch->room->contents)))
-	{
-	  send_to_char ("You don't see that here.\n", ch);
-	  return;
-	}
-
-      if (!can_obj_to_inv (obj, ch, &error, count))
+	if (*arg2 &&
+		container_loc == CONTAINER_LOC_UNKNOWN &&
+		(hitch = get_char_room_vis (ch, arg2)) &&
+		hitch->mob &&
+		hitch->mob->vehicle_type == VEHICLE_HITCH &&
+		(hitch_room = vtor (hitch->mob->nVirtual)))
 	{
 
-	  if (error == NO_CANT_TAKE)
-	    act ("You can't take $o.", true, ch, obj, 0, TO_CHAR);
-	  else if (error == NO_TOO_MANY)
-	    act ("You can't handle so much.", true, ch, 0, 0, TO_CHAR);
-	  else if (error == NO_TOO_HEAVY)
-	    act ("You can't carry so much weight.", true, ch, 0, 0, TO_CHAR);
-	  else if (error == NO_CANT_SEE)
-	    act ("You don't see it.", true, ch, 0, 0, TO_CHAR);
-	  else if (error == NO_HANDS_FULL)
-	    act ("Your hands are full!", true, ch, 0, 0, TO_CHAR);
-	  return;
+		for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+		{
+			AFFECTED_TYPE *af;
+			if (!(af = get_affect(tch, MAGIC_GUARD)) || af->a.spell.modifier == 1 || (CHAR_DATA *) af->a.spell.t != hitch)
+				continue;
+			sprintf(arg1, "You cannot take that from $N as #5%s#0 is guarding it.", char_short(tch));
+			act (arg1, true, ch, 0, hitch, TO_CHAR | _ACT_FORMAT);
+			return;
+		}
+
+		if (!(obj = get_obj_in_list_vis (ch, arg1, hitch_room->contents)))
+		{
+			act ("You don't see that in $N.", false, ch, 0, hitch,
+				TO_CHAR | _ACT_FORMAT);
+			return;
+		}
+
+		if (!can_obj_to_inv (obj, ch, &error, count))
+		{
+			if (error == NO_CANT_TAKE)
+			{
+				act ("You can't take $p.", true, ch, obj, 0, TO_CHAR);
+			}
+			else if (error == NO_TOO_MANY)
+			{
+				act ("You can't handle so much.", true, ch, 0, 0, TO_CHAR);
+			}
+			else if (error == NO_TOO_HEAVY)
+			{
+				act ("You can't carry so much weight.", true, ch, 0, 0, TO_CHAR);
+			}
+			else if (error == NO_CANT_SEE)
+			{
+				act ("You don't see it.", true, ch, 0, 0, TO_CHAR);
+			}
+			else if (error == NO_HANDS_FULL)
+			{
+				act ("Your hands are full!", true, ch, 0, 0, TO_CHAR);
+			}
+			else if (error == NO_GUARDED)
+			{
+				for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+				{
+					AFFECTED_TYPE *af;
+					if (!(af = get_affect(tch, MAGIC_GUARD)) || !af->a.spell.modifier || (OBJ_DATA *) af->a.spell.t != obj)
+						continue;
+					act ("You cannot take $p as $N is guarding it.", true, ch, obj, tch, TO_CHAR | _ACT_FORMAT);
+					return;
+				}
+			}
+			return;
+		}
+
+		obj_from_room (&obj, count);
+
+		act ("You take $p from $N.", false, ch, obj, hitch,
+			TO_CHAR | _ACT_FORMAT);
+		act ("$n takes $p from $N.", false, ch, obj, hitch,
+			TO_NOTVICT | _ACT_FORMAT);
+
+		char_from_room (ch);
+		char_to_room (ch, hitch->mob->nVirtual);
+
+		act ("$n reaches in and takes $p.", false, ch, obj, hitch,
+			TO_NOTVICT | _ACT_FORMAT);
+
+		char_from_room (ch);
+		char_to_room (ch, hitch->in_room);
+
+		obj_to_char (obj, ch);
+
+		return;
 	}
 
-      if ((sa = get_second_affect (ch, SA_GET_OBJ, obj)))
-	return;
+	else if (*arg2)
+	{
 
-      get (ch, obj, count);
-      return;
-    }
+		if (container_loc == CONTAINER_LOC_UNKNOWN &&
+			!(container = get_obj_in_dark (ch, arg2, ch->right_hand)) &&
+			!(container = get_obj_in_dark (ch, arg2, ch->left_hand)) &&
+			!(container = get_obj_in_dark (ch, arg2, ch->equip)) &&
+			!(container = get_obj_in_list_vis (ch, arg2, ch->room->contents)))
+			container_loc = CONTAINER_LOC_NOT_FOUND;
 
-  /* get obj from container */
+		else if (container_loc == CONTAINER_LOC_ROOM &&
+			!(container =
+			get_obj_in_list_vis (ch, arg2, ch->room->contents)))
+		{
+			container_loc = CONTAINER_LOC_NOT_FOUND;
+		}
 
-  if (!obj && !(obj = get_obj_in_dark (ch, arg1, container->contains)))
-    {
-      act ("You don't see that in $o.", true, ch, container, 0, TO_CHAR);
-      return;
-    }
+		else if (container_loc == CONTAINER_LOC_INVENTORY &&
+			!(container = get_obj_in_dark (ch, arg2, ch->right_hand)) &&
+			!(container = get_obj_in_dark (ch, arg2, ch->left_hand)))
+			container_loc = CONTAINER_LOC_NOT_FOUND;
 
-  if (!can_obj_to_inv (obj, ch, &error, count))
-    {
+		else if (container_loc == CONTAINER_LOC_WORN &&
+			!(container = get_obj_in_dark (ch, arg2, ch->equip)))
+			container_loc = CONTAINER_LOC_NOT_FOUND;
 
-      if (error == NO_CANT_TAKE)
-	act ("You cannot take $o.", true, ch, obj, 0, TO_CHAR);
-      else if (error == NO_TOO_HEAVY)
-	send_to_char ("You can't carry so much weight.\n", ch);
-      else if (error == NO_TOO_MANY)
-	send_to_char ("Your can't handle so much.\n", ch);
-      else if (error == NO_HANDS_FULL)
-	act ("Your hands are full!", true, ch, 0, 0, TO_CHAR);
-      return;
-    }
+		if (container_loc == CONTAINER_LOC_NOT_FOUND)
+		{
+			send_to_char ("You neither have nor see such a container.\n", ch);
+			return;
+		}
 
-  if (container && container != obj)
-    obj->in_obj = container;
-  if (!container->contains)
-    container->contains = obj;
+		if (GET_ITEM_TYPE (container) != ITEM_CONTAINER &&
+			GET_ITEM_TYPE (container) != ITEM_QUIVER &&
+			(GET_ITEM_TYPE (container) != ITEM_WEAPON &&
+			container->o.weapon.use_skill != SKILL_SLING) &&
+			GET_ITEM_TYPE (container) != ITEM_SHEATH &&
+			GET_ITEM_TYPE (container) != ITEM_KEYRING)
+		{
+			act ("$o isn't a container.", true, ch, container, 0, TO_CHAR);
+			return;
+		}
+		/*
+		if ( GET_ITEM_TYPE (container) != ITEM_QUIVER
+		&& ( bow = get_equip (ch, WEAR_PRIM) ) 
+		&& ( bow->o.weapon.use_skill == SKILL_SHORTBOW
+		|| bow->o.weapon.use_skill == SKILL_LONGBOW
+		|| bow->o.weapon.use_skill == SKILL_CROSSBOW ) ) {
+		send_to_char ("You'll have to stop using the bow first.\n", ch);
+		return;                
+		}
+		*/
+		if (IS_SET (container->o.container.flags, CONT_CLOSED))
+		{
+			send_to_char ("That's closed!\n", ch);
+			return;
+		}
 
-  get (ch, obj, count);
+		for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+		{
+			AFFECTED_TYPE *af;
+			if (!(af = get_affect(tch, MAGIC_GUARD)) || !af->a.spell.modifier || (OBJ_DATA *) af->a.spell.t != container)
+				continue;
+			act ("You cannot take anything out of $p as $N is guarding it.", true, ch, container, tch, TO_CHAR | _ACT_FORMAT);
+			return;
+		}
+
+		if (container_loc == CONTAINER_LOC_UNKNOWN)
+		{
+			if (container->carried_by)
+				container_loc = CONTAINER_LOC_INVENTORY;
+			else if (container->equiped_by)
+				container_loc = CONTAINER_LOC_WORN;
+			else
+				container_loc = CONTAINER_LOC_ROOM;
+		}
+	}
+
+	if (!*arg1)
+	{
+		send_to_char ("Get what?\n", ch);
+		return;
+	}
+
+	if (!str_cmp (arg1, "all"))
+	{
+
+		for (obj = (container ? container->contains : ch->room->contents);
+			obj && !can_obj_to_inv (obj, ch, &error, 1);
+			obj = obj->next_content)
+			;
+
+		if (!obj)
+		{
+			send_to_char ("There is nothing left you can take.\n", ch);
+			return;
+		}
+
+		ch->delay_type = DEL_GET_ALL;
+		ch->delay_who = (char *) container;
+		ch->delay_info1 = container_loc;
+		ch->delay = 4;
+	}
+
+	else if (*arg2 && !str_cmp (arg2, "all"))
+	{
+		send_to_char ("You'll have to get things one at a time.\n", ch);
+		return;
+	}
+
+	if (!container)
+	{
+
+		if (!obj && isdigit (*arg1) && coldload_id)
+		{
+			if (!(obj = get_obj_in_list_id (atoi (arg1), ch->room->contents))
+				|| obj->in_room != ch->in_room)
+			{
+				send_to_char ("You don't see that here.\n", ch);
+				return;
+			}
+		}
+
+		if (!obj && !(obj = get_obj_in_list_vis (ch, arg1, ch->room->contents)))
+		{
+			send_to_char ("You don't see that here.\n", ch);
+			return;
+		}
+
+		if (!can_obj_to_inv (obj, ch, &error, count))
+		{
+
+			if (error == NO_CANT_TAKE)
+				act ("You can't take $p.", true, ch, obj, 0, TO_CHAR);
+			else if (error == NO_TOO_MANY)
+				act ("You can't handle so much.", true, ch, 0, 0, TO_CHAR);
+			else if (error == NO_TOO_HEAVY)
+				act ("You can't carry so much weight.", true, ch, 0, 0, TO_CHAR);
+			else if (error == NO_CANT_SEE)
+				act ("You don't see it.", true, ch, 0, 0, TO_CHAR);
+			else if (error == NO_HANDS_FULL)
+				act ("Your hands are full!", true, ch, 0, 0, TO_CHAR);
+			else if (error == NO_GUARDED)
+			{
+				for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+				{
+					AFFECTED_TYPE *af;
+					if (!(af = get_affect(tch, MAGIC_GUARD)) || !af->a.spell.modifier || (OBJ_DATA *) af->a.spell.t != obj)
+						continue;
+					act ("You cannot take $p as $N is guarding it.", true, ch, obj, tch, TO_CHAR | _ACT_FORMAT);
+					return;
+				}
+			}
+			return;
+		}
+
+		if ((sa = get_second_affect (ch, SA_GET_OBJ, obj)))
+			return;
+
+		get (ch, obj, count);
+		return;
+	}
+
+	/* get obj from container */
+
+	if (!obj && !(obj = get_obj_in_dark (ch, arg1, container->contains)))
+	{
+		act ("You don't see that in $p.", true, ch, container, 0, 
+			TO_CHAR);
+		return;
+	}
+
+	if (!can_obj_to_inv (obj, ch, &error, count))
+	{
+
+		if (error == NO_CANT_TAKE)
+			act ("You cannot take $p.", true, ch, obj, 0, TO_CHAR);
+		else if (error == NO_TOO_HEAVY)
+			send_to_char ("You can't carry so much weight.\n", ch);
+		else if (error == NO_TOO_MANY)
+			send_to_char ("Your can't handle so much.\n", ch);
+		else if (error == NO_HANDS_FULL)
+			act ("Your hands are full!", true, ch, 0, 0, TO_CHAR);
+		else if (error == NO_GUARDED)
+		{
+			for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+			{
+				AFFECTED_TYPE *af;
+				if (!(af = get_affect(tch, MAGIC_GUARD)) || !af->a.spell.modifier || (OBJ_DATA *) af->a.spell.t != obj)
+					continue;
+				act ("You cannot take $p as $N is guarding it.", true, ch, obj, tch, TO_CHAR | _ACT_FORMAT);
+				return;
+			}
+		}
+		return;
+	}
+
+	if (container && container != obj)
+		obj->in_obj = container;
+	if (!container->contains)
+		container->contains = obj;
+
+	get (ch, obj, count);
 }
 
 void
@@ -2582,7 +2655,7 @@ do_drink (CHAR_DATA * ch, char *argument, int cmd)
 		  send_to_char("You are completely satiated.\n", ch);
 
 	  if (ch->hunger == 20 && drink->o.fluid.food)
-		  send_to_char("You are absoluletly stuffed.\n", ch);
+		  send_to_char("You are absolutely stuffed.\n", ch);
 
 /*
 		if( ch->intoxication > 0) {

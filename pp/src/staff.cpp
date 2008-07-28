@@ -2762,19 +2762,29 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	  continue;
 	}
 
-      if (af->type == MAGIC_GUARD)
-	{
-	  if (is_he_somewhere ((CHAR_DATA *) af->a.spell.t))
-	    {
-	      sprintf (buf, "#2%5d#0   Guarding %s.\n", af->type,
-		       GET_NAME ((CHAR_DATA *) af->a.spell.t));
-	      send_to_char (buf, ch);
-	    }
-	  else
-	    send_to_char ("   Guarding someone who's left the game.\n", ch);
+	  if (af->type == MAGIC_GUARD)
+	  {
+		  if (af->a.spell.modifier == 1)
+		  {
+			  sprintf (buf, "#2%5d#0   Guarding #2%s#0.\n", af->type, obj_short_desc((OBJ_DATA *) af->a.spell.t));
+			  send_to_char (buf, ch);
+		  }
+		  else
+		  {
+			  if (is_he_somewhere ((CHAR_DATA *) af->a.spell.t))
+			  {
+				  sprintf (buf, "#2%5d#0   Guarding %s.\n", af->type,
+					  GET_NAME ((CHAR_DATA *) af->a.spell.t));
+				  send_to_char (buf, ch);
+			  }
+			  else
+			  {
+				  send_to_char ("   Guarding someone who's left the game.\n", ch);
+			  }
+		  }
 
-	  continue;
-	}
+		  continue;
+	  }
 
       if (af->type >= MAGIC_CRIM_HOODED && af->type < MAGIC_CRIM_HOODED + 100)
 	{

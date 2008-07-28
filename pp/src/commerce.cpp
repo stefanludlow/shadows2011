@@ -4399,6 +4399,7 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
 
 	
 
+  bool found_keeper = false;
   if (IS_NPC (ch) && ch->shop)
     {
       keeper = ch;
@@ -4408,13 +4409,18 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
       //for (keeper = character_list; keeper; keeper = keeper->next)
 	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
-	keeper = *tch_iterator;
-	  if (IS_NPC (keeper) && keeper->shop
+		keeper = *tch_iterator;
+		if (keeper == ch)
+			continue;
+	    if (IS_NPC (keeper) && keeper->shop
 	      && keeper->shop->store_vnum == ch->in_room)
-	    break;
+		{
+			found_keeper = true;
+			break;
+		}
 	}
     }
-  if (keeper == NULL)
+  if (!found_keeper)
     {
       send_to_char ("You do not see a book of receipts here.\n", ch);
       return;

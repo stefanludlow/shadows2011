@@ -268,6 +268,16 @@ do_pitch (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+  for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+  {
+	  AFFECTED_TYPE *af;
+	  if (!(af = get_affect(tch, MAGIC_GUARD)) || af->a.spell.modifier == 0 || (OBJ_DATA *) af->a.spell.t != obj)
+		  continue;
+	  sprintf(buf, "You cannot pitch $p as #5%s#0 is guarding it.", char_short(tch));
+	  act (buf, true, ch, obj, tch, TO_CHAR | _ACT_FORMAT);
+	  return;
+  }
+
   sprintf (buf, "You begin pitching #2%s#0.", obj_short_desc (obj));
   act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 
@@ -346,6 +356,16 @@ do_dismantle (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("Only pitched tents can be dismantled.\n", ch);
       return;
     }
+
+  for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+  {
+	  AFFECTED_TYPE *af;
+	  if (!(af = get_affect(tch, MAGIC_GUARD)) || af->a.spell.modifier == 0 || (OBJ_DATA *) af->a.spell.t != obj)
+		  continue;
+	  sprintf(buf, "You cannot dismantle $p as #5%s#0 is guarding it.", char_short(tch));
+	  act (buf, true, ch, obj, tch, TO_CHAR | _ACT_FORMAT);
+	  return;
+  }
 
   if ((room = vtor (obj->o.od.value[0])))
     {

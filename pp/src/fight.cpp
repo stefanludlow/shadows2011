@@ -1577,6 +1577,14 @@ hit_char (CHAR_DATA * ch, CHAR_DATA * victim, int strike_parm)
       affect_remove (victim, get_affect (victim, AFFECT_GUARD_DIR));
     }
 
+  AFFECTED_TYPE *af;
+  if ((af = get_affect (victim, MAGIC_GUARD)) && af->a.spell.modifier == 1)
+  {
+	  act ("The attack prevents you from continuing to guard $p.", true, victim, (OBJ_DATA *) af->a.spell.t, 0, TO_CHAR | _ACT_FORMAT);
+	  act ("The attack prevents $n from continuining to guard $p.", true, victim, (OBJ_DATA *) af->a.spell.t, 0, TO_ROOM | _ACT_FORMAT);
+	  affect_remove (victim, af);
+  }
+
   /* Empty handed attack / Primary / Dual */
 
   if (!ch->primary_delay &&

@@ -458,6 +458,13 @@ load_mobile (int vnum)
 
   if (IS_SET (new_mobile->flags, FLAG_VARIABLE))
     {
+		new_mobile->str = proto->str; 
+new_mobile->dex = proto->dex; 
+new_mobile->intel = proto->intel; 
+new_mobile->aur = proto->aur; 
+new_mobile->agi = proto->agi; 
+new_mobile->con = proto->con; 
+new_mobile->wil = proto->wil; 
       randomize_mobile (new_mobile);
       new_mobile->flags &= ~FLAG_VARIABLE;
     }
