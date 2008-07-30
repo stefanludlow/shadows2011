@@ -140,5 +140,15 @@ MAX (const _value __x, const _value __y)
 // The following are defined in utility.cpp
 char* one_argument (char* argument, char* arg_first);
 std::string one_argument (std::string& argument, std::string& arg_first);
+struct ci_equal_to : std::binary_function <std::string, std::string, bool>
+  {
+  struct compare_equal 
+	  : public std::binary_function <unsigned char, unsigned char,bool>
+    {
+    bool operator() (const unsigned char& c1, const unsigned char& c2) const;
+    };  // end of compare_equal
 
+  bool operator() (const std::string & s1, const std::string & s2) const;
+  }; // end of ci_equal_to
+bool ciStringEqual (const std::string & s1, const std::string & s2);
 #endif // _rpie_utility_h

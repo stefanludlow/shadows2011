@@ -32,6 +32,7 @@ const struct command_data commands[] = {
   {":", do_emote, REST, C_SUB | C_DOA | C_BLD | C_PAR | C_DEL},
   {"accept", do_accept, REST, C_DEL | C_BLD | C_HID},
   {"accuse", do_accuse, REST, C_BLD},
+  {"aide", do_aide, FIGHT, C_BLD | C_HID},
   {"aim", do_aim, FIGHT, C_WLK | C_HID}, //| C_MNT
   {"alert", do_alert, FIGHT, C_BLD},
   {"apply", do_apply, SIT, C_WLK},
@@ -159,6 +160,7 @@ const struct command_data commands[] = {
   {"mute", do_mute, DEAD,
    C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL | C_NLG},
   {"north", do_north, FIGHT, C_HID | C_DOA | C_BLD},
+  {"name", do_name, DEAD, C_BLD | C_WLK | C_HID | C_SPL},
   {"nod", do_nod, REST, C_HID | C_SUB | C_DOA | C_BLD},
   {"notify", do_notify, DEAD, C_DEL | C_HID | C_SUB | C_BLD | C_PAR},
   {"news", do_news, DEAD,

@@ -3732,7 +3732,7 @@ perform_violence (void)
 	continue;
 
       if (ch->mount && !ch->mount->fighting)
-	set_fighting (ch->mount, ch->fighting);
+		set_fighting (ch->mount, ch->fighting);
 
       hit_char (ch, ch->fighting, 0);
 
@@ -4810,71 +4810,22 @@ sa_rescue (SECOND_AFFECT * sa)
 		  }
 	  }
 
-	  if (tch->race == lookup_race_id("Troll") || tch->race == lookup_race_id("Olog-Hai") || tch->race == lookup_race_id("Balrog"))
+	  if (still_fighting)
 	  {
-		  if (i > 7)
-		  {
-			  if (rescuee->fighting == tch && !still_fighting)
-			  {
-				  stop_fighting(rescuee);
-				  rescuee->fighting = NULL;
-				  send_to_char("#6You get pushed out of the melee as you are rescued.#0\n", rescuee);
-			  }
-			  else
-			  {
-				  rescuee->fighting = still_fighting_char;
-				  act("You shift your attention to #5$N#0 now that you are free.", false, rescuee, 0, rescuee->fighting, TO_CHAR);
-				  act("$n shifts $s attention to #5you#0 now that $e is free.", false, rescuee, 0, rescuee->fighting, TO_VICT);
-				  act("$n shifts $s attention to #5$N#0 now that $e is free.", false, rescuee, 0, rescuee->fighting, TO_NOTVICT);
-			  }
-
-		  }
+		  act("You shift your attention to #5$N#0 now that you are free.", false, rescuee, 0, rescuee->fighting, TO_CHAR);
+		  act("$n shifts $s attention to #5you#0 now that $e is free.", false, rescuee, 0, rescuee->fighting, TO_VICT);
+		  act("$n shifts $s attention to #5$N#0 now that $e is free.", false, rescuee, 0, rescuee->fighting, TO_NOTVICT);
+		  rescuee->fighting = still_fighting_char;
 	  }
-	  else if (tch->race == lookup_race_id("Fallohide Hobbit") || tch->race == lookup_race_id("Harfoot Hobbit") || tch->race == lookup_race_id("Stoor Hobbit") || tch->race == lookup_race_id("Dwarf") || tch->race == lookup_race_id("Snaga") || tch->race == lookup_race_id("Wolf") || tch->race == lookup_race_id("Boar") || tch->race == lookup_race_id("Deer"))
+	  else
 	  {
-		  if (i > 2)
-		  {
-			  if (rescuee->fighting == tch && !still_fighting)
-			  {
-				  stop_fighting(rescuee);
-				  rescuee->fighting = NULL;
-				  send_to_char("#6You get pushed out of the melee as you are rescued.#0\n", rescuee);
-			  }
-			  else
-			  {
-				  rescuee->fighting = still_fighting_char;
-				  act("You shift your attention to #5$N#0 now that you are free.", false, rescuee, 0, rescuee->fighting, TO_CHAR);
-				  act("$n shifts $s attention to #5you#0 now that $e is free.", false, rescuee, 0, rescuee->fighting, TO_VICT);
-				  act("$n shifts $s attention to #5$N#0 now that $e is free.", false, rescuee, 0, rescuee->fighting, TO_NOTVICT);
-			  }
-		  }
+		if (!has_combat_space(tch))
+		{
+			stop_fighting(rescuee);
+			rescuee->fighting = NULL;
+			send_to_char("#6You get pushed out of the melee as you are rescued.#0\n", rescuee);
+		}
 	  }
-	  else if (i > 3)
-	  {
-		  if (rescuee->fighting == tch)
-		  {
-			  if (rescuee->fighting == tch && !still_fighting)
-			  {
-				  stop_fighting(rescuee);
-				  rescuee->fighting = NULL;
-				  send_to_char("#6You get pushed out of the melee as you are rescued.#0", rescuee);
-			  }
-			  else
-			  {
-				  rescuee->fighting = still_fighting_char;
-				  act("You shift your attention to #5$N#0 now that you are free.", false, rescuee, 0, rescuee->fighting, TO_CHAR);
-				  act("$n shifts $s attention to #5you#0 now that $e is free.", false, rescuee, 0, rescuee->fighting, TO_VICT);
-				  act("$n shifts $s attention to #5$N#0 now that $e is free.", false, rescuee, 0, rescuee->fighting, TO_NOTVICT);
-			  }
-		  }
-	  }
-
-/*		if (tch->fighting)
-	{
-	  stop_fighting (tch);
-	  if (rescuee->fighting)
-	    stop_fighting (rescuee);
-		} */
       set_fighting (tch, sa->ch);
 
 	}
@@ -4972,222 +4923,157 @@ rescue_attempt (CHAR_DATA * ch, CHAR_DATA * friendPtr)
 void
 do_rescue (CHAR_DATA * ch, char *argument, int cmd)
 {
-  int result;
-  CHAR_DATA *friendPtr;
-  CHAR_DATA *tch;
-  SECOND_AFFECT *sa;
-  char buf[MAX_STRING_LENGTH];
+	int result;
+	CHAR_DATA *friendPtr;
+	CHAR_DATA *tch;
+	SECOND_AFFECT *sa;
+	char buf[MAX_STRING_LENGTH];
 
-  argument = one_argument (argument, buf);
+	argument = one_argument (argument, buf);
 
-  sa = get_second_affect (ch, SA_RESCUE, NULL);
+	sa = get_second_affect (ch, SA_RESCUE, NULL);
 
-  if (!*buf)
-    {
-
-      if (sa)
+	if (!*buf)
 	{
-	  send_to_char ("You stop trying to rescue.\n", ch);
-	  remove_second_affect (sa);
-	  return;
+
+		if (sa)
+		{
+			send_to_char ("You stop trying to rescue.\n", ch);
+			remove_second_affect (sa);
+			return;
+		}
+
+		send_to_char ("Rescue whom?\n", ch);
+		return;
 	}
 
-      send_to_char ("Rescue whom?\n", ch);
-      return;
-    }
-
-  if (!(friendPtr = get_char_room_vis (ch, buf)))
-    {
-      send_to_char ("You don't see them here.\n", ch);
-      return;
-    }
-
-  if (friendPtr == ch)
-    {
-      send_to_char ("Rescue yourself?\n", ch);
-      return;
-    }
-
-  if (friendPtr == ch->fighting)
-    {
-      send_to_char ("You can't rescue your opponent!\n", ch);
-      return;
-    }
-
-  int i = 0;
-  for (tch = ch->room->people; tch; tch = tch->next_in_room)
-  {
-	  if (tch->fighting == ch)
-		  i++;
-
-	  if (ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Olog-Hai") || ch->race == lookup_race_id("Balrog"))
-	  {
-		  if (i > 7)
-		  {
-			  send_to_char("Forget about rescuing someone else! You have too many people fighting you already!", ch);
-			  return;
-		  }
-	  }
-	  else if (ch->race == lookup_race_id("Fallohide Hobbit") || ch->race == lookup_race_id("Harfoot Hobbit") || ch->race == lookup_race_id("Stoor Hobbit") || ch->race == lookup_race_id("Dwarf") || ch->race == lookup_race_id("Snaga") || ch->race == lookup_race_id("Wolf") || ch->race == lookup_race_id("Boar") || ch->race == lookup_race_id("Deer"))
-	  {
-		  if (i > 2)
-		  {
-			  send_to_char("Forget about rescuing someone else! You have too many people fighting you already!", ch);
-			  return;
-		  }
-	  }
-	  else if (i > 3)
-	  {
-		  send_to_char("Forget about rescuing someone else! You have too many people fighting you already!", ch);
-		  return;
-	  }
-  }
-
-  tch = NULL;
-  for (tch = ch->room->people; tch; tch = tch->next_in_room)
-    if (tch->fighting == friendPtr)
-      break;
-
-  if (!tch)
-    {
-      act ("$N doesn't need rescuing.", false, ch, 0, friendPtr, TO_CHAR);
-      return;
-    }
-
-  if (IS_SET(tch->act, ACT_FLYING))
-  {
-    act ("You cannot help $N.", false, ch, 0, friendPtr, TO_CHAR);
-    return;
-  }
-
-  if (sa)
-    {
-
-      if ((CHAR_DATA *) sa->obj == friendPtr)
+	if (!(friendPtr = get_char_room_vis (ch, buf)))
 	{
-	  act ("You're still trying your best to rescue $N.",
-	       false, ch, 0, friendPtr, TO_CHAR);
-	  return;
+		send_to_char ("You don't see them here.\n", ch);
+		return;
 	}
 
-      sa->obj = (OBJ_DATA *) friendPtr;
-      act ("You will try to rescue $N now.", false, ch, 0, friendPtr,
-	   TO_CHAR);
-      return;
-    }
+	if (friendPtr == ch)
+	{
+		send_to_char ("Rescue yourself?\n", ch);
+		return;
+	}
 
-  result = rescue_attempt (ch, friendPtr);
+	if (friendPtr == ch->fighting)
+	{
+		send_to_char ("You can't rescue your opponent!\n", ch);
+		return;
+	}
 
-  if (result == 0)
-    {
-      act ("You try to draw $N's attention.", false, ch, 0, tch, TO_CHAR);
-      act ("$N tries to draw your attention.", false, tch, 0, ch, TO_CHAR);
-      act ("$n tries to draw $N's attention.", false, ch, 0, tch, TO_NOTVICT);
+	if (!has_combat_space(ch))
+	{
+		send_to_char("Forget about rescuing someone else! You have too many people fighting you already!", ch);
+		return;
+	}
 
-      add_second_affect (SA_RESCUE, 3, ch, (OBJ_DATA *) friendPtr, NULL, 0);
-    }
+	tch = NULL;
+	for (tch = ch->room->people; tch; tch = tch->next_in_room)
+		if (tch->fighting == friendPtr)
+			break;
 
-  else if (result == 3)
-    {
-      act ("You draw $N's attention.", false, ch, 0, tch, TO_CHAR);
-      act ("$N draws your attention.", false, tch, 0, ch, TO_CHAR);
-      act ("$N draws $n's attention.", false, tch, 0, ch, TO_NOTVICT);
+	if (!tch)
+	{
+		act ("$N doesn't need rescuing.", false, ch, 0, friendPtr, TO_CHAR);
+		return;
+	}
 
-      if (GET_POS (ch) != POSITION_DEAD && GET_POS (tch) != POSITION_DEAD)
-	criminalize (ch, tch, ch->room->zone, CRIME_KILL);
+	if (IS_SET(tch->act, ACT_FLYING))
+	{
+		act ("You cannot help $N.", false, ch, 0, friendPtr, TO_CHAR);
+		return;
+	}
 
-      if (!tch->fighting)
-	set_fighting (tch, ch);
-      else
-	tch->fighting = ch;
+	if (sa)
+	{
 
-	  bool still_fighting = false;
-	  CHAR_DATA *still_fighting_char = NULL;
-	  i = 0;
-	  for (CHAR_DATA *pNumberCheck = ch->room->people; pNumberCheck; pNumberCheck = pNumberCheck->next_in_room)
-	  {
-		  if (pNumberCheck->fighting == tch && pNumberCheck != friendPtr)
-			  i++;
+		if ((CHAR_DATA *) sa->obj == friendPtr)
+		{
+			act ("You're still trying your best to rescue $N.",
+				false, ch, 0, friendPtr, TO_CHAR);
+			return;
+		}
 
-		  if (pNumberCheck->fighting == friendPtr && pNumberCheck != tch)
-		  {
-			  still_fighting_char = pNumberCheck;
-			  still_fighting = true;
-		  }
-	  }
+		sa->obj = (OBJ_DATA *) friendPtr;
+		act ("You will try to rescue $N now.", false, ch, 0, friendPtr,
+			TO_CHAR);
+		return;
+	}
 
-	  if (tch->race == lookup_race_id("Troll") || tch->race == lookup_race_id("Olog-Hai") || tch->race == lookup_race_id("Balrog"))
-	  {
-		  if (i > 7)
-		  {
-			  if (friendPtr->fighting == tch && !still_fighting)
-			  {
-				  stop_fighting(friendPtr);
-				  friendPtr->fighting = NULL;
-				  send_to_char("#6You get pushed out of the melee as you are rescued.#0\n", friendPtr);
-			  }
-			  else
-			  {
-				  friendPtr->fighting = still_fighting_char;
-				  act("You shift your attention to #5$N#0 now that you are free.", false, friendPtr, 0, friendPtr->fighting, TO_CHAR);
-				  act("$n shifts $s attention to #5you#0 now that $e is free.", false, friendPtr, 0, friendPtr->fighting, TO_VICT);
-				  act("$n shifts $s attention to #5$N#0 now that $e is free.", false, friendPtr, 0, friendPtr->fighting, TO_NOTVICT);
-			  }
+	result = rescue_attempt (ch, friendPtr);
 
-		  }
-	  }
-	  else if (tch->race == lookup_race_id("Fallohide Hobbit") || tch->race == lookup_race_id("Harfoot Hobbit") || tch->race == lookup_race_id("Stoor Hobbit") || tch->race == lookup_race_id("Dwarf") || tch->race == lookup_race_id("Snaga") || tch->race == lookup_race_id("Wolf") || tch->race == lookup_race_id("Boar") || tch->race == lookup_race_id("Deer"))
-	  {
-		  if (i > 2)
-		  {
-			  if (friendPtr->fighting == tch && !still_fighting)
-			  {
-				  stop_fighting(friendPtr);
-				  friendPtr->fighting = NULL;
-				  send_to_char("#6You get pushed out of the melee as you are rescued.#0\n", friendPtr);
-			  }
-			  else
-			  {
-				  friendPtr->fighting = still_fighting_char;
-				  act("You shift your attention to #5$N#0 now that you are free.", false, friendPtr, 0, friendPtr->fighting, TO_CHAR);
-				  act("$n shifts $s attention to #5you#0 now that $e is free.", false, friendPtr, 0, friendPtr->fighting, TO_VICT);
-				  act("$n shifts $s attention to #5$N#0 now that $e is free.", false, friendPtr, 0, friendPtr->fighting, TO_NOTVICT);
-			  }
-		  }
-	  }
-	  else if (i > 3)
-	  {
-		  if (friendPtr->fighting == tch)
-		  {
-			  if (friendPtr->fighting == tch && !still_fighting)
-			  {
-				  stop_fighting(friendPtr);
-				  friendPtr->fighting = NULL;
-				  send_to_char("#6You get pushed out of the melee as you are rescued.#0\n", friendPtr);
-			  }
-			  else
-			  {
-				  friendPtr->fighting = still_fighting_char;
-				  act("You shift your attention to #5$N#0 now that you are free.", false, friendPtr, 0, friendPtr->fighting, TO_CHAR);
-				  act("$n shifts $s attention to #5you#0 now that $e is free.", false, friendPtr, 0, friendPtr->fighting, TO_VICT);
-				  act("$n shifts $s attention to #5$N#0 now that $e is free.", false, friendPtr, 0, friendPtr->fighting, TO_NOTVICT);
-			  }
-		  }
-	  }
-    }
+	if (result == 0)
+	{
+		act ("You try to draw $N's attention.", false, ch, 0, tch, TO_CHAR);
+		act ("$N tries to draw your attention.", false, tch, 0, ch, TO_CHAR);
+		act ("$n tries to draw $N's attention.", false, ch, 0, tch, TO_NOTVICT);
 
-  else if (result == 1)
-    {
-      act ("You will try to rescue $N when you can.",
-	   false, ch, 0, friendPtr, TO_CHAR);
+		add_second_affect (SA_RESCUE, 3, ch, (OBJ_DATA *) friendPtr, NULL, 0);
+	}
 
-      add_second_affect (SA_RESCUE, 1, ch, (OBJ_DATA *) friendPtr, NULL, 0);
-    }
+	else if (result == 3)
+	{
+		act ("You draw $N's attention.", false, ch, 0, tch, TO_CHAR);
+		act ("$N draws your attention.", false, tch, 0, ch, TO_CHAR);
+		act ("$N draws $n's attention.", false, tch, 0, ch, TO_NOTVICT);
 
-  else
-    {				/* better be result == 2, shouldn't be possible */
-      printf ("Rescue attempt, result = 2\n");
-    }
+		if (GET_POS (ch) != POSITION_DEAD && GET_POS (tch) != POSITION_DEAD)
+			criminalize (ch, tch, ch->room->zone, CRIME_KILL);
+
+		if (!tch->fighting)
+			set_fighting (tch, ch);
+		else
+			tch->fighting = ch;
+
+		bool still_fighting = false;
+		CHAR_DATA *still_fighting_char = NULL;
+		int i = 0;
+		for (CHAR_DATA *pNumberCheck = ch->room->people; pNumberCheck; pNumberCheck = pNumberCheck->next_in_room)
+		{
+			if (pNumberCheck->fighting == tch && pNumberCheck != friendPtr)
+				i++;
+
+			if (pNumberCheck->fighting == friendPtr && pNumberCheck != tch)
+			{
+				still_fighting_char = pNumberCheck;
+				still_fighting = true;
+			}
+		}
+
+		if (still_fighting)
+		{
+			act("You shift your attention to #5$N#0 now that you are free.", false, friendPtr, 0, friendPtr->fighting, TO_CHAR);
+			act("$n shifts $s attention to #5you#0 now that $e is free.", false, friendPtr, 0, friendPtr->fighting, TO_VICT);
+			act("$n shifts $s attention to #5$N#0 now that $e is free.", false, friendPtr, 0, friendPtr->fighting, TO_NOTVICT);
+			friendPtr->fighting = still_fighting_char;
+		}
+		else
+		{
+			if (!has_combat_space(tch))
+			{
+				stop_fighting(friendPtr);
+				friendPtr->fighting = NULL;
+				send_to_char("#6You get pushed out of the melee as you are rescued.#0\n", friendPtr);
+			}
+		}
+	}
+
+	else if (result == 1)
+	{
+		act ("You will try to rescue $N when you can.",
+			false, ch, 0, friendPtr, TO_CHAR);
+
+		add_second_affect (SA_RESCUE, 1, ch, (OBJ_DATA *) friendPtr, NULL, 0);
+	}
+
+	else
+	{				/* better be result == 2, shouldn't be possible */
+		printf ("Rescue attempt, result = 2\n");
+	}
 }
 
 void
@@ -5370,4 +5256,209 @@ delayed_study (CHAR_DATA * ch)
 
   if (ch->mob && is_area_enforcer (ch))
     enforcer (ch, ch->delay_ch, 1, 1);
+}
+
+void
+do_aide (CHAR_DATA *ch, char * argument, int cmd)
+{
+	if (!ch)
+		return;
+
+	CHAR_DATA * buddy = NULL;
+	OBJ_DATA * obj = NULL;
+	std::string strArgument = argument, ThisArg;
+	strArgument = one_argument(strArgument, ThisArg);
+
+	if (IS_SWIMMING (ch))
+    {
+      send_to_char ("You can't do that while swimming!\n", ch);
+      return;
+    }
+
+  if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch))
+    {
+      send_to_char ("You cannot do this in an OOC area.\n", ch);
+      return;
+    }
+
+  if (is_room_affected (ch->room->affects, MAGIC_ROOM_CALM))
+    {
+      act ("Try as you might, you simply cannot muster the will to break "
+	   "the peace that pervades the area.", false, ch, 0, 0, TO_CHAR);
+      return;
+    }
+
+  if (IS_SET (ch->flags, FLAG_PACIFIST))
+    {
+      send_to_char ("Remove your pacifist flag, first...\n", ch);
+      return;
+    }
+
+  if ((obj = get_equip (ch, WEAR_BOTH)))
+    {
+      if (obj->o.weapon.use_skill == SKILL_LONGBOW ||
+	  obj->o.weapon.use_skill == SKILL_SHORTBOW ||
+	  obj->o.weapon.use_skill == SKILL_CROSSBOW ||
+	  obj->o.weapon.use_skill == SKILL_SLING ||
+	  obj->o.weapon.use_skill == SKILL_THROWN)
+	{
+	  send_to_char ("You can't use that in melee combat!\n", ch);
+	  return;
+	}
+    }
+
+  if (get_affect (ch, MAGIC_AFFECT_PARALYSIS))
+    {
+      send_to_char ("You are paralyzed and unable to fight!\n\r", ch);
+      return;
+    }
+
+  if (get_affect (ch, MAGIC_AFFECT_FEAR))
+    {
+      send_to_char ("You are too afraid to fight!\n\r", ch);
+      return;
+    }
+
+  if (get_affect (ch, AFFECT_GROUP_RETREAT))
+    {
+      send_to_char ("You stop trying to retreat.\n", ch);
+      remove_affect_type (ch, AFFECT_GROUP_RETREAT);
+    }
+
+  if (IS_SUBDUER (ch))
+    {
+      act ("You can't attack while you have $N subdued.",
+	   false, ch, 0, ch->subdue, TO_CHAR);
+      return;
+    }
+
+  if (IS_SET (ch->flags, FLAG_FLEE))
+	{
+	  send_to_char ("You stop trying to flee.\n\r", ch);
+	  ch->flags &= ~FLAG_FLEE;
+	  return;
+	}
+
+	if (ThisArg.empty())
+	{
+		if (is_with_group(ch))
+		{
+			buddy = ch->following;
+		}
+		else
+		{
+			send_to_char("Who would you like to assist?\n", ch);
+			return;
+		}
+	}
+	
+	if (!buddy)
+		buddy = get_char_room_vis(ch, (char *) ThisArg.c_str());
+
+	if (!buddy)
+	{
+		send_to_char("You do not see that person here to assist.\n", ch);
+		return;
+	}
+
+	if (!buddy->fighting)
+	{
+		send_to_char("They aren't fighting anybody.\n", ch);
+		return;
+	}
+
+	if (are_grouped(ch, buddy->fighting))
+	{
+		send_to_char ("They're fighting one of your group mates!\n", ch);
+		return;
+	}
+
+	if (!has_combat_space(ch))
+	{
+		send_to_char ("You're fighting too many people to begin fighting any more!\n", ch);
+		return;
+	}
+
+	if (!has_combat_space(buddy->fighting))
+	{
+		send_to_char ("Their target is fighting too many people to begin fighting any more.\n", ch);
+		return;
+	}
+
+	if (ch->fighting)
+	{
+
+	  if (ch->fighting->fighting == ch)
+	    {
+
+	      int agi_diff = GET_AGI (ch) - GET_AGI (ch->fighting);
+
+	      if (agi_diff > number (-10, 10) && (number (0, 19) != 0))
+		{
+
+		  act ("You fail to shift your attention away from $N.",
+		       false, ch, 0, ch->fighting,
+		       TO_CHAR | _ACT_FORMAT | _ACT_COMBAT);
+		  act ("$N fails to shift their attention away from you.",
+		       false, ch->fighting, 0, ch,
+		       TO_CHAR | _ACT_FORMAT | _ACT_COMBAT);
+		  act ("$N fails to shift their attention away from $n.",
+		       false, ch->fighting, 0, ch,
+		       TO_NOTVICT | _ACT_FORMAT | _ACT_COMBAT);
+
+		  return;
+		}
+	    }
+
+	  act ("You stop fighting $N.", false, ch, 0, ch->fighting, TO_CHAR);
+	  act ("You ready yourself for battle with $N.",
+	       false, ch, 0, buddy->fighting, TO_CHAR);
+	  stop_fighting (ch);
+
+	}
+
+	std::string output;
+	output += "You move to assist #5" + MAKE_STRING(char_short(buddy)) + "#0, who is fighting #5" + MAKE_STRING(char_short(buddy->fighting)) + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	output = "#5";
+	output += char_short(ch) + MAKE_STRING("#0 moves to assist #5you#0, engaging #5") + char_short(buddy->fighting) + MAKE_STRING("#0.\n");
+	send_to_char(output.c_str(), buddy);
+	output = "#5";
+	output += char_short(ch) + MAKE_STRING("#0 moves to assist #5") + char_short(buddy) + MAKE_STRING("#0, engaging #5you!\n#0");
+	send_to_char(output.c_str(), buddy->fighting);
+
+	set_fighting(ch, buddy->fighting);
+}
+
+bool
+has_combat_space (CHAR_DATA *ch)
+{
+	if (!ch)
+		return 0;
+	int i = 0;
+	for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+	{
+		if (tch->fighting == ch)
+			i++;
+
+		if (ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Olog-Hai") || ch->race == lookup_race_id("Balrog"))
+		{
+			if (i > 7)
+			{
+				return 0;
+			}
+		}
+		else if (ch->race == lookup_race_id("Fallohide Hobbit") || ch->race == lookup_race_id("Harfoot Hobbit") || ch->race == lookup_race_id("Stoor Hobbit") || ch->race == lookup_race_id("Dwarf") || ch->race == lookup_race_id("Snaga") || ch->race == lookup_race_id("Wolf") || ch->race == lookup_race_id("Boar") || ch->race == lookup_race_id("Deer"))
+		{
+			if (i > 2)
+			{
+				return 0;
+			}
+		}
+		else if (i > 3)
+		{
+			return 0;
+		}
+	}
+	return 1;
 }

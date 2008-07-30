@@ -3247,6 +3247,8 @@ do_castout (CHAR_DATA * ch, char *argument, int cmd)
 	  send_to_char
 	    ("You are not a leader in that clan.  You can't cast out anybody.\n",
 	     ch);
+	  if (load_tag)
+		  unload_pc(victim);
 	  return;
 	}
 
@@ -3254,6 +3256,8 @@ do_castout (CHAR_DATA * ch, char *argument, int cmd)
       if (!clan)
 	{
 	  send_to_char ("No such clan, I am afraid.\n", ch);
+	  if (load_tag)
+		  unload_pc(victim);
 	  return;
 	}
       strcpy (clan_name, clan->name);
@@ -3268,6 +3272,8 @@ do_castout (CHAR_DATA * ch, char *argument, int cmd)
 	  send_to_char
 	    ("You are not a leader in that clan.  You cannot cast anyone out.\n",
 	     ch);
+	  if (load_tag)
+		  unload_pc(victim);
 	  return;
 	}
 
@@ -3275,6 +3281,8 @@ do_castout (CHAR_DATA * ch, char *argument, int cmd)
       if (!clan)
 	{
 	  send_to_char ("No such clan, I am afraid.\n", ch);
+	  if (load_tag)
+		  unload_pc(victim);
 	  return;
 	}
       strcpy (clan_name, clan->name);
@@ -3283,12 +3291,16 @@ do_castout (CHAR_DATA * ch, char *argument, int cmd)
   else
     {
       send_to_char ("You are not a member of such a clan.\n", ch);
+	  if (load_tag)
+		  unload_pc(victim);
       return;
     }
 
   if (!get_clan (victim, clan_name, &clan_flags2))
     {
       act ("$N is not part of your clan.\n", false, ch, 0, victim, TO_CHAR);
+	  if (load_tag)
+		  unload_pc(victim);
       return;
     }
 
@@ -3296,6 +3308,8 @@ do_castout (CHAR_DATA * ch, char *argument, int cmd)
     {
       act ("You are not of sufficient rank to cast $N from the clan.\n",
 	   false, ch, 0, victim, TO_CHAR | _ACT_FORMAT);
+	  if (load_tag)
+		  unload_pc(victim);
       return;
     }
 

@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
+#include <functional>
 
 #include "trigram.h"
 #include "structs.h"
@@ -3674,3 +3675,28 @@ while (*argument)
 
   return (argument);
 }
+
+bool ci_equal_to::compare_equal::operator() (const unsigned char& c1, const unsigned char& c2) const
+      { return tolower (c1) == tolower (c2); }
+
+bool ci_equal_to::operator() (const std::string & s1, const std::string & s2) const
+    {
+
+		std::pair <std::string::const_iterator,
+			std::string::const_iterator> result =
+			std::mismatch (s1.begin (), s1.end (),   // source range
+                s2.begin (),              // comparison start
+                compare_equal ());  // comparison
+
+    // match if both at end
+    return result.first == s1.end () &&
+           result.second == s2.end ();
+
+    }
+
+// compare strings for equality using the binary function above
+// returns true is s1 == s2
+bool ciStringEqual (const std::string & s1, const std::string & s2)
+  {
+  return ci_equal_to () (s1, s2);
+  }  // end of ciStringEqual

@@ -4670,12 +4670,14 @@ read_pc_message (CHAR_DATA * ch, char *name, char *argument)
   if (!atoi (buf))
     {
       send_to_char ("Which message?\n", ch);
+	  unload_pc (who);
       return 1;
     }
 
   if (!(message = load_message (name, 7, atoi (buf))))
     {
       send_to_char ("No such message.\n", ch);
+	  unload_pc (who);
       return 1;
     }
 
@@ -8221,11 +8223,30 @@ do_who (CHAR_DATA * ch, char *argument, int cmd)
   int mortals = 0;
   int immortals = 0;
   int guests = 0;
+  int mordorians = 0, gondorians = 0, northmen = 0, orks = 0, flags = 0;
   char tmp[MAX_STRING_LENGTH] = { '\0' };
   char buf[MAX_STRING_LENGTH] = { '\0' };
   DESCRIPTOR_DATA *d = NULL;
+  int sphere = 0; // 0 = mordor, 1 = gondor, 2 = northmen, 3 = orks
+
+  char *clanstring;
+  clanstring = ch->clans;
+  while (get_next_clan (&clanstring, buf, &flags))
+  {
+	  if (!strn_cmp (buf, "mt_citizens", 11))
+		  sphere = 1;
+	  if (!strn_cmp (buf, "outpost_citizens", 16))
+		  sphere = 2;
+	  if (!strn_cmp (buf, "moria_orks", 10))
+		  sphere = 3;
+  }
+
+  buf[0] = '\0';
 
   *s_buf = '\0';
+
+  if (IS_SET(ch->flags, FLAG_GUEST))
+	  sphere = 4;
 
   if (IS_MORTAL (ch))
     strcpy (tmp, "\n#2Available Staff:#0\n\n");
@@ -8248,7 +8269,22 @@ do_who (CHAR_DATA * ch, char *argument, int cmd)
 	      !d->character->pc->level &&
 	      d->character->pc->create_state == 2
 	      && !IS_SET (d->character->flags, FLAG_GUEST))
+	  {
+		  clanstring = d->character->clans;
+		  while (get_next_clan (&clanstring, buf, &flags))
+		  {
+			  if (!strn_cmp (buf, "mt_citizens", 11))
+				  gondorians++;
+			  else if (!strn_cmp (buf, "outpost_citizens", 
+16))
+				  northmen++;
+			  else if (!strn_cmp (buf, "moria_orks", 10))
+				  orks++;
+			  else if (!strn_cmp (buf, "mordor_char", 11))
+				  mordorians++;
+		  }
 	    mortals++;
+	  }
 	  else if (IS_SET (d->character->flags, FLAG_GUEST))
 	    guests++;
 	}
@@ -8276,6 +8312,24 @@ do_who (CHAR_DATA * ch, char *argument, int cmd)
   else
     sprintf (s_buf, "\nThere are currently #2%d#0 players in Middle-earth.\n",
 	     mortals);
+
+  switch (sphere)
+  {
+  case 0:
+	  sprintf(s_buf + strlen(s_buf), "In your sphere of Mordor, there are currently #2%d#0 players.\n", mordorians);
+	  break;
+  case 1:
+	  sprintf(s_buf + strlen(s_buf), "In your sphere of Gondor, there are currently #2%d#0 players.\n", gondorians);
+	  break;
+  case 2:
+	  sprintf(s_buf + strlen(s_buf), "In your sphere of Moria, there are currently #2%d#0 players.\n", northmen);
+	  break;
+  case 3:
+	  sprintf(s_buf + strlen(s_buf), "In your sphere of Orcs, there are currently #2%d#0 players.\n", orks);
+	  break;
+  default:
+	  break;
+  }
 
   if (guests)
     sprintf (s_buf + strlen (s_buf),
@@ -9595,6 +9649,7 @@ erase_pc_board (CHAR_DATA * ch, char *name, char *argument)
 
   if (who->pc->level > ch->pc->level)
     {
+		unload_pc(who);
       return 0;
     }
 
@@ -10181,37 +10236,40 @@ do_jread (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   if (!IS_MORTAL (ch))
-    {
-      if (!*argument)
-	who = ch;
-      else if (*argument && isdigit (*argument))
-	who = ch;
-      else
-	{
-	  argument = one_argument (argument, name);
-	  *name = toupper (*name);
-	  if (!(who = load_pc (name)))
-	    {
-	      send_to_char ("No such PC, I'm afraid.\n", ch);
-	      return;
-	    }
-	}
-      if (!read_journal_message (who, ch, argument))
-	{
-	  send_to_char ("There seems to be a problem with the journal.\n",
-			ch);
-	  return;
-	}
-    }
+  {
+	  if (!*argument)
+		  who = ch;
+	  else if (*argument && isdigit (*argument))
+		  who = ch;
+	  else
+	  {
+		  argument = one_argument (argument, name);
+		  *name = toupper (*name);
+		  if (!(who = load_pc (name)))
+		  {
+			  send_to_char ("No such PC, I'm afraid.\n", ch);
+			  return;
+		  }
+	  }
+	  if (!read_journal_message (who, ch, argument))
+	  {
+		  send_to_char ("There seems to be a problem with the journal.\n",
+			  ch);
+		  unload_pc(who);
+		  return;
+	  }
+  }
   else
-    {
-      if (!read_journal_message (ch, NULL, argument))
-	{
-	  send_to_char ("There seems to be a problem with the journal.\n",
-			ch);
-	  return;
-	}
-    }
+  {
+	  if (!read_journal_message (ch, NULL, argument))
+	  {
+		  send_to_char ("There seems to be a problem with the journal.\n",
+			  ch);
+		  unload_pc(who);
+		  return;
+	  }
+  }
+  unload_pc(who);
 }
 
 void
@@ -10769,16 +10827,16 @@ do_notes (CHAR_DATA * ch, char *argument, int cmd)
   *name = toupper (*name);
 
   if (!(who = load_pc (name)))
-    {
-      messages = get_mysql_board_listing (ch, 1, name);
-      if (!messages)
-	{
-	  send_to_char ("No such PC or vboard.\n", ch);
-	  return;
-	}
-      else
-	return;
-    }
+  {
+	  messages = get_mysql_board_listing (ch, 1, name);
+	  if (!messages)
+	  {
+		  send_to_char ("No such PC or vboard.\n", ch);
+		  return;
+	  }
+	  else
+		  return;
+  }
 
   unload_pc (who);
 
@@ -10948,92 +11006,92 @@ do_notify (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   if (!(tch = get_pc (buf)))
-    {
-      if (!(tch = load_pc (buf)))
-	{
-	  mysql_safe_query
-	    ("SELECT name FROM %s.pfiles WHERE keywords LIKE \'%%%s%%\'",
-	     (engine.get_config ("player_db")).c_str (), buf);
-	  result = mysql_store_result (database);
-	  if (!result || mysql_num_rows (result) <= 0)
-	    {
-	      mysql_safe_query
-		("SELECT name FROM %s.pfiles WHERE sdesc LIKE \'%%%s%%\'",
-		 (engine.get_config ("player_db")).c_str (), buf);
-	      result = mysql_store_result (database);
-	    }
-	  if (result && mysql_num_rows (result) > 0
-	      && mysql_num_rows (result) <= 50)
-	    {
-	      while ((row = mysql_fetch_row (result)))
-		{
-		  if ((tch = get_pc (row[0])))
-		    {
-		      sprintf (buf,
-			       "\a#3[%s is online.  Use NOTIFY to reply in kind.]#0\n",
-			       char_short (ch));
-		      buf[4] = toupper (buf[4]);
-		      send_to_char (buf, tch);
-		      if (!IS_SET (tch->plr_flags, MUTE_BEEPS))
-			send_to_char ("\a", tch);
-		      if ((af = get_affect (tch, MAGIC_NOTIFY)))
-			{
-			  af->a.spell.t = (long int) ch;
-			  af->a.spell.duration = 2;
+  {
+	  if (!(tch = load_pc (buf)))
+	  {
+		  mysql_safe_query
+			  ("SELECT name FROM %s.pfiles WHERE keywords LIKE \'%%%s%%\'",
+			  (engine.get_config ("player_db")).c_str (), buf);
+		  result = mysql_store_result (database);
+		  if (!result || mysql_num_rows (result) <= 0)
+		  {
+			  mysql_safe_query
+				  ("SELECT name FROM %s.pfiles WHERE sdesc LIKE \'%%%s%%\'",
+				  (engine.get_config ("player_db")).c_str (), buf);
+			  result = mysql_store_result (database);
+		  }
+		  if (result && mysql_num_rows (result) > 0
+			  && mysql_num_rows (result) <= 50)
+		  {
+			  while ((row = mysql_fetch_row (result)))
+			  {
+				  if ((tch = get_pc (row[0])))
+				  {
+					  sprintf (buf,
+						  "\a#3[%s is online.  Use NOTIFY to reply in kind.]#0\n",
+						  char_short (ch));
+					  buf[4] = toupper (buf[4]);
+					  send_to_char (buf, tch);
+					  if (!IS_SET (tch->plr_flags, MUTE_BEEPS))
+						  send_to_char ("\a", tch);
+					  if ((af = get_affect (tch, MAGIC_NOTIFY)))
+					  {
+						  af->a.spell.t = (long int) ch;
+						  af->a.spell.duration = 2;
+						  if (result)
+							  mysql_free_result (result);
+						  return;
+					  }
+					  magic_add_affect (tch, MAGIC_NOTIFY, 2, 0, 0, 0, 0);
+					  get_affect (tch, MAGIC_NOTIFY)->a.spell.t = (long int) ch;
+					  notify = true;
+				  }
+			  }
 			  if (result)
-			    mysql_free_result (result);
+				  mysql_free_result (result);
+			  if (!IS_MORTAL (ch))
+			  {
+				  if (notify)
+					  send_to_char ("\nParty was found online and notified.\n",
+					  ch);
+				  else
+					  send_to_char
+					  ("\nNo PC online has such a description or alias.  Did you spell it fully and correctly?\n",
+					  ch);
+			  }
+			  else
+			  {
+				  send_to_char
+					  ("\nIf this individual is online they have been notified.\n",
+					  ch);
+			  }
 			  return;
-			}
-		      magic_add_affect (tch, MAGIC_NOTIFY, 2, 0, 0, 0, 0);
-		      get_affect (tch, MAGIC_NOTIFY)->a.spell.t = (long int) ch;
-		      notify = true;
-		    }
-		}
-	      if (result)
-		mysql_free_result (result);
-	      if (!IS_MORTAL (ch))
-		{
-		  if (notify)
-		    send_to_char ("\nParty was found online and notified.\n",
+		  }
+		  if (result && mysql_num_rows (result) > 50)
+		  {
+			  send_to_char
+				  ("\nToo many matches were found. Please try elaborating on the description.\n",
 				  ch);
+			  mysql_free_result (result);
+			  return;
+		  }
+
+		  if (!IS_MORTAL (ch))
+			  send_to_char
+			  ("\nNo PC has such a name.  Did you spell it fully and correctly?\n",
+			  ch);
 		  else
-		    send_to_char
-		      ("\nNo PC online has such a description or alias.  Did you spell it fully and correctly?\n",
-		       ch);
-		}
-	      else
-		{
-		  send_to_char
-		    ("\nIf this individual is online they have been notified.\n",
-		     ch);
-		}
-	      return;
-	    }
-	  if (result && mysql_num_rows (result) > 50)
-	    {
-	      send_to_char
-		("\nToo many matches were found. Please try elaborating on the description.\n",
-		 ch);
-	      mysql_free_result (result);
-	      return;
-	    }
+			  send_to_char
+			  ("\nIf this individual is online they have been notified.\n",
+			  ch);
+		  return;
+	  }
 
-	  if (!IS_MORTAL (ch))
-	    send_to_char
-	      ("\nNo PC has such a name.  Did you spell it fully and correctly?\n",
-	       ch);
-	  else
-	    send_to_char
-	      ("\nIf this individual is online they have been notified.\n",
-	       ch);
+	  unload_pc (tch);
+	  send_to_char
+		  ("\nIf this individual is online they have been notified.\n", ch);
 	  return;
-	}
-
-      unload_pc (tch);
-      send_to_char
-	("\nIf this individual is online they have been notified.\n", ch);
-      return;
-    }
+  }
 
   send_to_char ("\nIf this individual is online they have been notified.\n",
 		ch);

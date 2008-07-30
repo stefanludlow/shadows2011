@@ -1738,6 +1738,7 @@ do_review (CHAR_DATA * ch, char *argument, int cmd)
     {
       send_to_char
 	("There is no playerfile associated with that name, sorry.\n", ch);
+	  unload_pc(review_ch);
       return;
     }
 
@@ -6808,6 +6809,7 @@ do_mobile (CHAR_DATA * ch, char *argument, int cmd)
 	    ("Sorry, but you'll need to get another staff member to edit your character.\n"
 	     "Editing of one's own PCs is not permitted, for a variety of reasons.\n",
 	     ch);
+	  unload_pc(edit_mobile);
 	  return;
 	}
 
@@ -6815,6 +6817,7 @@ do_mobile (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  send_to_char
 	    ("You may only open PCs in the application queue to edit.\n", ch);
+	  unload_pc(edit_mobile);
 	  return;
 	}
 
@@ -6822,6 +6825,7 @@ do_mobile (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				 send_to_char
 				("You are not authorized to work with mobiles.\n", ch);
+				 unload_pc(edit_mobile);
 				return;
 			}
 
@@ -6980,11 +6984,15 @@ post_mdesc (DESCRIPTOR_DATA * d)
   if (!*d->pending_message->message)
     {
       send_to_char ("No mobile description posted.\n", ch);
+	  if (!IS_NPC(mob))
+		  unload_pc(mob);
       return;
     }
 
   mob->description = add_hash (d->pending_message->message);
   d->pending_message = NULL;
+  if (!IS_NPC(mob))
+	  unload_pc(mob);
 }
 
 void
@@ -13872,3 +13880,144 @@ do_rcap (CHAR_DATA * ch, char *argument, int cmd)
   send_to_char (buf, ch);
 }
 
+void
+do_name (CHAR_DATA *ch, char *argument, int cmd)
+{
+	CHAR_DATA *tch = NULL;
+	std::string strArgument = argument, ThisArg;
+
+	strArgument = one_argument (strArgument, ThisArg);
+	if (ThisArg.empty())
+	{
+		send_to_char("Name who?\n", ch);
+		return;
+	}
+	if (!ThisArg.compare("self"))
+	{
+		tch = ch;
+	}
+	else
+	{
+		tch = get_char_room_vis(ch, (char *) ThisArg.c_str());
+	}
+
+	if (!tch)
+	{
+		send_to_char("You do not see that person to rename.\n", ch);
+		return;
+	}
+
+	if (tch != ch && !IS_NPC(tch) && IS_MORTAL(ch))
+	{
+		act("Mortals may only change their own keywords (via #6self#0), or the keywords of NPCs they own.", false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		return;
+	}
+
+	if (IS_MORTAL(ch) && IS_NPC(tch) && (!tch->mob->owner || strn_cmp(tch->mob->owner, ch->tname, strlen(tch->mob->owner))))
+	{
+		act("Mortals may only change their own keywords (via #6self#0), or the keywords of NPCs they own.", false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		return;
+	}
+
+	strArgument = one_argument (strArgument, ThisArg);
+	if (ThisArg.empty())
+	{
+		send_to_char ("Do you wish to add, delete, or view names?\n", ch);
+		return;
+	}
+	if (!ThisArg.compare("add"))
+	{
+		strArgument = one_argument (strArgument, ThisArg);
+		if (ThisArg.empty())
+		{
+			send_to_char("What keyword would you like to add?\n", ch);
+			return;
+		}
+		std::string keywords = tch->name;
+		if (keywords.find(ThisArg) != std::string::npos)
+		{
+			send_to_char("That is already a keyword.\n", ch);
+			return;
+		}
+		if (keywords.length() > 120)
+		{
+			send_to_char("You cannot have more than 120 characters of keywords, please remove some first.\n", ch);
+			return;
+		}
+		keywords += " " + ThisArg;
+		mem_free(tch->name);
+		tch->name = str_dup ((char *) keywords.c_str());
+		if (!IS_NPC(tch))
+			save_char(tch, true);
+		else
+			save_stayput_mobiles();
+		std::string sshort = (tch == ch) ? "you" : char_short(tch);
+		std::string output = "Keyword: #2" + ThisArg + "#0 installed for #5" + sshort + "#0.\n";
+		send_to_char((char *) output.c_str(), ch);
+		return;
+	}
+	else if (!ThisArg.compare("delete"))
+	{
+		strArgument = one_argument (strArgument, ThisArg);
+		if (ThisArg.empty())
+		{
+			send_to_char ("What keyword would you like to delete?\n", ch);
+			return;
+		}
+		std::string name = tch->tname;
+		name[0] = tolower(name[0]);
+		if (name.find(ThisArg) != std::string::npos)
+		{
+			send_to_char("You cannot remove the name from the keywords.\n", ch);
+			return;
+		}
+		std::string keywords = tch->name;
+		if (keywords.find(MAKE_STRING(" ") + ThisArg) == std::string::npos && keywords.find(ThisArg + " ") == std::string::npos)
+		{
+			send_to_char("That isn't a keyword.\n", ch);
+			return;
+		}
+		std::string sdesc = tch->short_descr;
+		if (sdesc.find(ThisArg) != std::string::npos)
+		{
+			send_to_char("You cannot remove keywords that are a part of the description.\n", ch);
+			return;
+		}
+		std::string NewKeywords;
+		while (!keywords.empty())
+		{
+			keywords = one_argument(keywords, sdesc);
+			if (sdesc.compare(ThisArg))
+			{
+				if (name.find(sdesc) != std::string::npos)
+					sdesc[0] = toupper(sdesc[0]);
+				if (NewKeywords.empty())
+					NewKeywords += sdesc;
+				else
+					NewKeywords += " " + sdesc;
+			}
+		}
+		mem_free(tch->name);
+		tch->name = str_dup((char *) NewKeywords.c_str());
+		if (!IS_NPC(tch))
+			save_char(tch, true);
+		else
+			save_stayput_mobiles();
+		std::string sshort = (tch == ch) ? "you" : char_short(tch);
+		std::string output = "Keyword: #2" + ThisArg + "#0 removed for #5" + sshort + "#0.\n";
+		send_to_char(output.c_str(), ch);
+		return;
+		
+	}
+	else if (!ThisArg.compare("view") || !ThisArg.compare("list"))
+	{
+		std::string output = MAKE_STRING(((tch == ch) ? "#5You#0 have" : (MAKE_STRING(char_short(tch)) + "has"))) + " the following keywords: " + MAKE_STRING(tch->name) + ".\n";
+		send_to_char(output.c_str(), ch);
+		return;
+	}
+	else
+	{
+		send_to_char("Do you wish to add, delete, or view names?\n", ch);
+		return;
+	}
+}

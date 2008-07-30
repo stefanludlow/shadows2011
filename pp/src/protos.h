@@ -41,7 +41,7 @@
 typedef unsigned short uint16;
 #endif
 
-
+#define MAKE_STRING(msg) (((std::ostringstream&) (std::ostringstream() << std::boolalpha << msg)).str())  
 #define STR_MATCH 0		// useful to make strcmp more readable
 
 //TODO: Portability: Change all calls to strcasecmp, 
@@ -204,6 +204,7 @@ void update_coverage_times(int admin_time, int admin_time_active, int admin_pc_t
 void prepare_copyover (int cmd);
 
 /* COMMAND PROTOTYPES */
+void do_name (CHAR_DATA *ch, char *argument, int cmd); // olc.cpp
 void do_wound (CHAR_DATA *ch, char *argument, int cmd); // wounds.cpp
 void do_mark (CHAR_DATA* ch, char *argument, int cmd); // commerce.c
 void do_csv (CHAR_DATA* ch, char *argument, int cmd); // staff.c
@@ -1231,6 +1232,8 @@ void hour_affect_update (void);
 void remove_cover (CHAR_DATA *ch, int type);
 int under_cover (CHAR_DATA *ch);
 
+void do_aide (CHAR_DATA *ch, char * arg, int cmd);
+bool has_combat_space (CHAR_DATA *ch);
 int find_door (CHAR_DATA * ch, char *type, char *dir);
 char *get_profession_name (int prof_id);
 void add_profession_skills (CHAR_DATA * ch, char *skill_list);

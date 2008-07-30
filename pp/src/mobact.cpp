@@ -21,15 +21,7 @@
 
 bool could_attack (const CHAR_DATA* ch, const CHAR_DATA* target)
 {
-  int i = 0;
-  for (CHAR_DATA * tch = vtor (ch->in_room)->people; tch; tch = tch->next_in_room)
-    {
-      if ((tch->fighting == target) && (++i >= 4))
-	{
-	  return false;
-        }
-    }
-  return true;
+  return (has_combat_space((CHAR_DATA *) ch) && has_combat_space((CHAR_DATA *) target));
 }
 
 int
@@ -133,7 +125,7 @@ enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness)
 
   if (!get_second_affect(crim, SA_ALREADY_WARNED,0) && !get_second_affect(crim, SA_WARNED,0))
   {
-	  add_second_affect(SA_WARNED, number(17,25), crim, NULL, NULL, 0);
+	  add_second_affect(SA_WARNED, number(35,50), crim, NULL, NULL, 0);
 
   if (!ch->fighting && !ch->ranged_enemy && !ch->delay)
     {
@@ -203,8 +195,11 @@ enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness)
 			do_say(ch, "You were warned. Your time is up. Surrender or die!", 0);
 		}
 		send_to_room("\n", ch->room->nVirtual);
-	  set_fighting (ch, crim);
-	  hit_char(ch, crim, 0);
+		if (has_combat_space(crim) && has_combat_space(ch))
+		{
+			set_fighting (ch, crim);
+			hit_char(ch, crim, 0);
+		}
 	}
 
       return 1;

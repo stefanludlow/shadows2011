@@ -969,6 +969,8 @@ do_deduct (CHAR_DATA * ch, char *argument, int cmd)
     {
       send_to_char ("No PC with that name was found. "
 		    "Is it spelled correctly?\n", ch);
+	  if (loaded)
+		  unload_pc(tch);
       return;
     }
 
@@ -980,6 +982,8 @@ do_deduct (CHAR_DATA * ch, char *argument, int cmd)
       act
 	("Hmm... there seems to be a problem with that character's account. Please notify the staff.",
 	 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	  if (loaded)
+		  unload_pc(tch);
       return;
     }
 
@@ -990,6 +994,8 @@ do_deduct (CHAR_DATA * ch, char *argument, int cmd)
       delete acct;
       send_to_char
 	("You must specify a number of roleplay points to deduct.\n", ch);
+	  if (loaded)
+		  unload_pc(tch);
       return;
     }
 
@@ -1000,6 +1006,8 @@ do_deduct (CHAR_DATA * ch, char *argument, int cmd)
       act
 	("The specified number must be greater than 0 and less than or equal to the named character's RP point total.",
 	 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	  if (loaded)
+		  unload_pc(tch);
       return;
     }
 
@@ -1058,6 +1066,8 @@ do_award (CHAR_DATA * ch, char *argument, int cmd)
   if (IS_NPC (tch))
     {
       send_to_char ("This command only works for player characters.\n", ch);
+	  if (loaded)
+		  unload_pc(tch);
       return;
     }
 
@@ -1069,6 +1079,8 @@ do_award (CHAR_DATA * ch, char *argument, int cmd)
       act
 	("Hmm... there seems to be a problem with that character's account. Please notify the staff.",
 	 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	  if (loaded)
+		  unload_pc(tch);
       return;
     }
 
@@ -1079,6 +1091,8 @@ do_award (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char
 	("Adding roleplay points to your own account is against policy.\n",
 	 ch);
+	  if (loaded)
+		  unload_pc(tch);
       return;
     }
 

@@ -4159,7 +4159,7 @@ erase_mysql_board_post (CHAR_DATA * ch, char *name, int board_type,
 	}
       if (!str_cmp (name, "Prescience") && GET_TRUST (ch))
 	{
-	  if (!load_pc (message->poster))
+	  if (!(ch->delay_ch = load_pc (message->poster)))
 	    {
 	      send_to_char
 		("I couldn't find the PC that left the prescience request.\n",
@@ -4169,7 +4169,6 @@ erase_mysql_board_post (CHAR_DATA * ch, char *name, int board_type,
 	  send_to_char
 	    ("Enter the dream you'd like to give in response to this prescience request:\n",
 	     ch);
-	  ch->delay_ch = load_pc (message->poster);
 	  ch->desc->str = &ch->delay_who;
 	  ch->desc->max_str = STR_MULTI_LINE;
 	  ch->desc->proc = post_dream;

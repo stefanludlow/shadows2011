@@ -3019,20 +3019,11 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
     }
 **************/
 
-  i = 0;
-  for (tch = vtor (ch->in_room)->people; tch; tch = tch->next_in_room)
-    {
-      if (tch->fighting == victim)
-	{
-	  if (++i >= 4)
-	    {
-	      act ("You can't find an opening to attack $N.",
-		   false, ch, 0, victim, TO_CHAR);
-	      return;
-	    }
-
-	}
-    }
+  if (!has_combat_space(victim))
+  {
+	  act ("You can't find an opening to attack $N.", false, ch, 0, victim, TO_CHAR);
+	  return;
+  }
 
   ch->flags &= ~FLAG_FLEE;
   ch->act &= ~PLR_STOP;

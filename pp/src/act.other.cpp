@@ -423,12 +423,9 @@ if (ch->in_room == 66955 || ch->in_room == 66956 || ch->in_room == 66954 || ch->
 
   extract_char (ch);
 
-  ch->desc = NULL;
-
   if (!d)
     return;
 
-	character_list.remove(ch);
   d->character = NULL;
 
   if (!d->acct || str_cmp(d->acct->name.c_str (), "Guest") == 0)
@@ -4292,10 +4289,6 @@ do_nod (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_camp (CHAR_DATA * ch, char *argument, int cmd)
 {
-  send_to_char("This command has been temporarily disabled, please find a place to quit instead.\n", 
-ch);
-return;
-
   int sector_type, block = 0;
   struct room_prog *p;
 
@@ -4824,7 +4817,7 @@ under_cover (CHAR_DATA *ch)
 
 void do_ownership (CHAR_DATA *ch, char *argument, int command)
 {
-	CHAR_DATA *property, *target;
+	CHAR_DATA *owned_mob, *target;
 	std::string ArgumentList = argument;
 	std::string ThisArgument;
 	std::string Output;
@@ -4860,16 +4853,16 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 		return;
 	}
 	
-	property = get_char_room_vis (ch, ThisArgument.c_str());
+	owned_mob = get_char_room_vis (ch, ThisArgument.c_str());
 	
-	if (!property)
+	if (!owned_mob)
 	{
 		if (GET_TRUST(ch))
 			{
-				property = get_char ((char*)ThisArgument.c_str());
+				owned_mob = get_char ((char*)ThisArgument.c_str());
 			}
 			
-		if (!property)
+		if (!owned_mob)
 			{
 		send_to_char ("Cannot find mobile with keyword \"#2", ch);
 		send_to_char (ThisArgument.c_str(), ch);
@@ -4878,19 +4871,19 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 	}
 	}
 	
-	if (!IS_NPC(property))
+	if (!IS_NPC(owned_mob))
 	{
 		send_to_char ("You have no authority to deliniate the ownership of a PC.\n", ch);
 		return;
 	}
 	
-	if (IS_NPC(property) && !property->mob->owner  && !GET_TRUST(ch))
+	if (IS_NPC(owned_mob) && !owned_mob->mob->owner  && !GET_TRUST(ch))
 	{
 		send_to_char ("You have no authority to deliniate the ownership of this individual.\n", ch);
 		return;
 	}
 	
-	if (property->mob->owner && strcmp(property->mob->owner, ch->tname) && !GET_TRUST(ch))
+	if (owned_mob->mob->owner && strcmp(owned_mob->mob->owner, ch->tname) && !GET_TRUST(ch))
 	{
 		send_to_char ("You have no authority to deliniate the ownership of this individual.\n", ch);
 		return;
@@ -4907,39 +4900,35 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 //new owner must be in the room and visible since get_char checks online PC only
 ////so we use load_pc to get around this
 //
-//	target = get_char_room_vis(ch, ThisArgument.c_str());
-	target = load_pc((char*)ThisArgument.c_str());
-	loaded_char = 1;
+	target = get_char_room_vis(ch, ThisArgument.c_str());
+	if (!target && GET_TRUST(ch))
+	{
+		target = load_pc((char*)ThisArgument.c_str());
+		loaded_char = 1;
+	}
 	
 		if (!target)
-		{
-			if (GET_TRUST(ch))
-			{
-				//target = get_char ((char*)ThisArgument.c_str());
-				target = load_pc ((char*)ThisArgument.c_str());
-				loaded_char = 1;
-			}
-			if (!loaded_char)
-			{	
+		{	
 			send_to_char ("You do not see a person with the keyword \"#2", ch);
 			send_to_char (ThisArgument.c_str(), ch);
 			send_to_char ("#0\" to transfer #5", ch);
-			send_to_char (char_short(property), ch);
+			send_to_char (char_short(owned_mob), ch);
 			send_to_char ("#0 to.\n", ch);
 			return;
-			}
 		}
 	
 	if (!transfer && GET_TRUST(ch))
 		{
 		
 			ThisArgument[0] = toupper(ThisArgument[0]);
-			property->mob->owner = str_dup (ThisArgument.c_str());
+			owned_mob->mob->owner = str_dup (ThisArgument.c_str());
 			send_to_char ("Setting ownership of #5", ch);
-			send_to_char (char_short(property), ch);
+			send_to_char (char_short(owned_mob), ch);
 			send_to_char ("#0 to \"#2", ch);
 			send_to_char (ThisArgument.c_str(), ch);
 			send_to_char ("#0\".", ch);
+			if (loaded_char)
+				unload_pc(target);
 			return;
 			
 		}
@@ -4952,29 +4941,31 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 		if (IS_NPC(target) && (ThisArgument.find('!') == std::string::npos))
 		{
 			send_to_char ("You are proposing to transfer ownership of #5", ch);
-			send_to_char (char_short(property), ch);
+			send_to_char (char_short(owned_mob), ch);
 			send_to_char ("#0 to #5", ch);
 			send_to_char (char_short(target), ch);
-			send_to_char ("#0, who is an NPC. Please confirm by typing #6OWNERSHIP TRANSFER <property> <target> !#0\n", ch);
+			send_to_char ("#0, who is an NPC. Please confirm by typing #6OWNERSHIP TRANSFER <owned_mob> <target> !#0\n", ch);
 			return;
 		}
 		
 		
 		Output.assign(target->tname);
 		Output[0] = toupper(Output[0]);
-		property->mob->owner = str_dup (Output.c_str());
+		owned_mob->mob->owner = str_dup (Output.c_str());
 		send_to_char ("You transfer ownership of #5", ch);
-		send_to_char (char_short(property), ch);
+		send_to_char (char_short(owned_mob), ch);
 		send_to_char ("#0 to #5", ch);
 		send_to_char (char_short(target), ch);
 		send_to_char ("#0.\n", ch);
 		Output.assign("#5");
 		Output.append(char_short(ch));
 		Output.append("#0 transfers ownership of #5");
-		Output.append(char_short(property));
+		Output.append(char_short(owned_mob));
 		Output.append("#0 to you.\n");
 		Output[2] = toupper(Output[2]);
 		send_to_char (Output.c_str(), target);
+		if (loaded_char)
+			unload_pc(target);
 		return;
 	}
 	if (loaded_char)
@@ -4982,6 +4973,3 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 
 	return;
 }
-
-
-	

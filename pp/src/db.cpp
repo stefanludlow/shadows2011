@@ -1736,26 +1736,10 @@ free_char (CHAR_DATA * ch)
   while (ch->threats)
     threat_from_char (ch, ch->threats);
 
-
-  /* Don't erase the pc and mob data structures, since they need
-     to sit around until cleanup_the_dead pulses.  new_char will
-     clean them up.
-   */
-
-  //std::set<CHAR_DATA*> *tmp = ch->group;
-  pc = ch->pc;
-  mob = ch->mob;
-
-  memset (ch, 0, sizeof (CHAR_DATA));
-
-  // ch->group = tmp;
-  ch->pc = pc;
-  ch->mob = mob;
-
-  if (pc)
+  if (ch->pc)
     mem_free (ch->pc);
 
-  if (mob)
+  if (ch->mob)
     mem_free (ch->mob);
 
   mem_free (ch);
