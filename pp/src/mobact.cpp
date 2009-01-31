@@ -42,170 +42,148 @@ is_wanted_in_area (CHAR_DATA * ch)
 int
 enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness)
 {
-  OBJ_DATA *obj;
+	OBJ_DATA *obj;
 
-  /* Return values:
+	/* Return values:
 
-     -1    ch is unable to enforce anyone
-     0    ch is unable to enforce crim
-     1    ch will enforce crim
+	-1    ch is unable to enforce anyone
+	0    ch is unable to enforce crim
+	1    ch will enforce crim
 
-     will_act
-     0    ch won't do anything about the criminal act
-     1    ch will do something: stand or attack
+	will_act
+	0    ch won't do anything about the criminal act
+	1    ch will do something: stand or attack
 
-     witness (can also mean guard just saw through disguise)
-     0    enforcer didn't see the act
-     1    enforcer saw the act, so MAY attack or react
-   */
+	witness (can also mean guard just saw through disguise)
+	0    enforcer didn't see the act
+	1    enforcer saw the act, so MAY attack or react
+*/
 
-/*	int			db_on = 0; */
-  char buf[MAX_STRING_LENGTH];
+	/*	int			db_on = 0; */
+	char buf[MAX_STRING_LENGTH];
 
-  if (ch == crim)
-    return 0;
+	if (ch == crim)
+	return 0;
 
-  if (ch->pc)
-    return -1;
+	if (ch->pc)
+	return -1;
 
-  if (!IS_SET (ch->act, ACT_ENFORCER))
-    return -1;
+	if (!IS_SET (ch->act, ACT_ENFORCER))
+	return -1;
 
-  if (ch->fighting)
-    return -1;
+	if (ch->fighting)
+	return -1;
 
-  if (ch->desc)
-    return -1;
+	if (ch->desc)
+	return -1;
 
-  if (is_room_affected (ch->room->affects, MAGIC_ROOM_CALM))
-    return -1;
+	if (is_room_affected (ch->room->affects, MAGIC_ROOM_CALM))
+	return -1;
 
-  if (IS_SUBDUEE (ch))
-    return -1;
+	if (IS_SUBDUEE (ch))
+	return -1;
 
-  if (!CAN_SEE (ch, crim))
-    return 0;
+	if (!CAN_SEE (ch, crim))
+	return 0;
 
-  if (IS_SUBDUEE (crim))
-    return 0;
+	if (IS_SUBDUEE (crim))
+	return 0;
 
-  if (is_brother (ch, crim))
-    return 0;
+	if (is_brother (ch, crim))
+	return 0;
 
-  if (get_second_affect(crim, SA_WARNED,0))
-	  return 0;
+	if (get_second_affect(crim, SA_WARNED,0))
+	return 0;
 
-  if (get_second_affect(crim, SA_FLEEING_WARNED, 0))
-	  return 0;
+	if (get_second_affect(crim, SA_FLEEING_WARNED, 0))
+	return 0;
 
-  if (get_affect (crim, MAGIC_CRIM_HOODED + ch->room->zone))
-    ;
-  else if (is_hooded (crim) && witness &&
-	   get_affect (crim, MAGIC_CRIM_BASE + ch->room->zone))
-    ;
-  else if (!is_hooded (crim) &&
-	   get_affect (crim, MAGIC_CRIM_BASE + ch->room->zone))
-    ;
-  else
-    return 0;
+	if (get_affect (crim, MAGIC_CRIM_HOODED + ch->room->zone))
+	;
+	else if (is_hooded (crim) && witness &&
+			get_affect (crim, MAGIC_CRIM_BASE + ch->room->zone))
+	;
+	else if (!is_hooded (crim) &&
+			get_affect (crim, MAGIC_CRIM_BASE + ch->room->zone))
+	;
+	else
+	return 0;
 
-  /* A bad guy.  Deal with him. */
+	/* A bad guy.  Deal with him. */
 
-  if (GET_POS (ch) == SIT || GET_POS (ch) == REST)
-    {
-
-      if (will_act)
-	add_second_affect (SA_STAND, 4, ch, NULL, NULL, 0);
-
-      return -1;
-    }
-
-  if (!will_act)
-    return 1;
-
-  if (!get_second_affect(crim, SA_ALREADY_WARNED,0) && !get_second_affect(crim, SA_WARNED,0))
-  {
-	  add_second_affect(SA_WARNED, number(35,50), crim, NULL, NULL, 0);
-
-  if (!ch->fighting && !ch->ranged_enemy && !ch->delay)
-    {
-		  if (ch->race == lookup_race_id("Black Numenorean"))
-		{
-			do_say(ch, "You are to surrender to the Black Watch immediately or you will be slain!", 0);
-		}
-		else if (ch->race == lookup_race_id("Orc") || ch->race == lookup_race_id("Half-Orc") || ch->race == lookup_race_id("Snaga") || ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Half-Troll"))
-		{
-			do_say(ch, "Hey you! Git yer snaga-hide over here cos youse mah prisoner now!", 0);
-		}
-		else
-		{
-      do_say (ch, "Surrender, now, or pay the consequences!", 0);
-    }
-      }
-	  return 1;
-  }
-
-  if (!IS_SET (crim->act, ACT_PARIAH) &&
-      !IS_SET (crim->act, ACT_AGGRESSIVE) &&
-      real_skill (ch, SKILL_SUBDUE) &&
-      zone_table[ch->mob->zone].jail_room &&
-      (GET_POS (crim) == UNCON || GET_POS (crim) == SLEEP))
-    {
-      name_to_ident (crim, buf);
-      do_subdue (ch, buf, 0);
-      return 1;
-    }
-
-  else
-    {
-      // I do not understand the purpose of setting obj here...
-      // seems to be do-nothing code until "set_fighting"
-      for (obj = ch->equip; obj; obj = obj->next_content)
-	if (obj->o.weapon.use_skill == SKILL_LONGBOW ||
-	    obj->o.weapon.use_skill == SKILL_SHORTBOW ||
-	    obj->o.weapon.use_skill == SKILL_CROSSBOW)
-	  break;
-      if (ch->right_hand
-	  && (ch->right_hand->o.weapon.use_skill == SKILL_SHORTBOW
-	      || ch->right_hand->o.weapon.use_skill == SKILL_LONGBOW
-	      || ch->right_hand->o.weapon.use_skill == SKILL_CROSSBOW))
+	if (GET_POS (ch) == SIT || GET_POS (ch) == REST)
 	{
-	  obj = ch->right_hand;
-	}
-      if (ch->left_hand
-	  && (ch->left_hand->o.weapon.use_skill == SKILL_SHORTBOW
-	      || ch->left_hand->o.weapon.use_skill == SKILL_LONGBOW
-	      || ch->left_hand->o.weapon.use_skill == SKILL_CROSSBOW))
-	{
-	  obj = ch->left_hand;
+
+		if (will_act)
+		add_second_affect (SA_STAND, 4, ch, NULL, NULL, 0);
+
+		return -1;
 	}
 
-      if (could_attack (ch, crim))
+	if (!will_act)
+	return 1;
+
+	if (!get_second_affect(crim, SA_ALREADY_WARNED,0) && !get_second_affect(crim, SA_WARNED,0))
 	{
-		if (ch->race == lookup_race_id("Black Numenorean"))
+		add_second_affect(SA_WARNED, number(35,50), crim, NULL, NULL, 0);
+
+		if (!ch->fighting && !ch->ranged_enemy && !ch->delay)
 		{
-			do_say(ch, "Wrong choice, scum! Run the dog through!", 0);
+			if (ch->race == lookup_race_id("Black Numenorean"))
+			{
+				do_say(ch, "You are to surrender to the Black Watch immediately or you will be slain!", 0);
+			}
+			else if (ch->race == lookup_race_id("Orc") || ch->race == lookup_race_id("Half-Orc") || ch->race == lookup_race_id("Snaga") || ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Half-Troll"))
+			{
+				do_say(ch, "Hey you! Git yer snaga-hide over here cos youse mah prisoner now!", 0);
+			}
+			else
+			{
+				do_say (ch, "Surrender, now, or pay the consequences!", 0);
+			}
 		}
-		else if (ch->race == lookup_race_id("Orc") || ch->race == lookup_race_id("Half-Orc") || ch->race == lookup_race_id("Snaga") || ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Half-Troll"))
-		{
-			do_say(ch, "Yuh make-a da wrong move, pushdug. Now I is gunna slice yuh up!", 0);
-		}
-		else
-		{
-			do_say(ch, "You were warned. Your time is up. Surrender or die!", 0);
-		}
-		send_to_room("\n", ch->room->nVirtual);
-		if (has_combat_space(crim) && has_combat_space(ch))
-		{
-			set_fighting (ch, crim);
-			hit_char(ch, crim, 0);
-		}
+		return 1;
 	}
 
-      return 1;
-    }
+	if (!IS_SET (crim->act, ACT_PARIAH) &&
+			!IS_SET (crim->act, ACT_AGGRESSIVE) &&
+			real_skill (ch, SKILL_SUBDUE) &&
+			zone_table[ch->mob->zone].jail_room &&
+			(GET_POS (crim) == UNCON || GET_POS (crim) == SLEEP))
+	{
+		name_to_ident (crim, buf);
+		do_subdue (ch, buf, 0);
+		return 1;
+	}
 
-  return 0;
+	else
+	{
+		if (could_attack (ch, crim))
+		{
+			if (ch->race == lookup_race_id("Black Numenorean"))
+			{
+				do_say(ch, "Wrong choice, scum! Run the dog through!", 0);
+			}
+			else if (ch->race == lookup_race_id("Orc") || ch->race == lookup_race_id("Half-Orc") || ch->race == lookup_race_id("Snaga") || ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Half-Troll"))
+			{
+				do_say(ch, "Yuh make-a da wrong move, pushdug. Now I is gunna slice yuh up!", 0);
+			}
+			else
+			{
+				do_say(ch, "You were warned. Your time is up. Surrender or die!", 0);
+			}
+			send_to_room("\n", ch->room->nVirtual);
+			if (has_combat_space(crim) && has_combat_space(ch))
+			{
+				set_fighting (ch, crim);
+				hit_char(ch, crim, 0);
+			}
+		}
+
+		return 1;
+	}
+
+	return 0;
 }
 
 CHAR_DATA *
@@ -691,7 +669,6 @@ int
 enforcer_weapon_check (CHAR_DATA * ch)
 {
   CHAR_DATA *tch;
-  int weapon_count = 0;
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
 
@@ -702,50 +679,34 @@ enforcer_weapon_check (CHAR_DATA * ch)
   if (number (0, 1))
     {
 
-      weapon_count = 0;
-
-      for (tch = ch->room->people; tch; tch = tch->next_in_room)
-	if (!IS_NPC (tch) && has_weapon (tch)
-	    && !get_affect (tch, MAGIC_WARNED) && !is_area_enforcer (tch))
-	  weapon_count++;
-
-      if (weapon_count)
+    for (tch = ch->room->people; tch; tch = tch->next_in_room)
 	{
-	  weapon_count = number (1, weapon_count);
+		if (!IS_NPC (tch) && has_weapon (tch) &&
+			!get_affect (tch, MAGIC_WARNED) && !is_area_enforcer (tch))
+		{
+			if (number(0,1)) /* only a chance of each individual being warned */
+			{
+				/* prevent a guard from warning him for a bit */
+				magic_add_affect (tch, MAGIC_WARNED, 90, 0, 0, 0, 0);
+				name_to_ident (tch, buf);
 
-	  for (tch = ch->room->people;; tch = tch->next_in_room)
-	    {
+				if (ch->room->zone == 5 || ch->room->zone == 6)
+				{
+					sprintf (buf2, "%s (with a menacing scowl) Don't let me see that weapon out again, maggot.",buf);
+				}
+				else
+				{
+					sprintf (buf2,"%s (frowning) You'll need to stow that weapon here, citizen.",buf);
+				}
 
-	      if (!IS_NPC (tch) && has_weapon (tch)
-		  && !get_affect (tch, MAGIC_WARNED)
-		  && !is_area_enforcer (tch))
-		weapon_count--;
+				do_tell (ch, buf2, 0);
 
-	      if (weapon_count <= 0)
-		break;
-	    }
-
-	  /* Prevent a guard for warning him for a bit */
-
-	  magic_add_affect (tch, MAGIC_WARNED, 90, 0, 0, 0, 0);
-
-	  name_to_ident (tch, buf);
-
-	  if (ch->room->zone == 5 || ch->room->zone == 6)
-	    sprintf (buf2,
-		     "%s (with a menacing scowl) Don't let me see that weapon out again, maggot.",
-		     buf);
-	  else
-	    sprintf (buf2,
-		     "%s (frowning) You'll need to stow that weapon here, citizen.",
-		     buf);
-
-	  do_tell (ch, buf2, 0);
-
-	  return 1;
-	}
-    }
-
+				/* previous desired behaviour was just to warn one */
+				return 1;
+			} // internal if for random chance to notify
+		} // internal if for checking to see if room member is eligible for notify
+	} //for loop
+  } //if one even checks at all
   return 0;
 }
 
@@ -786,7 +747,7 @@ enforcer_hood_check (CHAR_DATA * ch)
 
 	  /* Prevent a guard for studying him for a second */
 
-	  magic_add_affect (tch, MAGIC_STARED, 10, 0, 0, 0, 0);
+	  magic_add_affect (tch, MAGIC_STARED, 900, 0, 0, 0, 0);
 
 	  name_to_ident (tch, buf);
 
@@ -1017,7 +978,7 @@ morale_broken (CHAR_DATA * ch)
     {				/* Mob flagged as both re-evaluates at 15%. */
       if (damage > (limit = ch->max_hit * .85))
 	{
-	  if (number (1, 25) > ch->wil)
+	  if (number (1, ch->wil) > ch->wil)
 	    {
 	      morale_broken = true;
 	    }
@@ -1030,7 +991,7 @@ morale_broken (CHAR_DATA * ch)
     {				/* Mob flagged as one re-evaluates at 20%. */
       if (damage > (limit = ch->max_hit * .8))
 	{
-	  if (number (1, 25) > ch->wil)
+	  if (number (1, ch->wil) > ch->wil)
 	    {
 	      morale_broken = true;
 	    }
@@ -1043,7 +1004,7 @@ morale_broken (CHAR_DATA * ch)
     {				/* Aggro mobs cop out at 25%. */
       if (damage > (limit = ch->max_hit * .75))
 	{
-	  if (number (1, 25) > ch->wil)
+	  if (number (1, ch->wil) > ch->wil)
 	    {
 	      morale_broken = true;
 	    }
@@ -1054,7 +1015,7 @@ morale_broken (CHAR_DATA * ch)
 
   if (damage > (limit = ch->max_hit * .60))
     {				/* All others reconsider at 40%. */
-      if (number (1, 25) > ch->wil)
+      if (number (1, ch->wil) > ch->wil)
 	{
 	  morale_broken = true;
 	}
@@ -1788,7 +1749,7 @@ is_archer (CHAR_DATA * ch)
   if (!bow)
     return 0;
 
-  if (!has_ammunition (ch))
+  if (!bow->loaded && !has_ammunition (ch))
     return 0;
 
   if (!ch->skills[bow->o.weapon.use_skill])
@@ -2199,8 +2160,9 @@ target_acquisition (CHAR_DATA * ch)
 		      && (!IS_SET (ch->act, ACT_AGGRESSIVE)
 			  || is_brother (tch->subdue, ch)))
 		    continue;
-		  if (is_area_enforcer (ch) && is_wanted_in_area (tch))	/* Enforcers should rush in with melee weapons to subdue */
+		  if (is_area_enforcer (ch) && is_wanted_in_area (tch)) {/* Enforcers should rush in with melee weapons to subdue */
 		    continue;	/* criminals, not shoot them full of arrows. */
+		  }
 		  if (tch->fighting)
 		    {
 		      if (is_brother (ch, tch)
@@ -2214,14 +2176,21 @@ target_acquisition (CHAR_DATA * ch)
       if (!tch)
 	{
 	  for (i = 0; i <= LAST_DIR; i++)
+	  {
 	    if ((tch = acquire_archer_target (ch, i)))
-	      break;
+		{
+			break;
+		}
+	  }
+	     
 	  if (is_area_enforcer (ch) && is_wanted_in_area (tch))
+	  {
 	    tch = NULL;
+	  }
 	}
-      if (tch)
+	  if (tch)
 	{
-
+	
 	  // hook: cue_on_scan reflex
 	  typedef std::multimap<mob_cue,std::string>::const_iterator N;
 	  std::pair<N,N> range = ch->mob->cues->equal_range (cue_on_scan);
@@ -2292,6 +2261,8 @@ target_acquisition (CHAR_DATA * ch)
 	    }
 	}
     }
+
+	
   if ((IS_SET (ch->act, ACT_AGGRESSIVE) || IS_SET (ch->act, ACT_ENFORCER))
       && !IS_SET (ch->act, ACT_SENTINEL) && !morale_broken (ch))
     {
@@ -2299,6 +2270,7 @@ target_acquisition (CHAR_DATA * ch)
 	{
 	  if ((tch = acquire_distant_target (ch, i)))
 	    {
+			
 	      sprintf (buf, "%d", tch->in_room);
 	      ch->speed = tch->speed + 2;
 	      ch->speed = MIN (ch->speed, 4);

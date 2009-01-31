@@ -1034,7 +1034,7 @@ delete_role (CHAR_DATA * ch, char *argument)
 
   if (atoi (argument) == 1)
     {
-      if (GET_TRUST (ch) == 4 && str_cmp (role_list->poster, ch->tname))
+      if (GET_TRUST (ch) <= 4 && str_cmp (role_list->poster, ch->tname))
 	{
 	  send_to_char
 	    ("Sorry, but you are only allowed to delete your own roles.\n",

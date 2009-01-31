@@ -312,8 +312,16 @@ tactical_status (CHAR_DATA * ch)
   if (get_affect (ch, MAGIC_HIDDEN))
     sprintf (status + strlen (status), " #1(hidden)#0");
 
-  if (get_affect (ch, MAGIC_GUARD) || get_affect (ch, AFFECT_GUARD_DIR))
-    sprintf (status + strlen (status), " #6(guarding)#0");
+  if ((af = get_affect (ch, MAGIC_GUARD)))
+  {
+	  tch = (CHAR_DATA*) af->a.spell.t;
+	  sprintf (status + strlen (status), " #6(guarding: %s)#0",tch->short_descr);
+  }
+
+  if ((af = get_affect (ch, AFFECT_GUARD_DIR)))
+  {
+	  sprintf (status + strlen(status), " #6(guarding: %s)#0", dirs[af->a.shadow.edge]);
+  }
 
   for (tch = ch->room->people; tch; tch = tch->next_in_room)
     {
@@ -438,146 +446,33 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
   *status = '\0';
 
   sprintf (buf, "#5%s#0 [%s]%s, leading:\n\n", char_short (top_leader),
-	   wound_total (top_leader), tactical_status (top_leader));
+	   wound_total (top_leader,false), tactical_status (top_leader));
   buf[2] = toupper (buf[2]);
 
-  for (tch = top_leader->room->people; tch; tch = tch->next_in_room)
-    {
-      if (tch->following != top_leader)
-	continue;
-     // if (!CAN_SEE (ch, tch))
-	//continue;
-      if (found != false)
-	sprintf (buf + strlen (buf), ",\n");
-      *status = '\0';
-      sprintf (buf + strlen (buf), "   #5%s#0 [%s]%s", char_short (tch),
-	       wound_total (tch), tactical_status (tch));
-      found = true;
-    }
+	for (tch = top_leader->room->people; tch; tch = tch->next_in_room) {
+		if (tch->following != top_leader) {
+			continue;
+		}
+		
+		if (found != false) {
+			sprintf (buf + strlen (buf), ",\n");
+		}
+		
+		*status = '\0';
+		sprintf (buf + strlen (buf), "   #5%s#0 [%s]%s", char_short (tch), wound_total (tch,false), tactical_status (tch));
+		found = true;
+	}
 
-  strcat (buf, ".\n");
+	strcat (buf, ".\n");
 
-  if (!found)
-    {
-      send_to_char ("You aren't in a group.\n", ch);
-      return;
-    }
+	if (!found) {
+		send_to_char ("You aren't in a group.\n", ch);
+		return;
+	}
 
-  send_to_char (buf, ch);
+	send_to_char (buf, ch);
 }
-/*
-void
-do_group (CHAR_DATA * ch, char *argument, int cmd)
-{
-  CHAR_DATA *tch = NULL, *leader = NULL;
-  char buf[MAX_STRING_LENGTH];
-  bool found = false;
 
-  argument = one_argument (argument, buf);
-
-  if (*buf)
-    {
-      if (is_abbrev (buf, "open"))
-	{
-	  
-	  if (!IS_SET (ch->plr_flags, GROUP_CLOSED))
-	    {
-	      send_to_char ("Your group is already open!\n", ch);
-	      return;
-	    }
-	  ch->plr_flags &= ~GROUP_CLOSED;
-	  send_to_char ("You will now allow people to follow you.\n", ch);
-	  return;
-	}
-      else if (is_abbrev (buf, "close"))
-	{
-	  if (IS_SET (ch->plr_flags, GROUP_CLOSED))
-	    {
-	      send_to_char ("Your group is already closed!\n", ch);
-	      return;
-	    }
-	  ch->plr_flags |= GROUP_CLOSED;
-	  send_to_char ("You will no longer allow people to follow you.\n", ch);
-	  return;
-	}
-      else if (is_abbrev (buf, "retreat"))
-	{
-	  char direction_arg[AVG_STRING_LENGTH] = "";
-	  int direction = 0;
-	  argument = one_argument (argument, direction_arg);
-	  
-	  if (!*direction_arg 
-	      || (direction = index_lookup (dirs, direction_arg)) == -1 )
-	    {
-	      send_to_char ("Order a retreat in which direction?\n", ch);
-	    }
-	  else
-	    {
-	      CHAR_DATA* tch;
-	      bool ordered = false;
-	      for (tch = ch->room->people; tch; tch = tch->next)
-		{
-		  if (tch->following == ch)
-		    {
-		      ordered = true;
-		      retreat (tch, direction, ch);
-		    }
-		}
-
-	      if (ordered)
-		{
-		  retreat (ch, direction, ch);
-		}
-	      else
-		{
-		  retreat (ch, direction, 0);
-		}
-	    }
-	  return;
-	}
-      else
-	{
-	  send_to_char ("Unknown subcommand.\n", ch);
-	  return;
-	}
-    }
-
-  leader = (ch->following) ? (ch->following) : (ch);
-  if (leader->group->empty ())
-    {
-      send_to_char ("You aren't in a group.\n", ch);
-      return;
-    }
-
-  sprintf (buf, "#5%s#0 [%s]%s, leading:\n\n", char_short (leader),
-	   wound_total (leader), tactical_status (leader));
-  buf[2] = toupper (buf[2]);
-
-  std::set<CHAR_DATA*>::iterator i;
-  ROOM_DATA *here = ch->room;
-  for (i = leader->group->begin (); i != leader->group->end (); ++i)
-    {
-      CHAR_DATA *tch = (*i);
-      if (tch->room != here || !CAN_SEE (ch, tch))
-	continue;
-
-      if (found != false)
-	sprintf (buf + strlen (buf), ",\n");
-      sprintf (buf + strlen (buf), "   #5%s#0 [%s]%s", char_short (tch),
-	       wound_total (tch), tactical_status (tch));
-      found = true;
-    }
-  strcat (buf, ".\n");
-
-  if (!found)
-    {
-      send_to_char ("You aren't in a group.\n", ch);
-      return;
-    }
-
-  send_to_char (buf, ch);
-}
-*/
 void
 followers_follow (CHAR_DATA * ch, int dir, int leave_time, int arrive_time)
 {

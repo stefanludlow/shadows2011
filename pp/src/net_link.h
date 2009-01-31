@@ -141,7 +141,7 @@ struct snoop_data
 
 struct line_data
 {
-  char *line[2000];
+  char *line[MAX_STRING_LENGTH];
 };
 
 struct msg_type

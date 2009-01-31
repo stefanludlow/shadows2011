@@ -18,8 +18,11 @@
 
 
 const char *variable_races[] = {
-  "Gondorian Human",
+  "Common Human",
   "Mordorian Human",
+  "Eotheod",
+  "Free Man of the North",
+  "Eriadorian Man",
   "Haradrim",
   "Dwarf",
   "Orc",
@@ -1801,7 +1804,7 @@ return_adj2 (CHAR_DATA * mob)
   static char adj[MAX_STRING_LENGTH];
 
   if (!str_cmp
-      (lookup_race_variable (mob->race, RACE_NAME), "Gondorian Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Mordorian Human"))
+      (lookup_race_variable (mob->race, RACE_NAME), "Common Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Mordorian Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Eriadorian Man") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Free Man of the North") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Eotheod"))
     {
       for (limit = 0; *human_adj2[limit] != '\n'; limit++)
 	;
@@ -2008,7 +2011,7 @@ return_adj1 (CHAR_DATA * mob)
   static char adj[MAX_STRING_LENGTH];
 
   if (!str_cmp
-      (lookup_race_variable (mob->race, RACE_NAME), "Gondorian Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Mordorian Human"))
+      (lookup_race_variable (mob->race, RACE_NAME), "Common Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Mordorian Human"))
     {
       for (limit = 0; *human_adj1[limit] != '\n'; limit++)
 	;
@@ -2525,14 +2528,19 @@ create_description (CHAR_DATA * mob)
   int roll, i, j;
 
   for (i = 0; *variable_races[i] != '\n'; i++)
-    if (!str_cmp
-	(variable_races[i], lookup_race_variable (mob->race, RACE_NAME)))
+  {
+    if (!str_cmp (variable_races[i], lookup_race_variable (mob->race, RACE_NAME)))
+	{
       found = true;
+	  break;
+	}
+  }
 
   if (!found)
     {
       return;
     }
+
   if (!number (0, 1))
     {
       if (!number (0, 1))
@@ -2813,7 +2821,7 @@ create_description (CHAR_DATA * mob)
     }
   else
     if (!str_cmp
-      (lookup_race_variable (mob->race, RACE_NAME), "Gondorian Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Renegade Human"))
+      (lookup_race_variable (mob->race, RACE_NAME), "Common Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Renegade Human"))
     {
       roll = number (1, 9);
       if (roll == 1)
@@ -3034,46 +3042,22 @@ randomize_mobile (CHAR_DATA * mob)
       else
 	proto = vtom (1998);
 
-      if (lookup_race_variable (mob->race, RACE_NATIVE_TONGUE))
+	  /* Grommit changes to simplify language selection */
+   if (lookup_race_variable (mob->race, RACE_NATIVE_TONGUE))
 	{
-	  mob->speaks =
-	    atoi (lookup_race_variable (mob->race, RACE_NATIVE_TONGUE));
-		 
-	  if (!strcmp(lookup_race_variable(mob->race, RACE_NAME), "Mordorian Human"))
+	  mob->speaks = atoi (lookup_race_variable (mob->race, RACE_NATIVE_TONGUE));
+	  if (mob->race!=0) /* ignore common humans whose native tongue variable is not accurate, since it's location dependent */
 	  {
-		  mob->skills[SKILL_SPEAK_WESTRON] = number (0, MIN(40, calc_lookup (mob, REG_CAP, SKILL_SPEAK_WESTRON)));
-		  mob->speaks = SKILL_SPEAK_BLACK_SPEECH;
+		  mob->skills[mob->speaks] = calc_lookup(mob,REG_CAP, mob->speaks);
 	  }
-			
-	  switch (mob->speaks)
-	    {
-	    case SKILL_SPEAK_ORKISH:
-	      mob->skills[SKILL_SPEAK_WESTRON] = number (0, MIN (35, calc_lookup (mob, REG_CAP, SKILL_SPEAK_WESTRON)));
-		  mob->skills[SKILL_SPEAK_ORKISH] = number (0, MIN (45, calc_lookup (mob, REG_CAP, SKILL_SPEAK_ORKISH)));
-		  mob->speaks = SKILL_SPEAK_BLACK_SPEECH;
-				break;
-	    case SKILL_SPEAK_ADUNAIC:
-			mob->skills[SKILL_SPEAK_WESTRON] = number (0, MIN (35, calc_lookup (mob, REG_CAP, SKILL_SPEAK_WESTRON)));
-			mob->skills[SKILL_SPEAK_ADUNAIC] = number (0, MIN (35, calc_lookup (mob, REG_CAP, SKILL_SPEAK_ADUNAIC)));
-			mob->speaks = SKILL_SPEAK_BLACK_SPEECH;
-			break;
-	    case SKILL_SPEAK_HARADAIC:
-	      mob->skills[SKILL_SPEAK_HARADAIC] =
-		number (50,
-			MIN (50,
-			     calc_lookup (mob, REG_CAP,
-					  SKILL_SPEAK_HARADAIC)));
-		  mob->speaks = SKILL_SPEAK_BLACK_SPEECH;
-					break;
-					
-				default:
-					break;
-				}
-	  mob->skills[mob->speaks] = calc_lookup (mob, REG_CAP, mob->speaks);
-	}
+   }
 
-      for (i = 1; i <= LAST_SKILL; i++)
-			{
+   /* Grommit ensure Westron for NPCs */
+   if (!mob->skills[SKILL_SPEAK_WESTRON] && IS_NPC(mob))
+	   mob->skills[SKILL_SPEAK_WESTRON] = 20;
+
+   for (i = 1; i <= LAST_SKILL; i++)
+		{
 	proto->skills[i] = mob->skills[i];
 			}
 

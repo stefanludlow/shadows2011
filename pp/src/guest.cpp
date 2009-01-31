@@ -39,7 +39,7 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
   sprintf (tname_buf, "%s-Guest", d->acct->name.c_str ());
 
   d->character = new_char (1);
-  clear_char (d->character);
+  //clear_char (d->character);
 
   d->character->deleted = 0;
 

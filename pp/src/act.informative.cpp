@@ -1447,7 +1447,7 @@ reading_check (CHAR_DATA * ch, OBJ_DATA * obj, WRITING_DATA * writing,
       && strcasecmp (writing->author, ch->tname) != STR_MATCH)
     {
       sprintf (output,
-	       "Although you recognise the script as %s, the language in which this document is written is unknown to you.",
+	       "Although you recognise the script as %s, the mode and language in which this document is written is unknown to you.",
 	       skills[writing->script]);
       act (output, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
       return;
@@ -1467,16 +1467,16 @@ reading_check (CHAR_DATA * ch, OBJ_DATA * obj, WRITING_DATA * writing,
   if (!page)
     {
       sprintf (output,
-	       "#2On %s#0, %s sigils, scribed %s in %s, bear a message in the %s tongue:",
-	       obj->short_description, skills[writing->script],
+		  "#2On %s#0, %s sigils of the %s mode, scribed %s in %s, bear a message in the %s tongue:",
+	       obj->short_description, skills[writing->script],skills[writing->language],
 	       writing_adj (writing->skill), writing->ink,
 	       skills[writing->language]);
     }
   else
     {
       sprintf (output,
-	       "On #2page %d#0, %s sigils, scribed %s in %s, bear a message in the %s tongue:",
-	       page - 1, skills[writing->script],
+	       "On #2page %d#0, %s sigils of the %s mode, scribed %s in %s, bear a message in the %s tongue:",
+	       page - 1, skills[writing->script],skills[writing->language],
 	       writing_adj (writing->skill), writing->ink,
 	       skills[writing->language]);
     }
@@ -2651,210 +2651,6 @@ char_long (CHAR_DATA * ch, int show_tname)
     return ch->long_descr;
 }
 
-void
-stink_to_room_description (int type, char *buf)
-{
-  strcpy (buf, "#D");
-  buf += 2;
-
-  switch (type)
-    {
-    case MAGIC_AKLASH_ODOR:
-      strcpy (buf, "An overwhelming stench of rotten food, decaying "
-	      "animals and dead things\npervades the area.");
-      break;
-
-    case MAGIC_ROSE_SCENT:
-      strcpy (buf, "The pleasant fragrance of roses fills the air.");
-      break;
-
-    case MAGIC_JASMINE_SCENT:
-      strcpy (buf, "A subtle, alluring aroma of jasmine lingers upon the "
-	      "air.");
-      break;
-
-    case MAGIC_SEWER_STENCH:
-      strcpy (buf, "The stench of raw sewage permeates this area, and "
-	      "everything in it.");
-      break;
-
-    case MAGIC_SOAP_AROMA:
-      strcpy (buf, "The pleasant and comforting scent of soap fills the "
-	      "area.");
-      break;
-
-    case MAGIC_CINNAMON_SCENT:
-      strcpy (buf, "An unmistakable and pleasant fragrance of cinnamon "
-	      "floats upon the air.");
-      break;
-
-    case MAGIC_LEORTEVALD_STENCH:
-      strcpy (buf, "A strong, pungent odor of decaying corpses hangs "
-	      "heavily in the air.");
-      break;
-
-    case MAGIC_YULPRIS_ODOR:
-      strcpy (buf, "The unpleasant, almost sickening stench of rotting "
-	      "food makes breathing difficult.");
-      break;
-
-    case MAGIC_FRESH_BREAD:
-      strcpy (buf, "A fine aroma of freshly baked bread fills the area, "
-	      "making the mouth water.");
-      break;
-
-    case MAGIC_MOWN_HAY:
-      strcpy (buf, "The rich fragrance of new-mown hay pervades the "
-	      "area.");
-      break;
-
-    case MAGIC_FRESH_LINEN:
-      strcpy (buf, "This area bears the comforting scent of freshly "
-	      "laundered linen.");
-      break;
-
-    case MAGIC_INCENSE_SMOKE:
-      strcpy (buf,
-	      "The smoke of incense fills the air with its heady scent.");
-      break;
-
-    case MAGIC_WOOD_SMOKE:
-      strcpy (buf, "The smell of seasoned wood being burned fills the air.");
-      break;
-
-    default:
-      strcpy (buf, "There is an unrecognizable odor here.");
-      break;
-    }
-
-  strcat (buf, "#0");
-}
-
-void
-stink_to_description (int type, char *buf)
-{
-  switch (type)
-    {
-    case MAGIC_AKLASH_ODOR:
-      strcpy (buf, "$n #5smells of rotten food, decaying animals and "
-	      "dead things.");
-      break;
-
-    case MAGIC_ROSE_SCENT:
-      strcpy (buf, "$n #Dsmells pleasantly and faintly of roses.");
-      break;
-
-    case MAGIC_JASMINE_SCENT:
-      strcpy (buf, "$n #Dhas a subtle scent of jasmine about $mself.");
-      break;
-
-    case MAGIC_SEWER_STENCH:
-      strcpy (buf, "$n #Dsmells as if $e had been wallowing in raw "
-	      "sewage.");
-      break;
-
-    case MAGIC_SOAP_AROMA:
-      strcpy (buf, "$n #Dsmells fresly bathed.");
-      break;
-
-    case MAGIC_CINNAMON_SCENT:
-      strcpy (buf, "$n #Dhas about $mself the faint odor of cinnamon.");
-      break;
-
-    case MAGIC_LEORTEVALD_STENCH:
-      strcpy (buf, "$n #Dsmells of decaying corpses.");
-      break;
-
-    case MAGIC_YULPRIS_ODOR:
-      strcpy (buf, "$n #Dbears a foul odor, reminiscent of rotting food.");
-      break;
-
-    case MAGIC_FRESH_BREAD:
-      strcpy (buf, "$n #Dsmells pleasantly of fresh-baked bread.");
-      break;
-
-    case MAGIC_MOWN_HAY:
-      strcpy (buf, "$n #Dhas about $mself the fresh fragrance of new-mown "
-	      "hay.");
-      break;
-
-    case MAGIC_FRESH_LINEN:
-      strcpy (buf, "$n #Dis enveloped in the comforting scent of freshly "
-	      "laundered linen.");
-      break;
-
-    case MAGIC_INCENSE_SMOKE:
-      strcpy (buf, "$n #Dis surrounded by the pleasant scent of incense.");
-      break;
-
-    case MAGIC_WOOD_SMOKE:
-      strcpy (buf, "$n #Dhas the unmistakable aroma of burning firewood.");
-      break;
-
-    default:
-      strcpy (buf, "$n #Dhas an unrecognizable odor.");
-      break;
-    }
-
-  strcat (buf, "#0");
-}
-
-int
-get_stink_message (CHAR_DATA * ch, ROOM_DATA * room, char *stink_buf,
-		   CHAR_DATA * smeller)
-{
-  int smeller_is_admin = 0;
-  AFFECTED_TYPE *smell_af = NULL;
-  AFFECTED_TYPE *af = NULL;
-  AFFECTED_TYPE *affect_list = NULL;
-
-  if (ch)
-    affect_list = ch->hour_affects;
-  else
-    affect_list = room->affects;
-
-  if (smeller && GET_TRUST (smeller))
-    smeller_is_admin = 1;
-
-  for (af = affect_list; af; af = af->next)
-    {
-
-      if (af->type < MAGIC_SMELL_FIRST || af->type > MAGIC_SMELL_LAST)
-	continue;
-
-      if (!smeller_is_admin && af->a.smell.aroma_strength < 500)
-	continue;
-
-      if (!smell_af)
-	{
-	  smell_af = af;
-	  continue;
-	}
-
-      if (af->a.smell.aroma_strength > smell_af->a.smell.aroma_strength)
-	smell_af = af;
-    }
-
-  if (!smell_af)
-    return 0;
-
-  *stink_buf = '\0';
-
-  if (smeller && GET_TRUST (smeller))
-    sprintf (stink_buf, "(%d %d) ",
-	     smell_af->a.smell.duration, smell_af->a.smell.aroma_strength);
-
-  if (smeller_is_admin && smell_af->a.smell.aroma_strength < 500)
-    sprintf (stink_buf + strlen (stink_buf), "(weak) ");
-
-  if (ch)
-    stink_to_description (smell_af->type, stink_buf + strlen (stink_buf));
-  else
-    stink_to_room_description (smell_af->type,
-			       stink_buf + strlen (stink_buf));
-
-  return 1;
-}
 
 char *
 left_right_grip (CHAR_DATA * ch)
@@ -2953,750 +2749,760 @@ worn_third_loc (CHAR_DATA * ch, OBJ_DATA * obj)
 void
 show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 {
-	int percent = 0;
-	int curdamage = 0;
-	int location = 0;
-	OBJ_DATA *eq = NULL;
-	OBJ_DATA *blindfold = NULL;
-	OBJ_DATA *tobj = NULL;
-	AFFECTED_TYPE *af = NULL;
-	ROOM_DATA *troom = NULL;
-	WOUND_DATA *wound = NULL;
-	ENCHANTMENT_DATA *enchantment = NULL;
-	char *p = '\0';
-	char stink_buf[MAX_STRING_LENGTH] = { '\0' };
-	char buf[MAX_STRING_LENGTH] = { '\0' };
-	char buffer[MAX_STRING_LENGTH] = { '\0' };
-	char *dir_names[] = {
-		"to the north", "to the east", "to the south",
-		"to the west", "above", "below"
-	};
-	char buf2[MAX_STRING_LENGTH] = { '\0' };
-	char buf3[MAX_STRING_LENGTH] = { '\0' };
-	bool found = false;
+  int percent = 0;
+  int curdamage = 0;
+  int location = 0;
+  OBJ_DATA *eq = NULL;
+  OBJ_DATA *blindfold = NULL;
+  OBJ_DATA *tobj = NULL;
+  AFFECTED_TYPE *af = NULL;
+  ROOM_DATA *troom = NULL;
+  WOUND_DATA *wound = NULL;
+  ENCHANTMENT_DATA *enchantment = NULL;
+  char *p = '\0';
+  char buf[MAX_STRING_LENGTH] = { '\0' };
+  char buffer[MAX_STRING_LENGTH] = { '\0' };
+  char *dir_names[] = {
+    "to the north", "to the east", "to the south",
+    "to the west", "above", "below"
+  };
+  char buf2[MAX_STRING_LENGTH] = { '\0' };
+  char buf3[MAX_STRING_LENGTH] = { '\0' };
+  bool found = false;
 
-	if (mode == 4)
-		mode = 0;
+  if (mode == 4)
+    mode = 0;
 
-	if (!mode)
+  if (!mode)
+    {
+
+      if (IS_SUBDUEE (i))
 	{
-
-		if (IS_SUBDUEE (i))
-		{
-			if (i->subdue == ch)
-				act ("You have #5$N#0 in tow.", false, ch, 0, i, TO_CHAR);
-			return;
-		}
-
-		if (!CAN_SEE (ch, i))
-		{
-			if (!GET_FLAG (i, FLAG_WIZINVIS) &&
-				get_affect (ch, MAGIC_AFFECT_SENSE_LIFE))
-				send_to_char ("\nYou sense a hidden life form in the room.\n\n",
-				ch);
-			return;
-		}
-
-		if ((blindfold = get_equip (i, WEAR_BLINDFOLD)) ||
-			!char_long (i, 0) || GET_POS (i) != i->default_pos ||
-			IS_SWIMMING (i))
-		{
-			if (char_short (i))
-			{
-				strcpy (buffer, "#5");
-				strcat (buffer, char_short (i));
-				strcat (buffer, "#0");
-				buffer[2] = toupper (buffer[2]);
-
-			}
-			else
-				strcpy (buffer, "#5A nameless one#0");
-
-			if (IS_SWIMMING (i))
-			{
-				if ( IS_SET(i->act, ACT_FLYING ))
-					strcat(buffer, " is here, flying.");
-				else 
-					strcat (buffer, " is here, swimming.");
-			}
-			else
-				switch (GET_POS (i))
-			{
-				case POSITION_STUNNED:
-					if (blindfold)
-						strcat (buffer, " is here, stunned and blindfolded.");
-					else
-						strcat (buffer, " is here, stunned.");
-					break;
-				case POSITION_UNCONSCIOUS:
-					if (blindfold)
-						strcat (buffer,
-						" is lying here, unconscious and blindfolded.");
-					else
-						strcat (buffer, " is lying here, unconscious.");
-					break;
-				case POSITION_MORTALLYW:
-					if (blindfold)
-						strcat (buffer,
-						" is lying here, mortally wounded and blindfolded.");
-					else
-						strcat (buffer, " is lying here, mortally wounded.");
-					break;
-				case POSITION_DEAD:
-					strcat (buffer, " is lying here, dead.");
-					break;
-				case POSITION_STANDING:
-					if (blindfold)
-						strcat (buffer, " is standing here, blindfolded.");
-					else
-						strcat (buffer, " is standing here.");
-					break;
-				case POSITION_SITTING:
-					if (blindfold)
-						strcat (buffer, " is sitting here, blindfolded");
-					if (i->pmote_str)
-					{
-						sprintf (buffer, "#5");
-						strcat (buffer, char_long (i, GET_TRUST (ch)));
-						strcat (buffer, "#0");
-						break;
-					}
-					else
-						strcat (buffer, " is sitting here");
-
-					if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
-						is_obj_in_list (af->a.table.obj, i->room->contents))
-					{
-						tobj = af->a.table.obj;
-						sprintf (buffer + strlen (buffer), " at #2%s#0.",
-							OBJS (tobj, i));
-					}
-					else
-						strcat (buffer, ".");
-					break;
-				case POSITION_RESTING:
-					if (blindfold)
-						strcat (buffer, " is resting here, blindfolded");
-					else
-					{
-						if (i->pmote_str)
-						{
-							sprintf (buffer, "#5");
-							strcat (buffer, char_long (i, GET_TRUST (ch)));
-							strcat (buffer, "#0");
-							break;
-						}
-						else
-							strcat (buffer, " is resting here");
-					}
-					if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
-						is_obj_in_list (af->a.table.obj, i->room->contents))
-					{
-						tobj = af->a.table.obj;
-						sprintf (buffer + strlen (buffer), " at #2%s#0.",
-							OBJS (tobj, i));
-					}
-					else
-						strcat (buffer, ".");
-					break;
-				case POSITION_SLEEPING:
-					if (blindfold)
-						strcat (buffer, " is sleeping here, blindfolded");
-					else
-						strcat (buffer, " is sleeping here");
-
-					if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
-						is_obj_in_list ((OBJ_DATA *) af->a.spell.t,
-						i->room->contents))
-					{
-						tobj = (OBJ_DATA *) af->a.spell.t;
-						sprintf (buffer + strlen (buffer), " at #2%s#0.",
-							OBJS (tobj, i));
-					}
-					else
-						strcat (buffer, ".");
-
-					break;
-				case POSITION_FIGHTING:
-					if (i->fighting)
-					{
-
-						if (IS_SET (i->flags, FLAG_SUBDUING))
-						{
-							if (blindfold)
-								strcat (buffer,
-								" is here, #1wrestling blindfolded#0 against ");
-							else
-								strcat (buffer, " is here, #1wrestling#0 ");
-						}
-						else
-						{
-							if (blindfold)
-								strcat (buffer,
-								" is here, #1fighting blindfolded#0 against ");
-							else
-								strcat (buffer, " is here, #1fighting#0 ");
-						}
-
-						if (i->fighting == ch)
-							strcat (buffer, " you!");
-						else
-						{
-							if (i->in_room == i->fighting->in_room)
-							{
-								strcat (buffer, char_short (i->fighting));
-								strcat (buffer, ".");
-							}
-							else
-								strcat (buffer, "someone who has already left.");
-						}
-					}
-					else		/* NIL fighting pointer */
-						strcat (buffer, " is here struggling with thin air.");
-					break;
-				default:
-					strcat (buffer, " is floating here.");
-					break;
-			}
-			if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
-				strcat (buffer, " #2(new player)#0");
-
-			if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
-				strcat (buffer, " #B(new player guide)#0");
-
-			if (i->desc && i->desc->idle)
-				strcat (buffer, " #1(idle)#0");
-
-			if ((GET_TRUST (i) || get_affect (ch, MAGIC_AFFECT_SENSE_LIFE))
-				&& get_affect (i, MAGIC_HIDDEN))
-				strcat (buffer, " #1(hidden)#0");
-
-			if (are_grouped (i, ch))
-				strcat (buffer, " #6(grouped)#0");
-
-			if (GET_FLAG (i, FLAG_WIZINVIS))
-				strcat (buffer, " #C(wizinvis)#0");
-
-			if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
-				strcat (buffer, " #1(invisible)#0");
-
-			if (get_affect (i, MAGIC_AFFECT_CONCEALMENT) &&
-				(i == ch || GET_TRUST (i) ||
-				get_affect (ch, MAGIC_AFFECT_SENSE_LIFE)))
-				strcat (buffer, " #1(blend)#0");
-
-			if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
-				strcat (buffer, " #1(editing)#0");
-
-			if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
-				strcat (buffer, " #1(link dead)#0");
-
-			if (!IS_MORTAL (ch) && i->pc && !i->desc && i->pc->admin_loaded)
-				strcat (buffer, " #3(loaded)#0");
-
-			if (i->desc && i->desc->original && !IS_MORTAL (ch))
-				strcat (buffer, " #2(animated)#0");
-
-			strcat (buffer, "#0\n");
-			reformat_string (buffer, &p);
-			send_to_char (p, ch);
-			mem_free (p); // char*
-		}
-
-		else
-		{			/* npc with long */
-			if (IS_SUBDUER (i))
-			{
-				if (IS_RIDER (i))
-					sprintf (buffer,
-					"#5%s#0, mounted on #5%s#0, has #5%s#0 in tow.\n",
-					char_short (i), char_short (i->mount),
-					i->subdue == ch ? "you" : char_short (i->subdue));
-				else
-					sprintf (buffer, "#5%s#0 has #5%s#0 in tow.\n",
-					char_short (i),
-					i->subdue == ch ? "you" : char_short (i->subdue));
-				buffer[2] = toupper (buffer[2]);
-				send_to_char (buffer, ch);
-			}
-
-			else if (IS_RIDER (i) && !IS_SUBDUER (i))
-			{
-
-				sprintf (buffer, "%s#0 %s %s#5%s#0.",
-					char_short (i), AWAKE (i) ?
-					"sits atop" : "is asleep upon", AWAKE (i->mount) ?
-					"" : "a sleeping mount, ", char_short (i->mount));
-
-				*buffer = toupper (*buffer);
-				sprintf (buf2, "#5%s", buffer);
-				sprintf (buffer, "%s", buf2);
-				act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-			}
-
-			else if (IS_RIDEE (i))
-			{
-
-				if (ch == i->mount)
-				{
-					sprintf (buffer, "You sit upon %s#5%s#0.\n", AWAKE (i) ?
-						"" : "a sleeping mount, ", char_short (i));
-
-					send_to_char (buffer, ch);
-				}
-			}
-
-			else if (IS_HITCHEE (i))
-			{
-
-				if (i == ch)
-					sprintf (buffer, "#5You#0 ride upon #5%s#0.\n",
-					char_short (i));
-				else
-					sprintf (buffer, "#5%s#0 is here, hitched to #5%s#0.\n",
-					char_short (i),
-					i->hitcher == ch ? "you" : char_short (i->hitcher));
-
-				buffer[2] = toupper (buffer[2]);
-				send_to_char (buffer, ch);
-			}
-
-			else
-			{
-				*buffer = '\0';
-
-
-				if ((GET_FLAG (i, FLAG_ENTERING) ||
-					GET_FLAG (i, FLAG_LEAVING)) && enter_exit_msg (i, buffer))
-				{
-					if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
-						strcat (buffer, " #2(new player)#0");
-
-					if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
-						strcat (buffer, " #B(new player guide)#0");
-
-					if (i->desc && !IS_NPC (i) && i->desc->idle)
-						strcat (buffer, "#1(idle)#0 ");
-
-					if (GET_FLAG (i, FLAG_WIZINVIS))
-						strcat (buffer, " #C(wizinvis)#0");
-
-					if (get_affect (i, MAGIC_HIDDEN))
-						strcat (buffer, " #1(hidden)#0");
-
-					if (are_grouped (i, ch))
-						strcat (buffer, " #6(grouped)#0");
-
-					if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
-						strcat (buffer, " #1(invisible)#0");
-
-					if (get_affect (i, MAGIC_AFFECT_CONCEALMENT))
-						strcat (buffer, " #1(blend)#0");
-
-					if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
-						strcat (buffer, " #1(editing)#0");
-
-					if (i->desc && i->desc->original && !IS_MORTAL (ch))
-						strcat (buffer, " #2(animated)#0");
-
-					if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
-						strcat (buffer, " #1(link dead)#0");
-
-					if (!IS_MORTAL (ch) && !IS_NPC (i) && !i->desc
-						&& i->pc->admin_loaded)
-						strcat (buffer, " #3(loaded)#0");
-
-					strcat (buffer, "#0\n");
-					reformat_string (buffer, &p);
-					send_to_char (p, ch);
-					mem_free (p); // char*
-				}
-				else if ((af = get_affect (i, AFFECT_SHADOW)) &&
-					af->a.shadow.edge != -1)
-				{
-					sprintf (buf, "%s", char_short (i));
-					*buf = toupper (*buf);
-					sprintf (buffer + strlen (buffer),
-						"#5%s is here, #0standing %s.", buf,
-						dir_names[af->a.shadow.edge]);
-					act (buffer, false, ch, 0, i, TO_CHAR | _ACT_FORMAT);
-				}
-				else if ((af = get_affect (i, AFFECT_GUARD_DIR)) &&
-					af->a.shadow.edge != -1)
-				{
-					sprintf (buf, "%s", char_short (i));
-					*buf = toupper (*buf);
-					sprintf (buffer + strlen (buffer),
-						"#5%s#0 is here, guarding the %s exit.", buf,
-						dirs[af->a.shadow.edge]);
-					act (buffer, false, ch, 0, i, TO_CHAR | _ACT_FORMAT);
-				}
-				else
-				{
-					sprintf (buffer, "#5");
-					strcat (buffer, char_long (i, GET_TRUST (ch)));
-					if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
-						strcat (buffer, " #2(new player)#0");
-
-					if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
-						strcat (buffer, " #B(new player guide)#0");
-
-					if (get_affect (i, MAGIC_HIDDEN))
-						strcat (buffer, " #1(hidden)#0");
-
-					if (are_grouped (i, ch))
-						strcat (buffer, " #6(grouped)#0");
-
-					if (i->desc && i->desc->idle)
-						strcat (buffer, " #1(idle)#0");
-
-					if (GET_FLAG (i, FLAG_WIZINVIS))
-						strcat (buffer, " #C(wizinvis)#0");
-
-					if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
-						strcat (buffer, " #1(invisible)#0");
-
-					if (get_affect (i, MAGIC_AFFECT_CONCEALMENT))
-						strcat (buffer, " #1(blend)#0");
-
-					if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
-						strcat (buffer, " #1(editing)#0");
-
-					if (i->desc && i->desc->original && !IS_MORTAL (ch))
-						strcat (buffer, " #2(animated)#0");
-
-					if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
-						strcat (buffer, " #1(link dead)#0");
-
-					if (!IS_MORTAL (ch) && !IS_NPC (i) && !i->desc
-						&& i->pc->admin_loaded)
-						strcat (buffer, " #3(loaded)#0");
-
-					strcat (buffer, "#0\n");
-					reformat_string (buffer, &p);
-					send_to_char (p, ch);
-					mem_free (p); //char*
-				}
-			}
-		}
-
-		if (get_stink_message (i, NULL, stink_buf, ch))
-		{
-			act (stink_buf, false, i, 0, ch, TO_VICT);
-		}
-
-		if ((af = get_affect (i, MAGIC_TOLL)) &&
-			af->a.toll.room_num == i->in_room)
-		{
-			sprintf (buffer, "$n #Dis collecting tolls from people leaving "
-				"%s.#0", dirs[af->a.toll.dir]);
-			act (buffer, true, i, 0, ch, TO_VICT);
-		}
-
+	  if (i->subdue == ch)
+	    act ("You have #5$N#0 in tow.", false, ch, 0, i, TO_CHAR);
+	  return;
 	}
-	else if (mode == 1 || mode == 15)
+
+      if (!CAN_SEE (ch, i))
+	{
+	  if (!GET_FLAG (i, FLAG_WIZINVIS) &&
+	      get_affect (ch, MAGIC_AFFECT_SENSE_LIFE))
+	    send_to_char ("\nYou sense a hidden life form in the room.\n\n",
+			  ch);
+	  return;
+	}
+
+      if ((blindfold = get_equip (i, WEAR_BLINDFOLD)) ||
+	  !char_long (i, 0) || GET_POS (i) != i->default_pos ||
+	  IS_SWIMMING (i))
+	{
+	  if (char_short (i))
+	    {
+	      strcpy (buffer, "#5");
+	      strcat (buffer, char_short (i));
+	      strcat (buffer, "#0");
+	      buffer[2] = toupper (buffer[2]);
+
+	    }
+	  else
+	    strcpy (buffer, "#5A nameless one#0");
+
+	  if (IS_SWIMMING (i))
+	    {
+	      if ( IS_SET(i->act, ACT_FLYING ))
+	        strcat(buffer, " is here, flying.");
+	      else 
+	        strcat (buffer, " is here, swimming.");
+	     }
+	  else
+	    switch (GET_POS (i))
+	      {
+	      case POSITION_STUNNED:
+		if (blindfold)
+		  strcat (buffer, " is here, stunned and blindfolded.");
+		else
+		  strcat (buffer, " is here, stunned.");
+		break;
+	      case POSITION_UNCONSCIOUS:
+		if (blindfold)
+		  strcat (buffer,
+			  " is lying here, unconscious and blindfolded.");
+		else
+		  strcat (buffer, " is lying here, unconscious.");
+		break;
+	      case POSITION_MORTALLYW:
+		if (blindfold)
+		  strcat (buffer,
+			  " is lying here, mortally wounded and blindfolded.");
+		else
+		  strcat (buffer, " is lying here, mortally wounded.");
+		break;
+	      case POSITION_DEAD:
+		strcat (buffer, " is lying here, dead.");
+		break;
+	      case POSITION_STANDING:
+		if (blindfold)
+		  strcat (buffer, " is standing here, blindfolded.");
+		else
+		  strcat (buffer, " is standing here.");
+		break;
+	      case POSITION_SITTING:
+		if (blindfold)
+		  strcat (buffer, " is sitting here, blindfolded");
+		if (i->pmote_str)
+		  {
+		    sprintf (buffer, "#5");
+		    strcat (buffer, char_long (i, GET_TRUST (ch)));
+		    strcat (buffer, "#0");
+		    break;
+		  }
+		else
+		  strcat (buffer, " is sitting here");
+
+		if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
+		    is_obj_in_list (af->a.table.obj, i->room->contents))
+		  {
+		    tobj = af->a.table.obj;
+		    sprintf (buffer + strlen (buffer), " at #2%s#0.",
+			     OBJS (tobj, i));
+		  }
+		else
+		  strcat (buffer, ".");
+		break;
+	      case POSITION_RESTING:
+		if (blindfold)
+		  strcat (buffer, " is resting here, blindfolded");
+		else
+		  {
+		    if (i->pmote_str)
+		      {
+			sprintf (buffer, "#5");
+			strcat (buffer, char_long (i, GET_TRUST (ch)));
+			strcat (buffer, "#0");
+			break;
+		      }
+		    else
+		      strcat (buffer, " is resting here");
+		  }
+		if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
+		    is_obj_in_list (af->a.table.obj, i->room->contents))
+		  {
+		    tobj = af->a.table.obj;
+		    sprintf (buffer + strlen (buffer), " at #2%s#0.",
+			     OBJS (tobj, i));
+		  }
+		else
+		  strcat (buffer, ".");
+		break;
+	      case POSITION_SLEEPING:
+		if (blindfold)
+		  strcat (buffer, " is sleeping here, blindfolded");
+		else
+		  strcat (buffer, " is sleeping here");
+
+		if ((af = get_affect (i, MAGIC_SIT_TABLE)) &&
+		    is_obj_in_list ((OBJ_DATA *) af->a.spell.t,
+				    i->room->contents))
+		  {
+		    tobj = (OBJ_DATA *) af->a.spell.t;
+		    sprintf (buffer + strlen (buffer), " at #2%s#0.",
+			     OBJS (tobj, i));
+		  }
+		else
+		  strcat (buffer, ".");
+
+		break;
+	      case POSITION_FIGHTING:
+		if (i->fighting)
+		  {
+
+		    if (IS_SET (i->flags, FLAG_SUBDUING))
+		      {
+			if (blindfold)
+			  strcat (buffer,
+				  " is here, #1wrestling blindfolded#0 against ");
+			else
+			  strcat (buffer, " is here, #1wrestling#0 ");
+		      }
+		    else
+		      {
+			if (blindfold)
+			  strcat (buffer,
+				  " is here, #1fighting blindfolded#0 against ");
+			else
+			  strcat (buffer, " is here, #1fighting#0 ");
+		      }
+
+		    if (i->fighting == ch)
+		      strcat (buffer, " you!");
+		    else
+		      {
+			if (i->in_room == i->fighting->in_room)
+			  {
+			    strcat (buffer, char_short (i->fighting));
+			    strcat (buffer, ".");
+			  }
+			else
+			  strcat (buffer, "someone who has already left.");
+		      }
+		  }
+		else		/* NIL fighting pointer */
+		  strcat (buffer, " is here struggling with thin air.");
+		break;
+	      default:
+		strcat (buffer, " is floating here.");
+		break;
+	      }
+		  
+		if (GET_TRUST(ch)) {
+			std::stringstream health;health << " #0<" << wound_total(i,true) << "> ";
+			strcat (buffer, health.str().c_str());
+		}
+		  
+		if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
+			strcat (buffer, " #2(new player)#0");
+
+        if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
+            strcat (buffer, " #B(new player guide)#0");
+
+	  if (i->desc && i->desc->idle)
+	    strcat (buffer, " #1(idle)#0");
+
+	  if ((GET_TRUST (i) || get_affect (ch, MAGIC_AFFECT_SENSE_LIFE))
+	      && get_affect (i, MAGIC_HIDDEN))
+	    strcat (buffer, " #1(hidden)#0");
+
+	  if (are_grouped (i, ch))
+	    strcat (buffer, " #6(grouped)#0");
+
+	  if (GET_FLAG (i, FLAG_WIZINVIS))
+	    strcat (buffer, " #C(wizinvis)#0");
+
+	  if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
+	    strcat (buffer, " #1(invisible)#0");
+
+	  if (get_affect (i, MAGIC_AFFECT_CONCEALMENT) &&
+	      (i == ch || GET_TRUST (i) ||
+	       get_affect (ch, MAGIC_AFFECT_SENSE_LIFE)))
+	    strcat (buffer, " #1(blend)#0");
+
+	  if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
+	    strcat (buffer, " #1(editing)#0");
+
+	  if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
+	    strcat (buffer, " #1(link dead)#0");
+
+	  if (!IS_MORTAL (ch) && i->pc && !i->desc && i->pc->admin_loaded)
+	    strcat (buffer, " #3(loaded)#0");
+
+	  if (i->desc && i->desc->original && !IS_MORTAL (ch))
+	    strcat (buffer, " #2(animated)#0");
+	  strcat (buffer, "#0\n");
+	  reformat_string (buffer, &p);
+	  send_to_char (p, ch);
+	  mem_free (p); // char*
+	}
+
+      else
+	{			/* npc with long */
+	  if (IS_SUBDUER (i))
+	    {
+	      if (IS_RIDER (i))
+		sprintf (buffer,
+			 "#5%s#0, mounted on #5%s#0, has #5%s#0 in tow.\n",
+			 char_short (i), char_short (i->mount),
+			 i->subdue == ch ? "you" : char_short (i->subdue));
+	      else
+		sprintf (buffer, "#5%s#0 has #5%s#0 in tow.\n",
+			 char_short (i),
+			 i->subdue == ch ? "you" : char_short (i->subdue));
+	      buffer[2] = toupper (buffer[2]);
+	      send_to_char (buffer, ch);
+	    }
+
+	  else if (IS_RIDER (i) && !IS_SUBDUER (i))
+	    {
+
+	      sprintf (buffer, "%s#0 %s %s#5%s#0.",
+		       char_short (i), AWAKE (i) ?
+		       "sits atop" : "is asleep upon", AWAKE (i->mount) ?
+		       "" : "a sleeping mount, ", char_short (i->mount));
+
+	      *buffer = toupper (*buffer);
+	      sprintf (buf2, "#5%s", buffer);
+	      sprintf (buffer, "%s", buf2);
+	      act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	    }
+
+	  else if (IS_RIDEE (i))
+	    {
+
+	      if (ch == i->mount)
+		{
+		  sprintf (buffer, "You sit upon %s#5%s#0.\n", AWAKE (i) ?
+			   "" : "a sleeping mount, ", char_short (i));
+
+		  send_to_char (buffer, ch);
+		}
+	    }
+
+	  else if (IS_HITCHEE (i))
+	    {
+
+	      if (i == ch)
+		sprintf (buffer, "#5You#0 ride upon #5%s#0.\n",
+			 char_short (i));
+	      else
+		sprintf (buffer, "#5%s#0 is here, hitched to #5%s#0.\n",
+			 char_short (i),
+			 i->hitcher == ch ? "you" : char_short (i->hitcher));
+
+	      buffer[2] = toupper (buffer[2]);
+	      send_to_char (buffer, ch);
+	    }
+
+	  else
+	    {
+	      *buffer = '\0';
+
+
+	      if ((GET_FLAG (i, FLAG_ENTERING) ||
+		   GET_FLAG (i, FLAG_LEAVING)) && enter_exit_msg (i, buffer))
+		{
+			if (GET_TRUST(ch)) {std::stringstream health;
+				health << " #0<" << wound_total(i,true) << "> ";
+				strcat (buffer, health.str().c_str());
+			}
+
+		  if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
+		    strcat (buffer, " #2(new player)#0");
+
+	          if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
+        	    strcat (buffer, " #B(new player guide)#0");
+
+		  if (i->desc && !IS_NPC (i) && i->desc->idle)
+		    strcat (buffer, "#1(idle)#0 ");
+
+		  if (GET_FLAG (i, FLAG_WIZINVIS))
+		    strcat (buffer, " #C(wizinvis)#0");
+
+		  if (get_affect (i, MAGIC_HIDDEN))
+		    strcat (buffer, " #1(hidden)#0");
+
+		  if (are_grouped (i, ch))
+		    strcat (buffer, " #6(grouped)#0");
+
+		  if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
+		    strcat (buffer, " #1(invisible)#0");
+
+		  if (get_affect (i, MAGIC_AFFECT_CONCEALMENT))
+		    strcat (buffer, " #1(blend)#0");
+
+		  if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
+		    strcat (buffer, " #1(editing)#0");
+
+		  if (i->desc && i->desc->original && !IS_MORTAL (ch))
+		    strcat (buffer, " #2(animated)#0");
+
+		  if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
+		    strcat (buffer, " #1(link dead)#0");
+
+		  if (!IS_MORTAL (ch) && !IS_NPC (i) && !i->desc
+		      && i->pc->admin_loaded)
+		    strcat (buffer, " #3(loaded)#0");
+
+		  strcat (buffer, "#0\n");
+		  reformat_string (buffer, &p);
+		  send_to_char (p, ch);
+		  mem_free (p); // char*
+		}
+	      else if ((af = get_affect (i, AFFECT_SHADOW)) &&
+		       af->a.shadow.edge != -1)
+		{
+		  sprintf (buf, "%s", char_short (i));
+		  *buf = toupper (*buf);
+		  sprintf (buffer + strlen (buffer),
+			   "#5%s is here, #0standing %s.", buf,
+			   dir_names[af->a.shadow.edge]);
+		  act (buffer, false, ch, 0, i, TO_CHAR | _ACT_FORMAT);
+		}
+	      else if ((af = get_affect (i, AFFECT_GUARD_DIR)) &&
+		       af->a.shadow.edge != -1)
+		{
+		  sprintf (buf, "%s", char_short (i));
+		  *buf = toupper (*buf);
+		  sprintf (buffer + strlen (buffer),
+			   "#5%s#0 is here, guarding the %s exit.", buf,
+			   dirs[af->a.shadow.edge]);
+		  act (buffer, false, ch, 0, i, TO_CHAR | _ACT_FORMAT);
+		}
+	      else
+		{
+		  sprintf (buffer, "#5");
+		  strcat (buffer, char_long (i, GET_TRUST (ch)));
+		  
+			if (GET_TRUST(ch)) {std::stringstream health;
+				health << " #0<" << wound_total(i,true) << "> ";
+				strcat (buffer, health.str().c_str());
+			}
+		  
+		  if (!IS_NPC (i) && IS_SET (i->plr_flags, NEW_PLAYER_TAG))
+		    strcat (buffer, " #2(new player)#0");
+
+	      if (!IS_NPC (i) && IS_GUIDE(i) && IS_SET (i->flags, FLAG_GUEST))
+        	    strcat (buffer, " #B(new player guide)#0");
+
+		  if (get_affect (i, MAGIC_HIDDEN))
+		    strcat (buffer, " #1(hidden)#0");
+
+		  if (are_grouped (i, ch))
+		    strcat (buffer, " #6(grouped)#0");
+
+		  if (i->desc && i->desc->idle)
+		    strcat (buffer, " #1(idle)#0");
+
+		  if (GET_FLAG (i, FLAG_WIZINVIS))
+		    strcat (buffer, " #C(wizinvis)#0");
+
+		  if (get_affect (i, MAGIC_AFFECT_INVISIBILITY))
+		    strcat (buffer, " #1(invisible)#0");
+
+		  if (get_affect (i, MAGIC_AFFECT_CONCEALMENT))
+		    strcat (buffer, " #1(blend)#0");
+
+		  if (IS_SET (i->act, PLR_QUIET) && !IS_NPC (i))
+		    strcat (buffer, " #1(editing)#0");
+
+		  if (i->desc && i->desc->original && !IS_MORTAL (ch))
+		    strcat (buffer, " #2(animated)#0");
+
+		  if (!IS_NPC (i) && !i->desc && !i->pc->admin_loaded)
+		    strcat (buffer, " #1(link dead)#0");
+
+		  if (!IS_MORTAL (ch) && !IS_NPC (i) && !i->desc
+		      && i->pc->admin_loaded)
+		    strcat (buffer, " #3(loaded)#0");
+
+		  strcat (buffer, "#0\n");
+		  reformat_string (buffer, &p);
+		  send_to_char (p, ch);
+		  mem_free (p); //char*
+		}
+	    }
+	}
+      
+      if ((af = get_affect (i, MAGIC_TOLL)) &&
+	  af->a.toll.room_num == i->in_room)
+	{
+	  sprintf (buffer, "$n #Dis collecting tolls from people leaving "
+		   "%s.#0", dirs[af->a.toll.dir]);
+	  act (buffer, true, i, 0, ch, TO_VICT);
+	}
+
+    }
+  else if (mode == 1 || mode == 15)
+    {
+
+      if (i->description)
 	{
 
-		if (i->description)
-		{
+	  if (((eq = get_equip (i, WEAR_HEAD))
+	       && IS_SET (eq->obj_flags.extra_flags, ITEM_MASK))
+	      || ((eq = get_equip (i, WEAR_FACE))
+		  && IS_SET (eq->obj_flags.extra_flags, ITEM_MASK))
+	      || ((eq = get_equip (i, WEAR_NECK_1))
+		  && IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
+		  && IS_SET (i->affected_by, AFF_HOODED))
+	      || ((eq = get_equip (i, WEAR_NECK_2))
+		  && IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
+		  && IS_SET (i->affected_by, AFF_HOODED))
+	      || ((eq = get_equip (i, WEAR_ABOUT))
+		  && IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
+		  && IS_SET (i->affected_by, AFF_HOODED)))
+	    {
+	      send_to_char ("This person's features are not visible.\n", ch);
+	    }
+	  else
+	    {
+	      send_to_char (i->description, ch);
+	    }
+	}
+      else
+	{
+	  act ("You see nothing special about $m.", false, i, 0, ch, TO_VICT);
+	}
 
-			if (((eq = get_equip (i, WEAR_HEAD))
-				&& IS_SET (eq->obj_flags.extra_flags, ITEM_MASK))
-				|| ((eq = get_equip (i, WEAR_FACE))
-				&& IS_SET (eq->obj_flags.extra_flags, ITEM_MASK))
-				|| ((eq = get_equip (i, WEAR_NECK_1))
-				&& IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
-				&& IS_SET (i->affected_by, AFF_HOODED))
-				|| ((eq = get_equip (i, WEAR_NECK_2))
-				&& IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
-				&& IS_SET (i->affected_by, AFF_HOODED))
-				|| ((eq = get_equip (i, WEAR_ABOUT))
-				&& IS_SET (eq->obj_flags.extra_flags, ITEM_MASK)
-				&& IS_SET (i->affected_by, AFF_HOODED)))
-			{
-				send_to_char ("This person's features are not visible.\n", ch);
-			}
-			else
-			{
-				send_to_char (i->description, ch);
-			}
-		}
-		else
-		{
-			act ("You see nothing special about $m.", false, i, 0, ch, TO_VICT);
-		}
-
-		/* Show name (first keyword) if mobile is owned by the character examining the mobile*/
-		if (mode == 15)
-		{
-			if(IS_NPC(i)) 
+	/* Show name (first keyword) if mobile is owned by the character examining the mobile*/
+	if (mode == 15)
+	{
+		if(IS_NPC(i)) 
 			{
 				if(i->mob->owner)
-				{
-					if(!strcmp(i->mob->owner, ch->tname))
 					{
-						sprintf (buffer, "\nYou recognise $n to be called "
-							"%s.", GET_NAME (i));
-						act (buffer, false, i, 0, ch, TO_VICT);
+						if(!strcmp(i->mob->owner, ch->tname))
+							{
+								sprintf (buffer, "\nYou recognise $n to be called "
+									 "%s.", GET_NAME (i));
+								act (buffer, false, i, 0, ch, TO_VICT);
+							}
 					}
-				}
 			}
-		}
-
-		/* show dmote */
-		/* Description is formated to 65 char, so we need to use reformat_desc instead of _ACT_FORMAT*/
-		if (i->dmote_str)
-		{
-			reformat_desc (i->dmote_str, &i->dmote_str);
-			sprintf(buffer, "\n%s", i->dmote_str);
-			send_to_char (buffer, ch);
-		}
-
-		/* Show a character to another */
-
-		if (GET_MAX_HIT (i) > 0)
-			percent = (100 * GET_HIT (i)) / GET_MAX_HIT (i);
-		else
-			percent = -1;		/* How could MAX_HIT be < 1?? */
-
-		strcpy (buffer, char_short (i));
-		*buffer = toupper (*buffer);
-
-		if (IS_SET (i->act, ACT_VEHICLE))
-		{
-			if (percent >= 100)
-				strcat (buffer, " is in pristine condition.\n");
-			else if (percent >= 90)
-				strcat (buffer, " is slightly damaged.\n");
-			else if (percent >= 70)
-				strcat (buffer, " is damaged, but still functional.\n");
-			else if (percent >= 50)
-				strcat (buffer, " is badly damaged.\n");
-			else if (percent >= 25)
-				strcat (buffer, " is barely functional.\n");
-			else if (percent >= 10)
-				strcat (buffer, " has sustained a great deal of damage!\n");
-			else if (percent >= 0)
-				strcat (buffer, " is about ready to collapse inward!\n");
-			send_to_char ("\n", ch);
-			send_to_char (buffer, ch);
-		}
-
-		*buf2 = '\0';
-		*buf3 = '\0';
-		strcpy (buf2, display_clan_ranks (i, ch));
-		if (mode == 15 && i != ch && *buf2 && !is_hooded (i))
-		{
-			send_to_char ("\n", ch);
-			*buf2 = toupper (*buf2);
-			reformat_string (buf2, &p);
-			send_to_char (p, ch);
-			mem_free (p); //char*
-			p = NULL;
-		}
-
-		/*
-		if ( (mode == 1 || mode == 15) && !IS_NPC(i) ) {
-		send_to_char ("\n", ch);
-		sprintf (buffer, "%s is approximately %d inches in height, and appears to be of %s build.", HSSH(i), i->height, frames[i->frame]);
-		buffer[0] = toupper(buffer[0]);
-		reformat_string (buffer, &p);
-		send_to_char (p, ch);
-		mem_free (p); // char*
-		p = NULL;
-		}
-		*/
-
-		if (mode == 15 && i->damage && !IS_SET (i->act, ACT_VEHICLE)
-			&& !is_hooded (i))
-		{
-			curdamage = i->damage;
-			if (curdamage > 0 && curdamage <= i->max_hit * .25)
-				sprintf (buffer, "%s face looks slightly pale.\n",
-				char_short (i));
-			else if (curdamage > i->max_hit * .25
-				&& curdamage < i->max_hit * .50)
-				sprintf (buffer, "%s face looks rather pallid.\n",
-				char_short (i));
-			else if (curdamage > i->max_hit * .50
-				&& curdamage < i->max_hit * .75)
-				sprintf (buffer, "%s face looks quite ashen.\n", char_short (i));
-			else if (curdamage > i->max_hit * .75)
-				sprintf (buffer, "%s face looks deathly pale.\n", char_short (i));
-			*buffer = toupper (*buffer);
-			send_to_char ("\n", ch);
-			send_to_char (buffer, ch);
-		}
-
-		if (mode == 1)
-		{
-			curdamage = 0;
-			for (wound = i->wounds; wound; wound = wound->next)
-				curdamage += wound->damage;
-			curdamage += i->damage;
-
-			if (curdamage <= 0)
-				sprintf (buffer, "%s appears to be in excellent condition.\n",
-				char_short (i));
-			else if (curdamage <= i->max_hit * .1667)
-				sprintf (buffer,
-				"%s appears to be slightly the worse for wear.\n",
-				char_short (i));
-			else if (curdamage > i->max_hit * .1667
-				&& curdamage <= i->max_hit * .3333)
-				sprintf (buffer, "%s appears injured.\n", char_short (i));
-			else if (curdamage > i->max_hit * .3333
-				&& curdamage <= i->max_hit * .6667)
-				sprintf (buffer, "%s appears moderately injured.\n",
-				char_short (i));
-			else if (curdamage > i->max_hit * .6667
-				&& curdamage <= i->max_hit * .8335)
-				sprintf (buffer, "%s appears severely injured.\n",
-				char_short (i));
-			else if (curdamage >= i->max_hit * .8335)
-				sprintf (buffer, "%s appears close to death.\n", char_short (i));
-			send_to_char ("\n", ch);
-			*buffer = toupper (*buffer);
-			reformat_string (buffer, &p);
-			send_to_char (p, ch);
-			mem_free (p); // char*
-			p = NULL;
-		}
-
-		if (mode == 15 && !IS_SET (i->act, ACT_VEHICLE)
-			&& (i->wounds || i->lodged))
-		{
-			sprintf (buf2, "%s", show_wounds (i, 0));
-			if (ch->fighting || i->fighting)
-				sprintf (buf2, "%s", strip_small_minor(buf2, ch));
-
-			send_to_char ("\n", ch);
-			strcat (buf3, buf2);
-			act (buf3, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-			*buf3 = '\0';
-		}
-
-		if (mode == 15 && (!i->damage || is_hooded (i))
-			&& !IS_SET (i->act, ACT_VEHICLE) && !i->wounds && !i->lodged)
-		{
-			send_to_char ("\n", ch);
-			sprintf (buf2, "%s appears to be in excellent condition.",
-				char_short (i));
-			*buf2 = toupper (*buf2);
-			reformat_string (buf2, &p);
-			send_to_char (p, ch);
-			mem_free (p); //char*
-			p = NULL;
-		}
-
-		if (i->mob &&
-			i->mob->vehicle_type == VEHICLE_HITCH &&
-			(troom = vtor (i->mob->nVirtual)) &&
-			(troom->people || troom->contents) && i->room != troom)
-		{
-			sprintf (buf, "\nOn board, you see:\n");
-			send_to_char (buf, ch);
-			if (troom->people)
-				list_char_to_char (troom->people, ch, 0);
-			if (troom->contents)
-				list_obj_to_char (troom->contents, ch, 0, true);
-		}
-
-		for (enchantment = i->enchantments; enchantment;
-			enchantment = enchantment->next)
-		{
-			if (*show_enchantment (enchantment))
-				sprintf (buf3 + strlen (buf3), "%s",
-				show_enchantment (enchantment));
-		}
-
-		if (*buf3)
-		{
-			act (buf3, false, ch, 0, 0, TO_CHAR);
-		}
-
-		*buf3 = '\0';
-		if (i == ch)
-		{
-			send_to_char ("\n", i);
-			do_equipment (i, "", 0);
-		}
-		else
-		{
-			if (i->equip || i->right_hand || i->left_hand)
-				send_to_char ("\n", ch);
-			if (i->right_hand)
-			{
-				if (!IS_SET (i->act, ACT_MOUNT))
-				{
-					if (i->right_hand->location == WEAR_PRIM
-						|| i->right_hand->location == WEAR_SEC)
-						sprintf (buf, "<wielded in right hand>  ");
-					else if (i->right_hand->location == WEAR_BOTH)
-						sprintf (buf, "<wielded in both hands>  ");
-					else if (i->right_hand->location == WEAR_SHIELD)
-						sprintf (buf, "<gripped in right hand>  ");
-					else
-						sprintf (buf, "<carried in right hand>  ");
-				}
-				else
-					sprintf (buf, "<carried on back>        ");
-				send_to_char (buf, ch);
-				show_obj_to_char (i->right_hand, ch, 1);
-			}
-			if (i->left_hand)
-			{
-				if (!IS_SET (i->act, ACT_MOUNT))
-				{
-					if (i->left_hand->location == WEAR_PRIM
-						|| i->left_hand->location == WEAR_SEC)
-						sprintf (buf, "<wielded in left hand>   ");
-					else if (i->left_hand->location == WEAR_BOTH)
-						sprintf (buf, "<wielded in both hands>  ");
-					else if (i->left_hand->location == WEAR_SHIELD)
-						sprintf (buf, "<gripped in left hand>   ");
-					else
-						sprintf (buf, "<carried in left hand>   ");
-				}
-				else
-					sprintf (buf, "<carried on back>        ");
-
-				send_to_char (buf, ch);
-				show_obj_to_char (i->left_hand, ch, 1);
-			}
-
-			if (i->equip && (i->left_hand || i->right_hand))
-				send_to_char ("\n", ch);
-
-			for (location = 0; location < MAX_WEAR; location++)
-			{
-
-				if (!(eq = get_equip (i, loc_order[location])))
-					continue;
-
-				if (eq == i->right_hand || eq == i->left_hand)
-					continue;
-
-				send_to_char (where[loc_order[location]], ch);
-
-				if (location == WEAR_BLINDFOLD || IS_OBJ_VIS (ch, eq))
-					show_obj_to_char (eq, ch, 1);
-				else
-					send_to_char ("#2something#0\n", ch);
-
-				found = true;
-			}
-		}
 	}
 
-	else if (mode == 3)
+	/* show dmote */
+	/* Description is formated to 65 char, so we need to use reformat_desc instead of _ACT_FORMAT*/
+	 if (i->dmote_str)
+	   {
+		reformat_desc (i->dmote_str, &i->dmote_str);
+		sprintf(buffer, "\n%s", i->dmote_str);
+		 send_to_char (buffer, ch);
+       }
+       
+      /* Show a character to another */
+
+      if (GET_MAX_HIT (i) > 0)
+	percent = (100 * GET_HIT (i)) / GET_MAX_HIT (i);
+      else
+	percent = -1;		/* How could MAX_HIT be < 1?? */
+
+      strcpy (buffer, char_short (i));
+      *buffer = toupper (*buffer);
+
+      if (IS_SET (i->act, ACT_VEHICLE))
 	{
-		if (CAN_SEE (ch, i))
-		{
-			send_to_char ("   ", ch);
-			act ("$N", false, ch, 0, i, TO_CHAR);
-		}
+	  if (percent >= 100)
+	    strcat (buffer, " is in pristine condition.\n");
+	  else if (percent >= 90)
+	    strcat (buffer, " is slightly damaged.\n");
+	  else if (percent >= 70)
+	    strcat (buffer, " is damaged, but still functional.\n");
+	  else if (percent >= 50)
+	    strcat (buffer, " is badly damaged.\n");
+	  else if (percent >= 25)
+	    strcat (buffer, " is barely functional.\n");
+	  else if (percent >= 10)
+	    strcat (buffer, " has sustained a great deal of damage!\n");
+	  else if (percent >= 0)
+	    strcat (buffer, " is about ready to collapse inward!\n");
+	  send_to_char ("\n", ch);
+	  send_to_char (buffer, ch);
 	}
+
+      *buf2 = '\0';
+      *buf3 = '\0';
+      strcpy (buf2, display_clan_ranks (i, ch));
+      if (mode == 15 && i != ch && *buf2 && !is_hooded (i))
+	{
+	  send_to_char ("\n", ch);
+	  *buf2 = toupper (*buf2);
+	  reformat_string (buf2, &p);
+	  send_to_char (p, ch);
+	  mem_free (p); //char*
+	  p = NULL;
+	}
+
+      /*
+         if ( (mode == 1 || mode == 15) && !IS_NPC(i) ) {
+         send_to_char ("\n", ch);
+         sprintf (buffer, "%s is approximately %d inches in height, and appears to be of %s build.", HSSH(i), i->height, frames[i->frame]);
+         buffer[0] = toupper(buffer[0]);
+         reformat_string (buffer, &p);
+         send_to_char (p, ch);
+         mem_free (p); // char*
+         p = NULL;
+         }
+       */
+
+      if (mode == 15 && i->damage && !IS_SET (i->act, ACT_VEHICLE)
+	  && !is_hooded (i))
+	{
+	  curdamage = i->damage;
+	  if (curdamage > 0 && curdamage <= i->max_hit * .25)
+	    sprintf (buffer, "%s face looks slightly pale.\n",
+		     char_short (i));
+	  else if (curdamage > i->max_hit * .25
+		   && curdamage < i->max_hit * .50)
+	    sprintf (buffer, "%s face looks rather pallid.\n",
+		     char_short (i));
+	  else if (curdamage > i->max_hit * .50
+		   && curdamage < i->max_hit * .75)
+	    sprintf (buffer, "%s face looks quite ashen.\n", char_short (i));
+	  else if (curdamage > i->max_hit * .75)
+	    sprintf (buffer, "%s face looks deathly pale.\n", char_short (i));
+	  *buffer = toupper (*buffer);
+	  send_to_char ("\n", ch);
+	  send_to_char (buffer, ch);
+	}
+
+      if (mode == 1)
+	{
+	  curdamage = 0;
+	  for (wound = i->wounds; wound; wound = wound->next)
+	    curdamage += wound->damage;
+	  curdamage += i->damage;
+
+	  if (curdamage <= 0)
+	    sprintf (buffer, "%s appears to be in excellent condition.\n",
+		     char_short (i));
+	  else if (curdamage <= i->max_hit * .1667)
+	    sprintf (buffer,
+		     "%s appears to be slightly the worse for wear.\n",
+		     char_short (i));
+	  else if (curdamage > i->max_hit * .1667
+		   && curdamage <= i->max_hit * .3333)
+	    sprintf (buffer, "%s appears injured.\n", char_short (i));
+	  else if (curdamage > i->max_hit * .3333
+		   && curdamage <= i->max_hit * .6667)
+	    sprintf (buffer, "%s appears moderately injured.\n",
+		     char_short (i));
+	  else if (curdamage > i->max_hit * .6667
+		   && curdamage <= i->max_hit * .8335)
+	    sprintf (buffer, "%s appears severely injured.\n",
+		     char_short (i));
+	  else if (curdamage >= i->max_hit * .8335)
+	    sprintf (buffer, "%s appears close to death.\n", char_short (i));
+	  send_to_char ("\n", ch);
+	  *buffer = toupper (*buffer);
+	  reformat_string (buffer, &p);
+	  send_to_char (p, ch);
+	  mem_free (p); // char*
+	  p = NULL;
+	}
+
+      if (mode == 15 && !IS_SET (i->act, ACT_VEHICLE)
+	  && (i->wounds || i->lodged))
+	{
+	  sprintf (buf2, "%s", show_wounds (i, 0));
+					if (ch->fighting || i->fighting)
+						sprintf (buf2, "%s", strip_small_minor(buf2, ch));
+			
+	  send_to_char ("\n", ch);
+	  strcat (buf3, buf2);
+	  act (buf3, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	  *buf3 = '\0';
+	}
+
+      if (mode == 15 && (!i->damage || is_hooded (i))
+	  && !IS_SET (i->act, ACT_VEHICLE) && !i->wounds && !i->lodged)
+	{
+	  send_to_char ("\n", ch);
+	  sprintf (buf2, "%s appears to be in excellent condition.",
+		   char_short (i));
+	  *buf2 = toupper (*buf2);
+	  reformat_string (buf2, &p);
+	  send_to_char (p, ch);
+	  mem_free (p); //char*
+	  p = NULL;
+	}
+
+      if (i->mob &&
+	  i->mob->vehicle_type == VEHICLE_HITCH &&
+	  (troom = vtor (i->mob->nVirtual)) &&
+	  (troom->people || troom->contents) && i->room != troom)
+	{
+	  sprintf (buf, "\nOn board, you see:\n");
+	  send_to_char (buf, ch);
+	  if (troom->people)
+	    list_char_to_char (troom->people, ch, 0);
+	  if (troom->contents)
+	    list_obj_to_char (troom->contents, ch, 0, true);
+	}
+
+      for (enchantment = i->enchantments; enchantment;
+	   enchantment = enchantment->next)
+	{
+	  if (*show_enchantment (enchantment))
+	    sprintf (buf3 + strlen (buf3), "%s",
+		     show_enchantment (enchantment));
+	}
+
+      if (*buf3)
+	{
+	  act (buf3, false, ch, 0, 0, TO_CHAR);
+	}
+
+      *buf3 = '\0';
+      if (i == ch)
+	{
+	  send_to_char ("\n", i);
+	  do_equipment (i, "", 0);
+	}
+      else
+	{
+	  if (i->equip || i->right_hand || i->left_hand)
+	    send_to_char ("\n", ch);
+	  if (i->right_hand)
+	    {
+	      if (!IS_SET (i->act, ACT_MOUNT))
+		{
+		  if (i->right_hand->location == WEAR_PRIM
+		      || i->right_hand->location == WEAR_SEC)
+		    sprintf (buf, "<wielded in right hand>  ");
+		  else if (i->right_hand->location == WEAR_BOTH)
+		    sprintf (buf, "<wielded in both hands>  ");
+		  else if (i->right_hand->location == WEAR_SHIELD)
+		    sprintf (buf, "<gripped in right hand>  ");
+		  else
+		    sprintf (buf, "<carried in right hand>  ");
+		}
+	      else
+		sprintf (buf, "<carried on back>        ");
+	      send_to_char (buf, ch);
+	      show_obj_to_char (i->right_hand, ch, 1);
+	    }
+	  if (i->left_hand)
+	    {
+	      if (!IS_SET (i->act, ACT_MOUNT))
+		{
+		  if (i->left_hand->location == WEAR_PRIM
+		      || i->left_hand->location == WEAR_SEC)
+		    sprintf (buf, "<wielded in left hand>   ");
+		  else if (i->left_hand->location == WEAR_BOTH)
+		    sprintf (buf, "<wielded in both hands>  ");
+		  else if (i->left_hand->location == WEAR_SHIELD)
+		    sprintf (buf, "<gripped in left hand>   ");
+		  else
+		    sprintf (buf, "<carried in left hand>   ");
+		}
+	      else
+		sprintf (buf, "<carried on back>        ");
+
+	      send_to_char (buf, ch);
+	      show_obj_to_char (i->left_hand, ch, 1);
+	    }
+
+	  if (i->equip && (i->left_hand || i->right_hand))
+	    send_to_char ("\n", ch);
+
+	  for (location = 0; location < MAX_WEAR; location++)
+	    {
+
+	      if (!(eq = get_equip (i, loc_order[location])))
+		continue;
+
+	      if (eq == i->right_hand || eq == i->left_hand)
+		continue;
+
+	      send_to_char (where[loc_order[location]], ch);
+
+	      if (location == WEAR_BLINDFOLD || IS_OBJ_VIS (ch, eq))
+		show_obj_to_char (eq, ch, 1);
+	      else
+		send_to_char ("#2something#0\n", ch);
+
+	      found = true;
+	    }
+	}
+    }
+
+  else if (mode == 3)
+    {
+      if (CAN_SEE (ch, i))
+	{
+	  send_to_char ("   ", ch);
+	  act ("$N", false, ch, 0, i, TO_CHAR);
+	}
+    }
 }
 
 void
@@ -4351,20 +4157,20 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
       if (obj && obj->obj_flags.type_flag == ITEM_BOARD)
 	{
 
-		if (obj->clan_data 
-			&& !(is_clan_member(ch, obj->clan_data->name)))
-			{
-			show_obj_to_char (obj, ch, 15);
-			send_to_char ("\nYou can not read these reports, but you can write one.", ch);
-	    	return;
-			}
+		//if (obj->clan_data 
+			//&& !(is_clan_member(ch, obj->clan_data->name)))
+			//{
+			//show_obj_to_char (obj, ch, 15);
+			//send_to_char ("\nYou can not read these reports, but you can write one.", ch);
+	    	//return;
+			//}
 		
-		else
-			{
+		//else
+			//{
 			one_argument (obj->name, buf);
 	  retrieve_mysql_board_listing (ch, buf);
 			return;
-			}
+			//}
 	}
 
       /* Extra room description */
@@ -4568,10 +4374,7 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 
       if (contents)
 	send_to_char ("\n", ch);
-
-      if (get_stink_message (NULL, ch->room, arg1, ch))
-	act (arg1, false, ch, 0, 0, TO_CHAR);
-
+    
       if (!IS_SET (ch->room->room_flags, INDOORS)
 	  && ch->room->sector_type != SECT_UNDERWATER)
 	{
@@ -5353,7 +5156,7 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
   if (first == false)
     send_to_char ("\n", ch);
 
-  if (!IS_NPC (ch) && ch->pc->create_state == 4)
+  if (!IS_NPC (ch) && ch->pc->create_state == STATE_DIED)
     send_to_char ("You are DEAD.\n", ch);
 
   if (get_affect (ch, AFFECT_GUARD_DIR))
@@ -5596,7 +5399,24 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char (ch->dmote_str, ch);
       send_to_char ("\n", ch);
     }
-    
+  
+   /* after dmote, before clan dump, list subscribed petition zones for imms */
+  if (GET_TRUST(ch))
+  {
+	send_to_char("You are subscribed to petitions from:#5",ch);
+	  for (int i=0; i<SPHERE_COUNT; i++)
+		{
+			if (IS_SET(ch->petition_flags,(1<<i)))
+			{
+				send_to_char(" ",ch);
+				send_to_char(spheres[i].name,ch);
+			}
+	  }
+		send_to_char("#0",ch);
+  }
+  
+
+
   clan__do_score (ch);
 }
 
@@ -5691,11 +5511,11 @@ time_string (CHAR_DATA * ch)
   int minutes = 0;
   int high_sun = 0;
   int nCharAstronomySkill = 0;
-  char day_buf[25];
+  char day_buf[AVG_STRING_LENGTH];
   char phrase[MAX_STRING_LENGTH];
   static char time_str[MAX_STRING_LENGTH] = { '\0' };
 
-  const char *season_string[12] = {
+  const char *season_string[AVG_STRING_LENGTH] = {
     "deep winter",
     "late winter",
     "early spring",
@@ -6116,13 +5936,13 @@ do_weather (CHAR_DATA * ch, char *argument, int cmd)
 	int sunrise[] = { 6, 6, 6, 6, 5, 5, 4, 4, 5, 6, 6, 7 };
 	int sunset[] = { 18, 18, 19, 19, 20, 21, 22, 22, 21, 20, 19, 18 };
 	int ind = 0;
-	char w_phrase[50] = { '\0' };
+	char w_phrase[AVG_STRING_LENGTH] = { '\0' };
 	char buf[MAX_STRING_LENGTH] = { '\0' };
 	char buf2[MAX_STRING_LENGTH] = { '\0' };
 	char imm_buf[MAX_STRING_LENGTH];
 	int wind_case = 0;
 	int temp_case = 0;
-	char wind[20] = { '\0' };
+	char wind[AVG_STRING_LENGTH] = { '\0' };
 	int high_sun = 0;
 	AFFECTED_TYPE *room_af = NULL;
 	extern AFFECTED_TYPE *world_affects;
@@ -7612,8 +7432,8 @@ do_find (CHAR_DATA * ch, char *argument, int cmd)
   int type = -1;
   int i;
   OBJ_DATA *obj = NULL;
-  char *not_list[50] = { '\0' };
-  char *must_list[50] = { '\0' };
+  char *not_list[AVG_STRING_LENGTH] = { '\0' };
+  char *must_list[AVG_STRING_LENGTH] = { '\0' };
   char buf[MAX_STRING_LENGTH] = { '\0' };
 
   argument = one_argument (argument, buf);
@@ -7715,9 +7535,9 @@ do_locate (CHAR_DATA * ch, char *argument, int cmd)
   int pc_only = 0;
   CHAR_DATA *mob = NULL;
   char *arg = '\0';
-  char clan_names[10][80] = { {'\0'}, {'\0'} };
-  char not_list[50][80] = { {'\0'}, {'\0'} };
-  char must_list[50][80] = { {'\0'}, {'\0'} };
+  char clan_names[10][AVG_STRING_LENGTH] = { {'\0'}, {'\0'} };
+  char not_list[50][AVG_STRING_LENGTH] = { {'\0'}, {'\0'} };
+  char must_list[50][AVG_STRING_LENGTH] = { {'\0'}, {'\0'} };
   char buf[MAX_STRING_LENGTH] = { '\0' };
   char acts[MAX_STRING_LENGTH] = { '\0' };
 
@@ -7876,479 +7696,175 @@ do_locate (CHAR_DATA * ch, char *argument, int cmd)
   page_string (ch->desc, b_buf);
 }
 
-#define WHERE_LINE_LEN 77
-void
-do_where (CHAR_DATA * ch, char *argument, int cmd)
-{
-  char clan[MAX_INPUT_LENGTH] = "";
-  char name[MAX_INPUT_LENGTH] = "";
-  char buf[MAX_STRING_LENGTH] = "";
-  char buf1[MAX_STRING_LENGTH] = "";
-  char strFmtName[AVG_STRING_LENGTH] = "#1No Name!#0";
-  char strFmtAnim[AVG_STRING_LENGTH] = "";
-  char strFmtRoom[AVG_STRING_LENGTH] = "";
-  unsigned short int nMaxFmtRoomLen = WHERE_LINE_LEN;
-  unsigned short int nDescriptors = 0, x = 0, y = 0;
-  int arrRoom[500], tmpRoom = 0, rpp = 0;
-  unsigned char bIsInWater = 0;
-  ROOM_DATA *ch_room = NULL;
-  register CHAR_DATA *i = NULL;
-  register OBJ_DATA *k = NULL;
-  struct descriptor_data *d = NULL;
-  char chrState = ' ';
-  bool check_aura = false;
-  bool check_clan = false;
+void do_where (CHAR_DATA * ch, char *argument, int cmd) {
+	Argument whereArg = argument;
+	
+	int RPP = -1; // Will be less than 0 if this is where aura
+	bool checkAura = false;
+	bool checkClan = false; // Wait until my clan update - Case
+	std::string whichClan = "";
 
-  one_argument (argument, name);
-  if (strcmp (name,"aura") == 0) 
-    check_aura = true;
-
-  if (strcmp (name,"clan") == 0)
-    {
-      check_clan = true;  // set check_clan true if the admin wants to list a specific clan -Meth
-      half_chop (argument, name, buf1);  // chop the word 'clan' off the argument
-      one_argument(buf1, clan); // read the clanname into 'clan'
-    }
-
-  if (!*name || check_aura || check_clan)
-    {
-      if (IS_MORTAL (ch))
-	{
-	  send_to_char ("What are you looking for?\n", ch);
-	  return;
+	std::multimap<int, std::string> whereMap;
+	std::multimap<int, std::string>::iterator it;
+	std::stringstream outputWhere;
+	
+	
+	if (IS_MORTAL(ch)) {
+		send_to_char ("What are you looking for?\n", ch);
+		return;
 	}
-      else
-	{
-          /* The next four lines are pointless, we set nDescriptors again just 13 lines further on -Meth
-	  for (d = descriptor_list; d; d = d->next)
-	    {
-	      nDescriptors++;
-	    }
-	  */
-
-	  // iterate through descriptors and save room numbers where there are active players -Meth
-	  for (d = descriptor_list, x = 0; d; d = d->next)
-	    {
-	      if (d->character && (d->connected == CON_PLYNG)
-		  && (d->character->in_room != NOWHERE))
-		{
-		  /* arrDesc[x++] = d; */
-		  if (!check_clan || is_clan_member(d->character, clan)) // store the room if we're not listing by clans or if the char is in the specified clan -Meth
-		    arrRoom[x++] = d->character->in_room;
-		}
-	      arrRoom[x] = -1;  // set the next room to -1 to show the end -Meth
-	    }
-
-	  /*                      arrDesc[x] = NULL; */
-	  nDescriptors = x; // nDescriptors now equals the number of characters we'll show in the output - Meth
-
-	  // A bubble-sort to put the room numbers in order for pretty output -Meth
-	  for (y = 0; y < nDescriptors - 1; y++)
-	    {
-	      for (x = 0; x < nDescriptors - 1; x++)
-		{
-		  if (arrRoom[x] > arrRoom[x + 1])
-		    {
-		      tmpRoom = arrRoom[x];
-		      arrRoom[x] = arrRoom[x + 1];
-		      arrRoom[x + 1] = tmpRoom;
-		    }
-		  /*
-		     if ( arrDesc[x]->character->in_room > arrDesc[x + 1]->character->in_room ) {
-		     tmpDesc = arrDesc [x];
-		     arrDesc [x] = arrDesc [x + 1];
-		     arrDesc [x + 1] = tmpDesc;
-		     }
-		   */
-		}
-	    }
-
-	  strcat (buf, "\n"); // not sure why we're adding the newline here -Meth
-
-
-	  for (x = 0; x < nDescriptors; x++)
-	    {
-
-	      /* d = arrDesc[x]; */
-	      /* ch_room = vtor(d->character->in_room); */
-
-	      // skip if room number is less than zero OR if room number is equal to the last room OR 
-	      if ((arrRoom[x] < 0) || (x > 0 && arrRoom[x] == arrRoom[x - 1])
-		  || !(ch_room = vtor (arrRoom[x])))
-		continue;
-
-	      bIsInWater = (ch_room && (ch_room->sector_type == SECT_RIVER
-					|| ch_room->sector_type == SECT_LAKE
-					|| ch_room->sector_type == SECT_OCEAN
-					|| ch_room->sector_type == SECT_REEF
-					|| ch_room->sector_type ==
-					SECT_UNDERWATER));
-
-	      sprintf (strFmtRoom, "#2[%6d]#0 #6%s", ch_room->nVirtual,
-		       ch_room->name);
-
-	      for (d = descriptor_list; d; d = d->next) // iterate through characters to find out if they are in room arrRoom[x]
-		{
-
-		  if (d->character && (d->connected == CON_PLYNG)
-		      && (d->character->in_room != NOWHERE)
-		      && (d->character->in_room == arrRoom[x])
-		      && (!check_clan || is_clan_member(d->character,clan))
-                      )
-		    {
-
-
-		      /* Color Player Names */
-		      if ((d->original
-			   && (!bIsInWater && !d->character->fighting))
-			  || (d->character->pc
-			      && d->character->pc->level > 0))
-			{
-			  strcpy (strFmtName, "#5");
-			}
-		      else if (d->character->fighting)
-			{
-			  strcpy (strFmtName, "#1");
-			}
-		      else if (bIsInWater)
-			{
-			  strcpy (strFmtName, "#4");
-			}
-		      else if (IS_SET (d->character->flags, FLAG_ISADMIN))
-			{
-			  strcpy (strFmtName, "#6");
-			}
-		      else
-			if (IS_SET (d->character->plr_flags, NEW_PLAYER_TAG))
-			{
-			  strcpy (strFmtName, "#2");
-			}
-		      else if (IS_GUIDE (d->character))
-			{
-			  strcpy (strFmtName, "#3");
-			}
-		      else
-			{
-			  strcpy (strFmtName, "#0");
-			}
-
-		      rpp = d->acct ? d->acct->get_rpp () : 0;
-
-		      /* Fill in correct Player Name */
-		      if (d->original)
-			{
-			  sprintf (strFmtName + 2, "%-16s #3[%2d]#0",
-				   d->original->tname, (check_aura)?(d->character->aur):(rpp));
-			  sprintf (strFmtAnim, " (as #5%s#0)",
-				   fname (d->character->tname));
-			}
-		      else
-			{
-			  sprintf (strFmtName + 2, "%-16s #3[%2d]#0",
-				   d->character->tname, (check_aura)?(d->character->aur):(rpp));
-			  strcpy (strFmtAnim, "");
-			}
-
-		      i = d->character;
-		      chrState = '-';
-		      switch (GET_POS (i))
-			{
-			case POSITION_DEAD:
-			case POSITION_MORTALLYW:
-			  chrState = 'X';
-			  break;
-			case POSITION_UNCONSCIOUS:
-			case POSITION_STUNNED:
-			  chrState = 'U';
-			  break;
-			case POSITION_SLEEPING:
-			  chrState = 's';
-			default:
-			  {
-
-			    if (!IS_NPC (i) && !i->desc
-				&& !i->pc->admin_loaded)
-			      chrState = 'L';
-
-			    else if (IS_SET (i->act, PLR_QUIET)
-				     && !IS_NPC (i))
-			      chrState = 'e';
-
-			    else if (get_affect (i, MAGIC_HIDDEN))
-			      chrState = 'h';
-
-			    else if (i->desc && i->desc->idle)
-			      chrState = 'i';
-
-			  }
-			}
-
-
-		      /* Put the room together */
-		      nMaxFmtRoomLen =
-			(WHERE_LINE_LEN + 6 +
-			 ((strlen (strFmtAnim) >
-			   0) ? 4 : 0)) - (strlen (strFmtName) +
-					   strlen (strFmtAnim));
-		      if (strlen (strFmtRoom) >= nMaxFmtRoomLen)
-			{
-			  strcpy (strFmtRoom + (nMaxFmtRoomLen - 3), "...");
-			}
-		      sprintf (buf + strlen (buf), "%s#0 #%c%c#0 %s#0%s#0\n",
-			       strFmtName, (chrState <= 'Z'
-					    && chrState >=
-					    'A') ? '1' : ((chrState <= 'z'
-							   && chrState >=
-							   'a') ? '3' : '0'),
-			       chrState, strFmtRoom, strFmtAnim);
-		    }
-		}
-
-	    }
-	  strcat (buf,
-		  "\n#0Color key: #5Admin,#0 #6Admin PC,#0 #3Guide,#0 #2New PC,#0 #1In Melee,#0 #4In Water#0\n");
-	  strcat (buf,
-		  "\n#0Flag key:  e - editing, i - idle, h - hidden, s - sleeping\n"
-		  "L - Link Dead, U - Unconscious, X - Near Death\n");
-	  page_string (ch->desc, buf);
-	  return;
+	
+	// Check for 'aura'
+	if (whereArg.pop() == "aura") {
+		checkAura = true;
 	}
-    }
 
-  *buf = '\0';
+	for (descriptor_data *d = descriptor_list; d; d = d->next) {
+		if (d->character && (d->connected == CON_PLYNG) && (d->character->in_room != NOWHERE)) {
+			if (!checkAura) {
+				RPP = d->acct->get_rpp();
+			}
+			std::pair<int, std::string> reportPair = d->character->reportWhere(checkClan, RPP, whichClan);
 
-  //for (i = character_list; i; i = i->next)
-  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
-    {
-	i = *tch_iterator;
-
-      if (i->deleted)
-	continue;
-      if (strlen (buf) > MAX_STRING_LENGTH - 256)
-	{
-	  strcat (buf, "#1Too many entries to display!#0\n");
-	  break;
+			if (d->original) {
+				std::stringstream animationStream;
+				animationStream << " #0(#5" << d->original->tname
+					<< "#0: #2" << d->original->room->nVirtual << "#0)";
+				reportPair.second += animationStream.str();
+			}
+			whereMap.insert(reportPair);
+		}
 	}
-      if (isname (name, i->name) && CAN_SEE (ch, i))
-	{
-	  if ((i->in_room != NOWHERE) && ((GET_TRUST (ch) > 3) ||
-					  (vtor (i->in_room)->zone ==
-					   vtor (ch->in_room)->zone)))
-	    {
+	
+	outputWhere << std::endl << std::endl;
 
-	      if (IS_NPC(i))
-		sprintf (buf + strlen (buf),
-			 "#5%-20.20s#0 - #2[%5d]#0 #6%s#0\n", char_short (i),
-			 vtor (i->in_room)->nVirtual,
-			 vtor (i->in_room)->name);
-	      else
-		sprintf (buf + strlen (buf),
-			 "#5%-20.20s#0 - #2[%5d]#0 #6%s#0\n", i->tname,
-			 vtor (i->in_room)->nVirtual,
-			 vtor (i->in_room)->name);
-
-
-	    }
+	// Inorder traversal, with the key being the room number, puts it into room order
+	for (it = whereMap.begin(); it != whereMap.end(); it++) {
+		outputWhere << it->second << std::endl;
 	}
-    }
+	
+	// Append the remainder of the where information
+	outputWhere << std::endl << "#0Color key: #5Admin,#0 #6Admin PC,#0 #3Guide,#0 #2New PC,#0 #1In Melee,#0 #4In Water#0"
+		<< std::endl << std::endl << "#0Flag key:" << std::endl
+		<< "e - Editing, i - Idle, h - Hidden, s - Sleeping" << std::endl
+		<< "L - Link Dead, U - Unconscious, X - Near Death" << std::endl
+		<< "#1!#0 - Watch For Bad Behaviour, #2R#0 - Watch To Potentially Award" << std::endl
+		<< "#3P#0 - Involved In A Plot" << std::endl;
 
-  if (GET_TRUST (ch) > 3)
-    {
-      for (k = object_list; k; k = k->next)
-	{
-
-	  if (k->deleted)
-	    continue;
-
-	  if (strlen (buf) > MAX_STRING_LENGTH - 256)
-	    {
-	      strcat (buf, "#1Too many entries to display!#0\n");
-	      break;
-	    }
-
-	  if (isname (name, k->name) && CAN_SEE_OBJ (ch, k))
-	    {
-	      if (k->carried_by && !k->carried_by->deleted
-		  && k->carried_by->room)
-		{
-		  sprintf (buf + strlen (buf),
-			   "#2%-20.20s#0- #2[%5d]#0 Carried by #5%s#0",
-			   obj_short_desc (k),
-			   vtor (k->carried_by->in_room)->nVirtual,
-			   char_short (k->carried_by));
-		  strcat (buf, "\n");
-		}
-	      else if (k->equiped_by && !k->equiped_by->deleted
-		       && k->equiped_by->room)
-		{
-		  sprintf (buf + strlen (buf),
-			   "#2%-20.20s#0- #2[%5d]#0 Equipped by #5%s#0",
-			   obj_short_desc (k),
-			   vtor (k->equiped_by->in_room)->nVirtual,
-			   char_short (k->equiped_by));
-		  strcat (buf, "\n");
-		}
-	      else if (k->in_obj && !k->in_obj->deleted)
-		{
-		  sprintf (buf + strlen (buf),
-			   "#2%-20.20s#0- Inside #5%s#0, vnum#2[%5d].#0",
-			   obj_short_desc (k), obj_short_desc (k->in_obj),
-			   k->in_obj->nVirtual);
-		  strcat (buf, "\n");
-		}
-	      else if (k->in_room != NOWHERE)
-		{
-		  sprintf (buf + strlen (buf),
-			   "#2%-20.20s#0- #2[%5d]#0 #6%s#0",
-			   obj_short_desc (k), vtor (k->in_room)->nVirtual,
-			   vtor (k->in_room)->name);
-		  strcat (buf, "\n");
-		}
-	    }
-	}
-    }
-
-  if (!*buf)
-    send_to_char ("Couldn't find any such thing.\n", ch);
-  else
-    page_string (ch->desc, buf);
-
+	page_string (ch->desc, outputWhere.str().c_str());
 }
 
+void do_who (CHAR_DATA * ch, char *argument, int cmd) {
+	DESCRIPTOR_DATA *d = NULL;
 
+	int mortals = 0;
+	int immortals = 0;
+	int guests = 0;
+	int clanCount = 0;
 
-void
-do_who (CHAR_DATA * ch, char *argument, int cmd)
-{
-  int mortals = 0;
-  int immortals = 0;
-  int guests = 0;
-  int mordorians = 0, gondorians = 0, northmen = 0, orks = 0, flags = 0;
-  char tmp[MAX_STRING_LENGTH] = { '\0' };
-  char buf[MAX_STRING_LENGTH] = { '\0' };
-  DESCRIPTOR_DATA *d = NULL;
-  int sphere = 0; // 0 = mordor, 1 = gondor, 2 = northmen, 3 = orks
+	std::stringstream whoStream;
+	
+	std::stringstream availableAdminsStream;
+	availableAdminsStream << std::endl << "#2Available Staff#0:" << std::endl;
+	bool availableAdmins = false;
 
-  char *clanstring;
-  clanstring = ch->clans;
-  while (get_next_clan (&clanstring, buf, &flags))
-  {
-	  if (!strn_cmp (buf, "mt_citizens", 11))
-		  sphere = 1;
-	  if (!strn_cmp (buf, "outpost_citizens", 16))
-		  sphere = 2;
-	  if (!strn_cmp (buf, "moria_orks", 10))
-		  sphere = 3;
-  }
-
-  buf[0] = '\0';
-
-  *s_buf = '\0';
-
-  if (IS_SET(ch->flags, FLAG_GUEST))
-	  sphere = 4;
-
-  if (IS_MORTAL (ch))
-    strcpy (tmp, "\n#2Available Staff:#0\n\n");
-  else
-    strcpy (tmp, "\n\n#2Available Staff:#0\n\n");
-
-
-  for (d = descriptor_list; d; d = d->next)
-    {
-
-      if (!d->character)
-	continue;
-
-      if (d->connected)
-	continue;
-
-      if (IS_MORTAL (d->character))
-	{
-	  if (d->character->pc &&
-	      !d->character->pc->level &&
-	      d->character->pc->create_state == 2
-	      && !IS_SET (d->character->flags, FLAG_GUEST))
-	  {
-		  clanstring = d->character->clans;
-		  while (get_next_clan (&clanstring, buf, &flags))
-		  {
-			  if (!strn_cmp (buf, "mt_citizens", 11))
-				  gondorians++;
-			  else if (!strn_cmp (buf, "outpost_citizens", 
-16))
-				  northmen++;
-			  else if (!strn_cmp (buf, "moria_orks", 10))
-				  orks++;
-			  else if (!strn_cmp (buf, "mordor_char", 11))
-				  mordorians++;
-		  }
-	    mortals++;
-	  }
-	  else if (IS_SET (d->character->flags, FLAG_GUEST))
-	    guests++;
+	int sphere = ch->checkClansForWho(); // 0 = Gondor, 1 = Northmen, 2 = Fahad Jafari, 3 = Orcs,  4 = Mordor, -2 = Guest
+	if (ch->pc && ch->pc->level > 0 && sphere > -1) {
+		clanCount++;
+	}
+	
+	for (d = descriptor_list; d; d = d->next) {
+		if (!d->character || !(d->connected == CON_PLYNG)) {
+			continue;
+		}
+		else {
+			if (IS_SET (d->character->flags, FLAG_GUEST)) {
+				guests++;
+			}
+			else if (d->character->pc && !(d->character->pc->level > 0)) {
+				if (sphere > -1 && d->character->checkClansForWho() == sphere) {
+					clanCount++;
+				}
+				mortals++;
+			}
+			else {
+				mortals++;
+				immortals++;
+				if (IS_SET(d->character->flags, FLAG_AVAILABLE)) {
+					availableAdminsStream << d->character->tname << std::endl;
+					availableAdmins = true;
+				}
+			}
+		}
 	}
 
-      else if (d->original && !IS_SET (d->original->flags, FLAG_AVAILABLE))
-	continue;
-
-      else if (IS_SET (d->character->flags, FLAG_AVAILABLE))
-	{
-	  sprintf (tmp + strlen (tmp), "    %s",
-		   d->original ? GET_NAME (d->original) :
-		   GET_NAME (d->character));
-	  strcat (tmp, "\n");
-	  immortals = 1;
+	if (mortals < 1) {
+		whoStream << std::endl << "There aren't any beings within Middle-earth";
 	}
-    }
+	else if (mortals == 1) {
+		whoStream << std::endl << "There is a single presence within Middle-earth";
+	}
+	else {
+		whoStream << std::endl << "There are #2" << mortals << "#0 presences within Middle-earth";
+	}
+	
+	if (immortals == 1) {
+		if (mortals == 1) {
+			whoStream << " and it is an administrator." << std::endl;
+		}
+		else {
+			whoStream << ", and one of these is an administrator." << std::endl;
+		}
+	}
+	else if (immortals > 1) {
+		whoStream << ", of which #2" << immortals << "#0 are administrators." << std::endl;
+	}
+	else {
+		whoStream << "." << std::endl;
+	}
 
-  *buf = '\0';
+	switch (sphere) {
+		case 0:
+			whoStream << "In the Kingdom of Gondor, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
+			break;
+		case 1:
+			whoStream << "In the Angost Region, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
+			break;
+		case 2:
+			whoStream << "In Fahad Jafari, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
+			break;
+		case 3:
+			whoStream << "In the Mines Of Moria, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
+			break;
+		case 4:
+			whoStream << "In Mordor, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
+			break;
+		default:
+			 break;
+	}
+	
+	if (sphere > -1 && clanCount > 1) {
+		whoStream << "s." << std::endl;
+	}
+	else if (sphere > -1) {
+		whoStream << "." << std::endl;
+	}
 
-  if (!mortals)
-    sprintf (s_buf,
-	     "\nThere currently aren't any players in Middle-earth.\n");
-  else if (mortals == 1)
-    sprintf (s_buf, "\nThere is currently #21#0 player in Middle-earth.\n");
-  else
-    sprintf (s_buf, "\nThere are currently #2%d#0 players in Middle-earth.\n",
-	     mortals);
+	if (guests != 1) {
+		whoStream << "There are #2" << guests << "#0 guests visiting our out of character Guest Lounge." << std::endl;
+	}
+	else {
+		whoStream << "There is #21#0 guest visiting our out of character Guest Lounge." << std::endl;
+	}
 
-  switch (sphere)
-  {
-  case 0:
-	  sprintf(s_buf + strlen(s_buf), "In your sphere of Mordor, there are currently #2%d#0 players.\n", mordorians);
-	  break;
-  case 1:
-	  sprintf(s_buf + strlen(s_buf), "In your sphere of Gondor, there are currently #2%d#0 players.\n", gondorians);
-	  break;
-  case 2:
-	  sprintf(s_buf + strlen(s_buf), "In your sphere of Moria, there are currently #2%d#0 players.\n", northmen);
-	  break;
-  case 3:
-	  sprintf(s_buf + strlen(s_buf), "In your sphere of Orcs, there are currently #2%d#0 players.\n", orks);
-	  break;
-  default:
-	  break;
-  }
+	whoStream << std::endl << "Our record is #2" << count_max_online << "#0 players, last seen on #2" << max_online_date << "#0." << std::endl;
+	whoStream << availableAdminsStream.str();
 
-  if (guests)
-    sprintf (s_buf + strlen (s_buf),
-	     "There %s currently #2%d#0 guest%s visiting our OOC lounge.\n",
-	     guests == 1 ? "is" : "are", guests, guests == 1 ? "" : "s");
+	if (!availableAdmins) {
+		whoStream << "None." << std::endl;
+	}
 
-  sprintf (s_buf + strlen (s_buf),
-	   "\nOur record is #2%d#0 players, last seen on #2%s#0.",
-	   count_max_online, max_online_date);
-
-  if (IS_MORTAL (ch))
-    strcat (s_buf, "\n");
-
-  strcat (s_buf, tmp);
-
-  if (!immortals)
-    sprintf (s_buf + strlen (s_buf), "    None.\n");
-
-  send_to_char (s_buf, ch);
+	send_to_char (whoStream.str().c_str(), ch);
 }
 
 void
@@ -9217,283 +8733,337 @@ do_qscan (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_count (CHAR_DATA * ch, char *argument, int cmd)
 {
-  char buf[MAX_STRING_LENGTH] = { '\0' };
-  OBJ_DATA *obj = NULL;
+	char buf[MAX_STRING_LENGTH] = { '\0' };
+	OBJ_DATA *obj = NULL;
 
-  argument = one_argument (argument, buf);
+	argument = one_argument (argument, buf);
 
-  if (is_dark (ch->room) && !get_affect (ch, MAGIC_AFFECT_INFRAVISION)
-      && IS_MORTAL (ch) && !IS_SET (ch->affected_by, AFF_INFRAVIS))
-    {
-      send_to_char ("It's too dark to count coins.\n", ch);
-      return;
-    }
-
-  if (!*buf)
-    {
-      sprintf (buf,
-	       "You begin searching through your belongings, taking a tally of your coin.\n");
-      send_to_char (buf, ch);
-    }
-  else
-    {
-      if (!(obj = get_obj_in_list_vis (ch, buf, ch->right_hand)) &&
-	  !(obj = get_obj_in_list_vis (ch, buf, ch->left_hand)))
+	if (is_dark (ch->room) && !get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+		&& IS_MORTAL (ch) && !IS_SET (ch->affected_by, AFF_INFRAVIS))
 	{
-	  send_to_char ("I don't see that group of coins.\n", ch);
-	  return;
+		send_to_char ("It's too dark to count coins.\n", ch);
+		return;
 	}
 
-      if (GET_ITEM_TYPE (obj) != ITEM_MONEY)
+	if (!*buf)
 	{
-	  send_to_char ("That isn't a group of coins.\n", ch);
-	  return;
+		sprintf (buf, "You begin searching through your belongings, taking a tally of your coin.\n");
+		send_to_char (buf, ch);
 	}
+	else
+	{
+		if (!(obj = get_obj_in_list_vis (ch, buf, ch->right_hand)) &&
+			!(obj = get_obj_in_list_vis (ch, buf, ch->left_hand)))
+		{
+			send_to_char ("I don't see that group of coins.\n", ch);
+			return;
+		}
 
-      sprintf (buf,
-	       "After a moment of sorting, you determine that there are %d coins in the pile.",
-	       obj->count);
-      act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-      return;
-    }
+		if (GET_ITEM_TYPE (obj) != ITEM_MONEY)
+		{
+			send_to_char ("That isn't a group of coins.\n", ch);
+			return;
+		}
 
-  ch->delay = 10;
-
-  ch->delay_type = DEL_COUNT_COIN;
+		sprintf (buf, "After a moment of sorting, you determine that there are %d"
+			" coins in the pile.", obj->count);
+		act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		return;
+	}
+	ch->delay = 10;
+	ch->delay_type = DEL_COUNT_COIN;
 }
 
-char *
-coin_sdesc (OBJ_DATA * coin)
+char* coin_sdesc( const OBJ_DATA * coin )
 {
-  if (coin->nVirtual == 1538)
-    {
-      if (coin->count > 1)
-	return "glittering mithril coins";
-      else
-	return "glittering mithril coin";
-    }
-  else if (coin->nVirtual == 1539)
-    {
-      if (coin->count > 1)
-	return "thick, hexagonal gold coins";
-      else
-	return "thick, hexagonal gold coin";
-    }
-  else if (coin->nVirtual == 1540)
-    {
-      if (coin->count > 1)
-	return "thin, ridged silver coins";
-      else
-	return "thin, ridged silver coin";
-    }
-  else if (coin->nVirtual == 1541)
-    {
-      if (coin->count > 1)
-	return "large, rounded bronze coins";
-      else
-	return "large, rounded bronze coin";
-    }
-  else if (coin->nVirtual == 1542)
-    {
-      if (coin->count > 1)
-	return "semicircular copper coins";
-      else
-	return "semicircular copper coin";
-    }
-  else if (coin->nVirtual == 1543)
-    {
-      if (coin->count > 1)
-	return "thin, slightly fluted gold coins";
-      else
-	return "thin, slightly fluted gold coin";
-    }
-  else if (coin->nVirtual == 1544)
-    {
-      if (coin->count > 1)
-	return "heavy, oblong silver coins";
-      else
-	return "heavy, oblong silver coin";
-    }
-  else if (coin->nVirtual == 5030)
-    {
-      if (coin->count > 1)
-	return "crudely-hewn tokens of dark granite";
-      else
-	return "crudely-hewn token of dark granite";
-    }
-  else if (coin->nVirtual == 5031)
-    {
-      if (coin->count > 1)
-	return "razor-sharp flakes of obsidian";
-      else
-	return "razor-sharp flake of obsidian";
-    }
-  else if (coin->nVirtual == 5032)
-    {
-      if (coin->count > 1)
-	return "rectangular tokens of dusky brass";
-      else
-	return "rectangular token of dusky brass";
-    }
-  else if (coin->nVirtual == 5033)
-    {
-      if (coin->count > 1)
-	return "weighty pentagonal bronze coins";
-      else
-	return "weighty pentagonal bronze coin";
-    }
-  else if (coin->nVirtual == 5034)
-    {
-      if (coin->count > 1)
-	return "hexagonal tokens of blackened steel";
-      else
-	return "hexagonal token of blackened steel";
-    }
-  else if (coin->nVirtual == 5035)
-    {
-      if (coin->count > 1)
-	return "octagonal coins of smoky silver";
-      else
-	return "octagonal coin of smoky silver";
-    }
-  else if (coin->nVirtual == 66900)
-    {
-      if (coin->count > 1)
-	return "small iron discs";
-      else
-	return "small iron disc";
-    }
-  else if (coin->nVirtual == 66901)
-    {
-      if (coin->count > 1)
-	return "dull copper coins";
-      else
-	return "dull copper coin";
-    }
-  else if (coin->nVirtual == 66902)
-    {
-      if (coin->count > 1)
-	return "small, circular silver coins";
-      else
-	return "small, circular silver coin";
-    }
-  else if (coin->nVirtual == 66903)
-    {
-      if (coin->count > 1)
-	return "brazen silver coins";
-      else
-	return "brazen silver coin";
-    }
-  else if (coin->nVirtual == 66904)
-    {
-      if (coin->count > 1)
-	return "ornate silver coins";
-      else
-	return "ornate silver coin";
-    }
-  else if (coin->nVirtual == 66905)
-    {
-      if (coin->count > 1)
-	return "heavy, gleaming, gold coins";
-      else
-	return "heavy, gleaming, gold coin";
-    }
-
-  else
-    return "coin";
+	return coin_sdesc( coin->nVirtual, coin->count ? true : false );
 }
 
-void
-delayed_count_coin (CHAR_DATA * ch)
+char* coin_sdesc( const int currnum, const int seqnum, const bool plural )
 {
-  char buf[MAX_STRING_LENGTH] = { '\0' };
-  char buf2[MAX_STRING_LENGTH] = { '\0' };
-  OBJ_DATA *obj = NULL, *tobj = NULL;
-  int money = 0, location = 0;
-
-  *buf2 = '\0';
-
-  if (ch->right_hand)
-    {
-      if (GET_ITEM_TYPE (ch->right_hand) == ITEM_MONEY)
+	if( currnum == CURRENCY_TIRITH )
+		return coin_sdesc( 1544  - seqnum, plural );
+	if( currnum == CURRENCY_MORGUL )
+		return coin_sdesc( 5030  + seqnum, plural );
+	if( currnum == CURRENCY_EDEN )
+		return coin_sdesc( 6900  + seqnum, plural );
+	if( currnum == CURRENCY_HARAD )
+		return coin_sdesc( 80010 + seqnum, plural );
+	if( currnum == CURRENCY_NORTHMAN )
+		return coin_sdesc( 42131 + seqnum, plural );
+	return "BAH";
+}
+		
+char* coin_sdesc( const int objnum, const bool plural )
+{
+	std::string coinDesc;
+	switch (objnum)
 	{
-	  money += (int) ch->right_hand->farthings * ch->right_hand->count;
-	  tobj = ch->right_hand;
-	  sprintf (buf2 + strlen (buf2),
-		   "   #2%d %s#0 (#2right hand#0): %d coppers\n", tobj->count,
-		   coin_sdesc (tobj), (int) tobj->farthings * tobj->count);
+		case 1538:
+			coinDesc = "glittering mithril coin";
+			break;
+		case 1539:
+			coinDesc = "thick, hexagonal gold coin";
+			break;
+		case 1540:
+			coinDesc = "thin, ridged silver coin";
+			break;
+		case 1541:
+			coinDesc = "large, rounded bronze coin";
+			break;
+		case 1542:
+			coinDesc = "semicircular copper coin";
+			break;
+		case 1543:
+			coinDesc = "thin, slightly fluted gold coin";
+			break;
+		case 1544:
+			coinDesc = "heavy, oblong silver coin";
+			break;
+		case 5030:
+			if (plural)
+				return "crudely hewn tokens of dark granite";
+			else
+				return "crudely hewn token of dark granite";
+		case 5031:
+			if (plural)
+				return "razor-sharp flakes of obsidian";
+			else
+				return "razor-sharp flake of obsidian";
+		case 5032:
+			coinDesc = "rectangular token of dusky brass";
+			break;
+		case 5033:
+			coinDesc = "weighty pentagonal bronze coin";
+			break;
+		case 5034:
+			if (plural)
+				return "hexagonal tokens of blackened steel";
+			else 
+				return "hexagonal token of blackened steel";
+		case 5035:
+			if (plural)
+				return "octagonal coins of smoky silver";
+			else
+				"octagonal coin of smoky silver";
+		case 42131:
+			coinDesc = "small, rounded bronze coin";
+			break;
+		case 42132:
+			coinDesc = "heavy, stamped bronze coin";
+			break;
+		case 42133:
+			coinDesc = "hexagonal, stamped silver coin";
+			break;
+		case 42134:
+			coinDesc = "large, ornately detailed silver coin";
+			break;
+		case 66900:
+			coinDesc = "small iron disc";
+			break;
+		case 66901:
+			coinDesc = "dull copper coin";
+			break;
+		case 66902:
+			coinDesc = "small, circular silver coin";
+			break;
+		case 66903:
+			coinDesc = "brazen silver coin";
+			break;
+		case 66904:
+			coinDesc = "ornate silver coin";
+			break;
+		case 66905:
+			coinDesc = "heavy, gleaming, gold coin";
+			break;
+		case 80010:
+			coinDesc = "small copper coin";
+			break;
+		case 80011:
+			coinDesc = "large bronze coin";
+			break;
+		case 80012:
+			coinDesc = "thin silver coin";
+			break;
+		case 80013:
+			coinDesc = "heavy silver coin";
+			break;
+		case 80014:
+			coinDesc = "small gold coin";
+			break;
+		case 80015:
+			coinDesc = "shiny, thick round gold coin";
+			break;
+		default:
+			coinDesc = "coin";
+			break;
 	}
-      else if (GET_ITEM_TYPE (ch->right_hand) == ITEM_CONTAINER)
+
+	if (plural)
+		coinDesc += 's';
+	
+	return (char*)(coinDesc.c_str());
+}
+char get_currency_symbol(const int objnum)
+{
+	switch(objnum)
 	{
-	  for (tobj = ch->right_hand->contains; tobj;
-	       tobj = tobj->next_content)
-	    {
-	      if (GET_ITEM_TYPE (tobj) == ITEM_MONEY)
+		case NORTHMAN_ONUM_FARTHING:
+			return NORTHMAN_PRINTC_FARTHING;
+		case NORTHMAN_ONUM_PENNY:
+			return NORTHMAN_PRINTC_PENNY;
+		case NORTHMAN_ONUM_SHILLING:
+			return NORTHMAN_PRINTC_SHILLING;
+		case  NORTHMAN_ONUM_POUND:
+			return NORTHMAN_PRINTC_POUND;
+		default:
+			return 0;
+	}
+}
+
+char get_currency_symbol(const int currnum, const int denomnum)
+{
+	if(currnum == CURRENCY_NORTHMAN)
+		return get_currency_symbol( 42131 + denomnum );
+	return 0;
+}
+
+int get_currency_value(const int objnum)
+{
+	switch(objnum)
+	{
+		case NORTHMAN_ONUM_FARTHING:
+			return NORTHMAN_VAL_FARTHING;
+		case NORTHMAN_ONUM_PENNY:
+			return NORTHMAN_VAL_PENNY;
+		case NORTHMAN_ONUM_SHILLING:
+			return NORTHMAN_VAL_SHILLING;
+		case  NORTHMAN_ONUM_POUND:
+			return NORTHMAN_VAL_POUND;
+		default:
+			return 0;
+	}
+}
+
+int get_currency_value(const OBJ_DATA* obj)
+{ return (int) obj->farthings; }
+
+//shorthand define, for readability, please don't move this to a const file, as that
+//will horribly obfuscate the code.  Thankies
+#define CURR_SYM get_currency_symbol(obj->nVirtual)
+void currency_print_line(const OBJ_DATA* obj, int* money, char* buffer, const char* wear_loc)
+{
+	sprintf(buffer + strlen( buffer ), "   #2%d %s#0 (#2%s#0): ", obj->count, coin_sdesc( obj ), wear_loc);
+	money[CURR_SYM ? 1 : 0] += get_currency_value(obj) * obj->count;  //Badass line, check that shit twice, then gasp :D
+	if( CURR_SYM ) //checks if this is northman, note, this will need updating if more currencies are ever added
+		sprintf(buffer + strlen( buffer ), "%d%c\n", obj->count, CURR_SYM);
+	else
+		sprintf(buffer + strlen( buffer ), "%d coppers\n", obj->count * get_currency_value(obj), CURR_SYM);
+}
+#undef CURR_SYM
+
+void delayed_count_coin (CHAR_DATA * ch)
+{
+
+	char buf[MAX_STRING_LENGTH] = { '\0' };
+	char buf2[MAX_STRING_LENGTH] = { '\0' };
+	OBJ_DATA* hand_obj_ary[2] = { ch->right_hand, ch->left_hand };
+	char* hand_str_ary[2] = { "right hand", "left_hand" };
+	OBJ_DATA *obj = NULL, *tobj = NULL;
+	int location = 0, money[2] = {0,0}, nmoney[4]; //money[] holds the count of various types of money the char has, other in slot 0 northman in slot 1
+	char currency_symbol = '\0';
+	std::string amount;
+	
+	for( int i = 0; i < 2; i++ )
+	{
+		if( hand_obj_ary[i] )
 		{
-		  money += (int) tobj->farthings * tobj->count;
-		  sprintf (buf2 + strlen (buf2),
-			   "   #2%d %s#0 (#2%s#0): %d coppers\n", tobj->count,
-			   coin_sdesc (tobj), obj_short_desc (tobj->in_obj),
-			   (int) tobj->farthings * tobj->count);
-		}
-	    }
-	}
-    }
+			if( GET_ITEM_TYPE( hand_obj_ary[i] ) == ITEM_MONEY )
+				currency_print_line( hand_obj_ary[i], money, buf2, hand_str_ary[i] );
+			if( GET_ITEM_TYPE( hand_obj_ary[i] ) == ITEM_CONTAINER)
+			{
+				if (IS_SET (hand_obj_ary[i]->o.od.value[1], CONT_CLOSED))
+				{
+					std::stringstream ss;
+					ss << "#2" <<  (char)toupper(hand_obj_ary[i]->short_description[0]) << (char*)&(hand_obj_ary[i]->short_description[1]) << "#0" << " is closed.\n";
+					send_to_char(ss.str().c_str(),ch);
+				}
+				else
+				{
 
-  if (ch->left_hand)
-    {
-      if (GET_ITEM_TYPE (ch->left_hand) == ITEM_MONEY)
+					for( tobj = hand_obj_ary[i]->contains; tobj; tobj = tobj->next_content )
+					{
+						if( GET_ITEM_TYPE( tobj ) == ITEM_MONEY )
+						{
+							currency_print_line( tobj, money, buf2, obj_short_desc( tobj->in_obj ) );
+						}
+					}
+				} // is closed
+			} // is container
+		} // item exists in this hand
+	} // iterate both hands
+
+	for( location = 0; location < MAX_WEAR; location++ )
 	{
-	  money += (int) ch->left_hand->farthings * ch->left_hand->count;
-	  tobj = ch->left_hand;
-	  sprintf (buf2 + strlen (buf2),
-		   "   #2%d %s#0 (#2left hand#0): %d coppers\n", tobj->count,
-		   coin_sdesc (tobj), (int) tobj->farthings * tobj->count);
-	}
-      else if (GET_ITEM_TYPE (ch->left_hand) == ITEM_CONTAINER)
-	{
-	  for (tobj = ch->left_hand->contains; tobj;
-	       tobj = tobj->next_content)
-	    {
-	      if (GET_ITEM_TYPE (tobj) == ITEM_MONEY)
+		if( obj = get_equip(ch, location) )
 		{
-		  money += (int) tobj->farthings * tobj->count;
-		  sprintf (buf2 + strlen (buf2),
-			   "   #2%d %s#0 (#2%s#0): %d coppers\n", tobj->count,
-			   coin_sdesc (tobj), obj_short_desc (tobj->in_obj),
-			   (int) tobj->farthings * tobj->count);
-		}
-	    }
-	}
-    }
+//			if( GET_ITEM_TYPE( obj ) == ITEM_MONEY )		//Technically unnecessary, as money cannot be worn, included for completeness
+//				currency_print_line( obj, money, buf2, locations[location] );
+			if( GET_ITEM_TYPE( obj ) == ITEM_CONTAINER )
+			{
+				if (IS_SET (obj->o.od.value[1], CONT_CLOSED))
+				{
+					std::stringstream ss;
+					ss << "#2" <<  (char)toupper(obj->short_description[0]) << (char*)&(obj->short_description[1]) << "#0" << " is closed.\n";
+					send_to_char(ss.str().c_str(),ch);
+				}
+				else
+				{
+					for( tobj = obj->contains; tobj; tobj = tobj->next_content )
+					{
+						if( GET_ITEM_TYPE( tobj ) == ITEM_MONEY )
+						{
+							currency_print_line( tobj, money, buf2, obj_short_desc( tobj->in_obj ) );
+						}
+					}
+				}
+			} // container
+		} // object exists at location
+	}// for loop through locations
 
-  for (location = 0; location < MAX_WEAR; location++)
-    {
-      if (!(obj = get_equip (ch, location)))
-	continue;
-      for (tobj = obj->contains; tobj; tobj = tobj->next_content)
+	if(money[1])
 	{
-	  if (GET_ITEM_TYPE (tobj) == ITEM_MONEY)
-	    {
-	      money += (int) tobj->farthings * tobj->count;
-	      sprintf (buf2 + strlen (buf2),
-		       "   #2%d %s#0 (#2%s#0): %d coppers\n", tobj->count,
-		       coin_sdesc (tobj), obj_short_desc (obj),
-		       (int) tobj->farthings * tobj->count);
-	    }
+		nmoney[0] = money[1] / NORTHMAN_VAL_POUND;
+		money[1] %= NORTHMAN_VAL_POUND;
+		nmoney[1] = money[1] / NORTHMAN_VAL_SHILLING;
+		money[1] %= NORTHMAN_VAL_SHILLING;
+		nmoney[2] = money[1] / NORTHMAN_VAL_PENNY;
+		money[1] %= NORTHMAN_VAL_PENNY;
+		nmoney[3] = money[1] / NORTHMAN_VAL_FARTHING;
+		money[1] = 1;
+		for( int i = 0; i < 4; i++ )
+			if( nmoney[i] )
+			{
+				if( !amount.empty() )
+					amount += " ";
+					amount += MAKE_STRING( nmoney[i] ) + get_currency_symbol( CURRENCY_NORTHMAN, 3-i );
+			}
+
 	}
-    }
 
-  if (!money)
-    {
-      send_to_char ("You don't seem to have any coin.\n", ch);
-      return;
-    }
-
-  sprintf (buf, "By your count, you have %d coppers' worth in coin:", money);
-  act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-  send_to_char ("\n", ch);
-  send_to_char (buf2, ch);
+	if (money[0])
+		if(money[1])
+			sprintf (buf, "By your count, you have %s in coin, and also %d coppers:", amount.c_str(), money[0]);
+		else
+			sprintf( buf, "By your count, you have %d coppers' worth in coin:", money[0] );
+	else
+		if(money[1])
+			sprintf (buf, "By your count, you have %s in coin:", amount.c_str());		
+		else
+			send_to_char ("You don't seem to have any coin.\n", ch);
+	act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	send_to_char ("\n", ch);
+	send_to_char (buf2, ch);
 }
 
 void
@@ -9512,8 +9082,8 @@ tracking_system_response (CHAR_DATA * ch, MESSAGE_DATA * message)
   CHAR_DATA *tch = NULL;
   char buf[MAX_STRING_LENGTH] = { '\0' };
   char from[MAX_STRING_LENGTH] = { '\0' };
-  char subject[255] = { '\0' };
-  char type[15] = { '\0' };
+  char subject[AVG_STRING_LENGTH] = { '\0' };
+  char type[AVG_STRING_LENGTH] = { '\0' };
 
   if (!message)
     return;
@@ -9902,7 +9472,7 @@ write_virtual_board (CHAR_DATA * ch, char *name, char *argument)
 void
 post_player_message (DESCRIPTOR_DATA * d)
 {
-  char date[32] = "";
+  char date[AVG_STRING_LENGTH] = "";
   time_t current_time = 0;
 
   current_time = time (0);
@@ -9988,7 +9558,7 @@ write_pc_board (CHAR_DATA * ch, char *name, char *argument)
 void
 post_journal (DESCRIPTOR_DATA * d)
 {
-  char date[32] = "";
+  char date[AVG_STRING_LENGTH] = "";
   time_t current_time = 0;
 
   current_time = time (0);
@@ -10223,6 +9793,7 @@ do_jread (CHAR_DATA * ch, char *argument, int cmd)
   CHAR_DATA *who = NULL;
   char name[MAX_STRING_LENGTH] = { '\0' };
 
+  bool loaded_char = false;
   if (IS_SET (ch->flags, FLAG_GUEST))
     {
       send_to_char ("Journals are unavailable to guests.\n", ch);
@@ -10250,12 +9821,14 @@ do_jread (CHAR_DATA * ch, char *argument, int cmd)
 			  send_to_char ("No such PC, I'm afraid.\n", ch);
 			  return;
 		  }
+		  loaded_char = true;
 	  }
 	  if (!read_journal_message (who, ch, argument))
 	  {
 		  send_to_char ("There seems to be a problem with the journal.\n",
 			  ch);
-		  unload_pc(who);
+		  if (loaded_char)
+			unload_pc(who);
 		  return;
 	  }
   }
@@ -10265,11 +9838,13 @@ do_jread (CHAR_DATA * ch, char *argument, int cmd)
 	  {
 		  send_to_char ("There seems to be a problem with the journal.\n",
 			  ch);
-		  unload_pc(who);
+			  if (loaded_char)
+				unload_pc(who);
 		  return;
 	  }
   }
-  unload_pc(who);
+  if (loaded_char)
+	unload_pc(who);
 }
 
 void
@@ -10852,6 +10427,7 @@ do_journal (CHAR_DATA * ch, char *argument, int cmd)
   CHAR_DATA *who = NULL;
   char name[MAX_STRING_LENGTH] = { '\0' };
   int messages = 0;
+  bool loaded_char = false;
 
   if (IS_SET (ch->flags, FLAG_GUEST))
     {
@@ -10872,6 +10448,7 @@ do_journal (CHAR_DATA * ch, char *argument, int cmd)
 	      send_to_char ("No such PC, I'm afraid.\n", ch);
 	      return;
 	    }
+		loaded_char = true;
 	}
     }
   else
@@ -10881,7 +10458,7 @@ do_journal (CHAR_DATA * ch, char *argument, int cmd)
   if (!messages)
     send_to_char ("No journal entries found.\n", ch);
 
-  if (who && who != ch)
+  if (who && who != ch && loaded_char)
     unload_pc (who);
 }
 
@@ -11127,7 +10704,7 @@ post_writing (DESCRIPTOR_DATA * d)
   WRITING_DATA *writing = NULL;
   unsigned int i = 0;
   time_t current_time = 0;
-  char date[32] = "";
+  char date[AVG_STRING_LENGTH] = "";
   char message[MAX_STRING_LENGTH] = "";
   float mod = 0;
 
@@ -11698,9 +11275,9 @@ void
 do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 {	
 	char buf[AVG_STRING_LENGTH];
-	char buf2[12];
-	char f_tick[12];
-	char l_tick[12];
+	char buf2[AVG_STRING_LENGTH];
+	char f_tick[AVG_STRING_LENGTH];
+	char l_tick[AVG_STRING_LENGTH];
 	int first_tick;
 	int last_tick;
 	int tick_num = 1;
@@ -12303,4 +11880,100 @@ show_evaluate_information (CHAR_DATA *ch, OBJ_DATA	*obj)
 /*** END SKILL AFFECTS ***/
 	
 	return;
+}
+
+
+void do_origins (CHAR_DATA *ch, char *argument, int cmd)
+{
+	char output[MAX_STRING_LENGTH];
+	OBJ_DATA * obj = 0;
+
+	/* check hands then equip list then finally room */
+	obj = get_obj_in_list_vis(ch,argument,ch->left_hand);
+	if (!obj)
+		obj = get_obj_in_list_vis(ch,argument,ch->right_hand);
+	if (!obj)
+		obj = get_obj_in_list_vis(ch,argument,ch->equip);
+	if (!obj)
+		obj = get_obj_in_list_vis (ch, argument, ch->room->contents);
+	
+	/* complain if it doesn't exist */
+	if (!obj)
+	{
+		send_to_char("I don't see what you're referring to.\n",ch);
+		return;
+	}
+
+	/* build the initial output */
+	sprintf(output, "   It is #2%s#0.\n\n", OBJS (obj, ch));
+	
+	/* add the crafts list */
+	char* originlist = origins_list(ch,obj);
+	sprintf(output + strlen(output), originlist);
+	mem_free(originlist);
+	send_to_char(output,ch);
+}
+
+
+/* returns line formatted edition of crafts you can use something in */
+/* this must be mem_free'd to prevent leaks */
+char * origins_list(CHAR_DATA * ch, OBJ_DATA * obj)
+{
+	char* p = 0;
+	char buf[MAX_STRING_LENGTH] = {'\0'};
+	char output[MAX_STRING_LENGTH];
+	int crafts_found = 0;
+	AFFECTED_TYPE *af=0;
+
+	/* if you're an imm, search all crafts regardless of those on your avvie */
+	SUBCRAFT_HEAD_DATA *tcraft;
+	if (!IS_MORTAL (ch))
+	{
+	  	for (tcraft = crafts; tcraft; tcraft = tcraft->next)
+	 	{
+	  		if (!craft_produces (tcraft, obj->nVirtual))
+				continue;
+	        if (crafts_found)
+				sprintf (buf + strlen (buf), ", ");
+			sprintf (buf + strlen (buf), "'%s %s'",tcraft->command,tcraft->subcraft_name);
+			crafts_found += 1;
+	  	}
+	}
+	else /* you're a mortal .. only list from those you know */
+	{
+		/* search all crafts you have and look for the indicated object */
+		for (int i = CRAFT_FIRST; i <= CRAFT_LAST; i++)
+		{
+			if (!(af = get_affect (ch, i)))
+				continue;
+			/* this shouldn't happen since it's in the craft range of affect nums, but might as well check */
+			if (!af->a.craft || !af->a.craft->subcraft) 
+				continue;
+			/* if the craft does not produce this item, ignore that craft */
+		    if (!craft_produces (af->a.craft->subcraft, obj->nVirtual))
+				continue;
+
+			/* format prettily */
+		    if (crafts_found)
+				sprintf (buf + strlen (buf), ", ");
+
+		    /* print the command and name */
+			sprintf (buf + strlen (buf), "'%s %s'",af->a.craft->subcraft->command,af->a.craft->subcraft->subcraft_name);
+		    crafts_found += 1;
+		 }
+	}
+	
+	/* now whether mortal or not, check for any crafts found and stored in buf */
+	if (crafts_found)
+	{
+		sprintf (output,
+		   "\n   You realize that you could make this item with the following craft%s: %s.\n",
+		    crafts_found != 1 ? "s" : "", buf);
+
+		/* output reformats the long line into breaks for columns */
+		reformat_string (output, &p);
+	}
+
+	/* return the str_dup'd version */
+	return p;
 }

@@ -18,6 +18,7 @@
 #include <sys/time.h>
 #include <mysql/mysql.h>
 #include <signal.h>
+#include <stdexcept>
 
 #include "server.h"
 #include "structs.h"
@@ -32,6 +33,8 @@
 ************************************************************************ */
 
 extern rpie::server engine;
+
+ROOM_DATA * globalRoomArray[100000] = {NULL};
 
 int MAX_MEMORY;
 int PERM_MEMORY_SIZE;
@@ -51,6 +54,7 @@ OBJ_DATA *object_list = NULL;
 //CHAR_DATA *character_list = NULL;
 std::list<char_data*> character_list;
 std::multimap<int, room_prog> mob_prog_list;
+std::multimap<int, room_prog> obj_prog_list;
 CHAR_DATA *full_mobile_list = NULL;
 ROOM_DATA *full_room_list = NULL;
 OBJ_DATA *full_object_list = NULL;
@@ -91,7 +95,7 @@ int next_pc_coldload_id = 0;	/* get_next_pc_coldload_id () */
 int next_obj_coldload_id = 0;
 
 int count_max_online = 0;
-char max_online_date [32] = "";
+char max_online_date [AVG_STRING_LENGTH] = "";
 int MAX_ZONE = 100;
 int second_affect_active = 0;
 int hash_dup_strings = 0;
@@ -112,7 +116,7 @@ int pulse_violence = 8;
 REGISTRY_DATA *registry[MAX_REGISTRY];
 struct zone_data *zone_table;
 int advance_hour_now = 0;
-char BOOT[24];
+char BOOT[AVG_STRING_LENGTH];
 
 FILE *fp_log;
 FILE *imm_log;
@@ -128,7 +132,6 @@ ROOM_DATA *allocate_room (int nVirtual);
 char *file_to_string (char *name);
 void reset_time (void);
 void reload_hints (void);
-void clear_char (CHAR_DATA * ch);
 int change;
 bool memory_check = false;
 
@@ -139,36 +142,73 @@ void boot_mess (void);
 void load_messages (void);
 void boot_social_messages (void);
 
-ROOM_DATA *
-vtor (int nVirtual)
+// Enhanced vToR - Case '09
+/* moved to protos.h -  ROOM_DATA * vtor(int characterRVirtual) {
+	static ROOM_DATA *room = NULL;
+	
+	if (characterRVirtual < 100000) {
+		room = globalRoomArray[characterRVirtual];
+
+		if ((room != NULL) && room->nVirtual == characterRVirtual) {
+			return (room);
+		}
+	}
+
+	for (room = wld_tab[characterRVirtual % ZONE_SIZE]; room; room = room->hnext) {
+		if (room->nVirtual == characterRVirtual) {
+			globalRoomArray[characterRVirtual] = (room);
+			return (room);
+		}
+	}
+
+	return NULL;
+}*/
+
+//ROOM_DATA *
+//vtor (int nVirtual)
+//{
+//  static ROOM_DATA *room = NULL;
+//  static int shortcuts = 0;
+//  static int longways = 0;
+//  static int failures = 0;
+//
+//  /* Short cut...caller might want last used room */
+//
+//  if (room && room->nVirtual == nVirtual)
+//    {
+//      shortcuts++;
+//      return room;
+//    }
+//
+//  if (nVirtual < 0)
+//    return NULL;
+//
+//  for (room = wld_tab[nVirtual % ZONE_SIZE]; room; room = room->hnext)
+//    if (room->nVirtual == nVirtual)
+//      {
+//	longways++;
+//	return (room);
+//      }
+//
+//  failures++;
+//
+//  return NULL;
+//}
+
+
+ROOM_DATA* loadRoom (int vnum)
 {
-  static ROOM_DATA *room = NULL;
-  static int shortcuts = 0;
-  static int longways = 0;
-  static int failures = 0;
-
-  /* Short cut...caller might want last used room */
-
-  if (room && room->nVirtual == nVirtual)
-    {
-      shortcuts++;
-      return room;
-    }
-
-  if (nVirtual < 0)
-    return NULL;
-
-  for (room = wld_tab[nVirtual % ZONE_SIZE]; room; room = room->hnext)
-    if (room->nVirtual == nVirtual)
-      {
-	longways++;
-	return (room);
-      }
-
-  failures++;
-
-  return NULL;
+	ROOM_DATA* room = 0;
+	for (room = wld_tab[vnum % ZONE_SIZE]; room; room = room->hnext) {
+		if (room->nVirtual == vnum) {
+			globalRoomArray[vnum] = room;
+			return room;
+		}
+	}
+	return NULL;
 }
+
+
 
 void
 add_room_to_hash (ROOM_DATA * add_room)
@@ -316,9 +356,9 @@ boot_db (void)
   mud_time = time (NULL);
 
   mob_start_stat = 16;
-  MAX_MEMORY =       24000000;
+  MAX_MEMORY =       48000000;
   //PERM_MEMORY_SIZE = 12900000;
-  PERM_MEMORY_SIZE = 25600000;
+  PERM_MEMORY_SIZE = 51200000;
   MAX_OVERHEAD =     22048000;
   
 
@@ -450,6 +490,10 @@ boot_db (void)
   load_mob_progs();
 
   mm ("post load mob progs");
+  
+  load_obj_progs();
+  
+  mm ("post load object progs");
 
   mem_free (overhead_base);
 
@@ -481,6 +525,12 @@ boot_db (void)
       sprintf (buf, "loaded zone %d", i);
       mm (buf);
     }
+
+	// load timestamp of last sale from vnpc database
+  load_vnpc_timestamp();
+
+  initialize_materials();
+  initialize_location_map();
 
   print_mem_stats (NULL);
 
@@ -639,9 +689,13 @@ reset_time (void)
       weather_info[i].clouds = number (0, 3);
       if (time_info.season == SUMMER)
 	weather_info[i].clouds = number (0, 1);
-      weather_info[i].fog = 0;
-      if (weather_info[i].clouds > 0)
+	if (zone_table[i].weather_type == WEATHER_DESERT)
+		weather_info[i].clouds = 0;
+	weather_info[i].fog = 0;
+      if (weather_info[i].clouds > 0 && zone_table[i].weather_type != WEATHER_DESERT)
 	weather_info[i].state = number (0, 1);
+	 else if (zone_table[i].weather_type == WEATHER_DESERT)
+	   weather_info[i].state = NO_RAIN;
       weather_info[i].temperature =
 	seasonal_temp[zone_table[i].weather_type][time_info.month];
       weather_info[i].wind_speed = number (0, 2);
@@ -954,7 +1008,10 @@ allocate_room (int nVirtual)
   else
 #endif
     add_room_to_hash (new_room);
-
+  if (new_room->nVirtual < 100000) {	
+	  globalRoomArray[new_room->nVirtual] = (new_room);
+  }
+	
   return new_room;
 }
 
@@ -1273,7 +1330,7 @@ autosave (void)
       if (t->deleted || IS_NPC (t))
 	continue;
 
-      if (t->desc && t->desc->connected == CON_PLYNG)
+      if (t->desc && t->desc->connected == CON_PLYNG && (t->in_room!=NOWHERE))
 	{
 	  save_char (t, true);
 	  save_count++;
@@ -1281,34 +1338,6 @@ autosave (void)
     }
 }
 
-void
-autosave_stayputs (void)
-{
-  FILE *fp;
-  CHAR_DATA *ch;
-
-  if (!(fp = fopen (STAYPUT_FILE ".new", "w")))
-    {
-      system_log ("UNABLE TO OPEN stayput.new FILE!!!", true);
-      return;
-    }
-
-  //for (ch = character_list; ch; ch = ch->next)
-  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
-    {
-	ch = *tch_iterator;
-
-      if (ch->deleted)
-	continue;
-
-      if (IS_SET (ch->act, ACT_STAYPUT))
-	save_mobile (ch, fp, "STAYPUT", false);
-    }
-
-  fclose (fp);
-
-  system ("mv " STAYPUT_FILE ".new " STAYPUT_FILE);
-}
 
 /************************************************************************
 *  procs of a (more or less) general utility nature			*
@@ -1391,14 +1420,15 @@ read_string (char *string)
     }
 }
 
+/*
 CHAR_DATA *
 new_char (int pc_type)
 {
   CHAR_DATA *ch;
 
-  /* NOTE:  get_perm gets memory from perm_memory during bootup,
-     thereafter gets it from calloc.
-   */
+  // NOTE:  get_perm gets memory from perm_memory during bootup,
+  //   thereafter gets it from calloc.
+  
 
   if (booting)
     ch = (CHAR_DATA *) get_perm (sizeof (CHAR_DATA));
@@ -1425,7 +1455,7 @@ new_char (int pc_type)
     ch->mob = (MOB_DATA *) get_perm (sizeof (MOB_DATA));
 
   return ch;
-}
+} */
 
 OBJ_DATA *
 new_object ()
@@ -1442,7 +1472,7 @@ new_object ()
 
 
 /* release memory allocated for a char struct */
-
+/*
 void
 free_char (CHAR_DATA * ch)
 {
@@ -1747,7 +1777,7 @@ free_char (CHAR_DATA * ch)
   ch = NULL;
 
   memory_check = false;
-}
+} */
 
 void
 free_obj (OBJ_DATA * obj)
@@ -1850,6 +1880,7 @@ file_to_string (char *name)
   return (string);
 }
 
+/*
 void
 clear_char (CHAR_DATA * ch)
 {
@@ -1936,7 +1967,6 @@ clear_char (CHAR_DATA * ch)
   ch->lodged = NULL;
   ch->mount = NULL;
   ch->following = 0;
-  // ch->group = new std::set<CHAR_DATA*> ();
   ch->fighting = NULL;
   ch->subdue = NULL;
   ch->vehicle = NULL;
@@ -1962,14 +1992,14 @@ clear_char (CHAR_DATA * ch)
       ch->pc->profession = 0;
     }
 
-  /* initialize and clear ch's known spell array */
+  // initialize and clear ch's known spell array
 
   for (i = 0; i < MAX_LEARNED_SPELLS; i++)
     {
       ch->spells[i][0] = 0;
       ch->spells[i][1] = 0;
     }
-}
+} */
 
 
 void
@@ -2761,6 +2791,7 @@ check_memory ()
 }
 
 #else /* NOVELL */
+
 
 int
 mem_free (malloc_t string)

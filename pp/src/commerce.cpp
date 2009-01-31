@@ -24,7 +24,7 @@
 
 
 #define VNPC_COPPER_PURSE		200
-#define MAX_INV_COUNT			200
+#define MAX_INV_COUNT			32
 
 extern rpie::server engine;
 
@@ -432,13 +432,13 @@ const char *sizes[] = {
 
 const char *sizes_named[] = {
   "\01",			/* Binary 1 (^A) should be hard to enter for players */
-  "XX-Small",
-  "X-Small",
-  "Small",
-  "Medium",
-  "Large",
-  "X-Large",
-  "XX-Large",
+  "XX-Small",  //1 
+  "X-Small",   //2
+  "Small",     //3
+  "Medium",    //4
+  "Large",     //5
+  "X-Large",   //6
+  "XX-Large",  //7
   "\n"
 };
 
@@ -472,6 +472,7 @@ const char *econ_flags[] = {
   "meat",			// 1 << 25
   "pelargir",			// 1 << 26
   "generic",			// 1 << 27
+  "northman",			// 1 << 28
   "\n"
 };
 
@@ -495,6 +496,61 @@ const struct econ_data default_econ_info[] = {
   {"\n", {{1.00, 0.50}, {1.00, 0.50}, {1.00, 0.50}, {1.00, 0.50}, {1.00, 0.50}}}
 };
 
+
+// Returns a string in the form al bs cp df, for shillings-based money
+
+std::string
+alternate_money_description (int money)
+{
+	std::string amount;
+	int pounds = 0, shillings = 0, pennies = 0, farthings = 0;
+	if (money / 960)
+	{
+		pounds = money / 960;
+		money %= 960;
+	}
+	if (money / 24)
+	{
+		shillings = money / 24;
+		money %= 24;
+	}
+	if (money / 4)
+	{
+		pennies = money / 4;
+		money %= 4;
+	}
+	if (money)
+	{
+		farthings = money;
+	}
+	if (pounds)
+		amount += MAKE_STRING(pounds) + "l";
+	if (shillings)
+	{
+		if (!amount.empty())
+			amount += " ";
+		amount += MAKE_STRING(shillings) + "s";
+	}
+
+	if (pennies)
+	{
+		if (!amount.empty())
+			amount += " ";
+		amount += MAKE_STRING(pennies) + "p";
+	}
+
+	if (farthings)
+	{
+		if (!amount.empty())
+			amount += " ";
+		amount += MAKE_STRING(farthings) + "f";
+	}
+
+	if (amount.empty())
+		amount = "none";
+
+	return amount;
+}
 
 // Returns true if namestring contains new material name-tag.
 
@@ -928,32 +984,30 @@ calculate_sale_price (OBJ_DATA * obj, CHAR_DATA * keeper, CHAR_DATA * ch,
 	(obj->silver * 4.0 + obj->farthings) * markup * quantity;
     }
 
+  /* if PC, check for possible negotiations and adjust cost */
   if (ch != NULL)
-    {
+  {
       if (!sell)
-	{			// PC buying item
-	  for (neg = keeper->shop->negotiations; neg; neg = neg->next)
-	    {
-	      if (neg->ch_coldload_id == ch->coldload_id &&
-		  neg->obj_vnum == obj->nVirtual)
-		break;
-	    }
-	}
+      {			// PC buying item
+	     for (neg = keeper->shop->negotiations; neg; neg = neg->next)
+	     {
+	        if (neg->ch_coldload_id == ch->coldload_id && neg->obj_vnum == obj->nVirtual)
+				break;
+	     }
+	  }
       else
-	{			// PC selling item
-	  for (neg = keeper->shop->negotiations; neg; neg = neg->next)
-	    {
-	      if (neg->ch_coldload_id == ch->coldload_id &&
-		  neg->obj_vnum == obj->nVirtual && !neg->true_if_buying)
-		break;
-	    }
-	}
+	  {			// PC selling item
+	     for (neg = keeper->shop->negotiations; neg; neg = neg->next)
+	     {
+	       if (neg->ch_coldload_id == ch->coldload_id && neg->obj_vnum == obj->nVirtual && !neg->true_if_buying)
+		       break;
+	     }
+	  }
 
       if (neg && neg->price_delta)
-	val_in_farthings =
-	  val_in_farthings * (100.0 + neg->price_delta) / 100.0 ; //fixed formula
+	     val_in_farthings = val_in_farthings * (100.0 + neg->price_delta) / 100.0 ; //fixed formula
 	  
-   	}
+  }
 //ch != NULL
 
   if (round_result)
@@ -1528,6 +1582,62 @@ do_order (CHAR_DATA * ch, char *argument, int cmd)
       else
 	sprintf (output, ", including shipment");
 
+	if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+	{
+		std::string amount;
+		int money = (int) val_in_farthings, pounds = 0, shillings = 0, pennies = 0, farthings = 0;
+		if (money / 960)
+		{
+			pounds = money / 960;
+			money %= 960;
+		}
+		if (money / 24)
+		{
+			shillings = money / 24;
+			money %= 24;
+		}
+		if (money / 4)
+		{
+			pennies = money / 4;
+			money %= 4;
+		}
+		if (money)
+		{
+			farthings = money;
+		}
+		if (pounds)
+			amount += MAKE_STRING(pounds) + "l";
+		if (shillings)
+		{
+			if (!amount.empty())
+			amount += " ";
+			amount += MAKE_STRING(shillings) + "s";
+		}
+		
+		if (pennies)
+		{
+			if (!amount.empty())
+			amount += " ";
+			amount += MAKE_STRING(pennies) + "p";
+		}
+		
+		if (farthings)
+		{
+			if (!amount.empty())
+			amount += " ";
+			amount += MAKE_STRING(farthings) + "f";
+		}
+		
+		sprintf (buf,
+	       "You have opted to order %s #2%s#0, %s for a total of %s%s. Your"
+	       " order will be available for retrieval from #5%s#0 after %d in-game day%s. To confirm"
+	       " and render payment, please use the ACCEPT command.",
+	       quantity > 1 ? buf2 : "", obj_short_desc (obj),
+	       *buf3 ? buf3 : "", amount.c_str(), output, char_short (keeper),
+	       obj->order_time, obj->order_time != 1 ? "s" : "");
+	}
+	else
+	{
       sprintf (buf,
 	       "You have opted to order %s #2%s#0, %s for a total of %d copper%s%s. Your"
 	       " order will be available for retrieval from #5%s#0 after %d in-game day%s. To confirm"
@@ -1536,6 +1646,7 @@ do_order (CHAR_DATA * ch, char *argument, int cmd)
 	       *buf3 ? buf3 : "", (int) val_in_farthings,
 	       val_in_farthings != 1 ? "s" : "", output, char_short (keeper),
 	       obj->order_time, obj->order_time != 1 ? "s" : "");
+	}
 
       reformat_string (buf, &p);
       send_to_char (p, ch);
@@ -1580,10 +1691,65 @@ do_order (CHAR_DATA * ch, char *argument, int cmd)
 	  val_in_farthings =
 	    calculate_sale_price (obj, keeper, ch, 1, false,
 				  false) * (1.0 + ORDERING_MARKUP);
+				  
+	if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+	{
+		std::string amount;
+		int money = (int) val_in_farthings, pounds = 0, shillings = 0, pennies = 0, farthings = 0;
+		if (money / 960)
+		{
+			pounds = money / 960;
+			money %= 960;
+		}
+		if (money / 24)
+		{
+			shillings = money / 24;
+			money %= 24;
+		}
+		if (money / 4)
+		{
+			pennies = money / 4;
+			money %= 4;
+		}
+		if (money)
+		{
+			farthings = money;
+		}
+		if (pounds)
+		amount += MAKE_STRING(pounds) + "l";
+		if (shillings)
+		{
+			if (!amount.empty())
+			amount += " ";
+			amount += MAKE_STRING(shillings) + "s";
+		}
+		
+		if (pennies)
+		{
+			if (!amount.empty())
+			amount += " ";
+			amount += MAKE_STRING(pennies) + "p";
+		}
+		
+		if (farthings)
+		{
+			if (!amount.empty())
+			amount += " ";
+			amount += MAKE_STRING(farthings) + "f";
+		}
+		
+		amount.insert(0, (11-amount.length())/2, ' ');
+		amount.insert(amount.length(), MAX(0,(int)(11-amount.length())), ' ');
+		
+		sprintf(buf2, "  #1%5d  %s     #2%-55.55s#0", obj->nVirtual, amount.c_str(), obj_short_desc (obj));
+	}
+	else 
+	{
 
 	  sprintf (buf2, "  #1%5d   %7.2f cp%s  #2%-55.55s#0",
 		   obj->nVirtual,
 		   val_in_farthings, "   ", obj_short_desc (obj));
+	}
 
 	  if (strlen (obj_short_desc (obj)) > 52)
 	    {
@@ -1645,139 +1811,160 @@ refresh_colors (CHAR_DATA * keeper)
     }
 }
 
+/* return how much of purse was spent (returning all stops further calls) */
 int
 vnpc_customer (CHAR_DATA * keeper, int purse)
 {
-  ROOM_DATA *room;
-  OBJ_DATA *tobj;
-  int items_in_list = 0, target_item = 0, i = 0;
-  int required_check = 0, item_cost = 0;
-  float delivery_cost = 0;
-  int vnpc_max_spend = 0;
+	ROOM_DATA *room;
+	OBJ_DATA *tobj;
+	int items_in_list = 0, target_item = 0, i = 0;
+	int delivery_cost = 0;
+	int val_in_farthings=0;
 
-  if (IS_SET(keeper->room->room_flags, WEALTHY))
-  {
-	  vnpc_max_spend = 500;
-  }
-  else if (IS_SET(keeper->room->room_flags, SCUM))
-  {
-	  vnpc_max_spend = 50;
-  }
-  else if (IS_SET(keeper->room->room_flags, POOR))
-  {
-	  vnpc_max_spend = 100;
-  }
-  else
-  {
-	  vnpc_max_spend = 250;
-  }
+	if (!IS_NPC (keeper) || !IS_SET (keeper->flags, FLAG_KEEPER)
+			|| !keeper->shop)
+	return purse;
 
-  if (!IS_NPC (keeper) || !IS_SET (keeper->flags, FLAG_KEEPER)
-      || !keeper->shop)
-    return purse;
+	if (IS_SET (keeper->act, ACT_NOVNPC))
+	return purse;
 
-  if (IS_SET (keeper->act, ACT_NOVNPC))
-    return purse;
+	if (!(room = vtor (keeper->shop->store_vnum)))
+	return purse;
 
-  if (!(room = vtor (keeper->shop->store_vnum)))
-    return purse;
+	if (!room->psave_loaded)
+	load_save_room (room);
 
-  if (!room->psave_loaded)
-    load_save_room (room);
-
-  for (tobj = room->contents; tobj; tobj = tobj->next_content)
-    {
-      if (GET_ITEM_TYPE (tobj) == ITEM_MONEY)
-	continue;
-	  if (tobj->farthings > vnpc_max_spend)
-		  continue;
-      items_in_list++;
-    }
-
-  if (!items_in_list)
-    return purse;
-
-  if (items_in_list == 1)
-    target_item = 1;
-  else
-    target_item = number (1, items_in_list);
-
-  for (tobj = room->contents; tobj; tobj = tobj->next_content)
-    {
-      if (GET_ITEM_TYPE (tobj) == ITEM_MONEY)
-	continue;
-	  if (tobj->farthings > vnpc_max_spend)
-		  continue;
-      i++;
-      if (i == target_item)
-	break;
-    }
-
-  if (!tobj)
-    return purse;
-
-  // Cost of item being sold to vNPC
-  item_cost = (int) calculate_sale_price (tobj, keeper, NULL, 1, true, false);
-
-  // Cost of ordering replacement item for merchant
-  delivery_cost = calculate_sale_price (tobj, keeper, NULL, 1, true, true);
-
-  if (vnpc_max_spend == 500)
-	  required_check = 75 - (item_cost / 4);
-  else if (vnpc_max_spend == 250)
-	  required_check = 65 - (item_cost / 4);
-  else if (vnpc_max_spend == 100)
-	  required_check = 65 - (item_cost / 2);
-  else
-	  required_check = 65 - item_cost;
-
-  required_check = MAX (3, required_check);
-  int port = engine.get_port ();
-
-  if (number (1, 100) <= required_check)
-    {
-      target_item = tobj->nVirtual;
-      obj_from_room (&tobj, 1);
-
-      money_to_storeroom (keeper, item_cost);
-
-      mysql_safe_query
-	("INSERT INTO %s.receipts "
-	 "(time, shopkeep, transaction, who, customer, vnum, "
-	 "item, qty, cost, room, gametime, port) "
-	 "VALUES (NOW(),%d,'sold','%s','%s',%d,'%s',%d,%d,%d,'%d-%d-%d %d:00',%d)",
-	 (engine.get_config ("player_log_db")).c_str (),
-	 keeper->mob->nVirtual, "vNPC Customer",
-	 "an honest-looking person", tobj->nVirtual,
-	 tobj->short_description, 1, (int) item_cost, keeper->in_room,
-	 time_info.year, time_info.month + 1, time_info.day + 1,
-	 time_info.hour, port);
-
-      if (keeper_makes (keeper, target_item)
-	  && !get_obj_in_list_num (target_item, room->contents))
+	/* search the storeroom for stuff, ignoring money */
+	for (tobj = room->contents; tobj; tobj = tobj->next_content)
 	{
-	  if (keeper_has_money (keeper, (int) delivery_cost))
-	    {
-	      subtract_keeper_money (keeper, (int) delivery_cost);
-	      obj_to_room (load_object (target_item),
-			   keeper->shop->store_vnum);
-	      mysql_safe_query 
-		("INSERT INTO %s.receipts "
-		 "(time, shopkeep, transaction, who, customer, vnum, "
-		 "item, qty, cost, room, gametime, port) "
-		 "VALUES (NOW()+1,%d,'bought','%s','%s',%d,'%s',%d,%f,%d,'%d-%d-%d %d:00',%d)",
-		 (engine.get_config ("player_log_db")).c_str (),
-		 keeper->mob->nVirtual, "vNPC Merchant",
-		 "an honest-looking merchant", tobj->nVirtual,
-		 tobj->short_description, 1, delivery_cost,
-		 keeper->in_room, time_info.year, time_info.month + 1,
-		 time_info.day + 1, time_info.hour, port);
-	    }
-	}
-      extract_obj (tobj);
-    }
+		if (GET_ITEM_TYPE (tobj) == ITEM_MONEY)
+			continue;
 
-  return item_cost;
+        /* always activate roundup or you will get sales for 0cp*/
+		val_in_farthings = (int)calculate_sale_price (tobj, keeper, NULL, 1, true, false);
+
+		/* skip this if they can't afford it */
+		if (val_in_farthings > purse)
+			continue;
+
+		if (tobj->count > 1)
+			items_in_list += tobj->count;
+		else
+			items_in_list++;
+	}
+
+	/* if there is nothing to buy, skip */
+	if (!items_in_list)
+		return purse;
+
+	/* pick a random item to buy */
+	if (items_in_list == 1)
+		target_item = 1;
+	else
+		target_item = number (1, items_in_list);
+
+	/* search through the storeroom again */
+	for (tobj = room->contents; tobj; tobj = tobj->next_content)
+	{
+		/* skip money objs */
+		if (GET_ITEM_TYPE (tobj) == ITEM_MONEY)
+			continue;
+		
+		/* always activate roundup or you will get sales for 0cp*/
+		val_in_farthings = (int)calculate_sale_price (tobj, keeper, NULL, 1, true, false);
+
+		/* skip this if they can't afford it */
+		if (val_in_farthings > purse)
+			continue;
+
+		/* plus one because i is indexed [0,...) but target_item is rolled [1,...) */
+		if ((i + 1) == target_item)
+		{
+			break;
+		}
+		else if (tobj->count > 1)
+		{
+			if (i < target_item && target_item <= (i + tobj->count))
+			break;
+		}
+		if (tobj->count > 1)
+			i += tobj->count;
+		else
+			i++;
+	}
+
+	/* if there is nothing to buy, spend all money so the shop is not hit again */
+	if (!tobj)
+		return purse;
+
+	/* use max to ensure cost is at least 1 */
+	val_in_farthings = MAX(1,(int)calculate_sale_price (tobj, keeper, NULL, 1, true, false));
+
+	/*  paranoid check to ensure it's affordable */
+	if (val_in_farthings > purse)
+	{
+		send_to_gods("Grommit messed up and this vNPC has too much money!");
+		return 0;
+	}
+		
+
+	// Cost of ordering replacement item for merchant
+	// Merchant will pay to order a replacement of what was just bought if they
+	// can do so and the item is now out of stock
+	delivery_cost = (int)calculate_sale_price (tobj, keeper, NULL, 1, true, true);
+
+	int port = engine.get_port ();
+
+	/* remove the item */
+	target_item = tobj->nVirtual;
+	obj_from_room (&tobj, 1);
+
+	/* add the money */
+	money_to_storeroom (keeper, val_in_farthings);
+
+	/* log the receipt */
+	mysql_safe_query
+	("INSERT INTO %s.receipts "
+	"(time, shopkeep, transaction, who, customer, vnum, "
+	"item, qty, cost, room, gametime, port) "
+	"VALUES (NOW(),%d,'sold','%s','%s',%d,'%s',%d,%d,%d,'%d-%d-%d %d:00',%d)",
+	(engine.get_config ("player_log_db")).c_str (),
+	keeper->mob->nVirtual, "vNPC Customer",
+	"an honest-looking person", tobj->nVirtual,
+	tobj->short_description, 1, val_in_farthings, keeper->in_room,
+	time_info.year, time_info.month + 1, time_info.day + 1,
+	time_info.hour, port);
+
+	/* now, if the item can be ordered from that shop and is now out of stock...*/
+	if (keeper_makes (keeper, target_item) && !get_obj_in_list_num (target_item, room->contents))
+	{
+		/* order another if they can afford it */
+	  if (keeper_has_money (keeper, delivery_cost))
+	  {
+		subtract_keeper_money (keeper, delivery_cost); 
+		OBJ_DATA *obj = load_object (target_item);
+		/* set the cost to the same as before */
+		obj->obj_flags.set_cost = tobj->obj_flags.set_cost;
+		obj_to_room (obj, keeper->shop->store_vnum);
+
+		mysql_safe_query 
+			("INSERT INTO %s.receipts "
+			"(time, shopkeep, transaction, who, customer, vnum, "
+			"item, qty, cost, room, gametime, port) "
+			"VALUES (NOW()+1,%d,'bought','%s','%s',%d,'%s',%d,%f,%d,'%d-%d-%d %d:00',%d)",
+			(engine.get_config ("player_log_db")).c_str (),
+			keeper->mob->nVirtual, "vNPC Merchant",
+			"an honest-looking merchant", tobj->nVirtual,
+			tobj->short_description, 1, delivery_cost,
+			keeper->in_room, time_info.year, time_info.month + 1,
+			time_info.day + 1, time_info.hour, port);
+		}
+	}
+	/* item has been pulled, go destroy it */
+	extract_obj (tobj);
+
+	/* return the amount paid */
+    return val_in_farthings;
 }
 
 
@@ -1930,6 +2117,12 @@ do_list (CHAR_DATA * ch, char *argument, int cmd)
 	  header_said = 1;
 	}
 
+	if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+	{
+		val_in_farthings = calculate_sale_price (obj, keeper, ch, 1, true, false);
+		val_in_farthings = ceil(val_in_farthings);
+	}
+	else
       val_in_farthings =
 	calculate_sale_price (obj, keeper, ch, 1, false, false);
 
@@ -1941,12 +2134,66 @@ do_list (CHAR_DATA * ch, char *argument, int cmd)
       if (!keeper_makes (keeper, obj->nVirtual))
 	sprintf (stock_buf, "(%d in stock)", obj->count);
 
+	if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+	{
+	std::string amount;
+	int money = (int) val_in_farthings, pounds = 0, shillings = 0, pennies = 0, farthings = 0;
+	if (money / 960)
+	{
+		pounds = money / 960;
+		money %= 960;
+	}
+	if (money / 24)
+	{
+		shillings = money / 24;
+		money %= 24;
+	}
+	if (money / 4)
+	{
+		pennies = money / 4;
+		money %= 4;
+	}
+	if (money)
+	{
+		farthings = money;
+	}
+			if (pounds)
+			amount += MAKE_STRING(pounds) + "l";
+		if (shillings)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(shillings) + "s";
+		}
+		
+		if (pennies)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(pennies) + "p";
+		}
+		
+		if (farthings)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(farthings) + "f";
+		}
+		
+		amount.insert(0, (11-amount.length())/2, ' ');
+		amount.insert(amount.length(), MAX(0,(int)(11-amount.length())), ' ');
+		
+		sprintf(buf2, " #1%3d   %s     #2%-55.55s#0", i, ((val_in_farthings) ? amount.c_str() : "   free   "), obj_short_desc (obj));
+	}
+	else
+	{
 
-      char amt[16] = "";
+      char amt[AVG_STRING_LENGTH] = "";
       sprintf (amt,"%7.2f cp",val_in_farthings);
-      sprintf (buf2, "  #1%3d   %s%s  #2%-55.55s#0",
+      sprintf (buf2, " #1%3d    %s%s  #2%-55.55s#0",
 	       i, ((val_in_farthings) ? amt : "   free   "),
 	       "   ", obj_short_desc (obj));
+	}
 
       for (neg = keeper->shop->negotiations; neg; neg = neg->next)
 	{
@@ -2177,6 +2424,12 @@ do_preview (CHAR_DATA * ch, char *argument, int cmd)
 
   show_obj_to_char (obj, ch, 15);
 
+  /* grommit - show origins */
+  char* origins = origins_list(ch,obj);
+  send_to_char ("\n", ch);
+  send_to_char(origins,ch);
+  mem_free(origins);
+
   //append the output of the evaluate command
   show_evaluate_information(ch, obj);
 }
@@ -2218,148 +2471,206 @@ keeper_makes (CHAR_DATA * keeper, int ovnum)
 void
 money_to_storeroom (CHAR_DATA * keeper, int amount)
 {
-  OBJ_DATA *obj, *next_obj;
-  ROOM_DATA *store;
-  int money = 0;
+	OBJ_DATA *obj, *next_obj;
+	ROOM_DATA *store;
+	int money = 0;
+	bool use_standard_currency = true;
 
-  if (!keeper->shop)
-    return;
-  if (!keeper->shop->store_vnum)
-    return;
-  if (!(store = vtor (keeper->shop->store_vnum)))
-    return;
+	if (!keeper->shop)
+	return;
+	if (!keeper->shop->store_vnum)
+	return;
+	if (!(store = vtor (keeper->shop->store_vnum)))
+	return;
+	
+	if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+		use_standard_currency = false;
 
-  while (keeper_has_money (keeper, 1))
-    {
-      for (obj = store->contents; obj; obj = next_obj)
+	while (keeper_has_money (keeper, 1))
 	{
-	  next_obj = obj->next_content;
-	  if (GET_ITEM_TYPE (obj) == ITEM_MONEY)
-	    {
-	      money += ((int) obj->farthings) * obj->count;
-	      obj_from_room (&obj, 0);
-	      extract_obj (obj);
-	    }
+		for (obj = store->contents; obj; obj = next_obj)
+		{
+			next_obj = obj->next_content;
+			if (GET_ITEM_TYPE (obj) == ITEM_MONEY)
+			{
+				money += ((int) obj->farthings) * obj->count;
+				obj_from_room (&obj, 0);
+				extract_obj (obj);
+			}
+		}
 	}
-    }
 
-  money += amount;
+	money += amount;
 
-  if (money / 10000)
-    {				// Mithril/gold hundredpiece.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	{
-	  obj = load_object (5035);
+	if (money / 10000 && use_standard_currency)
+	{				// Mithril/gold hundredpiece.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5035);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66905);
+		} 
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80015);
+		}
+		else
+		{
+			if (!number (0, 4))
+			obj = load_object (1538);
+			else
+			obj = load_object (1543);
+		}
+		obj->count = money / 10000;
+		obj_to_room (obj, store->nVirtual);
+		money %= 10000;
 	}
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66905);
-	}
-      else
-	{
-	  if (!number (0, 4))
-	    obj = load_object (1538);
-	  else
-	    obj = load_object (1543);
-	}
-      obj->count = money / 10000;
-      obj_to_room (obj, store->nVirtual);
-      money %= 10000;
-    }
 
-  if (money / 1000)
-    {				// Gold crown.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	{
-	  obj = load_object (5034);
+	if (money / 1000 && use_standard_currency)
+	{				// Gold crown.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5034);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66904);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80014);
+		}
+		else
+		{
+			obj = load_object (1539);
+		}
+		obj->count = money / 1000;
+		obj_to_room (obj, store->nVirtual);
+		money %= 1000;
 	}
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
+	
+	/* Northman currency uses different amounts */
+	if (money / 960 && !use_standard_currency)
 	{
-	  obj = load_object (66904);
+		obj = load_object (42134);
+		obj->count = money / 960;
+		obj_to_room (obj, store->nVirtual);
+		money %= 960;
 	}
-      else
+	
+	if (money / 24 && !use_standard_currency)
 	{
-	  obj = load_object (1539);
+		obj = load_object (42133);
+		obj->count = money / 24;
+		obj_to_room (obj, store->nVirtual);
+		money %= 24;
 	}
-      obj->count = money / 1000;
-      obj_to_room (obj, store->nVirtual);
-      money %= 1000;
-    }
+	
+	if (money / 4 && !use_standard_currency)
+	{
+		obj = load_object (42132);
+		obj->count = money / 4;
+		obj_to_room (obj, store->nVirtual);
+		money %= 4;
+	}
+	/* End Northman currency */
 
-  if (money / 200)
-    {				// Silver tree.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	{
-	  obj = load_object (5033);
+	if (money / 200 && use_standard_currency)
+	{				// Silver tree.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5033);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66903);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80013);
+		}
+		else
+		{
+			obj = load_object (1544);
+		}
+		obj->count = money / 200;
+		obj_to_room (obj, store->nVirtual);
+		money %= 200;
 	}
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66903);
-	}
-      else
-	{
-	  obj = load_object (1544);
-	}
-      obj->count = money / 200;
-      obj_to_room (obj, store->nVirtual);
-      money %= 200;
-    }
 
-  if (money / 50)
-    {				// Silver royal.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	{
-	  obj = load_object (5032);
+	if (money / 50 && use_standard_currency)
+	{				// Silver royal.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5032);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66902);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80012);
+		}
+		else
+		{
+			obj = load_object (1540);
+		}
+		obj->count = money / 50;
+		obj_to_room (obj, store->nVirtual);
+		money %= 50;
 	}
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66902);
-	}
-      else
-	{
-	  obj = load_object (1540);
-	}
-      obj->count = money / 50;
-      obj_to_room (obj, store->nVirtual);
-      money %= 50;
-    }
 
-  if (money / 5)
-    {				// Bronze copper.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	{
-	  obj = load_object (5031);
+	if (money / 5 && use_standard_currency)
+	{				// Bronze copper.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5031);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66901);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80011);
+		}
+		else
+		{
+			obj = load_object (1541);
+		}
+		obj->count = money / 5;
+		obj_to_room (obj, store->nVirtual);
+		money %= 5;
 	}
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66901);
-	}
-      else
-	{
-	  obj = load_object (1541);
-	}
-      obj->count = money / 5;
-      obj_to_room (obj, store->nVirtual);
-      money %= 5;
-    }
 
-  if (money)
-    {				// Copper bit.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	{
-	  obj = load_object (5030);
+	if (money)
+	{				// Copper bit.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5030);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66900);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80010);
+		}
+		else if (!use_standard_currency)
+		{
+			obj = load_object (42131);
+		}
+		else
+		{
+			obj = load_object (1542);
+		}
+		obj->count = money;
+		obj_to_room (obj, store->nVirtual);
 	}
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66900);
-	}
-      else
-	{
-	  obj = load_object (1542);
-	}
-      obj->count = money;
-      obj_to_room (obj, store->nVirtual);
-    }
 }
 
 void
@@ -2368,6 +2679,7 @@ subtract_keeper_money (CHAR_DATA * keeper, int cost)
   OBJ_DATA *obj, *next_obj;
   ROOM_DATA *store;
   int money = 0;
+  bool use_standard_currency = true;
 
   if (!keeper->shop)
     return;
@@ -2392,100 +2704,179 @@ subtract_keeper_money (CHAR_DATA * keeper, int cost)
     }
 
   money -= cost;
+  
+  if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+		use_standard_currency = false;
 
-  if (money / 10000)
-    {				// Mithril/gold hundredpiece.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	obj = load_object (5035);
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66905);
+  if (money / 10000 && use_standard_currency)
+	{				// Mithril/gold hundredpiece.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5035);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66905);
+		} 
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80015);
+		}
+		else
+		{
+			if (!number (0, 4))
+			obj = load_object (1538);
+			else
+			obj = load_object (1543);
+		}
+		obj->count = money / 10000;
+		obj_to_room (obj, store->nVirtual);
+		money %= 10000;
 	}
-      else
-	{
-	  if (!number (0, 4))
-	    obj = load_object (1538);
-	  else
-	    obj = load_object (1543);
-	}
-      obj->count = money / 10000;
-      obj_to_room (obj, store->nVirtual);
-      money %= 10000;
-    }
 
-  if (money / 1000)
-    {				// Gold crown.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	obj = load_object (5034);
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66904);
+	if (money / 1000 && use_standard_currency)
+	{				// Gold crown.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5034);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66904);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80014);
+		}
+		else
+		{
+			obj = load_object (1539);
+		}
+		obj->count = money / 1000;
+		obj_to_room (obj, store->nVirtual);
+		money %= 1000;
 	}
-      else
-	obj = load_object (1539);
-      obj->count = money / 1000;
-      obj_to_room (obj, store->nVirtual);
-      money %= 1000;
-    }
+	
+	/* Northman currency uses different amounts */
+	if (money / 960 && !use_standard_currency)
+	{
+		obj = load_object (42134);
+		obj->count = money / 960;
+		obj_to_room (obj, store->nVirtual);
+		money %= 960;
+	}
+	
+	if (money / 24 && !use_standard_currency)
+	{
+		obj = load_object (42133);
+		obj->count = money / 24;
+		obj_to_room (obj, store->nVirtual);
+		money %= 24;
+	}
+	
+	if (money / 4 && !use_standard_currency)
+	{
+		obj = load_object (42132);
+		obj->count = money / 4;
+		obj_to_room (obj, store->nVirtual);
+		money %= 4;
+	}
+	/* End Northman currency */
 
-  if (money / 200)
-    {				// Silver tree.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	obj = load_object (5033);
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66903);
+	if (money / 200 && use_standard_currency)
+	{				// Silver tree.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5033);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66903);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80013);
+		}
+		else
+		{
+			obj = load_object (1544);
+		}
+		obj->count = money / 200;
+		obj_to_room (obj, store->nVirtual);
+		money %= 200;
 	}
-      else
-	obj = load_object (1544);
-      obj->count = money / 200;
-      obj_to_room (obj, store->nVirtual);
-      money %= 200;
-    }
 
-  if (money / 50)
-    {				// Silver royal.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	obj = load_object (5032);
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66902);
+	if (money / 50 && use_standard_currency)
+	{				// Silver royal.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5032);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66902);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80012);
+		}
+		else
+		{
+			obj = load_object (1540);
+		}
+		obj->count = money / 50;
+		obj_to_room (obj, store->nVirtual);
+		money %= 50;
 	}
-      else
-	obj = load_object (1540);
-      obj->count = money / 50;
-      obj_to_room (obj, store->nVirtual);
-      money %= 50;
-    }
 
-  if (money / 5)
-    {				// Bronze copper.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	obj = load_object (5031);
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66901);
+	if (money / 5 && use_standard_currency)
+	{				// Bronze copper.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5031);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66901);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80011);
+		}
+		else
+		{
+			obj = load_object (1541);
+		}
+		obj->count = money / 5;
+		obj_to_room (obj, store->nVirtual);
+		money %= 5;
 	}
-      else
-	obj = load_object (1541);
-      obj->count = money / 5;
-      obj_to_room (obj, store->nVirtual);
-      money %= 5;
-    }
 
-  if (money)
-    {				// Copper bit.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	obj = load_object (5030);
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66900);
+	if (money)
+	{				// Copper bit.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+		{
+			obj = load_object (5030);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+		{
+			obj = load_object (66900);
+		}
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+		{
+			obj = load_object (80010);
+		}
+		else if (!use_standard_currency)
+		{
+			obj = load_object (42131);
+		}
+		else
+		{
+			obj = load_object (1542);
+		}
+		obj->count = money;
+		obj_to_room (obj, store->nVirtual);
 	}
-      else
-	obj = load_object (1542);
-      obj->count = money;
-      obj_to_room (obj, store->nVirtual);
-    }
 }
 
 void
@@ -2577,12 +2968,9 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
       if (*buf2 == '!')
-	  {
-		  argument = one_argument(argument, buf2);
 	regardless = 1;
-	  }
 
-      if (*buf2)
+      else if (*buf2)
 	{
 
 	  size = index_lookup (sizes_named, buf2);
@@ -2786,7 +3174,6 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 			ch);
 	  ch->delay_type = 0;
 	  ch->delay_info1 = 0;
-	  ch->delay_info2 = 0;
 	  ch->delay_obj = NULL;
 	  ch->delay_ch = NULL;
 	  return;
@@ -2798,7 +3185,6 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 			ch);
 	  ch->delay_type = 0;
 	  ch->delay_info1 = 0;
-	  ch->delay_info2 = 0;
 	  ch->delay_obj = NULL;
 	  ch->delay_ch = NULL;
 	  return;
@@ -2809,7 +3195,6 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 			ch);
 	  ch->delay_type = 0;
 	  ch->delay_info1 = 0;
-	  ch->delay_info2 = 0;
 	  ch->delay_obj = NULL;
 	  ch->delay_ch = NULL;
 	  return;
@@ -2822,9 +3207,6 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 
       ch->delay_type = 0;
       ch->delay_info1 = 0;
-	  if (ch->delay_info2)
-		  size = ch->delay_info2;
-	  ch->delay_info2 = 0;
       ch->delay_obj = NULL;
       ch->delay_ch = NULL;
     }
@@ -3005,9 +3387,63 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
       keepers_cost = keepers_cost * (100 + discount) / 100;
 
       keepers_cost = (int) keepers_cost;
+	  
+	if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+	{
+		int money = (int) keepers_cost, pounds = 0, shillings = 0, pennies = 0, farthings = 0;
+		if (money / 960)
+		{
+			pounds = money / 960;
+			money %= 960;
+		}
+		if (money / 24)
+		{
+			shillings = money / 24;
+			money %= 24;
+		}
+		if (money / 4)
+		{
+			pennies = money / 4;
+			money %= 4;
+		}
+		if (money)
+		{
+			farthings = money;
+		}
+		
+		std::string amount;
+		if (pounds)
+		{
+			amount += MAKE_STRING(pounds) + "l";
+		}
+		if (shillings)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(shillings) + "s";
+		}
+		if (pennies)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(pennies) + "p";
+		}
+		if (farthings)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(farthings) + "f";
+		}
+		
+		sprintf (buf + strlen(buf), "%s", amount.c_str());
+		
+	}
+	else
+	{
 
       sprintf (buf + strlen (buf), "%d copper%s", (int) keepers_cost,
 	       (int) keepers_cost > 1 ? "s" : "");
+	}
 
       strcat (buf, ".");
 
@@ -3022,6 +3458,15 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 
 
   keepers_cost = (int) keepers_cost;
+  int markup_cost;
+  if (obj->obj_flags.set_cost != 0)
+  {
+	markup_cost = obj->obj_flags.set_cost;
+  }
+  else
+  {
+	markup_cost = 0;
+  }
 
   if (cmd != 2)
     {
@@ -3029,18 +3474,69 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
       obj->count = buy_count;
       if (obj->in_room != keeper->shop->store_vnum)
 	obj->in_room = keeper->shop->store_vnum;
+	if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+	{
+		int money = (int) keepers_cost, pounds = 0, shillings = 0, pennies = 0, farthings = 0;
+		if (money / 960)
+		{
+			pounds = money / 960;
+			money %= 960;
+		}
+		if (money / 24)
+		{
+			shillings = money / 24;
+			money %= 24;
+		}
+		if (money / 4)
+		{
+			pennies = money / 4;
+			money %= 4;
+		}
+		if (money)
+		{
+			farthings = money;
+		}
+		
+		std::string amount;
+		if (pounds)
+		{
+			amount += MAKE_STRING(pounds) + "l";
+		}
+		if (shillings)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(shillings) + "s";
+		}
+		if (pennies)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(pennies) + "p";
+		}
+		if (farthings)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(farthings) + "f";
+		}
+		
+		sprintf (buf, "You have opted to purchase #2%s#0 for the price of %s. To confirm, please use the ACCEPT command.", obj_short_desc(obj), amount.c_str());
+		
+	}
+	else
+	{
       sprintf (buf,
 	       "You have opted to purchase #2%s#0, for a total of %d copper%s. To confirm, please use the ACCEPT command.",
 	       obj_short_desc (obj), (int) keepers_cost,
 	       (int) keepers_cost > 1 ? "s" : "");
+	}
       act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
       ch->delay_type = DEL_PURCHASE_ITEM;
       ch->delay_obj = obj;
       ch->delay_info1 = buy_count;
       if (ch->delay_info1 < 1)
 	ch->delay_info1 = 1;
-	  if (wants_off_size)
-		  ch->delay_info2 = size;
       ch->delay_ch = keeper;
       obj->count = orig_count;
       if (GET_ITEM_TYPE (obj) == ITEM_NPC_OBJECT)
@@ -3085,7 +3581,9 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
       delivery_cost = calculate_sale_price (obj, keeper, NULL, 1, true, true);
       if (keeper_has_money (keeper, (int) delivery_cost))
 	{
-	  obj_to_room (load_object (obj->nVirtual), keeper->shop->store_vnum);
+		OBJ_DATA *new_obj = load_object (obj->nVirtual);
+		new_obj->obj_flags.set_cost = markup_cost;
+	  obj_to_room (new_obj, keeper->shop->store_vnum);
 	  subtract_keeper_money (keeper, (int) delivery_cost);
 	  mysql_safe_query
 	    ("INSERT INTO %s.receipts "
@@ -3109,7 +3607,58 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 
   name_to_ident (ch, buf2);
 
-  if (ch->room->zone == 5 || ch->room->zone == 6)
+  if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+	{
+		int money = (int) keepers_cost, pounds = 0, shillings = 0, pennies = 0, farthings = 0;
+		if (money / 960)
+		{
+			pounds = money / 960;
+			money %= 960;
+		}
+		if (money / 24)
+		{
+			shillings = money / 24;
+			money %= 24;
+		}
+		if (money / 4)
+		{
+			pennies = money / 4;
+			money %= 4;
+		}
+		if (money)
+		{
+			farthings = money;
+		}
+		
+		std::string amount;
+		if (pounds)
+		{
+			amount += MAKE_STRING(pounds) + "l";
+		}
+		if (shillings)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(shillings) + "s";
+		}
+		if (pennies)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(pennies) + "p";
+		}
+		if (farthings)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(farthings) + "f";
+		}
+		
+		sprintf (buf + strlen(buf), "%s At %s, you won't find a better price anywhere in town.", buf2, amount.c_str());
+		
+	}
+  
+  else if (ch->room->zone == 5 || ch->room->zone == 6)
     {
       sprintf (buf,
 	       "%s You're lucky I gave it to you for %d copper%s, maggot.",
@@ -3243,6 +3792,16 @@ keeper_uses_currency_type (int currency_type, OBJ_DATA * obj)
       if (obj->nVirtual >= 66900 && obj->nVirtual <= 66905)
 	return 1;
     }
+   else if (currency_type == CURRENCY_HARAD)
+    {
+	   if (obj->nVirtual >= 80010 && obj->nVirtual <= 80015)
+	     return 1;
+	}
+	else if (currency_type = CURRENCY_NORTHMAN)
+	{
+		if (obj->nVirtual >= 42131 && obj->nVirtual <= 42134)
+			return 1;
+	}
 
 
   return 0;
@@ -3355,263 +3914,327 @@ keeper_has_money (CHAR_DATA * keeper, int cost)
 void
 keeper_money_to_char (CHAR_DATA * keeper, CHAR_DATA * ch, int money)
 {
-  OBJ_DATA *obj, *tobj;
-  char buf[MAX_STRING_LENGTH];
-  int mithril = 0, crown = 0, tree = 0, hundredpiece = 0;
-  int royal = 0, copper = 0, bit = 0, location;
-  bool money_found = false;
+	OBJ_DATA *obj, *tobj;
+	char buf[MAX_STRING_LENGTH];
+	int coins[6] = { 0, 0, 0, 0, 0, 0, }, location;
+	bool money_found = false;
+	bool use_standard_currency = true;
+	std::string amount;
 
-  for (location = 0; location < MAX_WEAR; location++)
-    {
-      if (!(tobj = get_equip (ch, location)))
-	continue;
-      if (GET_ITEM_TYPE (tobj) == ITEM_CONTAINER)
-	{
-	  for (obj = tobj->contains; obj; obj = obj->next_content)
-	    if (GET_ITEM_TYPE (obj) == ITEM_MONEY)
-	      money_found = true;
-	  if (money_found)
-	    break;
+	for (location = 0; location < MAX_WEAR; location++)
+		if (tobj = get_equip (ch, location))
+			if (GET_ITEM_TYPE (tobj) == ITEM_CONTAINER)
+				for (obj = tobj->contains; obj; obj = obj->next_content)
+					if(money_found = (GET_ITEM_TYPE (obj) == ITEM_MONEY))
+						break;
+
+	if (!tobj)
+		for (location = 0; location < MAX_WEAR; location++)
+			if (tobj = get_equip (ch, location))
+				if(GET_ITEM_TYPE (tobj) == ITEM_CONTAINER)
+					break;
+	
+	if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+		use_standard_currency = false;
+
+	if (money / 10000 && use_standard_currency)
+	{				// Mithril/gold hundredpiece.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+			obj = load_object (5035);
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+			obj = load_object (66905);
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+			obj = load_object (80015);
+		else //CURRENCY_TIRITH
+		{
+			if (!number (0, 1))
+				obj = load_object (1538);
+			else
+				obj = load_object (1543);
+		}
+		coins[0] = obj->count = money / 10000;
+		money %= 10000;
+		if (tobj)
+			obj_to_obj (obj, tobj);
+		else
+			obj_to_char (obj, ch);
 	}
-    }
 
-  if (!tobj)
-    {
-      for (location = 0; location < MAX_WEAR; location++)
-	{
-	  if (!(tobj = get_equip (ch, location)))
-	    continue;
-	  if (GET_ITEM_TYPE (tobj) == ITEM_CONTAINER)
-	    break;
+	if (money / 1000 && use_standard_currency)
+	{				// Gold crown.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+			obj = load_object (5034);
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+			obj = load_object (66904);
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+			obj = load_object (80014);
+		else //CURRENCY_TIRITH
+			obj = load_object (1539);
+		
+		coins[1] = obj->count = money / 1000;
+		money %= 1000;
+		if (tobj)
+			obj_to_obj (obj, tobj);
+		else
+			obj_to_char (obj, ch);
 	}
-    }
 
-  if (money / 10000)
-    {				// Mithril/gold hundredpiece.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	{
-	  obj = load_object (5035);
-	  obj->count = money / 10000;
-	  hundredpiece = money / 10000;
+	if (money / 200 && use_standard_currency)
+	{				// Silver tree.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+			obj = load_object (5033);
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+			obj = load_object (66903);
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+			obj = load_object (80013);
+		else //CURRENCY_TIRITH
+			obj = load_object (1544);
+		
+		coins[2] = obj->count = money / 200;
+		money %= 200;
+		if (tobj)
+			obj_to_obj (obj, tobj);
+		else
+			obj_to_char (obj, ch);
 	}
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
-	{
-	  obj = load_object (66905);
-	  obj->count = money / 10000;
-	  hundredpiece = money / 10000;
+
+	if (money / 50 && use_standard_currency)
+	{				// Silver royal.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+			obj = load_object (5032);
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+			obj = load_object (66902);
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+			obj = load_object (80012);
+		else //CURRENCY_TIRITH
+			obj = load_object (1540);
+		coins[3] = obj->count = money / 50;
+		money %= 50;
+		if (tobj)
+			obj_to_obj (obj, tobj);
+		else
+			obj_to_char (obj, ch);
 	}
-      else
-	{
-	  if (!number (0, 1))
-	    {
-	      obj = load_object (1538);
-	      obj->count = money / 10000;
-	      mithril = money / 10000;
-	    }
-	  else
-	    {
-	      obj = load_object (1543);
-	      obj->count = money / 10000;
-	      hundredpiece = money / 10000;
-	    }
+
+	if (money / 5 && use_standard_currency)
+	{				// Bronze copper.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+			obj = load_object (5031);
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+			obj = load_object (66901);
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+			obj = load_object (80011);
+		else //CURRENCY_TIRITH
+			obj = load_object (1541);
+		coins[4] = obj->count = money / 5;
+		money %= 5;
+		if (tobj)
+			obj_to_obj (obj, tobj);
+		else
+			obj_to_char (obj, ch);
 	}
-      if (tobj)
-	obj_to_obj (obj, tobj);
-      else
-	obj_to_char (obj, ch);
-      money %= 10000;
-    }
-
-  if (money / 1000)
-    {				// Gold crown.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	obj = load_object (5034);
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
+	
+	// Northman currency
+	if (money / 960 && !use_standard_currency)
 	{
-	  obj = load_object (66904);
+		obj = load_object (42134);
+		coins[0] = obj->count = money / 960;
+		money %= 960;
+		if (tobj)
+			obj_to_obj (obj, tobj);
+		else
+			obj_to_char (obj, ch);
 	}
-      else
-	obj = load_object (1539);
-      obj->count = money / 1000;
-      if (tobj)
-	obj_to_obj (obj, tobj);
-      else
-	obj_to_char (obj, ch);
-      crown = money / 1000;
-      money %= 1000;
-    }
 
-  if (money / 200)
-    {				// Silver tree.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	obj = load_object (5033);
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
+	if (money / 24 && !use_standard_currency)
 	{
-	  obj = load_object (66903);
+		obj = load_object (42133);
+		coins[1] = obj->count = money / 24;
+		money %= 24;
+		if (tobj)
+			obj_to_obj (obj, tobj);
+		else
+			obj_to_char (obj, ch);
 	}
-      else
-	obj = load_object (1544);
-      obj->count = money / 200;
-      if (tobj)
-	obj_to_obj (obj, tobj);
-      else
-	obj_to_char (obj, ch);
-      tree = money / 200;
-      money %= 200;
-    }
 
-  if (money / 50)
-    {				// Silver royal.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	obj = load_object (5032);
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
+	if (money / 4 && !use_standard_currency)
 	{
-	  obj = load_object (66902);
+		obj = load_object (42132);
+		coins[2] = obj->count = money / 4;
+		money %= 4;
+		if (tobj)
+			obj_to_obj (obj, tobj);
+		else
+			obj_to_char (obj, ch);
 	}
-      else
-	obj = load_object (1540);
-      obj->count = money / 50;
-      if (tobj)
-	obj_to_obj (obj, tobj);
-      else
-	obj_to_char (obj, ch);
-      royal = money / 50;
-      money %= 50;
-    }
 
-  if (money / 5)
-    {				// Bronze copper.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	obj = load_object (5031);
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
+	if (money)
+	{				// Copper bit.
+		if (keeper->mob->currency_type == CURRENCY_MORGUL)
+			obj = load_object (5030);
+		else if (keeper->mob->currency_type == CURRENCY_EDEN)
+			obj = load_object (66900);
+		else if (keeper->mob->currency_type == CURRENCY_HARAD)
+			obj = load_object (80010);
+		else if (!use_standard_currency)
+			obj = load_object (42131);
+		else //CURRENCY_TIRITH
+			obj = load_object (1542);
+		coins[5] = obj->count = money;
+		if (tobj)
+			obj_to_obj (obj, tobj);
+		else
+			obj_to_char (obj, ch);
+	}
+
+	send_to_char ("\n", ch);
+	if( use_standard_currency )
 	{
-	  obj = load_object (66901);
+		if (tobj)
+			sprintf (buf, "$N gives you the following coin, which you tuck"
+			" away in #2%s#0:", obj_short_desc (tobj));
+		else
+			sprintf (buf, "$N gives you the following coin:");
 	}
-      else
-	obj = load_object (1541);
-      obj->count = money / 5;
-      if (tobj)
-	obj_to_obj (obj, tobj);
-      else
-	obj_to_char (obj, ch);
-      copper = money / 5;
-      money %= 5;
-    }
-
-  if (money)
-    {				// Copper bit.
-      if (keeper->mob->currency_type == CURRENCY_MORGUL)
-	obj = load_object (5030);
-      else if (keeper->mob->currency_type == CURRENCY_EDEN)
+	else //!use_standard_currency i.e. Northman atm
 	{
-	  obj = load_object (66900);
+		coins[3] = coins[5];
+		for( int i = 0; i < 4; i++ )
+			if( coins[i] )
+			{
+				if( !amount.empty() )
+					amount += " ";
+				amount += MAKE_STRING( coins[i] ) + get_currency_symbol( CURRENCY_NORTHMAN, 3-i );
+			}
+		if (tobj)
+			sprintf (buf,
+			"$N gives you the following coin (%s), which you tuck away in #2%s#0:",
+			amount.c_str(), obj_short_desc (tobj));
+		else
+			sprintf (buf, "$N gives you the following coin (%s):", amount.c_str());
 	}
-      else
-	obj = load_object (1542);
-      obj->count = money;
-      if (tobj)
-	obj_to_obj (obj, tobj);
-      else
-	obj_to_char (obj, ch);
-      bit = money;
-    }
 
-  send_to_char ("\n", ch);
-  if (tobj)
-    sprintf (buf,
-	     "$N gives you the following coin, which you tuck away in #2%s#0:",
-	     obj_short_desc (tobj));
-  else
-    sprintf (buf, "$N gives you the following coin:");
+	act (buf, true, ch, 0, keeper, TO_CHAR | _ACT_FORMAT);
 
-  act (buf, true, ch, 0, keeper, TO_CHAR | _ACT_FORMAT);
+	*buf = '\0';
+	int bit = coins[5], copper = coins[4], royal = coins[3], tree = coins[2], crown = coins[1], mithril = coins[0], hundredpiece = coins[0];
+	// a small note, the above line and the reasons for it are the cause of 
+	// the mis-printing of mithril hundredpieces... No, I'm not fixing it,
+	// it comes from a really stupid cause, and I simply don't have the time
+	// to fix it.  Oh, did I mention I knowingly introduced it?
+	// With love,
+	// - Vermonkey
+	
+	if (keeper->mob->currency_type == CURRENCY_MORGUL) //The following code is stupid
+	// TODO: fix at some point.
+	{
+		if (bit)
+		sprintf (buf + strlen (buf),
+		"  #2%d crudely-hewn token%s of dark granite#0\n", bit,
+		bit > 1 ? "s" : "");
+		if (copper)
+		sprintf (buf + strlen (buf),
+		"  #2%d razor-sharp flake%s of obsidian#0\n", copper,
+		copper > 1 ? "s" : "");
+		if (royal)
+		sprintf (buf + strlen (buf),
+		" #2%d rectangular token%s of dusky brass#0\n", royal,
+		royal > 1 ? "s" : "");
+		if (tree)
+		sprintf (buf + strlen (buf),
+		" #2%d weighty pentagonal bronze coin%s#0\n", tree,
+		tree > 1 ? "s" : "");
+		if (crown)
+		sprintf (buf + strlen (buf),
+		" #2%d hexagonal token%s of blackened steel#0\n", crown,
+		crown > 1 ? "s" : "");
+		if (hundredpiece)
+		sprintf (buf + strlen (buf),
+		" #2%d octagonal coin%s of smoky silver#0\n", mithril,
+		mithril > 1 ? "s" : "");
+	}
+	else if (keeper->mob->currency_type == CURRENCY_EDEN)
+	{
+		if (bit)
+		sprintf (buf + strlen (buf),
+		"  #2%d small iron disc%s#0\n", bit, bit > 1 ? "s" : "");
+		if (copper)
+		sprintf (buf + strlen (buf),
+		"  #2%d dull copper coin%s#0\n", copper,
+		copper > 1 ? "s" : "");
+		if (royal)
+		sprintf (buf + strlen (buf),
+		" #2%d small, circular silver coin%s#0\n", royal,
+		royal > 1 ? "s" : "");
+		if (tree)
+		sprintf (buf + strlen (buf),
+		" #2%d brazen silver coin%s#0\n", tree, tree > 1 ? "s" : "");
+		if (crown)
+		sprintf (buf + strlen (buf),
+		" #2%d ornate silver coin%s#0\n", crown,
+		crown > 1 ? "s" : "");
+		if (hundredpiece)
+		sprintf (buf + strlen (buf),
+		" #2%d heavy, gleaming, gold coin%s#0\n", mithril,
+		mithril > 1 ? "s" : "");
+	}
+	else if (keeper->mob->currency_type == CURRENCY_HARAD)
+	{
+		if (bit)
+		sprintf (buf + strlen(buf), "   #2%d small copper coin%s#0\n", bit, bit > 1 ? "s" : "");
+		if (copper)
+		sprintf (buf + strlen(buf), "   #2%d large bronze coin%s#0\n", copper, copper > 1 ? "s" : "");
+		if (royal)
+		sprintf (buf + strlen(buf), "   #2%d thin silver coin%s#0\n", royal, royal > 1 ? "s" : "");
+		if (tree)
+		sprintf (buf + strlen(buf), "   #2%d heavy silver coin%s#0\n", tree, tree > 1 ? "s" : "");
+		if (crown)
+		sprintf (buf + strlen(buf), "   #2%d small gold coin%s#0\n", crown, crown > 1 ? "s" : "");
+		if (hundredpiece)
+		sprintf (buf + strlen(buf), "   #2%d shiny, thick round gold coin%s#0\n", hundredpiece, hundredpiece > 1 ? "s" : "");
+	}
+	else if (!use_standard_currency)
+	{
+		if (coins[3])
+			sprintf (buf + strlen(buf), "   #2%d small, rounded bronze coin%s#0 (farthing%s)\n", coins[3], coins[3] > 1 ? "s" : "", coins[3] > 1 ? "s" : "");
+		if (coins[2])
+			sprintf (buf + strlen(buf), "   #2%d heavy, stamped bronze coin%s#0 (%s)\n", coins[2], coins[2] > 1 ? "s" : "", coins[2] > 1 ? "pence" : "penny");
+		if (coins[1])
+			sprintf (buf + strlen(buf), "   #2%d hexagonal, stamped silver coin%s#0 (shilling%s)\n", coins[1], coins[1] > 1 ? "s" : "", coins[1] > 1 ? "s" : "");
+		if (coins[0])
+			sprintf (buf + strlen(buf), "   #2%d large, ornately detailed silver coin%s#0 (pound%s)\n", coins[0], coins[0] > 1 ? "s" : "", coins[0] > 1 ? "s" : "");
+	}
+	else
+	{
+		if (mithril)
+		sprintf (buf + strlen (buf), "   #2%d glittering mithril coin%s#0\n",
+		mithril, mithril > 1 ? "s" : "");
+		if (hundredpiece)
+		sprintf (buf + strlen (buf),
+		"   #2%d thin, slightly fluted gold coin%s#0\n",
+		hundredpiece, hundredpiece > 1 ? "s" : "");
+		if (crown)
+		sprintf (buf + strlen (buf),
+		"   #2%d thick, hexagonal gold coin%s#0\n", crown,
+		crown > 1 ? "s" : "");
+		if (tree)
+		sprintf (buf + strlen (buf),
+		"   #2%d heavy, oblong silver coin%s#0\n", tree,
+		tree > 1 ? "s" : "");
+		if (royal)
+		sprintf (buf + strlen (buf), "   #2%d thin, ridged silver coin%s#0\n",
+		royal, royal > 1 ? "s" : "");
+		if (copper)
+		sprintf (buf + strlen (buf),
+		"   #2%d large, rounded bronze coin%s#0\n", copper,
+		copper > 1 ? "s" : "");
+		if (bit)
+		sprintf (buf + strlen (buf), "   #2%d semicircular copper coin%s#0\n",
+		bit, bit > 1 ? "s" : "");
+	}
 
-  *buf = '\0';
-
-  if (keeper->mob->currency_type == CURRENCY_MORGUL)
-    {
-      if (bit)
-	sprintf (buf + strlen (buf),
-		 "  #2%d crudely-hewn token%s of dark granite#0\n", bit,
-		 bit > 1 ? "s" : "");
-      if (copper)
-	sprintf (buf + strlen (buf),
-		 "  #2%d razor-sharp flake%s of obsidian#0\n", copper,
-		 copper > 1 ? "s" : "");
-      if (royal)
-	sprintf (buf + strlen (buf),
-		 " #2%d rectangular token%s of dusky brass#0\n", royal,
-		 royal > 1 ? "s" : "");
-      if (tree)
-	sprintf (buf + strlen (buf),
-		 " #2%d weighty pentagonal bronze coin%s#0\n", tree,
-		 tree > 1 ? "s" : "");
-      if (crown)
-	sprintf (buf + strlen (buf),
-		 " #2%d hexagonal token%s of blackened steel#0\n", crown,
-		 crown > 1 ? "s" : "");
-      if (hundredpiece)
-	sprintf (buf + strlen (buf),
-		 " #2%d octagonal coin%s of smoky silver#0\n", mithril,
-		 mithril > 1 ? "s" : "");
-    }
-  else if (keeper->mob->currency_type == CURRENCY_EDEN)
-    {
-      if (bit)
-	sprintf (buf + strlen (buf),
-		 "  #2%d small iron disc%s#0\n", bit, bit > 1 ? "s" : "");
-      if (copper)
-	sprintf (buf + strlen (buf),
-		 "  #2%d dull copper coin%s#0\n", copper,
-		 copper > 1 ? "s" : "");
-      if (royal)
-	sprintf (buf + strlen (buf),
-		 " #2%d small, circular silver coin%s#0\n", royal,
-		 royal > 1 ? "s" : "");
-      if (tree)
-	sprintf (buf + strlen (buf),
-		 " #2%d brazen silver coin%s#0\n", tree, tree > 1 ? "s" : "");
-      if (crown)
-	sprintf (buf + strlen (buf),
-		 " #2%d ornate silver coin%s#0\n", crown,
-		 crown > 1 ? "s" : "");
-      if (hundredpiece)
-	sprintf (buf + strlen (buf),
-		 " #2%d heavy, gleaming, gold coin%s#0\n", mithril,
-		 mithril > 1 ? "s" : "");
-    }
-  else
-    {
-      if (mithril)
-	sprintf (buf + strlen (buf), "   #2%d glittering mithril coin%s#0\n",
-		 mithril, mithril > 1 ? "s" : "");
-      if (hundredpiece)
-	sprintf (buf + strlen (buf),
-		 "   #2%d thin, slightly fluted gold coin%s#0\n",
-		 hundredpiece, hundredpiece > 1 ? "s" : "");
-      if (crown)
-	sprintf (buf + strlen (buf),
-		 "   #2%d thick, hexagonal gold coin%s#0\n", crown,
-		 crown > 1 ? "s" : "");
-      if (tree)
-	sprintf (buf + strlen (buf),
-		 "   #2%d heavy, oblong silver coin%s#0\n", tree,
-		 tree > 1 ? "s" : "");
-      if (royal)
-	sprintf (buf + strlen (buf), "   #2%d thin, ridged silver coin%s#0\n",
-		 royal, royal > 1 ? "s" : "");
-      if (copper)
-	sprintf (buf + strlen (buf),
-		 "   #2%d large, rounded bronze coin%s#0\n", copper,
-		 copper > 1 ? "s" : "");
-      if (bit)
-	sprintf (buf + strlen (buf), "   #2%d semicircular copper coin%s#0\n",
-		 bit, bit > 1 ? "s" : "");
-    }
-
-  send_to_char (buf, ch);
+	send_to_char (buf, ch);
 }
-
 void
 do_sell (CHAR_DATA * ch, char *argument, int cmd)
 {
@@ -3951,8 +4574,62 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
 
       keepers_cost = keepers_cost * (100 + discount) / 100;
 
+      if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+	{
+		int money = (int) keepers_cost, pounds = 0, shillings = 0, pennies = 0, farthings = 0;
+		if (money / 960)
+		{
+			pounds = money / 960;
+			money %= 960;
+		}
+		if (money / 24)
+		{
+			shillings = money / 24;
+			money %= 24;
+		}
+		if (money / 4)
+		{
+			pennies = money / 4;
+			money %= 4;
+		}
+		if (money)
+		{
+			farthings = money;
+		}
+		
+		std::string amount;
+		if (pounds)
+		{
+			amount += MAKE_STRING(pounds) + "l";
+		}
+		if (shillings)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(shillings) + "s";
+		}
+		if (pennies)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(pennies) + "p";
+		}
+		if (farthings)
+		{
+			if (!amount.empty())
+				amount += " ";
+			amount += MAKE_STRING(farthings) + "f";
+		}
+		
+		sprintf (buf + strlen(buf), "%s", amount.c_str());
+		
+	}
+	else
+	{
+
       sprintf (buf + strlen (buf), "%d copper%s", (int) keepers_cost,
 	       (int) keepers_cost > 1 ? "s" : "");
+	}
 
       strcat (buf, ".");
 
@@ -3973,10 +4650,6 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   keepers_cost = (int) keepers_cost;
-
-  argument = one_argument(argument, buf);
-  if (atoi(buf) && keepers_cost > atoi(buf))
-	  keepers_cost = atoi(buf);
 
   if (keepers_cost < 1)
     {
@@ -4308,6 +4981,7 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
   char args[3][AVG_STRING_LENGTH / 3] = { "", "", "" };
   char buf[MAX_STRING_LENGTH] = "";
   bool sumchk = false;
+  bool found_keeper = false;
   //int shopnum = 0;
 	
 	/****** begin future options test statments ***/
@@ -4399,15 +5073,13 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
 
 	
 
-  bool found_keeper = false;
   if (IS_NPC (ch) && ch->shop)
     {
       keeper = ch;
     }
   else
     {
-      //for (keeper = character_list; keeper; keeper = keeper->next)
-	  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
+      for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
 		keeper = *tch_iterator;
 		if (keeper == ch)
@@ -4425,6 +5097,7 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("You do not see a book of receipts here.\n", ch);
       return;
     }
+
 
   /* Detail */
   int port = engine.get_port ();
@@ -4461,10 +5134,20 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
 
 	  if (last_day > 0 && month != last_month)
 	    {
+			if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+			{
+				sprintf (buf + strlen (buf),
+		       "\n    Total for #6%s %d#0: Sales #2%s#0, Purchases #2%s#0.\n\n",
+		       month_short_name[(int) last_month], (int) last_year,
+		       alternate_money_description(nAmtSold).c_str(), alternate_money_description(nAmtBought).c_str());
+			}
+			else
+			{
 	      sprintf (buf + strlen (buf),
 		       "\n    Total for #6%s %d#0: Sales #2%d cp#0, Purchases #2%d cp#0.\n\n",
 		       month_short_name[(int) last_month], (int) last_year,
 		       nAmtSold, nAmtBought);
+			}
 	      /* send_to_char ( buf, ch ); */
 	      nTAmtBought += nAmtBought;
 	      nTAmtSold += nAmtSold;
@@ -4498,10 +5181,20 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
       row[2][0] = toupper (row[2][0]);
       if (!sumchk)
       	{
+			if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+			{
+				sprintf (buf + strlen (buf),
+		       "%s #2%s#0 of #2%s#0 %s #5%s#0 for #2%s#0.\n",
+	  	     row[2], row[7], row[6], (row[2][0] == 's') ? "to" : "from",
+	    	   (IS_NPC (ch) || IS_MORTAL (ch)) ? row[4] : row[3], alternate_money_description(atoi(row[8])).c_str());
+			}
+			else
+			{
 	      sprintf (buf + strlen (buf),
 		       "%s #2%s#0 of #2%s#0 %s #5%s#0 for #2%s cp#0.\n",
 	  	     row[2], row[7], row[6], (row[2][0] == 's') ? "to" : "from",
 	    	   (IS_NPC (ch) || IS_MORTAL (ch)) ? row[4] : row[3], row[8]);
+			}
       	/* send_to_char ( buf, ch ); */
       	}
       	
@@ -4519,14 +5212,36 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
     {
       if ((nTAmtBought + nTAmtSold == 0) && (nAmtSold + nAmtBought > 0))
 	{
+		if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+		{
+			sprintf (buf + strlen (buf),
+		   "\n    Total for #6%s %d#0: Sales #2%s#0, Purchases #2%s#0.\n\n"
+		   "    Current coin on hand: #2%s#0.\n",
+		   month_short_name[(int) last_month], (int) last_year,
+		   alternate_money_description(nAmtSold).c_str(), alternate_money_description(nAmtBought).c_str(), alternate_money_description(keeper_has_money (keeper, 0)).c_str());
+		}
+		else
+		{
 	  sprintf (buf + strlen (buf),
 		   "\n    Total for #6%s %d#0: Sales #2%d cp#0, Purchases #2%d cp#0.\n\n"
 		   "    Current coin on hand: #2%d cp#0.\n",
 		   month_short_name[(int) last_month], (int) last_year,
 		   nAmtSold, nAmtBought, keeper_has_money (keeper, 0));
+		}
 	}
       else
 	{
+		if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
+		{
+			sprintf (buf + strlen (buf),
+		   "\n    Total for #6%s %d#0: Sales #2%s#0, Purchases #2%s#0.\n\n"
+		   "    Total for period:    Sales #2%s#0, Purchases #2%s#0.\n"
+		   "    Current coin on hand:  #2%s#0.\n",
+		   month_short_name[(int) last_month], (int) last_year,
+		   alternate_money_description(nAmtSold).c_str(), alternate_money_description(nAmtBought).c_str(), alternate_money_description(nTAmtSold).c_str(), alternate_money_description(nTAmtBought).c_str(), alternate_money_description(keeper_has_money (keeper, 0)).c_str());
+		}
+		else
+		{
 	  sprintf (buf + strlen (buf),
 		   "\n    Total for #6%s %d#0: Sales #2%d cp#0, Purchases #2%d cp#0.\n\n"
 		   "    Total for period:    Sales #2%d cp#0, Purchases #2%d cp#0.\n"
@@ -4534,6 +5249,7 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
 		   month_short_name[(int) last_month], (int) last_year,
 		   nAmtSold, nAmtBought, nTAmtSold, nTAmtBought,
 		   keeper_has_money (keeper, 0));
+		}
 	}
       page_string (ch->desc, buf);
     }
@@ -4685,7 +5401,7 @@ do_stable (CHAR_DATA * ch, char *argument, int cmd)
 
   unhitch_char (ch, animal);
 
-  /* Take reigns of hitches hitch, if chained */
+  /* Take reins of hitches hitch, if chained */
 
   if (animal->hitchee && is_he_here (animal, animal->hitchee, 0))
     {
@@ -4694,7 +5410,7 @@ do_stable (CHAR_DATA * ch, char *argument, int cmd)
       unhitch_char (animal, new_hitch);
 
       if (hitch_char (ch, new_hitch))
-	act ("You take the reigns of $N.", false, ch, 0, new_hitch, TO_CHAR);
+	act ("You take the reins of $N.", false, ch, 0, new_hitch, TO_CHAR);
     }
 
   ticket = load_object (VNUM_TICKET);
@@ -4793,7 +5509,7 @@ unstable (CHAR_DATA * ch, OBJ_DATA * ticket, CHAR_DATA * keeper)
     {
       name_to_ident (ch, buf2);
       sprintf (buf, "tell %s Yeah, that's my ticket, but I don't have "
-	       "anyting in that stall.", buf2);
+	       "anything in that stall.", buf2);
       command_interpreter (keeper, buf);
       return;
     }
@@ -5602,6 +6318,16 @@ can_subtract_money (CHAR_DATA * ch, int farthings_to_subtract,
 	      if (obj->nVirtual >= 66900 && obj->nVirtual <= 66905)
 		money += ((int) ch->right_hand->farthings) * ch->right_hand->count;
 	    }
+		else if (currency_type == CURRENCY_HARAD)
+		  {
+		    if (obj->nVirtual >= 80010 && obj->nVirtual <= 80015)
+			  money += ((int) obj->farthings) * obj->count;
+		  }
+		else if (currency_type == CURRENCY_NORTHMAN)
+		{
+			if (obj->nVirtual >= 42131 && obj->nVirtual <= 42134)
+				money += ((int) obj->farthings) * obj->count;
+		}
 	  else
 	    {
 	      if (obj->nVirtual >= 1538 && obj->nVirtual <= 1544)
@@ -5624,6 +6350,16 @@ can_subtract_money (CHAR_DATA * ch, int farthings_to_subtract,
 		      if (tobj->nVirtual >= 66900 && tobj->nVirtual <= 66905)
 			money += ((int) tobj->farthings) * tobj->count;
 		    }
+			else if (currency_type == CURRENCY_HARAD)
+		  {
+		    if (tobj->nVirtual >= 80010 && tobj->nVirtual <= 80015)
+			  money += ((int) tobj->farthings) * tobj->count;
+		  }
+		  else if (currency_type == CURRENCY_NORTHMAN)
+		{
+			if (tobj->nVirtual >= 62131 && tobj->nVirtual <= 62134)
+				money += ((int) tobj->farthings) * tobj->count;
+		}
 		  else
 		    {
 		      if (tobj->nVirtual >= 1538 && tobj->nVirtual <= 1544)
@@ -5648,6 +6384,16 @@ can_subtract_money (CHAR_DATA * ch, int farthings_to_subtract,
 	      if (obj->nVirtual >= 66900 && obj->nVirtual <= 66905)
 		money += ((int) ch->left_hand->farthings) * ch->left_hand->count;
 	    }
+		else if (currency_type == CURRENCY_HARAD)
+		  {
+		    if (obj->nVirtual >= 80010 && obj->nVirtual <= 80015)
+			  money += ((int) obj->farthings) * obj->count;
+		  }
+		  else if (currency_type == CURRENCY_NORTHMAN)
+		{
+			if (obj->nVirtual >= 42131 && obj->nVirtual <= 42134)
+				money += ((int) obj->farthings) * obj->count;
+		}
 	  else
 	    {
 	      if (obj->nVirtual >= 1538 && obj->nVirtual <= 1544)
@@ -5670,6 +6416,16 @@ can_subtract_money (CHAR_DATA * ch, int farthings_to_subtract,
 		      if (tobj->nVirtual >= 66900 && tobj->nVirtual <= 66905)
 			money += ((int) tobj->farthings) * tobj->count;
 		    }
+			else if (currency_type == CURRENCY_HARAD)
+		  {
+		    if (tobj->nVirtual >= 80010 && tobj->nVirtual <= 80015)
+			  money += ((int) tobj->farthings) * tobj->count;
+		  }
+		  else if (currency_type == CURRENCY_NORTHMAN)
+		{
+			if (tobj->nVirtual >= 42131 && tobj->nVirtual <= 42134)
+				money += ((int) tobj->farthings) * tobj->count;
+		}
 		  else
 		    {
 		      if (tobj->nVirtual >= 1538 && tobj->nVirtual <= 1544)
@@ -5701,6 +6457,16 @@ can_subtract_money (CHAR_DATA * ch, int farthings_to_subtract,
 		{
 		  if (tobj->nVirtual >= 66900 && tobj->nVirtual <= 66905)
 		    money += ((int) tobj->farthings) * tobj->count;
+		}
+		  else if (currency_type == CURRENCY_HARAD)
+		  {
+		    if (tobj->nVirtual >= 80010 && tobj->nVirtual <= 80015)
+			  money += ((int) tobj->farthings) * tobj->count;
+		  }
+		  else if (currency_type == CURRENCY_NORTHMAN)
+		{
+			if (tobj->nVirtual >= 42131 && tobj->nVirtual <= 42134)
+				money += ((int) tobj->farthings) * tobj->count;
 		}
 	      else
 		{
@@ -5750,6 +6516,10 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
 		   && (tobj->nVirtual >= 66900 && tobj->nVirtual <= 66905))
 		  || (currency_type == CURRENCY_MORGUL
 		      && (tobj->nVirtual >= 5030 && tobj->nVirtual <= 5035))
+			  || (currency_type == CURRENCY_HARAD
+			  && (tobj->nVirtual >= 80010
+			      && tobj->nVirtual <= 80015))
+			  || (currency_type == CURRENCY_NORTHMAN && (tobj->nVirtual >= 42131 && tobj->nVirtual <= 42134))
 		  || (currency_type == CURRENCY_TIRITH
 		      && (tobj->nVirtual >= 1538 && tobj->nVirtual <= 1544)))
 		{
@@ -5771,6 +6541,10 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
 	       && (obj->nVirtual >= 66900 && obj->nVirtual <= 66905))
 	      || (currency_type == CURRENCY_MORGUL
 		  && (obj->nVirtual >= 5030 && obj->nVirtual <= 5035))
+		  || (currency_type == CURRENCY_HARAD
+			  && (obj->nVirtual >= 80010
+			      && obj->nVirtual <= 80015))
+				  || (currency_type == CURRENCY_NORTHMAN && (obj->nVirtual >= 42131 && obj->nVirtual <= 42134))
 	      || (currency_type == CURRENCY_TIRITH
 		  && (obj->nVirtual >= 1538 && obj->nVirtual <= 1544)))
 	    {
@@ -5792,6 +6566,10 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
 		      || (currency_type == CURRENCY_MORGUL
 			  && (tobj->nVirtual >= 5030
 			      && tobj->nVirtual <= 5035))
+				  || (currency_type == CURRENCY_HARAD
+			  && (tobj->nVirtual >= 80010
+			      && tobj->nVirtual <= 80015))
+				  || (currency_type == CURRENCY_NORTHMAN && (tobj->nVirtual >= 42131 && tobj->nVirtual <= 42134))
 		      || (currency_type == CURRENCY_TIRITH
 			  && (tobj->nVirtual >= 1538
 			      && tobj->nVirtual <= 1544)))
@@ -5815,6 +6593,10 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
 	       && (obj->nVirtual >= 66900 && obj->nVirtual <= 66905))
 	      || (currency_type == CURRENCY_MORGUL
 		  && (obj->nVirtual >= 5030 && obj->nVirtual <= 5035))
+		  || (currency_type == CURRENCY_HARAD
+			  && (obj->nVirtual >= 80010
+			      && obj->nVirtual <= 80015))
+				  || (currency_type == CURRENCY_NORTHMAN && (obj->nVirtual >= 42131 && obj->nVirtual <= 42134))
 	      || (currency_type == CURRENCY_TIRITH
 		  && (obj->nVirtual >= 1538 && obj->nVirtual <= 1544)))
 	    {
@@ -5836,6 +6618,10 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
 		      || (currency_type == CURRENCY_MORGUL
 			  && (tobj->nVirtual >= 5030
 			      && tobj->nVirtual <= 5035))
+			  || (currency_type == CURRENCY_HARAD
+			  && (tobj->nVirtual >= 80010
+			      && tobj->nVirtual <= 80015))
+				  || (currency_type == CURRENCY_NORTHMAN && (tobj->nVirtual >= 42131 && tobj->nVirtual <= 42134))
 		      || (currency_type == CURRENCY_TIRITH
 			  && (tobj->nVirtual >= 1538
 			      && tobj->nVirtual <= 1544)))
@@ -5861,7 +6647,7 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
   obj = ch->delay_obj;
   ch->delay_obj = NULL;
 
-  if (money / 10000)
+  if (money / 10000 && currency_type != CURRENCY_NORTHMAN)
     {				// Mithril/gold hundredpiece.
       if (currency_type == CURRENCY_MORGUL)
 	{
@@ -5871,6 +6657,10 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
 	{
 	  tobj = load_object (66905);
 	}
+	  else if (currency_type == CURRENCY_HARAD)
+	  {
+	     tobj = load_object (80015);
+	  }
       else
 	{
 	  if (!number (0, 4))
@@ -5879,7 +6669,7 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
 	    tobj = load_object (1543);
 	}
       tobj->count = money / 10000;
-      if (obj)
+      if (obj && GET_ITEM_TYPE(obj) == ITEM_CONTAINER)
 	obj_to_obj (tobj, obj);
       else
 	obj_to_char (tobj, ch);
@@ -5887,15 +6677,19 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
       change = true;
     }
 
-  if (money / 1000)
+  if (money / 1000 && currency_type != CURRENCY_NORTHMAN)
     {				// Gold crown.
       if (currency_type == CURRENCY_MORGUL)
 	tobj = load_object (5034);
       else if (currency_type == CURRENCY_EDEN)
 	tobj = load_object (66904);
+	else if (currency_type == CURRENCY_HARAD)
+	  {
+	     tobj = load_object (80014);
+	  }
       else
 	tobj = load_object (1539);
-      if (obj)
+      if (obj && GET_ITEM_TYPE(obj) == ITEM_CONTAINER)
 	obj_to_obj (tobj, obj);
       else
 	obj_to_char (tobj, ch);
@@ -5904,15 +6698,19 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
       change = true;
     }
 
-  if (money / 200)
+  if (money / 200 && currency_type != CURRENCY_NORTHMAN)
     {				// Silver tree.
       if (currency_type == CURRENCY_MORGUL)
 	tobj = load_object (5033);
       else if (currency_type == CURRENCY_EDEN)
 	tobj = load_object (66903);
+	else if (currency_type == CURRENCY_HARAD)
+	  {
+	     tobj = load_object (80013);
+	  }
       else
 	tobj = load_object (1544);
-      if (obj)
+      if (obj && GET_ITEM_TYPE(obj) == ITEM_CONTAINER)
 	obj_to_obj (tobj, obj);
       else
 	obj_to_char (tobj, ch);
@@ -5921,15 +6719,19 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
       change = true;
     }
 
-  if (money / 50)
+  if (money / 50 && currency_type != CURRENCY_NORTHMAN)
     {				// Silver royal.
       if (currency_type == CURRENCY_MORGUL)
 	tobj = load_object (5032);
       else if (currency_type == CURRENCY_EDEN)
 	tobj = load_object (66902);
+	else if (currency_type == CURRENCY_HARAD)
+	  {
+	     tobj = load_object (80012);
+	  }
       else
 	tobj = load_object (1540);
-      if (obj)
+      if (obj && GET_ITEM_TYPE(obj) == ITEM_CONTAINER)
 	obj_to_obj (tobj, obj);
       else
 	obj_to_char (tobj, ch);
@@ -5938,15 +6740,19 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
       change = true;
     }
 
-  if (money / 5)
+  if (money / 5 && currency_type != CURRENCY_NORTHMAN)
     {				// Bronze copper.
       if (currency_type == CURRENCY_MORGUL)
 	tobj = load_object (5031);
       else if (currency_type == CURRENCY_EDEN)
 	tobj = load_object (66901);
+	else if (currency_type == CURRENCY_HARAD)
+	  {
+	     tobj = load_object (80011);
+	  }
       else
 	tobj = load_object (1541);
-      if (obj)
+      if (obj && GET_ITEM_TYPE(obj) == ITEM_CONTAINER)
 	obj_to_obj (tobj, obj);
       else
 	obj_to_char (tobj, ch);
@@ -5954,6 +6760,42 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
       money %= 5;
       change = true;
     }
+	
+	if (money / 960 && currency_type == CURRENCY_NORTHMAN)
+	{
+		tobj = load_object (42134);
+		if (obj && GET_ITEM_TYPE(obj) == ITEM_CONTAINER)
+			obj_to_obj (tobj, obj);
+		else
+			obj_to_char (tobj, ch);
+		tobj->count = money / 960;
+		money %= 960;
+		change = true;
+	}
+	
+	if (money / 24  && currency_type == CURRENCY_NORTHMAN)
+	{
+		tobj = load_object (42133);
+		if (obj && GET_ITEM_TYPE(obj) == ITEM_CONTAINER)
+			obj_to_obj (tobj, obj);
+		else
+			obj_to_char (tobj, ch);
+		tobj->count = money / 24;
+		money %= 24;
+		change = true;
+	}
+	
+	if (money / 4  && currency_type == CURRENCY_NORTHMAN)
+	{
+		tobj = load_object (42132);
+		if (obj && GET_ITEM_TYPE(obj) == ITEM_CONTAINER)
+			obj_to_obj (tobj, obj);
+		else
+			obj_to_char (tobj, ch);
+		tobj->count = money / 4;
+		money %= 4;
+		change = true;
+	}
 
   if (money)
     {				// Copper bit.
@@ -5961,9 +6803,17 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
 	tobj = load_object (5030);
       else if (currency_type == CURRENCY_EDEN)
 	tobj = load_object (66900);
+	else if (currency_type == CURRENCY_HARAD)
+	  {
+	     tobj = load_object (80010);
+	  }
+	  else if (currency_type == CURRENCY_NORTHMAN)
+	  {
+		tobj = load_object (42131);
+	  }
       else
 	tobj = load_object (1542);
-      if (obj)
+      if (obj && GET_ITEM_TYPE(obj) == ITEM_CONTAINER)
 	obj_to_obj (tobj, obj);
       else
 	obj_to_char (tobj, ch);
@@ -5980,7 +6830,7 @@ subtract_money (CHAR_DATA * ch, int farthings_to_subtract, int currency_type)
 
   if (change)
     {
-      if (obj)
+      if (obj && GET_ITEM_TYPE(obj) == ITEM_CONTAINER)
 	sprintf (buf, "Change is made, which you then deposit in #2%s#0.",
 		 obj_short_desc (obj));
       else
@@ -6584,7 +7434,7 @@ do_mark (CHAR_DATA* ch, char *argument, int cmd)
 				obj->obj_flags.set_cost = (int) (obj->obj_flags.set_cost * new_value);
 		}
 		if (!multiplication && !addition && !subtraction)
-	  obj->obj_flags.set_cost = (int)(100.0 * new_value);
+			obj->obj_flags.set_cost = (int)(100.0 * new_value);
 	  ++count;
 	}
 
@@ -6610,6 +7460,7 @@ do_payroll (CHAR_DATA * ch, char *argument, int cmd)
   MYSQL_RES *result;
   MYSQL_ROW row;
   char buf[MAX_STRING_LENGTH];
+    bool found_keeper;
   //int shopnum = 0;
 	
 
@@ -6620,6 +7471,7 @@ do_payroll (CHAR_DATA * ch, char *argument, int cmd)
 		}
 	else
 		{
+		found_keeper = false;
 		//for (keeper = character_list; keeper; keeper = keeper->next)
 		for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 			{
@@ -6627,11 +7479,12 @@ do_payroll (CHAR_DATA * ch, char *argument, int cmd)
 			if (IS_NPC (keeper) &&
 				keeper->shop &&
 				keeper->shop->store_vnum == ch->in_room)
+				found_keeper = true;
 				break;
 			}
 		}
 
-	if (keeper == NULL)
+	if (!found_keeper)
 		{
 		send_to_char ("You do not see a payroll ledger here.\n", ch);
 		return;

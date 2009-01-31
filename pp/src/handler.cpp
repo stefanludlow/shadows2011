@@ -351,7 +351,7 @@ affect_modify (CHAR_DATA * ch, int type, int loc, int mod, int bitv,
       case APPLY_CON:
 	GET_CON (ch) += mod;
 	if (!IS_NPC (ch))
-	  ch->max_hit = 10 + 6 * GET_CON (ch);
+	  ch->max_hit = 50 + CONSTITUTION_MULTIPLIER * GET_CON (ch);
 	else
 	  {
 	    ch->max_hit += mod * 6;
@@ -458,12 +458,20 @@ reapply_affects (CHAR_DATA * ch)
 
   /* Make certain values are between 0..25, not < 0 and not > 25! */
 
-  GET_DEX (ch) = MAX (0, MIN (GET_DEX (ch), 25));
+/*  GET_DEX (ch) = MAX (0, MIN (GET_DEX (ch), 25));
   GET_INT (ch) = MAX (0, MIN (GET_INT (ch), 25));
   GET_WIL (ch) = MAX (0, MIN (GET_WIL (ch), 25));
   GET_AUR (ch) = MAX (0, MIN (GET_AUR (ch), 25));
   GET_CON (ch) = MAX (0, MIN (GET_CON (ch), 25));
-  GET_STR (ch) = MAX (0, MIN (GET_STR (ch), 25));
+  GET_STR (ch) = MAX (0, MIN (GET_STR (ch), 25)); */
+
+  GET_DEX (ch) = MAX (0, GET_DEX(ch));
+  GET_INT (ch) = MAX (0, GET_INT(ch));
+  GET_WIL (ch) = MAX (0, GET_WIL(ch));
+  GET_AUR (ch) = MAX (0, GET_AUR(ch));
+  GET_CON (ch) = MAX (0, GET_CON(ch));
+  GET_STR (ch) = MAX (0, GET_STR(ch));
+  
 }
 
 AFFECTED_TYPE *
@@ -1437,6 +1445,59 @@ get_char_nomask (char *name)
 
   return 0;
 }
+
+/* search all over the world for a char, and return a pointer if found */
+/* no NPCs here !*/
+CHAR_DATA *
+get_char_nomask_nonpc (char *name)
+{
+  CHAR_DATA *i;
+  int j;
+  int number;
+  char tmpname[MAX_INPUT_LENGTH];
+  char *tmp;
+
+  strcpy (tmpname, name);
+  tmp = tmpname;
+
+  if (!(number = get_number (&tmp)))
+    return 0;
+
+  //for (i = character_list, j = 1; i && (j <= number); i = i->next)
+  j = 1;
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); (tch_iterator != character_list.end()) && (j <= number); tch_iterator++)
+    {
+	i = *tch_iterator;
+
+      if (i->deleted)
+	continue;
+
+	  /* if this is switched into by an admin, run the check on the original char */
+	  if (IS_NPC(i) && i->desc && i->desc->original)
+	  {
+		if (isname (tmp, GET_NAMES (i->desc->original)))
+		{
+			/* return the desc on the NPC as that is where data would go to */
+			if (j == number)
+				return (i);
+			j++;
+		}
+	  }
+
+	  if (IS_NPC(i))
+		  continue;
+
+      if (isname (tmp, GET_NAMES (i)))
+	{
+	  if (j == number)
+	    return (i);
+	  j++;
+	}
+    }
+
+  return 0;
+}
+
 
 void
 obj_to_room (OBJ_DATA * object, int room)	/* STACKing */
@@ -4440,10 +4501,7 @@ morphtype = 2 will keep the same description, just change the skills
 		newMob->move = ch->move;
 		newMob->speaks = ch->speaks;
 		newMob->speed = ch->speed;
-		newMob->nightmare = ch->nightmare;
 		newMob->ppoints = ch->ppoints;
-
-		newMob->poison_type = ch->poison_type;
 		newMob->race = ch->race;
 		newMob->affected_by = ch->affected_by;
 		newMob->act = ch->act;

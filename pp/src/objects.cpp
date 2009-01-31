@@ -19,8 +19,6 @@
 
 extern rpie::server engine;
 
-MATERIAL_TYPE object__get_material (OBJ_DATA * thisPtr);
-
 const char *weapon_theme[] =
   { "stab", "pierce", "chop", "bludgeon", "slash", "lash" };
 
@@ -493,22 +491,50 @@ object__examine_damage (OBJ_DATA * thisPtr)
 /*------------------------------------------------------------------------\
 |  get_material()                                                         |
 |                                                                         |
-|  Try to get a material used to compose this object instance.            |
+|  This returns the "broad" type of material (i.e. wood, metal, etc)      |
 \------------------------------------------------------------------------*/
-MATERIAL_TYPE
-object__get_material (OBJ_DATA * thisPtr)
+int
+object__get_material (OBJECT_DAMAGE * thisPtr)
 {
   /* TODO: flesh this out */
+	switch (thisPtr->material)
+	{
+	case MATERIAL_BURLAP:
+	case MATERIAL_LINEN:
+	case MATERIAL_WOOL:
+	case MATERIAL_COTTON:
+	case MATERIAL_SILK:
+	case MATERIAL_VELVET:
+	case MATERIAL_CLOTH:
+		return 0;
 
-  if ((GET_ITEM_TYPE (thisPtr) == ITEM_ARMOR && thisPtr->o.od.value[0] <= 2)
-      || GET_ITEM_TYPE (thisPtr) == ITEM_WORN)
-    {
-      return MATERIAL_WOOL;
-    }
-  else
-    {
-      return MATERIAL_STEEL;
-    }
+	case MATERIAL_THIN_LEATHER:
+	case MATERIAL_PLAIN_LEATHER:
+	case MATERIAL_THICK_LEATHER:
+	case MATERIAL_COURBOULLI:
+	case MATERIAL_LEATHER:
+		return 1;
+
+	case MATERIAL_COPPER:
+	case MATERIAL_BRONZE:
+	case MATERIAL_IRON:
+	case MATERIAL_STEEL:
+	case MATERIAL_BRASS:
+	case MATERIAL_TIN:
+	case MATERIAL_LEAD:
+	case MATERIAL_MITHRIL:
+	case MATERIAL_METAL:
+		return 2;
+
+	case MATERIAL_CERAMIC:
+	case MATERIAL_STONE:
+		return 4;
+	case MATERIAL_IVORY:
+	case MATERIAL_WOOD:
+		return 3;
+	default:
+		return 0;
+	}
 }
 
 
@@ -526,10 +552,17 @@ object__add_damage (OBJ_DATA * thisPtr, DAMAGE_TYPE source,
   /* TODO: Remove this when we're ready to go live with damage */
   if (!engine.in_test_mode ())
     return NULL;
+  extern std::map<e_material_type, int> material_armour;
+  std::map<e_material_type, int>::iterator it = material_armour.find((e_material_type) thisPtr->material);
+  if (it != material_armour.end())
+	  impact -= MIN((int) impact, it->second);
+
+  if (impact < 1)
+	  return NULL;
 
   if ((damage =
        object_damage__new_init (source, impact,
-				object__get_material (thisPtr), 0)))
+				(e_material_type) thisPtr->material, 0)))
     {
       damage->next = thisPtr->damage;
       thisPtr->damage = damage;
@@ -567,80 +600,52 @@ do_grip (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (obj->o.od.value[3] == SKILL_BRAWLING)
-    {
-      send_to_char
-	("The grip command cannot be used with this weapon type.\n", ch);
-      return;
-    }
-
-  if (obj->o.od.value[3] != SKILL_MEDIUM_EDGE
-      && obj->o.od.value[3] != SKILL_MEDIUM_PIERCE
-      && obj->o.od.value[3] != SKILL_MEDIUM_BLUNT)
-    {
-      if ((ch->str > 19
-	   || (ch->race == 27 || ch->race == 28 || ch->race == 86))
-	  && (obj->o.od.value[3] == SKILL_HEAVY_EDGE
-	      || obj->o.od.value[3] == SKILL_HEAVY_PIERCE
-	      || obj->o.od.value[3] == SKILL_HEAVY_BLUNT))
-	;
-      else
-	{
-	  send_to_char ("You cannot shift your grip upon that weapon.\n", ch);
+  int hands = wieldHandCount(ch->race,obj->o.od.value[3]);
+  if (hands == 0)
+  {
+	  send_to_char("You shouldn't even be wielding that at all!\n",ch);
 	  return;
-	}
-    }
-  else if (ch->race == 20 || ch->race == 21 || ch->race == 22
-	   || ch->race == 24)
-    {
-      send_to_char
-	("Due to your stature you can only wield this weapon with both hands.\n",
-	 ch);
-      return;
-    }
-
-  argument = one_argument (argument, buf);
-
-  if ((!*buf && obj->location == WEAR_PRIM) || !str_cmp (buf, "both"))
-    {
-      if (ch->right_hand && ch->left_hand)
-	{
-	  send_to_char
-	    ("You'll need to free your other hand to switch to a two-handed grip.\n",
-	     ch);
-	  return;
-	}
-      if (obj->location == WEAR_BOTH)
-	{
-	  send_to_char
-	    ("You are already gripping your weapon in both hands.\n", ch);
-	  return;
-	}
-      sprintf (buf, "You shift to a two-handed grip on #2%s#0.",
-	       obj->short_description);
-      act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-      sprintf (buf, "$n shifts to a two-handed grip on #2%s#0.",
-	       obj->short_description);
-      act (buf, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
-      obj->location = WEAR_BOTH;
-    }
-  else if (!(*buf && obj->location == WEAR_BOTH) || !str_cmp (buf, "single"))
-    {
-      if (obj->location == WEAR_PRIM || obj->location == WEAR_SEC)
-	{
-	  send_to_char
-	    ("You are already gripping your weapon in your primary hand.\n",
-	     ch);
-	  return;
-	}
-      sprintf (buf, "You shift to a single-handed grip on #2%s#0.",
-	       obj->short_description);
-      act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-      sprintf (buf, "$n shifts to a single-handed grip on #2%s#0.",
-	       obj->short_description);
-      act (buf, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
-      obj->location = WEAR_PRIM;
-    }
+  }
+  else if (hands == 2)
+  {
+	  send_to_char("You cannot shift your grip upon that weapon.\n",ch);
+  }
+  else if (hands == 1)
+  {
+	  argument = one_argument (argument, buf);
+	  
+	  if ((!*buf && obj->location == WEAR_PRIM) || !str_cmp (buf, "both"))
+	  {
+		  if (ch->right_hand && ch->left_hand)
+		  {
+			  send_to_char ("You'll need to free your other hand to switch to a two-handed grip.\n", ch);
+			  return;
+		  }
+		  if (obj->location == WEAR_BOTH)
+		  {
+			send_to_char ("You are already gripping your weapon in both hands.\n", ch);
+			return;
+		  }
+		  sprintf (buf, "You shift to a two-handed grip on #2%s#0.", obj->short_description);
+		  act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		  sprintf (buf, "$n shifts to a two-handed grip on #2%s#0.", obj->short_description);
+		  act (buf, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+		  obj->location = WEAR_BOTH;
+	  }
+	  else if (!(*buf && obj->location == WEAR_BOTH) || !str_cmp (buf, "single"))
+	  {
+		  if (obj->location == WEAR_PRIM || obj->location == WEAR_SEC)
+		  {
+			  send_to_char("You are already gripping your weapon in your primary hand.\n", ch);
+			  return;
+		  }
+		  sprintf (buf, "You shift to a single-handed grip on #2%s#0.",obj->short_description);
+		  act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		  sprintf (buf, "$n shifts to a single-handed grip on #2%s#0.",obj->short_description);
+		  act (buf, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+		  obj->location = WEAR_PRIM;
+	  }
+  }
 }
 
 void
@@ -1918,13 +1923,36 @@ do_drop (CHAR_DATA * ch, char *argument, int cmd)
 
 	if ( !(first_person.empty()) )
 	{
+		/* grommit add start */
+	/*	char * result = NULL;
+		result = swap_xmote_target (ch, (char*)first_person.c_str(), 3);
+		if (result)
+		{
+			if (strlen (result) >= AVG_STRING_LENGTH * 4)
+			{
+				send_to_char ("Your omote needs to be more succinct.\n", ch);
+			}
+			else
+			{
+				std::stringstream ss;
+				ss << result;
+
+				if ((result[strlen (result) - 1] != '.'))
+					ss << "." ;
+
+				if (obj->short_description[0] == '#')
+					ss << "#0";
+
+				obj->omote_str = add_hash(ss.str().c_str());
+			}
+		}*/
+		/* grommit add end */
+		
 		sprintf (buffer, "%s %s", buf, first_person.c_str());
 		do_omote (ch, buffer, 0);
 	}
   }
-
   room = ch->room;
-
 }
 
 void
@@ -2639,7 +2667,7 @@ do_drink (CHAR_DATA * ch, char *argument, int cmd)
 	  if (ch->thirst != -1 && ch->thirst != 20)
 	    ch->thirst += (drink->o.fluid.water * sips);
 
-	  if (ch->hunger != -1 && ch->thirst != 20)
+	  if (ch->hunger != -1 && ch->hunger != 20)
 	    ch->hunger += (drink->o.fluid.food * sips);
 	
 	  if (ch->thirst < 0 && IS_MORTAL (ch))
@@ -3776,197 +3804,42 @@ wear (CHAR_DATA * ch, OBJ_DATA * obj_object, int keyword)
 
     case 12:
       if (CAN_WEAR (obj_object, ITEM_WIELD))
-	{
-/*
-				if ( !can_handle (obj_object, ch) ) {
-					send_to_char ("Your hands are occupied!\n", ch);
-					return;
-				}
-*/
-	  switch (obj_object->o.od.value[3])
-	    {
-	    case SKILL_MEDIUM_EDGE:	// Medium weapons.
-	    case SKILL_MEDIUM_BLUNT:
-	    case SKILL_MEDIUM_PIERCE:
-	      if (ch->race == 20 || ch->race == 21 || ch->race == 22
-		  || ch->race == 24)
-		{		// Hobbits and goblins wield medium weapons in both hands.
-		  if (get_equip (ch, WEAR_BOTH) ||
-		      get_equip (ch, WEAR_PRIM) ||
-		      get_equip (ch, WEAR_SEC) ||
-		      (ch->right_hand && ch->left_hand))
-		    {
-		      send_to_char
-			("You need both hands to wield this weapon.\n", ch);
-		      return;
-		    }
-		  send_to_char ("OK.\n", ch);
-		  perform_wear (ch, obj_object, keyword);
-		  equip_char (ch, obj_object, WEAR_BOTH);
-		  break;
-		}
-	      if (ch->str < 18
-		  && (ch->race != 27 && ch->race != 28 && ch->race != 86))
-		{
-		  if (get_equip (ch, WEAR_PRIM))
-		    {
-		      send_to_char
-			("You are already wielding a primary weapon.\n", ch);
-		      return;
-		    }
-		  else if (get_equip (ch, WEAR_BOTH))
-		    {
-		      send_to_char
-			("You are already wielding a two-handed weapon.\n",
-			 ch);
-		      return;
-		    }
-		  else
-		    {
-		      send_to_char ("OK.\n", ch);
-		      perform_wear (ch, obj_object, keyword);
-		      equip_char (ch, obj_object, WEAR_PRIM);
-		    }
-		  break;
-		}		// > 17 str or troll wields ME in either hand.
-
-	    case SKILL_LIGHT_EDGE:	// Light weapons.
-	    case SKILL_LIGHT_BLUNT:
-	    case SKILL_LIGHT_PIERCE:
-	    case SKILL_SLING:
-	      if (get_equip (ch, WEAR_PRIM) && get_equip (ch, WEAR_SEC))
-		{
-		  send_to_char
-		    ("You are already wielding both a primary and a secondary weapon.\n",
-		     ch);
-		  return;
-		}
-	      if (get_equip (ch, WEAR_BOTH))
-		{
-		  send_to_char
-		    ("You are already wielding a two-handed weapon.\n", ch);
-		  return;
-		}
-	      send_to_char ("OK.\n", ch);
-	      perform_wear (ch, obj_object, keyword);
-	      if (!get_equip (ch, WEAR_PRIM))
-		equip_char (ch, obj_object, WEAR_PRIM);
-	      else
-		equip_char (ch, obj_object, WEAR_SEC);
-	      break;
-	    case SKILL_CROSSBOW:
-	    case SKILL_SHORTBOW:
-	    case SKILL_LONGBOW:
-	      if (get_equip (ch, WEAR_BOTH) ||
-		  get_equip (ch, WEAR_PRIM) || get_equip (ch, WEAR_SEC))
-		{
-		  send_to_char
-		    ("You cannot wield this weapon while wielding another.\n",
-		     ch);
-		  return;
-		}
-	      send_to_char ("OK.\n", ch);
-	      perform_wear (ch, obj_object, keyword);
-	      equip_char (ch, obj_object, WEAR_PRIM);
-	      break;
-
-	    case SKILL_BRAWLING:	// Everybody uses two hands for ranged/brawling weapons.
-	    case SKILL_POLEARM:
-	    case SKILL_STAFF:
-	      if (get_equip (ch, WEAR_BOTH) ||
-		  get_equip (ch, WEAR_PRIM) ||
-		  get_equip (ch, WEAR_SEC) ||
-		  (ch->right_hand && ch->left_hand))
-		{
-		  send_to_char ("You need both hands to wield this weapon.\n",
-				ch);
-		  return;
-		}
-	      send_to_char ("OK.\n", ch);
-	      perform_wear (ch, obj_object, keyword);
-	      equip_char (ch, obj_object, WEAR_BOTH);
-	      break;
-
-	    case SKILL_HEAVY_EDGE:	// Heavy weapons.
-	    case SKILL_HEAVY_BLUNT:
-	    case SKILL_HEAVY_PIERCE:
-	      if (ch->race == 20 || ch->race == 21 || ch->race == 22
-		  || ch->race == 24)
-		{		// Hobbits and goblins can't wield.
-		  send_to_char
-		    ("You simply don't have the stature for such a weapon.\n",
-		     ch);
-		  break;
-		}
-	      if ((get_equip (ch, WEAR_PRIM) || get_equip (ch, WEAR_BOTH))
-		  && (ch->race == 27 || ch->race == 28 || ch->race == 86))
-		{		// Trolls can wield heavy weapons in either hand.
-		  if (get_equip (ch, WEAR_PRIM) && get_equip (ch, WEAR_SEC))
-		    {
-		      send_to_char
-			("You are already wielding both a primary and a secondary weapon.\n",
-			 ch);
-		      return;
-		    }
-		  send_to_char ("OK.\n", ch);
-		  perform_wear (ch, obj_object, keyword);
-		  if (!get_equip (ch, WEAR_PRIM) && !get_equip (ch, WEAR_SEC)
-		      && !get_equip (ch, WEAR_BOTH))
-		    equip_char (ch, obj_object, WEAR_BOTH);
-		  else if (!get_equip (ch, WEAR_PRIM))
-		    equip_char (ch, obj_object, WEAR_PRIM);
-		  else
-		    equip_char (ch, obj_object, WEAR_SEC);
-		  break;
-		}
-	      if (ch->str >= 20)
-		{		// Extremely strong chars can wield two-handed weapons with one hand.
-		  if (get_equip (ch, WEAR_PRIM))
-		    {
-		      send_to_char
-			("You are already wielding a primary weapon.\n", ch);
-		      return;
-		    }
-		  else if (get_equip (ch, WEAR_BOTH))
-		    {
-		      send_to_char
-			("You are already wielding a two-handed weapon.\n",
-			 ch);
-		      return;
-		    }
-		  else
-		    {
-		      send_to_char ("OK.\n", ch);
-		      perform_wear (ch, obj_object, keyword);
-		      if (get_equip (ch, WEAR_SEC)
-			  || (ch->right_hand && ch->left_hand))
-			equip_char (ch, obj_object, WEAR_PRIM);
-		      else
-			equip_char (ch, obj_object, WEAR_BOTH);
-		    }
-		  break;
-		}
-	      if (get_equip (ch, WEAR_BOTH) ||
-		  get_equip (ch, WEAR_PRIM) ||
-		  get_equip (ch, WEAR_SEC) ||
-		  (ch->right_hand && ch->left_hand))
-		{
-		  send_to_char ("You need both hands to wield this weapon.\n",
-				ch);
-		  return;
-		}
-	      send_to_char ("OK.\n", ch);
-	      perform_wear (ch, obj_object, keyword);
-	      equip_char (ch, obj_object, WEAR_BOTH);
-	      break;
-	    }
-
-	}
-      else
+	  {
+		  int hands = wieldHandCount(ch->race,obj_object->o.od.value[3]);
+		  if (hands==0)
+		  {
+			  send_to_char("You simply do not have the stature for that weapon.\n",ch);
+			  return;
+		  }
+		  else if (hands == 1)
+		  {
+			  /* to wield it must already be in hand 
+			   * thus we know there is room for it, just a matter of tracking it as 
+			   * primary or secondary weapon*/
+			  perform_wear (ch, obj_object, keyword);
+			  if (get_equip(ch,WEAR_PRIM))
+				  equip_char (ch, obj_object, WEAR_SEC);
+			  else
+				  equip_char (ch, obj_object, WEAR_PRIM);
+		  }
+		  else if (hands == 2)
+		  {
+			  /* it is in one hand. Both hands must not be taken to ensure that there
+			   * is room for this to take up the other */
+			  if (ch->right_hand && ch->left_hand)
+			  {
+				  send_to_char ("You need both hands to wield this weapon.\n",ch);
+				  return;
+			  }
+			  perform_wear (ch, obj_object, keyword);
+			  equip_char (ch, obj_object, WEAR_BOTH);
+		  }		 
+	  } // if can wear as wield
+    else
 	{
 	  send_to_char ("You can't wield that.\n", ch);
 	}
-      break;
+   break;
 
     case 14:
       {
@@ -5128,146 +5001,24 @@ do_draw (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  switch (obj->o.od.value[3])
-    {
-    case SKILL_MEDIUM_EDGE:	// Medium weapons.
-    case SKILL_MEDIUM_BLUNT:
-    case SKILL_MEDIUM_PIERCE:
-      if (ch->race == 20 || ch->race == 21 || ch->race == 22
-	  || ch->race == 24)
-	{			// Hobbits and goblins wield medium weapons in both hands.
-	  if (get_equip (ch, WEAR_BOTH) ||
-	      get_equip (ch, WEAR_PRIM) ||
-	      get_equip (ch, WEAR_SEC) || (ch->right_hand && ch->left_hand))
-	    {
-	      send_to_char ("You need both hands to wield this weapon.\n",
-			    ch);
-	      return;
-	    }
+  int hands = wieldHandCount(ch->race,obj->o.od.value[3]);
+  // free hands already covered
+  if (hands == 0)
+  {
+	  send_to_char("You simply do not have the stature for that weapon.\n",ch);
+	  return;
+  }
+  else if (hands == 1)
+  {
+	  if (get_equip(ch,WEAR_PRIM))
+		  obj_destination = WEAR_SEC;
+	  else
+		  obj_destination = WEAR_PRIM;
+  }
+  else if (hands == 2)
+  {
 	  obj_destination = WEAR_BOTH;
-	  break;
-	}
-      if (ch->str < 18
-	  && (ch->race != 27 && ch->race != 28 && ch->race != 86))
-	{
-	  if (get_equip (ch, WEAR_PRIM))
-	    {
-	      send_to_char ("You are already wielding a primary weapon.\n",
-			    ch);
-	      return;
-	    }
-	  else if (get_equip (ch, WEAR_BOTH))
-	    {
-	      send_to_char ("You are already wielding a two-handed weapon.\n",
-			    ch);
-	      return;
-	    }
-	  else
-	    {
-	      obj_destination = WEAR_PRIM;
-	    }
-	  break;
-	}			// > 17 str or troll wields ME in either hand.
-    case SKILL_LIGHT_EDGE:	// Light weapons.
-    case SKILL_LIGHT_BLUNT:
-    case SKILL_LIGHT_PIERCE:
-    case SKILL_SLING:
-      if (get_equip (ch, WEAR_PRIM) && get_equip (ch, WEAR_SEC))
-	{
-	  send_to_char
-	    ("You are already wielding both a primary and a secondary weapon.\n",
-	     ch);
-	  return;
-	}
-      if (get_equip (ch, WEAR_BOTH))
-	{
-	  send_to_char ("You are already wielding a two-handed weapon.\n",
-			ch);
-	  return;
-	}
-      if (!get_equip (ch, WEAR_PRIM))
-	obj_destination = WEAR_PRIM;
-      else
-	obj_destination = WEAR_SEC;
-      break;
-    case SKILL_BRAWLING:
-    case SKILL_SHORTBOW:	// Everybody uses two hands for ranged weapons, or brawling weapons.
-    case SKILL_LONGBOW:
-    case SKILL_CROSSBOW:
-    case SKILL_STAFF:
-    case SKILL_POLEARM:
-      if (get_equip (ch, WEAR_BOTH) ||
-	  get_equip (ch, WEAR_PRIM) ||
-	  get_equip (ch, WEAR_SEC) || (ch->right_hand || ch->left_hand))
-	{
-	  send_to_char ("You need both hands to wield this weapon.\n", ch);
-	  return;
-	}
-      obj_destination = WEAR_BOTH;
-      break;
-    case SKILL_HEAVY_EDGE:	// Heavy weapons.
-    case SKILL_HEAVY_BLUNT:
-    case SKILL_HEAVY_PIERCE:
-      if (ch->race == 20 || ch->race == 21 || ch->race == 22
-	  || ch->race == 24)
-	{			// Hobbits and goblins can't wield.  
-	  send_to_char
-	    ("You simply don't have the stature for such a weapon.\n", ch);
-	  break;
-	}
-      if ((get_equip (ch, WEAR_PRIM) || get_equip (ch, WEAR_BOTH))
-	  && (ch->race == 27 || ch->race == 28 || ch->race == 86))
-	{			// Trolls ca$
-	  if (get_equip (ch, WEAR_PRIM) && get_equip (ch, WEAR_SEC))
-	    {
-	      send_to_char
-		("You are already wielding both a primary and a secondary weapon.\n",
-		 ch);
-	      return;
-	    }
-	  if (!get_equip (ch, WEAR_PRIM) && !get_equip (ch, WEAR_SEC)
-	      && !get_equip (ch, WEAR_BOTH))
-	    obj_destination = WEAR_BOTH;
-	  else if (!get_equip (ch, WEAR_PRIM))
-	    obj_destination = WEAR_PRIM;
-	  else
-	    obj_destination = WEAR_SEC;
-	  break;
-	}
-      if (ch->str >= 20)
-	{			// Extremely strong chars can wield two-handed weapons with one hand.
-	  if (get_equip (ch, WEAR_PRIM))
-	    {
-	      send_to_char ("You are already wielding a primary weapon.\n",
-			    ch);
-	      return;
-	    }
-	  else if (get_equip (ch, WEAR_BOTH))
-	    {
-	      send_to_char ("You are already wielding a two-handed weapon.\n",
-			    ch);
-	      return;
-	    }
-	  else
-	    {
-	      if (get_equip (ch, WEAR_SEC)
-		  || (ch->right_hand || ch->left_hand))
-		obj_destination = WEAR_PRIM;
-	      else
-		obj_destination = WEAR_BOTH;
-	    }
-	  break;
-	}
-      if (get_equip (ch, WEAR_BOTH) ||
-	  get_equip (ch, WEAR_PRIM) ||
-	  get_equip (ch, WEAR_SEC) || (ch->right_hand || ch->left_hand))
-	{
-	  send_to_char ("You need both hands to wield this weapon.\n", ch);
-	  return;
-	}
-      obj_destination = WEAR_BOTH;
-      break;
-    }
+  }
 
   if (obj_destination == WEAR_BOTH && (ch->right_hand || ch->left_hand))
     {
@@ -6507,34 +6258,57 @@ do_light (CHAR_DATA * ch, char *argument, int cmd)
   light (ch, obj, on, true);
 }
 
-void
-do_smell (CHAR_DATA * ch, char *argument, int cmd)
+
+/* returns the number of hands needed for particular race to wield a weapon of a particular type */
+/* returns 0 for unable to wield, or 1 if it can be one-handed, or 2 if only two-handed */
+int wieldHandCount(int race,int skill)
 {
-  CHAR_DATA *tch;
-  char buf[MAX_STRING_LENGTH];
+	switch (skill)
+	{
+		case SKILL_LIGHT_EDGE:
+		case SKILL_LIGHT_BLUNT:
+		case SKILL_LIGHT_PIERCE:
+			return 1; //all races able to single hand this
 
-  argument = one_argument (argument, buf);
+		case SKILL_MEDIUM_EDGE:
+		case SKILL_MEDIUM_BLUNT:
+		case SKILL_MEDIUM_PIERCE:
+			if (race==21 || race==119) //hobbit and smallest orc, Mountain, need to two-hand these
+				return 2;
+			return 1; //everyone else single hands
 
-  if (!*buf)
-    {
-      send_to_char ("Smelling rooms doesn't work yet.\n", ch);
-      return;
-    }
+		case SKILL_HEAVY_EDGE:
+		case SKILL_HEAVY_BLUNT:
+		case SKILL_HEAVY_PIERCE:
+			if (race == 21 || race == 119 || race == 120) // Mountains and Mirks and hobbits, no go
+				return 0;
+			if (race == 86 || race == 28) // Olog and trolls can single hand them
+				return 1;
+			return 2; //everyone else two-hands heavies
 
-  if (!(tch = get_char_room_vis (ch, buf)))
-    {
-      send_to_char ("You don't see that person.\n", ch);
-      return;
-    }
+		case SKILL_BRAWLING: // Everybody uses two hands for brawling weapons
+			return 2;
 
-  if (!get_stink_message (tch, NULL, buf, ch))
-    {
-      act ("$N does not have any peculiar smells.",
-	   false, ch, 0, tch, TO_CHAR);
-      return;
-    }
+			
+		case SKILL_POLEARM:
+	    case SKILL_STAFF:
+			/* bug: if we ever move something other than LIGHT_ / MEDIUM_ / HEAVY_ to one handed, dual not pickable */
+			/* thus if you change this, go edit is_restricted_skill in utility.cpp */
+			if (race == 21 || race == 119 || race == 120) // Mountains and Mirks and hobbits, no go
+				return 0;
+			return 2; //Everyone else use two
 
-  act (buf, false, ch, 0, tch, TO_CHAR);
-  act ("$N smells you.", false, ch, 0, tch, TO_VICT);
-  act ("$n smells $N.", false, ch, 0, tch, TO_NOTVICT);
+		case SKILL_LONGBOW:
+			// hobbits, dwarves, mountains, mirkwoods - no longbow
+			if (race == 21 || race == 23 || race == 119 || race == 120)
+				return 0;
+			return 1; //everyone else (this means people can dual wield bows, but they're unloadable that way)
+
+		case SKILL_SHORTBOW:
+		case SKILL_CROSSBOW:
+		case SKILL_SLING:
+			return 1; //everyone can wield these, and it only takes one hand for the unloaded version
+	}
+	// wrong skill returns -1
+	return -1;
 }

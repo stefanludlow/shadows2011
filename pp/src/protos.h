@@ -84,7 +84,7 @@ extern int count_max_online;
 extern int arena_matches;
 extern int guest_conns;
 extern int new_accounts;
-extern char max_online_date[32];
+extern char max_online_date[AVG_STRING_LENGTH];
 extern int num_texts;
 extern const int arena_rooms[];
 extern const int te_pit_rooms[];
@@ -199,8 +199,20 @@ extern time_t next_hour_update;
 extern time_t next_minute_update;
 extern int mp_dirty;
 extern int maxdesc;
+extern const int SPHERE_COUNT;
+
+typedef struct
+{
+	char* name;
+	bool available;
+
+} SPHERE_INFO;
+
+extern SPHERE_INFO spheres[];
 
 void update_coverage_times(int admin_time, int admin_time_active, int admin_pc_time, bool admin_found, bool admin_found_absoloute);
+void save_vnpc_timestamp();
+void load_vnpc_timestamp();
 void prepare_copyover (int cmd);
 
 /* COMMAND PROTOTYPES */
@@ -212,7 +224,6 @@ void retreat (CHAR_DATA* ch, int direction, CHAR_DATA* leader);
 void do_retreat (CHAR_DATA * ch, char *argument, int cmd);
 void do_doitanyway (CHAR_DATA *ch, char *argument, int cmd);
 void do_accuse (CHAR_DATA * ch, char *argument, int cmd);	/* act.other.c        */
-void do_party (CHAR_DATA * ch, char *argument, int cmd);	/* act.movement.c     */
 void do_accept (CHAR_DATA * ch, char *argument, int cmd);	/* magic.c            */
 void do_addcraft (CHAR_DATA * ch, char *argument, int cmd);	/* crafts.c           */
 void do_affect (CHAR_DATA * ch, char *argument, int cmd);	/* staff.c            */
@@ -337,6 +348,8 @@ void do_locate (CHAR_DATA * ch, char *argument, int cmd);
 void do_lock (CHAR_DATA * ch, char *argument, int cmd);
 void do_log (CHAR_DATA * ch, char *argument, int cmd);
 void do_look (CHAR_DATA * ch, char *argument, int cmd);
+void do_origins (CHAR_DATA * ch, char *argument, int cmd);
+char *origins_list(CHAR_DATA * ch, OBJ_DATA * obj);
 void do_materials (CHAR_DATA * ch, char *argument, int cmd);
 void do_mclone (CHAR_DATA * ch, char *argument, int cmd);
 void do_mcopy (CHAR_DATA * ch, char *argument, int cmd);
@@ -353,6 +366,14 @@ void do_mpkey (CHAR_DATA * ch, char *argument, int cmd);
 void do_mpcmd (CHAR_DATA * ch, char *argument, int cmd);
 void do_mptype (CHAR_DATA * ch, char *argument, int cmd);
 void do_mpdel (CHAR_DATA * ch, char *argument, int cmd);
+void do_opadd (CHAR_DATA * ch, char *argument, int cmd);
+void do_opapp (CHAR_DATA * ch, char *argument, int cmd);
+void do_opprg (CHAR_DATA * ch, char *argument, int cmd);
+void do_opkey (CHAR_DATA * ch, char *argument, int cmd);
+void do_opcmd (CHAR_DATA * ch, char *argument, int cmd);
+void do_opdel (CHAR_DATA * ch, char *argument, int cmd);
+void do_opstat (CHAR_DATA * ch, char *argument, int cmd);
+void do_optype (CHAR_DATA *ch, char *argument, int cmd);
 void do_mset (CHAR_DATA * ch, char *argument, int cmd);
 void do_munused (CHAR_DATA * ch, char *argument, int cmd);
 void do_mute (CHAR_DATA * ch, char *argument, int cmd);
@@ -577,7 +598,34 @@ bool evaluate_emote_string (CHAR_DATA *ch, std::string * first_person, std::stri
 void list_char_to_char (CHAR_DATA * list, CHAR_DATA * ch, int mode);
 void do_evaluate (CHAR_DATA *ch, char *argument, int cmd);
 void post_motd (DESCRIPTOR_DATA * d);
-void read_motd(DESCRIPTOR_DATA * d); //nanny.cpp
+void read_motd(DESCRIPTOR_DATA * d); 
+void do_subscribe (CHAR_DATA * ch, char *argument, int cmd);
+void do_unsubscribe (CHAR_DATA * ch, char *argument, int cmd);
+
+
+//nanny.cpp
+//============VERMONKEY=================
+#define NORTHMAN_ONUM_POUND 42134
+#define NORTHMAN_ONUM_SHILLING 42133
+#define NORTHMAN_ONUM_PENNY 42132
+#define NORTHMAN_ONUM_FARTHING 42131
+#define NORTHMAN_PRINTC_POUND 'L'
+#define NORTHMAN_PRINTC_SHILLING 's'
+#define NORTHMAN_PRINTC_PENNY 'p'
+#define NORTHMAN_PRINTC_FARTHING 'f'
+#define NORTHMAN_VAL_POUND 960
+#define NORTHMAN_VAL_SHILLING 24
+#define NORTHMAN_VAL_PENNY 4
+#define NORTHMAN_VAL_FARTHING 1
+char get_currency_symbol( const int objnum );
+char get_currency_symbol( const int currnum, const int denomnum );
+int get_currency_value( const int objnum );
+int get_currency_value( const OBJ_DATA* obj );
+void currency_print_line( const OBJ_DATA* obj, int* money, char* buffer, const char* wear_loc );
+char* coin_sdesc( const int objnum, const bool plural );
+//============END_AWESOME===============
+
+
 /*
 //  arena.c Funtions --
 */
@@ -687,12 +735,13 @@ void do_blindfold (CHAR_DATA * ch, char *argument, int cmd);	/* objects.c */
 void do_behead (CHAR_DATA * ch, char *argument, int cmd);	/* objects.c */
 void light (CHAR_DATA * ch, OBJ_DATA * obj, int on, int on_off_msg);	/* objects.c */
 void do_light (CHAR_DATA * ch, char *argument, int cmd);	/* objects.c */
-void do_smell (CHAR_DATA * ch, char *argument, int cmd);	/* objects.c */
+int wieldHandCount(int race,int skill); /* objects.c */
 void do_receipts (CHAR_DATA * ch, char *argument, int cmd);	/* objects.c */
 void show_evaluate_information (CHAR_DATA *ch, OBJ_DATA * obj);	/* objects.c */
 /* end objects.c */
 
 
+float tally (OBJ_DATA * obj, char *buffer, int depth);
 void fwrite_a_obj (OBJ_DATA * obj, FILE * fp);
 int get_user_seconds ();
 struct time_info_data mud_time_passed (time_t t2, time_t t1);
@@ -701,6 +750,7 @@ void update_crafts_file ();
 void list_all_crafts (CHAR_DATA * ch);
 void display_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft);
 int craft_uses (SUBCRAFT_HEAD_DATA * craft, int vnum);
+int craft_produces (SUBCRAFT_HEAD_DATA * craft, int vnum);
 void craft_clan (CHAR_DATA * ch, char *argument, char *subcmd);
 void craft_delay (CHAR_DATA * ch, char *argument, char *subcmd);
 void craft_delete (CHAR_DATA * ch, char *argument, char *subcmd);
@@ -778,7 +828,7 @@ char *expand_wound_loc (char *location);
 char *show_wounds (CHAR_DATA * ch, int mode);
 int determine_material (OBJ_DATA * obj);
 char *figure_location (CHAR_DATA * tar, int location);
-char *wound_total (CHAR_DATA * ch);
+char *wound_total (CHAR_DATA * ch, bool showStun);
 void make_quiet (CHAR_DATA * ch);
 void close_socket (struct descriptor_data *d);
 bool isvowel (char c);
@@ -848,6 +898,7 @@ OBJ_DATA *get_obj_in_list_id (int coldload_id, OBJ_DATA * list);
 CHAR_DATA *get_char_room (char *name, int room);
 CHAR_DATA *get_char (char *name);
 CHAR_DATA *get_char_nomask (char *name);
+CHAR_DATA *get_char_nomask_nonpc (char *name);
 void char_from_room (CHAR_DATA * ch);
 void char_to_room (CHAR_DATA * ch, int room);
 CHAR_DATA *get_char_room_vis (CHAR_DATA * ch, const char *name);
@@ -906,7 +957,7 @@ void renum_zone_table (void);
 void update_room_tracks (void);
 int is_tagged (char *name_str);
 void update_char_objects (CHAR_DATA * ch);
-int is_number (const char *str);
+int is_number (std::string);
 int do_simple_move (CHAR_DATA * ch, int dir, int following, int falling,
 		    int speed);
 void raw_kill (CHAR_DATA * ch);
@@ -923,6 +974,8 @@ int parse_argument (const char *commands[], char *string);
 void stop_follower (CHAR_DATA * ch);
 void load_mob_progs (void);
 void save_mob_progs (void);
+void load_obj_progs(void);
+void save_obj_progs (void);
 void perform_pfile_update (CHAR_DATA * ch);
 int is_abbrev (const char *arg1, const char *arg2);
 int is_abbrevc (const char *arg1, const char *arg2);
@@ -931,6 +984,7 @@ int search_block (char *arg, char **list, bool exact);
 int r_program (CHAR_DATA * ch, char *argument);
 int m_prog (CHAR_DATA *ch, char *argument);
 int m_prog (CHAR_DATA *ch, char *argument, room_prog prog);
+int o_prog (CHAR_DATA *ch, char *argument, room_prog prog);
 void do_mpstat (CHAR_DATA *ch, char *argument, int cmd);
 void add_memory (CHAR_DATA * add, CHAR_DATA * mob);
 bool get_obj_in_equip_num (CHAR_DATA * ch, long vnum);
@@ -1006,7 +1060,7 @@ void stop_counting (CHAR_DATA * ch);
 char *encrypt_buf (const char *buf);
 void free_lodged (LODGED_OBJECT_INFO * lodged);
 void free_wound (WOUND_DATA * wound);
-void free_char (CHAR_DATA * ch);
+void free_char (CHAR_DATA *&ch);
 OBJ_DATA *find_dwelling_obj (int dwelling_room);
 void add_room_affect (AFFECTED_TYPE ** af, int type, int duration);
 void cleanup_the_dead (int mode);
@@ -1077,8 +1131,8 @@ void save_banned_sites ();
 void save_roles ();
 void save_stayput_mobiles ();
 void load_stayput_mobiles ();
-void save_reboot_mobiles ();
-void load_reboot_mobiles ();
+void save_skills_mysql(CHAR_DATA *ch, bool isMob);
+void load_skills_mysql(CHAR_DATA *ch, bool isMob);
 void lodge_missile (CHAR_DATA * target, OBJ_DATA * ammo,
 		    char *strike_location);
 void stock_new_deliveries ();
@@ -1107,9 +1161,7 @@ void sigchld (int);
 void sigabrt (int);
 int create_entry (char *name);
 void zone_update (void);
-void clear_char (CHAR_DATA * ch);
 void clear_object (OBJ_DATA * obj);
-void free_char (CHAR_DATA * ch);
 char *read_string (char *string);
 char *fread_string (FILE * fl);
 char *fread_word (FILE * fl);
@@ -1156,7 +1208,6 @@ void remove_spell (CHAR_DATA * ch, int id);
 int knows_spell (CHAR_DATA * ch, int id);
 int caster_type (CHAR_DATA * ch);
 void const_to_non_const_cstr (const char * string, char * edit_string);
-void const_to_non_const_cstr (const char * string, char * edit_string, int n);
 void act (char *str, int hide_invisible, CHAR_DATA * ch, OBJ_DATA * obj,
 	  void *vict_obj, int type);
 CHAR_DATA *try_load_char (char *name);
@@ -1240,7 +1291,24 @@ void add_profession_skills (CHAR_DATA * ch, char *skill_list);
 int has_required_crafting_skills (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft);
 int is_opening_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft);
 OBJ_DATA *has_key (CHAR_DATA * ch, OBJ_DATA * obj, int key);
-int is_brother (CHAR_DATA * ch, CHAR_DATA * tch);
+
+
+inline int is_brother (CHAR_DATA * ch, CHAR_DATA * tch) 
+{
+  int flags;
+  char *c1;
+  char clan_name[MAX_STRING_LENGTH];
+
+  for (c1 = ch->clans; get_next_clan (&c1, clan_name, &flags);)
+    {
+
+      if (get_clan (tch, clan_name, &flags))
+	return 1;
+    }
+
+  return 0;
+}
+
 void refresh_zone (void);
 int is_leader (CHAR_DATA * src, CHAR_DATA * tar);
 void invite_accept (CHAR_DATA * ch, char *argument);
@@ -1248,10 +1316,31 @@ void tashal_prisoner_release (CHAR_DATA * ch);
 malloc_t get_perm (int size);
 int flee_attempt (CHAR_DATA * ch);
 SECOND_AFFECT *get_second_affect (CHAR_DATA * ch, int type, OBJ_DATA * obj);
+void clear_player_from_second_affects (CHAR_DATA *ch);
 void remove_second_affect (SECOND_AFFECT * sa);
 void map_next_step (CHAR_DATA * ch);
 void open_skill (CHAR_DATA * ch, int skill);
-int get_trust (CHAR_DATA * ch);
+
+
+inline int get_trust (CHAR_DATA * ch) {
+	if (!ch || !ch->desc || (ch->flags & FLAG_GUEST)) {
+		return 0;
+	}
+
+	ch = ch->desc->original != NULL ? ch->desc->original : ch->desc->character;
+
+	if (!ch || !ch->pc || ch->pc->mortal_mode) {
+		return 0;
+	}
+
+	//if (ch->isLevelFivePC()) {
+	//	return 5;
+	//}
+
+	return ch->pc->level;
+}
+
+
 int real_trust (CHAR_DATA * ch);
 int is_obj_here (CHAR_DATA * ch, OBJ_DATA * obj, int check);
 void jailer_func (CHAR_DATA * ch);
@@ -1266,6 +1355,7 @@ void create_menu_actions (struct descriptor_data *d, char *arg);
 void attribute_priorities (struct descriptor_data *d, char *arg);
 void sex_selection (struct descriptor_data *d, char *arg);
 void race_selection (struct descriptor_data *d, char *arg);
+int get_native_tongue(CHAR_DATA* ch);
 void skill_selection (struct descriptor_data *d, char *argument);
 void skill_display (struct descriptor_data *d);
 char *read_a_line (FILE * fp);
@@ -1284,9 +1374,12 @@ void initialize_weather_zones (void);
 int combat_roll (int ability);
 int clear_current_move (CHAR_DATA * ch);
 int spell_chill_touch (CHAR_DATA * ch, CHAR_DATA * victim, int sn);
-void clear_char (CHAR_DATA * ch);
 void weight_change_object (OBJ_DATA * obj, int weight);
 int is_blind (CHAR_DATA * ch);
+void initialize_materials (void);
+void initialize_location_map (void);
+void do_materialhack (CHAR_DATA *ch, char * argument, int cmd);
+int object__get_material (OBJECT_DAMAGE * thisPtr);
 int wakeup (CHAR_DATA * ch);
 void remove_object_affect (OBJ_DATA * obj, AFFECTED_TYPE * af);
 int eval_att_eq (CHAR_DATA * ch, char **equation);
@@ -1454,6 +1547,8 @@ float econ_markup (CHAR_DATA * keeper, OBJ_DATA * obj);
 float econ_discount (CHAR_DATA * keeper, OBJ_DATA * obj);
 void add_combat_log (CHAR_DATA * ch, char *msg);
 int zone_to_econ_zone (int zone);
+int GCD(int, int);
+double RoundDouble(double, int);
 int get_bite_value (OBJ_DATA * obj);
 void make_height (CHAR_DATA * mob);
 void make_frame (CHAR_DATA * mob);

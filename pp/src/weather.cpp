@@ -59,6 +59,13 @@ initialize_weather_zones (void)
 
   // Pelargir, 100 miles south of Gondor, is hot
   zone_table[13].weather_type = WEATHER_HOT;
+  
+  // Haradwaith and all that
+  zone_table[80].weather_type = WEATHER_DESERT;
+  zone_table[81].weather_type = WEATHER_DESERT;
+  zone_table[82].weather_type = WEATHER_DESERT;
+
+  zone_table[42].weather_type = WEATHER_ARCTIC;
 }
 
 bool Weather::weather_unification (int zone)
@@ -86,6 +93,11 @@ bool Weather::weather_unification (int zone)
       weather_info[zone] = weather_info[10];
       zone_updated = true;
     }
+	else if (zone == 81)
+	{
+		weather_info[zone] = weather_info[80];
+		zone_updated = true;
+	}
   // End Japheth's changes
 
   return zone_updated;
@@ -98,7 +110,7 @@ weather (int moon_setting, int moon_rise, int moon_set)
   int roll = 0, chance_of_rain = 0, last_fog = 0, i = 0;
   char buf[MAX_STRING_LENGTH];
   char storm[MAX_STRING_LENGTH];
-  char wind[20] = { '\0' };
+  char wind[AVG_STRING_LENGTH] = { '\0' };
 
   for (i = 0; i <= 99; i++)
     {
@@ -825,6 +837,9 @@ weather (int moon_setting, int moon_rise, int moon_set)
 	  else
 	    chance_of_rain += (weather_info[i].clouds * 15);
 
+	  if (zone_table[i].weather_type == WEATHER_DESERT)
+		chance_of_rain = 0;
+	
 	  if (number (0, 99) < chance_of_rain)
 	    {
 	      weather_info[i].state = CHANCE_RAIN;
@@ -992,7 +1007,9 @@ weather (int moon_setting, int moon_rise, int moon_set)
 	}
       else
 	{
-	  if ((time_info.season == SPRING) || (time_info.season == AUTUMN))	/*   Gradual Nighttime Cooling   */
+	  if (zone_table[i].weather_type == WEATHER_DESERT)
+	    weather_info[i].temperature -= 50;
+	  else if ((time_info.season == SPRING) || (time_info.season == AUTUMN))	/*   Gradual Nighttime Cooling   */
 	    weather_info[i].temperature -= 10;
 	  else if (time_info.season == SUMMER)
 	    weather_info[i].temperature -= 15;

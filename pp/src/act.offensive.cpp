@@ -667,7 +667,7 @@ projectile_shield_block (CHAR_DATA * ch, int result)
   if ((shield_obj = get_equip (ch, WEAR_SHIELD)) && number (1, 25) <= ch->dex)
     {
       skill_use (ch, SKILL_BLOCK, 0);
-      roll = number (1, SKILL_CEILING);
+      roll = number (1, MAX(100, skill_level(ch, SKILL_BLOCK, 0)));
       if (roll <= ch->skills[SKILL_BLOCK])
 	{
 	  return 1;
@@ -694,9 +694,8 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
 
   skill_use (target, SKILL_DODGE, 0);
 
-  roll = number (1, SKILL_CEILING);
+  roll = number (1, MAX(100, skill_level(target, SKILL_DODGE, 0)));
   roll += def_modifier;
-  roll = MIN (roll, SKILL_CEILING);
 
   if (roll > target->skills[SKILL_DODGE])
     {
@@ -748,14 +747,13 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
  		att_modifier += -5;
 
 // Random modifier
-  roll = number (1, SKILL_CEILING);
+  roll = number (1, MAX(100, skill_level(ch, ch_skill, 0)));
   roll += att_modifier;
-  roll = MIN (roll, SKILL_CEILING);
 
   ch->aim = 0;
 
   if (ch->skills[ch_skill])
-    {
+  {
       if (roll > ch->skills[ch_skill])
 	{
 	  if (roll % 5 == 0 || roll == 1)
@@ -770,7 +768,7 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
 	  else
 	    assault = RESULT_MS;
 	}
-    }
+  } /* if the skill is not possessed, roll vs offense instead */
   else
     {
       if (roll > ch->skills[SKILL_OFFENSE])
@@ -1270,6 +1268,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
   float damage = 0;
   int dir = 0;
   bool switched_target = false, block = true;
+  bool can_lodge = true;
 
   if (!str_cmp (argument, "volley"))
     {
@@ -1439,6 +1438,14 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 		    ch);
     }
 
+  
+  ammo = load_object (bow->loaded->nVirtual);
+  ammo->count = 1;
+  ammo->in_obj = NULL;
+  ammo->carried_by = NULL;
+  ammo->equiped_by = NULL;
+  can_lodge = !(ammo->o.od.value[5]); /* oval 5 is bounce off */
+
   /* ranged_projectile_echoes (ch, target, bow, ammo); */
 
   if (bow->o.weapon.use_skill == SKILL_SHORTBOW
@@ -1565,11 +1572,6 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
       act (buf2, false, ch, 0, target, TO_NOTVICT | _ACT_FORMAT);
     }
 
-  ammo = load_object (bow->loaded->nVirtual);
-  ammo->count = 1;
-  ammo->in_obj = NULL;
-  ammo->carried_by = NULL;
-  ammo->equiped_by = NULL;
 
   if (ranged && ch->delay_who)
     {
@@ -1879,28 +1881,28 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 	    {
 	      if (result == CRITICAL_HIT)
 		sprintf (buf,
-			 "%s#0 comes whirring through the air from %s, headed straight toward you!\n\nThe missile lodges deeply in your %s!",
-			 ammo->short_description, from_direction,
+			 "%s#0 comes whirring through the air from %s, headed straight toward you!\n\nThe missile %s your %s!",
+			 ammo->short_description, from_direction, can_lodge ? "lodges deeply in" : "firmly strikes",
 			 expand_wound_loc (strike_location));
 	      else
 		sprintf (buf,
-			 "%s#0 comes whirring through the air from %s, headed straight toward you!\n\nThe missile lodges in your %s!",
-			 ammo->short_description, from_direction,
+			 "%s#0 comes whirring through the air from %s, headed straight toward you!\n\nThe missile %s your %s!",
+			 ammo->short_description, from_direction, can_lodge ? "lodges in" : " strikes",
 			 expand_wound_loc (strike_location));
 	      *buf = toupper (*buf);
 	      sprintf (buffer, "#2%s", buf);
 	      sprintf (buf, "\n%s", buffer);
 	      if (result == CRITICAL_HIT)
 		sprintf (buf2,
-			 "%s#0 comes whirring through the air from %s, headed straight toward #5%s#0.\n\nThe missile lodges deeply in %s %s!",
-			 ammo->short_description, from_direction,
-			 char_short (target), HSHR (target),
+			 "%s#0 comes whirring through the air from %s, headed straight toward #5%s#0.\n\nThe missile %s %s %s!",
+			 ammo->short_description, from_direction, 
+			 char_short (target), can_lodge ? "lodges deeply in" : "firmly strikes", HSHR (target),
 			 expand_wound_loc (strike_location));
 	      else
 		sprintf (buf2,
-			 "%s#0 comes whirring through the air from %s, headed straight toward #5%s#0.\n\nThe missile lodges in %s %s!",
+			 "%s#0 comes whirring through the air from %s, headed straight toward #5%s#0.\n\nThe missile %s %s %s!",
 			 ammo->short_description, from_direction,
-			 char_short (target), HSHR (target),
+			 char_short (target),can_lodge ? "lodges in" : "strikes", HSHR (target),
 			 expand_wound_loc (strike_location));
 	      *buf2 = toupper (*buf2);
 	      sprintf (buffer, "#2%s", buf2);
@@ -1909,24 +1911,24 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 		{
 		  if (result == CRITICAL_HIT)
 		    sprintf (buf3,
-			     "It strays off-course, instead lodging deeply in #5%s#0's %s!",
-			     char_short (target),
+			     "It strays off-course, instead %s #5%s#0's %s!",
+			     char_short (target),can_lodge ? "lodging deeply in" : "firmly striking",
 			     expand_wound_loc (strike_location));
 		  else
 		    sprintf (buf3,
-			     "It strays off-course, instead lodging in #5%s#0's %s!",
-			     char_short (target),
+			     "It strays off-course, instead %s #5%s#0's %s!",
+			     char_short (target),can_lodge ? "lodging in" : "striking",
 			     expand_wound_loc (strike_location));
 		}
 	      else
 		{
 		  if (result == CRITICAL_HIT)
-		    sprintf (buf3, "The missile lodges deeply in %s %s!",
-			     HSHR (target),
+		    sprintf (buf3, "The missile %s %s %s!",
+			     can_lodge ? "lodges deeply in" : "firmly strikes", HSHR (target),
 			     expand_wound_loc (strike_location));
 		  else
-		    sprintf (buf3, "The missile lodges in %s %s!",
-			     HSHR (target),
+		    sprintf (buf3, "The missile %s %s %s!",
+			     can_lodge ? "lodges in" : "strikes", HSHR (target),
 			     expand_wound_loc (strike_location));
 		}
 	    }
@@ -1954,27 +1956,36 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 	  if (switched_target)
 	    {
 	      sprintf (buf,
-		       "The missile strays off-course, striking #5%s#0 instead, and lodging deeply in %s %s!",
-		       char_short (target), HSHR (target),
+		       "The missile strays off-course, hitting #5%s#0 instead, and %s %s %s!",
+		       char_short (target), can_lodge ? "lodging deeply in" : "firmly striking", HSHR (target),
 		       expand_wound_loc (strike_location));
-	      sprintf (buf2,
+		  if (can_lodge)
+		  {
+			sprintf (buf2,
 		       "The missile strays off-course, striking you instead, and lodging deeply in your %s!",
 		       expand_wound_loc (strike_location));
+		  }
+		  else
+		  {
+			sprintf (buf2,
+				"The missile strays off-course, firmly striking you in the %s instead!",
+		       expand_wound_loc (strike_location));
+		  }
 	    }
 	  else
 	    {
 	      if (result == CRITICAL_HIT)
 		{
-		  sprintf (buf, "The missile lodges deeply in %s %s!",
-			   HSHR (target), expand_wound_loc (strike_location));
-		  sprintf (buf2, "The missile lodges deeply in your %s!",
+		  sprintf (buf, "The missile %s %s %s!",
+			   can_lodge ? "lodges deeply in" : "firmly strikes", HSHR (target), expand_wound_loc (strike_location));
+		  sprintf (buf2, "The missile %s your %s!",can_lodge ? "lodges deeply in" : "firmly strikes",
 			   expand_wound_loc (strike_location));
 		}
 	      else
 		{
-		  sprintf (buf, "The missile lodges in %s %s!", HSHR (target),
+		  sprintf (buf, "The missile %s %s %s!",can_lodge ? "lodges in" : "strikes", HSHR (target),
 			   expand_wound_loc (strike_location));
-		  sprintf (buf2, "The missile lodges in your %s!",
+		  sprintf (buf2, "The missile %s your %s!",can_lodge ? "lodges in" : "strikes",
 			   expand_wound_loc (strike_location));
 		}
 	    }
@@ -2008,7 +2019,22 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
     }
   else if (result == CRITICAL_HIT || result == HIT)
     {
-      lodge_missile (target, ammo, strike_location);
+		/* oval 5 is bounce off. Implemented by grommit for blunt practice arrows */
+		if (ammo->o.od.value[5])
+		{
+			/* object bounced off, so drop it on the ground */
+			obj = load_object (ammo->nVirtual);
+			obj->deleted = 0;
+			obj->count = 1;
+			obj->obj_timer = 8;	/* 2 RL hours. */
+			obj->next_content = NULL;
+			obj_to_room (obj, target->in_room);
+		}
+		else
+		{
+			/* lodge it in */
+			lodge_missile (target, ammo, strike_location);
+		}
       bow->loaded = NULL;
     }
 
@@ -2080,7 +2106,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 	  target->delay_ch = ch;
 	  target->delay_info1 = ammo->nVirtual;
 	}
-      if (wound_to_char (target, strike_location, (int) damage, 0, 0, 0, 0))
+      if (wound_to_char (target, strike_location, (int) damage, ammo->o.od.value[4], 0, 0, 0))
 	{
 	  if (ranged)
 	    send_to_char ("\nYour target collapses, dead.\n", ch);
@@ -2650,12 +2676,6 @@ do_unload (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (!bow->loaded)
-    {
-      send_to_char ("That isn't loaded.\n", ch);
-      return;
-    }
-
   if (!(arrow = bow->loaded))
     {
       send_to_char ("That isn't loaded.\n", ch);
@@ -2696,26 +2716,40 @@ do_unload (CHAR_DATA * ch, char *argument, int cmd)
 	}
     }
 
-  if (quiver)
+  /* switch to single hand so arrow can be unloaded into the other hand */
+  /* crossbows are already single-handed when loaded */
+ if (bow->o.weapon.use_skill == SKILL_SHORTBOW ||
+      bow->o.weapon.use_skill == SKILL_LONGBOW)
+    {
+      bow->location = WEAR_PRIM;
+    }
+
+  /* loop could terminate due to lack of finding anything */
+  if (quiver && GET_ITEM_TYPE(quiver) == ITEM_QUIVER)
     {
       send_to_char ("\n", ch);
       sprintf (buf, "You unload #2%s#0, and slide #2%s#0 into #2%s#0.",
 	       obj_short_desc (bow), obj_short_desc (arrow),
 	       obj_short_desc (quiver));
       act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-      obj_to_obj (arrow, quiver);
+
+	  if (IS_NPC(ch) && IS_SET(ch->act,ACT_STAYPUT))
+	  {
+		  // stayputted mobs autogen arrows and bolts. Thus an unload would 
+		  // cause an increment in size until the quiver was overfull 
+	  }
+	  else
+	  {
+		obj_to_obj (arrow, quiver);
+	  }
     }
-  else if (!quiver)
+  else 
     {
       sprintf (buf, "You unload #2%s#0.\n", obj_short_desc (bow));
       send_to_char (buf, ch);
       obj_to_char (arrow, ch);
     }
-  if (bow->o.weapon.use_skill == SKILL_SHORTBOW ||
-      bow->o.weapon.use_skill == SKILL_LONGBOW)
-    {
-      bow->location = WEAR_PRIM;
-    }
+ 
   bow->loaded = NULL;
 }
 
@@ -2840,7 +2874,16 @@ delayed_load (CHAR_DATA * ch)
 
   if (ch->delay_info1 >= 0)
     {
-      obj_from_obj (&ammo, 1);
+		/* grommit - stayput NPCs never remove the arrow from the quiver */
+	  if (IS_NPC(ch) && IS_SET(ch->act,ACT_STAYPUT))
+	  {
+		 //stayput NPC does nothing
+		  ;
+	  }
+	  else
+	  {
+		obj_from_obj (&ammo, 1);
+	  }
     }
   else
     {
@@ -3466,15 +3509,6 @@ do_kill (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  /**** removed to allow carts to be attacked 
-  if (IS_SET (victim->act, ACT_VEHICLE))
-    {
-      send_to_char ("How do you propose to kill an inanimate object, hmm?\n",
-		    ch);
-      return;
-    }
-**************/
-
   if (IS_SET (ch->plr_flags, NEW_PLAYER_TAG)
       && IS_SET (ch->room->room_flags, LAWFUL) && *verify != '!')
     {
@@ -3512,54 +3546,41 @@ do_kill (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (IS_NPC (ch) || !GET_TRUST (ch))
-    {
+	if (IS_NPC (ch) || !(ch->pc->level > 0)) {
+		ch->flags |= FLAG_KILL;
+		
+		if (GET_POS (ch) != POSITION_DEAD && GET_POS (victim) != POSITION_DEAD) {
+			criminalize (ch, victim, vtor (victim->in_room)->zone, CRIME_KILL);
+		}
 
-      ch->flags |= FLAG_KILL;
-
-      if (GET_POS (ch) != POSITION_DEAD && GET_POS (victim) != POSITION_DEAD)
-	criminalize (ch, victim, vtor (victim->in_room)->zone, CRIME_KILL);
-
-      set_fighting (ch, victim);
-      if (!victim->fighting)
-	{
-	  set_fighting (victim, ch);
-	  notify_guardians (ch, victim, 1);
-	  act ("$N engages $n in combat.", false, 
-	       victim, 0, ch, TO_NOTVICT | _ACT_FORMAT);
+		set_fighting (ch, victim);
+		if (!victim->fighting) {
+			set_fighting (victim, ch);
+			notify_guardians (ch, victim, 1);
+			act ("$N engages $n in combat.", false, 
+				victim, 0, ch, TO_NOTVICT | _ACT_FORMAT);
+		}
+		hit_char (ch, victim, 0);
 	}
-      hit_char (ch, victim, 0);
-
-    }
-
-  else
-    {
-      if (!IS_NPC (victim) && *verify != '!')
-	{
-	  send_to_char ("Target is a player character.  Please use "
-			"'KILL <name> !' syntax if \n\ryou really mean it.'\n\r",
-			ch);
-	  return;
+	else {
+		if (!IS_NPC (victim) && *verify != '!') {
+			send_to_char ("Target is a player character.  Please use "
+				"'KILL <name> !' syntax if \n\ryou really mean it.'\n\r", ch);
+			return;
+		}
+		
+		if (GET_TRUST(ch) && ch->pc && ch->pc->level > 0) {
+			act("$n stares at you, narrowing $s eyes. Shortly thereafter, your heart obediently ceases to beat, and you feel death upon you...",
+				false, ch, 0, victim, TO_VICT | _ACT_FORMAT);
+		  
+			act ("You narrow your eyes in concentration, and $N collapses, dead.",
+				false, ch, 0, victim, TO_CHAR | _ACT_FORMAT);
+		  
+			act("$n stares at $N, narrowing $s eyes. Suddenly, $N collapses, dead.",
+				false, ch, 0, victim, TO_NOTVICT | _ACT_FORMAT);
+			die (victim);
+		}
 	}
-
-      if (GET_TRUST (victim) > GET_TRUST (ch))
-	{
-	  victim = ch;
-	}
-
-      act
-	("$n stares at you, narrowing $s eyes. Shortly thereafter, your heart obediently ceases to beat, and you feel death upon you...",
-	 false, ch, 0, victim, TO_VICT | _ACT_FORMAT);
-
-      act ("You narrow your eyes in concentration, and $N collapses, dead.",
-	   false, ch, 0, victim, TO_CHAR | _ACT_FORMAT);
-
-      act
-	("$n stares at $N, narrowing $s eyes. Suddenly, $N collapses, dead.",
-	 false, ch, 0, victim, TO_NOTVICT | _ACT_FORMAT);
-
-      die (victim);
-    }
 }
 
 void
@@ -3618,6 +3639,12 @@ do_command (CHAR_DATA * ch, char *argument, int cmd)
 	  act ("You do not have the authority to command $N.", false, ch, 0,
 	       victim, TO_CHAR);
 	  return;
+	}
+	
+	if (IS_NPC(victim) && IS_SET(victim->act, ACT_NOCOMMAND))
+	{
+		act ("$N is not accepting orders at the moment.", false, ch, 0, victim, TO_CHAR);
+		return;
 	}
 
       sprintf (buf, "#5%s#0 commands you to '%s'.\n", char_short (ch),
@@ -3908,6 +3935,20 @@ flee_attempt (CHAR_DATA * ch)
     send_to_char (buf, ch);
 
   ch->flags &= ~FLAG_FLEE;
+  
+  typedef std::multimap<mob_cue,std::string>::const_iterator N;
+	if (IS_NPC(ch))
+	{
+		std::pair<N,N> range = ch->mob->cues->equal_range (cue_on_flee);
+		for (N n = range.first; n != range.second; n++)
+		{
+			std::string cue = n->second;
+			if (!cue.empty())
+			{
+				command_interpreter(ch, (char *) cue.c_str());
+			}
+		}
+	}
 
   return 1;
 }

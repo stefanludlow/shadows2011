@@ -21,6 +21,7 @@ DESCRIPTOR_DATA *last_descriptor;
 char full_last_command[MAX_STRING_LENGTH];
 char last_command[MAX_STRING_LENGTH];
 extern std::multimap<int, room_prog> mob_prog_list;
+extern std::multimap<int, room_prog> obj_prog_list;
 
 const struct command_data commands[] = {
 
@@ -166,6 +167,7 @@ const struct command_data commands[] = {
   {"news", do_news, DEAD,
    C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL},
   {"omote", do_omote, REST, C_SUB | C_DOA | C_BLD | C_PAR | C_SPL | C_DEL},
+  {"origins", do_origins, SIT, 0}, /* grommit */
   {"ooc", do_ooc, REST, C_WLK | C_SPL | C_DEL},
   {"open", do_open, SIT, C_BLD},
   {"order", do_order, REST, C_BLD},
@@ -268,7 +270,7 @@ const struct command_data commands[] = {
   {"unlock", do_unlock, SIT, C_MNT},
   {"unhitch", do_unhitch, STAND, 0},
   {"value", do_value, SIT, C_BLD},
-  {"vis", do_vis, REST, C_DEL | C_SUB | C_DOA | C_BLD | C_PAR},
+  {"vis", do_vis, REST, C_DEL | C_SUB | C_DOA | C_BLD | C_PAR | C_HID},
   {"voice", do_voice, DEAD,
    C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL},
   {"west", do_west, FIGHT, C_HID | C_DOA | C_BLD},
@@ -307,7 +309,8 @@ const struct command_data commands[] = {
   {"blog", do_blog, DEAD, C_LV1},	/* Building Log */
   {"goto", do_goto, DEAD, C_LV1},
   {"gstat", do_gstat, DEAD, C_LV1},
-  {"invis", do_invis, DEAD, C_LV1},
+  /* invis modified to be generally available, but then race limited */
+  {"invis", do_invis, DEAD, C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL | C_NLG},
   {"immcommands", do_immcommands, DEAD, C_LV1},
 	{"map", do_map, DEAD, C_LV1},	/* staff.c */
 	//{"mend", do_mend, DEAD, C_LV1},	/* object.c */
@@ -371,6 +374,14 @@ const struct command_data commands[] = {
 	{"munused", do_munused, DEAD, C_LV2},
 	{"notes", do_notes, DEAD, C_LV2},
 	{"outfit", do_outfit, DEAD, C_LV2},
+	{"opadd", do_opadd, DEAD, C_LV2},
+	{"opapp", do_opapp, DEAD, C_LV2},
+	{"opcmd", do_opcmd, DEAD, C_LV2},
+	{"opdel", do_opdel, DEAD, C_LV2},
+	{"opkey", do_opkey, DEAD, C_LV2},
+	{"opprg", do_opprg, DEAD, C_LV2},
+	{"opstat", do_opstat, DEAD, C_LV2},
+	{"optype", do_optype, DEAD, C_LV2},
 	{"prog", do_prog, DEAD, C_LV2},
 	{"rcap", do_rcap, DEAD, C_LV2},
 	{"report", do_report, DEAD, C_LV2},
@@ -403,8 +414,10 @@ const struct command_data commands[] = {
  	{"register", do_register, DEAD, C_LV3},
  	{"remcraft", do_remcraft, DEAD, C_LV3},
   {"snoop", do_snoop, DEAD, C_LV3},
+	{"subscribe", do_subscribe, DEAD, C_LV3},
  	{"summon", do_summon, DEAD, C_LV3},
  	{"ticket", do_ticket, DEAD, C_LV3},
+	{"unsubscribe", do_unsubscribe, DEAD, C_LV3},
   {"wclone", do_wclone, DEAD, C_LV3},
 	{"zecho", do_zecho, DEAD, C_LV3},
 
@@ -422,7 +435,6 @@ const struct command_data commands[] = {
 	{"hedit", do_hedit, DEAD, C_LV4},
 	{"hour", do_hour, DEAD, C_LV4},
 	{"log", do_log, DEAD, C_LV4},
-	{"party", do_party, DEAD, C_LV4},
 	{"passwd", do_passwd, DEAD, C_LV4},
 	{"plog", do_plog, DEAD, C_LV4},
 	{"professions", do_professions, DEAD, C_LV4},
@@ -460,6 +472,7 @@ const struct command_data commands[] = {
 	{"csv", do_csv, DEAD, C_IMP},  /* send the user a particular chunk of data */
 	{"day", do_day, DEAD, C_IMP},
 	{"debug", do_debug, DEAD, C_IMP},
+  {"mhack", do_materialhack, DEAD, C_IMP},
 	{"mysql", do_mysql, DEAD, C_IMP},
 	{"nuke", do_nuke, DEAD, C_IMP},
 	
@@ -604,8 +617,77 @@ command_interpreter (CHAR_DATA * ch, char *argument)
 		  return;
 	  }
   }
-
   std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> pair;
+  
+  if (ch->right_hand && !get_second_affect (ch, SA_DOANYWAY, 0))
+  {
+	  pair = obj_prog_list.equal_range(ch->right_hand->nVirtual);
+	  for (it = pair.first; it != pair.second; it++)
+	  {
+		if (it->second.type != 1 && it->second.type != 3 && it->second.type != 5)
+			continue;
+		if (o_prog(ch, p, it->second))
+			return;
+	  }
+  }
+  if (ch->left_hand && !get_second_affect (ch, SA_DOANYWAY, 0))
+  {
+	  pair = obj_prog_list.equal_range(ch->left_hand->nVirtual);
+	  for (it = pair.first; it != pair.second; it++)
+	  {
+		if (it->second.type != 1 && it->second.type != 3 && it->second.type != 5)
+			continue;
+		if (o_prog(ch, p, it->second))
+			return;
+	  }
+  }
+  for (OBJ_DATA *tobj = ch->equip; tobj; tobj = tobj->next_content)
+  {
+	  if (get_second_affect (ch, SA_DOANYWAY, 0))
+		break;
+	  
+	  pair = obj_prog_list.equal_range(tobj->nVirtual);
+	  for (it = pair.first; it != pair.second; it++)
+	  {
+		if (it->second.type != 2 && it->second.type != 3 && it->second.type != 5)
+			continue;
+		if (o_prog(ch, p, it->second))
+			return;
+	  }
+	  
+  }
+
+  /* this is where it crashes on the hour - Grommit */
+  
+  if (!ch->room )
+  {
+	  std::ostringstream stream;
+	  stream << "Error in command_interpreter:commands.cpp. Command \"" << 
+		  argument << "\" called by \"" << ch->tname << "\" with null room. Previously in "
+		  << (ch->last_room) << " entering null room from the " << (dirs[ch->from_dir]) << ".";
+	
+	system_log(stream.str().c_str(),true);
+	return;
+  }
+
+  /* end grommit diagnostics to avoid segfaulting on the below for loop */
+
+  for (OBJ_DATA *tobj = ch->room->contents; tobj; tobj = tobj->next_content)
+  {
+	  if (get_second_affect (ch, SA_DOANYWAY, 0))
+		break;
+	  
+	  pair = obj_prog_list.equal_range(tobj->nVirtual);
+	  for (it = pair.first; it != pair.second; it++)
+	  {
+		if (it->second.type != 4 && it->second.type != 5)
+			continue;
+		if (o_prog(ch, p, it->second))
+			return;
+	  }
+	  
+  }
+  
   for (CHAR_DATA *temp_char = ch->room->people; temp_char; temp_char = temp_char->next_in_room)
   {
 	  if (get_second_affect (ch, SA_DOANYWAY, 0))
@@ -698,18 +780,24 @@ command_interpreter (CHAR_DATA * ch, char *argument)
   if ((craft_affect = is_craft_command (ch, argument)))
     i = 0;
 
-  if (IS_SET (commands[i].flags, C_IMP))
-    cmd_level = 6;
-  else if (IS_SET (commands[i].flags, C_LV5))
-    cmd_level = 5;
-  else if (IS_SET (commands[i].flags, C_LV4))
-    cmd_level = 4;
-  else if (IS_SET (commands[i].flags, C_LV3))
-    cmd_level = 3;
-  else if (IS_SET (commands[i].flags, C_LV2))
-    cmd_level = 2;
-  else if (IS_SET (commands[i].flags, C_LV1))
-    cmd_level = 1;
+  if (IS_SET (commands[i].flags, C_IMP)) {
+	  cmd_level = 6;
+  }
+  else if (IS_SET (commands[i].flags, C_LV5)) {
+	  cmd_level = 5;
+  }
+  else if (IS_SET (commands[i].flags, C_LV4)) {
+	  cmd_level = 4;
+  }
+  else if (IS_SET (commands[i].flags, C_LV3)) {
+	  cmd_level = 3;
+  }
+  else if (IS_SET (commands[i].flags, C_LV2)) {
+	  cmd_level = 2;
+  }
+  else if (IS_SET (commands[i].flags, C_LV1)) {
+	  cmd_level = 1;
+  }
 
   if (IS_SET (commands[i].flags, C_GDE)
       && (IS_NPC (ch) || (!ch->pc->is_guide && !ch->pc->level)))
@@ -882,7 +970,7 @@ the command.  - Methuselah
 
   if (IS_MORTAL (ch) && get_affect (ch, MAGIC_HIDDEN) &&
       !IS_SET (commands[i].flags, C_HID) &&
-      skill_level (ch, SKILL_SNEAK, 0) < number (1, SKILL_CEILING) &&
+      skill_level (ch, SKILL_SNEAK, 0) < number (1, MAX(100, skill_level(ch, SKILL_SNEAK, 0))) &&
       would_reveal (ch))
     {
       remove_affect_type (ch, MAGIC_HIDDEN);
@@ -949,6 +1037,7 @@ argument_interpreter (char *argument, char *first_arg, char *second_arg)
   while (fill_word (second_arg));
 }
 
+/*
 int
 is_number (const char *str)
 {
@@ -961,6 +1050,32 @@ is_number (const char *str)
     if ((*(str + look_at) < '0') || (*(str + look_at) > '9'))
       return (0);
   return (1);
+} */
+
+int 
+is_number (std::string str)
+{
+	if (str.empty())
+		return 0;
+	
+	bool decimal_found = false;
+	for (unsigned int i = 0; i < str.length(); i++)
+	{
+		if (!isdigit(str[i]))
+		{
+			if (i == 0 && str[i] == '-')
+				continue;
+			
+			if (!decimal_found && str[i] == '.')
+			{
+				decimal_found = true;
+				continue;
+			}
+			
+			return 0;
+		}
+	}
+	return 1;
 }
 
 int

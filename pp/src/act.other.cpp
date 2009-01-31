@@ -23,7 +23,8 @@
 
 extern rpie::server engine;
 
-SECOND_AFFECT *second_affect_list = NULL;
+//SECOND_AFFECT *second_affect_list = NULL;
+std::list<second_affect> second_affect_list;
 extern int keeper_has_money (CHAR_DATA * keeper, int cost);
 extern void keeper_money_to_char (CHAR_DATA * keeper, CHAR_DATA * ch, int money);
 extern void subtract_keeper_money (CHAR_DATA * keeper, int cost);
@@ -75,7 +76,7 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
   CHAR_DATA *tch, *tch_next;
   DESCRIPTOR_DATA *td;
   int from_room = 0, to_room = 0;
-  bool morgul = false;
+  int commenced_in = 0; // 0 = gondor, 1 = mordor, 2 = haradrim, 3 = northman, 4 = orc
   char buf[MAX_STRING_LENGTH];
 
   if (!IS_SET (ch->plr_flags, NEWBIE))
@@ -103,33 +104,77 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 
   from_room = ch->in_room;
 
-  if (IS_SET (ch->plr_flags, START_MORDOR))
+	/* grommit - All characters get basic westron, EXCEPT ORCS*/	
+  if (ch->skills[SKILL_SPEAK_WESTRON] < 20 && (ch->race > 121 || ch->race < 119))
+	{
+		ch->skills[SKILL_SPEAK_WESTRON] = 20 ; 
+		ch->pc->skills[SKILL_SPEAK_WESTRON] = 20;
+    }
+
+  /* grommit - All characters are maxed at their native tongue*/
+	int	native_tongue = get_native_tongue(ch);
+	if (native_tongue)
+	{
+		ch->skills[native_tongue] = calc_lookup (ch, REG_CAP, native_tongue);
+		ch->pc->skills[native_tongue] = calc_lookup (ch, REG_CAP, native_tongue);
+	}
+
+  if (IS_SET (ch->plr_flags, START_HARAD))
+  {
+    char_from_room (ch);
+	char_to_room (ch, HARADRIM_START_LOC);
+	ch->was_in_room = 0;
+	add_clan (ch, "fahad_jafari", CLAN_MEMBER);
+	/* people who do not have Haradaic as their native get basic proficiency */
+	if (!ch->skills[SKILL_SPEAK_HARADAIC] || ch->skills[SKILL_SPEAK_HARADAIC] < 20)
+	{
+	  ch->skills[SKILL_SPEAK_HARADAIC] = 20;
+	  ch->pc->skills[SKILL_SPEAK_HARADAIC] = 20;
+	}
+	commenced_in = 2;
+  }
+  else if (IS_SET (ch->plr_flags, START_ANGOST))
     {
       char_from_room (ch);
-      char_to_room (ch, MINAS_MORGUL_START_LOC);
-      // char_to_room (ch, EDEN_START_LOC);
+      char_to_room (ch, ANGOST_START_LOC);
       ch->was_in_room = 0;
-      add_clan (ch, "mordor_char", CLAN_MEMBER);
-      if (!ch->skills[SKILL_SPEAK_BLACK_SPEECH]
-	  || ch->skills[SKILL_SPEAK_BLACK_SPEECH] < 30)
+      add_clan (ch, "outpost_citizens", CLAN_MEMBER);
+      if (!ch->skills[SKILL_SPEAK_ATLIDUK] || ch->skills[SKILL_SPEAK_ATLIDUK] < 20)
 	{
-	  ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 30;
-	  ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 30;
+	  ch->skills[SKILL_SPEAK_ATLIDUK] = 20;
+	  ch->pc->skills[SKILL_SPEAK_ATLIDUK] = 20;
 	}
-      morgul = true;
+      commenced_in = 3;
     }
+  else if (IS_SET (ch->plr_flags, START_MORIA))
+  {
+	  char_from_room(ch);
+	  char_to_room(ch, MORIA_START_LOC);
+	  ch->was_in_room = 0;
+	  add_clan (ch,"moria_dwellers",CLAN_MEMBER);
+
+	  /* no region-wide language is set */
+	  /* Grommit - make racial language adjustments here */ 
+	  if (ch->race == 121) /* Mordorian orc */
+		  ch->skills[SKILL_SPEAK_BLACK_SPEECH]=20;
+	  if (ch->race == 120 || ch->race == 119) /* Mountain or mirkwood orcs */
+		  ch->skills[SKILL_SPEAK_WESTRON]=10;
+
+	  commenced_in = 4;
+  }
   else
     {
       char_from_room (ch);
       char_to_room (ch, MINAS_TIRITH_START_LOC);
       ch->was_in_room = 0;
       add_clan (ch, "mt_citizens", CLAN_MEMBER);
-      if (!ch->skills[SKILL_SPEAK_WESTRON]
-	  || ch->skills[SKILL_SPEAK_WESTRON] < 30)
-	{
-	  ch->skills[SKILL_SPEAK_WESTRON] = 30;
-	  ch->pc->skills[SKILL_SPEAK_WESTRON] = 30;
-	}
+
+	  /* Grommit - Boost higher races in Gondor to 50 westron */	
+	  if (ch->skills[SKILL_SPEAK_WESTRON] < 50 && ch->race > 0 )
+		{
+				ch->skills[SKILL_SPEAK_WESTRON] = 50 ; 
+			ch->pc->skills[SKILL_SPEAK_WESTRON] = 50;
+		}	
     }
 
   ch->plr_flags &= ~NEWBIE;
@@ -138,11 +183,27 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 
   act ("$n has entered Middle-earth for the very first time!", true, ch, 0, 0,
        TO_ROOM | _ACT_FORMAT);
-  sprintf (buf,
-	   "#3[%s has entered Middle-earth for the first time in %s.]#0",
-	   char_short (ch), (morgul) ? "the Tur Edendor settlement" : "Gondor");
+	   
+	   switch (commenced_in)
+	   {
+	     case 0:
+		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Gondor.]#0", char_short(ch));
+		   break;
+		 case 1:
+		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Tur Edendor.]#0", char_short(ch));
+		   break;
+		 case 2:
+		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Fahad'Jafari.]#0", char_short(ch));
+		   break;
+		 case 3:
+		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Angost.]#0", char_short(ch));
+		   break;
+		 case 4:
+		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in the Mines of Moria.]#0", char_short(ch));
+		   break;
+	   }
 
-  for (td = descriptor_list; td; td = td->next)
+	   for (td = descriptor_list; td; td = td->next)
     {
       if (!td->character || td->connected != CON_PLYNG)
 	continue;
@@ -370,7 +431,17 @@ if (ch->in_room == 66955 || ch->in_room == 66956 || ch->in_room == 66954 || ch->
       ch->pc->edit_player = NULL;
     }
 
+	clear_player_from_second_affects(ch);
   remove_affect_type (ch, MAGIC_SIT_TABLE);
+  for (CHAR_DATA *tch = vtor(ch->in_room)->people; tch; tch = tch->next_in_room)
+  {
+		AFFECTED_TYPE *af;
+		if ((af = get_affect(tch, MAGIC_GUARD)))
+		{
+			if (af->a.spell.modifier && (CHAR_DATA *) af->a.spell.t == ch)
+				remove_affect_type(tch, MAGIC_GUARD);
+		}
+  }
 
   act ("Goodbye, friend.. Come back soon!", false, ch, 0, 0, TO_CHAR);
   act ("$n leaves the area.", true, ch, 0, 0, TO_ROOM);
@@ -657,7 +728,7 @@ do_hide (CHAR_DATA * ch, char *argument, int cmd)
 
   if (ch->aiming_at)
     {
-      send_to_char ("You loose your aim as you move to conceal yourself.\n", ch);
+      send_to_char ("You lose your aim as you move to conceal yourself.\n", ch);
       ch->aiming_at->targeted_by = NULL;
       ch->aiming_at = NULL;
       ch->aim = 0;
@@ -814,10 +885,13 @@ delayed_hide (CHAR_DATA * ch)
 
   if (skill_use (ch, SKILL_HIDE, mod))
     {
-      magic_add_affect (ch, MAGIC_HIDDEN, -1, 0, 0, 0, 0);
-      sprintf (buf, "[%s hides]", ch->tname);
-      act (buf, true, ch, 0, 0, TO_NOTVICT | TO_IMMS);
-    }
+		if (!get_affect(ch,MAGIC_HIDDEN))
+		{
+			magic_add_affect (ch, MAGIC_HIDDEN, -1, 0, 0, 0, 0);
+		}
+		sprintf (buf, "[%s hides]", ch->tname);
+		act (buf, true, ch, 0, 0, TO_NOTVICT | TO_IMMS);
+  }
 
   room_light (ch->room);
 }
@@ -1756,6 +1830,7 @@ void
 post_typo (DESCRIPTOR_DATA * d)
 {
   CHAR_DATA *ch;
+  char buf[MAX_STRING_LENGTH];
   char buf2[AVG_STRING_LENGTH];
   char msg[MAX_STRING_LENGTH];
   char *date;
@@ -1791,8 +1866,8 @@ post_typo (DESCRIPTOR_DATA * d)
   sprintf (msg + strlen (msg), "\n");
   sprintf (msg + strlen (msg), "%s", ch->desc->pending_message->message);
 
-  add_message (1, "Typos",
-	       -5, ch->desc->acct->name.c_str (), date2, buf2, "", msg, 0);
+  add_message (1, d->pending_message->info,
+	       -5, ch->desc->acct->name.c_str (), date2, d->pending_message->subject, "", msg, 0);
 
   send_to_char
     ("Thank you! Your typo report has been entered into our tracking system.\n\r",
@@ -1807,14 +1882,41 @@ post_typo (DESCRIPTOR_DATA * d)
 void
 do_typo (CHAR_DATA * ch, char *argument, int cmd)
 {
+	char arg[MAX_STRING_LENGTH] = { '\0'};
 
   if (IS_NPC (ch))
     {
-      send_to_char ("Mobs can't submit bug reports.\n\r", ch);
+      send_to_char ("Mobs can't submit bug reports.\n", ch);
       return;
     }
 
-  CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+  /* retrieve the category */
+	if (!(argument = one_argument(argument,arg)))
+	{
+		send_to_char ("Usage: typo <category> <title>\n"
+			          "Valid categories: Code, Room, Craft, Mob, Object, Misc\n",ch);
+		return;
+	}
+
+
+	/* Match a valid option then invert...thus, if does not match any option here */
+	if (!( !strcasecmp(arg,"Code") || !strcasecmp(arg,"Room") || !strcasecmp(arg,"Craft") || 
+		!strcasecmp(arg,"Mob") || !strcasecmp(arg,"Object") || !strcasecmp(arg,"Misc") ))
+	{
+		send_to_char ("Usage: typo <category> <title>\n"
+			          "Valid categories: Code, Room, Craft, Mob, Object, Misc\n",ch);
+		return;
+
+	}
+
+	/* check for a second argument */
+	if (!*argument)
+    {
+      send_to_char ("Please select a brief title for your typo\n", ch);
+      return;
+    }
+
+	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
   send_to_char
     ("Enter a typo report to be submitted to the admins. Terminate\n"
      "the editor with an '@' symbol. Please note that your post\n"
@@ -1825,6 +1927,12 @@ do_typo (CHAR_DATA * ch, char *argument, int cmd)
   make_quiet (ch);
 
   CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+
+  std::stringstream ss;
+  ss << "typos-" << arg;
+
+  ch->desc->pending_message->info = add_hash (ss.str().c_str()); /* category */
+  ch->desc->pending_message->subject = add_hash (argument); /* title */
 
   ch->desc->str = &ch->desc->pending_message->message;
   ch->desc->max_str = MAX_STRING_LENGTH;
@@ -2015,14 +2123,18 @@ sa_move (SECOND_AFFECT * sa)
 void
 sa_command (SECOND_AFFECT * sa)
 {
-	command_interpreter(sa->ch, sa->info);
+	char buf [MAX_STRING_LENGTH];
+	sprintf (buf, "%s", sa->info);
+	command_interpreter(sa->ch, buf);
 }
 
 void
 sa_warned (SECOND_AFFECT *sa)
 {
 	CHAR_DATA * ch;
-	add_second_affect(SA_ALREADY_WARNED, 3600, sa->ch, NULL, NULL, NULL);
+	add_second_affect(SA_ALREADY_WARNED, 3600, sa->ch, NULL, NULL, 0);
+	if (!sa->ch)
+		return;
 	for (ch = sa->ch->room->people; ch; ch = ch->next_in_room)
 	{
 		enforcer(ch, sa->ch, 1, 1);
@@ -2034,35 +2146,43 @@ void
 add_second_affect (int type, int seconds, CHAR_DATA * ch, OBJ_DATA * obj,
 		  const char *info, int info2)
 {
-  SECOND_AFFECT *sa;
+  second_affect sa;
 
-  CREATE (sa, SECOND_AFFECT, 1);
-
-  sa->type = type;
-  sa->seconds = seconds;
-  sa->ch = ch;
-  sa->obj = obj;
-  sa->info2 = info2;
+  sa.type = type;
+  sa.seconds = seconds;
+  sa.ch = ch;
+  sa.obj = obj;
+  sa.info2 = info2;
 
   if (info)
-    sa->info = str_dup (info);
+    sa.info = str_dup (info);
   else
-    sa->info = NULL;
-
-  sa->next = second_affect_list;
-
-  second_affect_list = sa;
+    sa.info = NULL;
+  
+  second_affect_list.push_back(sa);
 }
 
 SECOND_AFFECT *
 get_second_affect (CHAR_DATA * ch, int type, OBJ_DATA * obj)
 {
-  SECOND_AFFECT *sa;
+  std::list<second_affect>::iterator sa;
 
-  for (sa = second_affect_list; sa; sa = sa->next)
+  extern int second_affect_active;
+  if (second_affect_active)
+	return NULL;
+  
+  for (sa = second_affect_list.begin(); sa != second_affect_list.end(); sa++)
+  {
     if ((!ch || sa->ch == ch) && sa->type == type)
+	{
       if (!obj || obj == sa->obj)
-	return sa;
+	  {
+		SECOND_AFFECT *sa_return;
+		sa_return = &(*sa);
+		return sa_return;
+	  }
+	}
+   }
 
   return NULL;
 }
@@ -2070,105 +2190,88 @@ get_second_affect (CHAR_DATA * ch, int type, OBJ_DATA * obj)
 void
 remove_second_affect (SECOND_AFFECT * sa)
 {
-  SECOND_AFFECT *sa_list;
+  std::list<second_affect>::iterator it;
+  
+  for (it = second_affect_list.begin(); it != second_affect_list.end(); it++)
+  {
+	if (*it == *sa)
+	{
+		mem_free(it->info);
+		it = second_affect_list.erase(it);
+		break;
+	}
+  }
+}
 
-  if (sa == second_affect_list)
-    {
-
-      second_affect_list = sa->next;
-
-      if (sa->info)
-	mem_free (sa->info);
-
-      mem_free (sa);
-      return;
-    }
-
-  for (sa_list = second_affect_list; sa_list; sa_list = sa_list->next)
-    if (sa_list->next == sa)
-      sa_list->next = sa->next;
-
-  if (sa->info)
-    mem_free (sa->info);
-
-  mem_free (sa);
+void
+clear_player_from_second_affects (CHAR_DATA *ch)
+{
+  std::list<second_affect>::iterator it;
+  
+  for (it = second_affect_list.begin(); it != second_affect_list.end(); it++)
+  {
+	if (it->ch == ch || (it->obj && (CHAR_DATA *) it->obj == ch))
+	{
+		it = second_affect_list.erase(it);
+	}
+  }
 }
 
 void
 second_affect_update (void)
 {
   SECOND_AFFECT *sa;
-  SECOND_AFFECT *sa_t;
-  SECOND_AFFECT *next_sa;
   extern int second_affect_active;
-
-  for (sa = second_affect_list; sa; sa = next_sa)
-    {
-
-      next_sa = sa->next;
-
-      if (--(sa->seconds) > 0)
-	continue;
-
-      if (sa == second_affect_list)
-	second_affect_list = sa->next;
-      else
+  
+  std::list<second_affect>::iterator it;
+	for (it = second_affect_list.begin(); it != second_affect_list.end(); it++)
 	{
-	  for (sa_t = second_affect_list; sa_t->next; sa_t = sa_t->next)
-	    if (sa_t->next == sa)
-	      {
-		sa_t->next = sa->next;
-		break;
-	      }
+		if (--(it->seconds) > 0)
+			continue;
+		
+		sa = &(*it);  // Convert the iterator to a plain pointer
+		
+		second_affect_active = 1;
+
+		switch (sa->type)
+		{
+		case SA_STAND:
+			sa_stand (sa);
+			break;
+		case SA_GET_OBJ:
+			sa_get (sa);
+			break;
+		case SA_WEAR_OBJ:
+			sa_wear (sa);
+			break;
+		case SA_CLOSE_DOOR:
+			sa_close_door (sa);
+			break;
+		case SA_WORLD_SWAP:
+			break;
+		case SA_KNOCK_OUT:
+			sa_knock_out (sa);
+			break;
+		case SA_MOVE:
+			sa_move (sa);
+			break;
+		case SA_ESCAPE:
+			break;
+		case SA_RESCUE:
+			sa_rescue (sa);
+			break;
+		case SA_WARNED:
+			sa_warned (sa);
+			break;
+		case SA_COMMAND:
+			sa_command (sa);
+			break;
+		}
+
+		second_affect_active = 0;
+		mem_free(it->info);
+		it = second_affect_list.erase(it);
 	}
-
-      second_affect_active = 1;
-
-      switch (sa->type)
-	{
-	case SA_STAND:
-	  sa_stand (sa);
-	  break;
-	case SA_GET_OBJ:
-	  sa_get (sa);
-	  break;
-	case SA_WEAR_OBJ:
-	  sa_wear (sa);
-	  break;
-	case SA_CLOSE_DOOR:
-	  sa_close_door (sa);
-	  break;
-	case SA_WORLD_SWAP:
-	  break;
-	case SA_KNOCK_OUT:
-	  sa_knock_out (sa);
-	  break;
-	case SA_MOVE:
-	  sa_move (sa);
-	  break;
-	case SA_ESCAPE:
-	  break;
-	case SA_RESCUE:
-	  sa_rescue (sa);
-	  break;
-	case SA_WARNED:
-		sa_warned (sa);
-		break;
-        case SA_COMMAND:
-          sa_command (sa);
-	  break;
-	}
-
-      second_affect_active = 0;
-
-      if (sa->info)
-	{
-	  mem_free (sa->info);
-	  sa->info = NULL;
-	}
-
-      mem_free (sa);
-    }
 }
 
 void
@@ -2444,52 +2547,6 @@ rl_minute_affect_update (void)
     }
 }
 
-void
-character_stink (CHAR_DATA * ch, AFFECTED_TYPE * ch_stink)
-{
-  int aroma_strength;
-  AFFECTED_TYPE *room_stink;
-
-  aroma_strength = ch_stink->a.smell.aroma_strength - 500;
-
-  if (aroma_strength <= 0)
-    return;
-
-  room_stink = is_room_affected (ch->room->affects, ch_stink->type);
-
-  if (room_stink && room_stink->a.smell.aroma_strength > aroma_strength)
-    return;
-
-  if (room_stink && room_stink->a.smell.duration == -1)
-    return;
-
-  if (!room_stink)
-    {
-      room_stink = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
-      room_stink->type = ch_stink->type;
-      room_stink->next = ch->room->affects;
-
-      ch->room->affects = room_stink;
-    }
-
-  /* Increase duration, but not above aroma_strength */
-
-  if (room_stink->a.smell.duration < aroma_strength)
-    {
-      room_stink->a.smell.duration += aroma_strength / 100;
-      if (room_stink->a.smell.duration > aroma_strength)
-	room_stink->a.smell.duration = aroma_strength;
-    }
-
-  /* Same with aroma_strength */
-
-  if (room_stink->a.smell.aroma_strength < aroma_strength)
-    {
-      room_stink->a.smell.aroma_strength += aroma_strength / 100;
-      if (room_stink->a.smell.aroma_strength > aroma_strength)
-	room_stink->a.smell.aroma_strength = aroma_strength;
-    }
-}
 
 void
 ten_second_update (void)
@@ -2497,8 +2554,7 @@ ten_second_update (void)
   CHAR_DATA *ch, *ch_next;
   AFFECTED_TYPE *af;
   AFFECTED_TYPE *next_af;
-  AFFECTED_TYPE *room_stink;
-
+  
   //for (ch = character_list; ch; ch = ch_next)
   for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
@@ -2534,35 +2590,7 @@ ten_second_update (void)
 	    continue;
 
 			/***** Exclusion must be made in hour_affect_update!!! ******/
-
-	  if (af->type >= MAGIC_SMELL_FIRST && af->type <= MAGIC_SMELL_LAST)
-	    {
-
-	      room_stink = is_room_affected (ch->room->affects, af->type);
-
-	      if (af->a.smell.duration != -1 &&
-		  (!room_stink ||
-		   room_stink->a.smell.aroma_strength - 500 <
-		   af->a.smell.aroma_strength))
-		{
-
-		  af->a.smell.duration -= 10;
-		  af->a.smell.aroma_strength -= 10;
-
-		  if (af->a.smell.duration <= 0 ||
-		      af->a.smell.aroma_strength <= 0)
-		    {
-		      affect_remove (ch, af);
-		      continue;
-		    }
-		}
-
-	      if (af->a.smell.duration > 500 &&
-		  af->a.smell.aroma_strength > 500)
-		character_stink (ch, af);
-	    }
-
-	  else if (af->type >= CRAFT_FIRST && af->type <= CRAFT_LAST)
+	  if (af->type >= CRAFT_FIRST && af->type <= CRAFT_LAST)
 	    {
 
 	      if (IS_NPC (ch))

@@ -35,7 +35,7 @@
 #define PET_EMAIL		"staff@middle-earth.us"
 #define REPORT_EMAIL		"staff@middle-earth.us"
 
-#define IMPLEMENTOR_ACCOUNT	"Japheth"
+#define IMPLEMENTOR_ACCOUNT	"Sighentist"
 #define SERVER_LOCATION		"http://www.middle-earth.us"
 
 #define MUD_NAME		"Shadows of Isildur"
@@ -69,7 +69,10 @@
 #define MINAS_TIRITH_START_LOC		371
 #define MINAS_MORGUL_START_LOC		6120
 #define OSGILIATH_START_LOC		371
+#define HARADRIM_START_LOC      80243
+#define ANGOST_START_LOC         42999
 #define EDEN_START_LOC			6120
+#define MORIA_START_LOC			41453 /* orcs */
 
 #define LEANTO_OBJ_VNUM			95
 #define POWER_GRID_FLUX			25
@@ -81,7 +84,7 @@
 #define MAX_SPECIAL_ROLES		50
 
 #define CONSTITUTION_MULTIPLIER		3	/* Damage absorption limit for any */
-						/* humanoid N/PC is 50 + con x multiplier */
+						/* humanoid N/PC is 50 + (con+power) x multiplier */
 
 #define COMBAT_BRUTALITY        1.85	/* A quick way to adjust the brutality of */
 					/* combat; a setting of 175% seems pretty nasty, */
@@ -135,6 +138,8 @@
 #define CURRENCY_TIRITH		0
 #define CURRENCY_MORGUL		1
 #define CURRENCY_EDEN		2
+#define CURRENCY_HARAD      3
+#define CURRENCY_NORTHMAN   4
 
 
 

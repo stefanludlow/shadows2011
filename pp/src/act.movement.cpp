@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <math.h>
+#include <stdexcept>
 
 #include "structs.h"
 #include "protos.h"
@@ -144,111 +145,6 @@ const struct fatigue_data fatigue[] = {
   {90, 1.00, "Relatively Fresh"},
   {999, 1.00, "Completely Rested"}
 };
-
-
-
-void
-do_party (CHAR_DATA * ch, char *argument, int cmd)
-{
-  char buf[AVG_STRING_LENGTH];
-  char msg[AVG_STRING_LENGTH];
-  char strPartyDir[AVG_STRING_LENGTH];
-  char clan[AVG_STRING_LENGTH];
-
-  if (IS_MORTAL (ch))
-    {
-      send_to_char ("You're still too hungover from the last party!\n", ch);
-      return;
-    }
-
-  argument = one_argument (argument, buf);
-  if (*buf)
-    {
-
-      if (strcmp ("start", buf) == 0)
-	{
-
-	  if (nPartyRoom != 0)
-	    {
-	      sprintf (msg,
-		       "Party-hopping is unsupported. Please continue to enjoy the party at %d.\n",
-		       nPartyRoom);
-	      send_to_char (msg, ch);
-	      return;
-	    }
-
-	  sscanf (argument, "%s %d %s", clan, &nPartyRoom, strPartyDir);
-	  if (!(ptrPartyClan = get_clandef (clan)))
-	    {
-	      sprintf (msg, "Clan '%s' is not defined. Aborting.\n", clan);
-	      send_to_char (msg, ch);
-	      nPartyRoom = 0;
-	      return;
-	    }
-
-	  switch (tolower (strPartyDir[0]))
-	    {
-	    case 'n':
-	      nPartyDir = 0;
-	      break;
-	    case 'e':
-	      nPartyDir = 1;
-	      break;
-	    case 's':
-	      nPartyDir = 2;
-	      break;
-	    case 'w':
-	      nPartyDir = 3;
-	      break;
-	    case 'u':
-	      nPartyDir = 4;
-	      break;
-	    case 'd':
-	      nPartyDir = 5;
-	      break;
-	    default:
-	      {
-		send_to_char
-		  ("You need to specify the direction of the exit leading into the party.\n",
-		   ch);
-		return;
-	      }
-	    }
-
-	  sprintf (msg, "Starting party monitor at room %d for %s\n",
-		   nPartyRoom, ptrPartyClan->literal);
-	  send_to_gods (msg);
-	  return;
-
-	}
-      else if (strcmp ("end", buf) == 0)
-	{
-
-	  if (nPartyRoom == 0)
-	    {
-	      send_to_char
-		("There is no party in progress. Get back to work!\n", ch);
-	      return;
-	    }
-
-	  sprintf (msg, "Ending party monitor at room %d.\n", nPartyRoom);
-	  nPartyRoom = 0;
-	  send_to_gods (msg);
-	  return;
-
-	}
-    }
-  send_to_char
-    ("Usage: party start clanname room dir\n\n\t> party start herenyand 2846 n\n\t> party end\n",
-     ch);
-  return;
-
-}
-
-
-
-
-
 
 int
 drowned (CHAR_DATA * ch)
@@ -1970,9 +1866,7 @@ initiate_move (CHAR_DATA * ch)
   int speed;
   int wanted_time;
   int speed_name;
-  OBJ_DATA *obj;
-  unsigned char bIsMaskHolder = 0;
-  CHAR_DATA *tch, *pch = NULL;
+  CHAR_DATA *tch;
   AFFECTED_TYPE *af;
   MOVE_DATA *move;
   ROOM_DATA *target_room;
@@ -1989,7 +1883,6 @@ initiate_move (CHAR_DATA * ch)
     "swim"
   };
   char buf1[MAX_STRING_LENGTH];
-  char msg[AVG_STRING_LENGTH];
   char travel_str[MAX_STRING_LENGTH] = "";
 
 
@@ -2142,19 +2035,25 @@ initiate_move (CHAR_DATA * ch)
 	      return;
 	    }
 	}
-    }
+  }
+	//if (!(target_room->capacity == 0))
+	//{
+	//	if (!room_avail(target_room, NULL, ch) 
+	//		&& !(GET_TRUST(ch)) 
+	//		&& !force_enter(ch, target_room))
+	//	{
+	//		send_to_char("There isn't enough room for you.", ch);
+	//		clear_moves (ch);
+	//		return;
+	//	}
+	//}
+	// Case
 
-	if (!(target_room->capacity == 0))
-	{
-		if (!room_avail(target_room, NULL, ch) 
-			&& !(GET_TRUST(ch)) 
-			&& !force_enter(ch, target_room))
-		{
-			send_to_char("There isn't enough room for you.", ch);
-			clear_moves (ch);
-			return;
-		}
+	if (ch->room == NULL) {
+		send_to_gods("Room Capacity ERROR or before");
+		throw std::runtime_error::runtime_error("CRASH AT 2072");
 	}
+	// /Case
 		
   if (IS_SET (ch->act, ACT_MOUNT) &&
       IS_SET (target_room->room_flags, NO_MOUNT))
@@ -2171,214 +2070,44 @@ initiate_move (CHAR_DATA * ch)
       return;
     }
 
-  if (nPartyRoom
-      && ch->in_room == nPartyRoom
-      && !is_clan_member (ch, ptrPartyClan->name))
-    {
-
-      if (IS_MORTAL (ch) && get_affect (ch, MAGIC_HIDDEN))
-	{
-	  remove_affect_type (ch, MAGIC_HIDDEN);
-	  act ("$n reveals $mself.", true, ch, 0, 0, TO_ROOM);
-	}
-
-      for (pch = ch->room->people; pch; pch = pch->next_in_room)
-	if (IS_NPC (pch) && is_clan_member (pch, ptrPartyClan->name))
-	  break;
-
-      name_to_ident (ch, buf1);
-
-      if (dir == nPartyDir)
-	{
-
-	  if ((obj = get_equip (ch, WEAR_FACE))
-	      && IS_SET (obj->obj_flags.extra_flags, ITEM_MASK))
-	    {
-	      strcpy (msg, "Please enjoy your evening.");
-	      if (pch)
-		{
-		  if (!ch->following)
-		    {
-		      sprintf (buf, "%s (with a polite wave) %s", buf1, msg);
-		      do_tell (pch, buf, 0);
-		    }
-		}
-	      else
-		{
-		  sprintf (buf,
-			   "#5A doorman#0 tells you in Westron, with a polite wave,\n   \"%s\"\n",
-			   msg);
-		  act (buf, false, ch, 0, 0, TO_CHAR);
-		}
-	    }
-	  else
-	    {
-	      sprintf (msg,
-		       "Pardon me, but I'm afraid you must wear a mask to enter our estate this evening. We'd be happy to loan you a mask for the evening for a deposit of ten bits.");
-
-	      if (pch)
-		{
-		  if (!ch->following)
-		    {
-		      sprintf (buf, "%s (stepping forward) %s", buf1, msg);
-		      do_tell (pch, buf, 0);
-		    }
-		}
-	      else
-		{
-		  sprintf (buf,
-			   "#5A doorman#0 tells you in Westron, stepping forward,\n   \"%s\"\n",
-			   msg);
-		  act (buf, false, ch, 0, 0, TO_CHAR);
-
-		}
-
-	      clear_moves (ch);
-	      return;
-	    }
-
-	}
-      else
-	{
-
-	  for (obj = object_list; obj; obj = obj->next)
-	    {
-	      if (obj->nVirtual != 3078)
-		{
-		  continue;
-		}
-	      if (obj->equiped_by)
-		{
-		  if (obj->equiped_by == ch)
-		    {
-		      bIsMaskHolder = 1;
-		      break;
-		    }
-		  else
-		    {
-		      continue;
-		    }
-		}
-	      if (obj->carried_by)
-		{
-		  if (obj->carried_by == ch)
-		    {
-		      bIsMaskHolder = 1;
-		      break;
-		    }
-		  else
-		    {
-		      continue;
-		    }
-		}
-	      if (obj->in_obj)
-		{
-		  if (obj->in_obj->carried_by == ch
-		      || obj->in_obj->equiped_by == ch)
-		    {
-		      bIsMaskHolder = 1;
-		    }
-		  else if (obj->in_obj->in_obj)
-		    {
-		      if (obj->in_obj->in_obj->carried_by == ch
-			  || obj->in_obj->in_obj->equiped_by == ch)
-			{
-			  bIsMaskHolder = 1;
-			}
-		      else if (obj->in_obj->in_obj->in_obj
-			       && (obj->in_obj->in_obj->in_obj->carried_by ==
-				   ch
-				   || obj->in_obj->in_obj->in_obj->
-				   equiped_by == ch))
-			{
-			  bIsMaskHolder = 1;
-			}
-		    }
-		}
-	    }
-
-	  if (bIsMaskHolder)
-	    {
-	      sprintf (msg,
-		       "Pardon me, if you'd be so kind as to return the mask, I shall return your deposit to you. I'm terribly sorry, but we can't let you leave with it.");
-	      if (pch)
-		{
-		  if (!ch->following)
-		    {
-		      sprintf (buf, "%s (stepping forward) %s", buf1, msg);
-		      do_tell (pch, buf, 0);
-		    }
-		}
-	      else
-		{
-		  sprintf (buf,
-			   "#5A doorman#0 tells you in Westron, stepping forward,\n   \"%s\"",
-			   msg);
-		  act (buf, false, ch, 0, 0, TO_CHAR);
-		}
-	      clear_moves (ch);
-	      return;
-	    }
-	  else
-	    {
-	      sprintf (msg, "Thank you for attending.");
-	      if (pch)
-		{
-		  if (!ch->following)
-		    {
-		      sprintf (buf, "%s (waving politely) %s", buf1, msg);
-		      do_tell (pch, buf, 0);
-		    }
-		}
-	      else
-		{
-		  sprintf (buf,
-			   "#5A doorman#0 tells you in Westron,\n   \"%s\"",
-			   msg);
-		  act (buf, false, ch, 0, 0, TO_CHAR);
-		}
-	    }
-	}
-    }
-
   if (isguarded (ch->room, dir) && (IS_MORTAL (ch) || IS_NPC (ch)))
-    {
-      for (tch = ch->room->people; tch; tch = tch->next_in_room)
-	{
-	  if (tch == ch)
-	    continue;
-	  if (!CAN_SEE (tch, ch))
-	    continue;
-	  if (IS_SET (ch->act, ACT_FLYING) && !IS_SET (tch->act, ACT_FLYING))
-	    continue;
-	  if ((af = get_affect (tch, AFFECT_GUARD_DIR)))
-	    {
-	      if (af->a.shadow.edge == dir)
-		{
-		  if (get_affect (tch, MAGIC_HIDDEN))
-		    {
-		      remove_affect_type (tch, MAGIC_HIDDEN);
-		      act
-			("$N emerges from hiding and moves to block your egress in that direction.",
-			 true, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
-		      act
-			("$n attempts to move past you, but you emerge from hiding and intercept $m.",
-			 true, ch, 0, tch, TO_VICT | _ACT_FORMAT);
-		    }
-		  else
-		    {
-		      act ("$N moves to block your egress in that direction.",
-			   true, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
-		      act
-			("$n attempts to move past you, but you intercept $m.",
-			 true, ch, 0, tch, TO_VICT | _ACT_FORMAT);
-		    }
-		  clear_moves (ch);
-		  return;
-		}
-	    }
-	}
-    }
+  {
+	  for (tch = ch->room->people; tch; tch = tch->next_in_room)
+	  {
+		  if (tch == ch)
+			  continue;
+		  if (!CAN_SEE (tch, ch))
+			  continue;
+		  if (IS_SET (ch->act, ACT_FLYING) && !IS_SET (tch->act, ACT_FLYING))
+			  continue;
+		  if ((af = get_affect (tch, AFFECT_GUARD_DIR)))
+		  {
+			  if (af->a.shadow.edge == dir)
+			  {
+				  if (get_affect (tch, MAGIC_HIDDEN))
+				  {
+					  remove_affect_type (tch, MAGIC_HIDDEN);
+					  act
+						  ("$N emerges from hiding and moves to block your egress in that direction.",
+						  true, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
+					  act
+						  ("$n attempts to move past you, but you emerge from hiding and intercept $m.",
+						  true, ch, 0, tch, TO_VICT | _ACT_FORMAT);
+				  }
+				  else
+				  {
+					  act ("$N moves to block your egress in that direction.",
+						  true, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
+					  act
+						  ("$n attempts to move past you, but you intercept $m.",
+						  true, ch, 0, tch, TO_VICT | _ACT_FORMAT);
+				  }
+				  clear_moves (ch);
+				  return;
+			  }
+		  }
+	  }
+  }
 
   if (IS_MORTAL (ch) && (!IS_SET (flags, MF_SWIM) &&
 			 SWIM_ONLY (vtor (room_exit->to_room)) &&
@@ -2432,7 +2161,7 @@ initiate_move (CHAR_DATA * ch)
       return;
     }
 
-  if ((speed + 1) / 2)
+  if (speed == -1)
     {
       if (IS_SUBDUER (ch))
 	{
@@ -2448,7 +2177,7 @@ initiate_move (CHAR_DATA * ch)
 	  act (buf, true, ch->subdue, 0, ch, TO_CHAR);
 	  act (buf, true, ch->mount->subdue, 0, ch->mount, TO_CHAR);
 	}
-    }
+  }
 
   if (IS_SET (flags, MF_TOEDGE))
     {
@@ -2611,6 +2340,8 @@ initiate_move (CHAR_DATA * ch)
 int
 isguarded (ROOM_DATA * room, int dir)
 {
+	if (!room)
+		return 0;
   AFFECTED_TYPE *af;
   CHAR_DATA *tch;
 
@@ -2776,7 +2507,7 @@ do_move (CHAR_DATA * ch, char *argument, int dir)
   AFFECTED_TYPE *af;
   CHAR_DATA *tch;
   char buf[AVG_STRING_LENGTH];
-  char command[12];
+  char command[AVG_STRING_LENGTH];
 
   if (!can_move (ch))
     return;
@@ -2817,21 +2548,21 @@ do_move (CHAR_DATA * ch, char *argument, int dir)
 
 			if (shoutchar->race == lookup_race_id("Black Numenorean"))
 			{
-				command_interpreter(shoutchar, "shout Halt now or you will not leave this place alive!");
+				do_shout (shoutchar, "Halt now or you will not leave this place alive!", 0);
 			}
 			else if (shoutchar->race == lookup_race_id("Orc") || shoutchar->race == lookup_race_id("Half-Orc") || shoutchar->race == lookup_race_id("Snaga") || shoutchar->race == lookup_race_id("Troll") || shoutchar->race == lookup_race_id("Half-Troll"))
 			{
-				command_interpreter(shoutchar, "shout Oi! Youse not gunna get far! After da little bitch!");
+				do_shout (shoutchar, "Oi! Youse not gunna get far! After da little bitch!", 0);
 			}
 			else
 			{
-				command_interpreter(shoutchar, "shout The fugitive is fleeing! Give chase!");
+				do_shout (shoutchar, "The fugitive is fleeing! Give chase!", 0);
 			}
 		  break;
 	  }
 	  send_to_room("\n", ch->room->nVirtual);
 	  remove_second_affect(get_second_affect(ch, SA_WARNED, NULL));
-	  add_second_affect(SA_ALREADY_WARNED, 3600, ch, NULL, NULL, NULL);
+	  add_second_affect(SA_ALREADY_WARNED, 3600, ch, NULL, NULL, -1);
 	  
   }
 
@@ -2851,7 +2582,7 @@ do_move (CHAR_DATA * ch, char *argument, int dir)
   else
     sprintf (command, "south");
 
-  if (IS_SET (ch->plr_flags, NEW_PLAYER_TAG) && ch->room->dir_option[dir]
+  if (ch->room->dir_option[dir]
       && vtor (ch->room->dir_option[dir]->to_room)
       && IS_SET (vtor (ch->room->dir_option[dir]->to_room)->room_flags, FALL)
       && !IS_SET (ch->act, ACT_FLYING) && *argument != '!')
@@ -3809,180 +3540,168 @@ do_unlock (CHAR_DATA * ch, char *argument, int cmd)
 	}
 }
 
-void
-do_pick (CHAR_DATA * ch, char *argument, int cmd)
-{
-  int dir;
-  char buf[MAX_STRING_LENGTH];
-  OBJ_DATA *locked_obj = NULL;
+void do_pick (CHAR_DATA * ch, char *argument, int cmd) {
+	int dir;
+	char buf[MAX_STRING_LENGTH];
+	OBJ_DATA *locked_obj = NULL;
 
-  if (!real_skill (ch, SKILL_PICK))
-    {
-      send_to_char ("You don't know how to pick locks.\n", ch);
-      return;
-    }
-
-  argument = one_argument (argument, buf);
-
-  if (!*buf)
-    {
-      send_to_char ("What would you like to pick?\n", ch);
-      return;
-    }
-
-  if (!(ch->right_hand && GET_ITEM_TYPE (ch->right_hand) == ITEM_LOCKPICK) &&
-      !(ch->left_hand && GET_ITEM_TYPE (ch->left_hand) == ITEM_LOCKPICK))
-    {
-      send_to_char ("You must be holding a lockpick.\n", ch);
-      return;
-    }
-
-  if (!(locked_obj = get_obj_in_list_vis (ch, buf, ch->room->contents)))
-    locked_obj = get_obj_in_dark (ch, buf, ch->right_hand);
-
-  if (locked_obj)
-    {
-
-      if (locked_obj->obj_flags.type_flag != ITEM_CONTAINER &&
-	  GET_ITEM_TYPE (locked_obj) != ITEM_DWELLING)
-	{
-	  act ("You can't pick $p.", false, ch, locked_obj, 0, TO_CHAR);
-	  return;
+	if (!real_skill (ch, SKILL_PICK)) {
+		send_to_char ("You don't know how to pick locks.\n", ch);
+		return;
 	}
 
-      if (GET_ITEM_TYPE (locked_obj) == ITEM_CONTAINER)
-	{
-	  if (locked_obj->o.od.value[2] <= 0)
-	    {
-	      act ("$p looks unpickable.", false, ch, locked_obj, 0, TO_CHAR);
-	      return;
-	    }
+	argument = one_argument (argument, buf);
 
-	  if (!IS_SET (locked_obj->o.container.flags, CONT_CLOSED))
-	    {
-	      act ("$p is already open.", false, ch, locked_obj, 0, TO_CHAR);
-	      return;
-	    }
+	if (!*buf) {
+		send_to_char ("What would you like to pick?\n", ch);
+		return;
+    }
 
-	  if (!IS_SET (locked_obj->o.container.flags, CONT_LOCKED))
-	    {
-	      act ("As you start, you discover $p is already unlocked.",
-		   false, ch, locked_obj, 0, TO_CHAR);
-	      return;
-	    }
-	}
-      else
-	{
-	  if (locked_obj->o.od.value[3] <= 0)
-	    {
-	      act ("$p looks unpickable.", false, ch, locked_obj, 0, TO_CHAR);
-	      return;
-	    }
+	if (!(ch->right_hand && GET_ITEM_TYPE (ch->right_hand) == ITEM_LOCKPICK) &&
+		!(ch->left_hand && GET_ITEM_TYPE (ch->left_hand) == ITEM_LOCKPICK)) {
+		send_to_char ("You must be holding a lockpick.\n", ch);
+		return;
+    }
 
-	  if (!IS_SET (locked_obj->o.od.value[1], CONT_CLOSED))
-	    {
-	      act ("$p is already open.", false, ch, locked_obj, 0, TO_CHAR);
-	      return;
-	    }
-
-	  if (!IS_SET (locked_obj->o.od.value[1], CONT_LOCKED))
-	    {
-	      act ("As you start, you discover $p is already unlocked.",
-		   false, ch, locked_obj, 0, TO_CHAR);
-	      return;
-	    }
+	if (!(locked_obj = get_obj_in_list_vis (ch, buf, ch->room->contents))) {
+		locked_obj = get_obj_in_dark (ch, buf, ch->right_hand);
 	}
 
+	if (locked_obj) {
 
-      sprintf (buf,
-	       "#3[Guardian: %s%s]#0 Tries to pick the lock of %s in %d.",
-	       GET_NAME (ch), IS_SET (ch->plr_flags,
-				      NEW_PLAYER_TAG) ? " (new)" : "",
-	       locked_obj->short_description, ch->in_room);
-      send_to_guardians (buf, 0xFF);
+		if (locked_obj->obj_flags.type_flag != ITEM_CONTAINER &&
+			GET_ITEM_TYPE (locked_obj) != ITEM_DWELLING) {
+			act ("You can't pick $p.", false, ch, locked_obj, 0, TO_CHAR);
+			return;
+		}
 
-      act ("You begin picking the lock of $p.",
-	   false, ch, locked_obj, 0, TO_CHAR);
-      act ("$n uses $s tools on $p.", true, ch, locked_obj, NULL, TO_ROOM);
+		if (GET_ITEM_TYPE (locked_obj) == ITEM_CONTAINER) {
+			if (locked_obj->o.od.value[2] <= 0) {
+				act ("$p looks unpickable.", false, ch, locked_obj, 0, TO_CHAR);
+				return;
+			}
 
-      ch->delay_type = DEL_PICK_OBJ;
-      ch->delay = 25 - ch->skills[SKILL_PICK] / 10;
-      ch->delay_info1 = (long int) locked_obj;
+			if (!IS_SET (locked_obj->o.container.flags, CONT_CLOSED)) {
+				act ("$p is already open.", false, ch, locked_obj, 0, TO_CHAR);
+				return;
+			}
 
-      return;
+			if (!IS_SET (locked_obj->o.container.flags, CONT_LOCKED)) {
+				act ("As you start, you discover $p is already unlocked.",
+				false, ch, locked_obj, 0, TO_CHAR);
+				return;
+			}
+		}
+		else {
+			if (locked_obj->o.od.value[3] <= 0) {
+				act ("$p looks unpickable.", false, ch, locked_obj, 0, TO_CHAR);
+				return;
+			}
+
+			if (!IS_SET (locked_obj->o.od.value[1], CONT_CLOSED)) {
+				act ("$p is already open.", false, ch, locked_obj, 0, TO_CHAR);
+				return;
+			}
+
+			if (!IS_SET (locked_obj->o.od.value[1], CONT_LOCKED)) {
+				act ("As you start, you discover $p is already unlocked.",
+				false, ch, locked_obj, 0, TO_CHAR);
+				return;
+			}
+		}
+		
+		sprintf (buf, "#3[Guardian: %s%s]#0 Tries to pick the lock of %s in %d.",
+			GET_NAME (ch), IS_SET (ch->plr_flags,
+			NEW_PLAYER_TAG) ? " (new)" : "",
+			locked_obj->short_description, ch->in_room);
+    
+		send_to_guardians (buf, 0xFF);
+
+		act ("You begin picking the lock of $p.", false, ch, locked_obj, 0, TO_CHAR);
+		act ("$n uses $s tools on $p.", true, ch, locked_obj, NULL, TO_ROOM);
+
+		ch->delay_type = DEL_PICK_OBJ;
+		ch->delay = 25 - ch->skills[SKILL_PICK] / 10;
+		ch->delay_info1 = (long int) locked_obj;
+
+		return;
+	}
+
+	switch (*buf) {
+		case 'n':
+			dir = 0;
+			break;
+		case 'e':
+			dir = 1;
+			break;
+		case 's':
+			dir = 2;
+			break;
+		case 'w':
+			dir = 3;
+			break;
+		case 'u':
+			dir = 4;
+			break;
+		case 'd':
+			dir = 5;
+			break;
+		default:
+			send_to_char ("You may pick north, south, east, west, up, or "
+				"down.\n", ch);
+		return;
+	}
+	
+	if (!EXIT (ch, dir)) {
+		send_to_char ("There is no exit in that direction.\n", ch);
+		return;
     }
 
-  switch (*buf)
-    {
-    case 'n':
-      dir = 0;
-      break;
-    case 'e':
-      dir = 1;
-      break;
-    case 's':
-      dir = 2;
-      break;
-    case 'w':
-      dir = 3;
-      break;
-    case 'u':
-      dir = 4;
-      break;
-    case 'd':
-      dir = 5;
-      break;
-    default:
-      send_to_char ("You may pick north, south, east, west, up, or "
-		    "down.\n", ch);
-      return;
+	if (!IS_SET (EXIT (ch, dir)->exit_info, EX_ISDOOR) 
+		&& !IS_SET (EXIT (ch, dir)->exit_info, EX_ISGATE)) {
+		send_to_char ("No door in that direction.\n", ch);
+		return;
     }
 
-  if (!EXIT (ch, dir))
-    {
-      send_to_char ("There is no exit in that direction.\n", ch);
-      return;
-    }
+	sprintf (buf, "#3[Guardian: %s%s]#0 Tries to pick the lock of %s in %d.",
+		GET_NAME (ch),
+		IS_SET (ch->plr_flags, NEW_PLAYER_TAG) ? " (new)" : "",
+		EXIT (ch, dir)->keyword, ch->in_room);
+	
+	send_to_guardians (buf, 0xFF);
 
-  if (!IS_SET (EXIT (ch, dir)->exit_info, EX_ISDOOR) 
-  		&& !IS_SET (EXIT (ch, dir)->exit_info, EX_ISGATE))
-    {
-      send_to_char ("No door in that direction.\n", ch);
-      return;
-    }
+	act ("You try to pick the $T.", false, ch, 0, EXIT (ch, dir)->keyword, TO_CHAR);
 
-  if (!IS_SET (EXIT (ch, dir)->exit_info, EX_LOCKED))
-    {
-      send_to_char ("It's already open.\n", ch);
-      return;
-    }
+	if (number (1, 100) > ch->skills[SKILL_PICK]) {
+		act ("$n uses $s tools on the $T.", true, ch, 0, EXIT (ch, dir)->keyword, TO_ROOM);
+		
+		unsigned int luckyBreak = number(1,100);
 
-  sprintf (buf, "#3[Guardian: %s%s]#0 Tries to pick the lock of %s in %d.",
-	   GET_NAME (ch),
-	   IS_SET (ch->plr_flags, NEW_PLAYER_TAG) ? " (new)" : "",
-	   EXIT (ch, dir)->keyword, ch->in_room);
-  send_to_guardians (buf, 0xFF);
+		if (IS_SET (ch->room->room_flags, LAWFUL)) {
+			if (is_guarded (NULL, ch)) {
+				if (luckyBreak > (unsigned int) ((ch->aur)/5)) {
+					criminalize (ch, NULL, ch->room->zone, CRIME_PICKLOCK);
+				}
+			}
+			else {
+				if (luckyBreak > (unsigned int) (ch->aur)) {
+					criminalize (ch, NULL, ch->room->zone, CRIME_PICKLOCK);
+				}
+			}
+		}
+		else {
+			if (is_guarded (NULL, ch)) {
+				if (luckyBreak > (unsigned int) ((ch->aur/3))) {
+					criminalize (ch, NULL, ch->room->zone, CRIME_PICKLOCK);
+				}
+			}
+		}
+	}
 
-  act ("You try to pick the $T.",
-       false, ch, 0, EXIT (ch, dir)->keyword, TO_CHAR);
-
-  if (number (1, 100) > ch->skills[SKILL_PICK])
-    {
-
-      act ("$n uses $s tools on the $T.",
-	   true, ch, 0, EXIT (ch, dir)->keyword, TO_ROOM);
-
-      /* 100% crime in daylight for failure.  1/3 chance if night
-         and not guarded. */
-
-      if (sun_light || is_guarded (NULL, ch) || !number (0, 2))
-	criminalize (ch, NULL, ch->room->zone, CRIME_PICKLOCK);
-    }
-
-  ch->delay_type = DEL_PICK;
-  ch->delay = 25 - ch->skills[SKILL_PICK] / 10;
-  ch->delay_info1 = dir;
-  ch->delay_info2 = ch->in_room;
+	ch->delay_type = DEL_PICK;
+	ch->delay = 25 - ch->skills[SKILL_PICK] / 10;
+	ch->delay_info1 = dir;
+	ch->delay_info2 = ch->in_room;
 }
 
 void
@@ -4077,59 +3796,51 @@ delayed_pick_obj (CHAR_DATA * ch)
 }
 
 void
-delayed_pick (CHAR_DATA * ch)
-{
-  ROOM_DATA *troom;
-  OBJ_DATA *tobj;
-  int dir;
-  int roll;
+delayed_pick (CHAR_DATA * ch) {
+	ROOM_DATA *troom;
+	OBJ_DATA *tobj;
+	int dir;
+	int roll;
 
-  dir = ch->delay_info1;
+	dir = ch->delay_info1;
 
-  if (ch->delay_info2 != ch->in_room || !EXIT (ch, dir))
-    return;
-
-  if (IS_SET (EXIT (ch, dir)->exit_info, EX_PICKPROOF))
-    {
-      send_to_char ("You failed.\n", ch);
-      return;
-    }
-
-  if (!IS_SET (EXIT (ch, dir)->exit_info, EX_LOCKED))
-    {
-      send_to_char ("Someone has unlocked the door for you.\n", ch);
-      return;
-    }
-
-  /* Don't let PC get any practice out of this lock if it is beyond
-     his/her ability. */
-
-  if (ch->skills[SKILL_PICK] > EXIT (ch, dir)->pick_penalty)
-    skill_use (ch, SKILL_PICK, EXIT (ch, dir)->pick_penalty);
-
-  if ((roll =
-       number (1, 100)) > ch->skills[SKILL_PICK] - EXIT (ch,
-							 dir)->pick_penalty)
-    {
-      if (!(roll % 5) && (tobj = get_carried_item (ch, ITEM_LOCKPICK)))
-	{
-	  act ("You fail miserably, snapping your pick in the process!",
-	       false, ch, 0, 0, TO_CHAR);
-	  act ("$n mumbles as $s lockpick snaps.", true, ch, 0, 0,
-	       TO_ROOM | _ACT_FORMAT);
-	  extract_obj (tobj);
-	  return;
+	if (ch->delay_info2 != ch->in_room || !EXIT (ch, dir)) {
+		return;
 	}
-      send_to_char ("You failed.\n", ch);
-      return;
-    }
 
-  ch->room->dir_option[dir]->exit_info &= ~EX_LOCKED;
+	if (IS_SET (EXIT (ch, dir)->exit_info, EX_PICKPROOF)) {
+		send_to_char ("You failed.\n", ch);
+		return;
+	}
 
-  if ((troom = vtor (ch->room->dir_option[dir]->to_room)))
-    troom->dir_option[rev_dir[dir]]->exit_info &= ~EX_LOCKED;
+	/* Don't let PC get any practice out of this lock if it is beyond
+	his/her ability. */
 
-  send_to_char ("You successfully picked the lock.\n", ch);
+	if (ch->skills[SKILL_PICK] > EXIT (ch, dir)->pick_penalty) {
+		skill_use (ch, SKILL_PICK, EXIT (ch, dir)->pick_penalty);
+	}
+
+	if ((roll = number (1, 100)) > ch->skills[SKILL_PICK] - EXIT (ch, dir)->pick_penalty) {
+		if (!(roll % 5) && (tobj = get_carried_item (ch, ITEM_LOCKPICK))) {
+			act ("You fail miserably, snapping your pick in the process!", false, ch, 0, 0, TO_CHAR);
+			act ("$n mumbles as $s lockpick snaps.", true, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+			extract_obj (tobj);
+			return;
+		}
+		send_to_char ("You failed.\n", ch);
+		return;
+	}
+
+	// blah = ~(blah & pos) | (blah & ~pos)
+	// toggles the EX_LOCKED flag
+	// -Vermonkey
+	ch->room->dir_option[dir]->exit_info = ~(ch->room->dir_option[dir]->exit_info & EX_LOCKED) | (ch->room->dir_option[dir]->exit_info & ~EX_LOCKED);
+	
+	if ((troom = vtor (ch->room->dir_option[dir]->to_room))){
+		troom->dir_option[rev_dir[dir]]->exit_info = ~(troom->dir_option[rev_dir[dir]]->exit_info & EX_LOCKED) | (troom->dir_option[rev_dir[dir]]->exit_info & ~EX_LOCKED);
+	}
+
+	send_to_char ("You successfully picked the lock.\n", ch);
 }
 
 void
@@ -5340,6 +5051,75 @@ crude_name (int race)
 char *
 specific_name (int race)
 {
+	std::string buf;
+	char *ptrBodyProto = NULL;
+	char *ptrSizeProto = NULL;
+	if ((ptrSizeProto = lookup_race_variable (race, RACE_SIZE)) != NULL)
+	{
+		switch (strtol (ptrSizeProto, NULL, 10))
+		{
+			case -3:
+				buf.append("miniscule ");
+				break;
+			case -2:
+				buf.append("tiny ");
+				break;
+			case -1:
+				buf.append("small ");
+				break;
+			case 0:
+				buf.append("medium-sized ");
+				break;
+			case 1:
+				buf.append("large ");
+				break;
+			case 2:
+				buf.append("enormous ");
+				break;
+			case 3:
+				buf.append("colossal ");
+				break;
+			default:
+				break;
+		}
+	}
+	if ((ptrBodyProto = lookup_race_variable (race, RACE_BODY_PROTO)) != NULL)
+	{
+		switch (strtol (ptrBodyProto, NULL, 10))
+		{
+			case PROTO_WINGED_TAIL:
+				buf.append("tailed, bipedal creature");
+				break;
+			case PROTO_WINGED_NOTAIL:
+			case PROTO_HUMANOID:
+				buf.append("bipedal creature");
+				break;
+			case PROTO_FOURLEGGED_PAWS:
+			case PROTO_FOURLEGGED_FEET:
+				buf.append("four-legged creature");
+				break;
+			case PROTO_FOURLEGGED_HOOVES:
+				buf.append("four-legged, cloven-hoofed creature");
+				break;
+			case PROTO_SERPENTINE:
+				buf.append("serpentine creature");
+				break;
+			default:
+				buf.append("unknown creature");
+		}
+	}
+	
+	if (buf.empty())
+		return "unknown creature";
+	
+	return (char *) buf.c_str();
+	
+}
+
+/*
+char *
+specific_name (int race)
+{
   static char buf[MAX_STRING_LENGTH];
 
   ///\TODO: Make racially non-specific
@@ -5392,7 +5172,7 @@ specific_name (int race)
     }
 
 }
-
+*/
 char *
 track_age (int hours_passed)
 {
@@ -5434,143 +5214,121 @@ speed_adj (int speed)
 void
 delayed_track (CHAR_DATA * ch)
 {
-  TRACK_DATA *track;
-  bool found = false;
-  int needed;
-  char *p;
-  char buf[MAX_STRING_LENGTH];
-  char output[MAX_STRING_LENGTH];
+	TRACK_DATA *track;
+	bool found = false;
+	int needed;
+	char *p;
+	char buf[MAX_STRING_LENGTH];
+	char output[MAX_STRING_LENGTH];
 
-  skill_use (ch, SKILL_TRACKING, 0);
-  *output = '\0';
+	skill_use (ch, SKILL_TRACKING, 0);
+	*output = '\0';
 
-  for (track = ch->room->tracks; track; track = track->next)
-    {
-      *buf = '\0';
-      needed = ch->skills[SKILL_TRACKING];
-      needed -= track->hours_passed / 4;
-      if (IS_SET (track->flags, BLOODY_TRACK))
-	needed += number (10, 25);
-      needed += number (5, 10);
-      needed = MAX (needed, 5);
-      if (number (1, 100) > needed)
-	continue;
-      if (!found)
-	send_to_char ("\n", ch);
-      found = true;
-      if (needed < 30)
+	for (track = ch->room->tracks; track; track = track->next)
 	{
-	  if (track->from_dir != track->to_dir)
-	    sprintf (buf + strlen (buf),
-		     "#2The %stracks of a %s#0 are here, leading from %s to %s.",
-		     IS_SET (track->flags,
-			     BLOODY_TRACK) ? "#1blood-pooled#0 " : "",
-		     crude_name (track->race), dirs[track->from_dir],
-		     dirs[track->to_dir]);
-	  else
-	    sprintf (buf + strlen (buf),
-		     "#2The %stracks of a %s#0 are here, coming from the %s and then doubling back.",
-		     IS_SET (track->flags,
-			     BLOODY_TRACK) ? "#1blood-pooled#0 " : "",
-		     crude_name (track->race), dirs[track->from_dir]);
+		*buf = '\0';
+		needed = ch->skills[SKILL_TRACKING];
+		needed -= track->hours_passed / 4;
+		if (IS_SET (track->flags, BLOODY_TRACK))
+		needed += number (10, 25);
+		needed += number (5, 10);
+		needed = MAX (needed, 5);
+		if (number (1, 100) > needed)
+		continue;
+		if (!found)
+		send_to_char ("\n", ch);
+		found = true;
+		if (needed < 30)
+		{
+			if (track->from_dir != track->to_dir)
+			sprintf (buf + strlen (buf),
+			"#2The %stracks of a %s#0 are here, leading from %s to %s.",
+			IS_SET (track->flags,
+			BLOODY_TRACK) ? "#1blood-pooled#0 " : "",
+			crude_name (track->race), dirs[track->from_dir],
+			dirs[track->to_dir]);
+			else
+			sprintf (buf + strlen (buf),
+			"#2The %stracks of a %s#0 are here, coming from the %s and then doubling back.",
+			IS_SET (track->flags,
+			BLOODY_TRACK) ? "#1blood-pooled#0 " : "",
+			crude_name (track->race), dirs[track->from_dir]);
+		}
+		else if (needed < 50)
+		{
+			if (track->from_dir != track->to_dir)
+			sprintf (buf + strlen (buf),
+			"#2The %stracks of a %s#0 were laid here %s, leading from %s to %s.",
+			IS_SET (track->flags,
+			BLOODY_TRACK) ? "#1blood-pooled#0 " : "",
+			crude_name (track->race),
+			track_age (track->hours_passed),
+			dirs[track->from_dir], dirs[track->to_dir]);
+			else
+			sprintf (buf + strlen (buf),
+			"#2The %stracks of a %s#0 were laid here %s, coming from the %s and then doubling back.",
+			IS_SET (track->flags,
+			BLOODY_TRACK) ? "#1blood-pooled#0 " : "",
+			crude_name (track->race),
+			track_age (track->hours_passed),
+			dirs[track->from_dir]);
+		}
+		else if (needed < 90)
+		{
+			if (track->from_dir != track->to_dir)
+			sprintf (buf + strlen (buf),
+			"#2A set of %s tracks#0%s were laid here %s at %s, leading from %s to %s.",
+			specific_name (track->race), IS_SET (track->flags,
+			BLOODY_TRACK) ?
+			", #1pooled with blood#0, " : "",
+			track_age (track->hours_passed),
+			speed_adj (track->speed), dirs[track->from_dir],
+			dirs[track->to_dir]);
+			else
+			sprintf (buf + strlen (buf),
+			"#2A set of %s tracks#0%s were laid here %s at %s, coming from the %s and then doubling back.",
+			specific_name (track->race), IS_SET (track->flags,
+			BLOODY_TRACK) ?
+			", #1pooled with blood#0, " : "",
+			track_age (track->hours_passed),
+			speed_adj (track->speed), dirs[track->from_dir]);
+		}
+		else
+		{
+			if (track->from_dir != track->to_dir)
+			sprintf (buf + strlen (buf),
+			"#2A set of %s tracks#0%s were laid here %s at %s, leading from %s to %s.",
+			lookup_race_variable (track->race, RACE_NAME),
+			IS_SET (track->flags,
+			BLOODY_TRACK) ? ", #1pooled with blood#0, " : "",
+			track_age (track->hours_passed),
+			speed_adj (track->speed), dirs[track->from_dir],
+			dirs[track->to_dir]);
+			else
+			sprintf (buf + strlen (buf),
+			"#2A set of %s tracks#0%s were laid here %s at %s, coming from the %s and then doubling back.",
+			lookup_race_variable (track->race, RACE_NAME),
+			IS_SET (track->flags,
+			BLOODY_TRACK) ? ", #1pooled with blood#0, " : "",
+			track_age (track->hours_passed),
+			speed_adj (track->speed), dirs[track->from_dir]);
+		}
+		*buf = toupper (*buf);
+		sprintf (output + strlen (output), "%s ", buf);
 	}
-      else if (needed < 50)
-	{
-	  if (track->race <= 29)
-	    {
-	      if (track->from_dir != track->to_dir)
-		sprintf (buf + strlen (buf),
-			 "#2The %stracks of a %s#0 were laid here %s, leading from %s to %s.",
-			 IS_SET (track->flags,
-				 BLOODY_TRACK) ? "#1blood-pooled#0 " : "",
-			 crude_name (track->race),
-			 track_age (track->hours_passed),
-			 dirs[track->from_dir], dirs[track->to_dir]);
-	      else
-		sprintf (buf + strlen (buf),
-			 "#2The %stracks of a %s#0 were laid here %s, coming from the %s and then doubling back.",
-			 IS_SET (track->flags,
-				 BLOODY_TRACK) ? "#1blood-pooled#0 " : "",
-			 crude_name (track->race),
-			 track_age (track->hours_passed),
-			 dirs[track->from_dir]);
-	    }
-	  else
-	    {
-	      if (track->from_dir != track->to_dir)
-		sprintf (buf + strlen (buf),
-			 "#2A set of %s tracks#0%s were laid here %s, leading from %s to %s.",
-			 lookup_race_variable (track->race, RACE_NAME),
-			 IS_SET (track->flags,
-				 BLOODY_TRACK) ? ", #1pooled with blood#0, " :
-			 "", track_age (track->hours_passed),
-			 dirs[track->from_dir], dirs[track->to_dir]);
-	      else
-		sprintf (buf + strlen (buf),
-			 "#2A set of %s tracks#0%s were laid here %s, coming from the %s and then doubling back.",
-			 lookup_race_variable (track->race, RACE_NAME),
-			 IS_SET (track->flags,
-				 BLOODY_TRACK) ? ", #1pooled with blood#0, " :
-			 "", track_age (track->hours_passed),
-			 dirs[track->from_dir]);
-	    }
-	}
-      else if (needed < 70)
-	{
-	  if (track->from_dir != track->to_dir)
-	    sprintf (buf + strlen (buf),
-		     "#2A set of %s tracks#0%s were laid here %s at %s, leading from %s to %s.",
-		     specific_name (track->race), IS_SET (track->flags,
-							  BLOODY_TRACK) ?
-		     ", #1pooled with blood#0, " : "",
-		     track_age (track->hours_passed),
-		     speed_adj (track->speed), dirs[track->from_dir],
-		     dirs[track->to_dir]);
-	  else
-	    sprintf (buf + strlen (buf),
-		     "#2A set of %s tracks#0%s were laid here %s at %s, coming from the %s and then doubling back.",
-		     specific_name (track->race), IS_SET (track->flags,
-							  BLOODY_TRACK) ?
-		     ", #1pooled with blood#0, " : "",
-		     track_age (track->hours_passed),
-		     speed_adj (track->speed), dirs[track->from_dir]);
-	}
-      else
-	{
-	  if (track->from_dir != track->to_dir)
-	    sprintf (buf + strlen (buf),
-		     "#2A set of %s tracks#0%s were laid here %s at %s, leading from %s to %s.",
-		     lookup_race_variable (track->race, RACE_NAME),
-		     IS_SET (track->flags,
-			     BLOODY_TRACK) ? ", #1pooled with blood#0, " : "",
-		     track_age (track->hours_passed),
-		     speed_adj (track->speed), dirs[track->from_dir],
-		     dirs[track->to_dir]);
-	  else
-	    sprintf (buf + strlen (buf),
-		     "#2A set of %s tracks#0%s were laid here %s at %s, coming from the %s and then doubling back.",
-		     lookup_race_variable (track->race, RACE_NAME),
-		     IS_SET (track->flags,
-			     BLOODY_TRACK) ? ", #1pooled with blood#0, " : "",
-		     track_age (track->hours_passed),
-		     speed_adj (track->speed), dirs[track->from_dir]);
-	}
-      *buf = toupper (*buf);
-      sprintf (output + strlen (output), "%s ", buf);
-    }
 
-  if (!found)
-    {
-      send_to_char ("You were unable to locate any tracks in the area.\n",
-		    ch);
-      return;
-    }
-  else
-    {
-      reformat_string (output, &p);
-      page_string (ch->desc, p);
-      mem_free (p); //char*
-    }
+	if (!found)
+	{
+		send_to_char ("You were unable to locate any tracks in the area.\n",
+		ch);
+		return;
+	}
+	else
+	{
+		reformat_string (output, &p);
+		page_string (ch->desc, p);
+		mem_free (p); //char*
+	}
 }
 
 void
@@ -6562,8 +6320,6 @@ force_enter (CHAR_DATA *tch, ROOM_DATA *troom)
 	int check_roll;
 	float occup;
 	float capac;
-	
-	
 	
 	attr_str = GET_STR (tch);
 	attr_agi = GET_AGI (tch);

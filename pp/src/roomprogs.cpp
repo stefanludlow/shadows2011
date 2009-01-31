@@ -12,6 +12,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
+#include <vector>
+#include <exception>
 
 #include "structs.h"
 #include "net_link.h"
@@ -23,8 +25,7 @@
 #include "group.h"
 
 /* script program commands */
-#define MAKE_STRING(msg) \  
-(((std::ostringstream&) (std::ostringstream() << std::boolalpha << msg)).str())  
+#define MAKE_STRING(msg) (((std::ostringstream&) (std::ostringstream() << std::boolalpha << msg)).str())  
 #define RP_ATECHO 	0
 #define RP_GIVE		1
 #define RP_TAKE		2
@@ -64,7 +65,7 @@
 #define RP_SYSTEM	36	/* submit a system message */
 #define RP_CLAN_ECHO	37	/* send a message to clan members */
 #define RP_TRANS_GROUP	38	/* send a message to clan members */
-#define RP_SET		39	/* send a message to clan members */
+#define RP_SET		39	
 #define RP_CRIMINALIZE  40      /* criminalize a person or room */
 #define RP_STRIP        41      /* takes a person's equipment and puts it all neatly in a bag */
 #define RP_CLAN         42      /* adds people to a clan at a certain rank */
@@ -77,8 +78,18 @@
 #define RP_NOOP 49 /* Do nothing - i.e. for comments */
 #define RP_TRANSOBJ 50
 #define RP_OBR 51
+#define RP_TALLY 52
+#define RP_OBJVNUM 53
+#define RP_RANDOMOBJ 54
+#define RP_INFO 55
+#define RP_SETVAL 56
+#define RP_CONCAT 57
+#define RP_MFTOG 58
+#define RP_NOOP2 59
+#define RP_COPPER_TO_SHILLINGS 60
 
 extern std::multimap<int, room_prog> mob_prog_list;
+extern std::multimap<int, room_prog> obj_prog_list;
 
 struct room_prog_var
 {
@@ -129,6 +140,14 @@ void r_doitanyway (CHAR_DATA *ch, char *argument, char *, char *, char *);
 void r_door (CHAR_DATA *ch, char *argument);
 void r_math (CHAR_DATA *ch, char *argument, room_prog_var *&);
 void r_transobj (CHAR_DATA *ch, char *argument);
+void r_tally (CHAR_DATA *ch, std::string argument, room_prog_var *&);
+void r_objvnum (CHAR_DATA *ch, std::string argument, room_prog_var *&);
+void r_randomobj (CHAR_DATA *ch, std::string argument, room_prog_var *&);
+void r_info (CHAR_DATA *, std::string, room_prog_var *&);
+void r_setval (CHAR_DATA *, std::string);
+void r_concat (CHAR_DATA *, std::string, room_prog_var *&);
+void r_mftog (CHAR_DATA *, std::string);
+void r_coppertoshillings (std::string, room_prog_var *&);
 
 
 #define MAX_RPRG_NEST 30
@@ -190,6 +209,15 @@ const char *rfuncs[] = {
 	"noop",
 	"transobj",
 	"obr",
+	"tally",
+	"objvnum",
+	"randomobj",
+	"info",
+	"setval",
+	"concat",
+	"mftog",
+	"//",
+	"copper_to_shillings",
 	"\n"
 };
 
@@ -443,7 +471,7 @@ m_prog (CHAR_DATA * ch, char * argument)
 		{
 			if (!it->second.keys || !*it->second.keys)
 			{
-				strArgument = keys + strArgument;
+				strArgument = keys + " " + strArgument;
 				rxp(ch, it->second.prog, (char *) cmd.c_str(), "", (char *) strArgument.c_str());
 				return 1;
 			}
@@ -475,7 +503,35 @@ m_prog (CHAR_DATA *ch, char *argument, room_prog prog)
 	{
 		if (!prog.keys || !*prog.keys)
 		{
-			strArgument = keys + strArgument;
+			strArgument = keys + " " + strArgument;
+			rxp (ch, prog.prog, (char *) cmd.c_str(), "", (char *) strArgument.c_str());
+			return 1;
+		}
+
+		if (!keys.empty() && r_isname ((char *) keys.c_str(), prog.keys))
+		{
+			rxp (ch, prog.prog, (char *) cmd.c_str(), (char *) keys.c_str(), (char *) strArgument.c_str());
+			return 1;
+		}
+	}
+	return 0;
+}
+
+int
+o_prog (CHAR_DATA *ch, char *argument, room_prog prog)
+{
+	std::string cmd, keys, strArgument = argument;
+	strArgument = one_argument (strArgument, cmd);
+	strArgument = one_argument (strArgument, keys);
+
+	if (cmd.empty())
+		return 0;
+
+	if (!cmd.empty() && r_isname((char *) cmd.c_str(), prog.command))
+	{
+		if (!prog.keys || !*prog.keys)
+		{
+			strArgument = keys + " " + strArgument;
 			rxp (ch, prog.prog, (char *) cmd.c_str(), "", (char *) strArgument.c_str());
 			return 1;
 		}
@@ -589,6 +645,16 @@ rxp (CHAR_DATA *ch, char *prg, char *command, char *keyword, char *argument)
 				line.erase(first_index, index-first_index+1);
 			}
 		}
+		
+		while (line.find("\\n") != std::string::npos)
+		{
+			line.replace(line.find("\\n"), 2, "\n");
+		}
+		
+		while (line.find("\\t") != std::string::npos)
+		{
+			line.replace(line.find("\\t"), 2, "\t");
+		}
 
 		// Work out which rprog command to do
 		std::string strCommand;
@@ -649,37 +715,60 @@ oexist (int nVirtual, OBJ_DATA * ptrContents, bool bNest)
 /* Yeah I know, it's backwards.....I'll change it when I have time */
 
 void
-reval (CHAR_DATA * ch, char *arg)
+reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 {
-	int i, dsiz, dir, tsiz, nFlag = 0, nStat = 0;
+	int dir, nFlag = 0, nStat = 0;
 	int nArg1 = 0, nArg2 = 0, nArg3 = 0;
 	long virt = 0, who;
-	char tmp[80], tmp2[80], *dbuf, rbuf[80], sarg[80];
+	char tmp2[80], *dbuf, rbuf[80], sarg[80];
 	CHAR_DATA *tmp_ch, *tch1, *tch2;
 	OBJ_DATA *obj;
 	bool check;
 	ROOM_DATA *troom = NULL;
 
 	*rbuf = '\0';
-	strcpy (sarg, arg);
-	while (*arg != '(' && *arg != '\0')
+	strncpy (sarg, arg, 79);
+
+	while (*arg != '(' && *arg != '\0') {
 		arg++;
-	arg++;
-	i = 0;
-	while (*arg != ')' && *arg != '\0')
-	{
-		tmp[i] = *arg++;
-		i++;
 	}
-	tmp[i++] = '\0';
-	tsiz = strlen (tmp);
-	strcpy (tmp2, tmp);
-	if ((dbuf = strchr (tmp, ',')))
-	{
-		dsiz = strlen (dbuf);
-		dbuf++;
-		for (; isspace (*dbuf); dbuf++);
-		strncat (rbuf, tmp2, (tsiz - dsiz));
+	
+	if (*arg != '\0') {
+		arg++;
+	}
+
+	std::string temp = arg;
+	size_t tempFind = temp.find_first_of(")");
+	if (tempFind != std::string::npos) {
+		temp = temp.substr(0, tempFind);
+	}
+	else {
+		std::stringstream errorWhat;
+		errorWhat << ch->tname << " has triggered an rprog with an if statement missing a closing bracket.";
+		send_to_gods(errorWhat.str().c_str());
+		ifin[nNest] = 1;
+		return;
+	}
+
+	size_t sizeTemp = temp.length();
+	
+	if (sizeTemp > 79) {
+		ifin[nNest] = 1;
+		return;
+	}
+
+	strncpy (tmp2, temp.c_str(), 79);
+	
+	tempFind = temp.find_first_of(",");
+	
+	if (tempFind != std::string::npos) {
+		size_t dSize = temp.length() - tempFind;
+		//dbuf++;
+		dbuf = &(temp[tempFind + 1]);
+		while (isspace (*dbuf)) {
+			dbuf++;
+		}
+		strncat (rbuf, tmp2, (temp.length() - dSize));
 	}
 
 	// Check to see if mudhour compares with specified logic
@@ -849,11 +938,27 @@ reval (CHAR_DATA * ch, char *arg)
 
 		return;
 	}
+	
+	else if (!strncmp(sarg, "admin", 5))
+	{
+		if (!GET_TRUST(ch))
+			ifin[nNest] = 1;
+		return;
+	}
 
 	else if (!strncmp(sarg, "fighting", 8))
 	{
 		if (!ch->fighting)
 			ifin[nNest] = 1;
+		return;
+	}
+	
+	else if (!strncmp (sarg, "delayed", 7))
+	{
+		if (!get_second_affect (ch, SA_COMMAND, NULL))
+		{
+			ifin[nNest] = 1;
+		}
 		return;
 	}
 
@@ -885,6 +990,8 @@ reval (CHAR_DATA * ch, char *arg)
 			return;
 		}
 
+		if (!EXIT(ch, direction))
+			ifin[nNest] = 1;
 		if (!strcmp(dbuf, "locked") && !IS_SET(EXIT(ch, direction)->exit_info, EX_LOCKED))
 			ifin[nNest] = 1;
 		else if (!strcmp(dbuf, "unlocked") && IS_SET(EXIT(ch, direction)->exit_info, EX_LOCKED))
@@ -965,6 +1072,14 @@ reval (CHAR_DATA * ch, char *arg)
 		else if (!strncmp (dbuf, "numenorean", 10))
 		{
 			currency = 2;
+		}
+		else if (!strncmp (dbuf, "harad", 5))
+		{
+		    currency = 3;
+		}
+		else if (!strncmp (dbuf, "northman", 8) || !strncmp(dbuf, "shillings", 9))
+		{
+			currency = 4;
 		}
 		else
 		{
@@ -1053,6 +1168,56 @@ reval (CHAR_DATA * ch, char *arg)
 		return;
 	}
 
+	/* Check to see if an action flag is set */
+	/*  if mflag(flag,target) */
+	else if (!strncmp (sarg, "mflag", 5))
+	{
+		CHAR_DATA *tch;
+		if (is_number(dbuf))
+		{
+			if (atoi(dbuf) == -1 && IS_NPC(ch))
+			{
+				tch = ch;
+			}
+			else
+			{
+				for (tch = ch->room->people; tch; tch = tch->next_in_room)
+				{
+					if (!IS_NPC(tch))
+						continue;
+				
+					if (tch->mob->nVirtual == atoi(dbuf))
+						break;
+				}
+			}
+		}
+		else
+		{
+			tch = get_char_room (dbuf, ch->in_room);
+		}
+		if (!tch)
+		{
+			ifin[nNest] = 1;
+			return;
+		}
+		if (!IS_NPC(tch))
+		{
+			ifin[nNest] = 1;
+			return;
+		}
+		if ((nFlag = index_lookup (action_bits, rbuf)) == -1)
+		{
+			ifin[nNest] = 1;
+			return;
+		}
+		if (!IS_SET (tch->act, (1 << nFlag)))
+		{
+			ifin[nNest] = 1;
+			return;
+		}
+		return;
+	}
+	
 	/* Check to see if a flag is set on a given room */
 	/* Usage: if flag(room-flag,roomvnum)            */
 
@@ -1355,7 +1520,7 @@ reval (CHAR_DATA * ch, char *arg)
 			nArg3 = strtol (dbuf, NULL, 10);
 
 			if (((nArg1 = index_lookup (skills, rbuf)) != -1)
-				&& (skill_level (ch, nArg1, 0) >= dice (nArg2, nArg3)))
+				&& ((unsigned int) skill_level (ch, nArg1, 0) >= dice (nArg2, nArg3)))
 			{
 				return;
 			}
@@ -1406,18 +1571,85 @@ reval (CHAR_DATA * ch, char *arg)
 				return;
 			}
 		}
-
-		obj = get_obj_in_list_num (atol (dbuf), tmp_ch->right_hand);
-		if (!obj)
-			obj = get_obj_in_list_num (atol (dbuf), tmp_ch->left_hand);
-		if (!obj)
+		
+		ifin[nNest] = 1;
+		if (tmp_ch->right_hand)
 		{
-			if ((check = get_obj_in_equip_num (tmp_ch, atol (dbuf)) == false))
+			if (tmp_ch->right_hand->nVirtual == atol(dbuf))
+				ifin[nNest] = 0;
+			else if (GET_ITEM_TYPE(tmp_ch->right_hand) == ITEM_CONTAINER || GET_ITEM_TYPE(tmp_ch->right_hand) == ITEM_SHEATH || GET_ITEM_TYPE(tmp_ch->right_hand) == ITEM_QUIVER || GET_ITEM_TYPE(tmp_ch->right_hand) == ITEM_KEYRING)
 			{
-				ifin[nNest] = 1;
-				return;
+				for (obj = tmp_ch->right_hand->contains; obj; obj = obj->next_content)
+				{
+					if (obj->nVirtual == atol(dbuf))
+					{
+						ifin[nNest] = 0;
+						break;
+					}
+					if (GET_ITEM_TYPE(obj) == ITEM_CONTAINER || GET_ITEM_TYPE(obj) == ITEM_SHEATH || GET_ITEM_TYPE(obj) == ITEM_QUIVER || GET_ITEM_TYPE(obj) == ITEM_KEYRING)
+					{
+						for (OBJ_DATA *tobj = obj->contains; tobj; tobj = tobj->next_content)
+						{
+							if (tobj->nVirtual == atol(dbuf))
+								ifin[nNest] = 0;
+						}
+					}
+				}
 			}
 		}
+		if (tmp_ch->left_hand)
+		{
+			if (tmp_ch->left_hand->nVirtual == atol(dbuf))
+				ifin[nNest] = 0;
+			else if (GET_ITEM_TYPE(tmp_ch->left_hand) == ITEM_CONTAINER || GET_ITEM_TYPE(tmp_ch->left_hand) == ITEM_SHEATH || GET_ITEM_TYPE(tmp_ch->left_hand) == ITEM_QUIVER || GET_ITEM_TYPE(tmp_ch->left_hand) == ITEM_KEYRING)
+			{
+				for (obj = tmp_ch->left_hand->contains; obj; obj = obj->next_content)
+				{
+					if (obj->nVirtual == atol(dbuf))
+					{
+						ifin[nNest] = 0;
+						break;
+					}
+					if (GET_ITEM_TYPE(obj) == ITEM_CONTAINER || GET_ITEM_TYPE(obj) == ITEM_SHEATH || GET_ITEM_TYPE(obj) == ITEM_QUIVER || GET_ITEM_TYPE(obj) == ITEM_KEYRING)
+					{
+						for (OBJ_DATA *tobj = obj->contains; tobj; tobj = tobj->next_content)
+						{
+							if (tobj->nVirtual == atol(dbuf))
+								ifin[nNest] = 0;
+						}
+					}
+				}
+			}
+		}
+		if (tmp_ch->equip)
+		{
+			for (OBJ_DATA *equipped = tmp_ch->equip; equipped; equipped = equipped->next_content)
+			{
+				if (equipped->nVirtual == atol(dbuf))
+					ifin[nNest] = 0;
+				else if (GET_ITEM_TYPE(equipped) == ITEM_CONTAINER || GET_ITEM_TYPE(equipped) == ITEM_SHEATH || GET_ITEM_TYPE(equipped) == ITEM_QUIVER || GET_ITEM_TYPE(equipped) == ITEM_KEYRING)
+				{
+					for (obj = equipped->contains; obj; obj = obj->next_content)
+					{
+						if (obj->nVirtual == atol(dbuf))
+						{
+							ifin[nNest] = 0;
+							break;
+						}
+						if (GET_ITEM_TYPE(obj) == ITEM_CONTAINER || GET_ITEM_TYPE(obj) == ITEM_SHEATH || GET_ITEM_TYPE(obj) == ITEM_QUIVER || GET_ITEM_TYPE(obj) == ITEM_KEYRING)
+						{
+							for (OBJ_DATA *tobj = obj->contains; tobj; tobj = tobj->next_content)
+							{
+								if (tobj->nVirtual == atol(dbuf))
+									ifin[nNest] = 0;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return;
 	}
 
 	else if (!strncmp (sarg, "haso", 4))
@@ -1459,6 +1691,14 @@ reval (CHAR_DATA * ch, char *arg)
 	/* Usage: if cansee(seer,seen)                        */
 	/* Only checks in current room. To denote player use -1   */
 	/* General check for vision: if cansee(-1,-1) */
+	else if (!strncmp (sarg, "defined", 7))
+	{
+		if (!is_variable_in_list(variable_list, temp.c_str()))
+		{
+			ifin[nNest] = 1;
+			return;
+		}
+	}
 
 	else if (!strncmp (sarg, "cansee", 6))
 	{
@@ -1654,29 +1894,35 @@ reval (CHAR_DATA * ch, char *arg)
 			}
 			break;
 		case '<':
-			invert_logic = true;
-		case '>':
 			if (is_number(lhs.c_str()) && is_number(rhs.c_str()))
 			{
-				if (atoi(lhs.c_str()) > atoi(rhs.c_str()))
+				if (atoi(lhs.c_str()) >= atoi(rhs.c_str()))
 				{
-					if (invert_logic)
-						ifin[nNest] = 1;
+					ifin[nNest] = 1;
 					return;
 				}
-				else
-				{
-					if (!invert_logic)
-						ifin[nNest] = 1;
-					return;
-				}
+				return;
 			}
 			else
 			{
 				ifin[nNest] = 1;
 				return;
 			}
-			break;
+		case '>':
+			if (is_number(lhs.c_str()) && is_number(rhs.c_str()))
+			{
+				if (atoi(lhs.c_str()) <= atoi(rhs.c_str()))
+				{
+					ifin[nNest] = 1;
+					return;
+				}
+				return;
+			}
+			else
+			{
+				ifin[nNest] = 1;
+				return;
+			}
 		}
 	}
 }
@@ -1688,20 +1934,48 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 	char tmp[MAX_STRING_LENGTH];
 
 	for (i = 0; (*rfuncs[i] != '\n'); i++)
-		if (!strcmp (rfuncs[i], func))
+		if (!strn_cmp (rfuncs[i], func, strlen(func)))
 			break;
 
 	switch (i)
 	{
 	case RP_NOOP: // Comment
 		return 1;
+	case RP_NOOP2: // <-- Comment in that style
+		return 1;
 	case RP_MATH:
 		if (!ifin[nNest])
 			r_math(ch, arg, variable_list);
 		return 1;
+	case RP_SETVAL:
+		if (!ifin[nNest])
+			r_setval(ch, arg);
+		return 1;
+	case RP_INFO:
+		if (!ifin[nNest])
+			r_info(ch, arg, variable_list);
+		return 1;
+	case RP_MFTOG:
+		if (!ifin[nNest])
+			r_mftog(ch, arg);
+		return 1;
+	case RP_CONCAT:
+		if (!ifin[nNest])
+			r_concat(ch, arg, variable_list);
+		return 1;
 	case RP_ATECHO:
 		if (!ifin[nNest])
 			r_atecho (ch, arg);
+		
+		return 1;
+	case RP_OBJVNUM:
+		if (!ifin[nNest])
+			r_objvnum(ch, arg, variable_list);
+			
+		return 1;
+	case RP_RANDOMOBJ:
+		if (!ifin[nNest])
+			r_randomobj(ch, arg, variable_list);
 		
 		return 1;
 	case RP_LOADOBJ:
@@ -1713,6 +1987,10 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 		if (!ifin[nNest])
 			r_takemoney(ch, arg);
 		
+		return 1;
+	case RP_COPPER_TO_SHILLINGS:
+		if (!ifin[nNest])
+			r_coppertoshillings(arg, variable_list);
 		return 1;
 	case RP_EXIT:
 		if (!ifin[nNest])
@@ -1876,7 +2154,7 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 		return 1;
 	case RP_IF:
 		if (!ifin[nNest])
-			reval (ch, arg);
+			reval (ch, arg, variable_list);
 		ifin[nNest + 1] = ifin[nNest];
 		nNest++;
 		
@@ -1957,6 +2235,10 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 			r_door (ch, arg);
 		
 		return 1;
+	case RP_TALLY:
+		if (!ifin[nNest])
+			r_tally (ch, arg, variable_list);
+		return 1;
 	case RP_TRANSOBJ:
 		if (!ifin[nNest])
 			r_transobj(ch, arg);
@@ -1990,7 +2272,7 @@ do_mpstat (CHAR_DATA *ch, char *argument, int cmd)
 				counter = 1;
 			}
 			lastVnum = it->first;
-			output += "[#B" + MAKE_STRING(counter) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + MAKE_STRING(it->second.type) + "#0]\n";
+			output += "[#B" + MAKE_STRING(counter++) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + MAKE_STRING(it->second.type) + "#0]\n";
 		}
 		page_string (ch->desc, output.c_str());
 		return;
@@ -2013,7 +2295,7 @@ do_mpstat (CHAR_DATA *ch, char *argument, int cmd)
 			if (lastVnum == -1 || lastVnum != it->first)
 				output += "\nMobile #2" + MAKE_STRING(it->first) + "#0:\n";
 			lastVnum = it->first;
-			output += "[#B" + MAKE_STRING(counter) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + MAKE_STRING(it->second.type) + "#0]\n";
+			output += "[#B" + MAKE_STRING(counter++) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + MAKE_STRING(it->second.type) + "#0]\n";
 		}
 		page_string (ch->desc, output.c_str());
 		return;
@@ -2041,15 +2323,14 @@ do_mpstat (CHAR_DATA *ch, char *argument, int cmd)
 	for (std::multimap<int, room_prog>::iterator it = pair.first; it != pair.second; ++it)
 	{
 		if (!SingleProg)
-			output += "[#B" + MAKE_STRING(counter) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + MAKE_STRING(it->second.type) + "#0]\n";
+			output += "[#B" + MAKE_STRING(counter++) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + MAKE_STRING(it->second.type) + "#0]\n";
 		else
 		{
-			if (counter == atoi(ThisArgument.c_str()))
+			if (counter++ == atoi(ThisArgument.c_str()))
 			{
 				output += it->second.prog;
 			}
 		}
-		counter++;
 	}
 	page_string (ch->desc, output.c_str());
 	return;
@@ -2398,6 +2679,454 @@ do_mpapp (CHAR_DATA * ch, char *argument, int cmd)
 
 	std::string output;
 	output = "Mobile number [#2" + vnum + "#0] does not have a mob program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
+}
+
+void
+do_opstat (CHAR_DATA *ch, char *argument, int cmd)
+{
+	std::vector<std::string> OprogTypes;
+	OprogTypes.push_back("held");
+	OprogTypes.push_back("worn");
+	OprogTypes.push_back("personal");
+	OprogTypes.push_back("room");
+	OprogTypes.push_back("all");
+	std::string strArgument = argument, ThisArgument, output = "";
+	strArgument = one_argument(strArgument, ThisArgument);
+	int lastVnum = -1, counter = 1;
+
+	if (ThisArgument.empty())
+	{
+		for (std::multimap<int, room_prog>::iterator it = obj_prog_list.begin(); it != obj_prog_list.end(); it++)
+		{
+			if (lastVnum == -1 || lastVnum != it->first)
+			{
+				output += "\nObject #2" + MAKE_STRING(it->first) + "#0:\n";
+				counter = 1;
+			}
+			lastVnum = it->first;
+			output += "[#B" + MAKE_STRING(counter++) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + OprogTypes[it->second.type-1] + "#0]\n";
+		}
+		page_string (ch->desc, output.c_str());
+		return;
+	}
+
+	if (ThisArgument[0] == '*')
+	{
+		ThisArgument.erase(0, 1);
+		if (!is_number(ThisArgument.c_str()))
+		{
+			send_to_char ("Correct usage: #6oplist#0, #6oplist <vnum>#0, or #6oplist *<zone>#0.\n", ch);
+			return;
+		}
+		int zone = atoi(ThisArgument.c_str());
+		output += "Zone \"#F" + MAKE_STRING(zone_table[zone].name) + "#0\" [Zone " + ThisArgument + "]\n";
+		for (std::multimap<int, room_prog>::iterator it = obj_prog_list.begin(); it != obj_prog_list.end(); it++)
+		{
+			if ((it->first/1000) != zone)
+				continue;
+			if (lastVnum == -1 || lastVnum != it->first)
+				output += "\nObject #2" + MAKE_STRING(it->first) + "#0:\n";
+			lastVnum = it->first;
+			output += "[#B" + MAKE_STRING(counter++) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + OprogTypes[it->second.type-1] + "#0]\n";
+		}
+		page_string (ch->desc, output.c_str());
+		return;
+	}
+
+	if (!is_number(ThisArgument.c_str()))
+	{
+		send_to_char ("Correct usage: #6oplist#0, #6oplist <vnum> [number]#0, or #6oplist *<zone>#0.\n", ch);
+		return;
+	}
+	int vnum = atoi(ThisArgument.c_str());
+	strArgument = one_argument(strArgument, ThisArgument);
+	bool SingleProg = false;
+	if (!ThisArgument.empty() && is_number(ThisArgument.c_str()))
+	{
+		SingleProg = true;
+	}
+	std::pair<std::multimap<int, room_prog>::iterator,std::multimap<int, room_prog>::iterator> pair = obj_prog_list.equal_range(vnum);
+	output += "Object #2" + MAKE_STRING(vnum);
+	if (SingleProg)
+		output += "#0 Program Number #6" + ThisArgument + "#0:\n\n";
+	else
+		output += "#0:\n";
+	counter = 1;
+	for (std::multimap<int, room_prog>::iterator it = pair.first; it != pair.second; ++it)
+	{
+		if (!SingleProg)
+			output += "[#B" + MAKE_STRING(counter++) + "#0]: Commands [#6" + it->second.command + "#0] Keys [#6" + it->second.keys + "#0] Type [#1" + OprogTypes[it->second.type-1] + "#0]\n";
+		else
+		{
+			if (counter++ == atoi(ThisArgument.c_str()))
+			{
+				output += it->second.prog;
+			}
+		}
+	}
+	page_string (ch->desc, output.c_str());
+	return;
+}
+
+void
+do_opadd (CHAR_DATA *ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum;
+
+	strArgument = one_argument (strArgument, vnum);
+	if (vnum.empty() || atoi(vnum.c_str()) < 1 || atoi(vnum.c_str()) > 99999)
+	{
+		send_to_char ("You must specify a valid vnum of the object to initialize a new oprog for.\n", ch);
+		return;
+	}
+
+	room_prog prog;
+	prog.prog = "";
+	prog.keys = "";
+	prog.command = "";
+	prog.type = 5;	
+
+	obj_prog_list.insert(std::pair<int, room_prog>(atoi(vnum.c_str()), prog));
+	int prog_num = 0;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = obj_prog_list.equal_range(atoi(vnum.c_str()));
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		prog_num++;
+	}
+	send_to_char("Inserted blank object prog for Object vnum [#2", ch);
+	send_to_char(vnum.c_str(), ch);
+	send_to_char("#0] at position #6", ch);
+	send_to_char(((std::ostringstream&) (std::ostringstream() << std::boolalpha << prog_num)).str().c_str(), ch);
+	send_to_char("#0.\n", ch);
+	return;
+}
+
+void
+do_opdel (CHAR_DATA *ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is OPDEL <vnum> <prognum>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = obj_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			obj_prog_list.erase(it);
+			std::string output;
+			output = "Erasing object prog number #6" + prognum + "#0 from Object vnum [#2" + vnum + "#0].\n";
+			send_to_char(output.c_str(), ch);
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Object number [#2" + vnum + "#0] does not have a object program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
+}
+
+void
+do_opcmd (CHAR_DATA * ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is OPCMD <vnum> <prognum> <cmd>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	if (strArgument.empty())
+	{
+		send_to_char("What command would you like to install?\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = obj_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			it->second.command = add_hash((char *) strArgument.c_str());
+			std::string output;
+			output = "Installed command(s) [#6" + strArgument + "#0] for object prog number #6" + prognum + "#0 for Object vnum [#2" + vnum + "#0].\n";
+			send_to_char(output.c_str(), ch);
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Object number [#2" + vnum + "#0] does not have a object program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
+}
+
+void
+do_opkey (CHAR_DATA * ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is OPKEY <vnum> <prognum> <key>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	if (strArgument.empty())
+	{
+		send_to_char("What keyword would you like to install?\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = obj_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			it->second.keys = add_hash((char *) strArgument.c_str());
+			std::string output;
+			output = "Installed keyword(s) [#6" + strArgument + "#0] for object prog number #6" + prognum + "#0 for Object vnum [#2" + vnum + "#0].\n";
+			send_to_char(output.c_str(), ch);
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Object number [#2" + vnum + "#0] does not have a object program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
+}
+
+// Held, room, personal, worn, all
+void
+do_optype (CHAR_DATA * ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is OPTYPE <vnum> <prognum> <key>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	if (strArgument.empty())
+	{
+		send_to_char("What type are you setting this program to (held, worn, personal, room, all)?\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = obj_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			if (strArgument.find("held") != std::string::npos)
+			{
+				it->second.type = 1;
+				send_to_char("Set type to held.\n", ch);
+			}
+			else if (strArgument.find("worn") != std::string::npos)
+			{
+				it->second.type = 2;
+				send_to_char("Set type to worn.\n", ch);
+			}
+			else if (strArgument.find("personal") != std::string::npos)
+			{
+				it->second.type = 3;
+				send_to_char("Set type to personal.\n", ch);
+			}
+			else if (strArgument.find("room") != std::string::npos)
+			{
+				it->second.type = 4;
+				send_to_char("Set type to room.\n", ch);
+			}
+			else if (strArgument.find("all") != std::string::npos)
+			{
+				it->second.type = 5;
+				send_to_char("Set type to all.\n", ch);
+			}
+			else
+			{
+				send_to_char("Type is one of: held, worn, personal, room or all.\n", ch);
+				return;
+			}
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Object number [#2" + vnum + "#0] does not have a object program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
+}
+
+void
+do_opprg (CHAR_DATA * ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is OPPRG <vnum> <prognum>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = obj_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			make_quiet (ch);
+			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
+			ch->desc->str = &it->second.prog;
+			it->second.prog = 0;
+			ch->desc->max_str = MAX_STRING_LENGTH;
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Object number [#2" + vnum + "#0] does not have a object program with id #6" + prognum + "#0.\n";
+	send_to_char(output.c_str(), ch);
+	return;
+}
+
+void
+do_opapp (CHAR_DATA * ch, char *argument, int cmd)
+{
+	std::string strArgument = argument, vnum, prognum;
+	strArgument = one_argument(strArgument, vnum);
+	strArgument = one_argument(strArgument, prognum);
+
+	if (vnum.empty() || prognum.empty())
+	{
+		send_to_char("Format is OPAPP <vnum> <prognum>.\n", ch);
+		return;
+	}
+
+	int ivnum = atoi(vnum.c_str()), iprognum = atoi(prognum.c_str());
+	if (ivnum < 1 || ivnum > 99999)
+	{
+		send_to_char("Vnum must be between 1 and 99999.\n", ch);
+		return;
+	}
+
+	if (iprognum < 1)
+	{
+		send_to_char("Prognum must be a positive number.\n", ch);
+		return;
+	}
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = obj_prog_list.equal_range(ivnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == iprognum)
+		{
+			make_quiet (ch);
+			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
+			ch->desc->str = &it->second.prog;
+			ch->desc->max_str = MAX_STRING_LENGTH;
+			return;
+		}
+		count++;
+	}
+
+	std::string output;
+	output = "Object number [#2" + vnum + "#0] does not have a object program with id #6" + prognum + "#0.\n";
 	send_to_char(output.c_str(), ch);
 	return;
 }
@@ -2898,6 +3627,9 @@ r_set (CHAR_DATA * ch, char *argument, room_prog_var *& variable_list)
 			room_vnum = atoi(var);
 		if (!room_vnum)
 			return;
+		
+		if (!vtor(room_vnum))
+			return;
 
 		int count = 0;
 		if (object)
@@ -2944,6 +3676,83 @@ r_set (CHAR_DATA * ch, char *argument, room_prog_var *& variable_list)
 	}
 }
 
+void
+r_tally (CHAR_DATA *ch, std::string argument, room_prog_var *&variable_list)
+{
+	std::string buf;
+	CHAR_DATA *tch = NULL;
+	ROOM_DATA *room = NULL;
+	argument = one_argument(argument, buf);
+	if (buf.find("-1") != std::string::npos) // -1 means trigger puller
+	{	
+		tch = ch;
+		room = ch->room;
+		argument = one_argument(argument, buf); // Ignore next input
+	}
+	else 
+	{
+		std::string strroom;
+		argument = one_argument(argument, strroom);
+		if (strroom.find("-1") != std::string::npos)
+		{
+			room = ch->room;
+		}
+		else if (is_number((char *) strroom.c_str()))
+		{
+			if (!vtor(atoi((char *) strroom.c_str())))
+				return;
+			
+			room = vtor(atoi((char *) strroom.c_str()));
+		}
+		
+		if (is_number((char *) buf.c_str()))
+		{
+			for (CHAR_DATA *xch = room->people; xch; xch = xch->next_in_room)
+			{
+				if (!IS_NPC(xch))
+					continue;
+				
+				if (xch->mob->nVirtual == atoi((char *) buf.c_str()))
+				{
+					tch = xch;
+					break;
+				}
+			}
+		}
+		else 
+		{
+			tch = get_char_room_vis2 (ch, room->nVirtual, (char *) buf.c_str());
+		}
+		if (!tch)
+			return;
+	}
+	
+	float total = 0.0;
+	OBJ_DATA *obj;
+	char buffer [MAX_STRING_LENGTH] = {'\0'};
+	if ((obj = tch->right_hand))
+		total += tally (obj, buffer, 1);
+	if ((obj = tch->left_hand))
+		total += tally (obj, buffer, 1);
+	for (int location = 0; location < MAX_WEAR; location++)
+	{
+		if (!(obj = get_equip (tch, location)))
+			continue;
+		total += tally (obj, buffer, 1);
+	}
+	
+	std::string strTally = MAKE_STRING(total);
+	argument = one_argument (argument, buf);   // Get variable name
+	if (buf.empty())
+		return;
+		
+	if (is_variable_in_list(variable_list, buf))
+		set_variable_data(variable_list, buf, strTally);
+	else
+		add_variable_to_list(variable_list, buf, strTally);
+		
+	
+}
 
 // void
 // r_atecho (CHAR_DATA * ch, char *argument)
@@ -2987,6 +3796,14 @@ r_atecho(CHAR_DATA *ch, char *argument)
 	ploc_str = loc_str; 
 	ploc_str1 = loc_str1; 
 	strcat(buf,"\n\r"); 
+	
+	std::string bufchange = buf;
+	while (bufchange.find("$n") != std::string::npos)
+	{
+		bufchange.replace(bufchange.find("$n"), 2, char_short(ch));
+	}
+	
+	sprintf (buf, "%s", bufchange.c_str());
 
 	// buf is ready to go.  it's the echo that gets sent out to the rooms. 
 
@@ -3503,8 +4320,13 @@ r_force (CHAR_DATA * ch, char *argument)
 	*s_buf = '\0';
 	if (!strncmp(arg1, "all", 3))
 		mob = 0;
-	else
+	else if (!strncmp(arg1, "group", 5))
+	    mob = -2;
+	else if (!strncmp(arg1, "-1", 2))
+		mob = -1;
+	else if (is_number(arg1))
 		mob = atoi (arg1);
+	else mob = -3;
 
 	if (mob == -1)
 	{
@@ -3526,21 +4348,37 @@ r_force (CHAR_DATA * ch, char *argument)
 		system_log ("ERROR: unknown room in r_force.", true);
 		return;
 	}
-
-	for (tmp_ch = vtor (room)->people; tmp_ch; tmp_ch = tmp_ch->next_in_room)
+	
+	if (mob == -3)
 	{
-		if (tmp_ch->mob && tmp_ch->mob->nVirtual == mob)
+		tmp_ch = get_char_room_vis2(ch, room, arg1);
+		if (!tmp_ch)
+			return;
+		
+		command_interpreter (tmp_ch, arg3);
+	}
+	else
+	{
+
+		for (tmp_ch = vtor (room)->people; tmp_ch; tmp_ch = tmp_ch->next_in_room)
 		{
-			sprintf (buf, arg3, GET_NAME (ch));
-			command_interpreter (tmp_ch, buf);
-		}
-		else if (mob == 0)
-		{
-			sprintf (buf, arg3, GET_NAME(ch));
-			command_interpreter (tmp_ch, buf);
+			if (tmp_ch->mob && tmp_ch->mob->nVirtual == mob)
+			{
+				sprintf (buf, arg3, GET_NAME (ch));
+				command_interpreter (tmp_ch, buf);
+			}
+			else if (mob == 0)
+			{
+				sprintf (buf, arg3, GET_NAME(ch));
+				command_interpreter (tmp_ch, buf);
+			}
+			else if (mob == -2 && are_grouped(ch, tmp_ch))
+			{
+				sprintf (buf, arg3, GET_NAME(ch));
+				command_interpreter (tmp_ch, buf);
+			}
 		}
 	}
-
 	for (int index = 0; index < MAX_RPRG_NEST; index++)
 	{
 		ifin[index] = old_ifin[index];
@@ -3766,7 +4604,123 @@ r_zone_echo (CHAR_DATA * ch, char *argument)
 }
 
 void
-r_atwrite (CHAR_DATA * ch, char *argument) {}
+r_atwrite (CHAR_DATA * ch, char *argument) 
+{
+	std::string strArgument = argument, board, title;
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	char * date;
+	char date_buf[MAX_STRING_LENGTH];
+	char * suf;
+	int day;
+	
+	time_t time_now = time(0);
+	date = (char *) asctime (localtime (&time_now));
+	date[strlen(date) - 1] = '\0';
+	
+	while (strArgument.find('@') != std::string::npos)
+	{
+		strArgument.replace(strArgument.find('@'), 1, ch->tname);
+	}
+	while (strArgument.find("$n") != std::string::npos)
+	{
+		strArgument.replace(strArgument.find("$n"), 2, char_short(ch));
+	}
+	while (strArgument.find("$r") != std::string::npos)
+	{
+		strArgument.replace(strArgument.find("$r"), 2, ch->room->name);
+	}
+	while (strArgument.find("\\n") != std::string::npos)
+	{
+		strArgument.replace(strArgument.find("\\n"), 2, "\n");
+	}
+	
+	strArgument = one_argument (strArgument, board);
+	strArgument = one_argument (strArgument, title);
+	
+	if (strArgument.empty() || board.empty() || title.empty())
+	{
+		mem_free(date);
+		return;
+	}
+	
+	title[0] = toupper(title[0]);
+	
+	if (board[0] == '*') // PC Board
+	{
+		board.erase(0, 1);
+		board[0] = toupper(board[0]);
+		add_message (1, board.c_str(), -2, "Server", date,  (char *) title.c_str(), "", (char *) strArgument.c_str(), 0);
+	}
+	else if (board[0] == '!')   // Virtual board
+	{
+		board.erase(0, 1);
+		add_message (1, board.c_str(), -5, "Server", date, (char *) title.c_str(), "", (char *) strArgument.c_str(), 0);
+	}
+	else						// Non-virtual board (i.e. board object)
+		{
+			*date_buf = '\0';
+			day = time_info.day + 1;
+			if (day == 1)
+				suf = "st";
+			else if (day == 2)
+				suf = "nd";
+			else if (day == 3)
+				suf = "rd";
+			else if (day < 20)
+				suf = "th";
+			else if ((day % 10) == 1)
+				suf = "st";
+			else if ((day % 10) == 2)
+				suf = "nd";
+			else if ((day % 10) == 3)
+				suf = "rd";
+			else
+				suf = "th";
+
+			if (time_info.holiday == 0 &&
+			!(time_info.month == 1 && day == 12) &&
+			!(time_info.month == 4 && day == 10) &&
+			!(time_info.month == 7 && day == 11) &&
+			!(time_info.month == 10 && day == 12))
+				sprintf (date_buf, "%d%s %s, %d SR", day, suf, month_short_name[time_info.month], time_info.year);
+			else
+			{
+				if (time_info.holiday > 0)
+				{
+					sprintf (date_buf, "%s, %d SR", holiday_short_names[time_info.holiday], time_info.year);
+				}
+				else if (time_info.month == 1 && day == 12)
+					sprintf (date_buf, "Erukyerme, %d SR", time_info.year);
+				else if (time_info.month == 4 && day == 10)
+					sprintf (date_buf, "Lairemerende, %d SR", time_info.year);
+				else if (time_info.month == 7 && day == 11)
+					sprintf (date_buf, "Eruhantale, %d SR", time_info.year);
+				else if (time_info.month == 10 && day == 12)
+					sprintf (date_buf, "Airilaitale, %d SR", time_info.year);
+			}
+
+			if (isalpha (*date_buf))
+				*date_buf = toupper (*date_buf);
+				
+			mysql_safe_query ("SELECT * FROM boards WHERE board_name = '%s' ORDER BY post_number DESC LIMIT 1", (char *) board.c_str());
+			result = mysql_store_result(database);
+			int free_slot = 1;
+			if ((row = mysql_fetch_row (result)))
+			{
+				free_slot = atoi(row[1]);
+				free_slot++;
+			}
+			
+			mysql_safe_query ("INSERT INTO boards VALUES ('%s', %d, '%s', '%s', '%s', '%s', '%s', %d)", (char *) board.c_str(), free_slot, (char *) title.c_str(), "System", date, date_buf, (char *) strArgument.c_str(), (int) time(0));
+			
+			if (result)
+				mysql_free_result (result);		
+		}
+	
+	mem_free(date);
+	return;
+}
 
 void
 r_system (CHAR_DATA * ch, char *argument)
@@ -3923,12 +4877,30 @@ r_pain (CHAR_DATA * ch, char *argument)
 		type = 3;
 	}
 
-	if (!strncmp (arg4, "all", 3))
+	if (!strncmp (arg4, "allbutme", 8))
 	{
 
 		for (victim = vtor (room)->people; victim;
 			victim = victim->next_in_room)
 		{
+
+			if (victim == ch)
+				continue;
+
+			if ((dam = number (low, high)))
+			{
+				wound_to_char (victim, figure_location (victim, number (0, 10)),
+					dam, type, 0, 0, 0);
+			}
+
+		}
+	}
+	else if (!strncmp(arg4, "all", 3))
+	{
+		for (victim = vtor (room)->people; victim;
+			victim = victim->next_in_room)
+		{
+			
 
 			if ((dam = number (low, high)))
 			{
@@ -4356,6 +5328,10 @@ void r_takemoney ( CHAR_DATA *ch, char * argument)
 			Currency = 2;
 		else if (ThisArgument.find("orkish") != std::string::npos || ThisArgument.find("yrkish") != std::string::npos || ThisArgument.find("orcish") != std::string::npos)
 			Currency = 1;
+		else if (ThisArgument.find("harad") != std::string::npos)
+		    Currency = 3;
+		else if (ThisArgument.find("northman") != std::string::npos || ThisArgument.find("shillings") != std::string::npos)
+			Currency = 4;
 		else
 		{
 			send_to_gods("Error: Invalid currency type in r_takemoney");
@@ -4459,156 +5435,6 @@ void r_door (CHAR_DATA *ch, char *argument)
 	return;
 }
 
-/*
-void r_setvar (char *argument, DynamicVariableList *Variables)
-{
-std::string ArgumentList(argument), ThisArgument;
-
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-if (ThisArgument.find("declare")  != std::string::npos)
-{
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-if (ThisArgument.empty() || Variables.GetNamedVariable(ThisArgument) != NULL)
-{
-system_log("Error: Already declared variable in setvar.", true);
-return;
-}
-
-DynamicVariable NewVar(ThisArgument);
-Variables.push_back(NewVar);
-}
-else if (ThisArgument.find("add")  != std::string::npos)
-{
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-if (ThisArgument.empty())
-{
-system_log("Error: No argument after 'setvar arg'", true);
-return;
-}
-std::string VarName(ThisArgument);
-if (Variables.GetNamedVariable(VarName) == NULL)
-{
-system_log("Error: Invalid variable in setvar", true);
-return;
-}
-
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-if (is_number(ThisArgument.c_str()) && is_number((Variables.GetNamedVariable(VarName))->GetVariableContents()))
-{
-std::ostringstream conversion << atoi(Variables.GetNamedVariable(VarName)->GetVariableContent().c_str())+atoi(ThisArgument.c_str());
-Variables.GetNamedVariable(VarName)->SetVariableContents(converstion.str());
-}
-else
-{
-Variables.GetNamedVariable(VarName)->SetVariableContents(Variables.GetNamedVariable(VarName)->GetVariableContents() + ThisArgument);
-}
-}
-else if (ThisArgument.find("assign") != std::string::npos)
-{
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-if (ThisArgument.empty())
-{
-system_log("Error: No argument after 'setvar arg'", true);
-return;
-}
-std::string VarName(ThisArgument);
-if (Variables.GetNamedVariable(VarName) == NULL)
-{
-system_log("Error: Invalid variable in setvar", true);
-return;
-}
-
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-Variables.GetNamedVariable(VarName)->SetVariableContent(ThisArgument);
-}
-else if (ThisArgument.find("reset") != std::string::npos)
-{
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-if (ThisArgument.empty())
-{
-system_log("Error: No argument after 'setvar arg'", true);
-return;
-}
-if (Variables.GetNamedVariable(ThisArgument) == NULL)
-{
-system_log("Error: Invalid variable in setvar", true);
-return;
-}
-Variables.GetNamedVariable(ThisArgument)->SetVariableContent("");
-}
-else if (ThisArgument.find("divide") != std::string::npos)
-{
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-if (ThisArgument.empty())
-{
-system_log("Error: No argument after 'setvar arg'", true);
-return;
-}
-std::string VarName(ThisArgument);
-if (Variables.GetNamedVariable(VarName) == NULL)
-{
-system_log("Error: Invalid variable in setvar", true);
-return;
-}
-
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-if (!is_number(ThisArgument.c_str()))
-{
-system_log("Error: Non numeric value given to divide in setvar", true);
-return;
-}
-std::ostringstream conversion << (atoi(Variables.GetNamedVariable(VarName)->GetVariableContent())/atoi(ThisArgument.c_str()));
-Variables.GetNamedVariable(VarName)->SetVariableContent(conversion.str());
-}
-else if (ThisArgument.find("multiply") != std::string::npos)
-{
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-if (ThisArgument.empty())
-{
-system_log("Error: No argument after 'setvar arg'", true);
-return;
-}
-std::string VarName(ThisArgument);
-if (Variables.GetNamedVariable(VarName) == NULL)
-{
-system_log("Error: Invalid variable in setvar", true);
-return;
-}
-
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-if (!is_number(ThisArgument.c_str()))
-{
-system_log("Error: Non numeric value given to divide in setvar", true);
-return;
-}
-std::ostringstream conversion << (atoi(Variables.GetNamedVariable(VarName)->GetVariableContent()) * atoi(ThisArgument.c_str()));
-Variables.GetNamedVariable(VarName)->SetVariableContent(conversion.str());
-}
-else if (ThisArgument.find("addrandom") != std::string::npos)
-{
-ArgumentList = one_argument(ArgumentList, ThisArgument);
-if (ThisArgument.empty())
-{
-system_log("Error: No argument after 'setvar arg'", true);
-return;
-}
-
-if (Variables.GetNamedVariable(VarName) == NULL)
-{
-system_log("Error: Invalid variable in setvar", true);
-return;
-}
-std::ostringstream conversion << random_number;
-Variables.GetNamedVariable(VarName)->SetVariableContent(conversion.str());
-}
-else
-{
-system_log("Unknown argument type for Setvar.", true);
-return;
-}
-}
-*/
-
 void r_teach (CHAR_DATA *ch, char * argument)
 {
 	std::string ArgumentList = argument, ThisArgument;
@@ -4698,6 +5524,1132 @@ r_transobj (CHAR_DATA *ch, char *argument)
 	obj_to_room(obj, iDestination);
 }
 
+// objvnum <room> <keyword or number> <variable>
+void 
+r_objvnum (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
+{
+	OBJ_DATA *obj;
+	ROOM_DATA *room;
+	std::string buf;
+	
+	// Room first. -1 means actor's room. 
+	argument = one_argument(argument, buf);
+	if (buf.empty())
+		return;
+	if (buf.find("-1") != std::string::npos)
+	{
+		room = ch->room;
+	}
+	else
+	{
+		if (!atoi(buf.c_str()))
+			return;
+		
+		room = vtor(atoi(buf.c_str()));
+		if (!room)
+			return;
+	}
+	
+	// Work out if it's a keyword or a number. Numbers mean nth object in room, keyword means first keyword named object.
+	argument = one_argument(argument, buf);
+	if (buf.empty())
+		return;
+	if (buf.find(".") != std::string::npos || !atoi(buf.c_str()))
+	{
+		obj = get_obj_in_list ((char *) buf.c_str(), room->contents);
+	}
+	else
+	{
+		if (atoi(buf.c_str()) < 0)
+			return;
+		int j = atoi(buf.c_str());
+		obj = room->contents;
+		for (int i = 1; i != j; i++, obj = obj->next_content)
+			;
+	}
+	if (!obj)
+		return;
+	
+	// Work out what variable to save to.
+	argument = one_argument(argument, buf);
+	if (buf.empty())
+		return;
+	
+	if (is_variable_in_list(variable_list, buf))
+		set_variable_data(variable_list, buf, MAKE_STRING(obj->nVirtual));
+	else
+		add_variable_to_list(variable_list, buf, MAKE_STRING(obj->nVirtual));
+	
+	return;
+}
+
+// randomobj <room> <variable>
+void 
+r_randomobj (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
+{
+	OBJ_DATA *obj;
+	ROOM_DATA *room;
+	std::string buf;
+	
+	// Room first. -1 means actor's room. 
+	argument = one_argument(argument, buf);
+	if (buf.empty())
+		return;
+	if (buf.find("-1") != std::string::npos)
+	{
+		room = ch->room;
+	}
+	else
+	{
+		if (!atoi(buf.c_str()))
+			return;
+		
+		room = vtor(atoi(buf.c_str()));
+		if (!room)
+			return;
+	}
+	
+	// Get a random object in the room
+	
+	int count = 0;
+	for (obj = room->contents; obj; obj = obj->next_content)
+	{
+		count++;
+	}
+	
+	// Grab a random number in the list to use
+	int rnumber = number(1, count);
+	
+	// Find the nth object
+	for (count = 1, obj = room->contents; obj; count++, obj = obj->next_content)
+	{
+		if (count == rnumber)
+			break;
+	}
+	
+	if (!obj)
+		return;
+	
+	// Work out what variable to save to.
+	argument = one_argument(argument, buf);
+	if (buf.empty())
+		return;
+	
+	if (is_variable_in_list(variable_list, buf))
+		set_variable_data(variable_list, buf, MAKE_STRING(obj->nVirtual));
+	else
+		add_variable_to_list(variable_list, buf, MAKE_STRING(obj->nVirtual));
+	
+	return;
+}
+
+void
+r_mftog (CHAR_DATA *ch, std::string argument)
+{
+	std::string buf;
+	CHAR_DATA *tch;
+	argument = one_argument (argument, buf);
+	if (!buf.compare("-1"))
+	{
+		tch = ch;
+	}
+	else if (is_number(buf.c_str()))
+	{
+		for (tch = ch->room->people; tch; tch = tch->next_in_room)
+		{
+			if (!IS_NPC(tch))
+				continue;
+			
+			if (tch->mob->nVirtual == atoi(buf.c_str()))
+				break;
+		}
+	}
+	else
+	{
+		tch = get_char_room ((char *) buf.c_str(), ch->in_room);
+	}
+	if (!tch)
+		return;
+	
+	if (!IS_NPC(tch))
+		return;
+	
+	argument = one_argument(argument, buf);
+	int flag;
+	if ((flag = index_lookup(action_bits, (char *) buf.c_str())) == -1)
+	{
+		return;
+	}
+	
+	if (!IS_SET(tch->act, (1 << flag)))
+		tch->act |= (1 << flag);
+	else
+		tch->act &= ~(1 << flag);
+	
+	return;
+}
+
+char * room__get_description (ROOM_DATA * room);
+char *exits[] = {
+    "north",
+    "east",
+    "south",
+    "west",
+    "up",
+    "down",
+    "outside",
+    "inside"
+  };
+
+bool
+prog_object_properties (OBJ_DATA *obj, std::string argument, std::string& output)
+{
+	std::string buf;
+	argument = one_argument(argument, buf);
+	if (buf.empty())
+		return false;
+	
+	if (buf.find("name") != std::string::npos)
+	{
+		std::string objname = obj->name;
+		one_argument (objname, output);
+	}
+	if (buf.find("keywords") != std::string::npos)
+	{
+		output = obj->name;
+	}
+	else if (buf.find("vnum") != std::string::npos)
+	{
+		output = MAKE_STRING(obj->nVirtual);
+	}
+	else if (buf.find("sdesc") != std::string::npos)
+	{
+		output = obj_short_desc(obj);
+	}
+	else if (buf.find("ldesc") != std::string::npos)
+	{
+		output = obj->description;
+	}
+	else if (buf.find("desc") != std::string::npos)
+	{
+		output = obj->full_description;
+	}
+	else if (buf.find("type") != std::string::npos)
+	{
+		output = item_types[(int) obj->obj_flags.type_flag];
+	}
+	else if (buf.find("material") != std::string::npos)
+	{
+		extern std::map<int, std::string> material_names;
+		std::map<int, std::string>::iterator it;
+		it = material_names.find(obj->material);
+		if (it != material_names.end())
+			output = it->second;
+	}
+	else if (buf.find("weight") != std::string::npos)
+	{
+		output = MAKE_STRING(obj_mass(obj));
+	}
+	else if (buf.find("cost") != std::string::npos)
+	{
+		output = MAKE_STRING((obj->obj_flags.set_cost ? obj->obj_flags.set_cost/100 : obj->farthings));
+	}
+	else if (buf.find("quality") != std::string::npos)
+	{
+		output = MAKE_STRING(obj->quality);
+	}
+	else if (buf.find("count") != std::string::npos)
+	{
+		if (obj->count > 1)
+			output = MAKE_STRING(obj->count);
+		else
+			output = "1";
+	}
+	else if (buf.find("color") != std::string::npos)
+	{
+		if (obj->var_color)
+			output = obj->var_color;
+	}
+	else if (buf.find("ink") != std::string::npos)
+	{
+		if (obj->ink_color)
+			output = obj->ink_color;
+	}
+	else if (buf.find("mkey") != std::string::npos)
+	{
+		if (obj->desc_keys)	
+			output = obj->desc_keys;
+	}
+	else if (buf.find("months") != std::string::npos)
+	{
+		int morphtime = obj->morphTime - time(0);
+		morphtime /= 3600;
+		output = MAKE_STRING(morphtime / (24*30));			
+	}
+	else if (buf.find("days") != std::string::npos)
+	{
+		int delta, days;
+
+	    delta = obj->morphTime - time (0);
+	    days = delta / 86400;
+		days %= 30;
+        output = MAKE_STRING(days);
+	}
+	else if (buf.find("hours") != std::string::npos)
+	{
+	    int delta, days, hours;
+	    delta = obj->morphTime - time (0);
+	    days = delta / 86400;
+	    delta -= days * 86400;
+        hours = delta / 3600;
+		output = MAKE_STRING(hours);
+	}
+	else if (buf.find("minutes") != std::string::npos)
+	{
+		int delta, days, hours, minutes;
+	    delta = obj->morphTime - time (0);
+	    days = delta / 86400;
+	    delta -= days * 86400;
+        hours = delta / 3600;
+	    delta -= hours * 3600;
+		minutes = delta / 60;
+		output = MAKE_STRING(minutes);
+	}
+	else if (buf.find("oval") != std::string::npos)
+	{
+		switch (buf[4])
+		{
+			case '0':
+				output = MAKE_STRING(obj->o.od.value[0]);
+				break;
+			case '1':
+				output = MAKE_STRING(obj->o.od.value[1]);
+				break;
+			case '2':
+				output = MAKE_STRING(obj->o.od.value[2]);
+				break;
+			case '3':
+				output = MAKE_STRING(obj->o.od.value[3]);
+				break;
+			case '4':
+				output = MAKE_STRING(obj->o.od.value[4]);
+				break;
+			case '5':
+				output = MAKE_STRING(obj->o.od.value[5]);
+				break;
+		}
+	}
+	
+	if (output.empty())
+		return false;
+		
+	return true;
+}
+
+void
+prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded versions sets rather than reads
+{
+	std::string buf;
+	argument = one_argument(argument, buf);
+	if (buf.empty())
+		return;
+	
+	if (buf.find("name") != std::string::npos)
+	{
+		if (MAKE_STRING(obj->name).find(argument) != std::string::npos)
+		{
+			std::string buf2 = obj->name;
+			buf2.erase(buf2.find(argument), argument.length());
+			buf2 = argument + buf2;
+			mem_free(obj->name);
+			obj->name = str_dup(buf2.c_str());
+		}
+		else
+		{
+			std::string buf2 = obj->name;
+			mem_free(obj->name);
+			obj->name = str_dup((argument + buf2).c_str());
+		}
+	}
+	else if (buf.find("sdesc") != std::string::npos)
+	{
+		mem_free(obj->short_description);
+		obj->short_description = str_dup(argument.c_str());
+	}
+	else if (buf.find("ldesc") != std::string::npos)
+	{
+		mem_free(obj->description);
+		obj->description = str_dup(argument.c_str());
+	}
+	else if (buf.find("desc") != std::string::npos)
+	{
+		mem_free(obj->full_description);
+		obj->full_description = str_dup(argument.c_str());
+	}
+	else if (buf.find("material") != std::string::npos)
+	{
+		extern std::map<int, std::string> material_names;
+		for (std::map<int, std::string>::iterator it = material_names.begin(); it != material_names.end(); it++)
+		{
+			if (it->second.find(argument) != std::string::npos)
+			{
+				obj->material = it->first;
+				break;
+			}		
+		}
+	}
+	else if (buf.find("weight") != std::string::npos)
+	{
+		obj->obj_flags.weight = atoi(argument.c_str());
+	}
+	else if (buf.find("cost") != std::string::npos)
+	{
+		obj->obj_flags.set_cost = atol(argument.c_str()) * 100;
+	}
+	else if (buf.find("quality") != std::string::npos)
+	{
+		obj->quality = atoi(argument.c_str());
+	}
+	else if (buf.find("count") != std::string::npos)
+	{
+		obj->count = atoi(argument.c_str());
+	}
+	else if (buf.find("mkey") != std::string::npos)
+	{
+		mem_free(obj->desc_keys);
+		obj->desc_keys = add_hash(argument.c_str());
+	}
+	else if (buf.find("timer") != std::string::npos)
+	{
+		std::string months, days, hours, minutes;
+		argument = one_argument(argument, months);
+		argument = one_argument(argument, days);
+		argument = one_argument(argument, hours);
+		argument = one_argument(argument, minutes);
+		if (months.empty() || days.empty() || hours.empty())
+			return;
+		int clock = 0;
+		clock = atoi(months.c_str()) * 24 * 30 + atoi(days.c_str()) * 24 + atoi(hours.c_str());
+		clock *= 3600;
+		if (!minutes.empty())
+			clock += (atoi(minutes.c_str())*60);
+		obj->morphTime = time (0) + clock;
+	}
+	else if (buf.find("oval") != std::string::npos)
+	{
+		switch (buf[4])
+		{
+			case '0':
+				obj->o.od.value[0] = atoi(argument.c_str());
+				break;
+			case '1':
+				obj->o.od.value[1] = atoi(argument.c_str());
+				break;
+			case '2':
+				obj->o.od.value[2] = atoi(argument.c_str());
+				break;
+			case '3':
+				obj->o.od.value[3] = atoi(argument.c_str());
+				break;
+			case '4':
+				obj->o.od.value[4] = atoi(argument.c_str());
+				break;
+			case '5':
+				obj->o.od.value[5] = atoi(argument.c_str());
+				break;
+		}
+	}
+		
+	return;
+}
+
+// info <variable> obj/char/room target property
+void
+r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
+{
+	std::string buf, variable;
+	std::string value; // What we're setting the variable to be
+	argument = one_argument (argument, buf);
+	
+	if (buf.empty())
+		return;
+	else
+		variable = buf;
+		
+	argument = one_argument (argument, buf);
+	if (buf.find("obj") != std::string::npos)
+	{
+		OBJ_DATA *obj = NULL;
+		// Ascertain what object they want to target. With this command it is done using a vnum
+		argument = one_argument (argument, buf);
+		if (buf.empty())
+			return;
+		
+		if (atoi(buf.c_str()) < 1)
+			return;
+		
+		obj = vtoo(atoi(buf.c_str()));
+		
+		if (!obj)
+			return;
+		
+		// what property?
+		argument = one_argument (argument, buf);
+		if (buf.empty())
+			return;
+		
+		if (buf.find("vnum") != std::string::npos)
+		{
+			value = MAKE_STRING(obj->nVirtual);
+		}
+		if (buf.find("name") != std::string::npos)
+		{
+			std::string objname = obj->name;
+			one_argument(objname, value);
+		}
+		else if (buf.find("sdesc") != std::string::npos)
+		{
+			value = obj_short_desc(obj);
+		}
+		else if (buf.find("ldesc") != std::string::npos)
+		{
+			value = obj->description;
+		}
+		else if (buf.find("desc") != std::string::npos)
+		{
+			value = obj->full_description;
+		}
+		else if (buf.find("weight") != std::string::npos)
+		{
+			value = MAKE_STRING(obj_mass(obj));
+		}
+		else if (buf.find("cost") != std::string::npos)
+		{
+			value = MAKE_STRING(obj->farthings);
+		}
+		else if (buf.find("quality") != std::string::npos)
+		{
+			value = MAKE_STRING(obj->quality);
+		}
+		else if (buf.find("color") != std::string::npos)
+		{
+			if (obj->var_color)
+				value = obj->var_color;
+		}
+		else if (buf.find("ink") != std::string::npos)
+		{
+			if (obj->ink_color)
+				value = obj->ink_color;
+		}
+		else if (buf.find("mkey") != std::string::npos)
+		{
+			if (obj->desc_keys)
+				value = obj->desc_keys;
+		}
+		else if (buf.find("oval") != std::string::npos)
+		{
+			switch (buf[4])
+			{
+				case '0':
+					value = MAKE_STRING(obj->o.od.value[0]);
+					break;
+				case '1':
+					value = MAKE_STRING(obj->o.od.value[1]);
+					break;
+				case '2':
+					value = MAKE_STRING(obj->o.od.value[2]);
+					break;
+				case '3':
+					value = MAKE_STRING(obj->o.od.value[3]);
+					break;
+				case '4':
+					value = MAKE_STRING(obj->o.od.value[4]);
+					break;
+				case '5':
+					value = MAKE_STRING(obj->o.od.value[5]);
+					break;
+			}
+		}
+	}
+	else if (buf.find("room") != std::string::npos)
+	{
+		OBJ_DATA *obj = NULL;
+		ROOM_DATA *room = NULL;
+		CHAR_DATA *tch = NULL;
+		argument = one_argument(argument, buf);
+		
+		if (buf.empty())
+			return;
+		
+		// Argument is a room vnum
+		if (buf.find("-1") != std::string::npos)
+		{
+			room = ch->room;
+		}
+		else if (atoi(buf.c_str()) > 0)
+		{
+			room = vtor(atoi(buf.c_str()));
+		}
+		else
+			return;
+		
+		if (!room)
+			return;
+		
+		// What about the room do they want to know?
+		argument = one_argument (argument, buf);
+		if (buf.empty())
+			return;
+		
+		if (buf.find("vnum") != std::string::npos)
+		{
+			value = MAKE_STRING(room->nVirtual);
+		}
+		if (buf.find("name") != std::string::npos)
+		{
+			value = room->name;
+		}
+		else if (buf.find("desc") != std::string::npos)
+		{
+			value = room__get_description(room);  // This function handles "weather room" descriptions so that case is covered
+		}
+		else if (buf.find("sector") != std::string::npos)
+		{
+			value = sector_types[room->sector_type];
+		}
+		else if (buf.find("exit") != std::string::npos)    // Get the vnum of the room that exit has requested
+		{
+			argument = one_argument(argument, buf);
+			if (buf.empty())
+				return;
+			
+			int exit_requested;
+			if ((exit_requested = index_lookup (exits, buf.c_str())) != -1)
+			{
+				if (!(room->dir_option[exit_requested]))
+					return;
+				
+				value = MAKE_STRING(room->dir_option[exit_requested]->to_room);
+			}
+			else
+			{
+				return;
+			}
+		}
+		else if (buf.find("char") != std::string::npos)    // Another option is that you want a character in that room
+		{
+			argument = one_argument (argument, buf);
+			if (buf.empty())
+				return;
+				
+			if (buf.find("-1") != std::string::npos)        // Actor
+			{
+				tch = ch;
+			}
+			else if (atoi(buf.c_str()) > 0)            // Have a vnum
+			{
+				for (tch = room->people; tch; tch = tch->next_in_room)
+				{
+					if (IS_NPC(tch) && tch->mob->nVirtual == atoi(buf.c_str()))
+						break;
+				}
+			}
+			else				// Assumedly a keyword
+			{
+				tch = get_char_room ((char *) buf.c_str(), room->nVirtual);
+			}
+			
+			if (!tch)
+				return;
+				
+			argument = one_argument (argument, buf);
+			
+			//    We now know who we're targetting, work out what property we want
+			if (buf.find("vnum") != std::string::npos)
+			{
+				if (!IS_NPC(tch))
+					value = "-1";
+				else
+					value = MAKE_STRING(tch->mob->nVirtual);
+			}
+			else if (buf.find("race") != std::string::npos)
+			{
+				value = lookup_race_variable (tch->race, RACE_NAME);
+			}
+			else if (buf.find("name") != std::string::npos)
+			{
+				if (tch->tname != '\0')
+				{
+					value = tch->tname;
+				}
+				else
+				{
+					std::string tchname = tch->name;
+					one_argument(tchname, value);
+				}
+			}
+			else if (buf.find("sdesc") != std::string::npos)
+			{
+				value = char_short(tch);
+			}
+			else if (buf.find("ldesc") != std::string::npos)
+			{
+				value = tch->long_descr;
+			}
+			else if (buf.find("desc") != std::string::npos)
+			{
+				value = tch->description;
+			}
+			else if (buf.find("height") != std::string::npos)
+			{
+				value = MAKE_STRING(tch->height);
+			}
+			else if (buf.find("weight") != std::string::npos)
+			{
+				value = MAKE_STRING(get_weight(tch) / 100);
+			}
+			else if (buf.find("str") != std::string::npos)
+			{
+				value = MAKE_STRING(GET_STR(tch));
+			}
+			else if (buf.find("dex") != std::string::npos)
+			{
+				value = MAKE_STRING(GET_DEX(tch));
+			}
+			else if (buf.find("agi") != std::string::npos)
+			{
+				value = MAKE_STRING(GET_AGI(tch));
+			}
+			else if (buf.find("wil") != std::string::npos)
+			{
+				value = MAKE_STRING(GET_WIL(tch));
+			}
+			else if (buf.find("int") != std::string::npos)
+			{
+				value = MAKE_STRING(GET_INT(tch));
+			}
+			else if (buf.find("aur") != std::string::npos)
+			{
+				value = MAKE_STRING(GET_AUR(tch));
+			}
+			else if (buf.find("con") != std::string::npos)
+			{
+				value = MAKE_STRING(GET_CON(tch));
+			}
+			else if (buf.find("skill") != std::string::npos)	// skill <skillname>
+			{
+				argument = one_argument(argument, buf);
+				if (buf.empty())
+					return;
+				int index;
+				if ((index = index_lookup(skills, buf.c_str())) != -1)
+				{
+					value = MAKE_STRING(tch->skills[index]);
+				}
+				else
+					return;
+			}
+			else if (buf.find("sex") != std::string::npos)
+			{
+				switch (tch->sex)
+				{
+					case 0:
+						value = "genderless";
+						break;
+					case 1:
+						value = "male";
+						break;
+					case 2:
+						value = "female";
+						break;
+				}		
+			}
+			else if (buf.find("inv") != std::string::npos || buf.find("worn") != std::string::npos)
+			{
+				if (buf.find("inv") != std::string::npos)	// Target object by keyword, or vnum, in rhand, lhand and equip
+				{
+					argument = one_argument (argument, buf);
+					if (buf.empty())
+						return;
+					
+					if (is_number(buf.c_str()) && atoi(buf.c_str()) > 0)    // Obj vnum
+					{
+						if (tch->right_hand && tch->right_hand->nVirtual == atoi(buf.c_str()))
+							obj = tch->right_hand;
+						else if (tch->left_hand && tch->left_hand->nVirtual == atoi(buf.c_str()))
+							obj = tch->left_hand;
+						else if (tch->equip)
+						{
+							for (obj = tch->equip; obj; obj = obj->next_content)
+							{
+								if (obj->nVirtual == atoi(buf.c_str()))
+									break;
+							}
+						}
+					}
+					else				// Obj keyword
+					{
+						if (tch->right_hand && get_obj_in_list ((char *) buf.c_str(), tch->right_hand))
+							obj = tch->right_hand;
+						else if (tch->left_hand && get_obj_in_list ((char *) buf.c_str(), tch->left_hand))
+							obj = tch->left_hand;
+						else if (tch->equip)
+							obj = get_obj_in_list ((char *) buf.c_str(), tch->equip);
+					}
+					
+					if (!obj)
+						return;
+					
+					if (!prog_object_properties (obj, argument, value))
+						return;
+				}
+				else 		// Target object by worn location (worn <location>)
+				{
+					// There is actually no good way to target a specific location in the existing code, as all "wordy" location names
+					// are general - i.e. although there is a right shoulder and left shoulder, you can only target shoulder and it will
+					// choose for you. In this case that's inappropriate, and I don't want the builder to need to know any numbers.
+					// Hence the mapWearByName container was created to store this information.
+					
+					extern std::map<std::string, int> mapWearByName;
+					std::map<std::string, int>::iterator it;
+					argument = one_argument(argument, buf);
+					if (buf.empty())
+						return;
+					if (buf.find("rhand") != std::string::npos)
+					{	
+						obj = tch->right_hand;
+					}
+					else if (buf.find("lhand") != std::string::npos)
+					{
+						obj = tch->left_hand;
+					}
+					else
+					{
+						it = mapWearByName.find(buf);
+						if (it != mapWearByName.end())
+							obj = get_equip(tch, it->second);
+					}
+					if (!obj)
+						return;
+						
+					if (!prog_object_properties (obj, argument, value))
+						return;
+				}
+			}
+		}
+		else if (buf.find("obj") != std::string::npos)
+		{
+			argument = one_argument(argument, buf);
+			if (buf.empty())
+				return;
+			
+			if (is_number(buf.c_str()) && atoi(buf.c_str()) > 0)
+			{
+				obj = get_obj_in_list_num(atoi(buf.c_str()), room->contents);
+			}
+			else
+			{
+				obj = get_obj_in_list((char *) buf.c_str(), room->contents);
+			}
+			
+			if (!obj)
+				return;
+				
+			if (!prog_object_properties (obj, argument, value))
+				return;
+		}
+	}
+	
+	if (value.empty())
+		return;
+		
+	if (is_variable_in_list(variable_list, variable))
+		set_variable_data(variable_list, variable, value);
+	else
+		add_variable_to_list(variable_list, variable, value);
+	
+	return;
+}
+
+// setval obj/char/room target property <value>
+void
+r_setval (CHAR_DATA *ch, std::string argument)
+{
+	std::string buf;
+	std::string value; // What we're setting the variable to be
+		
+	argument = one_argument (argument, buf);
+	
+	if (buf.find("room") != std::string::npos)
+	{
+		OBJ_DATA *obj = NULL;
+		ROOM_DATA *room = NULL;
+		CHAR_DATA *tch = NULL;
+		argument = one_argument(argument, buf);
+		
+		if (buf.empty())
+			return;
+		
+		// Argument is a room vnum
+		if (buf.find("-1") != std::string::npos)
+		{
+			room = ch->room;
+		}
+		else if (atoi(buf.c_str()) > 0)
+		{
+			room = vtor(atoi(buf.c_str()));
+		}
+		else
+			return;
+		
+		if (!room)
+			return;
+		
+		// What about the room do they want to know?
+		argument = one_argument (argument, buf);
+		if (buf.empty())
+			return;
+		
+		if (buf.find("name") != std::string::npos)
+		{
+			mem_free(room->name);
+			room->name = str_dup(argument.c_str());
+		}
+		else if (buf.find("desc") != std::string::npos)
+		{
+			mem_free(room->description);
+			room->description = str_dup(argument.c_str());
+		}
+		else if (buf.find("sector") != std::string::npos)
+		{
+			int ind = 0;
+			if ((ind = index_lookup (sector_types, argument.c_str())) != -1)
+				room->sector_type = ind;
+		}
+		else if (buf.find("char") != std::string::npos)    // Another option is that you want a character in that room
+		{
+			argument = one_argument (argument, buf);
+			if (buf.empty())
+				return;
+				
+			if (buf.find("-1") != std::string::npos)        // Actor
+			{
+				tch = ch;
+			}
+			else if (atoi(buf.c_str()) > 0)            // Have a vnum
+			{
+				for (tch = room->people; tch; tch = tch->next_in_room)
+				{
+					if (IS_NPC(tch) && tch->mob->nVirtual == atoi(buf.c_str()))
+						break;
+				}
+			}
+			else				// Assumedly a keyword
+			{
+				tch = get_char_room ((char *) buf.c_str(), room->nVirtual);
+			}
+			
+			if (!tch)
+				return;
+				
+			argument = one_argument (argument, buf);
+			
+			//    We now know who we're targetting, work out what property we want
+			if (buf.find("name") != std::string::npos)
+			{
+				mem_free(tch->tname);
+				tch->tname = str_dup (argument.c_str());
+			}
+			else if (buf.find("sdesc") != std::string::npos)
+			{
+				mem_free(tch->short_descr);
+				tch->short_descr = str_dup (argument.c_str());
+			}
+			else if (buf.find("ldesc") != std::string::npos)
+			{
+				mem_free(tch->long_descr);
+				tch->long_descr = str_dup (argument.c_str());
+			}
+			else if (buf.find("desc") != std::string::npos)
+			{
+				mem_free(tch->description);
+				tch->description = str_dup (argument.c_str());
+			}
+			else if (buf.find("height") != std::string::npos)
+			{
+				tch->height = atoi(argument.c_str());
+			}
+			else if (buf.find("bmi") != std::string::npos)
+			{
+				tch->bmi = atoi(argument.c_str());
+			}
+			else if (buf.find("str") != std::string::npos)
+			{
+				GET_STR(tch) = atoi(argument.c_str());
+			}
+			else if (buf.find("dex") != std::string::npos)
+			{
+				GET_DEX(tch) = atoi(argument.c_str());
+			}
+			else if (buf.find("agi") != std::string::npos)
+			{
+				GET_AGI(tch) = atoi(argument.c_str());
+			}
+			else if (buf.find("wil") != std::string::npos)
+			{
+				GET_WIL(tch) = atoi(argument.c_str());
+			}
+			else if (buf.find("int") != std::string::npos)
+			{
+				GET_INT(tch) = atoi(argument.c_str());
+			}
+			else if (buf.find("aur") != std::string::npos)
+			{
+				GET_AUR(tch) = atoi(argument.c_str());
+			}
+			else if (buf.find("con") != std::string::npos)
+			{
+				GET_CON(tch) = atoi(argument.c_str());
+			}
+			else if (buf.find("skill") != std::string::npos)	// skill <skillname>
+			{
+				argument = one_argument(argument, buf);
+				if (buf.empty())
+					return;
+				int index;
+				if ((index = index_lookup(skills, buf.c_str())) != -1)
+				{
+					tch->skills[index] = atoi(argument.c_str());
+				}
+				else
+					return;
+			}
+			else if (buf.find("sex") != std::string::npos)
+			{
+				if (argument.find("genderless") != std::string::npos)
+					tch->sex = 0;
+				else if (argument.find("male") != std::string::npos)
+					tch->sex = 1;
+				else if (argument.find("female") != std::string::npos)
+					tch->sex = 2;		
+			}
+			else if (buf.find("inv") != std::string::npos || buf.find("worn") != std::string::npos)
+			{
+				if (buf.find("inv") != std::string::npos)	// Target object by keyword, or vnum, in rhand, lhand and equip
+				{
+					argument = one_argument (argument, buf);
+					if (buf.empty())
+						return;
+					
+					if (atoi(buf.c_str()) > 0)    // Obj vnum
+					{
+						if (tch->right_hand && tch->right_hand->nVirtual == atoi(buf.c_str()))
+							obj = tch->right_hand;
+						else if (tch->left_hand && tch->left_hand->nVirtual == atoi(buf.c_str()))
+							obj = tch->left_hand;
+						else if (tch->equip)
+						{
+							for (obj = tch->equip; obj; obj = obj->next_content)
+							{
+								if (obj->nVirtual == atoi(buf.c_str()))
+									break;
+							}
+						}
+					}
+					else				// Obj keyword
+					{
+						if (tch->right_hand && get_obj_in_list ((char *) buf.c_str(), tch->right_hand))
+							obj = tch->right_hand;
+						else if (tch->left_hand && get_obj_in_list ((char *) buf.c_str(), tch->left_hand))
+							obj = tch->left_hand;
+						else if (tch->equip)
+							obj = get_obj_in_list ((char *) buf.c_str(), tch->equip);
+					}
+					
+					if (!obj)
+						return;
+					
+					prog_object_properties (obj, argument);
+				}
+				else 		// Target object by worn location (worn <location>)
+				{
+					// There is actually no good way to target a specific location in the existing code, as all "wordy" location names
+					// are general - i.e. although there is a right shoulder and left shoulder, you can only target shoulder and it will
+					// choose for you. In this case that's inappropriate, and I don't want the builder to need to know any numbers.
+					// Hence the mapWearByName container was created to store this information.
+					
+					extern std::map<std::string, int> mapWearByName;
+					std::map<std::string, int>::iterator it;
+					argument = one_argument(argument, buf);
+					if (buf.empty())
+						return;
+					it = mapWearByName.find(buf);
+					if (it != mapWearByName.end())
+						obj = get_equip(tch, it->second);
+					
+					if (!obj)
+						return;
+						
+					prog_object_properties (obj, argument);
+				}
+			}
+		}
+		else if (buf.find("obj") != std::string::npos)
+		{
+			argument = one_argument(argument, buf);
+			if (buf.empty())
+				return;
+			
+			if (atoi(buf.c_str()) > 0)
+			{
+				obj = get_obj_in_list_num(atoi(buf.c_str()), room->contents);
+			}
+			else
+			{
+				obj = get_obj_in_list((char *) buf.c_str(), room->contents);
+			}
+			
+			if (!obj)
+				return;
+				
+			prog_object_properties (obj, argument);
+		}
+	}
+	return;
+}
+
+std::string alternate_money_description (int money);
+
+void
+r_coppertoshillings (std::string argument, room_prog_var *& variable_list)
+{
+	std::string variable;
+	argument = one_argument(argument, variable);
+	if (variable.empty() || argument.empty() || !is_number(argument))
+		return;
+
+	std::string value = alternate_money_description(atoi(argument.c_str()));
+	if (is_variable_in_list(variable_list, variable))
+		set_variable_data(variable_list, variable, value);
+	else
+		add_variable_to_list(variable_list, variable, value);
+}
+
+void
+r_concat (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
+{
+	std::string variable;
+	argument = one_argument(argument, variable);
+	
+	if (variable.empty() || argument.empty())
+		return;
+	
+	if (is_variable_in_list(variable_list, variable))
+		set_variable_data(variable_list, variable, get_variable_data(variable_list, variable) + argument);
+	else
+		add_variable_to_list(variable_list, variable, get_variable_data(variable_list, variable) + argument);
+}
+
 // Supported Operations:
 // math var add x
 // math var subtract x
@@ -4730,14 +6682,29 @@ r_math (CHAR_DATA *ch, char *arg, room_prog_var *& variable_list)
 		if (variable.empty() || !is_number(variable.c_str()))
 			return;
 
-		int new_value = 0;
+		double new_value = 0;
 		if (!operation.compare("invert"))
 		{
-			new_value = atoi(variable.c_str()) * -1;
+			new_value = atof(variable.c_str()) * -1;
 		}
 		else if (!operation.compare("abs"))
 		{
-			new_value = abs(atoi(variable.c_str()));
+			new_value = (double) abs(atoi(variable.c_str()));
+		}
+		else if (!operation.compare("int"))
+		{
+			new_value = (double) (atoi(variable.c_str()));
+		}
+		else if (!operation.compare("round"))
+		{
+			if (buffer.empty() || !is_number(buffer.c_str()))
+			{
+				new_value = (double) (floor(atof(variable.c_str())+0.5));
+			}
+			else
+			{
+				new_value = RoundDouble(atof(variable.c_str()), atoi(buffer.c_str()));
+			}
 		}
 		else
 		{
@@ -4747,33 +6714,35 @@ r_math (CHAR_DATA *ch, char *arg, room_prog_var *& variable_list)
 
 			if (!operation.compare("add"))
 			{
-				new_value = atoi(variable.c_str()) + atoi(buffer.c_str());
+				new_value = atof(variable.c_str()) + atof(buffer.c_str());
 			}
 			else if (!operation.compare("sub"))
 			{
-				new_value = atoi(variable.c_str()) - atoi(buffer.c_str());
+				new_value = atof(variable.c_str()) - atof(buffer.c_str());
 			}
 			else if (!operation.compare("multiply"))
 			{
-				new_value = atoi(variable.c_str()) * atoi(buffer.c_str());
+				new_value = atof(variable.c_str()) * atof(buffer.c_str());
 			}
 			else if (!operation.compare("divide"))
 			{
-				new_value = atoi(variable.c_str()) / atoi(buffer.c_str());
+				if (atof(buffer.c_str()) != 0)
+					new_value = atof(variable.c_str()) / atof(buffer.c_str());
 			}
 			else if (!operation.compare("power"))
 			{
-				new_value = pow(atoi(variable.c_str()), atoi(buffer.c_str()));
+				new_value = pow(atof(variable.c_str()), atof(buffer.c_str()));
 			}
-			else if (!operation.compare("root"))
+			else if (!operation.compare("sqrt"))
 			{
-				new_value = pow(atoi(variable.c_str()), 1 / atoi(buffer.c_str()));
+				new_value = sqrt(atof(variable.c_str()));
+			}
+			else if (!operation.compare("mod"))
+			{
+				new_value = (double) (atoi(variable.c_str()) % atoi(buffer.c_str()));
 			}
 		}
-		std::stringstream conversion;
-		conversion << new_value;
-		variable = conversion.str();
-		set_variable_data(variable_list, variable_name, variable);
+		set_variable_data(variable_list, variable_name, MAKE_STRING(new_value));
 		return;
 	}
 	else

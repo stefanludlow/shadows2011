@@ -9,10 +9,14 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <ctype.h>
+#include <math.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
 #include <functional>
+#include <vector>
+#include <sstream>
+#include <iostream>
 
 #include "trigram.h"
 #include "structs.h"
@@ -23,6 +27,8 @@
 #include "decl.h"
 #include "group.h"
 #include "utility.h"
+
+
 
 CHAR_DATA *loaded_list = NULL;
 
@@ -103,7 +109,7 @@ const int restricted_skills[] = {
   0,				/* Stonecraft */
   -2,				/* Candlery */
   0,				/* Brewing */
-  0,				/* Distilling */
+  -2,				/* Distilling */
   0,				/* Literacy */
   -2,				/* Dyecraft */
   0,				/* Apothecary */
@@ -122,7 +128,7 @@ const int restricted_skills[] = {
   -4,				/* Westron */
   -4,				/* Dunael */
   -4,				/* Labba */
-  -4,				/* Norliduk */
+  -2,				/* Norliduk - Remove from use, as per Kite's instruction - Case '08*/
   -4,				/* Rohirric */
   -4,				/* Talathic */
   -4,				/* Umitic */
@@ -156,6 +162,37 @@ const int restricted_skills[] = {
   0,				/* Sleight */ 
   -2				/* Astonomy */
 };
+
+int GCD(int a, int b)
+{
+    while( 1 )
+    {
+        a = a % b;
+		if( a == 0 )
+			return b;
+		b = b % a;
+        if( b == 0 )
+			return a;
+    }
+}
+
+double RoundDouble(double doValue, int nPrecision)
+{
+    static const double doBase = 10.0;
+    double doComplete5, doComplete5i;
+    
+    doComplete5 = doValue * pow(doBase, (double) (nPrecision + 1));
+    
+    if(doValue < 0.0)
+        doComplete5 -= 5.0;
+    else
+        doComplete5 += 5.0;
+    
+    doComplete5 /= doBase;
+    modf(doComplete5, &doComplete5i);
+    
+    return doComplete5i / pow(doBase, (double) nPrecision);
+}
 
 /*
  * Pick off one argument from a string and return the rest.
@@ -264,6 +301,319 @@ one_argument (std::string& argument, std::string& arg_first)
   return argument.substr(x);
 }
 
+/* Method definitions for Argument, see utility.h, line 147, for more information
+   Case - www.middle-earth.us, 2008 */
+
+// Private
+void Argument::squelch() {
+	size_t size = argument.size();
+	size_t squelchLimit = ARGUMENT_SQUELCH_LIMIT;
+
+	if (size > 0) {
+		std::string::iterator it;
+		for(it = argument.begin(); it != argument.end() && squelchLimit; squelchLimit--) {
+			if (*it != ' ') {
+				break;
+			}
+			else {
+				argument.erase(it);
+			}
+		}
+		size = argument.size();
+		if (size <= 0) {
+			argument = "";
+		}
+	}
+}
+
+// Public
+Argument::Argument() {
+}
+
+Argument::Argument(std::string input) {
+	argument = input;
+	removeSpaces = true;
+	finished = false;
+	
+	squelch();
+}
+
+Argument::Argument(const char *input) {
+	std::string temp = input;
+	
+	argument = temp;
+	removeSpaces = true;
+	finished = false;
+
+	squelch();
+}
+
+Argument::Argument(std::string input, bool removeSpaces) {
+	argument = input;
+	this->removeSpaces = removeSpaces;
+	finished = false;
+	
+	if (removeSpaces) {
+		squelch();
+	}
+}
+
+Argument::Argument(const char *input, bool removeSpaces) {
+	argument = input;
+	this->removeSpaces = removeSpaces;
+	finished = false;
+
+	if (removeSpaces) {
+		squelch();
+	}
+}
+
+Argument& Argument::operator= (std::string input){
+	Argument construct (input);
+	(*this) = construct;
+	return (*this);
+}
+
+Argument& Argument::operator= (const char *input) {
+	Argument construct (input);
+	(*this) = construct;
+	return (*this);
+}
+
+bool Argument::operator== (const std::string compare) const {
+	if (!(this->argumentMemory.empty())) {
+		if ((strcasecmp(this->argumentMemory.back().c_str(), compare.c_str())) == 0) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	else {
+		return false;
+	}
+}
+
+std::string Argument::pop() {
+	if (removeSpaces) {
+		squelch();
+	}
+
+	size_t space = argument.find_first_of(' ');
+
+	if (space != std::string::npos) {
+		if (argument.length() > space + 1) {
+			argumentMemory.push_back(argument.substr(0,space));
+			argument = argument.substr(space + 1);
+			return argumentMemory.back();
+		}
+		else {
+			argumentMemory.push_back(argument.substr(0,space));
+			argument = "";
+			finished = true;
+			return argumentMemory.back();
+		}
+	}
+	else {
+		if (argument != "" || argumentMemory.empty()) {
+			argumentMemory.push_back(argument);
+		}
+		argument = "";
+		finished = true;
+		return argumentMemory.back();
+	}
+}
+
+std::string Argument::popSpeech() {
+	pop();
+	std::string toReturn = argumentMemory.back();
+	size_t size = toReturn.length();
+	size_t tempPos = toReturn.find_first_of('"');
+
+	if (tempPos != std::string::npos) {
+		toReturn.erase(tempPos,1);
+		tempPos = toReturn.find_last_of('"');
+		if (tempPos != std::string::npos) {
+			toReturn.erase(tempPos,1);
+		}
+		else {
+			tempPos = argument.find_first_of('"');
+			if (tempPos != std::string::npos) {
+				std::stringstream concatenate;
+				
+				argument.erase(tempPos,1);
+				concatenate << toReturn << " " << argument.substr(0, tempPos);
+				toReturn = concatenate.str();
+				size = argument.length();
+				if (tempPos >= size) {
+					argument = "";
+				}
+				else {
+					argument = argument.substr(tempPos + 1);
+				}
+			}
+			else {
+				return argumentMemory.back();
+			}
+		}
+	}
+	else {
+		size_t tempPos = toReturn.find_first_of("'");
+
+		if (tempPos != std::string::npos) {
+			toReturn.erase(tempPos,1);
+			tempPos = toReturn.find_last_of("'");
+			if (tempPos != std::string::npos) {
+				toReturn.erase(tempPos,1);
+			}
+			else {
+				tempPos = argument.find_first_of("'");
+				if (tempPos != std::string::npos) {
+					std::stringstream concatenate;
+
+					argument.erase(tempPos,1);
+					concatenate << toReturn << " " << argument.substr(0, tempPos);
+					toReturn = concatenate.str();
+					size = argument.length();
+					if (tempPos >= size) {
+						argument = "";
+					}
+					else {
+						argument = argument.substr(tempPos + 1);
+					}
+				}
+				else {
+					return argumentMemory.back();
+				}
+			}
+		}
+	}
+	argumentMemory.back() = toReturn;
+	return toReturn;
+}
+
+std::string Argument::recall(size_t indexArg) {
+	if (indexArg < argumentMemory.size()) {
+		return argumentMemory[indexArg];
+	}
+	else {
+		return "";
+	}
+}
+
+std::string Argument::last() {
+	if (argumentMemory.size() > 0) {
+		return argumentMemory.back();
+	}
+	else {
+		return "";
+	}
+}
+
+int Argument::toInt() {
+	if (argumentMemory.size() > 0) {
+		return atoi(argumentMemory.back().c_str());
+	}
+	else {
+		return -1;
+	}
+}
+
+int Argument::toInt(size_t indexArg) {
+	std::string temp = recall(indexArg);
+	return atoi(temp.c_str());
+}
+
+std::string Argument::printPartialArg(size_t begin) {
+	size_t size = argumentMemory.size();
+	std::stringstream toReturn;
+
+	if (begin >= size) {
+		return "ERROR: No Argument There At That Position";
+	}
+	else {
+		for (size_t i = begin; i <= size; i++) {
+			toReturn << recall(i);
+			if (i < (size - 1)) {
+				toReturn << " ";
+			}
+		}
+	}
+	return toReturn.str();
+}
+
+std::string Argument::printPartialArg(size_t begin, size_t arguments) {
+	size_t size = argumentMemory.size();
+	std::stringstream toReturn;
+
+	if (begin >= size) {
+		return printPartialArg(0);
+	}
+	else {
+		for (size_t i = begin; i < size && arguments; i++) {
+			toReturn << recall(i);
+			if (i < (size - 1)  && i < arguments) {
+				toReturn << " ";
+			}
+			arguments--;
+		}
+	}
+	return toReturn.str();
+}
+
+std::string Argument::printArg() {
+	return printPartialArg(0);
+}
+
+char* Argument::allocateCStringRemainingArgument() {
+	char *pointer = (char *) malloc((argument.size() + 1) * (sizeof(char)));
+
+	if (pointer == NULL) {
+		throw std::runtime_error::runtime_error("Not enough memory to allocate - getPointerToRemainingArgument");
+	}
+	strncpy(pointer, argument.c_str(), (argument.size() + 1));
+	return pointer;
+}
+
+char* Argument::allocateCStringPartialArg(size_t begin) {
+	std::string partialArg = printPartialArg(begin);
+	char *pointer = (char *) malloc((partialArg.size() + 1) * (sizeof(char)));
+
+	if (pointer == NULL) {
+		throw std::runtime_error::runtime_error("Not enough memory to allocate - getPointerToPartialArg");
+	}
+	strncpy(pointer, partialArg.c_str(), (partialArg.size() + 1));
+	return pointer;
+}
+
+char* Argument::allocateCStringPartialArg(size_t begin, size_t arguments) {
+	std::string partialArg = printPartialArg(begin, arguments);
+	char *pointer = (char *) malloc((partialArg.size() + 1) * (sizeof(char)));
+	
+	if (pointer == NULL) {
+		throw std::runtime_error::runtime_error("Not enough memory to allocate - getPointerToPartialArg");
+	}
+	strncpy(pointer, partialArg.c_str(), (partialArg.size() + 1));
+	return pointer;
+}
+
+void Argument::popAll() {
+	while (!finished) {
+		pop();
+	}
+}
+
+void Argument::popAllSpeech() {
+	while (!finished) {
+		popSpeech();
+	}
+}
+
+bool Argument::isFinished() {
+	return finished;
+}
+
+// End of Argument Class
 
 #ifdef NOVELL
 int
@@ -343,13 +693,9 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
       || restricted_skills[skill] == -3)
     return 1;
 
-  if (ch->race == 24 || ch->race == 20 || ch->race == 21 || ch->race == 22)
-    {				// Hobbits and goblins don't get heavy weapons.
-      if (skill == SKILL_HEAVY_EDGE || skill == SKILL_HEAVY_PIERCE
-	  || skill == SKILL_HEAVY_BLUNT || skill == SKILL_POLEARM
-	  || skill == SKILL_STAFF)
-	return 1;
-    }
+  // mark skill unavailable if they cannot wield it at all
+  if (wieldHandCount(ch->race,skill)==0)
+	  return 1;
 
   if (restricted_skills[skill] == -6)
     {				// RPP-restricted skills
@@ -377,25 +723,19 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
   		return 1;
   	}
   	
+  // no dual wield skill if you can't one hand the weapon 
   if (skill == SKILL_DUAL)
     {
-      if (ch->skills[SKILL_LIGHT_EDGE] || ch->skills[SKILL_LIGHT_BLUNT]
-	  || ch->skills[SKILL_LIGHT_PIERCE])
-	return 0;
-      else if (ch->str > 17
-	       && (ch->skills[SKILL_MEDIUM_EDGE]
-		   || ch->skills[SKILL_MEDIUM_BLUNT]
-		   || ch->skills[SKILL_MEDIUM_PIERCE]))
-	return 0;
-      else if ((ch->race == 27 || ch->race == 28 || ch->race == 86) &&
-	       (ch->skills[SKILL_HEAVY_EDGE] || ch->skills[SKILL_HEAVY_PIERCE]
-		|| ch->skills[SKILL_HEAVY_BLUNT]))
-	return 0;
-      else
-	return 1;
+		/* bug: if we ever move something other than LIGHT_ / MEDIUM_ / HEAVY_ to one handed, dual not pickable */
+		for (int skilli=SKILL_LIGHT_EDGE; skilli <= SKILL_HEAVY_PIERCE; skilli++)
+		{
+			if (ch->skills[skilli] && (wieldHandCount(ch->race,skilli)==1))
+				return 0;
+		}
+		return 1;
     }
 
-  if (ch->race >= 24 && ch->race <= 29)
+  if (ch->race >= 119 && ch->race <= 121)
     {				// Orc-kin
       if (skill == SKILL_GLASSWORK)
 	return 1;
@@ -405,21 +745,32 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 	return 1;
       if (skill == SKILL_DYECRAFT)
 	return 1;
-      if (skill == SKILL_SPEAK_BLACK_SPEECH)
-	return 0;
+	if (skill == SKILL_BAKING)
+		  return 1;
+	  if (skill == SKILL_APOTHECARY)
+		  return 1;
+	  if (skill == SKILL_GARDENING)
+		  return 1;
+   if (skill == SKILL_SPEAK_BLACK_SPEECH) /* mordorians get this, others can't pick it */
+	return 1;
+   if (skill == SKILL_LITERACY) /* no writing */
+	   return 1;
     }
 
   if (restricted_skills[skill] == -4)
     {				// Languages
       if (skill == SKILL_SPEAK_WESTRON)
 	return 0;
-      if (ch->race == 0 || ch->race == 1 || ch->race == 9)
+      if (ch->race == 0 || ch->race == 1 || ch->race == 101 ) /* Common, GD, AD */
 	{			// Light Humans
 	  if (skill == SKILL_SPEAK_ATLIDUK)
 	    return 0;
 	  if (skill == SKILL_SPEAK_NORLIDUK)
 	    return 0;
-	  if (ch->race == 1)
+	  if (skill == SKILL_SPEAK_HARADAIC) /* grommit - added haradraic to basic human */
+		return 0;
+
+	  if (ch->race == 1 || ch->race == 101) /* GD/AD additional languages */
 	    {
 	      if (skill == SKILL_SPEAK_ADUNAIC)
 		return 0;
@@ -439,18 +790,20 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 	    return 0;
 	  if (skill == SKILL_SPEAK_BLACK_SPEECH)
 	    return 1;
-	  if (ch->race == 3)
+	  if (ch->race == 3) /* BN */
 	    {
 	      if (skill == SKILL_SPEAK_ADUNAIC)
 		return 0;
 	      if (skill == SKILL_SPEAK_SINDARIN)
 		return 0;
+		  if (skill == SKILL_SPEAK_QUENYA)
+		  return 0;
 	    }
 	}
       else if (ch->race == 14 || ch->race == 15)
 	{			// Wose, Woodman
 	}
-      else if (ch->race >= 15 && ch->race <= 19)
+      else if ((ch->race >= 15 && ch->race <= 19) || ch->race == 93) /* grommit - added silvan elf */
 	{			// Half-elves, Elves
 	  if (skill == SKILL_SPEAK_ADUNAIC)
 	    return 0;
@@ -487,15 +840,25 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 	  if (skill == SKILL_SPEAK_ORKISH)
 	    return 0;
 	}
-      else if (ch->race >= 24 && ch->race <= 29)
+      else if (ch->race >= 119 && ch->race <= 121 )
 	{			// Orc-kin
 	  if (skill == SKILL_SPEAK_BLACK_SPEECH)
 	    return 0;
 	  if (skill == SKILL_SPEAK_ORKISH)
 	    return 0;
 	  if (skill == SKILL_SPEAK_ATLIDUK)
-	    return 0;
+	    return 1;
+	  if (skill == SKILL_SPEAK_WESTRON)
+	  {
+		  // WW says Mordorian can pick Westron, others can't
+		  if (ch->race == 121)
+			  return 0;
+		  return 1;
+	  }
+
+		  
 	}
+
     }
   else if (restricted_skills[skill] == -5)
     {				// Scripts
@@ -503,13 +866,13 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 	return 1;
       if (skill == SKILL_SCRIPT_NUMENIAN_TENGWAR)
 	return 0;
-      if (ch->race == 0 || ch->race == 1 || ch->race == 9)
+      if (ch->race == 0 || ch->race == 1 || ch->race == 101)
 	{			// Light Humans
 	  if (skill == SKILL_SCRIPT_ARNORIAN_TENGWAR)
 	    return 0;
 	  if (skill == SKILL_SCRIPT_NORTHERN_TENGWAR)
 	    return 0;
-	  if (ch->race == 1)
+	  if (ch->race == 1 || ch->race == 101)
 	    if (skill == SKILL_SCRIPT_QUENYAN_TENGWAR)
 	      return 0;
 	}
@@ -526,9 +889,13 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
       else if (ch->race == 14 || ch->race == 15)
 	{			// Wose, Woodman
 	}
-      else if (ch->race >= 15 && ch->race <= 19)
+      else if ((ch->race >= 15 && ch->race <= 19) || ch->race == 93) /* grommit added silva elf */
 	{			// Half-elves, Elves
-	  if (skill == SKILL_SCRIPT_TENGWAR)
+	  if (skill == SKILL_SCRIPT_ARNORIAN_TENGWAR)
+	    return 0;
+	  if (skill == SKILL_SCRIPT_NORTHERN_TENGWAR)
+	    return 0;
+	  if (skill == SKILL_SCRIPT_QUENYAN_TENGWAR)
 	    return 0;
 	  if (skill == SKILL_SCRIPT_SARATI)
 	    return 0;
@@ -548,7 +915,9 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 	}
       else if (ch->race == 23)
 	{			// Dwarves
-	  if (skill == SKILL_SCRIPT_TENGWAR)
+	  if (skill == SKILL_SCRIPT_ARNORIAN_TENGWAR)
+	    return 0;
+	  if (skill == SKILL_SCRIPT_NORTHERN_TENGWAR)
 	    return 0;
 	  if (skill == SKILL_SCRIPT_SARATI)
 	    return 0;
@@ -559,7 +928,7 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 	  if (skill == SKILL_SCRIPT_ANGERTHAS_DAERON)
 	    return 0;
 	}
-      else if (ch->race >= 24 && ch->race <= 29)
+      else if (ch->race >= 119 && ch->race <= 121)
 	{			// Orc-kin
 	  if (skill == SKILL_SCRIPT_NORTHERN_TENGWAR)
 	    return 0;
@@ -1277,6 +1646,7 @@ int bytes_allocated = 0;
 int first_free = 0;
 int mud_memory = 0;
 
+
 #ifdef MEMORY_CHECK
 malloc_t
 alloc (int bytes, int dtype)
@@ -1455,6 +1825,7 @@ alloc (int bytes, int dtype)
 
 #else /* NOVELL */
 
+
 malloc_t
 alloc (int bytes, int dtype)
 {
@@ -1484,12 +1855,13 @@ alloc (int bytes, int dtype)
   strncpy (p, "ZZZZ", 4);
 
   if (x1)
-    printf ("+ @ %Xd  bytes = %d\n", (long int) p, bytes);
+    printf ("+ @ %Xd  bytes = %d\n", (unsigned int) p, bytes);
 
   bytes_allocated += bytes;
 
   return p + 4;
 }
+
 
 #endif /* NOVELL */
 
@@ -1521,7 +1893,7 @@ is_obj_here (CHAR_DATA * ch, OBJ_DATA * obj, int check)
 int
 is_he_there (CHAR_DATA * ch, ROOM_DATA * room)
 {
-  CHAR_DATA *tch;
+  CHAR_DATA *tch = NULL;
 
   /* he could be dead, or have left the game...who knows.   We
      cannot dereference "he" cause we are uncertain of the pointer
@@ -1670,19 +2042,23 @@ real_trust (CHAR_DATA * ch)
   return ch->pc->level;
 }
 
-int
-get_trust (CHAR_DATA * ch)
-{
-  if (!ch || !ch->desc || IS_SET (ch->flags, FLAG_GUEST))
-    return 0;
+/* moved to protos.h - int get_trust (CHAR_DATA * ch) {
+	if (!ch || !ch->desc || IS_SET (ch->flags, FLAG_GUEST)) {
+		return 0;
+	}
 
-  ch = ch->desc->original != NULL ? ch->desc->original : ch->desc->character;
+	ch = ch->desc->original != NULL ? ch->desc->original : ch->desc->character;
 
-  if (!ch || !ch->pc || ch->pc->mortal_mode)
-    return 0;
+	if (!ch || !ch->pc || ch->pc->mortal_mode) {
+		return 0;
+	}
 
-  return ch->pc->level;
-}
+	//if (ch->isLevelFivePC()) {
+	//	return 5;
+	//}
+
+	return ch->pc->level;
+}*/
 
 CHAR_DATA *
 get_pc (char *buf)
@@ -1788,6 +2164,9 @@ load_pc (const char *buf)
       return NULL;
     }
 
+
+  /* debugging why loaded_list gets set to something in the 0x65's.
+     this is ok or it would have crashed ch->next. - Grommit */
   ch->next = loaded_list;
   loaded_list = ch;
 
@@ -1834,6 +2213,8 @@ unload_pc (CHAR_DATA * ch)
   if (ch->deleted)
     {
       ch->deleted = 0;
+	  /* Also okay, because if ch were a bad ptr, it would fail on the ch->next line
+	     not secretly shove a bad value into loaded_list - Grommit */
       ch->next = loaded_list;
       loaded_list = ch;
     }
@@ -1854,7 +2235,17 @@ unload_pc (CHAR_DATA * ch)
   /* remove ch from loaded_list */
 
   if (loaded_list == ch)
+  {
+	/* this is the first possible loaded_list bug 
+	    new code below to check its ranges - Grommit*/
+	  unsigned int chnext_hex = (unsigned int) chnext_hex;
+	  if ( chnext_hex > 0x400000 && chnext_hex < 0xc0000000 )
+	  {
+		  fprintf(stderr,"Error: loaded_list set to something bogus: 0x%08x. This was set in ch->next for the ch named %s\n", (unsigned int) loaded_list, ch->tname);
+	  }
+   /* end new code */
     loaded_list = ch->next;
+  }
 
   else
     {
@@ -2501,6 +2892,34 @@ obj_short_desc (OBJ_DATA * obj)
 	  else
 	    strcat (coins, " heavy, oblong silver coins");
 	}
+	  else if (obj->nVirtual == 42131)
+	  {
+		if (obj->count == 1)
+		  strcat (coins, " small, rounded bronze coin");
+		else
+		  strcat (coins, " small, rounded bronze coins");
+	  }
+	  else if (obj->nVirtual == 42132)
+	  {
+		if (obj->count == 1)
+		  strcat (coins, " heavy, stamped bronze coin");
+		else
+		  strcat (coins, " heavy, stamped bronze coins");
+	  }
+	  else if (obj->nVirtual == 42133)
+	  {
+		if (obj->count == 1)
+		  strcat (coins, " hexagonal, stamped silver coin");
+		else
+		  strcat (coins, " hexagonal, stamped silver coins");
+	  }
+	  else if (obj->nVirtual == 42134)
+	  {
+		if (obj->count == 1)
+		  strcat (coins, " large, ornately detailed silver coin");
+		else
+		  strcat (coins, " large, ornately detailed silver coins");
+	  }
       else if (obj->nVirtual == 66900)
 	{
 	  if (obj->count == 1)
@@ -2542,6 +2961,48 @@ obj_short_desc (OBJ_DATA * obj)
 	    strcat (coins, " heavy, gleaming, gold coin");
 	  else
 	    strcat (coins, " heavy, gleaming, gold coins");
+	}
+	else if (obj->nVirtual == 80010)
+	{
+	   if (obj->count > 1)
+	      strcat (coins, " small copper coins");
+	   else
+	      strcat (coins, " small copper coin");
+	}
+	else if (obj->nVirtual == 80011)
+	{
+	   if (obj->count > 1)
+	      strcat (coins, " large bronze coins");
+	   else
+	      strcat (coins, " large bronze coin");
+	}
+	else if (obj->nVirtual == 80012)
+	{
+	   if (obj->count > 1)
+	      strcat (coins, " thin silver coins");
+	   else
+	      strcat (coins, " thin silver coin");
+	}
+	else if (obj->nVirtual == 80013)
+	{
+	   if (obj->count > 1)
+	      strcat (coins, " heavy silver coins");
+	   else
+	      strcat (coins, " heavy silver coin");
+	}
+	else if (obj->nVirtual == 80014)
+	{
+	   if (obj->count > 1)
+	      strcat (coins, " small gold coins");
+	   else
+	      strcat (coins, " small gold coin");
+	}
+	else if (obj->nVirtual == 80015)
+	{
+	   if (obj->count > 1)
+	      strcat (coins, " shiny, thick round gold coins");
+	   else
+	      strcat (coins, " shiny, thick round gold coin");
 	}
       return coins;
     }
@@ -2720,7 +3181,7 @@ obj_desc (OBJ_DATA * obj)
 	    break;
 
 	  case 4:
-	    sprintf (description, "%s is here, partialy eaten.",
+	    sprintf (description, "%s is here, partially eaten.",
 		     obj->short_description);
 	    break;
 
@@ -3700,3 +4161,8 @@ bool ciStringEqual (const std::string & s1, const std::string & s2)
   {
   return ci_equal_to () (s1, s2);
   }  // end of ciStringEqual
+
+
+
+
+

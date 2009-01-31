@@ -17,6 +17,7 @@
 #include <sys/stat.h>
 #include <mysql/mysql.h>
 
+#include "object_damage.h"
 #include "server.h"
 #include "structs.h"
 #include "net_link.h"
@@ -43,6 +44,20 @@ const char *player_bits[] = {
   "Approval",
   "Outlaw",
   "\n"
+};
+
+const int SPHERE_COUNT = 8;
+
+/* flag is 1 << index */
+SPHERE_INFO spheres[] = { /* ONLY ADD TO THE END OF THIS OR YOU WILL SCREW UP CURRENT FLAGS */
+	{"MT",true},           
+	{"PelAnor",true},      
+	{"Northlands",true},
+	{"Mines",true},
+	{"Harad",true},
+	{"Battalions",true},
+	{"Guldur",false},
+	{"Undeep",false},
 };
 
 extern rpie::server engine;
@@ -741,7 +756,6 @@ do_roll (CHAR_DATA * ch, char *argument, int cmd)
       if (buf[3] == 0)
 	{
 	//roll 1-30 vs ATTR: attribute of 15 will have a 50% chance of sucess
-	  int roll = dice (1, 30); 
 	  int attr = 0;
 	  if (strcasecmp (buf, "str") == 0)
 	    {
@@ -779,7 +793,8 @@ do_roll (CHAR_DATA * ch, char *argument, int cmd)
 	    {
 	      strcpy (buf, "???");
 	    }
-	  
+
+	  int roll = dice (1, MAX(30, attr)); 
 	  int diff = attr - roll;
 	  char output_ch [AVG_STRING_LENGTH] = "";
 	  char output_room [AVG_STRING_LENGTH] = "";
@@ -836,7 +851,7 @@ do_roll (CHAR_DATA * ch, char *argument, int cmd)
 	  int ind = index_lookup (skills, buf);
 	  if (ind >= 0)
 	    {  
-	      int roll = number (1, SKILL_CEILING);
+	      int roll = number (1, MAX(100, skill_level(ch, ind, 0)));
 	      int diff = skill_level (ch, ind, 0) - roll;
 
 	      char output_ch [AVG_STRING_LENGTH] = "";
@@ -2446,13 +2461,6 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
       send_to_char (buf, ch);
     }
 
-  if (k->poison_type)
-    {
-      p = lookup_string (k->poison_type, REG_MAGIC_SPELLS);
-      sprintf (buf, "#2Bite:#0 %s\n", p ? p : "Unknown Poison Type");
-      send_to_char (buf, ch);
-    }
-
   if (k->desc && k->desc->snoop.snooping &&
       is_he_somewhere (k->desc->snoop.snooping))
     {
@@ -2482,24 +2490,6 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	if (IS_SET (k->affected_by, 1 << i))
 	  sprintf (buf + strlen (buf), "%s ", affected_bits[i]);
       sprintf (buf + strlen (buf), "]\n");
-      send_to_char (buf, ch);
-    }
-
-  if (k->venom)
-    {
-      sprintf (buf, "#2Venoms:#0 ");
-      for (poison = k->venom; poison; poison = poison->next)
-	{
-	  if (poison != k->venom)
-	    sprintf (buf + strlen (buf), "        ");
-	  sprintf (buf + strlen (buf), "[%s, Duration: %dd%d",
-		   lookup_string (poison->poison_type, REG_MAGIC_SPELLS),
-		   poison->duration_die_1, poison->duration_die_2);
-	  if (poison->effect_die_1 && poison->effect_die_2)
-	    sprintf (buf + strlen (buf), ", Effect %dd%d",
-		     poison->effect_die_1, poison->effect_die_2);
-	  sprintf (buf + strlen (buf), "]\n");
-	}
       send_to_char (buf, ch);
     }
 
@@ -3683,6 +3673,7 @@ acctstat (CHAR_DATA * ch, char *name)
   page_string (ch->desc, buf);
 }
 
+extern std::map<e_material_type, std::string> material_names;
 void
 objstat (CHAR_DATA * ch, char *name)
 {
@@ -3811,6 +3802,16 @@ objstat (CHAR_DATA * ch, char *name)
     }
 
   *buf = 0;
+
+  extern std::map<e_material_type, std::string> material_names;
+  std::map<e_material_type, std::string>::iterator it;
+  it = material_names.find((e_material_type) j->material);
+  if (it != material_names.end())
+  {
+	  sprintf (buf, "#2Material:#0 %s\n", it->second.c_str());
+	send_to_char (buf, ch);
+	*buf = 0;
+  }
 
   if (j->size)
     {
@@ -4096,10 +4097,21 @@ objstat (CHAR_DATA * ch, char *name)
 	       j->o.od.value[0] / 100);
       break;
 
-    case ITEM_MISSILE:
     case ITEM_BULLET:
-      sprintf (buf, "#2Base Damage:#0 %dd%d\n", j->o.od.value[0],
+		sprintf (buf, "#2Base Damage:#0 %dd%d\n", j->o.od.value[0],
 	       j->o.od.value[1]);
+		break;
+    case ITEM_MISSILE:
+		sprintf (buf, "#2Base Damage:#0 %dd%d\n", j->o.od.value[0],j->o.od.value[1]);
+
+		if (j->o.od.value[4] >= 0 && j->o.od.value[4] <= 4)
+			sprintf (buf + strlen (buf), "#2Hit Theme (Oval4):#0 %d (%s)\n",
+		     j->o.od.value[4], weapon_theme[j->o.od.value[4]]);
+		else
+			sprintf (buf + strlen (buf), "#2Hit Theme (Oval4):#0 %d (None!)\n",
+				 j->o.od.value[4]);
+
+		sprintf (buf + strlen (buf),"#2Bounce Off (Oval5):#0 %d (%s)\n",j->o.od.value[5], (j->o.od.value[5] ? "yes" : "no"));
       break;
 
     case ITEM_POISON:
@@ -4588,12 +4600,20 @@ do_shutdown (CHAR_DATA * ch, char *argument, int cmd)
     }
   else if (!str_cmp (arg, "reboot"))
     {
-      if (engine.in_play_mode () && GET_TRUST (ch) < 5)
-	{
-	  send_to_char ("You'll need to wait for the 4 AM PST auto-reboot.\n",
-			ch);
-	  return;
-	}
+		/* grommit exception to L5 limit on reboot */
+      if (engine.in_play_mode ())
+		{
+			if (!strcasecmp(ch->tname,"Grommit"))
+			{
+				send_to_char ("Grommit exception to L5 reboot restriction enabled.\n",ch);
+			}
+			else if (GET_TRUST(ch) < 5)
+			{
+				send_to_char ("You'll need to wait for the 4 AM PST auto-reboot.\n", ch);
+				return;
+			}
+	  }
+
       if (morgul_arena_fight)
 	block = true;
 
@@ -4622,7 +4642,7 @@ do_shutdown (CHAR_DATA * ch, char *argument, int cmd)
 	    block = true;
 	  if (d->character->following && IS_NPC (d->character->following))
 	    block = true;
-	}
+	  }
 
       argument = one_argument (argument, arg);
       if (block && *arg != '!')
@@ -4966,9 +4986,10 @@ do_switch (CHAR_DATA * ch, char *argument, int cmd)
       ch->desc->character = victim;
       ch->desc->original = ch;
       if (ch->desc->original->color)
-	victim->color = 1;
+		victim->color = 1;
 
       victim->desc = ch->desc;
+	  victim->petition_flags = ch->petition_flags; /* copy over display of flags */
       ch->desc = 0;
     }
 }
@@ -6140,6 +6161,37 @@ do_zlock (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_invis (CHAR_DATA * ch, char *argument, int cmd)
 {
+	/* This command is now open to all, but generates the typical failures if
+	   not of race 77 - Istari. This race is used to assign to PP characters not
+	   given immortality */
+
+	if (IS_MORTAL(ch) && ch->race != 77)
+	{
+		int echo = number (1, 9);
+		if (echo == 1)
+			send_to_char ("Eh?\n\r", ch);
+		else if (echo == 2)
+			send_to_char ("Huh?\n\r", ch);
+		else if (echo == 3)
+		    send_to_char ("I'm afraid that just isn't possible...\n\r", ch);
+		else if (echo == 4)
+			send_to_char ("I don't recognize that command.\n\r", ch);
+		else if (echo == 5)
+			send_to_char ("What?\n\r", ch);
+		else if (echo == 6)
+			send_to_char
+		      ("Perhaps you should try typing it a different way?\n\r", ch);
+	  else if (echo == 7)
+		    send_to_char
+			  ("Try checking your typing - I don't recognize it.\n\r", ch);
+	  else if (echo == 8)
+			send_to_char
+		    ("That isn't a recognized command, craft, or social.\n\r", ch);
+	  else
+			send_to_char ("Hmm?\n\r", ch);
+	  return;
+	}
+
   if (!IS_SET (ch->flags, FLAG_WIZINVIS))
     {
       ch->flags |= FLAG_WIZINVIS;
@@ -6162,6 +6214,12 @@ do_vis (CHAR_DATA * ch, char *argument, int cmd)
 
   if (IS_SET (ch->flags, FLAG_WIZINVIS))
     {
+		if (ch->race == 77)
+		{
+			send_to_char("That wouldn't be wise!\n",ch);
+			return;
+		}
+
       ch->flags &= ~FLAG_WIZINVIS;
       remove_affect_type (ch, MAGIC_HIDDEN);
 
@@ -6661,13 +6719,13 @@ do_debug (CHAR_DATA * ch, char *argument, int cmd)
 	}
     }
 
-  if (!str_cmp (buf, "createmob"))
+/*  if (!str_cmp (buf, "createmob"))
     {
       for (i = 0; i < 10000; i++)
 	{
 	  free_char (new_char (0));
 	}
-    }
+    } */
 
   if (!str_cmp (buf, "fighting") || !str_cmp (buf, "fight"))
     {
@@ -11124,6 +11182,7 @@ do_becho (CHAR_DATA * ch, char *argument, int cmd)
 	int i;
   std::string output;
 	char buf[MAX_STRING_LENGTH];
+	char* result = NULL;
 	
   for (i = 0; *(argument + i) == ' '; i++);
 
@@ -11136,8 +11195,12 @@ do_becho (CHAR_DATA * ch, char *argument, int cmd)
 	output.assign ("#9<<<****************************************>>>#0\n");
 	output.append ("#B<<<---------------------------------------->>>#0\n\n");
   
-  sprintf (buf, "%s\n\n", argument + i);
-  output.append (buf);
+	sprintf (buf, "%s", argument + i);
+	result = swap_xmote_target (ch, buf, 3);
+	if (!result)
+		return;
+    output.append (CAP(result));
+	output.append ("\n\n");
   
   output.append ("#B<<<---------------------------------------->>>#0\n");
   output.append ("#9<<<****************************************>>>#0\n");
@@ -11300,3 +11363,125 @@ post_motd (DESCRIPTOR_DATA * d)
  	
 
 }
+
+void do_subscribe (CHAR_DATA * ch, char *argument, int cmd)
+{
+	int sphereIndex = -1;
+	/* ch is the character to send to, twiddle the one to adjust flags on */
+	CHAR_DATA* twiddlechar = ch;
+	
+
+	/* check if body is switched */
+	if (ch->desc && ch->desc->original)
+	{
+		twiddlechar = ch->desc->original;
+	}
+
+
+	if (IS_NPC (twiddlechar) || !GET_TRUST(ch))
+    {
+      send_to_char ("Eh?\n", ch);
+      return;
+    }
+
+	/* find the sphere they want to subscribe to */
+	for (int i=0; i<SPHERE_COUNT; i++)
+	{
+		if (!strcasecmp(argument,spheres[i].name) && spheres[i].available)
+		{
+			sphereIndex = i;
+			break;
+		}
+	}
+
+	/* fail if the sphere is not recognised */
+	if (sphereIndex == -1)
+	{
+		send_to_char("That sphere was not recognised.\n",ch);
+		send_to_char("Current spheres:#5\n",ch);
+		for (int j=0; j<SPHERE_COUNT; j++)
+		{
+			if (spheres[j].available)
+			{
+				send_to_char(spheres[j].name,ch);
+				send_to_char("\n",ch);
+			}
+		}
+		send_to_char("#0",ch);
+		return;
+	}
+
+	/* fail if sphere already set */
+	if (IS_SET(twiddlechar->petition_flags,(1<<sphereIndex)))
+	{
+		send_to_char("You are already subscribed to that sphere's petitions.\n",ch);
+		return;
+	}
+	
+	/* subscribe */
+	twiddlechar->petition_flags |= (1<<sphereIndex);
+	send_to_char("You have subscribed to petitions and hobbitmails for #5",ch);
+	send_to_char(spheres[sphereIndex].name,ch);
+	send_to_char("#0.\n",ch);
+	save_char_mysql(twiddlechar);
+
+	/* replicate flags */
+	ch->petition_flags = twiddlechar->petition_flags;
+
+}
+
+void do_unsubscribe (CHAR_DATA * ch, char *argument, int cmd)
+{
+	int sphereIndex = -1;
+	/* ch is the character to send to, twiddle the one to adjust flags on */
+	CHAR_DATA* twiddlechar = ch;
+	
+
+	/* check if body is switched */
+	if (ch->desc && ch->desc->original)
+	{
+		twiddlechar = ch->desc->original;
+	}
+
+
+	if (IS_NPC (twiddlechar) || !GET_TRUST(ch))
+    {
+      send_to_char ("Eh?\n", ch);
+      return;
+    }
+
+	/* find the sphere they want to unsubscribe from */
+	for (int i=0; i<SPHERE_COUNT; i++)
+	{
+		if (!strcasecmp(argument,spheres[i].name))
+		{
+			sphereIndex = i;
+			break;
+		}
+	}
+
+	/* fail if the sphere is not recognised */
+	if (sphereIndex == -1)
+	{
+		send_to_char("That sphere was not recognised.\n",ch);
+		return;
+	}
+
+	/* fail if sphere not set */
+	if (!IS_SET(twiddlechar->petition_flags,(1<<sphereIndex)))
+	{
+		send_to_char("You are not subscribed to that sphere's petitions.\n",ch);
+		return;
+	}
+	
+	/* unsubscribe */
+	twiddlechar->petition_flags &= ~(1 << sphereIndex);
+	send_to_char("You have unsubscribed from petitions and hobbitmails for #5",ch);
+	send_to_char(spheres[sphereIndex].name,ch);
+	send_to_char("#0.\n",ch);
+	save_char_mysql(twiddlechar);
+
+	/* replicate flags */
+	ch->petition_flags = twiddlechar->petition_flags;
+}
+

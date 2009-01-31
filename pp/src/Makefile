@@ -3,8 +3,9 @@
 
 CC=g++
 
-SVN_VERS = -D'SVN_REV="$(shell svnversion -n . && touch comm.cpp)"'
-CFLAGS = $(SVN_VERS) -ggdb -DLINUX -Wall
+#SVN_VERS = -D'SVN_REV="$(shell svnversion -n . && touch comm.cpp)"'
+CFLAGS = -DLINUX -Wall -ggdb
+CXXFLAGS = $(CFLAGS)
 LFLAGS = -lm -lmysqlclient -lcrypt -lnsl
 
 INSTALL_DIR = ..
@@ -15,7 +16,7 @@ LIBDIRS = -L/usr/lib64/mysql -L/usr/lib/mysql -L/usr/local/mysql/lib
 
 OBJS = \
 account.o act.comm.o act.informative.o act.movement.o \
-act.offensive.o act.other.o arena.o auctions.o clan.o comm.o \
+act.offensive.o act.other.o arena.o auctions.o character.o clan.o comm.o \
 commands.o commerce.o constants.o control.o crafts.o \
 create_mobile.o creation.o db.o destruction.o \
 dwellings.o edit.o employment.o fight.o group.o guest.o \
@@ -27,7 +28,7 @@ server.o somatics.o \
 staff.o transformation.o utility.o weather.o wounds.o
 
 HEADERS = \
-account.h clan.h constants.h decl.h group.h net_link.h \
+account.h argument.h clan.h character.h constants.h decl.h group.h net_link.h \
 object_damage.h protos.h server.h structs.h trigram.h utils.h
 
 # default target
@@ -47,3 +48,6 @@ tags:
 clean:
 	rm -f *.o $(INSTALL_DIR)/bin/server
 
+install:
+	cp -f ~/shadows/tp/bin/server ~/shadows/pp/bin/server
+	cp -f ~/shadows/tp/bin/server ~/shadows/bp/bin/server

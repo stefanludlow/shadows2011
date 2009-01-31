@@ -122,10 +122,13 @@ mob_get_token (char **ptr, char *token, int token_type)
 void
 require_open_paren (char **ptr)
 {
-  while (**ptr == ' ')
-    (*ptr)++;
-
-  (*ptr)++;
+	while (**ptr == ' ' && **ptr != '\0') {
+		(*ptr)++;
+	}
+	
+	if (**ptr != '\0') {
+		(*ptr)++;
+	}
 }
 
 void

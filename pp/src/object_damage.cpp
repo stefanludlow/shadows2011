@@ -17,6 +17,9 @@
 
 extern rpie::server engine;
 
+std::map<e_material_type, int> material_armour;
+std::map<e_material_type, std::string> material_names;
+
 const char *unspecified_conditions[] = {
   "It has been completely destroyed, and is clearly unfit for use.\n",
   "It has been savaged, rendering the item nearly unusable.\n",
@@ -62,6 +65,176 @@ const char *bone_conditions[] = {
 };
 
 short skill_to_damage_name_index (ushort n_skill);
+
+void
+initialize_materials (void)
+{
+	material_names[MATERIAL_TYPE_UNDEFINED] = "undefined";
+	material_names[MATERIAL_BURLAP] = "burlap";
+	material_names[MATERIAL_LINEN] = "linen";
+	material_names[MATERIAL_WOOL] = "wool";
+	material_names[MATERIAL_COTTON] = "cotton";
+	material_names[MATERIAL_SILK] = "silk";
+	material_names[MATERIAL_VELVET] = "velvet";
+	material_names[MATERIAL_CLOTH] = "cloth";
+	material_names[MATERIAL_THIN_LEATHER] = "thin leather";
+	material_names[MATERIAL_PLAIN_LEATHER] = "plain leather";
+	material_names[MATERIAL_THICK_LEATHER] = "thick leather";
+	material_names[MATERIAL_COURBOULLI] = "courboulli";
+	material_names[MATERIAL_LEATHER] = "leather";
+	material_names[MATERIAL_COPPER] = "copper";
+	material_names[MATERIAL_BRONZE] = "bronze";
+	material_names[MATERIAL_LEAD] = "lead";
+	material_names[MATERIAL_BRASS] = "brass";
+	material_names[MATERIAL_TIN] = "tin";
+	material_names[MATERIAL_MITHRIL] = "mithril";
+	material_names[MATERIAL_IRON] = "iron";
+	material_names[MATERIAL_STEEL] = "steel";
+	material_names[MATERIAL_METAL] = "metal";
+	material_names[MATERIAL_IVORY] = "ivory";
+	material_names[MATERIAL_WOOD] = "wood";
+
+
+
+	material_armour[MATERIAL_TYPE_UNDEFINED] = 0;
+	material_armour[MATERIAL_BURLAP] = 0;
+	material_armour[MATERIAL_LINEN] = 0;
+	material_armour[MATERIAL_WOOL] = 0;
+	material_armour[MATERIAL_COTTON] = 0;
+	material_armour[MATERIAL_SILK] = 0;
+	material_armour[MATERIAL_VELVET] = 0;
+	material_armour[MATERIAL_CLOTH] = 0;
+	material_armour[MATERIAL_THIN_LEATHER] = 0;
+	material_armour[MATERIAL_PLAIN_LEATHER] = 0;
+	material_armour[MATERIAL_THICK_LEATHER] = 1;
+	material_armour[MATERIAL_COURBOULLI] = 1;
+	material_armour[MATERIAL_LEATHER] = 0;
+	material_armour[MATERIAL_COPPER] = 1;
+	material_armour[MATERIAL_LEAD] = 1;
+	material_armour[MATERIAL_BRASS] = 1;
+	material_armour[MATERIAL_TIN] = 1;
+	material_armour[MATERIAL_MITHRIL] = 5;
+	material_armour[MATERIAL_BRONZE] = 2;
+	material_armour[MATERIAL_IRON] = 2;
+	material_armour[MATERIAL_STEEL] = 2;
+	material_armour[MATERIAL_METAL] = 1;
+	material_armour[MATERIAL_IVORY] = 0;
+	material_armour[MATERIAL_WOOD] = 0;
+}
+
+// This is a debug command, designed to be run once on the BP to convert
+// all existing objects to have a material of some sort.
+void
+do_materialhack (CHAR_DATA *ch, char * argument, int cmd)
+{
+	extern OBJ_DATA *obj_tab[ZONE_SIZE];
+	OBJ_DATA *obj;
+	for (int i = 0; i <= 999; i++)
+	{
+		for (obj = obj_tab[i]; obj; obj = obj->hnext)
+		{
+			for (std::map<e_material_type, std::string>::iterator it = material_names.begin(); it != material_names.end(); it++)
+			{
+				std::string names = obj->name;
+				if (names.find(it->second) != std::string::npos)
+				{
+					obj->material = it->first;
+					break;
+				}
+
+				if (is_tagged(obj->name))
+				{
+					switch GET_MATERIAL_TYPE(obj)
+					{
+					case (1 << 1): // TEXTILE
+						if (isname ("burlap", obj->name))
+							obj->material = MATERIAL_BURLAP;
+						else if (isname ("linen", obj->name))
+							obj->material = MATERIAL_LINEN;
+						else if (isname ("wool", obj->name))
+							obj->material = MATERIAL_WOOL;
+						else if (isname ("cotton", obj->name))
+							obj->material = MATERIAL_COTTON;
+						else if (isname ("silk", obj->name))
+							obj->material = MATERIAL_SILK;
+						else if (isname ("velvet", obj->name))
+							obj->material = MATERIAL_VELVET;
+						else
+							obj->material = MATERIAL_CLOTH;
+						break;
+					case (1 << 2): // LEATHER
+						if (isname ("thin leather", obj->name))
+							obj->material = MATERIAL_THIN_LEATHER;
+						else if (isname ("plain leather", obj->name))
+							obj->material = MATERIAL_PLAIN_LEATHER;
+						else if (isname ("thick leather", obj->name))
+							obj->material = MATERIAL_THICK_LEATHER;
+						else if (isname ("courboulli", obj->name))
+							obj->material = MATERIAL_COURBOULLI;
+						else if (isname ("leather", obj->name))
+							obj->material = MATERIAL_LEATHER;
+						else if (isname ("hide", obj->name))
+							obj->material = MATERIAL_LEATHER;
+						else if (isname ("deerskin", obj->name))
+							obj->material = MATERIAL_LEATHER;
+						else if (isname ("deerhide", obj->name))
+							obj->material = MATERIAL_LEATHER;
+						else if (isname ("pelt", obj->name))
+							obj->material = MATERIAL_LEATHER;
+						else if (isname ("rawhide", obj->name))
+							obj->material = MATERIAL_LEATHER;
+						else
+							obj->material = MATERIAL_LEATHER;
+						break;
+					case (1 << 3): // WOOD
+						obj->material = MATERIAL_WOOD;
+						break;
+					case (1 << 4): // METAL
+						if (isname ("copper", obj->name))
+							obj->material = MATERIAL_COPPER;
+						else if (isname ("bronze", obj->name))
+							obj->material = MATERIAL_BRONZE;
+						else if (isname ("iron", obj->name))
+							obj->material = MATERIAL_IRON;
+						else if (isname ("steel", obj->name))
+							obj->material = MATERIAL_STEEL;
+						else if (isname ("brass", obj->name))
+							obj->material = MATERIAL_BRASS;
+						else if (isname ("tin", obj->name))
+							obj->material = MATERIAL_TIN;
+						else if (isname ("lead", obj->name))
+							obj->material = MATERIAL_LEAD;
+						else if (isname ("metal", obj->name))
+							obj->material = MATERIAL_METAL;
+						else
+							obj->material = MATERIAL_METAL;
+						break;
+
+					case (1 << 5): // STONE
+					case (1 << 6): // GLASS
+					case (1 << 11): // OTHER
+						if (isname ("ivory", obj->name))
+							obj->material = MATERIAL_IVORY;
+						else if (isname ("stone", obj->name))
+							obj->material = MATERIAL_STONE;
+						else if (isname ("chert", obj->name))
+							obj->material = MATERIAL_STONE;
+						else if (isname ("flint", obj->name))
+							obj->material = MATERIAL_STONE;
+						else if (isname ("obsidian", obj->name))
+							obj->material = MATERIAL_STONE;
+						else if (isname ("ceramic", obj->name))
+							obj->material = MATERIAL_CERAMIC;
+						else if (isname ("brick", obj->name))
+							obj->material = MATERIAL_CERAMIC;
+						break;
+					}
+					break;
+				}
+			}
+		}
+	}
+}
 
 /*------------------------------------------------------------------------\
 |  new()                                                                  |
@@ -172,6 +345,9 @@ object_damage__get_sdesc (OBJECT_DAMAGE * thisPtr)
   if (thisPtr->source == DAMAGE_PERMANENT)
     return NULL;
 
+  int broad_damage_type;
+  broad_damage_type = object__get_material(thisPtr);
+
   n_sdesc_length = strlen (damage_severity[thisPtr->severity])
     +
     strlen (damage_name[thisPtr->source]
@@ -181,8 +357,7 @@ object_damage__get_sdesc (OBJECT_DAMAGE * thisPtr)
 	   (isvowel (damage_severity[thisPtr->severity][0])) ? "an" : "a",
 	   damage_severity[thisPtr->severity],
 	   damage_name[thisPtr->
-		       source][(thisPtr->material <
-				MATERIAL_IRON) ? 0 : 1][thisPtr->name]);
+		       source][broad_damage_type][thisPtr->name]);
   return str_sdesc;
 }
 
@@ -320,87 +495,87 @@ skill_to_damage_name_index (ushort n_skill)
 const char *damage_name[12][5][4] = {
 
   {				/*  DAMAGE_STAB  */
-   {"puncture", "hole", "perforation", "piercing"},	/* vs cloth */
-   {"puncture", "hole", "perforation", "piercing"},	/* vs hide */
-   {"puncture", "gouge", "perforation", "rupture"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""}		/* vs stone */
+   {"puncture", "hole", "perforation", "piercing"}, /* vs cloth */
+   {"puncture", "hole", "perforation", "piercing"}, /* vs hide */
+   {"puncture", "gouge", "perforation", "rupture"}, /* vs metal */
+   {"hole", "split", "nick", "split"}, /* vs wood */
+   {"chip", "scratch", "scrape", "nick"} /* vs stone */
    },
   {				/*  DAMAGE_PIERCE  */
-   {"puncture", "hole", "perforation", "piercing"},	/* vs cloth */
-   {"puncture", "hole", "perforation", "piercing"},	/* vs hide */
-   {"puncture", "gouge", "perforation", "rupture"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""}		/* vs stone */
+   {"puncture", "hole", "perforation", "piercing"}, /* vs cloth */
+   {"puncture", "hole", "perforation", "piercing"}, /* vs hide */
+   {"puncture", "gouge", "perforation", "rupture"}, /* vs metal */
+   {"hole", "split", "nick", "split"}, /* vs wood */
+   {"chip", "scratch", "scrape", "nick"} /* vs stone */
    },
   {				/*  DAMAGE_CHOP  */
-   {"slice", "cut", "slash", "gash"},	/* vs cloth */
-   {"slice", "cut", "slash", "gash"},	/* vs hide */
-   {"nick", "chip", "rivet", "gash"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""}		/* vs stone */
+   {"slice", "cut", "slash", "gash"}, /* vs cloth */
+   {"slice", "cut", "slash", "gash"}, /* vs hide */
+   {"nick", "chip", "rivet", "gash"}, /* vs metal */
+   {"split", "nick", "gouge", "hack"}, /* vs wood */
+   {"chip", "nick", "scrape", "crack"} /* vs stone */
    },
   {				/*  DAMAGE_BLUNT  */
-   {"tear", "rip", "rent", "tatter"},	/* vs cloth */
-   {"tear", "split", "rent", "tatter"},	/* vs hide */
-   {"gouge", "rivet", "nick", "dent"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""}		/* vs stone */
+   {"tear", "rip", "rent", "tatter"}, /* vs cloth */
+   {"tear", "split", "rent", "tatter"}, /* vs hide */
+   {"gouge", "rivet", "nick", "dent"}, /* vs metal */
+   {"dent", "splinter", "crack", "split"}, /* vs wood */
+   {"chip", "nick", "crack", "dent"} /* vs stone */
    },
   {				/*  DAMAGE_SLASH  */
-   {"slice", "cut", "slash", "gash"},	/* vs cloth */
-   {"slice", "cut", "slash", "gash"},	/* vs hide */
-   {"nick", "chip", "rivet", "gash"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""}		/* vs stone */
+   {"slice", "cut", "slash", "gash"}, /* vs cloth */
+   {"slice", "cut", "slash", "gash"}, /* vs hide */
+   {"nick", "chip", "rivet", "gash"}, /* vs metal */
+   {"split", "nick", "gouge", "hack"}, /* vs wood */
+   {"chip", "nick", "scrape", "crack"} /* vs stone */
    },
   {				/*  DAMAGE_FREEZE  */
-   {"", "", "", ""},		/* vs cloth */
-   {"", "", "", ""},		/* vs hide */
-   {"crack", "split", "dent", "tarnish"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""}		/* vs stone */
+   {"stain", "tarnish", "tear", "tarnish"}, /* vs cloth */
+   {"crack", "tarnish", "tarnish", "tear"}, /* vs hide */
+   {"crack", "split", "dent", "tarnish"}, /* vs metal */
+   {"warp", "split", "warp", "splint"}, /* vs wood */
+   {"crack", "chip", "crack", "chip"} /* vs stone */
    },
   {				/*  DAMAGE_BURN  */
-   {"scorching", "charring", "blackening", "hole"},	/* vs cloth */
-   {"scorching", "charring", "blackening", "hole"},	/* vs hide */
-   {"scorching", "charring", "blackening", "tarnish"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""}		/* vs stone */
+   {"scorching", "charring", "blackening", "hole"}, /* vs cloth */
+   {"scorching", "charring", "blackening", "hole"}, /* vs hide */
+   {"scorching", "charring", "blackening", "tarnish"}, /* vs metal */
+   {"charring", "blackening", "scorching", "cindering"}, /* vs wood */
+   {"blackening", "scorching", "blackening", "scorching"} /* vs stone */
    },
   {				/*  DAMAGE_TOOTH  */
-   {"tear", "rip", "rent", "tatter"},	/* vs cloth */
-   {"tear", "rip", "rent", "tatter"},	/* vs hide */
-   {"gouge", "rivet", "nick", "dent"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""}		/* vs stone */
+   {"tear", "rip", "rent", "tatter"}, /* vs cloth */
+   {"tear", "split", "rent", "tatter"}, /* vs hide */
+   {"gouge", "rivet", "nick", "dent"}, /* vs metal */
+   {"dent", "splinter", "crack", "split"}, /* vs wood */
+   {"chip", "nick", "crack", "dent"} /* vs stone */
    },
   {				/*  DAMAGE_CLAW  */
-   {"tear", "rip", "rent", "tatter"},	/* vs cloth */
-   {"tear", "rip", "rent", "tatter"},	/* vs hide */
-   {"gouge", "rivet", "nick", "dent"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""}		/* vs stone */
+   {"tear", "rip", "rent", "tatter"}, /* vs cloth */
+   {"tear", "split", "rent", "tatter"}, /* vs hide */
+   {"gouge", "rivet", "nick", "dent"}, /* vs metal */
+   {"dent", "splinter", "crack", "split"}, /* vs wood */
+   {"chip", "nick", "crack", "dent"} /* vs stone */
    },
   {				/*  DAMAGE_FIST  */
    {"dent", "deformation", "dimple", "impression"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""},		/* vs cloth */
-   {"", "", "", ""},		/* vs hide */
-   {"", "", "", ""}		/* vs stone */
+   {"dent", "deformation", "dimple", "impression"},		/* vs wood */
+   {"dent", "deformation", "dimple", "impression"},		/* vs cloth */
+   {"dent", "deformation", "dimple", "impression"},		/* vs hide */
+   {"dent", "deformation", "dimple", "impression"}		/* vs stone */
    },
   {				/*  DAMAGE_BLOOD  */
    {"bloodstain", "bloodstain", "blood-splatter", "stain"},	/* vs cloth */
    {"bloodstain", "bloodstain", "blood-splatter", "stain"},	/* vs hide */
    {"bloodstain", "bloodstain", "blood-splatter", "tarnish"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""}		/* vs stone */
+   {"bloodstain", "bloodstain", "blood-splatter", "stain"},		/* vs wood */
+   {"bloodstain", "bloodstain", "blood-splatter", "stain"}		/* vs stone */
    },
   {				/*  DAMAGE_WATER  */
    {"stain", "discoloration", "blemish", "splotch"},	/* vs cloth */
    {"stain", "discoloration", "blemish", "splotch"},	/* vs hide */
    {"tarnish", "corrosion", "flaking", "deterioration"},	/* vs metal */
-   {"", "", "", ""},		/* vs wood */
-   {"", "", "", ""}		/* vs stone */
+   {"stain", "discoloration", "blemish", "splotch"},		/* vs wood */
+   {"stain", "discoloration", "blemish", "splotch"}		/* vs stone */
    }
 };

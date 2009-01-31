@@ -978,7 +978,7 @@ read_obj_suppliment (CHAR_DATA * ch, FILE * fp)
 
 struct key_data
 {
-  char key[14];
+  char key[AVG_STRING_LENGTH];
   int key_type;
   void *ptr;
 };

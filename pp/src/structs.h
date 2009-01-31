@@ -53,7 +53,7 @@ typedef struct affected_type AFFECTED_TYPE;
 typedef struct alias_data ALIAS_DATA;
 typedef struct board_data BOARD_DATA;
 typedef struct char_ability_data CHAR_ABILITY_DATA;
-typedef struct char_data CHAR_DATA;
+typedef class char_data CHAR_DATA;
 typedef struct combat_data COMBAT_DATA;
 typedef struct combat_msg_data COMBAT_MSG_DATA;
 typedef struct delayed_affect_data DELAYED_AFFECT_DATA;
@@ -63,13 +63,13 @@ typedef struct default_item_data DEFAULT_ITEM_DATA;
 typedef struct help_data HELP_DATA;
 typedef struct memory_t MEMORY_T;
 typedef struct mudmail_data MUDMAIL_DATA;
-typedef struct mob_data MOB_DATA;
+typedef class mob_data MOB_DATA;
 typedef struct mobprog_data MOBPROG_DATA;
 typedef struct move_data MOVE_DATA;
 typedef struct name_switch_data NAME_SWITCH_DATA;
 typedef struct negotiation_data NEGOTIATION_DATA;
 typedef struct obj_data OBJ_DATA;
-typedef struct pc_data PC_DATA;
+typedef class pc_data PC_DATA;
 typedef struct phase_data PHASE_DATA;
 typedef struct qe_data QE_DATA;
 typedef struct reset_affect RESET_AFFECT;
@@ -92,7 +92,6 @@ typedef struct lodged_missile_info LODGED_MISSILE_INFO;
 typedef struct body_info BODY_INFO;
 typedef struct sighted_data SIGHTED_DATA;
 typedef struct obj_clan_data OBJ_CLAN_DATA;
-
 
 #ifndef __cplusplus
 typedef char bool;
@@ -744,12 +743,12 @@ typedef signed char shortint;
 #define ACT_MEMORY	    ( 1 << 0 )
 #define ACT_SENTINEL    ( 1 << 1 )
 #define ACT_SCAVENGER   ( 1 << 2 )
+#define ACT_NOCOMMAND   ( 1 << 2 )
 #define ACT_ISNPC       ( 1 << 3 )
-#define ACT_NOVNPC	( 1 << 4 )	/* Shopkeep doesn't have vNPC buyers */
+#define ACT_NOVNPC	    ( 1 << 4 )	/* Shopkeep doesn't have vNPC buyers */
 #define ACT_AGGRESSIVE 	( 1 << 5 )
 #define ACT_STAY_ZONE  	( 1 << 6 )
 #define ACT_WIMPY     	( 1 << 7 )
-#define ACT_SAGGRESS	( 1 << 8 )
 #define ACT_PURSUE		( 1 << 8 )
 #define ACT_THIEF	    ( 1 << 9 )
 #define ACT_NOORDER	    ( 1 << 10 )
@@ -1067,7 +1066,55 @@ typedef signed char shortint;
 #define SOMA_GENERAL_SLOWPULSE          MAGIC_FIRST_SOMA + 58
 #define SOMA_GENERAL_HYPERTHERMIA       MAGIC_FIRST_SOMA + 59
 #define SOMA_GENERAL_HYPOTHERMIA        MAGIC_FIRST_SOMA + 60
-#define MAGIC_LAST_SOMA                 MAGIC_FIRST_SOMA + 60
+#define SOMA_BREAK_ARM_L			    MAGIC_FIRST_SOMA + 61
+#define SOMA_BREAK_ARM_R			    MAGIC_FIRST_SOMA + 62
+#define SOMA_BREAK_LEG_L			    MAGIC_FIRST_SOMA + 63
+#define SOMA_BREAK_LEG_R			    MAGIC_FIRST_SOMA + 64
+#define SOMA_BREAK_HAND_R				MAGIC_FIRST_SOMA + 65
+#define SOMA_BREAK_HAND_L				MAGIC_FIRST_SOMA + 66
+#define SOMA_BREAK_FOOT_R				MAGIC_FIRST_SOMA + 67
+#define SOMA_BREAK_FOOT_L				MAGIC_FIRST_SOMA + 68
+#define SOMA_BREAK_COLLARBONE			MAGIC_FIRST_SOMA + 69
+#define SOMA_BREAK_RIB					MAGIC_FIRST_SOMA + 70
+#define SOMA_BREAK_HIP_L				MAGIC_FIRST_SOMA + 71
+#define SOMA_BREAK_HIP_R				MAGIC_FIRST_SOMA + 72
+#define SOMA_BREAK_SKULL				MAGIC_FIRST_SOMA + 73
+#define SOMA_BREAK_SHOULDER_L			MAGIC_FIRST_SOMA + 74
+#define SOMA_BREAK_SHOULDER_R			MAGIC_FIRST_SOMA + 75
+#define SOMA_BREAK_NECK					MAGIC_FIRST_SOMA + 76
+#define SOMA_BREAK_BACK					MAGIC_FIRST_SOMA + 77
+#define SOMA_BREAK_JAW					MAGIC_FIRST_SOMA + 78
+#define SOMA_BREAK_NOSE					MAGIC_FIRST_SOMA + 79
+#define SOMA_BREAK_EYE_L				MAGIC_FIRST_SOMA + 80
+#define SOMA_BREAK_EYE_R				MAGIC_FIRST_SOMA + 81
+#define SOMA_SPRAIN_ARM_L			    MAGIC_FIRST_SOMA + 82
+#define SOMA_SPRAIN_ARM_R			    MAGIC_FIRST_SOMA + 83
+#define SOMA_SPRAIN_LEG_L			    MAGIC_FIRST_SOMA + 84
+#define SOMA_SPRAIN_LEG_R			    MAGIC_FIRST_SOMA + 85
+#define SOMA_SPRAIN_HAND_R				MAGIC_FIRST_SOMA + 86
+#define SOMA_SPRAIN_HAND_L				MAGIC_FIRST_SOMA + 87
+#define SOMA_SPRAIN_FOOT_R				MAGIC_FIRST_SOMA + 88
+#define SOMA_SPRAIN_FOOT_L				MAGIC_FIRST_SOMA + 89
+#define SOMA_SPRAIN_COLLARBONE			MAGIC_FIRST_SOMA + 90
+#define SOMA_SPRAIN_RIB					MAGIC_FIRST_SOMA + 91
+#define SOMA_SPRAIN_HIP_L				MAGIC_FIRST_SOMA + 92
+#define SOMA_SPRAIN_HIP_R				MAGIC_FIRST_SOMA + 93
+#define SOMA_SPRAIN_SHOULDER_L			MAGIC_FIRST_SOMA + 94
+#define SOMA_SPRAIN_SHOULDER_R			MAGIC_FIRST_SOMA + 95
+#define SOMA_SPRAIN_NECK				MAGIC_FIRST_SOMA + 96
+#define SOMA_SPRAIN_BACK				MAGIC_FIRST_SOMA + 97
+#define SOMA_SPRAIN_JAW					MAGIC_FIRST_SOMA + 98
+#define SOMA_BLACK_EYE_L				MAGIC_FIRST_SOMA + 99
+#define SOMA_BLACK_EYE_R				MAGIC_FIRST_SOMA + 100
+#define SOMA_SEVERED_ARM_L			    MAGIC_FIRST_SOMA + 101
+#define SOMA_SEVERED_ARM_R			    MAGIC_FIRST_SOMA + 102
+#define SOMA_SEVERED_LEG_L			    MAGIC_FIRST_SOMA + 103
+#define SOMA_SEVERED_LEG_R			    MAGIC_FIRST_SOMA + 104
+#define SOMA_SEVERED_HAND_R				MAGIC_FIRST_SOMA + 105
+#define SOMA_SEVERED_HAND_L				MAGIC_FIRST_SOMA + 106
+#define SOMA_SEVERED_FOOT_R				MAGIC_FIRST_SOMA + 107
+#define SOMA_SEVERED_FOOT_L				MAGIC_FIRST_SOMA + 108
+#define MAGIC_LAST_SOMA                 MAGIC_FIRST_SOMA + 108
 
 #define TYPE_UNDEFINED		    -1
 
@@ -1293,7 +1340,7 @@ typedef signed char shortint;
 
 struct body_info
 {
-  char part[10];
+  char part[AVG_STRING_LENGTH];
   int damage_mult;
   int damage_div;
   int percent;
@@ -1357,6 +1404,13 @@ struct extra_descr_data
   char *keyword;
   char *description;
   struct extra_descr_data *next;
+};
+
+struct time_data
+{
+  time_t birth;			/* This represents the characters age                */
+  time_t logon;			/* Time of the last logon (used to calculate played) */
+  long played;			/* This is the total accumulated time played in secs */
 };
 
 struct writing_data
@@ -1669,6 +1723,42 @@ struct room_direction_data
   int to_room;
 };
 
+#include "room.h"
+
+enum mob_cue {
+  cue_none,
+  cue_notes,		// Freeform notes
+  cue_flags,		// Flags (unimplemented)
+  cue_memory,		// Var = Value
+
+  // Scheduled Cues
+  cue_on_hour,		// (hr/sun/moon) reflex
+  cue_on_time,		// (min/%) reflex
+
+  // Personal Cues
+  cue_on_health,	// (hp%) reflex
+  cue_on_moves,		// (mp%) reflex
+
+  // Socials
+  cue_on_command,	// (command key (with rvnum)) reflex
+  cue_on_receive,	// (vnum) reflex
+  cue_on_hear,		// (phrase) reflex
+  cue_on_nod,		// (nodder) reflex
+
+  // Crime Cues
+  cue_on_theft,
+  cue_on_witness,	// (pick,steal,assault)
+
+  // Combat Cues
+  cue_on_engage,
+  cue_on_flee,
+  cue_on_scan,		// (specific enemy) reflex
+  cue_on_hit		// reflex
+  
+};
+
+#include "character.h"
+
 struct prog_vars
 {
   char *name;
@@ -1791,13 +1881,6 @@ struct time_info_data
   int season;
   int minute;
   int holiday;
-};
-
-struct time_data
-{
-  time_t birth;			/* This represents the characters age                */
-  time_t logon;			/* Time of the last logon (used to calculate played) */
-  long played;			/* This is the total accumulated time played in secs */
 };
 
 struct memory_data
@@ -2061,6 +2144,13 @@ struct second_affect
   char *info;
   int info2;
   SECOND_AFFECT *next;
+  
+   bool operator== (second_affect &rhs)
+   {
+		if (this->type != rhs.type || this->seconds != rhs.seconds || this->ch != rhs.ch || this->obj != rhs.obj || this->info2 != rhs.info2 || this->info != rhs.info)
+			return false;
+		return true;
+   }
 };
 
 struct var_data
@@ -2146,65 +2236,6 @@ struct site_info
 
 #include <string>
 
-struct pc_data
-{
-  DREAM_DATA *dreams;
-  DREAM_DATA *dreamed;
-  int create_state;		/* Approval system */
-  int mortal_mode;		/* Immortals can act mortal */
-  int edit_obj;
-  int edit_mob;
-  int level;
-  int boat_virtual;
-  int staff_notes;
-  int mount_speed;
-  CHAR_DATA *edit_player;
-  CHAR_DATA *target_mob;	/* Used by 'mob' and 'resets' */
-  char *msg;			/* SUBMIT/APPROVAL system */
-  char *unused_01;		// formerly 'email_address'
-  char *creation_comment;
-  char *imm_enter;		///< Immortals only
-  char *imm_leave;
-  char *site_lie;		/* Lie about connecting site */
-  int start_str;
-  int start_dex;
-  int start_con;
-  int start_wil;
-  int start_aur;
-  int start_intel;
-  int start_agi;
-  int load_count;		/* See load_pc */
-  int unused_02;		// formerly 'common'
-  int chargen_flags;
-  int last_global_pc_msg;
-  int last_global_staff_msg;
-  int sleep_needed;
-  int auto_toll;		/* Amount willing to pay if following */
-  int doc_type;			/* Not saved.  Current doc */
-  int doc_index;		/* Not saved.  type relative index */
-  struct descriptor_data *owner;
-  shortint skills[MAX_SKILLS];
-  CHAR_DATA *dot_shorthand;	/* '.' indicates last referenced n/pc */
-  ALIAS_DATA *aliases;
-  ALIAS_DATA *execute_alias;
-  time_t last_logon;
-  time_t last_logoff;
-  time_t last_disconnect;
-  time_t last_connect;
-  time_t last_died;
-  char *account_name;
-  OBJ_DATA *writing_on;
-  SUBCRAFT_HEAD_DATA *edit_craft;
-  int app_cost;
-  bitflag nanny_state;
-  bitflag role;
-  ROLE_DATA *special_role;
-  bool admin_loaded;
-  int time_last_activity;
-  int is_guide;
-  int profession;
-};
-
 struct threat_data
 {
   CHAR_DATA *source;
@@ -2224,254 +2255,14 @@ struct sighted_data
   SIGHTED_DATA *next;
 };
 
-enum mob_cue {
-  cue_none,
-  cue_notes,		// Freeform notes
-  cue_flags,		// Flags (unimplemented)
-  cue_memory,		// Var = Value
-
-  // Scheduled Cues
-  cue_on_hour,		// (hr/sun/moon) reflex
-  cue_on_time,		// (min/%) reflex
-
-  // Personal Cues
-  cue_on_health,	// (hp%) reflex
-  cue_on_moves,		// (mp%) reflex
-
-  // Socials
-  cue_on_command,	// (command key (with rvnum)) reflex
-  cue_on_receive,	// (vnum) reflex
-  cue_on_hear,		// (phrase) reflex
-  cue_on_nod,		// (nodder) reflex
-
-  // Crime Cues
-  cue_on_theft,
-  cue_on_witness,	// (pick,steal,assault)
-
-  // Combat Cues
-  cue_on_engage,
-  cue_on_flee,
-  cue_on_scan,		// (specific enemy) reflex
-  cue_on_hit		// reflex
-  
-};
-
-struct mob_data
-{
-  int nVirtual;
-  int zone;
-  int spawnpoint;
-  int merch_seven;		/* Merchant set up for 7 economic rules like Regi wanted - punt in time */
-  int skinned_vnum;		/* What mob skins into */
-  int carcass_vnum;		/* What mob leaves for a carcass */
-  int vehicle_type;		/* Mobile value: boat, etc */
-  int helm_room;		/* If boat, defines helm */
-  int access_flags;		/* Flags; mob room access */
-  int noaccess_flags;		/* Flags; mob room noaccess */
-  int reset_zone;		/* mobs only */
-  int reset_cmd;		/* mobs only */
-  int damnodice;
-  int damsizedice;
-  int damroll;
-  int min_height;		// min height for proto define
-  int max_height;		// min height for proto define
-  int size;			// race size for proto define
-  CHAR_DATA *hnext;
-  CHAR_DATA *lnext;
-  COMBAT_DATA *combat;
-  RESET_DATA *resets;
-  int currency_type;
-  char *owner;
-  int jail;			/* What jail the enforcer brings criminals to */
-
-  // Mob Triggers
-  std::multimap<mob_cue,std::string> *cues;
-
-  // Mob Progs (Room Prog Hack)
-  room_prog *prg;
-};
-
-#include "room.h"
-
-/* ================== Structure for player/non-player ===================== */
-struct char_data
-{
-  int in_room;
-  ROOM_DATA *room;
-  int deleted;
-  int circle;			/* Rank within church */
-  int fight_mode;		/* Frantic..defensive */
-  int debug_mode;
-  int primary_delay;		/* ticks to next hit */
-  int secondary_delay;		/* ticks to next hit */
-  int coldload_id;		/* Uniq id of mob */
-  int natural_delay;		/* Added delay for natural */
-  int body_type;		/* Determines hit locations */
-  int poison_type;		/* Bite causes poison */
-  int nat_attack_type;		/* Bite, claw, slime, etc */
-  int flags;			/* FLAG_ stuff */
-  int move_points;		/* Not saved; move remainder */
-  int hit_points;		/* Not saved; hit remainder */
-  int nightmare;		/* Nightmare sequence # */
-  int speaks;			/* Currently spoken language */
-  int alarm;			/* Not saved. */
-  int trigger_delay;		/* Not saved. */
-  int trigger_line;		/* Used with trigger_delay */
-  int trigger_id;		/* Used with trigger_delay */
-  int psionic_talents;
-  CHAR_DATA *subdue;		/* Subduer or subduee */
-  MOBPROG_DATA *prog;
-  struct var_data *vartab;	/* Mob program variable table */
-  SHOP_DATA *shop;
-  CHAR_DATA *vehicle;		/* Char that is the vehicle */
-  int str;
-  int intel;
-  int wil;
-  int dex;
-  int con;
-  int aur;
-  int agi;
-  int tmp_str;
-  int tmp_intel;
-  int tmp_wil;
-  int tmp_dex;
-  int tmp_con;
-  int tmp_aur;
-  int tmp_agi;
-  shortint skills[MAX_SKILLS];
-  AFFECTED_TYPE *hour_affects;
-  OBJ_DATA *equip;
-  struct descriptor_data *desc;
-  CHAR_DATA *next_in_room;
-  CHAR_DATA *next;
-  CHAR_DATA *next_fighting;
-  CHAR_DATA *next_assist;
-  int assist_pos;
-  CHAR_DATA *following;
-  PC_DATA *pc;
-  MOB_DATA *mob;
-  MOVE_DATA *moves;
-  char *casting_arg;		/* Contains delayed spell */
-  int hit;
-  int max_hit;
-  int move;
-  int max_move;
-  int armor;
-  int offense;
-  int ppoints;
-  CHAR_DATA *fighting;
-  int distance_to_target;
-  struct memory_data *remembers;
-  long affected_by;
-  int position;
-  int default_pos;
-  bitflag act;
-  bitflag hmflags;
-  int carry_weight;
-  int carry_items;
-  int delay_type;
-  int delay;
-  char *delay_who;
-  char *delay_who2;
-  CHAR_DATA *delay_ch;
-  OBJ_DATA *delay_obj;
-  int delay_info1;
-  int delay_info2;
-  int delay_info3;
-  int was_in_room;
-  int intoxication;
-  int hunger;
-  int thirst;
-  int last_room;
-  int attack_type;
-  char *name;
-  char *tname;
-  char *short_descr;
-  char *long_descr;
-  char *pmote_str;
-  char *voice_str;
-  char *description;
-  int sex;
-  int deity;
-  int race;
-  int color;
-  int speed;
-  int age;
-  int height;
-  int frame;
-  int totem;
-  struct time_data time;
-  char *clans;
-  CHAR_DATA *mount;		/* Rider/Ridee */
-  CHAR_DATA *hitcher;
-  CHAR_DATA *hitchee;
-  char *combat_log;
-  WOUND_DATA *wounds;
-  int damage;
-  int lastregen;
-  int defensive;
-  int cell_1, cell_2, cell_3;	/* NPC jailer cell VNUMS */
-  int laststuncheck;
-  int knockedout;
-  int writes;
-  int stun;
-  int curse;
-  CHAR_DATA *aiming_at;
-  CHAR_DATA *targeted_by;
-  int aim;
-  LODGED_OBJECT_INFO *lodged;
-  int mana;
-  int max_mana;
-  int harness;
-  int max_harness;
-  int preparing_id;
-  int preparing_time;
-  ENCHANTMENT_DATA *enchantments;
-  int roundtime;
-  OBJ_DATA *right_hand;
-  OBJ_DATA *left_hand;
-  bitflag plr_flags;
-  CHAR_DATA *ranged_enemy;
-  char *enemy_direction;
-  THREAT_DATA *threats;
-  ATTACKER_DATA *attackers;
-  int whirling;
-  int from_dir;
-  SIGHTED_DATA *sighted;
-  POISON_DATA *venom;
-  int balance;
-  char *travel_str;
-  int spells[MAX_LEARNED_SPELLS][2];
-  int body_proto;
-  int bmi;
-  int size;
-  unsigned short int guardian_mode;
-  int hire_storeroom;
-  int hire_storeobj;
-  char *dmote_str;
-  int cover_from_dir;
-  int morph_type;
-  int clock;
-  int morph_time;
-  int morphto;
-  int craft_index; //remembers which item was used in craft key-pair
-  bool enforcement [100]; // keeps track of zones this char is enforcer in
-  // std::set<CHAR_DATA*> *group; // complement to ch->following
-  std::string *plan;
-  std::string *goal;
-  bool bleeding_prompt;
-  int fight_percentage;
-};
-
-
 /* ======================================================================== */
 
 #include "weather.h"
 
 struct constant_data
 {
-  char constant_name[20];
-  char description[80];
+  char constant_name[AVG_STRING_LENGTH];
+  char description[AVG_STRING_LENGTH];
   void **index;
 };
 
@@ -2560,8 +2351,11 @@ struct race_data
 
 /* Possible starting locations for race defines */
 
-#define RACE_HOME_OSGILIATH		( 1 << 0 )
-#define RACE_HOME_MORGUL		( 1 << 1 )
+#define RACE_HOME_GONDOR		( 1 << 0 ) /* 1 */
+#define RACE_HOME_MORDOR    ( 1 << 1 )     /* 2 */
+#define RACE_HOME_HARAD     ( 1 << 2 )     /* 4 */
+#define RACE_HOME_ANGOST	( 1 << 3 )     /* 8 */
+#define RACE_HOME_MORIA		( 1 << 4)     /* 16 - orcs */
 
 /* These should match the order of the rows in the races */
 /* database, since they're read in ascending order. */
@@ -2613,7 +2407,7 @@ struct registry_data
 
 struct fight_data
 {
-  char name[12];
+  char name[AVG_STRING_LENGTH];
   float offense_modifier;
   float defense_modifier;
   int delay;
@@ -2621,7 +2415,7 @@ struct fight_data
 
 struct language_data
 {
-  char name[16];
+  char name[AVG_STRING_LENGTH];
 };
 
 struct poison_data
@@ -2702,15 +2496,19 @@ struct encumberance_info
 #define GROUP_CLOSED		( 1 << 14 )	/* Not accepting any other followers */
 #define QUIET_SCAN		( 1 << 15 ) /* quick and quiet scan when entering rooms */
 #define NO_BUILDERPORT          ( 1 << 16 )     /* Admins w/o access to 4501 */
+#define START_ANGOST             ( 1 << 17 ) /* Players starting on human/elf/dwarf side of Angost */
+#define START_HARAD             ( 1 << 18 ) /* FJ */
+#define START_MORIA				( 1 << 19 ) /* Start in moria orcs */
+
 
 /* char_data.guardian_flags - controls notification of PC initiated attacks */
 #define GUARDIAN_PC		( 1 << 0 )	/* 01 */
 #define GUARDIAN_NPC_HUMANOIDS	( 1 << 1 )	/* 02 */
 #define GUARDIAN_NPC_WILDLIFE 	( 1 << 2 )	/* 04 */
 #define GUARDIAN_NPC_SHOPKEEPS	( 1 << 3 )	/* 08 */
-#define GUARDIAN_NPC_SENTINELS	( 1 << 4 )	/* 10 */
-#define GUARDIAN_NPC_KEYHOLDER	( 1 << 5 )	/* 20 */
-#define GUARDIAN_NPC_ENFORCERS	( 1 << 6 )	/* 40 */
+#define GUARDIAN_NPC_SENTINELS	( 1 << 4 )	/* 16 */
+#define GUARDIAN_NPC_KEYHOLDER	( 1 << 5 )	/* 32 */
+#define GUARDIAN_NPC_ENFORCERS	( 1 << 6 )	/* 64 */
 
 #define STATE_NAME		( 1 << 0 )	/* Enter name */
 #define STATE_GENDER		( 1 << 1 )	/* Choose gender */
@@ -2943,29 +2741,6 @@ struct reset_com
 
 	/* zone definition structure. for the 'zone-table'   */
 
-struct zone_data
-{
-  char *name;			/* name of this zone                  */
-  char *lead;			/* Name of the project lead             */
-  int lifespan;			/* how long between resets (minutes)  */
-  int age;			/* current age of this zone (minutes) */
-  int top;
-  int frozen;
-  unsigned long flags;
-  int reset_mode;		/* conditions for reset (see below)   */
-  struct reset_com *cmd;	/* command table for reset                  */
-  int jailer;
-  int jail_room_num;
-  ROOM_DATA *jail_room;
-  int earth_mod;
-  int wind_mod;
-  int fire_mod;
-  int water_mod;
-  int shadow_mod;
-  int player_in_zone;
-  int weather_type;
-};
-
 #define MAX_MSGS_PER_BOARD		5000
 #define MAX_LANG_PER_BOARD		  10
 
@@ -3015,7 +2790,7 @@ struct fatigue_data
 {
   int percent;
   float penalty;
-  char name[24];
+  char name[AVG_STRING_LENGTH];
 };
 
 struct use_table_data
@@ -3156,7 +2931,7 @@ typedef int PP_ch_obj (CHAR_DATA * ch, OBJ_DATA * obj, int success, int psn);
 
 struct mob_race_data
 {
-  char race_name[30];
+  char race_name[AVG_STRING_LENGTH];
   int male_ht_dice;
   int male_ht_sides;
   int male_ht_constant;
@@ -3373,12 +3148,35 @@ struct name_switch_data
 #define ECON_ZONES 13
 struct econ_data
 {
-  char flag_name[25];
+  char flag_name[AVG_STRING_LENGTH];
   struct
   {
     float markup;
     float discount;
   } obj_econ_info[ECON_ZONES];
+};
+
+struct zone_data
+{
+  char *name;			/* name of this zone                  */
+  char *lead;			/* Name of the project lead             */
+  int lifespan;			/* how long between resets (minutes)  */
+  int age;			/* current age of this zone (minutes) */
+  int top;
+  int frozen;
+  unsigned long flags;
+  int reset_mode;		/* conditions for reset (see below)   */
+  struct reset_com *cmd;	/* command table for reset                  */
+  int jailer;
+  int jail_room_num;
+  ROOM_DATA *jail_room;
+  int earth_mod;
+  int wind_mod;
+  int fire_mod;
+  int water_mod;
+  int shadow_mod;
+  int player_in_zone;
+  int weather_type;
 };
 
 #endif //_rpie_structs_h

@@ -18,7 +18,53 @@ const char *verbose_dirs[] = {
   "\n"
 };
 
+std::map<int, std::string> mapWearByLoc;
+std::map<std::string, int> mapWearByName;
 
+void
+initialize_location_map (void)
+{
+	mapWearByLoc[WEAR_LIGHT] = "light";
+	mapWearByLoc[WEAR_FINGER_R] = "rfinger";
+	mapWearByLoc[WEAR_FINGER_L] = "lfinger";
+	mapWearByLoc[WEAR_NECK_1] = "neck1";
+	mapWearByLoc[WEAR_NECK_2] = "neck2";
+	mapWearByLoc[WEAR_BODY] = "body";
+	mapWearByLoc[WEAR_HEAD] = "head";
+	mapWearByLoc[WEAR_LEGS] = "legs";
+	mapWearByLoc[WEAR_FEET] = "feet";
+	mapWearByLoc[WEAR_HANDS] = "hands";
+	mapWearByLoc[WEAR_ARMS] = "arms";
+	mapWearByLoc[WEAR_SHIELD] = "shield";
+	mapWearByLoc[WEAR_ABOUT] = "about";
+	mapWearByLoc[WEAR_WAIST] = "waist";
+	mapWearByLoc[WEAR_WRIST_R] = "rwrist";
+	mapWearByLoc[WEAR_WRIST_L] = "lwrist";
+	mapWearByLoc[WEAR_PRIM] = "primary";
+	mapWearByLoc[WEAR_SEC] = "secondary";
+	mapWearByLoc[WEAR_BOTH] = "both";
+	mapWearByLoc[WEAR_BELT_1] = "belt1";
+	mapWearByLoc[WEAR_BELT_2] = "belt2";
+	mapWearByLoc[WEAR_BACK] = "back";
+	mapWearByLoc[WEAR_BLINDFOLD] = "blindfold";
+	mapWearByLoc[WEAR_THROAT] = "throat";
+	mapWearByLoc[WEAR_EAR] = "ear";
+	mapWearByLoc[WEAR_SHOULDER_R] = "rshoulder";
+	mapWearByLoc[WEAR_SHOULDER_L] = "lshoulder";
+	mapWearByLoc[WEAR_ANKLE_R] = "rankle";
+	mapWearByLoc[WEAR_ANKLE_L] = "lankle";
+	mapWearByLoc[WEAR_HAIR] = "hair";
+	mapWearByLoc[WEAR_FACE] = "face";
+	mapWearByLoc[WEAR_CARRY_R] = "rhand";
+	mapWearByLoc[WEAR_CARRY_L] = "lhand";
+	mapWearByLoc[WEAR_ARMBAND_R] = "rarmband";
+	mapWearByLoc[WEAR_ARMBAND_L] = "larmband";
+	
+	for (std::map<int, std::string>::iterator it = mapWearByLoc.begin(); it != mapWearByLoc.end(); it++)
+	{
+		mapWearByName[it->second] = it->first;
+	}
+}
 
 
 const char *season_string[12] = {
@@ -469,7 +515,7 @@ const char *affected_bits[] = {
 const char *action_bits[] = {
   "Memory",
   "Sentinel",
-  "Scavenger",
+  "NoCommand",
   "IsNPC",
   "NoVNPC",
   "Aggressive",

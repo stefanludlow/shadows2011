@@ -11,6 +11,7 @@
 #include <signal.h>
 #include <ctype.h>
 #include <time.h>
+#include <math.h>
 #include <unistd.h>
 #include "server.h"
 
@@ -129,9 +130,9 @@ const char *armor_types[] = {
 
 const struct body_info body_tab[NUM_BODIES][MAX_HITLOC] = {
   {{"body", 2, 1, 45, WEAR_BODY, WEAR_ABOUT},
-   {"leg", 1, 1, 25, WEAR_LEGS},
+   {"leg", 1, 1, 25, WEAR_LEGS, WEAR_FEET},
    {"arms", 1, 1, 20, WEAR_ARMS, WEAR_HANDS},
-   {"head", 5, 2, 8, WEAR_HEAD},
+   {"head", 5, 2, 8, WEAR_HEAD, WEAR_FACE},
    {"neck", 3, 1, 2, WEAR_NECK_1, WEAR_NECK_2},
    }
 };
@@ -247,7 +248,7 @@ int
 figure_wound_skillcheck_penalties (CHAR_DATA * ch, int skill)
 {
   // Save vs WILLPOWER
-  if (number (1, 25) <= ch->wil)
+  if (number (1, ch->wil) <= ch->wil)
     {
       return skill;
     }
@@ -740,53 +741,56 @@ set_fighting (CHAR_DATA * ch, CHAR_DATA * vict)
 void
 stop_fighting (CHAR_DATA * ch)
 {
-  CHAR_DATA *tch;
-  bool fighting = false;
+	CHAR_DATA *tch;
+	bool fighting = false;
 
-  for (tch = ch->room->people; tch; tch = tch->next_in_room)
-    {
-      if (tch == ch)
-	continue;
-      if (tch->fighting)
-	fighting = true;
-    }
-
-  if (ch == combat_next_dude)
-    combat_next_dude = ch->next_fighting;
-
-  if (combat_list == ch)
-    combat_list = ch->next_fighting;
-  else
-    {
-      for (tch = combat_list; tch && (tch->next_fighting != ch);
-	   tch = tch->next_fighting);
-      if (!tch)
+	for (tch = ch->room->people; tch; tch = tch->next_in_room)
 	{
-	  system_log
-	    ("Char fighting not found Error (fight.c, stop_fighting)", true);
-	  sigsegv (SIGSEGV);
+		if (tch == ch)
+			continue;
+		if (tch->fighting)
+			fighting = true;
 	}
-      tch->next_fighting = ch->next_fighting;
-    }
 
-  ch->next_fighting = 0;
-  ch->fighting = 0;
-  if (GET_POS (ch) == FIGHT)
-  	{
-    GET_POS (ch) = STAND;
-		remove_cover(ch,0);
+	if (ch == combat_next_dude)
+		combat_next_dude = ch->next_fighting;
+
+	if (combat_list == ch)
+		combat_list = ch->next_fighting;
+	else
+	{
+		for (tch = combat_list; tch && (tch->next_fighting != ch);
+			tch = tch->next_fighting);
+		if (!tch)
+		{
+			/* system_log
+		("Char fighting not found Error (fight.c, stop_fighting)", true);
+	sigsegv (SIGSEGV); */
 		}
-  ch->flags &= ~FLAG_KILL;
+		else
+		{
+			tch->next_fighting = ch->next_fighting;
+		}
+	}
 
-  if (ch->mount && !IS_SET (ch->act, ACT_MOUNT) && ch->mount->fighting)
-    stop_fighting (ch->mount);
+	ch->next_fighting = 0;
+	ch->fighting = 0;
+	if (GET_POS (ch) == FIGHT)
+	{
+		GET_POS (ch) = STAND;
+		remove_cover(ch,0);
+	}
+	ch->flags &= ~FLAG_KILL;
 
-  if (IS_NPC (ch))
-    {
-      ch->speed = 0;
-      ch->threats = NULL;
-      ch->attackers = NULL;
-    }
+	if (ch->mount && !IS_SET (ch->act, ACT_MOUNT) && ch->mount->fighting)
+		stop_fighting (ch->mount);
+
+	if (IS_NPC (ch))
+	{
+		ch->speed = 0;
+		ch->threats = NULL;
+		ch->attackers = NULL;
+	}
 }
 
 void
@@ -1272,15 +1276,19 @@ raw_kill (CHAR_DATA * ch)
     }
 
   //for (tch = character_list; tch; tch = tch->next)
-  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
-    {
-	tch = *tch_iterator;
-      if (tch->deleted)
-	continue;
-      if (tch->aiming_at == ch && ch->room != tch->room)
-	act ("$n collapses, slain. You lower your weapon.", false, ch, 0, tch,
-	     TO_VICT | _ACT_FORMAT);
-    }
+	for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
+	{
+		tch = *tch_iterator;
+		if (tch->deleted)
+			continue;
+		if (tch->aiming_at == ch && ch->room != tch->room)
+			act ("$n collapses, slain. You lower your weapon.", false, ch, 0, tch,
+			TO_VICT | _ACT_FORMAT);
+		AFFECTED_TYPE *af;
+		if ((af = get_affect(tch, MAGIC_GUARD)))
+			if (af->a.spell.t == (long int) ch)
+				remove_affect_type(tch, MAGIC_GUARD);
+	}
 
   if (!IS_SET (ch->plr_flags, FLAG_PETRIFIED))
     make_corpse (ch);
@@ -1394,16 +1402,18 @@ die (CHAR_DATA * ch)
     {
       arena__death (ch);
     }
-
-if (ch->in_room == 66953 || ch->in_room == 66954 || ch->in_room == 66955 || ch->in_room == 66956)
-    {
-      te_pit_death (ch);
-    }
+//
+//if (ch->in_room == 66953 || ch->in_room == 66954 || ch->in_room == 66955 || ch->in_room == 66956)
+//    {
+//      te_pit_death (ch);
+//    }
     
   if (ch->combat_log)
     {
       system_log (ch->combat_log, false);
     }
+	
+  clear_player_from_second_affects(ch);
 
   if (!IS_NPC (ch))
     {
@@ -1668,6 +1678,7 @@ hit_char (CHAR_DATA * ch, CHAR_DATA * victim, int strike_parm)
     }
 }
 
+/*
 void
 poison_bite (CHAR_DATA * src, CHAR_DATA * tar)
 {
@@ -1678,7 +1689,7 @@ poison_bite (CHAR_DATA * src, CHAR_DATA * tar)
     {
       if (!poison->poison_type)
 	continue;
-      if (GET_CON (tar) > number (0, 25))
+      if (GET_CON (tar) > number (0, GET_CON(tar)))
 	continue;
       duration = number (poison->duration_die_1, poison->duration_die_2);
       if (poison->poison_type == POISON_LETHARGY)
@@ -1690,7 +1701,7 @@ poison_bite (CHAR_DATA * src, CHAR_DATA * tar)
 	     false, tar, 0, 0, TO_CHAR | _ACT_FORMAT);
       magic_add_affect (tar, poison->poison_type, duration, 0, 0, 0, 0);
     }
-}
+} */
 
 char *
 get_dam_word (int damage)
@@ -1716,13 +1727,10 @@ combat_roll (int ability)
   int r;
   int roll_result;
 
-  r = number (1, SKILL_CEILING);
-
-  if (ability > 98)
-    ability = 98;
-
   if (ability < 5)
     ability = 5;
+
+  r = number (1, MAX(100, ability));
 
   if (r > ability)
     roll_result = SUC_MF - ((r % 5) ? 0 : 1);
@@ -1769,867 +1777,760 @@ advance (CHAR_DATA * src, CHAR_DATA * tar)
 int
 strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 {
-  float defense = 0;
-  float attack = 0;
-  int off_success;
-  int def_success;
-  int off_result = 0;
-  int def_result = 0;
-  int defense_hand;
-  int location;
-  int damage = 0, hit_type = 0;
-  int i;
-  int j, wear_loc1 = 0, wear_loc2 = 0;
-  int strchk;
-  int movecost;
-  char loc[MAX_STRING_LENGTH];
-  OBJ_DATA *tar_prim = get_equip (tar, WEAR_PRIM);
-  OBJ_DATA *tar_sec = get_equip (tar, WEAR_SEC);
-  OBJ_DATA *tar_both = get_equip (tar, WEAR_BOTH);
-  OBJ_DATA *src_prim = get_equip (src, WEAR_PRIM);
-  OBJ_DATA *src_sec = get_equip (src, WEAR_SEC);
-  OBJ_DATA *src_dual = get_equip (src, WEAR_BOTH);
-  OBJ_DATA *attack_weapon = NULL;
-  OBJ_DATA *defense_weapon = NULL;
-  OBJ_DATA *shield = NULL;
-  OBJ_DATA *attack_shield = NULL;
-  OBJ_DATA *eq1 = NULL, *eq2 = NULL, *broken_eq = NULL;
-  CHAR_DATA *mount;
-  AFFECTED_TYPE *af = NULL;
-  int bonus;
-  float attack_modifier;
-  float defense_modifier;
-  float r1;
-  float fatchk;
-  
-  char fd[MAX_STRING_LENGTH];
-  char buf[MAX_STRING_LENGTH];
-  CHAR_DATA *dch;
+	float defense = 0;
+	float attack = 0;
+	int off_success;
+	int def_success;
+	int off_result = 0;
+	int def_result = 0;
+	int defense_hand;
+	int location;
+	int damage = 0, hit_type = 0;
+	int i;
+	int j, wear_loc1 = 0, wear_loc2 = 0;
+	int strchk;
+	int movecost;
+	char loc[MAX_STRING_LENGTH];
+	OBJ_DATA *tar_prim = get_equip (tar, WEAR_PRIM);
+	OBJ_DATA *tar_sec = get_equip (tar, WEAR_SEC);
+	OBJ_DATA *tar_both = get_equip (tar, WEAR_BOTH);
+	OBJ_DATA *src_prim = get_equip (src, WEAR_PRIM);
+	OBJ_DATA *src_sec = get_equip (src, WEAR_SEC);
+	OBJ_DATA *src_dual = get_equip (src, WEAR_BOTH);
+	OBJ_DATA *attack_weapon = NULL;
+	OBJ_DATA *defense_weapon = NULL;
+	OBJ_DATA *shield = NULL;
+	OBJ_DATA *attack_shield = NULL;
+	OBJ_DATA *eq1 = NULL, *eq2 = NULL, *broken_eq = NULL;
+	CHAR_DATA *mount;
+	AFFECTED_TYPE *af = NULL;
+	int bonus;
+	float attack_modifier;
+	float defense_modifier;
+	float r1;
+	float fatchk;
 
-  *fd = 0;
+	char fd[MAX_STRING_LENGTH];
+	char buf[MAX_STRING_LENGTH];
+	CHAR_DATA *dch;
 
-  if (IS_SET (src->act, ACT_VEHICLE))
-    return 0;
+	*fd = 0;
 
-  sprintf (AD, "%s [%d hp %d mvs] strike %d %s [%d hp %d mvs]  ",
-	   GET_NAME (src), GET_HIT (src), GET_MOVE (src), attack_num,
-	   GET_NAME (tar), GET_HIT (tar), GET_MOVE (tar));
+	if (IS_SET (src->act, ACT_VEHICLE))
+		return 0;
 
-  attack_modifier = src->fight_percentage;
-  defense_modifier = tar->fight_percentage;
+	sprintf (AD, "%s [%d hp %d mvs] strike %d %s [%d hp %d mvs]  ",
+		GET_NAME (src), GET_HIT (src), GET_MOVE (src), attack_num,
+		GET_NAME (tar), GET_HIT (tar), GET_MOVE (tar));
 
-  if (src->in_room != tar->in_room)
-    return 0;
+	attack_modifier = src->fight_percentage;
+	defense_modifier = tar->fight_percentage;
 
-  if (attack_num == 1)
-    attack_weapon = src_prim ? src_prim : src_dual;
-  else
-    attack_weapon = src_sec;
+	if (src->in_room != tar->in_room)
+		return 0;
 
-  if (attack_weapon &&
-      (attack_weapon->o.weapon.use_skill == SKILL_SHORTBOW ||
-       attack_weapon->o.weapon.use_skill == SKILL_LONGBOW ||
-       attack_weapon->o.weapon.use_skill == SKILL_CROSSBOW ||
-       attack_weapon->o.weapon.use_skill == SKILL_SLING ||
-       attack_weapon->o.weapon.use_skill == SKILL_THROWN))
-    return 0;
+	if (attack_num == 1)
+		attack_weapon = src_prim ? src_prim : src_dual;
+	else
+		attack_weapon = src_sec;
 
-  if (attack_weapon && GET_ITEM_TYPE (attack_weapon) != ITEM_WEAPON &&
-      GET_ITEM_TYPE (attack_weapon) != ITEM_SHIELD)
-    attack_weapon = NULL;
+	if (attack_weapon &&
+		(attack_weapon->o.weapon.use_skill == SKILL_SHORTBOW ||
+		attack_weapon->o.weapon.use_skill == SKILL_LONGBOW ||
+		attack_weapon->o.weapon.use_skill == SKILL_CROSSBOW ||
+		attack_weapon->o.weapon.use_skill == SKILL_SLING ||
+		attack_weapon->o.weapon.use_skill == SKILL_THROWN))
+		return 0;
 
-  if (IS_SET (src->flags, FLAG_PACIFIST))
-    return 0;
+	if (attack_weapon && GET_ITEM_TYPE (attack_weapon) != ITEM_WEAPON &&
+		GET_ITEM_TYPE (attack_weapon) != ITEM_SHIELD)
+		attack_weapon = NULL;
 
-  if (attack_weapon)
-    sprintf (AD, "%s\n\r", attack_weapon->short_description);
-  else
-    {
-      attack = src->skills[SKILL_BRAWLING];	/* default attack */
-      sprintf (AD, "BRAWLING\n\r");
-    }
+	if (IS_SET (src->flags, FLAG_PACIFIST))
+		return 0;
 
-  if (attack_weapon)
-    attack = src->skills[attack_weapon->o.weapon.use_skill];
-
-  if (attack < src->offense)
-    {
-      attack = src->offense;
-      sprintf (AD, "Using Offense %d ", (int) attack);
-    }
-
-  sprintf (AD, "ABase %d ", (int) attack);
-
-  /* Weapon bonus/penalty */
-
-  bonus = 100;
-
-  if (attack_weapon)
-    {
-      for (af = attack_weapon->xaffected; af; af = af->next)
-	switch (af->a.spell.location)
-	  {
-	  case APPLY_OFFENSE:
-	  case APPLY_CLUB:
-	  case APPLY_SPEAR:
-	  case APPLY_SWORD:
-	  case APPLY_DAGGER:
-	  case APPLY_AXE:
-	  case APPLY_WHIP:
-	  case APPLY_POLEARM:
-	    sprintf (AD, "+%d WEAP-AFF ", af->a.spell.modifier);
-	    bonus += af->a.spell.modifier;
-	    break;
-	  default:
-	    break;
-	  }
-    }
-
-  if ((attack_shield = get_equip (src, WEAR_SHIELD)))
-    {
-
-      for (af = attack_shield->xaffected; af; af = af->next)
+	if (attack_weapon)
+		sprintf (AD, "%s\n\r", attack_weapon->short_description);
+	else
 	{
-	  if (af->a.spell.location == APPLY_OFFENSE)
-	    {
-	      sprintf (AD, "%d OFF/SHIELD PEN ", af->a.spell.modifier);
-	      bonus += af->a.spell.modifier;
-	    }
+		attack = src->skills[SKILL_BRAWLING];	/* default attack */
+		sprintf (AD, "BRAWLING\n\r");
 	}
-    }
 
-  if (bonus < 0)
-    attack_modifier = 0.0;
-  else
-    attack_modifier = attack_modifier * bonus / 100.0;
+	if (attack_weapon)
+		attack = skill_level(src, attack_weapon->o.weapon.use_skill, 0);
 
-  sprintf (AD, "weapmod %d ", bonus);
+	if (attack < skill_level(src, SKILL_OFFENSE, 0))
+	{
+		attack = skill_level(src, SKILL_OFFENSE, 0);
+		sprintf (AD, "Using Offense %d ", (int) attack);
+	}
 
-/* Encumberance penalty */
+	sprintf (AD, "ABase %d ", (int) attack);
 
-  for (i = 0; i < ENCUMBERANCE_ENTRIES; i++)
-    {
-    	if (GET_STR (src) >= 18)
-    		strchk = 18;
-    	else
-    		strchk = GET_STR (src);
-    	
-      if (strchk * enc_tab[i].str_mult_wt >= IS_CARRYING_W (src))
-				break;
-    }
+	/* Encumberance penalty */
 
-  attack_modifier = attack_modifier * enc_tab[i].penalty;
-  sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
+	for (i = 0; i < ENCUMBERANCE_ENTRIES; i++)
+	{
+		strchk = GET_STR (src);
+
+		if (strchk * enc_tab[i].str_mult_wt >= IS_CARRYING_W (src))
+			break;
+	}
+
+	attack_modifier = attack_modifier * enc_tab[i].penalty;
+	sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
 	/* Move costs */    
-    /** 
-    move_cost = enc_tab[i].move + 2.0 for Frantic
-    move_cost = enc_tab[i].move + 1.5 for Aggressive
-    move_cost = enc_tab[i].move + 1.0 for Normal
-    move_cost = enc_tab[i].move + 0.5 for Careful
-    move_cost = enc_tab[i].move + 0.0 for Defensive
-    **/
-    
-		movecost = int (enc_tab[i].move + (0.5) * (4 - src->fight_mode));
-		
+	/** 
+	move_cost = enc_tab[i].move + 2.0 for Frantic
+	move_cost = enc_tab[i].move + 1.5 for Aggressive
+	move_cost = enc_tab[i].move + 1.0 for Normal
+	move_cost = enc_tab[i].move + 0.5 for Careful
+	move_cost = enc_tab[i].move + 0.0 for Defensive
+	**/
 
-		 
-/* 50% chance to lose a move if they would have lost no points */  
-  if ((number (1, 100) > 50) && (movecost <= 1))
-  	movecost = 1;
-  	
+	movecost = int (enc_tab[i].move + (0.5) * (4 - src->fight_mode));
+
+
+
+	/* 50% chance to lose a move if they would have lost no points */  
+	if ((number (1, 100) > 50) && (movecost <= 1))
+		movecost = 1;
+
 	src->move = src->move - movecost;
-  if (src->move < 0)
-  	src->move = 0;
-			
-  /* Fatigue penalty */
+	if (src->move < 0)
+		src->move = 0;
 
-  if (GET_MAX_MOVE (src) > 0)
-    j = GET_MOVE (src) * 100 / GET_MAX_MOVE (src);
-  else
-    j = 0;
+	/* Fatigue penalty */
 
-  if (j > 100)
-    j = 100;
+	if (GET_MAX_MOVE (src) > 0)
+		j = GET_MOVE (src) * 100 / GET_MAX_MOVE (src);
+	else
+		j = 0;
 
-  for (i = 0; j > fatigue[i].percent; i++)
-    ;
+	if (j > 100)
+		j = 100;
+
+	for (i = 0; j > fatigue[i].percent; i++)
+		;
 
 	// Save vs WILLPOWER
-  if (number (1, 25) < src->wil)
-  	fatchk = fatigue[i].penalty;
-  else
-  	fatchk = 1.00;
+	if (number (1, src->wil) < src->wil)
+		fatchk = fatigue[i].penalty;
+	else
+		fatchk = 1.00;
 
-	
+
 	attack_modifier = attack_modifier * fatchk;
 	sprintf (AD, "\nAtk Fatigue %3.2f real Fatigue  %3.2f", fatchk, fatigue[i].penalty);
 
-  
 
-  /* Dual wield penalty */
 
-  if (attack_num == 2)
-    {
-      r1 = .60 + .40 * src->skills[SKILL_DUAL] / 100.0;
-      sprintf (AD, "Dual Pen %3.2f ", r1);
-      attack_modifier = attack_modifier * r1;
-    }
+	/* Dual wield penalty */
 
-  
-
-  /* Fightmode modifier */
-
-  attack_modifier = attack_modifier *
-    fight_tab[src->fight_mode].offense_modifier;
-
-  if (get_affect (src, MAGIC_AFFECT_FURY))
-    {
-      attack_modifier = attack_modifier * 1.25;
-      sprintf (AD, "* 1.25 [FURY] ");
-    }
-
-  if (get_affect (src, MAGIC_AFFECT_DIZZINESS))
-    {
-      attack_modifier = attack_modifier * 0.75;
-      sprintf (AD, "* 0.75 [DIZZINESS] ");
-    }
-
-  sprintf (AD, "FM %3.2f ", fight_tab[src->fight_mode].offense_modifier);
-  sprintf (AD, " = OFFENSE %3.0f\n", attack * attack_modifier / 100);
-
-  /* DEFENSE */
-
-  /* We need to know which weapon to defend with */
-
-  shield = get_equip (tar, WEAR_SHIELD);
-
-  if (shield && shield->obj_flags.type_flag != ITEM_SHIELD)
-    {
-      printf ("Non-shield object %d, on %d(%s), at %d\n",
-	      shield->nVirtual, IS_NPC (tar) ? tar->mob->nVirtual : 0,
-	      tar->name, tar->room->nVirtual);
-      fflush (stdout);
-    }
-
-  defense_weapon = NULL;
-
-  if (tar_both)
-    {
-      defense_weapon = tar_both;
-      defense_hand = 1;
-    }
-
-  else if (tar_prim && !tar_sec && !shield)
-    {
-      defense_weapon = tar_prim;
-      defense_hand = 1;
-    }
-
-  else if (tar_sec && !tar_prim && !shield)
-    {
-      defense_weapon = tar_sec;
-      defense_hand = 2;
-    }
-
-  else if (shield && !tar_prim && !tar_sec)
-    {
-      defense_weapon = shield;
-      defense_hand = 1;
-    }
-
-  else if (shield && tar_prim)
-    {
-      if (tar->primary_delay > tar->secondary_delay)
+	if (attack_num == 2)
 	{
-	  defense_weapon = shield;
-	  defense_hand = 2;
+		skill_use(src, SKILL_DUAL, 0);
+		r1 = .60 + .40 * src->skills[SKILL_DUAL] / 100.0;
+		sprintf (AD, "Dual Pen %3.2f ", r1);
+		attack_modifier = attack_modifier * r1;
 	}
-      else
+
+
+
+	/* Fightmode modifier */
+
+	attack_modifier = attack_modifier *
+		fight_tab[src->fight_mode].offense_modifier;
+
+	if (get_affect (src, MAGIC_AFFECT_FURY))
 	{
-	  defense_weapon = tar_prim;
-	  defense_hand = 1;
+		attack_modifier = attack_modifier * 1.25;
+		sprintf (AD, "* 1.25 [FURY] ");
 	}
-    }
 
-  else if (shield && tar_sec)
-    {
-      if (tar->primary_delay > tar->secondary_delay)
+	if (get_affect (src, MAGIC_AFFECT_DIZZINESS))
 	{
-	  defense_weapon = tar_sec;
-	  defense_hand = 2;
+		attack_modifier = attack_modifier * 0.75;
+		sprintf (AD, "* 0.75 [DIZZINESS] ");
 	}
-      else
+
+	sprintf (AD, "FM %3.2f ", fight_tab[src->fight_mode].offense_modifier);
+	sprintf (AD, " = OFFENSE %3.0f\n", attack * attack_modifier / 100);
+
+	/* DEFENSE */
+
+	/* We need to know which weapon to defend with */
+
+	shield = get_equip (tar, WEAR_SHIELD);
+
+	if (shield && shield->obj_flags.type_flag != ITEM_SHIELD)
 	{
-	  defense_weapon = shield;
-	  defense_hand = 1;
+		printf ("Non-shield object %d, on %d(%s), at %d\n",
+			shield->nVirtual, IS_NPC (tar) ? tar->mob->nVirtual : 0,
+			tar->name, tar->room->nVirtual);
+		fflush (stdout);
 	}
-    }
 
-  else if (tar_prim && tar_sec)
-    {
-      if (tar->primary_delay > tar->secondary_delay)
+	defense_weapon = NULL;
+
+	if (tar_both)
 	{
-	  defense_weapon = tar_sec;
-	  defense_hand = 2;
+		defense_weapon = tar_both;
+		defense_hand = 1;
 	}
-      else
+
+	else if (tar_prim && !tar_sec && !shield)
 	{
-	  defense_weapon = tar_prim;
-	  defense_hand = 1;
+		defense_weapon = tar_prim;
+		defense_hand = 1;
 	}
-    }
 
-  else
-    {
-      defense_weapon = NULL;
-      defense_hand = 1;
-    }
-
-  if (shield != defense_weapon)
-    shield = NULL;
-
-  if (defense_weapon && GET_ITEM_TYPE (defense_weapon) != ITEM_WEAPON
-      && GET_ITEM_TYPE (defense_weapon) != ITEM_SHIELD)
-    defense_weapon = NULL;
-
-  if (!defense_weapon)
-    defense = tar->skills[SKILL_DODGE];
-  else if (defense_weapon->obj_flags.type_flag == ITEM_SHIELD)
-    defense = tar->skills[SKILL_BLOCK];
-  else if (defense_weapon->obj_flags.type_flag == ITEM_WEAPON)
-    {
-      if (defense_weapon->o.weapon.use_skill == SKILL_LONGBOW ||
-	  defense_weapon->o.weapon.use_skill == SKILL_SHORTBOW ||
-	  defense_weapon->o.weapon.use_skill == SKILL_CROSSBOW ||
-	  defense_weapon->o.weapon.use_skill == SKILL_SLING ||
-	  defense_weapon->o.weapon.use_skill == SKILL_THROWN)
+	else if (tar_sec && !tar_prim && !shield)
 	{
-	  defense = tar->skills[SKILL_DODGE];
-	  defense_weapon = NULL;
+		defense_weapon = tar_sec;
+		defense_hand = 2;
 	}
-      else
-	defense = tar->skills[SKILL_PARRY];
-    }
-  else
-    {
-      defense = 0;
-    }
 
-  if (real_skill (tar, SKILL_DANGER_SENSE))
-    if (skill_use (tar, SKILL_DANGER_SENSE, 0))
-      defense += tar->skills[SKILL_DANGER_SENSE] / 5;
-  /* On a successful use of the Danger Sense skill, if */
-  /* the skill being checked is a defensive combat skill, */
-  /* it grants them a bonus; they are able to sense the */
-  /* impending blow before it lands. (Nexus) */
+	else if (shield && !tar_prim && !tar_sec)
+	{
+		defense_weapon = shield;
+		defense_hand = 1;
+	}
 
-  if (IS_SET (tar->flags, FLAG_PACIFIST))
-    defense += 10;
+	else if (shield && tar_prim)
+	{
+		if (tar->primary_delay > tar->secondary_delay)
+		{
+			defense_weapon = shield;
+			defense_hand = 2;
+		}
+		else
+		{
+			defense_weapon = tar_prim;
+			defense_hand = 1;
+		}
+	}
 
-  if (defense > 95)
-    defense = 95;
+	else if (shield && tar_sec)
+	{
+		if (tar->primary_delay > tar->secondary_delay)
+		{
+			defense_weapon = tar_sec;
+			defense_hand = 2;
+		}
+		else
+		{
+			defense_weapon = shield;
+			defense_hand = 1;
+		}
+	}
 
-  /*  Unless you're Legolas, using bows in melee isn't so bright... */
-  if (tar->aiming_at)
-    defense -= 20;
+	else if (tar_prim && tar_sec)
+	{
+		if (tar->primary_delay > tar->secondary_delay)
+		{
+			defense_weapon = tar_sec;
+			defense_hand = 2;
+		}
+		else
+		{
+			defense_weapon = tar_prim;
+			defense_hand = 1;
+		}
+	}
 
-  sprintf (AD, "DBase %d ", (int) defense);
+	else
+	{
+		defense_weapon = NULL;
+		defense_hand = 1;
+	}
+
+	if (shield != defense_weapon)
+		shield = NULL;
+
+	if (defense_weapon && GET_ITEM_TYPE (defense_weapon) != ITEM_WEAPON
+		&& GET_ITEM_TYPE (defense_weapon) != ITEM_SHIELD)
+		defense_weapon = NULL;
+
+	if (!defense_weapon || !number(0, 5))
+		defense = skill_level(tar, SKILL_DODGE, 0);
+	else if (defense_weapon->obj_flags.type_flag == ITEM_SHIELD)
+		defense = skill_level(tar, SKILL_BLOCK, 0);
+	else if (defense_weapon->obj_flags.type_flag == ITEM_WEAPON)
+	{
+		if (defense_weapon->o.weapon.use_skill == SKILL_LONGBOW ||
+			defense_weapon->o.weapon.use_skill == SKILL_SHORTBOW ||
+			defense_weapon->o.weapon.use_skill == SKILL_CROSSBOW ||
+			defense_weapon->o.weapon.use_skill == SKILL_SLING ||
+			defense_weapon->o.weapon.use_skill == SKILL_THROWN)
+		{
+			defense = skill_level(tar, SKILL_DODGE, 0);
+			defense_weapon = NULL;
+		}
+		else
+			defense = skill_level(tar, SKILL_PARRY, 0);
+	}
+	else
+	{
+		defense = 0;
+	}
+
+	if (real_skill (tar, SKILL_DANGER_SENSE))
+		if (skill_use (tar, SKILL_DANGER_SENSE, 0))
+			defense += tar->skills[SKILL_DANGER_SENSE] / 5;
+	/* On a successful use of the Danger Sense skill, if */
+	/* the skill being checked is a defensive combat skill, */
+	/* it grants them a bonus; they are able to sense the */
+	/* impending blow before it lands. (Nexus) */
+
+	if (IS_SET (tar->flags, FLAG_PACIFIST))
+		defense += 10;
+
+	/*  Unless you're Legolas, using bows in melee isn't so bright... */
+	if (tar->aiming_at)
+		defense -= 20;
+
+	sprintf (AD, "DBase %d ", (int) defense);
 
 
- /* Encumberance penalty */
+	/* Encumberance penalty */
 
-  for (i = 0; i < ENCUMBERANCE_ENTRIES; i++)
-    {
-      if (GET_STR (tar) >= 18)
-    		strchk = 18;
-    	else
-    		strchk = GET_STR (tar);
-    	
-      if (strchk * enc_tab[i].str_mult_wt >= IS_CARRYING_W (tar))
-				break;
-    }
+	for (i = 0; i < ENCUMBERANCE_ENTRIES; i++)
+	{
+		strchk = GET_STR (tar);
 
-  sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
-  defense_modifier = defense_modifier * enc_tab[i].penalty;
-  
-  /* Move costs */    
-    /** 
-    move_cost = enc_tab[i].move + 2.0 for Frantic
-    move_cost = enc_tab[i].move + 1.5 for Aggressive
-    move_cost = enc_tab[i].move + 1.0 for Normal
-    move_cost = enc_tab[i].move + 0.5 for Careful
-    move_cost = enc_tab[i].move + 0.0 for Defensive
-    **/
+		if (strchk * enc_tab[i].str_mult_wt >= IS_CARRYING_W (tar))
+			break;
+	}
 
-  movecost = int (enc_tab[i].move + (0.5) * (4 - tar->fight_mode));
-   /* 50% chance to lose a move if they would have lost no points */  
-  if ((number (1, 100) > 50) && (movecost <= 1))
-  	movecost = 1;
-  	
+	sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
+	defense_modifier = defense_modifier * enc_tab[i].penalty;
+
+	/* Move costs */    
+	/** 
+	move_cost = enc_tab[i].move + 2.0 for Frantic
+	move_cost = enc_tab[i].move + 1.5 for Aggressive
+	move_cost = enc_tab[i].move + 1.0 for Normal
+	move_cost = enc_tab[i].move + 0.5 for Careful
+	move_cost = enc_tab[i].move + 0.0 for Defensive
+	**/
+
+	movecost = int (enc_tab[i].move + (0.5) * (4 - tar->fight_mode));
+	/* 50% chance to lose a move if they would have lost no points */  
+	if ((number (1, 100) > 50) && (movecost <= 1))
+		movecost = 1;
+
 	tar->move = tar->move - movecost;
-  if (tar->move < 0)
-  	tar->move = 0;
-  /* Fatigue penalty */
+	if (tar->move < 0)
+		tar->move = 0;
+	/* Fatigue penalty */
 
-  if (GET_MAX_MOVE (tar) > 0)
-    j = GET_MOVE (tar) * 100 / GET_MAX_MOVE (tar);
-  
-  if (j > 100)
-    j = 100;
+	if (GET_MAX_MOVE (tar) > 0)
+		j = GET_MOVE (tar) * 100 / GET_MAX_MOVE (tar);
 
-  for (i = 0; j > fatigue[i].percent; i++)
-    ;
+	if (j > 100)
+		j = 100;
 
-	
+	for (i = 0; j > fatigue[i].percent; i++)
+		;
+
+
 	// Save vs WILLPOWER
-  if (number (1, 25) > tar->wil)
-  	fatchk = fatigue[i].penalty;
-  else
-  	fatchk = 1.00;
-	
+	if (number (1, tar->wil) > tar->wil)
+		fatchk = fatigue[i].penalty;
+	else
+		fatchk = 1.00;
+
 	defense_modifier = defense_modifier * fatchk;
 	sprintf (AD, "\nDef Fatigue %3.2f FatiguePen %3.2f", fatchk, fatigue[i].penalty);
 
-  
 
 
-  /* Fightmode modifier */
 
-  defense_modifier = defense_modifier *
-    fight_tab[tar->fight_mode].defense_modifier;
+	/* Fightmode modifier */
 
-  sprintf (AD, "FM %3.2f ", fight_tab[tar->fight_mode].defense_modifier);
+	defense_modifier = defense_modifier *
+		fight_tab[tar->fight_mode].defense_modifier;
 
-  /* Hand delay modifier */
+	sprintf (AD, "FM %3.2f ", fight_tab[tar->fight_mode].defense_modifier);
 
-  if (defense_hand == 1)
-    r1 = (100 - 5 * tar->primary_delay) / 100.0;
-  else
-    r1 = (100 - 5 * tar->secondary_delay) / 100.0;
+	/* Hand delay modifier */
 
-  if (r1 < .25)			/* Maximum 75% penalty for being delayed. */
-    r1 = .25;
+	if (defense_hand == 1)
+		r1 = (100 - 5 * tar->primary_delay) / 100.0;
+	else
+		r1 = (100 - 5 * tar->secondary_delay) / 100.0;
 
-  defense_modifier = defense_modifier * r1;
+	if (r1 < .25)			/* Maximum 75% penalty for being delayed. */
+		r1 = .25;
 
-  sprintf (AD, "DelayPen %3.2f ", r1);
+	defense_modifier = defense_modifier * r1;
 
-  /* Weapon/shield defense */
+	sprintf (AD, "DelayPen %3.2f ", r1);
 
-  if (defense_weapon)
-    {
+	defense = defense * defense_modifier / 100;
+	attack = attack * attack_modifier / 100;
 
-      bonus = 100;
-
-      for (af = defense_weapon->xaffected; af; af = af->next)
+	if (attack_weapon
+		&& (attack_weapon->o.od.value[3] == SKILL_MEDIUM_EDGE
+		|| attack_weapon->o.od.value[3] == SKILL_MEDIUM_BLUNT
+		|| attack_weapon->o.od.value[3] == SKILL_MEDIUM_PIERCE))
 	{
-
-	  if (defense_weapon->obj_flags.type_flag == ITEM_SHIELD)
-	    {
-	      if (af->a.spell.location == APPLY_BLOCK)
-		bonus += af->a.spell.modifier;
-	    }
-
-	  else if (af->a.spell.location == APPLY_PARRY)
-	    bonus += af->a.spell.modifier;
+		if (attack_weapon->location == WEAR_SEC)
+			attack -= 10;
 	}
 
-      if (bonus < 0)
-	defense_modifier = 0.0;
-      else
-	defense_modifier = defense_modifier * bonus / 100.0;
-
-      sprintf (AD, "Weapbon %d ", bonus);
-    }
-
-  defense = defense * defense_modifier / 100;
-  attack = attack * attack_modifier / 100;
-
-  if (attack_weapon
-      && (attack_weapon->o.od.value[3] == SKILL_MEDIUM_EDGE
-	  || attack_weapon->o.od.value[3] == SKILL_MEDIUM_BLUNT
-	  || attack_weapon->o.od.value[3] == SKILL_MEDIUM_PIERCE))
-    {
-      if (attack_weapon->location == WEAR_SEC)
-	attack -= 10;
-    }
-
-  if (attack_weapon
-      && (attack_weapon->o.od.value[3] == SKILL_HEAVY_EDGE
-	  || attack_weapon->o.od.value[3] == SKILL_HEAVY_BLUNT
-	  || attack_weapon->o.od.value[3] == SKILL_HEAVY_PIERCE))
-    {
-      if (attack_weapon->location == WEAR_PRIM)
-	attack -= 10;
-      if (attack_weapon->location == WEAR_SEC)
-	attack -= 20;
-    }
-
-  if (defense_weapon
-      && (defense_weapon->o.od.value[3] == SKILL_HEAVY_EDGE
-	  || defense_weapon->o.od.value[3] == SKILL_HEAVY_BLUNT
-	  || defense_weapon->o.od.value[3] == SKILL_HEAVY_PIERCE))
-    {
-      if (defense_weapon->location == WEAR_PRIM)
-	defense -= 10;
-      if (defense_weapon->location == WEAR_SEC)
-	defense -= 20;
-    }
-
-  if ((src->race == 24 || src->race == 25) && sun_light
-      && src->room->sector_type != SECT_INSIDE)
-    {
-      if (weather_info[src->room->zone].clouds == CLEAR_SKY)
-	attack -= 40;
-      else if (weather_info[src->room->zone].clouds == LIGHT_CLOUDS)
-	attack -= 30;
-      else if (weather_info[src->room->zone].clouds == HEAVY_CLOUDS)
-	attack -= 15;
-      else if (weather_info[src->room->zone].clouds == OVERCAST)
-	attack -= 5;
-    }
-
-  if ((tar->race == 24 || tar->race == 25) && sun_light
-      && tar->room->sector_type != SECT_INSIDE)
-    {
-      if (weather_info[tar->room->zone].clouds == CLEAR_SKY)
-	defense -= 40;
-      else if (weather_info[tar->room->zone].clouds == LIGHT_CLOUDS)
-	defense -= 30;
-      else if (weather_info[tar->room->zone].clouds == HEAVY_CLOUDS)
-	defense -= 15;
-      else if (weather_info[tar->room->zone].clouds == OVERCAST)
-	defense -= 5;
-    }
-
-  sprintf (AD, " = DEFENSE %d\n", (int) defense);
-
-  attack = figure_wound_skillcheck_penalties (src, (int) attack);
-  defense = figure_wound_skillcheck_penalties (tar, (int) defense);
-
-  defense = MAX (5.0f, defense);
-  attack = MAX (5.0f, attack);
-
-  off_success = combat_roll ((int) attack);
-
-  def_success = combat_roll ((int) defense);
-
-  sprintf (buf, "End Result: %f Attack %f Defense\n", attack, defense);
-/*	send_to_char (buf, src); */
-
-  if (attack_weapon)
-    hit_type = attack_weapon->o.weapon.hit_type;
-  else
-    {
-      if (src->nat_attack_type == 0)
-	hit_type = 9;
-      else if (src->nat_attack_type == 1 || src->nat_attack_type == 3)
-	hit_type = 7;
-      else if (src->nat_attack_type == 2)
-	hit_type = 8;
-    }
-
-  /* Must be standing or fighting AND not in frantic mode */
-
-  if ((GET_POS (tar) != STAND && GET_POS (tar) != FIGHT) ||
-      tar->fight_mode == 0)
-    {
-      def_result = RESULT_NONE;
-      off_result = ignore_offense[off_success];
-      sprintf (AD, "IGNORE:  %s = %s\n",
-	       cs_name[off_success], rs_name[off_result]);
-    }
-
-  else if (defense_hand == 1 && !defense_weapon)
-    {
-      off_result = dodge_offense[off_success][def_success];
-      def_result = dodge_defense[off_success][def_success];
-      sprintf (AD, "DODGE:  %s(%d) = %s(%d);    %s(%d) = %s(%d)\n",
-	       cs_name[off_success], off_success, rs_name[off_result],
-	       off_result, cs_name[def_success], def_success,
-	       rs_name[def_result], def_result);
-    }
-
-  else if (defense_weapon)
-    {
-      off_result = shield_parry_offense[off_success][def_success];
-      def_result = shield_parry_defense[off_success][def_success];
-
-      if (off_result == RESULT_BLOCK && defense_weapon != shield)
+	if (attack_weapon
+		&& (attack_weapon->o.od.value[3] == SKILL_HEAVY_EDGE
+		|| attack_weapon->o.od.value[3] == SKILL_HEAVY_BLUNT
+		|| attack_weapon->o.od.value[3] == SKILL_HEAVY_PIERCE))
 	{
-	  off_result = RESULT_PARRY;
-	  def_result = RESULT_PARRY;
+		if (attack_weapon->location == WEAR_PRIM)
+			attack -= 10;
+		if (attack_weapon->location == WEAR_SEC)
+			attack -= 20;
 	}
 
-      sprintf (AD, "BLOCK/PARRY:  %s = %s;    %s = %s\n",
-	       cs_name[off_success], rs_name[off_result],
-	       cs_name[def_success], rs_name[def_result]);
-    }
-
-  figure_damage (src, tar, attack_weapon, off_result, &damage, &location);
-
-  sprintf (loc, "%s", figure_location (tar, location));
-
-  wear_loc1 = body_tab[0][location].wear_loc1;
-  wear_loc2 = body_tab[0][location].wear_loc2;
-  eq1 = get_equip (tar, wear_loc1);
-  eq2 = get_equip (tar, wear_loc2);
-
-  if (eq2 && IS_SET (eq2->obj_flags.wear_flags, ITEM_WEAR_ABOUT)
-      && (isname ("cloak", eq2->name) || isname ("cape", eq2->name))
-      && number (0, 2))
-    eq2 = NULL;
-
-  if (off_result == RESULT_FUMBLE)
-    {
-
-      if (GET_DEX (src) <= number (1, 21))
+	if (defense_weapon
+		&& (defense_weapon->o.od.value[3] == SKILL_HEAVY_EDGE
+		|| defense_weapon->o.od.value[3] == SKILL_HEAVY_BLUNT
+		|| defense_weapon->o.od.value[3] == SKILL_HEAVY_PIERCE))
 	{
-	  if (attack_weapon && number (0, 1))
-	    off_result = RESULT_NEAR_FUMBLE;
-	  else
-	    off_result = RESULT_NEAR_STUMBLE;
+		if (defense_weapon->location == WEAR_PRIM)
+			defense -= 10;
+		if (defense_weapon->location == WEAR_SEC)
+			defense -= 20;
 	}
 
-      else if (!attack_weapon || number (0, 1))
-	off_result = RESULT_STUMBLE;
+	sprintf (AD, " = DEFENSE %d\n", (int) defense);
 
-      if (off_result != RESULT_FUMBLE)
-	sprintf (AD, "offensive result -> %s\n", rs_name[off_result]);
-    }
+	attack = figure_wound_skillcheck_penalties (src, (int) attack);
+	defense = figure_wound_skillcheck_penalties (tar, (int) defense);
 
-  if (def_result == RESULT_FUMBLE)
-    {
+	defense = MAX (5.0f, defense);
+	attack = MAX (5.0f, attack);
 
-      if (GET_DEX (tar) <= number (1, 21))
+	off_success = combat_roll ((int) attack);
+
+	def_success = combat_roll ((int) defense);
+
+	sprintf (buf, "End Result: %f Attack %f Defense\n", attack, defense);
+	/*	send_to_char (buf, src); */
+
+	if (attack_weapon)
+		hit_type = attack_weapon->o.weapon.hit_type;
+	else
 	{
-	  if (defense_weapon && number (0, 1))
-	    def_result = RESULT_NEAR_FUMBLE;
-	  else
-	    def_result = RESULT_NEAR_STUMBLE;
+		if (src->nat_attack_type == 0)
+			hit_type = 9;
+		else if (src->nat_attack_type == 1 || src->nat_attack_type == 3)
+			hit_type = 7;
+		else if (src->nat_attack_type == 2)
+			hit_type = 8;
 	}
 
-      else if (!defense_weapon || number (0, 1))
-	def_result = RESULT_STUMBLE;
+	/* Must be standing or fighting AND not in frantic mode */
 
-      if (def_result != RESULT_FUMBLE)
-	sprintf (AD, "defensive result -> %s\n", rs_name[def_result]);
-    }
-
-  /* DA can occur only if defending a primary attacker */
-
-  if (def_result == RESULT_ADV && tar->fighting != src)
-    def_result = RESULT_NONE;
-
-  if (attack_weapon
-      && (off_result == RESULT_BLOCK || off_result == RESULT_PARRY))
-    {
-
-      if (attack_weapon
-	  &&
-	  ((defense_weapon
-	    && attack_weapon->quality <= defense_weapon->quality) || (shield
-								      &&
-								      attack_weapon->
-								      quality
-								      <=
-								      shield->
-								      quality))
-	  && number (1, 100) > attack_weapon->quality)
+	if ((GET_POS (tar) != STAND && GET_POS (tar) != FIGHT) ||
+		tar->fight_mode == 0)
 	{
-	  if (shield)
-	    object__add_damage (attack_weapon, DAMAGE_BLUNT,
+		def_result = RESULT_NONE;
+		off_result = ignore_offense[off_success];
+		sprintf (AD, "IGNORE:  %s = %s\n",
+			cs_name[off_success], rs_name[off_result]);
+	}
+
+	else if (defense_hand == 1 && !defense_weapon)
+	{
+		off_result = dodge_offense[off_success][def_success];
+		def_result = dodge_defense[off_success][def_success];
+		sprintf (AD, "DODGE:  %s(%d) = %s(%d);    %s(%d) = %s(%d)\n",
+			cs_name[off_success], off_success, rs_name[off_result],
+			off_result, cs_name[def_success], def_success,
+			rs_name[def_result], def_result);
+	}
+
+	else if (defense_weapon)
+	{
+		off_result = shield_parry_offense[off_success][def_success];
+		def_result = shield_parry_defense[off_success][def_success];
+
+		if (off_result == RESULT_BLOCK && defense_weapon != shield)
+		{
+			off_result = RESULT_PARRY;
+			def_result = RESULT_PARRY;
+		}
+
+		sprintf (AD, "BLOCK/PARRY:  %s = %s;    %s = %s\n",
+			cs_name[off_success], rs_name[off_result],
+			cs_name[def_success], rs_name[def_result]);
+	}
+
+	figure_damage (src, tar, attack_weapon, off_result, &damage, &location);
+
+	sprintf (loc, "%s", figure_location (tar, location));
+
+	wear_loc1 = body_tab[0][location].wear_loc1;
+	wear_loc2 = body_tab[0][location].wear_loc2;
+	eq1 = get_equip (tar, wear_loc1);
+	eq2 = get_equip (tar, wear_loc2);
+
+	if (eq2 && IS_SET (eq2->obj_flags.wear_flags, ITEM_WEAR_ABOUT)
+		&& (isname ("cloak", eq2->name) || isname ("cape", eq2->name))
+		&& number (0, 2))
+		eq2 = NULL;
+
+	if (off_result == RESULT_FUMBLE)
+	{
+
+		if (GET_DEX (src) <= number (1, 21))
+		{
+			if (attack_weapon && number (0, 1))
+				off_result = RESULT_NEAR_FUMBLE;
+			else
+				off_result = RESULT_NEAR_STUMBLE;
+		}
+
+		else if (!attack_weapon || number (0, 1))
+			off_result = RESULT_STUMBLE;
+
+		if (off_result != RESULT_FUMBLE)
+			sprintf (AD, "offensive result -> %s\n", rs_name[off_result]);
+	}
+
+	if (def_result == RESULT_FUMBLE)
+	{
+
+		if (GET_DEX (tar) <= number (1, 21))
+		{
+			if (defense_weapon && number (0, 1))
+				def_result = RESULT_NEAR_FUMBLE;
+			else
+				def_result = RESULT_NEAR_STUMBLE;
+		}
+
+		else if (!defense_weapon || number (0, 1))
+			def_result = RESULT_STUMBLE;
+
+		if (def_result != RESULT_FUMBLE)
+			sprintf (AD, "defensive result -> %s\n", rs_name[def_result]);
+	}
+
+	/* DA can occur only if defending a primary attacker */
+
+	if (def_result == RESULT_ADV && tar->fighting != src)
+		def_result = RESULT_NONE;
+
+	if (attack_weapon
+		&& (off_result == RESULT_BLOCK || off_result == RESULT_PARRY))
+	{
+
+		if (attack_weapon
+			&&
+			((defense_weapon
+			&& attack_weapon->quality <= defense_weapon->quality) || (shield
+			&&
+			attack_weapon->
+			quality
+			<=
+			shield->
+			quality))
+			&& number (1, 100) > attack_weapon->quality)
+		{
+			if (shield)
+				object__add_damage (attack_weapon, DAMAGE_BLUNT,
 				number (1, MAX (damage, 5)));
-	  else
-	    object__add_damage (attack_weapon,
+			else
+				object__add_damage (attack_weapon,
 				(DAMAGE_TYPE) defense_weapon->o.weapon.
 				hit_type, number (1, MAX (damage, 5)));
-	  if ((number (1, 100) > attack_weapon->quality
-	       && number (1, 100) > attack_weapon->item_wear)
-	      || attack_weapon->item_wear <= 0)
-	    off_result = RESULT_WEAPON_BREAK;
-	}
-      else if (attack_weapon && defense_weapon
-	       && number (1, 100) > defense_weapon->quality)
-	{
-	  object__add_damage (defense_weapon, (DAMAGE_TYPE) hit_type,
-			      number (1, MAX (damage, 5)));
-	  if ((number (1, 100) > defense_weapon->quality
-	       && number (1, 100) > defense_weapon->item_wear)
-	      || defense_weapon->item_wear <= 0)
-	    def_result = RESULT_WEAPON_BREAK;
-	}
-      else if (attack_weapon && shield && number (1, 100) > shield->quality)
-	{
-	  object__add_damage (shield, (DAMAGE_TYPE) hit_type,
-			      number (1, MAX (damage, 5)));
-	  if ((number (1, 100) > shield->quality
-	       && number (1, 100) > shield->item_wear)
-	      || shield->item_wear <= 0)
-	    def_result = RESULT_SHIELD_BREAK;
-	}
-      else if (attack_weapon
-	       &&
-	       ((defense_weapon
-		 && attack_weapon->quality > defense_weapon->quality)
-		|| (shield && attack_weapon->quality > shield->quality))
-	       && attack_weapon->quality > defense_weapon->quality
-	       && number (1, 100) > attack_weapon->quality)
-	{
-	  if (shield)
-	    object__add_damage (attack_weapon, DAMAGE_BLUNT,
+			if ((number (1, 100) > attack_weapon->quality
+				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
+				|| attack_weapon->item_wear <= 0)
+				off_result = RESULT_WEAPON_BREAK;
+		}
+		else if (attack_weapon && defense_weapon
+			&& number (1, 100) > defense_weapon->quality)
+		{
+			object__add_damage (defense_weapon, (DAMAGE_TYPE) hit_type,
 				number (1, MAX (damage, 5)));
-	  else
-	    object__add_damage (attack_weapon,
+			if ((number (1, 100) > defense_weapon->quality
+				&& number (1, 100) > defense_weapon->item_wear && damage > 10)
+				|| defense_weapon->item_wear <= 0)
+				def_result = RESULT_WEAPON_BREAK;
+		}
+		else if (attack_weapon && shield && number (1, 100) > shield->quality)
+		{
+			object__add_damage (shield, (DAMAGE_TYPE) hit_type,
+				number (1, MAX (damage, 5)));
+			if ((number (1, 100) > shield->quality
+				&& number (1, 100) > shield->item_wear && damage > 10)
+				|| shield->item_wear <= 0)
+				def_result = RESULT_SHIELD_BREAK;
+		}
+		else if (attack_weapon
+			&&
+			((defense_weapon
+			&& attack_weapon->quality > defense_weapon->quality)
+			|| (shield && attack_weapon->quality > shield->quality))
+			&& attack_weapon->quality > defense_weapon->quality
+			&& number (1, 100) > attack_weapon->quality)
+		{
+			if (shield)
+				object__add_damage (attack_weapon, DAMAGE_BLUNT,
+				number (1, MAX (damage, 5)));
+			else
+				object__add_damage (attack_weapon,
 				(DAMAGE_TYPE) defense_weapon->o.weapon.
 				hit_type, number (1, MAX (damage, 5)));
-	  if ((number (1, 100) > attack_weapon->quality
-	       && number (1, 100) > attack_weapon->item_wear)
-	      || attack_weapon->item_wear <= 0)
-	    off_result = RESULT_WEAPON_BREAK;
+			if ((number (1, 100) > attack_weapon->quality
+				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
+				|| attack_weapon->item_wear <= 0)
+				off_result = RESULT_WEAPON_BREAK;
+		}
 	}
-    }
 
-  if ((off_result == RESULT_HIT1 || off_result == RESULT_HIT2
-       || off_result == RESULT_HIT3 || off_result == RESULT_HIT4)
-      && attack_weapon && (eq1 || eq2))
-    {
-      if (attack_weapon && eq1 && eq1->o.od.value[0] > 2
-	  && attack_weapon->quality <= eq1->quality
-	  && number (1, 100) > attack_weapon->quality)
+	if ((off_result == RESULT_HIT1 || off_result == RESULT_HIT2
+		|| off_result == RESULT_HIT3 || off_result == RESULT_HIT4)
+		&& attack_weapon && (eq1 || eq2))
 	{
-	  object__add_damage (attack_weapon, DAMAGE_BLUNT,
-			      number (1, MAX (damage, 5)));
-	  if ((number (1, 100) > attack_weapon->quality
-	       && number (1, 100) > attack_weapon->item_wear)
-	      || attack_weapon->item_wear <= 0)
-	    {
-	      off_result = RESULT_WEAPON_BREAK;
-	      def_result = RESULT_ANY;
-	    }
-	}
-      else if (attack_weapon && eq2 && eq2->o.od.value[0] > 2
-	       && attack_weapon->quality <= eq2->quality
-	       && number (1, 100) > attack_weapon->quality)
-	{
-	  object__add_damage (attack_weapon, DAMAGE_BLUNT,
-			      number (1, MAX (damage, 5)));
-	  if ((number (1, 100) > attack_weapon->quality
-	       && number (1, 100) > attack_weapon->item_wear)
-	      || attack_weapon->item_wear <= 0)
-	    {
-	      off_result = RESULT_WEAPON_BREAK;
-	      def_result = RESULT_ANY;
-	    }
-	}
-      else if (attack_weapon && eq1 && number (1, 100) > eq1->quality)
-	{
-	  if (GET_ITEM_TYPE (eq1) == ITEM_ARMOR)
-	    object__add_damage (eq1, (DAMAGE_TYPE) hit_type,
+		if (attack_weapon && eq1 && eq1->o.od.value[0] > 2
+			&& attack_weapon->quality <= eq1->quality
+			&& number (1, 100) > attack_weapon->quality)
+		{
+			object__add_damage (attack_weapon, DAMAGE_BLUNT,
 				number (1, MAX (damage, 5)));
-	  else
-	    object__add_damage (eq1, (DAMAGE_TYPE) hit_type,
-				number (1, MAX (damage, 5)));
-	  if ((number (1, 100) > eq1->quality
-	       && number (1, 100) > eq1->item_wear) || eq1->item_wear <= 0)
-	    broken_eq = eq1;
-	}
-      else if (attack_weapon && eq2 && number (1, 100) > eq2->quality)
-	{
-	  if (GET_ITEM_TYPE (eq2) == ITEM_ARMOR)
-	    object__add_damage (eq2, (DAMAGE_TYPE) hit_type,
-				number (1, MAX (damage, 5)));
-	  else
-	    object__add_damage (eq2, (DAMAGE_TYPE) hit_type,
-				number (1, MAX (damage, 5)));
-	  if (number (1, 100) > eq2->quality
-	      && number (1, 100) > eq2->item_wear)
-	    broken_eq = eq2;
-	}
-      else if (attack_weapon && eq1 && eq1->o.od.value[0] > 2
-	       && attack_weapon->quality > eq1->quality
-	       && number (1, 100) > attack_weapon->quality)
-	{
-	  object__add_damage (attack_weapon, DAMAGE_BLUNT,
-			      number (1, MAX (damage, 5)));
-	  if ((number (1, 100) > attack_weapon->quality
-	       && number (1, 100) > attack_weapon->item_wear)
-	      || attack_weapon->item_wear <= 0)
-	    {
-	      off_result = RESULT_WEAPON_BREAK;
-	      def_result = RESULT_ANY;
-	    }
-	}
-      else if (attack_weapon && eq2 && eq2->o.od.value[0] > 2
-	       && attack_weapon->quality > eq2->quality
-	       && number (1, 100) > attack_weapon->quality)
-	{
-	  object__add_damage (attack_weapon, DAMAGE_BLUNT,
-			      number (1, MAX (damage, 5)));
-	  if ((number (1, 100) > attack_weapon->quality
-	       && number (1, 100) > attack_weapon->item_wear)
-	      || attack_weapon->item_wear <= 0)
-	    {
-	      off_result = RESULT_WEAPON_BREAK;
-	      def_result = RESULT_ANY;
-	    }
-	}
-    }
-
-  if (IS_SET (tar->flags, FLAG_COMPETE))
-    {
-      if (attack_weapon)
-	return wound_to_char (tar, loc, damage,
-			      attack_weapon->o.weapon.hit_type, 0, 0, 0);
-      else
-	return wound_to_char (tar, loc, damage, src->nat_attack_type, 0, 0,
-			      0);
-    }
-
-  if (tar->room->nVirtual == 5142 || tar->room->nVirtual == 5119
-      || tar->room->nVirtual == 5196 || tar->room->nVirtual == 5197
-      || tar->room->nVirtual == 5198 || tar->room->nVirtual == 5199)
-    arena_combat_message (src, tar, loc, damage, tar->room->nVirtual);
-
-  if (tar->in_room == 66953 || tar->in_room == 66954 || tar->in_room == 66955 || tar->in_room == 66956)
-  	te_pit_combat_message(src, tar, loc, damage, tar->room->nVirtual);
-	
-  combat_results (src,
-		  tar,
-		  attack_weapon,
-		  defense_weapon,
-		  broken_eq,
-		  damage,
-		  loc,
-		  off_result,
-		  def_result, attack_num, fd, off_success, def_success);
-
-  sprintf (AD, "---------------------------------------\n");
-
-  for (dch = src->room->people; dch; dch = dch->next_in_room)
-    if (IS_SET (dch->debug_mode, DEBUG_FIGHT))
-      send_to_char (fd, dch);
-
-  if (tar->deleted)
-    return 1;
-  else
-    {
-      if (IS_RIDER (tar))
-	{
-
-	  mount = tar->mount;
-/*
-			if ( mount && (mount->skills [SKILL_RIDE] < 33 ||
-				 (mount->skills [SKILL_RIDE] < 66 &&
-				  !skill_use (mount, SKILL_RIDE, 0))) ) {
-				dump_rider (tar, false);
-				flee_attempt (mount);
+			if ((number (1, 100) > attack_weapon->quality
+				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
+				|| attack_weapon->item_wear <= 0)
+			{
+				off_result = RESULT_WEAPON_BREAK;
+				def_result = RESULT_ANY;
 			}
-*/
+		}
+		else if (attack_weapon && eq2 && eq2->o.od.value[0] > 2
+			&& attack_weapon->quality <= eq2->quality
+			&& number (1, 100) > attack_weapon->quality)
+		{
+			object__add_damage (attack_weapon, DAMAGE_BLUNT,
+				number (1, MAX (damage, 5)));
+			if ((number (1, 100) > attack_weapon->quality
+				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
+				|| attack_weapon->item_wear <= 0)
+			{
+				off_result = RESULT_WEAPON_BREAK;
+				def_result = RESULT_ANY;
+			}
+		}
+		else if (attack_weapon && eq1 && number (1, 100) > eq1->quality)
+		{
+			if (GET_ITEM_TYPE (eq1) == ITEM_ARMOR)
+				object__add_damage (eq1, (DAMAGE_TYPE) hit_type,
+				number (1, MAX (damage, 5)));
+			else
+				object__add_damage (eq1, (DAMAGE_TYPE) hit_type,
+				number (1, MAX (damage, 5)));
+			if ((number (1, 100) > eq1->quality
+				&& number (1, 100) > eq1->item_wear && damage > 10) || eq1->item_wear <= 0)
+				broken_eq = eq1;
+		}
+		else if (attack_weapon && eq2 && number (1, 100) > eq2->quality)
+		{
+			if (GET_ITEM_TYPE (eq2) == ITEM_ARMOR)
+				object__add_damage (eq2, (DAMAGE_TYPE) hit_type,
+				number (1, MAX (damage, 5)));
+			else
+				object__add_damage (eq2, (DAMAGE_TYPE) hit_type,
+				number (1, MAX (damage, 5)));
+			if (number (1, 100) > eq2->quality
+				&& number (1, 100) > eq2->item_wear && damage > 10)
+				broken_eq = eq2;
+		}
+		else if (attack_weapon && eq1 && eq1->o.od.value[0] > 2
+			&& attack_weapon->quality > eq1->quality
+			&& number (1, 100) > attack_weapon->quality)
+		{
+			object__add_damage (attack_weapon, DAMAGE_BLUNT,
+				number (1, MAX (damage, 5)));
+			if ((number (1, 100) > attack_weapon->quality
+				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
+				|| attack_weapon->item_wear <= 0)
+			{
+				off_result = RESULT_WEAPON_BREAK;
+				def_result = RESULT_ANY;
+			}
+		}
+		else if (attack_weapon && eq2 && eq2->o.od.value[0] > 2
+			&& attack_weapon->quality > eq2->quality
+			&& number (1, 100) > attack_weapon->quality)
+		{
+			object__add_damage (attack_weapon, DAMAGE_BLUNT,
+				number (1, MAX (damage, 5)));
+			if ((number (1, 100) > attack_weapon->quality
+				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
+				|| attack_weapon->item_wear <= 0)
+			{
+				off_result = RESULT_WEAPON_BREAK;
+				def_result = RESULT_ANY;
+			}
+		}
 	}
 
-      return 0;
-    }
+	if (IS_SET (tar->flags, FLAG_COMPETE))
+	{
+		if (attack_weapon)
+			return wound_to_char (tar, loc, damage,
+			attack_weapon->o.weapon.hit_type, 0, 0, 0);
+		else
+			return wound_to_char (tar, loc, damage, src->nat_attack_type, 0, 0,
+			0);
+	}
+
+	if (tar->room->nVirtual == 5142 || tar->room->nVirtual == 5119
+		|| tar->room->nVirtual == 5196 || tar->room->nVirtual == 5197
+		|| tar->room->nVirtual == 5198 || tar->room->nVirtual == 5199)
+		arena_combat_message (src, tar, loc, damage, tar->room->nVirtual);
+
+	if (tar->in_room == 66953 || tar->in_room == 66954 || tar->in_room == 66955 || tar->in_room == 66956)
+		te_pit_combat_message(src, tar, loc, damage, tar->room->nVirtual);
+
+	combat_results (src,
+		tar,
+		attack_weapon,
+		defense_weapon,
+		broken_eq,
+		damage,
+		loc,
+		off_result,
+		def_result, attack_num, fd, off_success, def_success);
+
+	sprintf (AD, "---------------------------------------\n");
+
+	for (dch = src->room->people; dch; dch = dch->next_in_room)
+		if (IS_SET (dch->debug_mode, DEBUG_FIGHT))
+			send_to_char (fd, dch);
+
+	if (tar->deleted)
+		return 1;
+	else
+	{
+		if (IS_RIDER (tar))
+		{
+
+			mount = tar->mount;
+			/*
+			if ( mount && (mount->skills [SKILL_RIDE] < 33 ||
+			(mount->skills [SKILL_RIDE] < 66 &&
+			!skill_use (mount, SKILL_RIDE, 0))) ) {
+			dump_rider (tar, false);
+			flee_attempt (mount);
+			}
+			*/
+		}
+
+		return 0;
+	}
 }
 
 void
@@ -2941,7 +2842,7 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
   else if (off_result == RESULT_STUMBLE)
     {
       GET_POS (src) = SIT;
-      add_second_affect (SA_STAND, ((25-GET_AGI(src))+number(1,3)), src, NULL, NULL, 0);
+      add_second_affect (SA_STAND, ((MAX(25,GET_AGI(src))-GET_AGI(src))+number(1,3)), src, NULL, NULL, 0);
 
       if (IS_SET (tar->flags, FLAG_FLEE))
 	flee_attempt (tar);
@@ -3052,15 +2953,15 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
       if (GET_POS (tar) == FIGHT || GET_POS (tar) == STAND)
 	{
 	  GET_POS (tar) = SIT;
-	  add_second_affect (SA_STAND, ((25-GET_AGI(tar))+number(1,3)), tar, NULL, NULL, 0);
+	  add_second_affect (SA_STAND, ((MAX(25,GET_AGI(tar))-GET_AGI(tar))+number(1,3)), tar, NULL, NULL, 0);
 	}
       else
 	def_result = RESULT_NONE;
     }
 
-  if (damage && src->venom
-      && (off_result == RESULT_HIT3 || off_result == RESULT_HIT4))
-    poison_bite (src, tar);
+  //if (damage && src->venom
+  //    && (off_result == RESULT_HIT3 || off_result == RESULT_HIT4))
+  //  poison_bite (src, tar);
 
   if (attack_weapon)
     hit_type = attack_weapon->o.weapon.hit_type;
@@ -3196,9 +3097,9 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
     ;
 
   if (i == 0)
-    attack_delay += 8;		/* Completely Exhausted */
-  else if (i == 1)
-    attack_delay += 4;		/* Exhausted */
+    attack_delay += 25;		/* Completely Exhausted */
+  else if (i < 15)
+    attack_delay += (15 - i);		/* Exhausted */
 
   sprintf (AD, "Fatigue %d ", attack_delay);
 
@@ -3251,7 +3152,7 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
     dam += src->mob->damroll;
 
   /* For weapons, add weapon damage roll and affects */
-
+  float potential_damage = 0;
   if (attack_weapon)
     {
       if (attack_weapon->o.weapon.dice && attack_weapon->o.weapon.sides)
@@ -3317,13 +3218,13 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 
   /* For NPCs with no weapons, add natural attack */
 
-  else if (IS_NPC (src))
+  else if (IS_NPC (src) && src->mob->damnodice && src->mob->damsizedice)
     {
 
       if (src->mob->damnodice * src->mob->damsizedice < 8 && shock)
-	dam += dice (2, 4);
+	potential_damage = dice (2, 4);
       else
-	dam += dice (src->mob->damnodice, src->mob->damsizedice);
+	potential_damage = dice (src->mob->damnodice, src->mob->damsizedice);
     }
 
   /* For bare handed PCs */
@@ -3332,21 +3233,14 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
     dam += dice (2, 4);
   else
   {
-	  if (GET_STR(src) > 23)
-		  dam += number(3,8);
-	  else if (GET_STR(src) > 21)
-		  dam += number(2,6);
-	  else if (GET_STR(src) > 19)
-		  dam += number(2,4);
-	  else if (GET_STR(src) > 17)
-		  dam += number(1,3);
-	  else if (GET_STR(src) > 14)
-		  dam += number(1,2);
-	  else if (GET_STR(src) > 10)
-		  dam += number(0,2);
-	  else
-		  dam += number (0, 1);
+	  float upperval = sqrt(GET_STR(src)*GET_STR(src)/5)-2;
+	  if (upperval < 1)
+		  upperval = 1;
+	  potential_damage = MAX((int) potential_damage, number(GET_STR(src)/10, (int)upperval));
   }
+  
+  if (potential_damage > 0)
+     dam += potential_damage;
 
   /* Subtract the armor protection at the hit location */
 
@@ -3372,11 +3266,11 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
   {
   eq = get_equip (tar, wear_loc2);
 
-	  if (attack_weapon && eq  && eq->obj_flags.type_flag == ITEM_ARMOR)
+	  if (eq && eq->obj_flags.type_flag == ITEM_ARMOR)
 		  if (attack_weapon || !shock)
 			  dam -= eq->o.armor.armor_value;
 
-	  if (attack_weapon && eq  && eq->obj_flags.type_flag == ITEM_ARMOR)
+	  if (attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
     dam += weapon_armor_table[attack_weapon->o.weapon.hit_type]
       [eq->o.armor.armor_type];
 	  else if (!attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
@@ -3449,6 +3343,13 @@ weaken (CHAR_DATA * victim, uint16 hp_penalty, uint16 mp_penalty,
 {
   char buf[MAX_STRING_LENGTH];
 
+  /* dwarves and elves immune to endurance loss */
+  if (victim->race == 23 || (victim->race >=16 && victim->race <= 19)  || victim->race==93) 
+  {
+	  mp_penalty = 0;
+  }
+  
+
   if (hp_penalty == 0 && mp_penalty == 0)
     return 0;
 
@@ -3462,24 +3363,19 @@ weaken (CHAR_DATA * victim, uint16 hp_penalty, uint16 mp_penalty,
   if (!IS_MORTAL (victim) && !IS_NPC (victim))
     return 0;
 
+	int overflow = mp_penalty - GET_MOVE(victim);
+	if (overflow > 0)
+		if (wound_to_char(victim, "bloodloss",  MAX(1,overflow/3), 0, 0, 0, 0))
+		{
+			act ("$n dies of exhaustion!", false, victim, 0, 0, TO_ROOM);
+			act ("You die of exhaustion!", false, victim, 0, 0, TO_CHAR);
+			return 1;
+		}
+  
   if (GET_MOVE (victim) > mp_penalty)
     GET_MOVE (victim) -= mp_penalty;
   else
     GET_MOVE (victim) = 0;
-
-  if (GET_POS (victim) == POSITION_DEAD)
-    {
-
-      if (mp_penalty)
-	{
-	  act ("$n dies of exhaustion!", false, victim, 0, 0, TO_ROOM);
-	  add_combat_log (victim, "Death by exhaustion");
-	}
-
-      die (victim);
-
-      return 1;
-    }
 
   return 0;
 }
@@ -3818,7 +3714,7 @@ do_stop (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (GET_TRUST (ch))
+  if (ch->pc && (ch->pc->level > 0))
     {
       for (tch = ch->room->people; tch; tch = tch->next_in_room)
 	{
@@ -4222,7 +4118,7 @@ do_subdue (CHAR_DATA * ch, char *argument, int cmd)
     {
       GET_POS (target) = STAND;
       remove_cover(target,0);
-      if (number (1, SKILL_CEILING) <= target->skills[SKILL_LISTEN])
+      if (number (1, MAX(100, skill_level(target, SKILL_LISTEN, 0))) <= target->skills[SKILL_LISTEN])
 	{
 	  do_wake (target, "", 0);
 	  act
@@ -4745,13 +4641,19 @@ void
 sa_rescue (SECOND_AFFECT * sa)
 {
   int result;
-  CHAR_DATA *tch, *rescuee;
+  CHAR_DATA *tch = NULL, *rescuee = NULL;
 
+  if (!sa->ch)
+	return;
+	
   if (!is_he_somewhere (sa->ch))
     return;
 
   rescuee = (CHAR_DATA *) sa->obj;
   result = rescue_attempt (sa->ch, rescuee);
+  
+  if (!rescuee)
+	return;
 
   if (result == 2)		/* can't rescue...stop trying */
     return;
@@ -4794,7 +4696,14 @@ sa_rescue (SECOND_AFFECT * sa)
 		act ("You draw $N's attention.", false, sa->ch, 0, tch, TO_CHAR);
 		act ("$N draws your attention.", false, tch, 0, sa->ch, TO_CHAR);
 		act ("$N draws $n's attention.", false, tch, 0, sa->ch, TO_NOTVICT);
+		
+	  if (GET_POS(sa->ch) != POSITION_DEAD && GET_POS(tch) != POSITION_DEAD)
+		  criminalize (sa->ch, tch, sa->ch->room->zone, CRIME_KILL);
 
+      if (!tch->fighting)
+		set_fighting (tch, sa->ch);
+	  else
+	    tch->fighting = sa->ch;
 	  bool still_fighting = false;
 	  CHAR_DATA *still_fighting_char = NULL;
 	  int i = 0;
@@ -4812,22 +4721,21 @@ sa_rescue (SECOND_AFFECT * sa)
 
 	  if (still_fighting)
 	  {
-		  act("You shift your attention to #5$N#0 now that you are free.", false, rescuee, 0, rescuee->fighting, TO_CHAR);
-		  act("$n shifts $s attention to #5you#0 now that $e is free.", false, rescuee, 0, rescuee->fighting, TO_VICT);
-		  act("$n shifts $s attention to #5$N#0 now that $e is free.", false, rescuee, 0, rescuee->fighting, TO_NOTVICT);
+		  act("You shift your attention to #5$N#0 now that you are free.", false, rescuee, 0, still_fighting_char, TO_CHAR);
+		  act("$n shifts $s attention to #5you#0 now that $e is free.", false, rescuee, 0, still_fighting_char, TO_VICT);
+		  act("$n shifts $s attention to #5$N#0 now that $e is free.", false, rescuee, 0, still_fighting_char, TO_NOTVICT);
 		  rescuee->fighting = still_fighting_char;
 	  }
 	  else
 	  {
 		if (!has_combat_space(tch))
 		{
-			stop_fighting(rescuee);
+			if (rescuee->fighting)
+				stop_fighting(rescuee);
 			rescuee->fighting = NULL;
 			send_to_char("#6You get pushed out of the melee as you are rescued.#0\n", rescuee);
 		}
 	  }
-      set_fighting (tch, sa->ch);
-
 	}
 	else if (result == 4) // Has too many people fighting them
 	{
@@ -5046,16 +4954,17 @@ do_rescue (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (still_fighting)
 		{
-			act("You shift your attention to #5$N#0 now that you are free.", false, friendPtr, 0, friendPtr->fighting, TO_CHAR);
-			act("$n shifts $s attention to #5you#0 now that $e is free.", false, friendPtr, 0, friendPtr->fighting, TO_VICT);
-			act("$n shifts $s attention to #5$N#0 now that $e is free.", false, friendPtr, 0, friendPtr->fighting, TO_NOTVICT);
+			act("You shift your attention to #5$N#0 now that you are free.", false, friendPtr, 0, still_fighting_char, TO_CHAR);
+			act("$n shifts $s attention to #5you#0 now that $e is free.", false, friendPtr, 0, still_fighting_char, TO_VICT);
+			act("$n shifts $s attention to #5$N#0 now that $e is free.", false, friendPtr, 0, still_fighting_char, TO_NOTVICT);
 			friendPtr->fighting = still_fighting_char;
 		}
 		else
 		{
 			if (!has_combat_space(tch))
 			{
-				stop_fighting(friendPtr);
+				if (friendPtr->fighting)
+					stop_fighting(friendPtr);
 				friendPtr->fighting = NULL;
 				send_to_char("#6You get pushed out of the melee as you are rescued.#0\n", friendPtr);
 			}
@@ -5367,10 +5276,41 @@ do_aide (CHAR_DATA *ch, char * argument, int cmd)
 		return;
 	}
 
+	if (buddy == ch)
+	{
+		send_to_char ("You cannot aide yourself.\n", ch);
+		return;
+	}
+
+	if (buddy->fighting == ch)
+	{
+		send_to_char ("But they're fighting you!\n", ch);
+		return;
+	}
+
 	if (are_grouped(ch, buddy->fighting))
 	{
 		send_to_char ("They're fighting one of your group mates!\n", ch);
 		return;
+	}
+
+	if (ch->agi <= 9)
+	ch->balance += -15;
+      else if (ch->agi > 9 && ch->agi <= 13)
+	ch->balance += -13;
+      else if (ch->agi > 13 && ch->agi <= 15)
+	ch->balance += -11;
+      else if (ch->agi > 15 && ch->agi <= 18)
+	ch->balance += -9;
+      else
+	ch->balance += -7;
+      ch->balance = MAX (ch->balance, -50);
+
+	if (ch->balance < -15)
+	{
+	  act ("You need more balance before you can try to attack $N!",
+	       false, ch, 0, buddy->fighting, TO_CHAR | _ACT_FORMAT);
+	  return;
 	}
 
 	if (!has_combat_space(ch))
@@ -5413,8 +5353,6 @@ do_aide (CHAR_DATA *ch, char * argument, int cmd)
 	  act ("You stop fighting $N.", false, ch, 0, ch->fighting, TO_CHAR);
 	  act ("You ready yourself for battle with $N.",
 	       false, ch, 0, buddy->fighting, TO_CHAR);
-	  stop_fighting (ch);
-
 	}
 
 	std::string output;

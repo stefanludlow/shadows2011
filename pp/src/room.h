@@ -107,13 +107,28 @@ ROOM_DATA *allocate_room (int nVirtual);
 void clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits);
 int clone_contiguous_rblock (ROOM_DATA * start_room, int from_dir);
 int delete_contiguous_rblock (ROOM_DATA * start_room, int from_dir, int outside_vnum);
-ROOM_DATA *vtor (int nVirtual);
+
+ROOM_DATA* loadRoom(int vnum);
+extern ROOM_DATA * globalRoomArray[];
+
+inline ROOM_DATA * vtor(int characterRVirtual)
+{
+	static ROOM_DATA *room = NULL;
+	
+	if (characterRVirtual < 100000)
+	{
+		room = globalRoomArray[characterRVirtual];
+
+		if (room != NULL && (room->nVirtual == characterRVirtual))
+			return (room);	
+	}
+	return loadRoom(characterRVirtual);
+}
+
 
 int rdelete (ROOM_DATA * room);
 void room_light (ROOM_DATA * room);
 
-int get_stink_message (CHAR_DATA * ch, ROOM_DATA * room, char *stink_buf,
-		       CHAR_DATA * smeller);
 void room_affect_wearoff (ROOM_DATA * room, int type);
 CHAR_DATA *toll_collector (ROOM_DATA * room, int dir);
 

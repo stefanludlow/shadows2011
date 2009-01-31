@@ -76,7 +76,7 @@ fread_mobile (int vnum, const int *nZone, FILE * fp)
 
   mob = new_char (0);		/* NPC */
 
-  clear_char (mob);
+  //clear_char (mob);
   mob->mob->currency_type = 0;
 
   mob->mob->nVirtual = vnum;
@@ -171,15 +171,31 @@ fread_mobile (int vnum, const int *nZone, FILE * fp)
 
   fscanf (fp, " %ld \n", &buy_flags);
 
+
+  if (world_version_in <= 12)
+  {
+	  int throwaway;
   fscanf (fp, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", &mob->mob->skinned_vnum, &mob->circle, &mob->cell_1, &mob->mob->carcass_vnum, &mob->cell_2,	/*Formerly defense_bonus - free */
 	  &mob->ppoints,
 	  &mob->natural_delay,
 	  &mob->mob->helm_room,
 	  &mob->body_type,
-	  &mob->poison_type,
+	  &throwaway,
 	  &mob->nat_attack_type,
 	  &mob->mob->access_flags,
 	  &mob->height, &mob->frame, &mob->mob->noaccess_flags, &mob->cell_3);
+  }
+  else
+  {
+	  fscanf (fp, "%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", &mob->mob->skinned_vnum, &mob->circle, &mob->cell_1, &mob->mob->carcass_vnum, &mob->cell_2,	/*Formerly defense_bonus - free */
+	  &mob->ppoints,
+	  &mob->natural_delay,
+	  &mob->mob->helm_room,
+	  &mob->body_type,
+	  &mob->nat_attack_type,
+	  &mob->mob->access_flags,
+	  &mob->height, &mob->frame, &mob->mob->noaccess_flags, &mob->cell_3);
+  }
 
   if (world_version_in == 5)
     {

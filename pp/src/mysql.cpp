@@ -4,6 +4,7 @@
 |  All original code, derived under license from DIKU GAMMA (0.0).        |
 \------------------------------------------------------------------------*/
 
+#include <sstream>
 #include <stdarg.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -32,6 +33,7 @@
 extern RACE_TABLE_ENTRY *entry;
 extern CHAR_DATA *loaded_list;
 extern std::multimap<int, room_prog> mob_prog_list;
+extern std::multimap<int, room_prog> obj_prog_list;
 
 RACE_TABLE_ENTRY *race_table = NULL;
 
@@ -42,6 +44,8 @@ bool mysql_logging = true;
 extern int booting;
 extern int finished_booting;
 extern rpie::server engine;
+
+int last_vnpc_sale=0;
 
 void
 init_mysql (void)
@@ -93,8 +97,8 @@ mysql_safe_query (char *fmt, ...)
   int i = 0;
   double j = 0;
   char *s = 0, *out = 0, *p = 0;
-  char safe[MAX_STRING_LENGTH];
-  char query[MAX_STRING_LENGTH];
+  char safe[2*MAX_STRING_LENGTH];
+  char query[2*MAX_STRING_LENGTH];
 
   *query = '\0';
   *safe = '\0';
@@ -151,6 +155,39 @@ mysql_safe_query (char *fmt, ...)
 //	       query, mysql_error (database));
 //    }
   return (result);
+}
+
+void load_obj_progs (void)
+{
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+
+	mysql_safe_query ("SELECT vnum, cmd, keywords, prog, type FROM obj_progs");
+
+	if (!(result = mysql_store_result (database)))
+		return;
+
+	while (row = mysql_fetch_row(result))
+	{
+		room_prog prog;
+		prog.command = row[1];
+		prog.keys = row[2];
+		prog.prog = row[3];
+		prog.type = atoi(row[4]);
+		obj_prog_list.insert (std::pair<int, room_prog>(atoi(row[0]), prog));
+	}
+}
+
+void save_obj_progs (void)
+{
+	if (!engine.in_build_mode())
+		return;
+	mysql_safe_query ("INSERT INTO obj_progs_backup SELECT * FROM obj_progs");
+	mysql_safe_query ("DELETE FROM obj_progs");
+	for (std::multimap<int, room_prog>::iterator it = obj_prog_list.begin(); it != obj_prog_list.end(); it++)
+	{
+		mysql_safe_query ("INSERT INTO obj_progs (vnum, cmd, keywords, prog, type) VALUES('%d', '%s', '%s', '%s', '%d')", it->first, it->second.command, it->second.keys, it->second.prog, it->second.type);
+	}
 }
 
 void load_mob_progs (void)
@@ -565,10 +602,10 @@ system_log (const char *str, bool error)
   std::string log_db = engine.get_config ("player_log_db");
   int port = engine.get_port ();
   mysql_safe_query
-    ("INSERT INTO %s.mud (name, timestamp, port, room, error, entry, sha_hash) "
-     "VALUES ('System', %d, %d, -1, %d, '%s', SHA('%s'))", 
+    ("INSERT INTO %s.mud (name, timestamp, port, room, error, entry) "
+     "VALUES ('System', %d, %d, -1, %d, '%s')", 
      log_db.c_str (),
-     timestamp, port, (int) error, buf, sha_buf);
+     timestamp, port, (int) error, buf);
 }
 
 void
@@ -594,14 +631,14 @@ player_log (CHAR_DATA * ch, char *command, char *str)
   std::string log_db = engine.get_config ("player_log_db");
   int port = engine.get_port ();
   mysql_safe_query
-    ("INSERT INTO %s.mud (name, account, switched_into, timestamp, port, room, guest, immortal, command, entry, sha_hash) "
-     "VALUES ('%s', '%s', '%s', %d, %d, %d, %d, %d, '%s', '%s', SHA('%s'))",
+    ("INSERT INTO %s.mud (name, account, switched_into, timestamp, port, room, guest, immortal, command, entry) "
+     "VALUES ('%s', '%s', '%s', %d, %d, %d, %d, %d, '%s', '%s')",
      log_db.c_str (), ch->desc
      && ch->desc->original ? ch->desc->original->tname : ch->tname, ch->pc
      && ch->pc->account_name ? ch->pc->account_name : "", ch->desc
      && ch->desc->original ? ch->tname : "", timestamp, port, ch->in_room,
      IS_SET (ch->flags, FLAG_GUEST) ? 1 : 0, GET_TRUST (ch) > 0
-     && !IS_NPC (ch) ? 1 : 0, command, buf, sha_buf);
+     && !IS_NPC (ch) ? 1 : 0, command, buf);
 
   // feed to stdout for any on-server, realtime monitoring
 
@@ -609,6 +646,65 @@ player_log (CHAR_DATA * ch, char *command, char *str)
 
   fflush (stdout);
 }
+
+/*void system_log (const char *str, bool error)
+{
+	static std::stringstream log_dump;// = std::stringstream();
+	static int logs_count = 0;
+	std::string log_db = engine.get_config ("player_log_db");
+	int port = engine.get_port ();
+//	if (!str || !*str || !mysql_logging)
+//		return;
+	if(logs_count == 0)
+	{
+		log_dump.clear();
+		log_dump<<"INSERT INTO "<<log_db.c_str()<<".mud (name, timestamp, port, room, error, entry) VALUES ";
+	}
+	log_dump<<"('System', "<<((int) time (0))<<", "<<port<<", "<<((int) error)<<", "<<str<<")";
+	if(++logs_count < 100)
+		log_dump<<", ";
+	else
+	{
+		mysql_safe_query((char*)log_dump.str().c_str());
+		log_dump.flush();
+		log_dump.clear();
+		log_dump.str(" ");
+		log_dump.seekp(0);
+		logs_count = 0;
+	}
+}
+
+void player_log (CHAR_DATA * ch, char *command, char *str)
+{
+	static std::stringstream log_dump;// = std::stringstream();
+	static int logs_count = 0;
+	std::string log_db = engine.get_config ("player_log_db");
+	int port = engine.get_port ();
+	if (!str || !*str || !command || !*command || !ch || ch->deleted || !mysql_logging)
+		return;
+	if(logs_count == 0)
+	{
+		log_dump.clear();
+		log_dump<<"INSERT INTO "<<log_db.c_str()<<".mud (name, account, switched_into, timestamp, port, room, guest, immortal, command, entry) VALUES ";
+	}
+	log_dump<<"('"<<((ch->desc && ch->desc->original) ? ch->desc->original->tname : ch->tname)
+		<<"', '"<<((ch->pc && ch->pc->account_name) ? ch->pc->account_name : "")<<"', '"
+		<<((ch->desc && ch->desc->original) ? ch->tname : "")<<"', "<<((int) time (0))<<", "
+		<<port<<", "<<ch->in_room<<", "<<(IS_SET (ch->flags, FLAG_GUEST) ? 1 : 0)<<", "
+		<<((GET_TRUST (ch) > 0 && !IS_NPC (ch)) ? 1 : 0)<<", '"<<command<<"', '"<<str<<"') ";
+	if(++logs_count < 50)
+		log_dump<<", ";
+	else
+	{
+//		send_to_room((char*)log_dump.str().c_str(), 686);
+		mysql_safe_query((char*)log_dump.str().c_str());
+		log_dump.flush();
+		log_dump.clear();
+		log_dump.str(" ");
+		log_dump.seekp(0);
+		logs_count = 0;
+	}
+}*/
 
 void
 add_profession_skills (CHAR_DATA * ch, char *skill_list)
@@ -2070,29 +2166,14 @@ perform_pfile_update (CHAR_DATA * ch)
       update_crafts (ch);
     }
 
-  if (ch->race >= 16 && ch->race <= 19)
+  if ((ch->race >= 16 && ch->race <= 19) || ch->race == 93)
     {				// Elves have superb distance vision and hearing.
-      ch->skills[SKILL_SCAN] = 90;
-      ch->skills[SKILL_LISTEN] = 90;
+      ch->skills[SKILL_SCAN] = 120;
+      ch->skills[SKILL_LISTEN] = 120;
     }
 
   for (i = 1; i <= LAST_SKILL; i++)
     ch->pc->skills[i] = ch->skills[i];
-
-  if (ch->str > 25)
-    ch->str = 25;
-  if (ch->dex > 25)
-    ch->dex = 25;
-  if (ch->agi > 25)
-    ch->agi = 25;
-  if (ch->aur > 25)
-    ch->aur = 25;
-  if (ch->con > 25)
-    ch->con = 25;
-  if (ch->wil > 25)
-    ch->wil = 25;
-  if (ch->intel > 25)
-    ch->intel = 25;
 
   ch->tmp_str = ch->str;
   ch->tmp_dex = ch->dex;
@@ -2325,10 +2406,14 @@ num_starting_locs (int race)
   if (lookup_race_variable (race, RACE_START_LOC))
     {
       flags = atoi (lookup_race_variable (race, RACE_START_LOC));
-      if (IS_SET (flags, RACE_HOME_OSGILIATH))
+      if (IS_SET (flags, RACE_HOME_GONDOR))
 	start_loc++;
-      if (IS_SET (flags, RACE_HOME_MORGUL))
+      if (IS_SET (flags, RACE_HOME_ANGOST))
 	start_loc++;
+	  if (IS_SET (flags, RACE_HOME_HARAD))
+	    start_loc++;
+	  if (IS_SET (flags, RACE_HOME_MORIA))
+		  start_loc++;
       return start_loc;
     }
 
@@ -2450,7 +2535,7 @@ load_char_mysql (const char *name)
     }
 
   ch = new_char (1);
-  clear_char (ch);
+  //clear_char (ch);
 
   ch->tname = str_dup (row[0]);
   ch->name = str_dup (row[1]);
@@ -2762,6 +2847,30 @@ load_char_mysql (const char *name)
     {
       ch->goal = new std::string(row[95]);
     }
+	
+	// Code added by Vermonkey: 081021
+	// extracts three flags from row 97
+	// room for 5 more flags!
+	{
+		int temp =  atoi (row[97]);
+		if((temp >> 0) % 2)
+			ch->toggleNaughtyFlag();
+		if((temp >> 1) % 2)
+			ch->toggleRPFlag();
+		if((temp >> 2) % 2)
+			ch->togglePlotFlag();
+	}
+	
+	// Persistant dmotes, wooo!
+	if (row[98] && strlen (row[98]) > 1 && str_cmp (row[98], "(null)"))
+		ch->dmote_str = str_dup (row[98]);
+	
+	// Determines the number of chars to wrap the screen to
+	ch->setWrapLength( atoi( row[102] ) );
+	// END Vermonkey
+	
+	//Grommit - petition flags
+	ch->petition_flags = ( row[103] == 0 ? 0 : ( atoi ( row[103] ) ));
 
   fix_offense (ch);
 
@@ -2822,11 +2931,14 @@ save_char_mysql (CHAR_DATA * ch)
   MYSQL_RES *result;
   char buf[MAX_STRING_LENGTH];
   char wounds[MAX_STRING_LENGTH], lodged[MAX_STRING_LENGTH];
-  char skills_buf[MAX_STRING_LENGTH], affects[MAX_STRING_LENGTH];
+  char skills_buf[MAX_STRING_LENGTH], affects[2*MAX_STRING_LENGTH]; // double size needed for huge crafts list
   int i = 0, hooded = 0;
 
   if (IS_NPC (ch) || IS_SET (ch->flags, FLAG_GUEST))
     return;
+
+	/* adjust last_logoff to now for offline healing tracking in event of crash */
+  ch->pc->last_logoff = time(0);
 
   *wounds = '\0';
   *skills_buf = '\0';
@@ -2902,7 +3014,8 @@ save_char_mysql (CHAR_DATA * ch)
 	 "speaks = %d, flags = %d, plrflags = %d, boatvnum = %d, speed = %d, mountspeed = %d, sleepneeded = %d, autotoll = %d, coldload = %d, affectedby = %d, "
 	 "affects = '%s', age = %d, intoxication = %d, hunger = %d, thirst = %d, height = %d, frame = %d, damage = %d, lastregen = %d, lastroom = %d, harness = %d, maxharness = %d, "
 	 "lastlogon = %d, lastlogoff = %d, lastdis = %d, lastconnect = %d, lastdied = %d, hooded = %d, immenter = '%s', immleave = '%s', sitelie = '%s', voicestr = '%s', clans = '%s', skills = '%s', "
-	 "wounds = '%s', lodged = '%s', writes = %d, profession = %d, was_in_room = %d, travelstr = '%s', bmi = %d, guardian_mode = %d, hire_storeroom = %d, hire_storeobj = %d, plan = '%s', goal = '%s', role_id = %d WHERE name = '%s'",
+	 "wounds = '%s', lodged = '%s', writes = %d, profession = %d, was_in_room = %d, travelstr = '%s', bmi = %d, guardian_mode = %d, hire_storeroom = %d, hire_storeobj = %d, plan = '%s', goal = '%s', "
+	 "role_id = %d, player_flags = %d, dmotestr = '%s', wraplen = %d, petition_flags = %d WHERE name = '%s'",
 	 player_db.c_str (), ch->name, ch->pc->account_name, ch->short_descr,
 	 ch->long_descr, ch->description, ch->pc->msg,
 	 ch->pc->creation_comment, ch->pc->create_state, ch->pc->nanny_state,
@@ -2925,7 +3038,7 @@ save_char_mysql (CHAR_DATA * ch)
 	 (int) ch->coldload_id, (int) ch->affected_by, affects, ch->age,
 	 ch->intoxication, ch->hunger, ch->thirst, ch->height, ch->frame,
 	 ch->damage, (int) ch->lastregen, ch->last_room, ch->mana,
-	 ch->max_mana, (int) ch->pc->last_logon, (int) ch->pc->last_logoff,
+	 ch->max_mana, (int) ch->pc->last_logon, (int) ch->pc->last_logoff,    /* use current time as last logoff so if there is a crash, wounds heal properly not spam heal */
 	 (int) ch->pc->last_disconnect, (int) ch->pc->last_connect,
 	 (int) ch->pc->last_died, hooded, ch->pc->imm_enter,
 	 ch->pc->imm_leave, ch->pc->site_lie, ch->voice_str, ch->clans,
@@ -2935,7 +3048,8 @@ save_char_mysql (CHAR_DATA * ch)
 	 (ch->plan && !ch->plan->empty()) ? ch->plan->c_str() : "",
 	 (ch->goal && !ch->goal->empty()) ? ch->goal->c_str() : "",
 	 ch->pc->special_role ? ch->pc->special_role->id : 0,     
-	 ch->tname);
+	(int)((ch->getNaughtyFlag() << 0) + (ch->getRPFlag() << 1) + (ch->getPlotFlag() << 2)), //bool compression of player_flags
+	 ch->dmote_str, ch->getWrapLength(), (int)ch->petition_flags, ch->tname);
       save_dreams (ch);
     }
   else
@@ -2952,7 +3066,8 @@ save_char_mysql (CHAR_DATA * ch)
 	 "speaks, flags, plrflags, boatvnum, speed, mountspeed, sleepneeded, autotoll, coldload, affectedby, "
 	 "affects, age, intoxication, hunger, thirst, height, frame, damage, lastregen, lastroom, harness, maxharness, "
 	 "lastlogon, lastlogoff, lastdis, lastconnect, lastdied, hooded, immenter, immleave, sitelie, voicestr, clans, skills, "
-	 "wounds, lodged, writes, profession, was_in_room, travelstr, bmi, hire_storeroom, hire_storeobj, plan, goal, role_id) VALUES "
+	 "wounds, lodged, writes, profession, was_in_room, travelstr, bmi, hire_storeroom, hire_storeobj, plan, goal, role_id, "
+	 "player_flags, dmotestr, wraplen) VALUES "
 	 "('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', %d, "
 	 "%d, %d, '%s', '%s', '%s', '%s', %d, %d, %d, %d, %d, "
 	 "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, "
@@ -2960,7 +3075,7 @@ save_char_mysql (CHAR_DATA * ch)
 	 "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, "
 	 "'%s', %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, "
 	 "%d, %d, %d, %d, %d, %d, '%s', '%s', '%s', '%s', '%s', '%s', "
-	 "'%s', '%s', %d, %d, %d, '%s', %d, %d, %d, '%s', '%s', %d)", 
+	 "'%s', '%s', %d, %d, %d, '%s', %d, %d, %d, '%s', '%s', %d, %d, '%s', %d)", 
 	 player_db.c_str (),
 	 ch->tname, ch->name, ch->pc->account_name, ch->short_descr,
 	 ch->long_descr, ch->description, ch->pc->msg,
@@ -2993,8 +3108,10 @@ save_char_mysql (CHAR_DATA * ch)
 	 ch->hire_storeroom, ch->hire_storeobj,
 	 (ch->plan && !ch->plan->empty()) ? ch->plan->c_str() : "",
 	 (ch->goal && !ch->goal->empty()) ? ch->goal->c_str() : "",
-   	 ch->pc->special_role ? ch->pc->special_role->id : 0
-	 );
+   	 ch->pc->special_role ? ch->pc->special_role->id : 0,
+	(int)((ch->getNaughtyFlag() << 0) + (ch->getRPFlag() << 1) + (ch->getPlotFlag() << 2)), //bool compression of player_flags
+	ch->dmote_str, ch->getWrapLength()
+	);
     }
 }
 
@@ -3041,37 +3158,6 @@ reference_ip (char *guest_name, char *host)
   mysql_free_result (result);
 
   return guest_name;
-}
-
-void
-load_reboot_mobiles ()
-{
-  FILE *fp;
-  MYSQL_RES *result;
-  MYSQL_ROW row;
-  CHAR_DATA *mob;
-  int i = 0, j = 0;
-  char query[MAX_STRING_LENGTH];
-
-  mysql_safe_query ("SELECT * FROM reboot_mobiles");
-  result = mysql_store_result (database);
-
-  while ((row = mysql_fetch_row (result)))
-    {
-      i++;
-      j++;
-      sprintf (query, "Mobile #%d, Load #%d", atoi (row[2]), j);
-      sprintf (query, "save/reboot/%s", row[2]);
-      fp = fopen (query, "r");
-      if (!fp)
-	continue;
-      mob = load_a_saved_mobile (atoi (row[0]), fp, false);
-      if (mob)
-	char_to_room (mob, atoi (row[1]));
-      fclose (fp);
-    }
-
-  mysql_free_result (result);
 }
 
 void
@@ -4546,4 +4632,37 @@ if (!admin_found_absoloute)
   no_admin_time_absoloute = 1;
 
 mysql_safe_query("UPDATE admin_coverage SET coverage_time=coverage_time+%d, coverage_time_absoloute=coverage_time_absoloute+%d, admin_pc_time=admin_pc_time+%d, no_admin_time=no_admin_time+%d, no_admin_time_absoloute=no_admin_time_absoloute+%d WHERE week_num=%d", admin_time, admin_time_active, admin_pc_time, no_admin_time, no_admin_time_absoloute, week_num); 
+}
+
+
+void load_vnpc_timestamp()
+{
+  MYSQL_RES *result;
+  MYSQL_ROW row;
+  
+  mysql_safe_query
+    ("SELECT * FROM shopdata LIMIT 1");
+
+  result = mysql_store_result (database);
+
+  if (!result)
+    {
+		/* if no result, set to now */
+		last_vnpc_sale = time(0);
+		return;
+    }
+
+  /* get one row */
+  if ((row = mysql_fetch_row (result)))
+    {
+		last_vnpc_sale = atoi(row[0]);
+    }
+ 
+  if (result)
+    mysql_free_result (result);
+}
+
+void save_vnpc_timestamp()
+{
+	mysql_safe_query("UPDATE shopdata SET last_vnpc_timestamp=%d",last_vnpc_sale);
 }

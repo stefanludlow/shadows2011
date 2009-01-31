@@ -1152,7 +1152,7 @@ spell_failed (CHAR_DATA * ch, AFFECTED_TYPE * spell)
   int check = 0, effective_skill = 0, preparation_mod = 0;
   bool failure = false, critical_failure = false;
   char buf[MAX_STRING_LENGTH];
-  char failbuf[25];
+  char failbuf[AVG_STRING_LENGTH];
 
   // Deal with penalties for casting spells of other spheres
 
@@ -1553,7 +1553,7 @@ process_spell_save (CHAR_DATA * ch, void *target, int id, int target_type)
 	  if (ch->in_room == tch->in_room)
 	    send_to_room ("\n", ch->in_room);
 	  penalty = caster_magic_skill (ch) / 15;
-	  if ((save = (tch->wil - penalty) <= number (1, 25)))
+	  if ((save = (tch->wil - penalty) <= number (1, tch->wil)))
 	    {
 	      act
 		("You manage to fight off the effect encroaching upon your mind.",
@@ -2422,7 +2422,7 @@ check_psionic_talents (CHAR_DATA * ch)
   char *date;
   time_t time_now;
 
-  if (is_newbie (ch) || ch->aur <= 15)
+  if (is_newbie (ch) || ch->aur < 16)
     {
       return;
     }
@@ -2439,7 +2439,7 @@ check_psionic_talents (CHAR_DATA * ch)
 	{
 	  block = true;
 	}
-    }
+  }
   else
     {
       return;
@@ -2451,9 +2451,7 @@ check_psionic_talents (CHAR_DATA * ch)
       return;
     }
 
-  if (ch->aur < 16)
-    return;
-  else if (ch->aur == 16)
+ if (ch->aur == 16)
     chance = 5;
   else if (ch->aur == 17)
     chance = 10;
@@ -2559,21 +2557,19 @@ setup_new_character (CHAR_DATA * tch)
   tch->tmp_dex = tch->dex;
   tch->tmp_agi = tch->agi;
 
-  tch->max_hit = 10 + 6 * GET_CON (tch);
+  tch->max_hit = 50 + CONSTITUTION_MULTIPLIER * GET_CON (tch);
 
   tch->max_move = calc_lookup (tch, REG_MISC, MISC_MAX_MOVE);
 
   tch->hit = GET_MAX_HIT (tch);
   tch->move = GET_MAX_MOVE (tch);
 
-  if (lookup_race_variable (tch->race, RACE_NATIVE_TONGUE))
-    {
-      i =
-	strtol (lookup_race_variable (tch->race, RACE_NATIVE_TONGUE), NULL,
-		10);
-      tch->skills[i] = calc_lookup (tch, REG_CAP, i);
-      tch->pc->skills[i] = calc_lookup (tch, REG_CAP, i);
-    }
+  int nat_tongue = get_native_tongue(tch); /* this is race0 aware */
+  if (nat_tongue)
+  {
+     tch->skills[nat_tongue] = calc_lookup (tch, REG_CAP, i);
+     tch->pc->skills[nat_tongue] = calc_lookup (tch, REG_CAP, i);
+  }
 
   // Define all race-specific characteristics
 
@@ -2630,7 +2626,7 @@ setup_new_character (CHAR_DATA * tch)
       tch->race == 18 || tch->race == 19 || tch->race == 23 ||
       tch->race == 24 || tch->race == 25 || tch->race == 26 ||
       tch->race == 27 || tch->race == 28 || tch->race == 29 ||
-      tch->race == 86)
+      tch->race == 86 || tch->race == 93)
     {
       if (!IS_SET (tch->affected_by, AFF_INFRAVIS))
 	tch->affected_by |= AFF_INFRAVIS;
@@ -2654,10 +2650,14 @@ setup_new_character (CHAR_DATA * tch)
     {
       flags =
 	strtol (lookup_race_variable (tch->race, RACE_START_LOC), NULL, 10);
-      if (IS_SET (flags, RACE_HOME_MORGUL))
-	tch->plr_flags |= START_MORDOR;
-      else if (IS_SET (flags, RACE_HOME_OSGILIATH))
+      if (IS_SET (flags, RACE_HOME_ANGOST))
+	tch->plr_flags |= START_ANGOST;
+      else if (IS_SET (flags, RACE_HOME_GONDOR))
 	tch->plr_flags |= START_GONDOR;
+	  else if (IS_SET (flags, RACE_HOME_HARAD))
+	   tch->plr_flags |= START_HARAD;
+	  else if (IS_SET (flags, RACE_HOME_MORIA))
+	    tch->plr_flags |= START_MORIA;
     }
 }
 

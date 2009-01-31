@@ -1065,7 +1065,7 @@ skill_level (CHAR_DATA * ch, int skill, int diff_mod)
   if ((af = get_affect (ch, MAGIC_AFFECT_CURSE)))
     skill_lev -= af->a.spell.modifier;
 
-  if ((ch->race == 24 || ch->race == 25) && sun_light
+  if ((ch->race == 119 || ch->race == 120 || ch->race == 121 || ch->race == 25 || ch->race == 29  ) && sun_light
       && ch->room->sector_type != SECT_INSIDE)
     {
       if (weather_info[ch->room->zone].clouds == CLEAR_SKY)
@@ -1110,7 +1110,6 @@ skill_level (CHAR_DATA * ch, int skill, int diff_mod)
     }
 
   skill_lev = MAX (2, skill_lev);
-  skill_lev = MIN (80, skill_lev);
 
   return skill_lev;
 }
@@ -1129,24 +1128,23 @@ skill_use (CHAR_DATA * ch, int skill, int diff_mod)
 
   lv = calc_lookup (ch, REG_LV, skill);
   cap = calc_lookup (ch, REG_CAP, skill);
+  int skill_level_val = skill_level (ch, skill, diff_mod);
 
-  cap = MIN (cap, SKILL_CEILING);
-
-  roll = number (1, SKILL_CEILING);
+  roll = number (1, MAX(100, skill_level_val));
 
   if (!AWAKE (ch))
     return 0;
 
-  if (roll <= skill_level (ch, skill, diff_mod))
+  if (roll <= skill_level_val)
     return 1;
 
   if (IS_NPC (ch))
     {
-      if (ch->skills[skill] < cap && lv >= number (1, SKILL_CEILING))
+      if (ch->skills[skill] < cap && lv >= number (1, MAX(100, skill_level_val)))
 	ch->skills[skill]++;
     }
 
-  else if (ch->pc->skills[skill] < cap && lv >= number (1, SKILL_CEILING))
+  else if (ch->pc->skills[skill] < cap && lv >= number (1, MAX(100, skill_level_val)))
     {
 
       if (!ch->desc || ch->desc->idle)	/* No skill gain idle/discon */

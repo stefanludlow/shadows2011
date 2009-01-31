@@ -309,7 +309,7 @@ display_clan_ranks (CHAR_DATA * ch, CHAR_DATA * observer)
       while (get_next_clan (&argument2, clan_name2, &flags2))
 	{
 	  if (!str_cmp (clan_name, "osgi_citizens") ||
-	      !str_cmp (clan_name, "mordor_char"))
+	      !str_cmp (clan_name, "mordor_char") || !str_cmp (clan_name, "moria_dwellers") )
 	    continue;
 	  clan = get_clandef (clan_name);
 	  if (!clan)
@@ -383,8 +383,7 @@ add_clandef (char *argument)
   clan_list = clan;
 }
 
-int
-is_brother (CHAR_DATA * ch, CHAR_DATA * tch)
+/* moved to protos.h - int is_brother (CHAR_DATA * ch, CHAR_DATA * tch)
 {
   int flags;
   char *c1;
@@ -398,7 +397,7 @@ is_brother (CHAR_DATA * ch, CHAR_DATA * tch)
     }
 
   return 0;
-}
+}*/
 
 int
 is_leader (CHAR_DATA * src, CHAR_DATA * tar)
@@ -1144,14 +1143,14 @@ clan_flags_to_value (char *flag_names, char *clan_name)
       
 	  else if (!str_cmp (buf, "member")
   		|| ((!str_cmp (buf, "kalla'jundi") || !str_cmp (buf, "kalla'jundi al mara"))
-      	&& !str_cmp (clan_name, "silvermoon"))
+      	&& !str_cmp (clan_name, "silvermoon") || !str_cmp (clan_name, "silvermoon-cobra") || !str_cmp (clan_name, "silvermoon-field-cobra"))
   		|| ((!str_cmp (buf, "kalla") || !str_cmp (buf, "kalla al mara"))
       	&& !str_cmp (clan_name, "abdul-matin")) )
     	flags |= CLAN_MEMBER;
 		
       else if (!str_cmp (buf, "recruit") 
    		|| ((!str_cmp (buf, "khafid'jundi") || !str_cmp (buf, "khafid'jundi al mara"))
-      	&& !str_cmp (clan_name, "silvermoon"))
+      	&& !str_cmp (clan_name, "silvermoon") || !str_cmp (clan_name, "silvermoon-cobra") || !str_cmp (clan_name, "silvermoon-field-cobra"))
   		|| ((!str_cmp (buf, "khafid") || !str_cmp (buf, "khafid al mara"))
       	&& !str_cmp (clan_name, "abdul-matin"))
       || ((!str_cmp (buf, "snaga") || !str_cmp (buf, "snaga-uruk"))
@@ -1176,7 +1175,7 @@ clan_flags_to_value (char *flag_names, char *clan_name)
       
       else if (!str_cmp (buf, "private")
    		|| ((!str_cmp (buf, "harba'jundi") || !str_cmp (buf, "harba'jundi al mara"))
-      	&& !str_cmp (clan_name, "silvermoon"))
+      	&& !str_cmp (clan_name, "silvermoon") || !str_cmp (clan_name, "silvermoon-cobra") || !str_cmp (clan_name, "silvermoon-field-cobra"))
   		|| ((!str_cmp (buf, "harba") || !str_cmp (buf, "harba al mara"))
       	&& !str_cmp (clan_name, "abdul-matin"))
       || ((!str_cmp (buf, "acolyte")) 
@@ -1195,13 +1194,14 @@ clan_flags_to_value (char *flag_names, char *clan_name)
       	&& !str_cmp (clan_name, "nebavla_tribe"))
 	|| (!str_cmp (buf, "squire of lord astirian") 
       	&& !str_cmp (clan_name, "astirian_villeins"))
+		|| (!str_cmp (buf, "free spear") && !str_cmp (clan_name, "dalewatch"))
       || (!str_cmp (buf, "footman") 
       	&& (!str_cmp (clan_name, "eradan_battalion") || !str_cmp (clan_name, "ithilien_battalion"))))
 	flags |= CLAN_PRIVATE;
       
       else if (!str_cmp (buf, "corporal") 
    		|| ((!str_cmp (buf, "sayf'jundi") || !str_cmp (buf, "sayf'jundi al mara"))
-      	&& !str_cmp (clan_name, "silvermoon"))
+      	&& !str_cmp (clan_name, "silvermoon") || !str_cmp (clan_name, "silvermoon-cobra") || !str_cmp (clan_name, "silvermoon-field-cobra"))
   		|| ((!str_cmp (buf, "sayf") || !str_cmp (buf, "sayf al mara"))
       	&& !str_cmp (clan_name, "abdul-matin"))
       || (!str_cmp(buf, "roquen") 
@@ -1226,7 +1226,7 @@ clan_flags_to_value (char *flag_names, char *clan_name)
       
       else if (!str_cmp (buf, "sergeant") 
    		|| ((!str_cmp (buf, "qasir'jundi") || !str_cmp (buf, "qasir'jundi al mara"))
-      	&& !str_cmp (clan_name, "silvermoon"))
+      	&& !str_cmp (clan_name, "silvermoon") || !str_cmp (clan_name, "silvermoon-cobra") || !str_cmp (clan_name, "silvermoon-field-cobra"))
   		|| ((!str_cmp (buf, "qasir") || !str_cmp (buf, "qasir al mara"))
       	&& !str_cmp (clan_name, "abdul-matin"))
       || ((!str_cmp (buf, "zaak") || !str_cmp (buf, "high-puruk")) 
@@ -1247,7 +1247,7 @@ clan_flags_to_value (char *flag_names, char *clan_name)
       
       else if (!str_cmp (buf, "lieutenant")  
    		|| ((!str_cmp (buf, "ashum'jundi") || !str_cmp (buf, "ashum'jundi al mara"))
-      	&& !str_cmp (clan_name, "silvermoon"))
+      	&& !str_cmp (clan_name, "silvermoon") || !str_cmp (clan_name, "silvermoon-cobra") || !str_cmp (clan_name, "silvermoon-field-cobra"))
   		|| ((!str_cmp (buf, "ashum") || !str_cmp (buf, "ashum al mara"))
       	&& !str_cmp (clan_name, "abdul-matin"))
       || (!str_cmp(buf, "constable") 
@@ -1271,7 +1271,7 @@ clan_flags_to_value (char *flag_names, char *clan_name)
       
       else if (!str_cmp (buf, "captain")
    		|| ((!str_cmp (buf, "badikh'jundi") || !str_cmp (buf, "badikh'jundi al mara"))
-      	&& !str_cmp (clan_name, "silvermoon"))
+      	&& !str_cmp (clan_name, "silvermoon") || !str_cmp (clan_name, "silvermoon-cobra") || !str_cmp (clan_name, "silvermoon-field-cobra"))
   		|| ((!str_cmp (buf, "badikh") || !str_cmp (buf, "badikh al mara"))
       	&& !str_cmp (clan_name, "abdul-matin"))
       || (!str_cmp (buf, "barun") 
@@ -1292,7 +1292,7 @@ clan_flags_to_value (char *flag_names, char *clan_name)
       
       else if (!str_cmp (buf, "general") 
    		|| ((!str_cmp (buf, "dahab'jundi") || !str_cmp (buf, "dahab'jundi al mara"))
-      	&& !str_cmp (clan_name, "silvermoon"))
+      	&& !str_cmp (clan_name, "silvermoon") || !str_cmp (clan_name, "silvermoon-cobra") || !str_cmp (clan_name, "silvermoon-field-cobra"))
       || (!str_cmp(buf, "marshall") 
       	&& !str_cmp(clan_name, "tirithguard")) 
       ||  (!str_cmp (buf, "nalo-barun") 
@@ -1309,7 +1309,7 @@ clan_flags_to_value (char *flag_names, char *clan_name)
       
       else if (!str_cmp (buf, "commander") 
    		|| ((!str_cmp (buf, "sha'jundi") || !str_cmp (buf, "sha'jundi al mara"))
-      	&& !str_cmp (clan_name, "silvermoon"))
+      	&& !str_cmp (clan_name, "silvermoon") || !str_cmp (clan_name, "silvermoon-cobra") || !str_cmp (clan_name, "silvermoon-field-cobra"))
   		|| ((!str_cmp (buf, "sha") || !str_cmp (buf, "sha al mara"))
       	&& !str_cmp (clan_name, "abdul-matin"))	  
       || (!str_cmp (buf, "daur-phazan") 
@@ -1651,7 +1651,9 @@ get_shared_clan_rank (CHAR_DATA * ch, CHAR_DATA * observer)
       while (get_next_clan (&argument2, clan_name2, &flags2))
 	{
 	  if (!str_cmp (clan_name, "osgi_citizens") ||
-	      !str_cmp (clan_name, "mordor_char"))
+	      !str_cmp (clan_name, "mordor_char") ||
+		  !str_cmp (clan_name, "mt_citizens") ||
+		  !str_cmp (clan_name, "outpost_citizens"))
 	    continue;
 	  if (!str_cmp (clan_name, clan_name2))
 	    {
@@ -1736,26 +1738,26 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
   {
     if (!str_cmp (clan, "militaryrecruits"))
     {
-	return "Commander of West Osgiliath and Yeoman to Lord Astirian";
+		return "Commander of West Osgiliath and Yeoman to Lord Astirian";
     }
     if (!str_cmp (clan, "eradan_battalion") || !str_cmp (clan, "ithilien_battalion"))
     {
-	return "Lord Eradan";
+		return "Lord Eradan";
     }
 	if (!str_cmp (clan, "astirian_villeins"))
     {
-	return "Great Lord Astirian";
+		return "Great Lord Astirian";
     }    
     if (!str_cmp (clan, "abdul-matin"))
     {
-	if (HSSH(ch) == "her")
-	{
-		return "Qadim Al Mara";
-	}
-	else
-	{
-		return "Qadim";
-	}
+		if (HSSH(ch) == "her")
+		{
+			return "Qadim Al Mara";
+		}
+		else
+		{
+			return "Qadim";
+		}
     }
 
 	return "Leadership";	
@@ -1766,6 +1768,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 //Recruit  
   else if (flags == CLAN_RECRUIT)
   {
+	  if (!str_cmp (clan, "dalewatch"))
+	  {
+		  return "Dreng";
+	  }
 	  if (!str_cmp (clan, "bar_caged"))
 	  {
 		  return "Fightah";
@@ -1801,7 +1807,7 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 			{
 			return "Roenucht";
 			}
-    if (!str_cmp (clan, "silvermoon"))
+    if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
 	if (HSSH(ch) == "her")
 	{
@@ -1845,6 +1851,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //Private  
   else if (flags == CLAN_PRIVATE)
   {
+	  if (!str_cmp (clan, "dalewatch"))
+	  {
+		  return "Spjot";
+	  }
 	  if (!str_cmp (clan, "bar_caged"))
 	  {
 		  return "Respected Fightah";
@@ -1896,7 +1906,7 @@ if (!str_cmp (clan, "militaryrecruits"))
 	{
 		return "Squire of Lord Astirian";
 	}
-    if (!str_cmp (clan, "silvermoon"))
+    if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
 	if (HSSH(ch) == "her")
 	{
@@ -1925,6 +1935,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //Corporal
   else if (flags == CLAN_CORPORAL)
   {
+	  if (!str_cmp (clan, "dalewatch"))
+	  {
+		  return "Brimskr";
+	  }
 	  if (!str_cmp (clan, "bar_caged"))
 	  {
 		  return "Fist";
@@ -1972,7 +1986,7 @@ if (!str_cmp (clan, "militaryrecruits"))
 	{
 		return "Villein Employer of Lord Astirian";
 	}
-    if (!str_cmp (clan, "silvermoon"))
+    if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
 	if (HSSH(ch) == "her")
 	{
@@ -2001,6 +2015,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //Sergeant
   else if (flags == CLAN_SERGEANT)
   {
+	  if (!str_cmp (clan, "dalewatch"))
+	  {
+		  return "Hundredman";
+	  }
 	  if (!str_cmp (clan, "bar_caged"))
 	  {
 		  return "Respected Fist";
@@ -2067,7 +2085,7 @@ if (!str_cmp (clan, "militaryrecruits"))
 		  }
 	return "Warden of Lord Astirian";
     }
-    if (!str_cmp (clan, "silvermoon"))
+    if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
 	if (HSSH(ch) == "her")
 	{
@@ -2096,6 +2114,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //lieutenant  
   else if (flags == CLAN_LIEUTENANT)
   {
+	  if (!str_cmp(clan, "dalewatch"))
+	  {
+		  return "Heafodman";
+	  }
 	  if (!str_cmp (clan, "bar_caged"))
 	  {
 		  return "Warleader";
@@ -2142,7 +2164,7 @@ if (!str_cmp (clan, "militaryrecruits"))
     {
 	return "Chief Warden of Lord Astirian";
     }
-    if (!str_cmp (clan, "silvermoon"))
+   if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
 	if (HSSH(ch) == "her")
 	{
@@ -2203,7 +2225,7 @@ if (!str_cmp (clan, "militaryrecruits"))
     {
 	return "Retainer of Lord Astirian";
     }
-    if (!str_cmp (clan, "silvermoon"))
+   if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
 	if (HSSH(ch) == "her")
 	{
@@ -2256,7 +2278,7 @@ if (!str_cmp (clan, "militaryrecruits"))
 	{
 		return "Senior Retainer of Lord Astirian";
 	}
-    if (!str_cmp (clan, "silvermoon"))
+   if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
 	if (HSSH(ch) == "her")
 	{
@@ -2275,6 +2297,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //Commander
   else if (flags == CLAN_COMMANDER)
   {
+	  if (!str_cmp(clan,"dalewatch"))
+	  {
+		  return "Ealdorman";
+	  }
 	  if (!str_cmp(clan, "ralan-salvage"))
 	  {
 		  return "Patron";
@@ -2299,7 +2325,7 @@ if (!str_cmp (clan, "militaryrecruits"))
 			{
 			return "Captain of Great Lord Astirian";
 			}
-    if (!str_cmp (clan, "silvermoon"))
+if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
 	if (HSSH(ch) == "her")
 	{

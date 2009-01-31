@@ -36,6 +36,7 @@
 #include "room.h"
 
 extern int errno;		///< Global error number
+extern int last_vnpc_sale; // timestamp of last time vnpc sale was called, stored in mysql
 
 /* local globals */
 rpie::server engine;
@@ -223,7 +224,7 @@ run_the_game (int port)
 
   game_loop (nMainSocket);
 
-  if (engine.in_play_mode ())
+  if (engine.in_play_mode () || engine.in_test_mode())
     {
       save_tracks ();
       save_stayput_mobiles ();
@@ -273,7 +274,7 @@ game_loop (int s)
   char comm[MAX_STRING_LENGTH] = "";
   DESCRIPTOR_DATA *point, *next_point, *next_to_process;
   DESCRIPTOR_DATA *d;
-  CHAR_DATA *tch, *next_ch;
+  CHAR_DATA *tch;
   int pulse = 0, purse = 0;
   int mask;
   int i;
@@ -283,7 +284,7 @@ game_loop (int s)
   struct rlimit limit;
   bool first_loop = true;
   extern bool morgul_arena_fight;	// Defined in arena.c
-  extern bool te_pit_fight;	// Defined in arena.c
+  //extern bool te_pit_fight;	// Defined in arena.c
   extern QE_DATA *quarter_event_list;
 
 
@@ -313,7 +314,7 @@ game_loop (int s)
   check_maintenance ();
 
   morgul_arena_time = (int) time (0);
-  te_pit_time = (int) time (0);
+  //te_pit_time = (int) time (0);
 #ifndef MACOSX
 
   getrlimit (RLIMIT_NOFILE, &limit);	/* Determine max # descriptors */
@@ -560,7 +561,7 @@ game_loop (int s)
 			  prompt += "##";
 			}
 
-		      prompt += wound_total (point->character);
+		      prompt += wound_total (point->character,true);
 
 		      if (point->character->flags & FLAG_HARNESS)
 			{
@@ -679,7 +680,7 @@ game_loop (int s)
 	  autosave ();
 	}
 
-      if (!((pulse + 5) % PULSE_AUTOSAVE * 12) && engine.in_play_mode ())
+      if (!((pulse + 5) % PULSE_AUTOSAVE * 12) && (engine.in_play_mode () || engine.in_test_mode()))
 	{
 	  save_stayput_mobiles ();
 	}
@@ -721,21 +722,21 @@ game_loop (int s)
 		      morgul_arena_wargs ();
 		    }
 		}
-/** TE PIT
-* 1 chance in 20 for automatic troll or wargs
-**/
-	      if (te_pit_fight)
-		{
-		  if (!number (0, 19) && is_te_pit_clear ())
-		    {
-		      te_pit_troll ();
-		    }
-		  if (!number (0, 19) && is_te_pit_clear ())
-		    {
-		      te_pit_wargs ();
-		    }
-		}
-/*** end te Pit **/
+///** TE PIT
+//* 1 chance in 20 for automatic troll or wargs
+//**/
+//	      if (te_pit_fight)
+//		{
+//		  if (!number (0, 19) && is_te_pit_clear ())
+//		    {
+//		      te_pit_troll ();
+//		    }
+//		  if (!number (0, 19) && is_te_pit_clear ())
+//		    {
+//		      te_pit_wargs ();
+//		    }
+//		}
+///*** end te Pit **/
 	    }
 	  else  // if (engine.in_build_mode ())
 	    {
@@ -757,35 +758,42 @@ game_loop (int s)
 	    }
 	}
 	
-/** TE PIT **
-* Runs on the 1 and 15 of each month, for 1 day, every half hour RL
-*/
-      ///\TODO Uh... lets not calc this every pulse, mmkay?
-      time_t t = time(NULL);
-      struct tm* tp = localtime(&t);
-      int daymonth;
-      
-      daymonth = tp->tm_mday;
- 
-      if (daymonth == 1 || daymonth == 15)
-	{
-	  if (!(pulse % (SECOND_PULSE * 60 * 30))) //every 30 RL miuntes
+///** TE PIT **
+//* Runs on the 1 and 15 of each month, for 1 day, every half hour RL
+//*/
+//      ///\TODO Uh... lets not calc this every pulse, mmkay?
+//      time_t t = time(NULL);
+//      struct tm* tp = localtime(&t);
+//      int daymonth;
+//      
+//      daymonth = tp->tm_mday;
+// 
+//      if (daymonth == 1 || daymonth == 15)
+//	{
+//	  if (!(pulse % (SECOND_PULSE * 60 * 30))) //every 30 RL miuntes
+//	    {
+//	      if (!te_pit_fight 
+//		  && engine.in_play_mode () 
+//		  && is_te_pit_clear ())
+//	    	{
+//	    	  te_pit_first ();
+//	    	  te_pit_time = (int) time (0);
+//	    	}
+//	    }
+//	}  
+///* end te minute update pit **/
+	  
+	  
+	  if (!(pulse % (SECOND_PULSE * 60 * 15))) /* every fifteen minutes */
+	  {
+		if (!engine.in_build_mode ())
 	    {
-	      if (!te_pit_fight 
-		  && engine.in_play_mode () 
-		  && is_te_pit_clear ())
-	    	{
-	    	  te_pit_first ();
-	    	  te_pit_time = (int) time (0);
-	    	}
-	    }
-	}  
-/* end te minute update pit **/
+			int sales_time = time(0) - last_vnpc_sale;
+			int sale_pulses = sales_time / (6 * 60 * 60); /* six hour pulse (1 game day) */
 
-      if (!(pulse % (SECOND_PULSE * 60 * 60 * 4)))
-	{
-	  if (!engine.in_build_mode ())
-	    {
+			if (sale_pulses > 0)
+			{ /* do all the below */
+
 	      //for (tch = character_list; tch; tch = tch->next)
 		  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 		{
@@ -794,23 +802,31 @@ game_loop (int s)
 		    continue;
 		  if (!IS_NPC (tch) || !IS_SET (tch->flags, FLAG_KEEPER))
 		    continue;
-		  if (IS_SET(tch->room->room_flags, WEALTHY))
-			  purse = number (40, 80);
-		  else if (IS_SET(tch->room->room_flags, SCUM))
-			  purse = number (10, 25);
-		  else if (IS_SET(tch->room->room_flags, POOR))
-			  purse = number (10, 50);
-		  else
-		  purse = number (20, 60);
-		  while (purse > 0)
-		    purse -= vnpc_customer (tch, purse);
-		  refresh_colors (tch);
-		}
-	    }
-	}
+
+		  //loop sale pulse amount of time
+		  for (int i=0; i<sale_pulses; i++)
+		  {
+			if (IS_SET(tch->room->room_flags, WEALTHY))
+				purse = number (40, 80);
+			else if (IS_SET(tch->room->room_flags, SCUM))
+				purse = number (10, 25);
+			else if (IS_SET(tch->room->room_flags, POOR))
+				purse = number (10, 50);
+			else
+				purse = number (20, 60);
+			while (purse > 0)
+				purse -= vnpc_customer (tch, purse);
+			refresh_colors (tch);
+		  }
+		} // most recent iterator ^
+	    last_vnpc_sale = time(0);
+	    save_vnpc_timestamp(); // save timestamp to db;
+			} // has more than one pulse to do
+		} // isn't build mode
+	} // sales pulse
 
       if (time (0) >= next_minute_update)	/* 1 RL minute */
-	rl_minute_affect_update ();
+		rl_minute_affect_update ();
 
 
       if (knockout)
@@ -2364,10 +2380,6 @@ colorize (const char *source, char *target, struct descriptor_data *d)
   return retval;
 }
 
-
-
-
-
 void
 sigusr1 (int signo)
 {
@@ -2389,7 +2401,6 @@ signal_setup (void)
   signal (SIGCHLD, sigchld);
 
 }
-
 
 void
 reset_itimer ()
@@ -2620,7 +2631,7 @@ prepare_copyover (int cmd)
   save_player_rooms ();
   save_dwelling_rooms ();
 
-  if (engine.in_play_mode ())
+  if (engine.in_play_mode () || engine.in_test_mode())
     {
       save_stayput_mobiles ();
       save_tracks ();
@@ -2956,9 +2967,6 @@ sigchld (int signo)
 
   return;
 }
-
-
-
 
 bool
 in_crash_loop (void)
@@ -3404,16 +3412,6 @@ void const_to_non_const_cstr (const char * string, char * edit_string)
 {
 
 	for (int i = 0; string[i] != '\0'; i++)
-	{
-		edit_string[i] = string[i];
-	}
-
-	return;
-}
-
-void const_to_non_const_cstr (const char * string, char * edit_string, int n)
-{
-	for (int i = 0; string[i] != '\0' && i < n; i++)
 	{
 		edit_string[i] = string[i];
 	}
