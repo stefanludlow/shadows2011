@@ -2417,6 +2417,8 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 	bool sent = false;
 	char *date;
 	time_t current_time;
+	char * sphereName = NULL;
+	bool emergencyPetition = false;
 
 	if (IS_NPC(ch))
 		return;
@@ -2458,19 +2460,26 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 		if (!strcasecmp(buf,spheres[i].name) && spheres[i].available)
 		{
 			sphereIndex = i;
+			sphereName = spheres[i].name;
 			break;
 		}
 	}
 
+	if (!strcasecmp(buf,"emergency"))
+	{
+		sphereName="Emergency";
+		emergencyPetition = true;	
+	}
+
 	/* check to see if the word matched a sphere. if so, go with it, otherwise check for admin name */
-	if (sphereIndex>=0)
+	if (sphereIndex>=0 || emergencyPetition)
 	{
 		std::stringstream petitionStream;
 		petitionStream << "#6[" << (ch->getNaughtyFlag() ? "#1!" : "#6_")
 			<< (ch->getRPFlag() ? "#2R" : "#6_") << (ch->getPlotFlag() ? "#3P" : "#6_")
 			<< "#6]";
 
-		sprintf (buf, "%s[Petition(#5%s#6): %s]#0 %s\n", petitionStream.str().c_str(),spheres[sphereIndex].name, IS_NPC (ch) ? ch->short_descr : GET_NAME (ch), CAP (argument));
+		sprintf (buf, "%s[Petition(#5%s#6): %s]#0 %s\n", petitionStream.str().c_str(),sphereName, IS_NPC (ch) ? ch->short_descr : GET_NAME (ch), CAP (argument));
 		reformat_string (buf, &p);
 
 		for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
@@ -2488,7 +2497,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			if (admin->desc && admin->desc->original && GET_TRUST(admin))
 			{
 				/* skip if orig char is not subscribed */
-				if (!IS_SET(admin->desc->original->petition_flags,(1<<sphereIndex)))
+				if (!emergencyPetition && !IS_SET(admin->desc->original->petition_flags,(1<<sphereIndex)))
 					continue;
 
 				/* send to switched in target as that has the socket now */
@@ -2505,7 +2514,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 				continue;
 
 			/* do not send to this admin if they are not assigned to this sphere */
-			if (!IS_SET(admin->petition_flags,(1<<sphereIndex)))
+			if (!emergencyPetition && !IS_SET(admin->petition_flags,(1<<sphereIndex)))
 				continue;
 
 			send_to_char (p, admin);
@@ -2515,10 +2524,11 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 		}
 
 		/* was it actually sent? log if not */
-		if (!sent)
+		/* emergency petitions are not logged */
+		if (!sent && !emergencyPetition)
 		{
 			std::stringstream boardName;
-			boardName << "Petitions-" << spheres[sphereIndex].name;
+			boardName << "Petitions-" << sphereName;
 
 			current_time = time (0);
 			date = (char *) asctime (localtime (&current_time));
@@ -2586,6 +2596,20 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 		reformat_string (buf, &p);
 		send_to_char (p, ch);
 		mem_free (p); // char*
+
+		if (!sent)
+		{
+			if (emergencyPetition)
+			{
+				send_to_char("#1No one was present to receive your emergency petition.\n"
+				"Please petition your sphere to have your request logged for review.\n#0",ch);
+			}
+			else
+			{
+				send_to_char("#1Your petition has been logged for review.\n#0",ch);
+			}
+
+		}
 	
 		return;
 		

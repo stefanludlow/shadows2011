@@ -4225,8 +4225,8 @@ erase_mysql_board_post (CHAR_DATA * ch, char *name, int board_type,
     {
       if (!(message = load_message (name, 5, atoi (argument))))
 	return 0;
-      if ((!str_cmp (name, "Bugs") || !str_cmp (name, "Typos")
-	   || !str_cmp (name, "Ideas") || !str_cmp (name, "Petitions")
+      if ((!str_cmp (name, "Bugs") || !strncasecmp(name, "Typos",5)
+	   || !str_cmp (name, "Ideas") || !strncasecmp (name, "Petitions",9)
 	   || !str_cmp (name, "Submissions")) && GET_TRUST (ch))
 	{
 	  send_to_char
