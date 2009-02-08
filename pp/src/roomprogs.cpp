@@ -87,6 +87,7 @@
 #define RP_MFTOG 58
 #define RP_NOOP2 59
 #define RP_COPPER_TO_SHILLINGS 60
+#define RP_MCOPY 61
 
 extern std::multimap<int, room_prog> mob_prog_list;
 extern std::multimap<int, room_prog> obj_prog_list;
@@ -114,6 +115,7 @@ void r_atlook (CHAR_DATA * ch, char *argument);
 void r_atecho (CHAR_DATA * ch, char *argument);
 void r_atread (CHAR_DATA * ch, char *argument);
 void r_loadmob (CHAR_DATA * ch, char *argument);
+void r_mcopy (CHAR_DATA * ch, char *argument);
 void r_exmob (CHAR_DATA * ch, char *argument);
 void r_rftog (CHAR_DATA * ch, char *arg);
 void r_force (CHAR_DATA * ch, char *argument);
@@ -218,6 +220,7 @@ const char *rfuncs[] = {
 	"mftog",
 	"//",
 	"copper_to_shillings",
+	"mcopy",
 	"\n"
 };
 
@@ -2147,6 +2150,13 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 			r_exmob (ch, arg);
 		
 		return 1;
+
+	case RP_MCOPY:
+		if (!ifin[nNest])
+			r_mcopy (ch,arg);
+
+		return 1;
+
 	case RP_FORCE:
 		if (!ifin[nNest])
 			r_force (ch, arg);
@@ -4225,6 +4235,13 @@ r_loadmob (CHAR_DATA * ch, char *argument)
 		save_stayput_mobiles ();
 	}
 }
+
+void
+r_mcopy (CHAR_DATA * ch, char *argument)
+{
+  do_mcopy(ch, argument, 0);
+}
+
 
 void
 r_exmob (CHAR_DATA * ch, char *argument)

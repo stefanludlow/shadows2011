@@ -2548,13 +2548,14 @@ get_equip (CHAR_DATA * ch, int location)
   if (ch->left_hand && ch->left_hand->location == location)
     return ch->left_hand;
 
-  if (location != WEAR_SHIELD)
-    {
-      for (obj = ch->equip; obj; obj = obj->next_content)
+  for (obj = ch->equip; obj; obj = obj->next_content)
+  {
 	if (obj->location == location)
+	{
 	  return obj;
-    }
-
+	}
+  }
+  
   return NULL;
 }
 
