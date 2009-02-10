@@ -789,7 +789,7 @@ game_loop (int s)
 		if (!engine.in_build_mode ())
 	    {
 			int sales_time = time(0) - last_vnpc_sale;
-			int sale_pulses = sales_time / (6 * 60 * 60); /* six hour pulse (1 game day) */
+			int sale_pulses = sales_time / (6 * 60 * 60 * 30); /* six hour pulse (1 game day) * 30 = 1 game month */
 
 			if (sale_pulses > 0)
 			{ /* do all the below */
@@ -804,16 +804,17 @@ game_loop (int s)
 		    continue;
 
 		  //loop sale pulse amount of time
+		  // all these adjusted to monthly totals by multiplying by 30
 		  for (int i=0; i<sale_pulses; i++)
 		  {
 			if (IS_SET(tch->room->room_flags, WEALTHY))
-				purse = number (40, 80);
+				purse = number (1200, 2400);
 			else if (IS_SET(tch->room->room_flags, SCUM))
-				purse = number (10, 25);
+				purse = number (300, 750);
 			else if (IS_SET(tch->room->room_flags, POOR))
-				purse = number (10, 50);
+				purse = number (300, 1500);
 			else
-				purse = number (20, 60);
+				purse = number (600, 1800);
 			while (purse > 0)
 				purse -= vnpc_customer (tch, purse);
 			refresh_colors (tch);

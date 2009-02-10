@@ -4874,6 +4874,7 @@ r_pain (CHAR_DATA * ch, char *argument)
 	int high, low, dam, type;
 	int room;
 	CHAR_DATA *victim;
+	CHAR_DATA* tempnext=NULL;
 
 	arg_splitter (5, argument, arg1, arg2, arg3, arg4, arg5);
 
@@ -4893,16 +4894,17 @@ r_pain (CHAR_DATA * ch, char *argument)
 	{
 		type = 3;
 	}
-
 	if (!strncmp (arg4, "allbutme", 8))
 	{
-
 		for (victim = vtor (room)->people; victim;
-			victim = victim->next_in_room)
+			victim = tempnext)
 		{
+			/* save early so pointer isn't invalidated by death of char */
+			tempnext = victim->next_in_room;
 
 			if (victim == ch)
 				continue;
+
 
 			if ((dam = number (low, high)))
 			{
@@ -4914,28 +4916,25 @@ r_pain (CHAR_DATA * ch, char *argument)
 	}
 	else if (!strncmp(arg4, "all", 3))
 	{
-		for (victim = vtor (room)->people; victim;
-			victim = victim->next_in_room)
+		for (victim = vtor(room)->people; victim; victim = tempnext)
 		{
-			
+
+			/* save early so pointer isn't invalidated by death of char */
+			tempnext = victim->next_in_room;
 
 			if ((dam = number (low, high)))
 			{
-				wound_to_char (victim, figure_location (victim, number (0, 10)),
-					dam, type, 0, 0, 0);
+				wound_to_char (victim, figure_location (victim, number (0, 10)),dam, type, 0, 0, 0);
 			}
-
 		}
 	}
 	else
 	{
-
 		if ((dam = number (low, high)))
 		{
 			wound_to_char (ch, figure_location (ch, number (0, 10)), dam, type,
 				0, 0, 0);
 		}
-
 	}
 }
 
