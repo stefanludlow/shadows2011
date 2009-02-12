@@ -1529,6 +1529,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
   char buffer[MAX_STRING_LENGTH] = { '\0' };
   char buf[MAX_STRING_LENGTH] = { '\0' };
   char buf2[MAX_STRING_LENGTH] = { '\0' };
+  int count;
 
   *buffer = '\0';
 
@@ -1750,6 +1751,43 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 	      sprintf (buffer + strlen (buffer),
 		       "\n   #6This garment would fit individuals wearing size %s.#0",
 		       sizes_named[obj->size]);
+	    }
+	    
+	    /* Show information about how many spaces at a table
+			are taken or available */
+	    if (IS_TABLE (obj))
+	    {
+			//get the number of people currently sat at the table
+			count = 0;
+			for (tch = ch->room->people; tch; tch = tch->next_in_room)
+			{
+			  if ((af = get_affect (tch, MAGIC_SIT_TABLE)) &&
+				  af->a.table.obj == obj)
+				count++;
+			}
+			
+			//append approrpiate message
+			if(obj->o.container.table_max_sitting == 0)
+			{
+				sprintf (buffer + strlen (buffer), "\n   #6There is plenty of space here.#0");
+			}
+			else if (obj->o.container.table_max_sitting == 1)
+			{
+				if(count==1)
+				{
+					sprintf (buffer + strlen (buffer), "\n   #6The single space here is taken.#0");
+				}
+				else
+				{
+					sprintf (buffer + strlen (buffer), "\n   #6The one space here is available.#0");
+				}
+			}
+			else
+			{
+				sprintf (buffer + strlen (buffer),
+				   "\n   #6%d of the %d places here %s taken.#0",
+				   count,obj->o.container.table_max_sitting,count==1 ? "is" : "are");
+			}
 	    }
 
 	  if (GET_ITEM_TYPE (obj) == ITEM_TOSSABLE && mode == 15
