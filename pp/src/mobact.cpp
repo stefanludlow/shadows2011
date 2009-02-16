@@ -133,7 +133,7 @@ enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness)
 			{
 				do_say(ch, "You are to surrender to the Black Watch immediately or you will be slain!", 0);
 			}
-			else if (ch->race == lookup_race_id("Orc") || ch->race == lookup_race_id("Half-Orc") || ch->race == lookup_race_id("Snaga") || ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Half-Troll"))
+			else if (ch->race == lookup_race_id("Mountain Orc") || ch->race == lookup_race_id("Mirkwood Orc") || ch->race == lookup_race_id("Mordorian Orc") || ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Olog-hai"))
 			{
 				do_say(ch, "Hey you! Git yer snaga-hide over here cos youse mah prisoner now!", 0);
 			}
@@ -164,7 +164,7 @@ enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness)
 			{
 				do_say(ch, "Wrong choice, scum! Run the dog through!", 0);
 			}
-			else if (ch->race == lookup_race_id("Orc") || ch->race == lookup_race_id("Half-Orc") || ch->race == lookup_race_id("Snaga") || ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Half-Troll"))
+			else if (ch->race == lookup_race_id("Mountain Orc") || ch->race == lookup_race_id("Mirkwood Orc") || ch->race == lookup_race_id("Mordorian Orc") || ch->race == lookup_race_id("Troll") || ch->race == lookup_race_id("Olog-hai"))
 			{
 				do_say(ch, "Yuh make-a da wrong move, pushdug. Now I is gunna slice yuh up!", 0);
 			}

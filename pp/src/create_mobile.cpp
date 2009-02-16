@@ -25,8 +25,8 @@ const char *variable_races[] = {
   "Eriadorian Man",
   "Haradrim",
   "Dwarf",
-  "Orc",
-  "Snaga",
+  "Mountain Orc",
+  "Mirkwood Orc",
   "Noldo Elf",
   "Sinda Elf",
   "Vanya Elf",
@@ -46,8 +46,7 @@ const char *variable_races[] = {
   "Rat",
   "Arachnid",
   "Wolf",
-  "Half-Orc",
-  "Uruk-Hai",
+  "Mordorian Orc",
   "\n"
 };
 
@@ -1822,7 +1821,7 @@ return_adj2 (CHAR_DATA * mob)
       sprintf (adj, "%s", haradrim_adj2[roll]);
       return adj;
     }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Orc"))
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mirkwood Orc"))
     {
       for (limit = 0; *orc_adj2[limit] != '\n'; limit++)
 	;
@@ -1831,7 +1830,7 @@ return_adj2 (CHAR_DATA * mob)
       sprintf (adj, "%s", orc_adj2[roll]);
       return adj;
     }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Snaga"))
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mountain Orc"))
     {
       for (limit = 0; *goblin_adj2[limit] != '\n'; limit++)
 	;
@@ -1840,7 +1839,7 @@ return_adj2 (CHAR_DATA * mob)
       sprintf (adj, "%s", goblin_adj2[roll]);
       return adj;
     }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Uruk-Hai"))
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mordorian Orc"))
     {
       for (limit = 0; *urukhai_adj2[limit] != '\n'; limit++)
 	;
@@ -2029,7 +2028,7 @@ return_adj1 (CHAR_DATA * mob)
       sprintf (adj, "%s", haradrim_adj1[roll]);
       return adj;
     }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Orc"))
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mirkwood Orc"))
     {
       for (limit = 0; *orc_adj1[limit] != '\n'; limit++)
 	;
@@ -2038,7 +2037,7 @@ return_adj1 (CHAR_DATA * mob)
       sprintf (adj, "%s", orc_adj1[roll]);
       return adj;
     }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Goblin"))
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mountain Orc"))
     {
       for (limit = 0; *goblin_adj1[limit] != '\n'; limit++)
 	;
@@ -2047,7 +2046,7 @@ return_adj1 (CHAR_DATA * mob)
       sprintf (adj, "%s", goblin_adj1[roll]);
       return adj;
     }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Uruk-Hai"))
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mordorian Orc"))
     {
       for (limit = 0; *urukhai_adj1[limit] != '\n'; limit++)
 	;
@@ -2235,7 +2234,9 @@ return_name (CHAR_DATA * mob)
 
   *buf = '\0';
 
-  if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Orc"))
+  if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mirkwood Orc") 
+	  || !str_cmp(lookup_race_variable(mob->race,RACE_NAME),"Mordorian Orc")
+	  || !str_cmp(lookup_race_variable(mob->race,RACE_NAME),"Mountain Orc"))
     {
       if (GET_SEX (mob) == SEX_MALE)
 	return "male orc";
@@ -2244,59 +2245,12 @@ return_name (CHAR_DATA * mob)
       else
 	return "orc";
     }
-  if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Half-Orc"))
-    {
-      if (GET_SEX (mob) == SEX_MALE)
-	{
-	  switch (number (0, 5))
-	    {
-	    case 0:
-	    case 1:
-	    case 2:
-	      return "male half-orc";
-	    case 3:
-	    case 4:
-	      return "half-man";
-	    default:
-	      return "male half-breed";
-	    }
-	}
-      else if (GET_SEX (mob) == SEX_MALE)
-	{
-	  switch (number (0, 8))
-	    {
-	    case 0:
-	    case 1:
-	    case 2:
-	    case 3:
-	    case 4:
-	    case 5:
-	      return "female half-orc";
-	    case 6:
-	    case 7:
-	      return "half-woman";
-	    default:
-	      return "female half-breed";
-	    }
-	}
-      else
-	return "half-orc";
-    }
   else
     if (!str_cmp
 	(lookup_race_variable (mob->race, RACE_NAME), "Barrow-Wight"))
     {
       mob->sex = SEX_NEUTRAL;
       return "wight";
-    }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Snaga"))
-    {
-      if (GET_SEX (mob) == SEX_MALE)
-	return "male goblin";
-      else if (GET_SEX (mob) == SEX_FEMALE)
-	return "female goblin";
-      else
-	return "goblin";
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Noldo Elf")
 	   || !str_cmp (lookup_race_variable (mob->race, RACE_NAME),
@@ -2338,8 +2292,6 @@ return_name (CHAR_DATA * mob)
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Bird"))
     return "bird";
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Uruk-Hai"))
-    return "uruk-hai";
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Arachnid"))
     return "spider";
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Rat"))

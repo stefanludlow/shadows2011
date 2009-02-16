@@ -2550,7 +2550,7 @@ do_move (CHAR_DATA * ch, char *argument, int dir)
 			{
 				do_shout (shoutchar, "Halt now or you will not leave this place alive!", 0);
 			}
-			else if (shoutchar->race == lookup_race_id("Orc") || shoutchar->race == lookup_race_id("Half-Orc") || shoutchar->race == lookup_race_id("Snaga") || shoutchar->race == lookup_race_id("Troll") || shoutchar->race == lookup_race_id("Half-Troll"))
+			else if (shoutchar->race == lookup_race_id("Mountain Orc") || shoutchar->race == lookup_race_id("Mirkwood Orc") || shoutchar->race == lookup_race_id("Mordorian Orc") || shoutchar->race == lookup_race_id("Troll") || shoutchar->race == lookup_race_id("Olog-hai"))
 			{
 				do_shout (shoutchar, "Oi! Youse not gunna get far! After da little bitch!", 0);
 			}
