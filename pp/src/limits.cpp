@@ -375,11 +375,12 @@ point_update (void)
 	      ch->pc && ch->pc->dreams && !number (0, 5))
 	    dream (ch);
 
-	  if (GET_MOVE (ch) < GET_MAX_MOVE (ch))
-	    GET_MOVE (ch) =
-	      MIN (GET_MOVE (ch) + move_gain (ch), GET_MAX_MOVE (ch));
+	  
 	}
 end sleep code removed by grommit */
+
+	if (GET_MOVE (ch) < GET_MAX_MOVE (ch))
+	    GET_MOVE (ch) = MIN (GET_MOVE (ch) + move_gain (ch), GET_MAX_MOVE (ch));
 
 // Healing from bloodloss
       int old_damage = ch->damage;
