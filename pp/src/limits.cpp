@@ -650,8 +650,6 @@ end sleep code removed by grommit */
 	  } // range.first != range.second
 	 } // end is NPC
    } // end if wounded
-
-   send_to_gods("Beginning OOC timer check in point_update.\n");
 	 
    if ((af = get_affect (ch, MAGIC_CRAFT_DELAY)))
 	{
