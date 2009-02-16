@@ -260,7 +260,7 @@ point_update (void)
 
     //  room = ch->room;
 
-      *ch->short_descr = tolower (*ch->short_descr);
+      //*ch->short_descr = tolower (*ch->short_descr);
 
 //boats take damage - Disabled by Grommit - no forseeable usage
 /*      if (IS_SET (ch->act, ACT_VEHICLE))
