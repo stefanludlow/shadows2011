@@ -223,16 +223,15 @@ point_update (void)
   char buf[MAX_STRING_LENGTH];
   char buf2[MAX_STRING_LENGTH];
   CHAR_DATA *ch;
-  CHAR_DATA *tch;
   CHAR_DATA *next_ch = NULL;
-  ROOM_DATA *room;
+//  ROOM_DATA *room;
   AFFECTED_TYPE *af;
   WOUND_DATA *wound, *next_wound;
   struct time_info_data healing_time;
   struct time_info_data bled_time;
   struct time_info_data playing_time;
 
-  static int reduceIntox = 0;
+  //static int reduceIntox = 0;
 
   cycle_count = 0;
 
@@ -243,15 +242,12 @@ point_update (void)
   for (i = 0; i <= 99; i++)
     zone_table[i].player_in_zone = 0;
 
-  //for (ch = character_list; ch; ch = next_ch)
   for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
     {
 	ch = *tch_iterator;
 
       if (!ch)
 	continue;
-
-      //next_ch = ch->next;
 
       if (ch->deleted)
 	continue;
@@ -262,7 +258,7 @@ point_update (void)
       if (!IS_NPC (ch) && ch->room)
 	zone_table[ch->room->zone].player_in_zone++;
 
-      room = ch->room;
+    //  room = ch->room;
 
       *ch->short_descr = tolower (*ch->short_descr);
 
@@ -386,68 +382,56 @@ point_update (void)
 end sleep code removed by grommit */
 
 // Healing from bloodloss
-      if (!ch)
-		continue;
-
       int old_damage = ch->damage;
       int new_damage = 0;
       if (ch->damage)
-	{
-	  int base = (get_affect (ch, MAGIC_AFFECT_REGENERATION)
-		      ||ch->skills[SKILL_EMPATHIC_HEAL]) 
-	    ? BASE_SPECIAL_HEALING
-	    : BASE_PC_HEALING;
-	  
-	  healing_time = real_time_passed (time (0) - ch->lastregen, 0);
-	  if (healing_time.minute >= (base - ch->con / 6))
-	    {
-	      roll = dice (1, 100);
-	      if (GET_POS (ch) == POSITION_SLEEPING)
-		roll -= 20;
-	      if (GET_POS (ch) == POSITION_RESTING)
-		roll -= 10;
-	      if (GET_POS (ch) == POSITION_SITTING)
-		roll -= 5;
-	      if (roll <= (ch->con * 4))
 		{
-		  if (roll % 5 == 0)
-		    ch->damage -= 2;
-		  else
-		    ch->damage -= 1;
-		}
-	      ch->lastregen = time (0);
-	    }
+			int base = (get_affect (ch, MAGIC_AFFECT_REGENERATION)
+				  ||ch->skills[SKILL_EMPATHIC_HEAL]) 
+				? BASE_SPECIAL_HEALING
+				: BASE_PC_HEALING;
 	  
-	}
+			healing_time = real_time_passed (time (0) - ch->lastregen, 0);
+			if (healing_time.minute >= (base - ch->con / 6))
+			{
+				roll = dice (1, 100);
+				if (GET_POS (ch) == POSITION_SLEEPING)
+					roll -= 20;
+				if (GET_POS (ch) == POSITION_RESTING)
+					roll -= 10;
+				if (GET_POS (ch) == POSITION_SITTING)
+					roll -= 5;
+				if (roll <= (ch->con * 4))
+				{
+					if (roll % 5 == 0)
+						ch->damage -= 2;
+					else
+						ch->damage -= 1;
+				} 
+				ch->lastregen = time (0);
+			} // end if time to cure some bloodloss
+	  } // end if damaged
 
 // Stun recovery
-      if (!ch)
-	continue;
-
       if (GET_POS (ch) == POSITION_STUNNED)
-	{
-	  if ((time (0) - ch->laststuncheck) >= number (15, 20))
-	    {
-	      ch->laststuncheck = time (0);
-	      GET_POS (ch) = REST;
-	      send_to_char
-		("You shake your head vigorously, recovering from your stun.\n",
-		 ch);
-	      sprintf (buf,
-		       "$n shakes $s head vigorously, seeming to recover.");
-	      act (buf, false, ch, 0, 0, TO_ROOM);
-	      if (IS_NPC (ch))
-		do_stand (ch, "", 0);
-	    }
-	}
+		{
+			  if ((time (0) - ch->laststuncheck) >= number (15, 20))
+				{
+					ch->laststuncheck = time (0);
+					GET_POS (ch) = REST;
+					send_to_char ("You shake your head vigorously, recovering from your stun.\n", ch);
+					sprintf (buf,
+						"$n shakes $s head vigorously, seeming to recover.");
+			      act (buf, false, ch, 0, 0, TO_ROOM);
+					if (IS_NPC (ch))
+						do_stand (ch, "", 0);
+			  } // end if time to update stun
+	  } // end if stunned
 
 //regain consciousness
-      if (!ch)
-	continue;
-
-      if (GET_POS (ch) == POSITION_UNCONSCIOUS)
+    if (GET_POS (ch) == POSITION_UNCONSCIOUS)
 	{
-		int total_damage = get_damage_total(ch);
+	  int total_damage = get_damage_total(ch);
 	  healing_time = real_time_passed (time (0) - ch->knockedout, 0);
 	  if ((healing_time.minute >= 5 && ((ch->max_hit * 0.85) > total_damage)) || healing_time.minute > 10)
 	    {
@@ -457,9 +441,9 @@ end sleep code removed by grommit */
 	      sprintf (buf, "Groaning groggily, $n regains consciousness.");
 	      act (buf, false, ch, 0, 0, TO_ROOM);
 	      if (IS_NPC (ch))
-		do_stand (ch, "", 0);
-	    }
-	}
+			do_stand (ch, "", 0);
+	  } // end if time to come to senses
+	} // end if unconscious
 
 //intoxication
   //    if (!ch)
@@ -478,13 +462,9 @@ end sleep code removed by grommit */
 //	reduceIntox++;
 
 //Application RPP cost
-      if (!ch)
-	continue;
-
-      if (!IS_NPC (ch) && ch->pc->app_cost && ch->desc)
+    if (!IS_NPC (ch) && ch->pc->app_cost && ch->desc)
 	{
-	  playing_time =
-	    real_time_passed (time (0) - ch->time.logon + ch->time.played, 0);
+	  playing_time = real_time_passed (time (0) - ch->time.logon + ch->time.played, 0);
 	  if (playing_time.hour >= 10 && ch->desc->acct)
 	    {
 
@@ -495,7 +475,7 @@ end sleep code removed by grommit */
 	}
 
 //Remove New Player Flag
-      if (!IS_NPC (ch) && IS_SET (ch->plr_flags, NEW_PLAYER_TAG))
+    if (!IS_NPC (ch) && IS_SET (ch->plr_flags, NEW_PLAYER_TAG))
 	{
 	  playing_time =
 	    real_time_passed (time (0) - ch->time.logon + ch->time.played, 0);
@@ -508,133 +488,132 @@ end sleep code removed by grommit */
 	    }
 	}
 
-// Bleeding
-      if (!ch)
-	continue;
-
-    if (!ch->wounds || ch->delay_type == DEL_BIND_WOUNDS)
-		continue;
-
-	for (wound = ch->wounds; wound; wound = next_wound)
+// Bleeding wounds and healing check
+     
+	// skip if they have no wounds
+	if (ch->wounds)
 	{
-	  next_wound = wound->next;
-	  int wound_damage = wound->damage;
-	  if (strcmp(wound->type, "stun"))
-	  {
-		  old_damage += (wound_damage / 2);
-		  new_damage += (wound_damage / 2);
-	  }
-	  else
-	  {
-	      old_damage += wound_damage;
-	      new_damage += wound_damage;
-	  }
-	  healing_time = real_time_passed (time (0) - wound->lasthealed, 0);
-	  bled_time = real_time_passed (time (0) - wound->lastbled, 0);
-    
-	  if (IS_MORTAL (ch) && bled_time.minute >= BLEEDING_INTERVAL
-	      && wound->bleeding)
-	    {
-						
-	      wound->lastbled = time (0);
-	      if (wound->bleeding > 0 && wound->bleeding <= 3)
+		for (wound = ch->wounds; wound; wound = next_wound)
 		{
-		  sprintf (buf,
-			   "#1Blood continues to seep from a %s %s on your %s.#0",
+			next_wound = wound->next;
+			int wound_damage = wound->damage;
+			if (strcmp(wound->type, "stun"))
+			{
+				old_damage += (wound_damage / 2);
+				new_damage += (wound_damage / 2);
+			}
+			else
+			{
+				old_damage += wound_damage;
+				new_damage += wound_damage;
+			}
+			healing_time = real_time_passed (time (0) - wound->lasthealed, 0);
+			bled_time = real_time_passed (time (0) - wound->lastbled, 0);
+
+			/* do not bleed if binding wounds */
+			if (IS_MORTAL (ch) && bled_time.minute >= BLEEDING_INTERVAL && wound->bleeding && !ch->delay==DEL_BIND_WOUNDS)
+			{
+						
+				wound->lastbled = time (0);
+				if (wound->bleeding > 0 && wound->bleeding <= 3)
+				{
+					sprintf (buf,
+					"#1Blood continues to seep from a %s %s on your %s.#0",
 										 wound->severity,
 										 wound->name,
 										 expand_wound_loc (wound->location));
 									
-		  sprintf (buf2,
-			   "Blood continues to seep from a %s %s on #5%s#0's %s.",
+					sprintf (buf2,
+					"Blood continues to seep from a %s %s on #5%s#0's %s.",
 										 wound->severity,
 										 wound->name,
 										 char_short (ch),
-			   expand_wound_loc (wound->location));
-		}
-	      else if (wound->bleeding > 3 && wound->bleeding <= 6)
-		{
-		  sprintf (buf, "#1Blood flows from a %s %s on your %s.#0",
+					expand_wound_loc (wound->location));
+				}
+				else if (wound->bleeding > 3 && wound->bleeding <= 6)
+				{
+					sprintf (buf, "#1Blood flows from a %s %s on your %s.#0",
 									wound->severity,
 									wound->name,
 									expand_wound_loc (wound->location));
 									
-		  sprintf (buf2, "Blood flows from a %s %s on #5%s#0's %s.",
+					sprintf (buf2, "Blood flows from a %s %s on #5%s#0's %s.",
 									wound->severity,
 									wound->name,
 									char_short (ch),
-			   expand_wound_loc (wound->location));
-		}
-	      else if (wound->bleeding > 6 && wound->bleeding <= 9)
-		{
-		  sprintf (buf,
-			   "#1Blood flows heavily from a %s %s on your %s!#0",
+					expand_wound_loc (wound->location));
+				}
+				else if (wound->bleeding > 6 && wound->bleeding <= 9)
+				{
+					sprintf (buf,
+					"#1Blood flows heavily from a %s %s on your %s!#0",
 										 wound->severity,
 										 wound->name,
-			   expand_wound_loc (wound->location));
-		  sprintf (buf2,
-			   "Blood flows heavily from a %s %s on #5%s#0's %s!",
+					expand_wound_loc (wound->location));
+					sprintf (buf2,
+					"Blood flows heavily from a %s %s on #5%s#0's %s!",
 										 wound->severity,
 										 wound->name,
 										 char_short (ch),
-			   expand_wound_loc (wound->location));
-		}
-	      else if (wound->bleeding > 9)
-		{
-									sprintf (buf,
-									"#1Blood gushes from a %s %s on your %s!#0",
-									wound->severity,
-									wound->name,
-									expand_wound_loc (wound->location));
+					expand_wound_loc (wound->location));
+				}
+				else if (wound->bleeding > 9)
+				{
+					sprintf (buf,
+						"#1Blood gushes from a %s %s on your %s!#0",
+							wound->severity,
+							wound->name,
+							expand_wound_loc (wound->location));
 									
-									sprintf (buf2,
-									"Blood gushes from a %s %s on #5%s#0's %s!",
-									wound->severity,
-									wound->name,
-									char_short (ch),
-									expand_wound_loc (wound->location));
-								}
-								
-	      act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-	      act (buf2, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+					sprintf (buf2,
+						"Blood gushes from a %s %s on #5%s#0's %s!",
+							wound->severity,
+							wound->name,
+							char_short (ch),
+							expand_wound_loc (wound->location));
+				}
+				act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+				act (buf2, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
         
-	      if (IS_SET (ch->plr_flags, NEW_PLAYER_TAG))
-    						act ("#6To stop the bleeding before it's too late, type BIND.#0", false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-    						
-	      if (general_damage (ch, wound->bleeding))
-		continue;
+				if (IS_SET (ch->plr_flags, NEW_PLAYER_TAG))
+    				act ("#6To stop the bleeding before it's too late, type BIND.#0", false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+    				
+				// continue out of further updates for this char if died of bleeding
+				if (general_damage (ch, wound->bleeding))
+					continue;
 
-	  } // end bleeding update
-      			
-	  int base = (get_affect (ch, MAGIC_AFFECT_REGENERATION)
-		      || ch->skills[SKILL_EMPATHIC_HEAL])
-	    ? BASE_SPECIAL_HEALING 
-	    : BASE_PC_HEALING;
+			} // end bleeding update
+      		
+			// commence healing update
+			int base = (get_affect (ch, MAGIC_AFFECT_REGENERATION) || ch->skills[SKILL_EMPATHIC_HEAL])
+						? BASE_SPECIAL_HEALING 
+						: BASE_PC_HEALING;
 
-	  if (healing_time.minute >= (base + (wound->damage / 3) 
+			if (healing_time.minute >= (base + (wound->damage / 3) 
 				      - (GET_CON (ch) / 7) 
 				      - (wound->healerskill / 20)))
-	    {
-	      wound->lasthealed = time (0);
-	      if (!IS_SET (ch->room->room_flags, OOC))
-		{
-			if (strcmp(wound->type, "stun"))
-				new_damage -= wound_damage;
-			else
-				new_damage -= (wound_damage / 2);
+			{
+				wound->lasthealed = time (0);
+				if (!IS_SET (ch->room->room_flags, OOC))
+				{
+					if (strcmp(wound->type, "stun"))
+						new_damage -= wound_damage;
+					else
+						new_damage -= (wound_damage / 2);
 
-		  // returns false if wound still exists
-		  if (!natural_healing_check (ch, wound))
-		    {
-				if (strcmp(wound->type, "stun"))
-					new_damage += wound->damage;
-				else
-					new_damage += (wound->damage / 2);
-		    }
-		  } //no OOC room
-	  } // if can be healed
-	} // end wound for loop
+					// returns false if wound still exists
+					if (!natural_healing_check (ch, wound))
+					{
+						if (strcmp(wound->type, "stun"))
+							new_damage += wound->damage;
+						else
+							new_damage += (wound->damage / 2);
+					}
+				} //no OOC room
+			} // if can be healed
+		} // end wound for loop
 
+	  // post loop cleanup
       new_damage += ch->damage; // we add this later, since bloodloss can add
       // NPCs that healed trigger on_health (>NN)
       if (IS_NPC(ch) && new_damage < old_damage && ch->mob->cues)
@@ -660,20 +639,20 @@ end sleep code removed by grommit */
 		      char *p;
 		      int threshold = strtol (r+2, &p, 0);
 		      if (new_health > threshold && old_health <= threshold)
-			{
-			  char reflex[AVG_STRING_LENGTH] = "";
-			  strcpy (reflex, p+2);
-			  command_interpreter (ch, reflex);
-			}
+			  {
+			    char reflex[AVG_STRING_LENGTH] = "";
+			    strcpy (reflex, p+2);
+			    command_interpreter (ch, reflex);
+			  }
 		    }
-		}
-	    }
+		  }  // for loop
+	  } // range.first != range.second
+	 } // end is NPC
+   } // end if wounded
 
-
-
-	}
-
-      if ((af = get_affect (ch, MAGIC_CRAFT_DELAY)))
+   send_to_gods("Beginning OOC timer check in point_update.\n");
+	 
+   if ((af = get_affect (ch, MAGIC_CRAFT_DELAY)))
 	{
 	  if (time (0) >= af->a.spell.modifier)
 	    {
@@ -694,7 +673,7 @@ end sleep code removed by grommit */
 	  die (ch);
 	}
 
-    }				/* for */
+	}				/* for */
 }
 
 void

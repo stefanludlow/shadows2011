@@ -47,6 +47,8 @@ apply_con_penalties (CHAR_DATA * ch)
   ch->tmp_con -= 2;
 }
 
+
+// returns 1 if character died, else 0
 int
 wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 	       int bleeding, int poison, int infection)
