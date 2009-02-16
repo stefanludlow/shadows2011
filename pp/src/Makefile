@@ -49,5 +49,5 @@ clean:
 	rm -f *.o $(INSTALL_DIR)/bin/server
 
 install:
-	cp -f ~/shadows/tp/bin/server ~/shadows/pp/bin/server
-	cp -f ~/shadows/tp/bin/server ~/shadows/bp/bin/server
+	cp -f ~shadows/shadows/tp/bin/server ~shadows/shadows/pp/bin/server
+	cp -f ~shadows/shadows/tp/bin/server ~shadows/shadows/bp/bin/server

@@ -4706,7 +4706,7 @@ height_frame_selection (DESCRIPTOR_DATA * d, char *argument)
 
 	ind = index_lookup (frames, buf);
 
-	if (ind < 1 || ind == FRAME_SUPER_MASSIVE)
+	if (ind < 1 || ind >= FRAME_SUPER_MASSIVE)
 	{
 		SEND_TO_Q
 			("Valid frames are scant, light, medium, heavy and massive.\n", d);
