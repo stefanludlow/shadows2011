@@ -266,8 +266,8 @@ point_update (void)
 
       *ch->short_descr = tolower (*ch->short_descr);
 
-//boats take damage
-      if (IS_SET (ch->act, ACT_VEHICLE))
+//boats take damage - Disabled by Grommit - no forseeable usage
+/*      if (IS_SET (ch->act, ACT_VEHICLE))
 	{
 	  if (room->sector_type == SECT_REEF)
 	    {
@@ -290,12 +290,12 @@ point_update (void)
 			    ch);
 
 	      if (weaken (ch, 10, 0, "boat in REEF"))	/* 10 hits for scraping the reef */
-		continue;
-	    }
-	}
+//		continue;
+//	    }
+//	}
 
-//Sleep
-      if (GET_POS (ch) >= SLEEP)
+//Sleep - disabled by  Grommit, to be used later */
+/*      if (GET_POS (ch) >= SLEEP)
 	{
 
 	  if (ch->pc)
@@ -331,8 +331,8 @@ point_update (void)
 	      if (sleep_needed_in_seconds (ch) == 300 && IS_MORTAL (ch))
 		{
 		  send_to_char ("You are feeling drowsy.\n", ch);
-		  /* Adding this is 1 sec.  If we don't do this, the
-		     drowsy message appears every 5 seconds. */
+		  // Adding this is 1 sec.  If we don't do this, the
+		     drowsy message appears every 5 seconds. //
 		  ch->pc->sleep_needed += 100000;
 		}
 
@@ -383,10 +383,11 @@ point_update (void)
 	    GET_MOVE (ch) =
 	      MIN (GET_MOVE (ch) + move_gain (ch), GET_MAX_MOVE (ch));
 	}
+end sleep code removed by grommit */
 
-// Healing
+// Healing from bloodloss
       if (!ch)
-	continue;
+		continue;
 
       int old_damage = ch->damage;
       int new_damage = 0;
@@ -461,20 +462,20 @@ point_update (void)
 	}
 
 //intoxication
-      if (!ch)
-	continue;
+  //    if (!ch)
+//	continue;
 
-      if (reduceIntox == 3)
-	{
-	  if (ch->intoxication > 0)
-	    if (!--ch->intoxication)
-	      ;
-	  /*send_to_char ("You are sober.\n", ch); */
-	  reduceIntox = 0;
+ //     if (reduceIntox == 3)
+//	{
+//	  if (ch->intoxication > 0)
+//	    if (!--ch->intoxication)
+//	      ;
+//	  /*send_to_char ("You are sober.\n", ch); */
+//	  reduceIntox = 0;
 
-	}
-      else
-	reduceIntox++;
+//	}
+  //    else
+//	reduceIntox++;
 
 //Application RPP cost
       if (!ch)
@@ -511,14 +512,11 @@ point_update (void)
       if (!ch)
 	continue;
 
-      for (wound = ch->wounds; wound; wound = next_wound)
+    if (!ch->wounds || ch->delay_type == DEL_BIND_WOUNDS)
+		continue;
+
+	for (wound = ch->wounds; wound; wound = next_wound)
 	{
-	  if (!ch->wounds)
-      			break;   // they aren't really wounded
-					
-					if (ch->delay_type == DEL_BIND_WOUNDS)
-						break;  //they are binding, so no bloodloss
-						
 	  next_wound = wound->next;
 	  int wound_damage = wound->damage;
 	  if (strcmp(wound->type, "stun"))
@@ -528,8 +526,8 @@ point_update (void)
 	  }
 	  else
 	  {
-	  old_damage += wound_damage;
-	  new_damage += wound_damage;
+	      old_damage += wound_damage;
+	      new_damage += wound_damage;
 	  }
 	  healing_time = real_time_passed (time (0) - wound->lasthealed, 0);
 	  bled_time = real_time_passed (time (0) - wound->lastbled, 0);
@@ -537,7 +535,7 @@ point_update (void)
 	  if (IS_MORTAL (ch) && bled_time.minute >= BLEEDING_INTERVAL
 	      && wound->bleeding)
 	    {
-							//ch->damage += wound->bleeding;
+						
 	      wound->lastbled = time (0);
 	      if (wound->bleeding > 0 && wound->bleeding <= 3)
 		{
@@ -606,7 +604,7 @@ point_update (void)
 	      if (general_damage (ch, wound->bleeding))
 		continue;
 
-	    }
+	  } // end bleeding update
       			
 	  int base = (get_affect (ch, MAGIC_AFFECT_REGENERATION)
 		      || ch->skills[SKILL_EMPATHIC_HEAL])
@@ -618,11 +616,10 @@ point_update (void)
 				      - (wound->healerskill / 20)))
 	    {
 	      wound->lasthealed = time (0);
-	      if (GET_POS (ch) != POSITION_FIGHTING 
-		  && !IS_SET (ch->room->room_flags, OOC))
+	      if (!IS_SET (ch->room->room_flags, OOC))
 		{
 			if (strcmp(wound->type, "stun"))
-		  new_damage -= wound_damage;
+				new_damage -= wound_damage;
 			else
 				new_damage -= (wound_damage / 2);
 
@@ -630,13 +627,13 @@ point_update (void)
 		  if (!natural_healing_check (ch, wound))
 		    {
 				if (strcmp(wound->type, "stun"))
-		      new_damage += wound->damage;
+					new_damage += wound->damage;
 				else
 					new_damage += (wound->damage / 2);
 		    }
-		}
-	    }
-	}
+		  } //no OOC room
+	  } // if can be healed
+	} // end wound for loop
 
       new_damage += ch->damage; // we add this later, since bloodloss can add
       // NPCs that healed trigger on_health (>NN)
