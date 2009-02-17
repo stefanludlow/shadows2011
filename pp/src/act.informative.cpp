@@ -2428,14 +2428,19 @@ enter_exit_msg (CHAR_DATA * ch, char *buffer)
   else
     return 0;
 
+
+  char* charShort = str_dup(char_short(ch));
+
   sprintf (addon, "#3%s is %s %s%s%s.#0",
-	   CAP (char_short (ch)),
+	   CAP (charShort),
 	   (isLeaving ? "leaving" : "arriving from"),
 	   (isLeaving ? e_dirs[qe->dir] : a_dirs[qe->dir]),
 	   ((qe->travel_str == NULL && ch->travel_str) ? ", " : ""),
 	   ((qe->travel_str ? qe->
 	     travel_str : (ch->travel_str ? ch->travel_str : ""))));
   addon[2] = toupper (addon[2]);
+
+  mem_free(charShort);
 
   return 1;
 }
@@ -2541,9 +2546,9 @@ char_short (CHAR_DATA * ch)
 
     }
 
-  /* always copy, so the copy can be capitalized or otherwise edited */
-  sprintf (buf,"%s",ch->short_descr);
-  return buf;
+	if (!ch->short_descr)
+		return "a strangely amorphous person";
+   return ch->short_descr;
 }
 
 char *
