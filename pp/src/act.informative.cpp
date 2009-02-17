@@ -2540,7 +2540,10 @@ char_short (CHAR_DATA * ch)
       return buf;
 
     }
-  return ch->short_descr;
+
+  /* always copy, so the copy can be capitalized or otherwise edited */
+  sprintf (buf,"%s",ch->short_descr);
+  return buf;
 }
 
 char *
