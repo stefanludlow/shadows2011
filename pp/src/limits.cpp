@@ -512,7 +512,7 @@ end sleep code removed by grommit */
 			bled_time = real_time_passed (time (0) - wound->lastbled, 0);
 
 			/* do not bleed if binding wounds */
-			if (IS_MORTAL (ch) && bled_time.minute >= BLEEDING_INTERVAL && wound->bleeding && !ch->delay==DEL_BIND_WOUNDS)
+			if (IS_MORTAL (ch) && bled_time.minute >= BLEEDING_INTERVAL && wound->bleeding && ch->delay_type!=DEL_BIND_WOUNDS)
 			{
 						
 				wound->lastbled = time (0);
