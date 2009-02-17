@@ -2467,7 +2467,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!strcasecmp(buf,"emergency"))
 	{
-		sphereName="Emergency";
+		sphereName="#1Emergency#0";
 		emergencyPetition = true;	
 	}
 

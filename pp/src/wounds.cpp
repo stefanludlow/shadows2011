@@ -2138,6 +2138,14 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 							bleeding = 1;
 							strcat (buf2, buf);
 						}
+
+		  if (!IS_MORTAL(ch))
+		  {
+			  // display minutes and seconds since last heal
+			  int time_diff = time(0) - wound->lasthealed;
+			  sprintf(buf," #6[%dm%ds]#0 ",time_diff/60,time_diff%60);
+			  strcat(buf2, buf);
+		  }
      
 	  strcat (buf2, "\n");
 	  strcat (buf3, buf2);
@@ -3035,18 +3043,28 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
 void
 offline_healing (CHAR_DATA * ch, int since)
 {
-
   WOUND_DATA *wound, *next_wound;
   time_t healing_time = 0;
   int checks = 0, i = 0, roll = 0;
 
   healing_time = time (0) - since;
 
+  std::ostringstream oss;
+  oss << "Current time: " << time(0) << " Since time: " << since << "\n.";
+	oss << "Attempting offline healing on character " << ch->tname << " who last logged on ["
+		<< healing_time / 60 << "m" << healing_time%60 << "s] ago.\n";
+
   checks += (healing_time / ((BASE_PC_HEALING - ch->con / 6) * 60));	// BASE_PC is in minutes, not seconds.
+
+  oss << "Attempting " << checks << " healing checks.\n";
 
   /* wound reduction */
   for (wound = ch->wounds; wound; wound = next_wound)
     {
+		/*oss << "Attempting to heal a " << wound->severity << " " << wound->name << " on the "
+			<< wound->location << (wound->infection > 0 ?  "(I) " : " ") << " with "
+			<< wound->damage << " damage and " << wound->bleeding
+			<< " bleeding.\n";*/
 
       next_wound = wound->next;
 
@@ -3057,6 +3075,8 @@ offline_healing (CHAR_DATA * ch, int since)
 	  }
 
     }
+
+  //oss << "Started with " << ch->damage << " bloodloss damage ";
 
   /* bloodloss reduction */
   for (i = 0; i < checks; i++)
@@ -3073,7 +3093,11 @@ offline_healing (CHAR_DATA * ch, int since)
 	      ch->lastregen = time (0);
 	    }
 	}
-    }
+  }
+
+  //oss << "and ended with " << ch->damage << " bloodloss damage.\n";
+  send_to_room((char*)oss.str().c_str(),686);
+
 }
 
 

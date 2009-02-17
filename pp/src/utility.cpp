@@ -2210,6 +2210,7 @@ unload_pc (CHAR_DATA * ch)
 
   ch->pc->load_count--;
 
+  /* some kind of weird undelete? - Grommit */
   if (ch->deleted)
     {
       ch->deleted = 0;
@@ -4161,8 +4162,6 @@ bool ciStringEqual (const std::string & s1, const std::string & s2)
   {
   return ci_equal_to () (s1, s2);
   }  // end of ciStringEqual
-
-
 
 
 
