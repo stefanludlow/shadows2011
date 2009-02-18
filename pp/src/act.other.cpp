@@ -4481,8 +4481,11 @@ do_tables (CHAR_DATA * ch, char *argument, int cmd)
 	  af_table = get_affect (tmp, MAGIC_SIT_TABLE);
 	  if (af_table && is_at_table (tmp, obj) && tmp != ch)
 	    {
+			char* charShort = str_dup(char_short(tmp));
+
 	      sprintf (buf2, "    #5%s#0 is seated here.\n",
-		       CAP (char_short (tmp)));
+		       CAP (charShort));
+		  mem_free (charShort);
 	      strcat (buf, buf2);
 	    }
 	}
