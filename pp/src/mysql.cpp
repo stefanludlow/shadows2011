@@ -2541,6 +2541,10 @@ load_char_mysql (const char *name)
   ch->name = str_dup (row[1]);
   ch->pc->account_name = str_dup (row[2]);
   ch->short_descr = str_dup (row[3]);
+  //correction for capital short_descr's;
+  if (isupper(ch->short_descr[0]))
+	  ch->short_descr[0] = tolower(ch->short_descr[0]);
+
   ch->long_descr = str_dup (row[4]);
   ch->description = str_dup (row[5]);
   ch->pc->msg = str_dup (row[6]);
