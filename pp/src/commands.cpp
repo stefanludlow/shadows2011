@@ -238,6 +238,7 @@ const struct command_data commands[] = {
   {"stable", do_stable, STAND, C_MNT | C_WLK},
   {"steal", do_steal, STAND, C_WLK | C_MNT},
   {"stop", do_stop, SIT, C_BLD | C_DEL | C_PAR | C_SPL},
+  {"stronghold", do_stronghold, DEAD, C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL | C_NLG},
   {"study", do_study, SIT, 0},
   {"subdue", do_subdue, FIGHT, C_WLK | C_MNT},
   {"surrender", do_surrender, FIGHT, C_WLK | C_HID | C_MNT},

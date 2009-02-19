@@ -1996,8 +1996,10 @@ morph_obj (OBJ_DATA * obj)
   newObj->count = obj->count;
   if (obj->equiped_by)
     {
+		int location = obj->location;
+		CHAR_DATA* equipped_by = obj->equiped_by;
       unequip_char (obj->equiped_by, obj->location);
-      equip_char (obj->equiped_by, newObj, obj->location);
+      equip_char (equipped_by, newObj, location);
     }
 
   if (obj->carried_by)

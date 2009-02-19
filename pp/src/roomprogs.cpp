@@ -5975,6 +5975,34 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 				break;
 		}
 	}
+	else if (buf.find("morphto") != std::string::npos )
+	{
+		obj->morphto = atoi(argument.c_str());
+	}
+	else if (buf.find("clock") != std::string::npos )
+	{
+		int month, day, hour;
+
+		if (!isdigit (argument[0]))
+			return;
+		
+		month = atoi (argument.c_str());
+		argument = one_argument(argument, buf);
+
+		if (!isdigit (argument[0]))
+			return;
+
+		day = atoi (argument.c_str());
+
+		argument = one_argument (argument, buf);
+
+		if (!isdigit (argument[0]))
+			return;
+
+		hour = atoi (argument.c_str());
+
+		obj->clock = ((month * 30 * 24) + (day * 24) + hour);
+	}
 		
 	return;
 }

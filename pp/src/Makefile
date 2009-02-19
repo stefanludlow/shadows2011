@@ -25,11 +25,11 @@ limits.o magic.o mobact.o mobprogs.o mysql.o \
 nanny.o net_link.o object_damage.o objects.o olc.o \
 perception.o psionics.o roles.o roomprogs.o save.o \
 server.o somatics.o \
-staff.o transformation.o utility.o weather.o wounds.o
+staff.o strongholds.o transformation.o utility.o weather.o wounds.o
 
 HEADERS = \
 account.h argument.h clan.h character.h constants.h decl.h group.h net_link.h \
-object_damage.h protos.h server.h structs.h trigram.h utils.h
+object_damage.h protos.h server.h strongholds.h structs.h trigram.h utils.h
 
 # default target
 ../bin/server: $(OBJS)

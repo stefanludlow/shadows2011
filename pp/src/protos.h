@@ -508,6 +508,7 @@ void do_stat (CHAR_DATA * ch, char *argument, int cmd);
 void do_stayput (CHAR_DATA * ch, char *argument, int cmd);
 void do_steal (CHAR_DATA * ch, char *argument, int cmd);
 void do_stop (CHAR_DATA * ch, char *argument, int cmd);
+void do_stronghold(CHAR_DATA * ch, char *argument, int cmd);
 void do_strike (CHAR_DATA * ch, char *argument, int cmd);
 void do_study (CHAR_DATA * ch, char *argument, int cmd);
 void do_subdue (CHAR_DATA * ch, char *argument, int cmd);
