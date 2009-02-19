@@ -2624,12 +2624,12 @@ setup_new_character (CHAR_DATA * tch)
 
   if (tch->race == 15 || tch->race == 16 || tch->race == 17 ||
       tch->race == 18 || tch->race == 19 || tch->race == 23 ||
-      tch->race == 24 || tch->race == 25 || tch->race == 26 ||
-      tch->race == 27 || tch->race == 28 || tch->race == 29 ||
-      tch->race == 86 || tch->race == 93)
-    {
-      if (!IS_SET (tch->affected_by, AFF_INFRAVIS))
-	tch->affected_by |= AFF_INFRAVIS;
+      tch->race == 27 || tch->race == 28 || tch->race == 86 || 
+      tch->race == 93 || tch->race == 119 || tch->race == 120 
+      || tch->race == 121)
+    {      
+  	if (!IS_SET (tch->affected_by, AFF_INFRAVIS))
+	  tch->affected_by |= AFF_INFRAVIS;
     }
 
   reformat_desc (tch->description, &tch->description);

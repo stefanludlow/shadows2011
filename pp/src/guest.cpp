@@ -66,9 +66,9 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
   else if (roll == 4)
     ch->race = 23;
   else if (roll == 5)
-    ch->race = 25;
+    ch->race = 120;
   else if (roll == 6)
-    ch->race = 24;
+    ch->race = 119;
   else if (roll == 7)
     ch->race = 89;
   else if (roll == 8)
