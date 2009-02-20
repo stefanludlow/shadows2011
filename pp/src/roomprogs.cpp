@@ -678,7 +678,7 @@ rxp (CHAR_DATA *ch, char *prg, char *command, char *keyword, char *argument)
 			if (engine.in_build_mode () || engine.in_test_mode())
 			{
 				std::ostringstream oss;
-				oss << "#1Error in prog line:#0 " << strCommand << std::endl;
+				oss << "#1Error in prog line:#0 " << strCommand << " " << buf << std::endl;
 				send_to_char((char*)oss.str().c_str(),ch);
 			}
 			break;
