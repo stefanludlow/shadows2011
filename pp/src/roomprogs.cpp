@@ -14,6 +14,7 @@
 #include <math.h>
 #include <vector>
 #include <exception>
+#include "server.h"
 
 #include "structs.h"
 #include "net_link.h"
@@ -23,6 +24,7 @@
 #include "decl.h"
 #include "clan.h"
 #include "group.h"
+
 
 extern rpie::server engine;
 
@@ -673,12 +675,13 @@ rxp (CHAR_DATA *ch, char *prg, char *command, char *keyword, char *argument)
 		sprintf(buf, "%s", line.c_str());
 		if (!doit (ch, strCommand.c_str(), buf, command, keyword, argument, local_variables))
 		{
-			if (engine.in_build_mode ())
+			if (engine.in_build_mode () || engine.in_test_mode())
 			{
 				std::ostringstream oss;
-				oss << "#1Error in prog line:#0 " << line << std::endl;
+				oss << "#1Error in prog line:#0 " << strCommand << std::endl;
 				send_to_char((char*)oss.str().c_str(),ch);
 			}
+			break;
 		}
 	}
 	while (!line.empty());
