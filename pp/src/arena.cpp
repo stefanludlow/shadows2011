@@ -447,9 +447,9 @@ morgul_arena (void)
     {
       tmob = NULL;
       if (!number (0, 3))
-	tmob = load_mobile (5997);
+	tmob = load_mobile (41175);
       else
-	tmob = load_mobile (5998);
+	tmob = load_mobile (41036);
       sprintf (tmob->long_descr, "%s is here.", char_short (tmob));
       *tmob->long_descr = toupper (*tmob->long_descr);
       equip_slave (tmob);
@@ -662,9 +662,7 @@ arena__death (CHAR_DATA * ch)
     {
       humans--;
     }
-  else if (ch->race == 24 ||
-	   ch->race == 25 ||
-	   ch->race == 26 || ch->race == 27 || ch->race == 29)
+  else if (ch->race == 27 || ch->race == 119 || ch->race == 120 || ch->race == 121)
     {
       orcs--;
     }
@@ -1027,7 +1025,7 @@ arena__do_enter (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if ((!vtom (5999) || !vtom (5997) || !vtom (5998)) ||
+  if ((!vtom (5999) || !vtom (41175) || !vtom (41036)) ||
       (!vtor (5142) || !vtor (5119) || !vtor (5196) ||
        !vtor (5197) || !vtor (5198) || !vtor (5199)))
     {
@@ -1054,13 +1052,13 @@ arena__do_enter (CHAR_DATA * ch, char *argument, int cmd)
     {
       if (!number (0, 9))
 	{
-	  ch->race = 25;
-	  ch->description = str_dup (vtom (5997)->description);
+	  ch->race = 119;
+	  ch->description = str_dup (vtom (41175)->description);
 	}
       else
 	{
-	  ch->race = 24;
-	  ch->description = str_dup (vtom (5998)->description);
+	  ch->race = 120;
+	  ch->description = str_dup (vtom (41036)->description);
 	}
       send_to_char ("#1\nYou have been placed on the Orcish team!#0\n", ch);
       orcs++;
@@ -1072,7 +1070,7 @@ arena__do_enter (CHAR_DATA * ch, char *argument, int cmd)
 
   randomize_mobile (ch);
 
-  if (ch->race == 24 || ch->race == 25)
+  if (ch->race == 119 || ch->race == 120)
     {
       add_clan (ch, "orcslaves", CLAN_MEMBER);
     }
@@ -1661,7 +1659,7 @@ te_pit (void)
   for (; orcs <= te_pit_orc_max_count;)
     {
       tmob = NULL;
-      tmob = load_mobile (5997);
+      tmob = load_mobile (41036);
       sprintf (tmob->long_descr, "%s is here.", char_short (tmob));
       *tmob->long_descr = toupper (*tmob->long_descr);
       te_equip_slave (tmob);
@@ -1886,9 +1884,7 @@ te_pit_death (CHAR_DATA * ch)
     {
       humans--;
     }
-  else if (ch->race == 24 ||
-       ch->race == 25 ||
-       ch->race == 26 || ch->race == 27 || ch->race == 29)
+  else if (ch->race == 27 || ch->race == 119 || ch->race == 120 || ch->race == 121)
     {
       orcs--;
     }
@@ -2236,7 +2232,7 @@ te_pit_do_enter (CHAR_DATA * ch, char *argument, int cmd)
     }
 
 
-  if ((!vtom (5999) || !vtom (5997) || !vtom (5998)) || (!vtor (66955) || !vtor (66956) || !vtor (66954) || !vtor (66953)))
+  if ((!vtom (5999) || !vtom (41175) || !vtom (41036)) || (!vtor (66955) || !vtor (66956) || !vtor (66954) || !vtor (66953)))
     {
       send_to_char ("The necessary prototypes cannot be found. Aborting.\n",
             ch);
@@ -2266,11 +2262,7 @@ te_pit_do_enter (CHAR_DATA * ch, char *argument, int cmd)
        return;
        }
      }
-  else if (ch->race == 24 ||
-           ch->race == 25 ||
-           ch->race == 26 ||
-           ch->race == 27 ||
-           ch->race == 29)
+  else if (ch->race == 27 || ch->race == 119 || ch->race == 120 || ch->race == 121)
     {
       if (te_pit_orc_max_count > 0)
       {
