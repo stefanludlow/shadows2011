@@ -24,6 +24,8 @@
 #include "clan.h"
 #include "group.h"
 
+extern rpie::server engine;
+
 /* script program commands */
 #define MAKE_STRING(msg) (((std::ostringstream&) (std::ostringstream() << std::boolalpha << msg)).str())  
 #define RP_ATECHO 	0
@@ -551,6 +553,10 @@ o_prog (CHAR_DATA *ch, char *argument, room_prog prog)
 void
 rxp (CHAR_DATA *ch, char *prg, char *command, char *keyword, char *argument)
 {
+    // set null or empty argument to 'NOARG'
+	if (!argument || !*argument)
+		argument="NOARG";
+
 	// Let's use std::string
 	std::string line, program = prg;
 	std::stringstream streamProg;
@@ -667,7 +673,12 @@ rxp (CHAR_DATA *ch, char *prg, char *command, char *keyword, char *argument)
 		sprintf(buf, "%s", line.c_str());
 		if (!doit (ch, strCommand.c_str(), buf, command, keyword, argument, local_variables))
 		{
-			break;
+			if (engine.in_build_mode ())
+			{
+				std::ostringstream oss;
+				oss << "#1Error in prog line:#0 " << line << std::endl;
+				send_to_char((char*)oss.str().c_str(),ch);
+			}
 		}
 	}
 	while (!line.empty());
@@ -2255,7 +2266,7 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 
 		return 1;
 	default:
-		system_log ("ERROR: unknown command in program", true);
+		//system_log ("ERROR: unknown command in program", true);
 		
 		return 0;
 	}
