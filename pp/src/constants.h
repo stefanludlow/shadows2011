@@ -26,8 +26,6 @@
 #ifndef _rpie_constants_h_
 #define _rpie_constants_h_
 
-#define ENCRYPT_PASS		"w01fm3a7"
-
 #define STAFF_EMAIL		"staff@middle-earth.us"
 
 #define APP_EMAIL		"staff@middle-earth.us"
@@ -35,7 +33,7 @@
 #define PET_EMAIL		"staff@middle-earth.us"
 #define REPORT_EMAIL		"staff@middle-earth.us"
 
-#define IMPLEMENTOR_ACCOUNT	"Sighentist"
+#define IMPLEMENTOR_ACCOUNT	"Grommit"
 #define SERVER_LOCATION		"http://www.middle-earth.us"
 
 #define MUD_NAME		"Shadows of Isildur"

@@ -1316,6 +1316,18 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 		update_crafts_file ();
 
 		send_to_char ("All in-game zones have been saved.\n", ch);
+		if (engine.in_build_mode ())
+		{
+			std::ostringstream oss;
+			oss << "cd " << engine.get_base_path() << "/regions; git-commit -a -m \"Changes committed by ";
+			if (!ch || !ch->tname)
+				oss << "System";
+			else
+				oss << ch->tname;
+			oss << " via zsave all\"";
+			system(oss.str().c_str());
+			//send_to_char(oss.str().c_str(),ch);
+		}
 		return;
 	}
 
@@ -1357,7 +1369,22 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 	save_obj_progs();
 	stat = save_rooms (ch, num);
 	if (!stat)
+	{
 		send_to_char ("Saved.\n", ch);
+		if (engine.in_build_mode ())
+		{
+			std::ostringstream oss;
+			oss << "cd " << engine.get_base_path() << "/regions; git add *."
+				<< num << " ; git-commit -m \"Changes committed by ";
+			if (!ch || !ch->tname)
+				oss << "System";
+			else
+				oss << ch->tname;
+			oss << " via zsave " << num << "\"";
+			system(oss.str().c_str());
+			//send_to_char(oss.str().c_str(),ch);
+		}
+	}
 	else
 	{
 		send_to_char
