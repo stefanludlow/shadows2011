@@ -318,7 +318,7 @@ const char *sector_types[] = {
 	"Mountains",
 	"Swamp",
 	"Dock",
-	"CrowsNest",
+	"Cave",
 	"Pasture",
 	"Heath",
 	"Pit",

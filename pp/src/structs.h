@@ -535,7 +535,7 @@ typedef signed char shortint;
 #define SECT_MOUNTAIN  	    8
 #define SECT_SWAMP     	    9
 #define SECT_DOCK	    10
-#define SECT_CROWSNEST	    11
+#define SECT_CAVE	    11
 #define SECT_PASTURE	    12
 #define SECT_HEATH	    13
 #define SECT_PIT	    14

@@ -1020,7 +1020,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 			"Mountains",
 			"Swamp",
 			"Dock",
-			"CrowsNest",
+			"Cave",
 			"Pasture",
 			"Heath",
 			"Pit",
