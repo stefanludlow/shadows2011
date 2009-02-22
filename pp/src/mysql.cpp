@@ -2900,7 +2900,13 @@ load_char_mysql (const char *name)
 
   ch->pc->is_guide = is_guide (ch->pc->account_name);
   
+  int old = ch->pc->skills[1];
+  
   load_skills_mysql(ch, false);
+  
+  if (ch->pc->skills[1] != old){
+	send_to_char("FAIL", ch);
+	}
 
   if (ch->speaks == SKILL_HEALING)
     ch->speaks = SKILL_SPEAK_WESTRON;

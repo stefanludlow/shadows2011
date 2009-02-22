@@ -506,6 +506,10 @@ personalize_emote (CHAR_DATA * src, char *emote)
 			continue;
 		if (get_affect (tch, MAGIC_SENT))
 			continue;
+	// Hibou's potential emote fix.
+		if (IS_NPC(src))
+			act (copy, false, tch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			continue;
 		act (copy, true, tch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	}
 
