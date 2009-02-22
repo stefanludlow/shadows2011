@@ -1738,9 +1738,29 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
       else
 	{
 	  if (obj->full_description && *obj->full_description)
-	    strcpy (buffer, obj->full_description);
+	  {
+	    if (obj->count > 1)
+	    {
+			sprintf (buffer, "   It is #2%s#0. (x%d)\n", OBJS (obj, ch), obj->count);
+			
+	    }
+	    else
+	    {
+			sprintf (buffer, "   It is #2%s#0.\n", OBJS (obj, ch));
+		}
+		sprintf (buffer + strlen (buffer), "%s", obj->full_description);
+	  }
 	  else
-	    sprintf (buffer, "   It is #2%s#0.\n", OBJS (obj, ch));
+	  {
+		if (obj->count > 1)
+	    {
+			sprintf (buffer, "   It is #2%s#0. (x%d)\n", OBJS (obj, ch), obj->count);
+	    }
+	    else
+	    {
+			sprintf (buffer, "   It is #2%s#0.\n", OBJS (obj, ch));
+		}
+	  }
 
 	  if (mode == 15)
 	    sprintf (buffer + strlen (buffer), "%s",
@@ -2193,15 +2213,19 @@ list_obj_to_char (OBJ_DATA * list, CHAR_DATA * ch, int mode, int show)
 	      for (obj = i; obj; obj = obj->next_content)
 		if (IS_TABLE (obj))
 		  looked_for_tables++;
-
-	      if (looked_for_tables == 1)
-		show_obj_to_char (i, ch, 7);
-	      else if (looked_for_tables == 2)
-		send_to_char ("#6There are a couple of furnishings here.#0\n",
+	      
+			//show first four tables otherwise group them
+			if (looked_for_tables < 5)
+			{
+				for (obj = i; obj; obj = obj->next_content)
+				if (IS_TABLE (obj))
+					show_obj_to_char (i, ch, 7);
+			}
+			else
+			{
+				send_to_char ("#6There are several furnishings here.#0\n",
 			      ch);
-	      else
-		send_to_char ("#6There are several furnishings here.#0\n",
-			      ch);
+			}
 	    }
 
 	  if (!mode && !looked_for_corpses && i->nVirtual == VNUM_CORPSE)
