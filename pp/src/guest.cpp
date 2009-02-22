@@ -116,7 +116,7 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 
   d->character->flags |= FLAG_GUEST;
 
-  if (d->character->race >= 0 && d->character->race <= 29)
+  if (d->character->race >= 0 && d->character->race <= 120)
     {
       for (i = 0; i <= MAX_SKILLS; i++)
 	{
