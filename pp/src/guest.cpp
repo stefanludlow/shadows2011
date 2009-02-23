@@ -124,41 +124,16 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 	  d->character->pc->skills[i] = 0;
 	}
 
-      if (lookup_race_variable (d->character->race, RACE_NATIVE_TONGUE))
+//Get the native tongue of each race and cap it - Vader
+  int	native_tongue = get_native_tongue(ch);
+	if (native_tongue)
 	{
-	  d->character->speaks =
-	    atoi (lookup_race_variable
-		  (d->character->race, RACE_NATIVE_TONGUE));
-	  d->character->skills[d->character->speaks] =
-	    calc_lookup (d->character, REG_CAP, d->character->speaks);
-	  d->character->pc->skills[d->character->speaks] =
-	    calc_lookup (d->character, REG_CAP, d->character->speaks);
+		ch->skills[native_tongue] = calc_lookup (ch, REG_CAP, native_tongue);
+		ch->pc->skills[native_tongue] = calc_lookup (ch, REG_CAP, native_tongue);
 	}
+  ch->speaks = native_tongue;
     }
-  else
-    {
-      if (d->character->race == 89)
-	{
-	  d->character->nat_attack_type = 1;
-	  d->character->skills[SKILL_SPEAK_BLACK_SPEECH] = 55;
-	  d->character->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 55;
-	  d->character->speaks = SKILL_SPEAK_BLACK_SPEECH;
-	}
-      else if (d->character->race == 69)
-	{
-	  d->character->skills[SKILL_SPEAK_QUENYA] = 70;
-	  d->character->pc->skills[SKILL_SPEAK_QUENYA] = 70;
-	  d->character->speaks = SKILL_SPEAK_QUENYA;
-	}
-      else if (d->character->race == 64)
-	{
-	  equip_char (ch, load_object (5261), WEAR_BODY);
-	  d->character->skills[SKILL_SPEAK_ADUNAIC] = 70;
-	  d->character->pc->skills[SKILL_SPEAK_ADUNAIC] = 70;
-	  d->character->speaks = SKILL_SPEAK_ADUNAIC;
-	}
-    }
-
+ 
   guest_conns++;
 
   if (ch->description)
@@ -185,6 +160,8 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 
   if (ch->race != 89 && ch->race != 69 && ch->race != 64)
     equip_newbie (ch);
+  else if (ch->race == 64)
+    equip_char (ch, load_object (5261), WEAR_BODY);
 
   ch->hunger = -1;
   ch->thirst = -1;
