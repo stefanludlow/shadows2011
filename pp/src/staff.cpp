@@ -87,7 +87,6 @@ is_switched (CHAR_DATA * ch)
   return NULL;
 }
 
-
 void
 do_roster (CHAR_DATA * ch, char *argument, int cmd)
 {

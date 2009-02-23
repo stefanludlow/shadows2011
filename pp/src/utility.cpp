@@ -4163,5 +4163,60 @@ bool ciStringEqual (const std::string & s1, const std::string & s2)
   return ci_equal_to () (s1, s2);
   }  // end of ciStringEqual
 
+//Hibou testing date function
+char * 
+get_date( ) 
+  {
+char suf[4] = { '\0'};
+char date_buf[MAX_STRING_LENGTH] = { '\0'};
+int day;
 
+*date_buf = '\0';
 
+  day = time_info.day + 1;
+  if (day == 1)
+    strcpy(suf, "st");
+  else if (day == 2)
+    strcpy(suf, "nd");
+  else if (day == 3)
+    strcpy(suf, "rd");
+  else if (day < 20)
+    strcpy(suf, "th");
+  else if ((day % 10) == 1)
+    strcpy(suf, "st");
+  else if ((day % 10) == 2)
+    strcpy(suf, "nd");
+  else if ((day % 10) == 3)
+    strcpy(suf, "rd");
+  else
+    strcpy(suf, "th");
+
+  if (time_info.holiday == 0 &&
+      !(time_info.month == 1 && day == 12) &&
+      !(time_info.month == 4 && day == 10) &&
+      !(time_info.month == 7 && day == 11) &&
+      !(time_info.month == 10 && day == 12))
+    sprintf (date_buf, "%d%s %s, %d SR", day, suf,
+	     month_short_name[time_info.month], time_info.year);
+  else
+    {
+      if (time_info.holiday > 0)
+	{
+	  sprintf (date_buf, "%s, %d SR",
+		   holiday_short_names[time_info.holiday], time_info.year);
+	}
+      else if (time_info.month == 1 && day == 12)
+	sprintf (date_buf, "Erukyerme, %d SR", time_info.year);
+      else if (time_info.month == 4 && day == 10)
+	sprintf (date_buf, "Lairemerende, %d SR", time_info.year);
+      else if (time_info.month == 7 && day == 11)
+	sprintf (date_buf, "Eruhantale, %d SR", time_info.year);
+      else if (time_info.month == 10 && day == 12)
+	sprintf (date_buf, "Airilaitale, %d SR", time_info.year);
+    }
+	
+	if (isalpha (*date_buf))
+    *date_buf = toupper (*date_buf);
+	
+	return date_buf;
+}

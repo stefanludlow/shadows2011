@@ -2903,6 +2903,14 @@ load_char_mysql (const char *name)
     }
 
   ch->pc->is_guide = is_guide (ch->pc->account_name);
+  
+  int old = ch->pc->skills[1];
+  
+  load_skills_mysql(ch, false);
+  
+  if (ch->pc->skills[1] != old){
+	send_to_char("FAIL", ch);
+	}
 
   if (ch->speaks == SKILL_HEALING)
     ch->speaks = SKILL_SPEAK_WESTRON;
@@ -3117,6 +3125,8 @@ save_char_mysql (CHAR_DATA * ch)
 	ch->dmote_str, ch->getWrapLength()
 	);
     }
+	
+	save_skills_mysql(ch, false);
 }
 
 int
@@ -4669,4 +4679,75 @@ void load_vnpc_timestamp()
 void save_vnpc_timestamp()
 {
 	mysql_safe_query("UPDATE shopdata SET last_vnpc_timestamp=%d",last_vnpc_sale);
+}
+
+int getCharNum( CHAR_DATA * ch, bool isMob )
+{
+	if( !isMob )
+	{
+		mysql_safe_query("SELECT char_num FROM %s.pfiles WHERE name='%s'", engine.get_config("player_db").c_str(), ch->tname);
+		MYSQL_RES *result = mysql_store_result( database );
+		if (!result || !mysql_num_rows( result ))
+		{
+			if (result != NULL)
+				mysql_free_result( result );
+			return 0;
+		}
+		MYSQL_ROW row = mysql_fetch_row( result );
+		mysql_free_result( result );
+		return atoi(row[0]);
+	}
+	else
+		return ch->mob->nVirtual;
+}
+
+void load_skills_mysql(CHAR_DATA * ch, bool isMob)
+{
+	int c_num = getCharNum(ch, isMob);
+	std::string player_db = engine.get_config ("player_db");
+	MYSQL_RES* result;
+	MYSQL_ROW row;
+	if( !ch->name )
+		return;
+	mysql_safe_query( "SELECT skill_num, skill_value FROM %s.skill_values WHERE char_num=%d and is_mob=%d", player_db.c_str(), c_num, isMob);
+	result = mysql_store_result( database );
+	if (!result || !mysql_num_rows( result ))
+	{
+		if (result != NULL)
+			mysql_free_result( result );
+		return;
+	}
+	for(row = mysql_fetch_row( result ); row; row = mysql_fetch_row( result ))
+	{
+		ch->skills[atoi(row[1])] = atoi(row[2]);
+		if(!isMob)
+			ch->pc->skills[atoi(row[1])] = ch->skills[atoi(row[1])];
+		row = mysql_fetch_row (result);
+	}
+	mysql_free_result( result );
+}
+
+void save_skills_mysql( CHAR_DATA * ch, bool isMob )
+{
+	std::string player_db = engine.get_config ("player_db");
+	MYSQL_RES* result = NULL;
+	MYSQL_ROW row = NULL;
+	int c_num = getCharNum(ch, isMob), curr_skill = 0;
+
+	for( int i = 0; i < LAST_SKILL; i++ )
+		if( ch->skills[i] )
+		{
+			mysql_safe_query("SELECT skill_value FROM %s.skill_values WHERE char_num=%d AND skill_num=%d AND is_mob=%d", player_db.c_str(), c_num, i, isMob);
+			result = mysql_store_result( database );
+			if( mysql_num_rows( result ) != 0 )
+			{
+				row = mysql_fetch_row( result );
+				curr_skill = atoi( row[0] );
+				if( curr_skill != ch->skills[i] )
+					mysql_safe_query("UPDATE %s.skill_values SET skill_value=%d WHERE char_num=%d AND skill_num=%d AND is_mob=%d", player_db.c_str(), ch->skills[i], c_num, i, isMob);
+			}
+			else
+				mysql_safe_query("INSERT INTO %s.skill_values SET char_num=%d, skill_num=%d, skill_value=%d, is_mob=%d", player_db.c_str(), c_num, i, ch->skills[i], isMob);
+			mysql_free_result( result );
+		}
 }

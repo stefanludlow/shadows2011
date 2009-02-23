@@ -1132,8 +1132,9 @@ void save_banned_sites ();
 void save_roles ();
 void save_stayput_mobiles ();
 void load_stayput_mobiles ();
-void save_skills_mysql(CHAR_DATA *ch, bool isMob);
-void load_skills_mysql(CHAR_DATA *ch, bool isMob);
+int getCharNum(CHAR_DATA * ch, bool isMob);
+void save_skills_mysql(CHAR_DATA * ch, bool isMob);
+void load_skills_mysql(CHAR_DATA * ch, bool isMob);
 void lodge_missile (CHAR_DATA * target, OBJ_DATA * ammo,
 		    char *strike_location);
 void stock_new_deliveries ();
@@ -1563,6 +1564,9 @@ int check_account_flags (char *host);
 char *strip_small_minor(char * wounds, CHAR_DATA * ch);
 int room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch);
 int force_enter (CHAR_DATA *tch, ROOM_DATA *troom);
+
+//Hibou testing date function
+char *get_date( );
 
 
 void read_ticket (CHAR_DATA * ch, int tick_num);
