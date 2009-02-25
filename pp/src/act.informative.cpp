@@ -2219,7 +2219,7 @@ list_obj_to_char (OBJ_DATA * list, CHAR_DATA * ch, int mode, int show)
 			{
 				for (obj = i; obj; obj = obj->next_content)
 				if (IS_TABLE (obj))
-					show_obj_to_char (i, ch, 7);
+					show_obj_to_char (obj, ch, 7);
 			}
 			else
 			{
