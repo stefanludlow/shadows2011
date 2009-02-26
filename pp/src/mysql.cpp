@@ -2906,7 +2906,7 @@ load_char_mysql (const char *name)
   
   int old = ch->pc->skills[1];
   
-  load_skills_mysql(ch, false);
+  //load_skills_mysql(ch, false);
   
   if (ch->pc->skills[1] != old){
 	send_to_char("FAIL", ch);
@@ -3126,7 +3126,7 @@ save_char_mysql (CHAR_DATA * ch)
 	);
     }
 	
-	save_skills_mysql(ch, false);
+//	save_skills_mysql(ch, false);
 }
 
 int
