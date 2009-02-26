@@ -406,7 +406,7 @@ if (are_grouped (ch, tch) && is_brother (ch, tch)
 	  act (buf3, false, ch, 0, tch, TO_VICT | _ACT_FORMAT);
 	}
 
-      if (GET_ITEM_TYPE (tobj) == ITEM_WEAPON
+      if ( (GET_ITEM_TYPE (tobj) == ITEM_WEAPON && IS_SET (tobj->obj_flags.extra_flags, ITEM_THROWING))
 	  && (tobj->o.weapon.hit_type == 0 || tobj->o.weapon.hit_type == 1
 	      || tobj->o.weapon.hit_type == 2
 	      || tobj->o.weapon.hit_type == 4))
@@ -874,7 +874,7 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
       if (GET_ITEM_TYPE (missile) == ITEM_MISSILE
 	  || GET_ITEM_TYPE (missile) == ITEM_BULLET)
 	*damage = dice (missile->o.od.value[0], missile->o.od.value[1]);
-      else if (GET_ITEM_TYPE (missile) == ITEM_WEAPON)
+      else if (GET_ITEM_TYPE (missile) == ITEM_WEAPON && IS_SET(missile->obj_flags.extra_flags,ITEM_THROWING))
 	*damage = dice (missile->o.od.value[1], missile->o.od.value[2]);
       else
 	*damage = dice (1, 3);
@@ -925,9 +925,11 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
 	    }
 	}
 
+   if (weapon || IS_SET (missile->obj_flags.extra_flags, ITEM_THROWING))
+
       if (missile)
 	{
-	  if (GET_ITEM_TYPE (missile) != ITEM_WEAPON
+	  if (!(GET_ITEM_TYPE (missile) == ITEM_WEAPON && IS_SET (missile->obj_flags.extra_flags, ITEM_THROWING))
 	      && GET_ITEM_TYPE (missile) != ITEM_MISSILE
 	      && GET_ITEM_TYPE (missile) != ITEM_BULLET)
 	    *damage = 0;

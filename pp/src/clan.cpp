@@ -1768,6 +1768,10 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 //Recruit  
   else if (flags == CLAN_RECRUIT)
   {
+	  if (!str_cmp(clan,"z3_astirian_wardens"))
+	  {
+		 return "Squire-recruit";
+	  }
 	  if (!str_cmp (clan, "dalewatch"))
 	  {
 		  return "Dreng";
@@ -1839,7 +1843,7 @@ get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
     }
 if (!str_cmp (clan, "astirian_villeins"))
     {
-	return "Squire Recruit";
+	return "Squire-recruit of the Wardenry";
     }
 if (!str_cmp (clan, "militaryrecruits"))
     {
@@ -1851,6 +1855,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //Private  
   else if (flags == CLAN_PRIVATE)
   {
+	  if (!str_cmp (clan, "z3_astirian_wardens"))
+	  {
+		  return "Squire";
+	  }
 	  if (!str_cmp (clan, "dalewatch"))
 	  {
 		  return "Spjot";
@@ -1904,7 +1912,7 @@ if (!str_cmp (clan, "militaryrecruits"))
 	}
 	if (!str_cmp (clan, "astirian_villeins"))
 	{
-		return "Squire of Lord Astirian";
+		return "Squire of the Wardenry";
 	}
     if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
@@ -1935,6 +1943,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //Corporal
   else if (flags == CLAN_CORPORAL)
   {
+	  if (!str_cmp (clan, "z3_astirian_wardens"))
+	  {
+		  return "Warden";
+	  }
 	  if (!str_cmp (clan, "dalewatch"))
 	  {
 		  return "Brimskr";
@@ -2015,6 +2027,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //Sergeant
   else if (flags == CLAN_SERGEANT)
   {
+	  if (!str_cmp (clan, "z3_astirian_wardens"))
+	  {
+		  return "Warden-Sergeant";
+	  }
 	  if (!str_cmp (clan, "dalewatch"))
 	  {
 		  return "Hundredman";
@@ -2075,15 +2091,7 @@ if (!str_cmp (clan, "militaryrecruits"))
     }
     if (!str_cmp (clan, "astirian_villeins"))
     {
-	for (OBJ_DATA *obj = ch->equip; obj; obj = obj->next_content)
-		  {
-			  if (obj->nVirtual == 3364)
-				  return "Warden of Lord Astirian";
-
-			  if (obj->nVirtual == 8288)
-				  return "The Yeoman of the Wardenry";
-		  }
-	return "Warden of Lord Astirian";
+		return "Warden of Lord Astirian";
     }
     if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
@@ -2114,6 +2122,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //lieutenant  
   else if (flags == CLAN_LIEUTENANT)
   {
+	  if (!str_cmp (clan, "z3_astirian_wardens"))
+	  {
+		  return "Warden-Lieutenant";
+	  }
 	  if (!str_cmp(clan, "dalewatch"))
 	  {
 		  return "Heafodman";
@@ -2162,7 +2174,7 @@ if (!str_cmp (clan, "militaryrecruits"))
 	}
     if (!str_cmp (clan, "astirian_villeins"))
     {
-	return "Chief Warden of Lord Astirian";
+		return "Senior Captain of the Wardenry";
     }
    if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
@@ -2193,6 +2205,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //Captain
   else if (flags == CLAN_CAPTAIN)
   {
+	  if (!str_cmp (clan, "z3_astirian_wardens"))
+	  {
+		  return "Warden-Captain";
+	  }
 	  if (!str_cmp (clan, "bar_caged"))
 	  {
 		  return "Great Lord";
@@ -2254,6 +2270,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //General
   else if (flags == CLAN_GENERAL)
   {
+	 if (!str_cmp (clan, "z3_astirian_wardens"))
+	 {
+		  return "Senior Captain";
+	 }
     if (!str_cmp (clan, "com"))
     {
 	return "Nalo-Barun";
@@ -2297,6 +2317,10 @@ if (!str_cmp (clan, "militaryrecruits"))
 //Commander
   else if (flags == CLAN_COMMANDER)
   {
+	  if (!str_cmp (clan, "z3_astirian_wardens"))
+	  {
+		  return "Chief Warden";
+	  }
 	  if (!str_cmp(clan,"dalewatch"))
 	  {
 		  return "Ealdorman";
@@ -2323,7 +2347,7 @@ if (!str_cmp (clan, "militaryrecruits"))
 			}
   if (!str_cmp (clan, "astirian_villeins"))
 			{
-			return "Captain of Great Lord Astirian";
+			return "Chief Warden of Great Lord Astirian";
 			}
 if (!str_cmp (clan, "silvermoon") || !str_cmp (clan, "silvermoon-cobra") || !str_cmp (clan, "silvermoon-field-cobra"))
     {
