@@ -352,9 +352,10 @@ public:
 	void toggleRPFlag();
 	void togglePlotFlag();
 
-	// Utility Method For do_who
-	int checkClansForWho();
-	
+	// Utility Method For do_who - These are currently Unused - Vader
+	bool* checkClansForWho();
+	int majorSphere();	
+
 	// Methods to establish if account this character is on is Level 5, and whether to treat them like one
 	bool isLevelFivePC();
 	char * getLevelFiveName();

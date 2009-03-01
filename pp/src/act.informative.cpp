@@ -1738,9 +1738,29 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
       else
 	{
 	  if (obj->full_description && *obj->full_description)
-	    strcpy (buffer, obj->full_description);
+	  {
+	    if (obj->count > 1)
+	    {
+			sprintf (buffer, "   It is #2%s#0. (x%d)\n", OBJS (obj, ch), obj->count);
+			
+	    }
+	    else
+	    {
+			sprintf (buffer, "   It is #2%s#0.\n", OBJS (obj, ch));
+		}
+		sprintf (buffer + strlen (buffer), "%s", obj->full_description);
+	  }
 	  else
-	    sprintf (buffer, "   It is #2%s#0.\n", OBJS (obj, ch));
+	  {
+		if (obj->count > 1)
+	    {
+			sprintf (buffer, "   It is #2%s#0. (x%d)\n", OBJS (obj, ch), obj->count);
+	    }
+	    else
+	    {
+			sprintf (buffer, "   It is #2%s#0.\n", OBJS (obj, ch));
+		}
+	  }
 
 	  if (mode == 15)
 	    sprintf (buffer + strlen (buffer), "%s",
@@ -2193,15 +2213,19 @@ list_obj_to_char (OBJ_DATA * list, CHAR_DATA * ch, int mode, int show)
 	      for (obj = i; obj; obj = obj->next_content)
 		if (IS_TABLE (obj))
 		  looked_for_tables++;
-
-	      if (looked_for_tables == 1)
-		show_obj_to_char (i, ch, 7);
-	      else if (looked_for_tables == 2)
-		send_to_char ("#6There are a couple of furnishings here.#0\n",
+	      
+			//show first four tables otherwise group them
+			if (looked_for_tables < 5)
+			{
+				for (obj = i; obj; obj = obj->next_content)
+				if (IS_TABLE (obj))
+					show_obj_to_char (obj, ch, 7);
+			}
+			else
+			{
+				send_to_char ("#6There are several furnishings here.#0\n",
 			      ch);
-	      else
-		send_to_char ("#6There are several furnishings here.#0\n",
-			      ch);
+			}
 	    }
 
 	  if (!mode && !looked_for_corpses && i->nVirtual == VNUM_CORPSE)
@@ -7800,50 +7824,79 @@ void do_where (CHAR_DATA * ch, char *argument, int cmd) {
 	page_string (ch->desc, outputWhere.str().c_str());
 }
 
-void do_who (CHAR_DATA * ch, char *argument, int cmd) {
-	DESCRIPTOR_DATA *d = NULL;
+//Will allow sphere counts in who to count by zones instead of clanning. - Vader
+int kingdom_from_zone (CHAR_DATA *ch)
+{
+	int zone = ch->in_room / 1000; 
+	if (IS_SET(ch->flags, FLAG_GUEST))
+		return 0;
+	else if (zone == 41)
+		return 4;
+	else if (zone == 80 || zone == 81 || zone == 82)
+		return 3;
+	else if (zone == 42 || zone == 43)
+		return 2;
+	else if (zone == 1  || zone == 2  || zone == 3  || zone == 4  ||
+		  zone == 8  || zone == 10 || zone == 11 || zone == 13 ||
+		  zone == 14 || zone == 15 || zone == 18 || zone == 19 ||
+		  zone == 22 || zone == 38 || zone == 51 || zone == 70 ||
+		  zone == 71 || zone == 72 || zone == 73 || zone == 74 ||
+		  zone == 75 || zone == 76 || zone == 77 || zone == 78 ||
+		  zone == 79 || zone == 96)
+		return 1;
+	else return -1;
+}
 
-	int mortals = 0;
-	int immortals = 0;
-	int guests = 0;
-	int clanCount = 0;
+//This helper function counts how many players are in the room.
+//Anytime a new room is reference with vtor, run this command. - Vader
+
+void roomCount(ROOM_DATA *rd)
+{
+	rd->occupants = 0;
+	for (CHAR_DATA *tch = rd->people; tch; tch = tch->next_in_room)
+	{
+		if (!IS_NPC(tch) && IS_MORTAL(tch)) //Don't count NPC's or admin's. - Vader
+		rd->occupants++;
+	}
+}
+
+void do_who (CHAR_DATA * ch, char *argument, int cmd)
+{
+	DESCRIPTOR_DATA *d = NULL;
+	ROOM_DATA *rd = NULL;
+
+	int mortals = 0, immortals = 0, guests = 0, clanCount = 0, clansphere = 0;
 
 	std::stringstream whoStream;
-	
+
 	std::stringstream availableAdminsStream;
 	availableAdminsStream << std::endl << "#2Available Staff#0:" << std::endl;
 	bool availableAdmins = false;
 
-	int sphere = ch->checkClansForWho(); // 0 = Gondor, 1 = Northmen, 2 = Fahad Jafari, 3 = Orcs,  4 = Mordor, -2 = Guest
-	if (ch->pc && ch->pc->level > 0 && sphere > -1) {
-		clanCount++;
-	}
-	
-	for (d = descriptor_list; d; d = d->next) {
-		if (!d->character || !(d->connected == CON_PLYNG)) {
-			continue;
-		}
-		else {
-			if (IS_SET (d->character->flags, FLAG_GUEST)) {
+	int sphere = kingdom_from_zone(ch); // 0 = Guest, 1 = Gondor, 2 = Northmen, 3 = Fahad Jafari, 4 = Orcs,  5 = Mordor
+
+	for (d = descriptor_list; d; d = d->next)
+	{
+		if ( d->character && d->connected == CON_PLYNG )
+		{
+			clansphere = kingdom_from_zone(ch);
+			if( clansphere )
+				mortals++;
+			else
 				guests++;
-			}
-			else if (d->character->pc && !(d->character->pc->level > 0)) {
-				if (sphere > -1 && d->character->checkClansForWho() == sphere) {
-					clanCount++;
-				}
-				mortals++;
-			}
-			else {
-				mortals++;
+			if( clansphere == sphere  && IS_MORTAL(ch))
+				clanCount++;
+			if( d->character->pc->level > 0 )
+			{
 				immortals++;
-				if (IS_SET(d->character->flags, FLAG_AVAILABLE)) {
+				if( IS_SET( d->character->flags, FLAG_AVAILABLE ) )
+				{
 					availableAdminsStream << d->character->tname << std::endl;
 					availableAdmins = true;
 				}
 			}
 		}
 	}
-
 	if (mortals < 1) {
 		whoStream << std::endl << "There aren't any beings within Middle-earth";
 	}
@@ -7870,30 +7923,111 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd) {
 	}
 
 	switch (sphere) {
-		case 0:
+		case 1:
 			whoStream << "In the Kingdom of Gondor, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			break;
-		case 1:
+		case 2:
 			whoStream << "In the Angost Region, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			break;
-		case 2:
+		case 3:
 			whoStream << "In Fahad Jafari, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			break;
-		case 3:
+		case 4:
 			whoStream << "In the Mines Of Moria, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			break;
-		case 4:
+		case 5:
 			whoStream << "In Mordor, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			break;
 		default:
-			 break;
+			break;
 	}
 	
-	if (sphere > -1 && clanCount > 1) {
+	if (sphere > 0 && clanCount != 1) {
 		whoStream << "s." << std::endl;
 	}
-	else if (sphere > -1) {
+	else if (sphere > 0) {
 		whoStream << "." << std::endl;
+	}
+
+	if (sphere == -1)
+		whoStream << "Outside of the scope of Arda [#6" << ch->in_room / 1000 << "#0] " << std::endl;
+	if (sphere == 1)
+	{
+		rd = vtor(3500);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In the Wardenry Bastion Commons, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		rd = vtor(8299);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In the Hawk and Dove Barn, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		rd = vtor(3271);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In the Wardog Commons, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		rd = vtor(1108);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In the Battered Shield Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		rd = vtor(1111);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In the Gilded Lily Commons, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		rd = vtor(3831);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In the Copper Tankard Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		//Show battalion information to only those who can access it - Vader
+		if (is_clan_member(ch, "ithilien_battalion"))
+		{
+			rd = vtor(51162);
+			roomCount(rd);
+			if (rd->occupants > 0)
+				whoStream << "In the Copper Tankard Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+			rd = vtor(51169);
+			roomCount(rd);
+			if (rd->occupants > 0)
+				whoStream << "In the Copper Tankard Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+			rd = vtor(51170);
+			roomCount(rd);
+			if (rd->occupants > 0)
+				whoStream << "In the Copper Tankard Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		}
+	}
+
+	else if (sphere == 2)
+	{
+		rd = vtor(42002);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In Halburg's Rest Mead Hall, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+	}
+	else if (sphere == 3)
+	{
+		rd = vtor(80129);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In the Drifting Lily Inn, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		rd = vtor(80239);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In the Drowning Corsair, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+	}
+
+	else if (sphere == 4)
+	{
+		rd = vtor(41207);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In Blackrend's Cave, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		rd = vtor(41425);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In Da Bleedin' Fist Waterhole, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		rd = vtor(41470);
+		roomCount(rd);
+		if (rd->occupants > 0)
+			whoStream << "In Grutz's Guttahs' cave, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
 	}
 
 	if (guests != 1) {

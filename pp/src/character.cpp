@@ -762,34 +762,57 @@ std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std:
 	return std::make_pair(room->nVirtual, reportStream.str());
 }
 
-int char_data::checkClansForWho() {
-	if (clans != NULL) {
+//Revision for PCs with multiple major clan-clanning - Vermonkey 090226
+//Currently Unused - Vader
+bool *char_data::checkClansForWho()
+{
+	bool *ret = new bool(6);
+	ret[0] = IS_SET(flags,FLAG_GUEST);
+	ret[1] = ret[2] = ret[3] = ret[4] = ret[5] = false;
+	if( clans )
+	{
 		Argument clansArgument = clans;
-
-		if (IS_SET(flags, FLAG_GUEST)) {
-			return -2;
+		while(!(clansArgument.isFinished()))
+		{
+			clansArgument.pop(); // Pop Clan Flags
+			clansArgument.pop(); // Pop Clan Name
+			if( clansArgument == "mt_citizens" )
+			ret[1] = true;
+			else if( clansArgument == "outpost_citizens" )
+			ret[2] = true;
+			else if( clansArgument == "fahad_jafari" )
+			ret[3] = true;
+			else if( clansArgument == "moria_orks" )
+			ret[4] = true;
+			else if( clansArgument == "mordor_char" )
+			ret[5] = true;
 		}
-		else {
-			while (!clansArgument.isFinished()) {
-				clansArgument.pop(); // Clan Flags
-				clansArgument.pop(); // Clan Name
+	}
+	return ret;
+}
 
-				if (clansArgument == "mt_citizens") {
-					return 0;
-				}
-				else if (clansArgument == "outpost_citizens") {
-					return 1;
-				}
-				else if (clansArgument == "fahad_jafari") {
-					return 2;
-				}
-				else if (clansArgument == "moria_dwellers") {
-					return 3;
-				}
-				else if (clansArgument == "mordor_char") {
-					return 4;
-				}
-			}
+//Currently Unused - Vader
+int char_data::majorSphere()
+{
+	if( IS_SET(flags,FLAG_GUEST) )
+	return 0;
+	if( clans )
+	{
+		Argument clansArgument = clans;
+		while(!(clansArgument.isFinished()))
+		{
+			clansArgument.pop(); // Pop Clan Flags
+			clansArgument.pop(); // Pop Clan Name
+			if( clansArgument == "mt_citizens" )
+				return 1;
+			else if( clansArgument == "outpost_citizens" )
+				return 2;
+			else if( clansArgument == "fahad_jafari" )
+				return 3;
+			else if( clansArgument == "moria_orks" )
+				return 4;
+			else if( clansArgument == "mordor_char" )
+				return 5;
 		}
 	}
 	return -1;
