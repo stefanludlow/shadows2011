@@ -7877,19 +7877,19 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 
 	for (d = descriptor_list; d; d = d->next)
 	{
-		if ( d->character && d->connected == CON_PLYNG )
+		if (d->character && d->connected == CON_PLYNG)
 		{
-			clansphere = kingdom_from_zone(ch);
-			if( clansphere )
+			clansphere = kingdom_from_zone(d->character);
+			if(clansphere)
 				mortals++;
 			else
 				guests++;
-			if( clansphere == sphere  && IS_MORTAL(ch))
+			if(clansphere == sphere && IS_MORTAL(d->character))
 				clanCount++;
-			if( d->character->pc->level > 0 )
+			if(d->character->pc->level > 0)
 			{
 				immortals++;
-				if( IS_SET( d->character->flags, FLAG_AVAILABLE ) )
+				if(IS_SET( d->character->flags, FLAG_AVAILABLE ))
 				{
 					availableAdminsStream << d->character->tname << std::endl;
 					availableAdmins = true;
