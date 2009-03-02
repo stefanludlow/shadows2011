@@ -7825,7 +7825,7 @@ void do_where (CHAR_DATA * ch, char *argument, int cmd) {
 }
 
 //Will allow sphere counts in who to count by zones instead of clanning. - Vader
-int kingdom_from_zone (char zone)
+int kingdom_from_zone (int zone)
 {
  	CHAR_DATA *ch;
 	if (IS_SET(ch->flags, FLAG_GUEST))
@@ -7983,15 +7983,15 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 			rd = vtor(51162);
 			roomCount(rd);
 			if (rd->occupants > 0)
-				whoStream << "In the Copper Tankard Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+				whoStream << "In the Keep's Courtyard, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
 			rd = vtor(51169);
 			roomCount(rd);
 			if (rd->occupants > 0)
-				whoStream << "In the Copper Tankard Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+				whoStream << "In the Keep's Dining Hall, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
 			rd = vtor(51170);
 			roomCount(rd);
 			if (rd->occupants > 0)
-				whoStream << "In the Copper Tankard Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+				whoStream << "In the Keep's Kitchen, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
 		}
 	}
 

@@ -4599,14 +4599,9 @@ do_shutdown (CHAR_DATA * ch, char *argument, int cmd)
     }
   else if (!str_cmp (arg, "reboot"))
     {
-		/* grommit exception to L5 limit on reboot */
       if (engine.in_play_mode ())
 		{
-			if (!strcasecmp(ch->tname,"Grommit"))
-			{
-				send_to_char ("Grommit exception to L5 reboot restriction enabled.\n",ch);
-			}
-			else if (GET_TRUST(ch) < 5)
+			if (GET_TRUST(ch) < 5)
 			{
 				send_to_char ("You'll need to wait for the 4 AM PST auto-reboot.\n", ch);
 				return;
