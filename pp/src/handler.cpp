@@ -1994,23 +1994,33 @@ morph_obj (OBJ_DATA * obj)
     }
 
   newObj->count = obj->count;
-  if (obj->equiped_by)
-    {
-		int location = obj->location;
-		CHAR_DATA* equipped_by = obj->equiped_by;
-      unequip_char (obj->equiped_by, obj->location);
-      equip_char (equipped_by, newObj, location);
-    }
+  int location = obj->location;
+  CHAR_DATA* equipped_by = obj->equiped_by;
 
+	/* if the object is equipped, unequip it. This takes it into nowhere */
+  if (obj->equiped_by)
+      unequip_char (obj->equiped_by, obj->location);
+   
+  /* if the object is carried, remove it from the user */
+  /* this will clear it out of any hand */
+  /* then, load it into a hand again -- this may move something from left to right etc */
   if (obj->carried_by)
     {
       CHAR_DATA *ch;
-
       ch = obj->carried_by;
-
       obj_from_char (&obj, 0);
-      obj_to_char (newObj, ch);
+	  obj_to_char(newObj, ch);
     }
+
+  /* if the item had been equipped, move it to the proper location
+  /* for wielded items this takes it from just being in a hand (see above)
+  /* to also being wielded in the same spot again (prim, sec, both) */
+  /* for items that were not in hands, they just magically reappear in the same spot
+  /* without use of hands */
+  if (equipped_by)
+  {
+	  equip_char(equipped_by,newObj,location);
+  }
 
 
   if (obj->in_obj)
