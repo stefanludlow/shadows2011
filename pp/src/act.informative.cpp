@@ -7830,7 +7830,7 @@ int kingdom_from_zone (int zone)
  	CHAR_DATA *ch;
 	if (IS_SET(ch->flags, FLAG_GUEST))
 		return 0;
-	else if (zone == 41)
+	else if (zone == 41 || zone == 40)
 		return 4;
 	else if (zone == 80 || zone == 81 || zone == 82)
 		return 3;
