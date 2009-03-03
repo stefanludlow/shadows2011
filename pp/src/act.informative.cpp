@@ -7877,7 +7877,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 
 	for (d = descriptor_list; d; d = d->next)
 	{
-		if (d->character && d->connected == CON_PLYNG)
+		if (d->character && d->character->pc && d->connected == CON_PLYNG)
 		{
 			clansphere = kingdom_from_zone(d->character->in_room / 1000);
 			if(clansphere)
