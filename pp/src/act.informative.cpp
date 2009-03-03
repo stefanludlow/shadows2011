@@ -7880,12 +7880,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		if (d->character && d->character->pc && d->connected == CON_PLYNG)
 		{
 			clansphere = kingdom_from_zone(d->character->in_room / 1000);
-			if(clansphere)
-				mortals++;
-			else
-				guests++;
-			if(clansphere == sphere && IS_MORTAL(d->character))
-				clanCount++;
+
 			if(d->character->pc->level > 0)
 			{
 				immortals++;
@@ -7895,8 +7890,21 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 					availableAdmins = true;
 				}
 			}
+			else
+			{
+				if (IS_SET (ch->flags, FLAG_GUEST))
+					guests++;
+				else
+					mortals++;
+				if(clansphere == sphere)
+					clanCount++;
+			}
 		}
 	}
+
+	// display texts below use 'mortals' to represent total presences
+	mortals+=immortals;
+
 	if (mortals < 1) {
 		whoStream << std::endl << "There aren't any beings within Middle-earth";
 	}
@@ -8034,10 +8042,10 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	if (guests != 1) {
-		whoStream << "There are #2" << guests << "#0 guests visiting our out of character Guest Lounge." << std::endl;
+		whoStream << "Additionally, there are #2" << guests << "#0 guests visiting our out of character Guest Lounge." << std::endl;
 	}
 	else {
-		whoStream << "There is #21#0 guest visiting our out of character Guest Lounge." << std::endl;
+		whoStream << "Additionally, there is #21#0 guest visiting our out of character Guest Lounge." << std::endl;
 	}
 
 	whoStream << std::endl << "Our record is #2" << count_max_online << "#0 players, last seen on #2" << max_online_date << "#0." << std::endl;
