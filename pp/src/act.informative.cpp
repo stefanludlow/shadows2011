@@ -8016,10 +8016,6 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 
 	else if (sphere == 4)
 	{
-		rd = vtor(41207);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In Blackrend's Cave, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
 		rd = vtor(41425);
 		roomCount(rd);
 		if (rd->occupants > 0)
@@ -8028,6 +8024,13 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		roomCount(rd);
 		if (rd->occupants > 0)
 			whoStream << "In Grutz's Guttahs' cave, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		if (is_clan_member(ch, "blackrend"))
+		{
+			rd = vtor(41207);
+			roomCount(rd);
+			if (rd->occupants > 0)
+				whoStream << "In Blackrend's Cave, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		}
 	}
 
 	if (guests != 1) {
