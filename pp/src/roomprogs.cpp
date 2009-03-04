@@ -1536,8 +1536,9 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 		if (dbuf && dbuf++)
 		{
 			nArg3 = strtol (dbuf, NULL, 10);
-
-			if (((nArg1 = index_lookup (skills, rbuf)) != -1)
+			nArg1 = index_lookup (skills, rbuf);
+			skill_use(ch,nArg1,0); // skill use for chance to improve
+			if (nArg1 != -1)
 				&& ((unsigned int) skill_level (ch, nArg1, 0) >= dice (nArg2, nArg3)))
 			{
 				return;
@@ -1558,7 +1559,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 		if (((nArg1 = index_lookup (skills, rbuf)) != -1)
 			&& (skill_level (ch, nArg1, 0) >= nArg2))
 		{
-			return;
+			return; // no chance to improve since it was a minimum test not a check
 		}
 		ifin[nNest] = 1;
 		return;
