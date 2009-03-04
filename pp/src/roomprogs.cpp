@@ -673,9 +673,10 @@ rxp (CHAR_DATA *ch, char *prg, char *command, char *keyword, char *argument)
 
 		char buf [MAX_STRING_LENGTH]; // doit isn't really set up to handle constant c_str so must convert to non-const
 		sprintf(buf, "%s", line.c_str());
-		if (!doit (ch, strCommand.c_str(), buf, command, keyword, argument, local_variables))
+		int returnval = 0;
+		if ((returnval = doit (ch, strCommand.c_str(), buf, command, keyword, argument, local_variables))!=1)
 		{
-			if (engine.in_build_mode () || engine.in_test_mode())
+			if ((engine.in_build_mode () || engine.in_test_mode()) && returnval == -1)
 			{
 				std::ostringstream oss;
 				oss << "#1Error in prog line:#0 " << strCommand << " " << buf << std::endl;
@@ -2271,7 +2272,7 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 	default:
 		//system_log ("ERROR: unknown command in program", true);
 		
-		return 0;
+		return -1;
 	}
 }
 
