@@ -2642,23 +2642,6 @@ setup_new_character (CHAR_DATA * tch)
   unlink (buf);
 
   tch->in_room = NOWHERE;
-
-  // Set starting location for characters that didn't choose one in chargen
-
-  if (num_starting_locs (tch->race) <= 1
-      && lookup_race_variable (tch->race, RACE_START_LOC))
-    {
-      flags =
-	strtol (lookup_race_variable (tch->race, RACE_START_LOC), NULL, 10);
-      if (IS_SET (flags, RACE_HOME_ANGOST))
-	tch->plr_flags |= START_ANGOST;
-      else if (IS_SET (flags, RACE_HOME_GONDOR))
-	tch->plr_flags |= START_GONDOR;
-	  else if (IS_SET (flags, RACE_HOME_HARAD))
-	   tch->plr_flags |= START_HARAD;
-	  else if (IS_SET (flags, RACE_HOME_MORIA))
-	    tch->plr_flags |= START_MORIA;
-    }
 }
 
 void

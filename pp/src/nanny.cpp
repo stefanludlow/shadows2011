@@ -5713,6 +5713,21 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 		if (get_native_tongue(ch))
 			ch->speaks = get_native_tongue(ch); 
 
+		/* grommit moved it here - set start flag if one was not picked (e.g. for races w/o a choice) */
+		 if (num_starting_locs (ch->race) <= 1
+			&& lookup_race_variable (ch->race, RACE_START_LOC))
+		{
+			int flags = strtol (lookup_race_variable (tch->race, RACE_START_LOC), NULL, 10);
+			if (IS_SET (flags, RACE_HOME_ANGOST))
+				ch->plr_flags |= START_ANGOST;
+			else if (IS_SET (flags, RACE_HOME_GONDOR))
+				ch->plr_flags |= START_GONDOR;
+			else if (IS_SET (flags, RACE_HOME_HARAD))
+				ch->plr_flags |= START_HARAD;
+			else if (IS_SET (flags, RACE_HOME_MORIA))
+				ch->plr_flags |= START_MORIA;
+		}
+
 		ch->in_room = NOWHERE;
 		ch->time.played = 0;
 
