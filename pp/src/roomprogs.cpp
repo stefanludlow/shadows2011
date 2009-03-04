@@ -1538,7 +1538,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 			nArg3 = strtol (dbuf, NULL, 10);
 			nArg1 = index_lookup (skills, rbuf);
 			skill_use(ch,nArg1,0); // skill use for chance to improve
-			if (nArg1 != -1)
+			if ((nArg1 != -1)
 				&& ((unsigned int) skill_level (ch, nArg1, 0) >= dice (nArg2, nArg3)))
 			{
 				return;
