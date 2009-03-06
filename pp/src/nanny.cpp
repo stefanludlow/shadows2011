@@ -5717,7 +5717,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 		 if (num_starting_locs (ch->race) <= 1
 			&& lookup_race_variable (ch->race, RACE_START_LOC))
 		{
-			int flags = strtol (lookup_race_variable (tch->race, RACE_START_LOC), NULL, 10);
+			int flags = strtol (lookup_race_variable (ch->race, RACE_START_LOC), NULL, 10);
 			if (IS_SET (flags, RACE_HOME_ANGOST))
 				ch->plr_flags |= START_ANGOST;
 			else if (IS_SET (flags, RACE_HOME_GONDOR))

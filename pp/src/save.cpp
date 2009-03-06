@@ -185,31 +185,36 @@ fwrite_a_obj (OBJ_DATA * obj, FILE * fp)
 
     }
 
-  if (IS_SET (proto->obj_flags.extra_flags, ITEM_MASK)
-      && proto->obj_flags.type_flag == ITEM_ARMOR && obj->desc_keys
-      && strlen (obj->desc_keys) > 1)
-    {
-      if (!proto->desc_keys && obj->desc_keys)
-	modifiers++;
-      else if (strcmp (obj->desc_keys, proto->desc_keys))
-	modifiers++;
-    }
+  /* if there is no proto type key but there is an object key, save it */
+  bool saveMkey = false;
+  if (!(proto->desc_keys))
+  {
+	  if (!(obj->desc_keys))
+	  {
+		  saveMkey=false; // no proto, no current setting
+	  }
+	  else
+	  {
+		  saveMkey = strlen(obj->desc_keys) > 1; // no proto, verify length on current setting
+	  }
+  }
+  else
+  {
+	  if (!(obj->desc_keys))
+	  {
+		  saveMkey=false; // currently no mkey despite on on proto. Let it revert to proto.
+	  }
+	  else // both valid so strcmp possible. Save if different.
+	  {
+		  // if strcmp is not zero, there is a non-zero difference between them and 
+		  // thus the object's version should be saved
+		  saveMkey = ( strcmp(obj->desc_keys, proto->desc_keys) != 0 );
+	  }
 
-  if (IS_SET (proto->obj_flags.extra_flags, ITEM_MASK)
-      && proto->obj_flags.type_flag == ITEM_WORN && obj->desc_keys
-      && strlen (obj->desc_keys) > 1)
-    {
-      if (strcmp (obj->desc_keys, proto->desc_keys))
-	modifiers++;
-    }
-
-  if (proto->obj_flags.type_flag == ITEM_TOSSABLE && obj->desc_keys
-      && strlen (obj->desc_keys) > 1)
-    {
-      if (strcmp (obj->desc_keys, proto->desc_keys))
-	modifiers++;
-    }
-
+  }
+  if (saveMkey)
+  	modifiers++;
+  
   if (obj->coldload_id)
     modifiers++;
 
@@ -239,17 +244,10 @@ fwrite_a_obj (OBJ_DATA * obj, FILE * fp)
 	if (strcmp (obj->full_description, proto->full_description))
 	  fprintf (fp, "full %s~\n", obj->full_description);
 
-      if (IS_SET (proto->obj_flags.extra_flags, ITEM_MASK)
-	  && (proto->obj_flags.type_flag == ITEM_WORN
-	      || proto->obj_flags.type_flag == ITEM_ARMOR) && obj->desc_keys
-	  && strlen (obj->desc_keys) > 1)
-	if (strcmp (obj->desc_keys, proto->desc_keys))
+  if (saveMkey) // reuse value computed above
 	  fprintf (fp, "desc_keys %s~\n", obj->desc_keys);
-      if (proto->obj_flags.type_flag == ITEM_TOSSABLE && obj->desc_keys
-	  && strlen (obj->desc_keys) > 1)
-	if (strcmp (obj->desc_keys, proto->desc_keys))
-	  fprintf (fp, "desc_keys %s~\n", obj->desc_keys);
-    }
+  }
+
 
   if (obj->book_title && obj->title_skill)
     {
@@ -460,41 +458,50 @@ fread_obj (FILE * fp)
 	{
 	  fgetc (fp);
 	  obj->name = fread_string (fp);
+	  continue;
 	}
       else if (!strcmp (p, "short"))
 	{
 	  fgetc (fp);
 	  obj->short_description = fread_string (fp);
+	  continue;
 	}
       else if (!strcmp (p, "loaded"))
 	{
 	  obj->loaded = vtoo (fread_number (fp));
+	  continue;
 	}
       else if (!strcmp (p, "coldload"))
 	{
 	  obj->coldload_id = fread_number (fp);
+	  continue;
 	}
       else if (!strcmp (p, "extraflags"))
 	{
 	  obj->obj_flags.extra_flags = fread_number (fp);
+	  continue;
 	}
       else if (!strcmp (p, "itemwear"))
 	{
 	  obj->item_wear = fread_number (fp);
+	  continue;
 	}
       else if (!strcmp (p, "set_cost"))
 	{
 	  obj->obj_flags.set_cost = fread_number (fp);
+	  continue;
 	}
       else if (!strcmp (p, "long"))
 	{
 	  fgetc (fp);
 	  obj->description = fread_string (fp);
+	  continue;
 	}
       else if (!strcmp (p, "full"))
 	{
 	  fgetc (fp);
 	  obj->full_description = fread_string (fp);
+	  continue;
 	}
       else if (!strcmp (p, "values"))
 	{
@@ -507,31 +514,68 @@ fread_obj (FILE * fp)
 	  if (GET_ITEM_TYPE (obj) == ITEM_BOOK
 	      || GET_ITEM_TYPE (obj) == ITEM_PARCHMENT)
 	    writing = obj->writing;
+	  continue;
 	}
       else if (!strcmp (p, "weight"))
-	obj->obj_flags.weight = fread_number (fp);
+	  {
+			obj->obj_flags.weight = fread_number (fp);
+			continue;
+	  }
       else if (!strcmp (p, "size"))
-	obj->size = fread_number (fp);
+	  {
+		obj->size = fread_number (fp);
+		continue;
+	  }
       else if (!strcmp (p, "count"))
-	obj->count = fread_number (fp);
+	  {
+			obj->count = fread_number (fp);
+			continue;
+	  }
       else if (!str_cmp (p, "timer"))
-	obj->obj_timer = fread_number (fp);
+	  {
+		  obj->obj_timer = fread_number (fp);
+		  continue;
+	  }
       else if (!strcmp (p, "clock"))
-	obj->clock = fread_number (fp);
+	  {
+		  obj->clock = fread_number (fp);
+		  continue;
+	  }
       else if (!strcmp (p, "morphTime"))
-	obj->morphTime = fread_number (fp);
+	  {
+			obj->morphTime = fread_number (fp);
+			continue;
+	  }
       else if (!strcmp (p, "morphto"))
-	obj->morphto = fread_number (fp);
+	  {
+			obj->morphto = fread_number (fp);
+			continue;
+	  }
       else if (!strcmp (p, "VarColor"))
-	obj->var_color = unspace (fread_string (fp));
+	  {
+			obj->var_color = unspace (fread_string (fp));
+			continue;
+	  }
       else if (!strcmp (p, "book_title"))
-	obj->book_title = unspace (fread_string (fp));
+	  {
+			obj->book_title = unspace (fread_string (fp));
+			continue;
+	  }
       else if (!str_cmp (p, "title_skill"))
-	obj->title_skill = fread_number (fp);
+	  {
+			obj->title_skill = fread_number (fp);
+			continue;
+	  }
       else if (!str_cmp (p, "title_script"))
-	obj->title_script = fread_number (fp);
+	  {
+			obj->title_script = fread_number (fp);
+			continue;
+	  }
       else if (!str_cmp (p, "title_language"))
-	obj->title_language = fread_number (fp);
+	  {
+			obj->title_language = fread_number (fp);
+			continue;
+	  }
       else if (!strcmp (p, "page:"))
 	{
 	  if (GET_ITEM_TYPE (obj) == ITEM_BOOK)
@@ -547,6 +591,7 @@ fread_obj (FILE * fp)
 	      else
 		writing = writing->next_page;
 	    }
+	  continue;
 	}
       else if (!strcmp (p, "message:"))
 	{
@@ -556,6 +601,7 @@ fread_obj (FILE * fp)
 	    obj->o.od.value[0] = 0;
 	  fgetc (fp);
 	  writing->message = fread_string (fp);
+	  continue;
 	}
       else if (!strcmp (p, "author:"))
 	{
@@ -565,6 +611,7 @@ fread_obj (FILE * fp)
 	    obj->o.od.value[0] = 0;
 	  fgetc (fp);
 	  writing->author = fread_string (fp);
+	  continue;
 	}
       else if (!strcmp (p, "date:"))
 	{
@@ -574,11 +621,18 @@ fread_obj (FILE * fp)
 	    obj->o.od.value[0] = 0;
 	  fgetc (fp);
 	  writing->date = fread_string (fp);
+	  continue;
 	}
       else if (!strcmp (p, "language:"))
-	writing->language = fread_number (fp);
+	  {
+			writing->language = fread_number (fp);
+			continue;
+	  }
       else if (!strcmp (p, "script:"))
-	writing->script = fread_number (fp);
+	  {
+			writing->script = fread_number (fp);
+			continue;
+	  }
       else if (!strcmp (p, "ink:"))
 	{
 	  if (GET_ITEM_TYPE (obj) == ITEM_BOOK)
@@ -587,17 +641,23 @@ fread_obj (FILE * fp)
 	    obj->o.od.value[0] = 0;
 	  fgetc (fp);
 	  writing->ink = fread_string (fp);
+	  continue;
 	}
       else if (!strcmp (p, "skill:"))
-	writing->skill = fread_number (fp);
+	  {
+			writing->skill = fread_number (fp);
+			continue;
+	  }
       else if (!strcmp (p, "desc_keys"))
 	{
 	  fgetc (fp);
 	  obj->desc_keys = fread_string (fp);
+	  continue;
 	}
       else if (!strcmp (p, "OmoteStr"))
 	{
 	  obj->omote_str = unspace (fread_string (fp));
+	  continue;
 	}
       else if (!strcmp (p, "Wound"))
 	{
@@ -625,7 +685,8 @@ fread_obj (FILE * fp)
 			  wound->healerskill = fread_number (fp);
 			  wound->lasthealed = fread_number (fp);
 			  wound->lastbled = fread_number (fp);
-				}
+			  continue;
+	}
 
 			else if (!strcmp (p, "Clan"))
 				{
@@ -633,6 +694,7 @@ fread_obj (FILE * fp)
 				obj->clan_data->next = NULL;
 				obj->clan_data->name = add_hash (fread_string (fp));
 			  obj->clan_data->rank = add_hash (fread_string (fp));
+			  continue;
 				}
 
 
@@ -644,6 +706,7 @@ fread_obj (FILE * fp)
 	      damage->next = obj->damage;
 	      obj->damage = damage;
 	    }
+	  continue;
 
 	}
       else if (!strcmp (p, "Lodged"))
@@ -662,8 +725,9 @@ fread_obj (FILE * fp)
 	    }
 	  lodged->location = add_hash (fread_word (fp));
 	  lodged->vnum = fread_number (fp);
+	  continue;
 	}
-      else if (!strcmp (p, "DONE"))
+	else if (!strcmp (p, "DONE"))
 	{
 	  fseek (fp, nFilePosition, SEEK_SET);
 	  break;
@@ -673,6 +737,7 @@ fread_obj (FILE * fp)
 	  fseek (fp, nFilePosition, SEEK_SET);
 	  break;
 	}
+	
     }//for (; modifiers; modifiers--)
 
   if (old_money)
