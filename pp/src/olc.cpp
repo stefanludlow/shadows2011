@@ -12972,7 +12972,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 
 	ch->pc->edit_mob = vnum;
 
-	send_to_char ("Ok.\n", ch);
+	send_to_char ("Mclone complete. #1IT IS CRUCIAL THAT YOU REBOOT NOW BEFORE DOING ANYTHING WITH EITHER THE SOURCE OR THE DESTINATION MOB#0.\n", ch);
 }
 
 void
