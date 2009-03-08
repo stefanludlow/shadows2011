@@ -7825,9 +7825,9 @@ void do_where (CHAR_DATA * ch, char *argument, int cmd) {
 }
 
 //Will allow sphere counts in who to count by zones instead of clanning. - Vader
-int kingdom_from_zone (int zone)
+int kingdom_from_zone (CHAR_DATA *ch)
 {
- 	CHAR_DATA *ch;
+	int zone = ch->in_room / 1000;
 	if (IS_SET(ch->flags, FLAG_GUEST))
 		return 0;
 	else if (zone == 41 || zone == 40)
@@ -7873,14 +7873,20 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	availableAdminsStream << std::endl << "#2Available Staff#0:" << std::endl;
 	bool availableAdmins = false;
 
-	int sphere = kingdom_from_zone(ch->in_room / 1000); // 0 = Guest, 1 = Gondor, 2 = Northmen, 3 = Fahad Jafari, 4 = Orcs,  5 = Mordor
+	int sphere = kingdom_from_zone(ch); // 0 = Guest, 1 = Gondor, 2 = Northmen, 3 = Fahad Jafari, 4 = Orcs,  5 = Mordor
 
 	for (d = descriptor_list; d; d = d->next)
 	{
 		if (d->character && d->character->pc && d->connected == CON_PLYNG)
 		{
-			clansphere = kingdom_from_zone(d->character->in_room / 1000);
+			clansphere = kingdom_from_zone(d->character);
 
+			if (clansphere)
+				mortals++;
+			else
+				guests++;
+			if(clansphere == sphere)
+				clanCount++;
 			if(d->character->pc->level > 0)
 			{
 				immortals++;
@@ -7890,20 +7896,8 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 					availableAdmins = true;
 				}
 			}
-			else
-			{
-				if (IS_SET (ch->flags, FLAG_GUEST))
-					guests++;
-				else
-					mortals++;
-				if(clansphere == sphere)
-					clanCount++;
-			}
 		}
 	}
-
-	// display texts below use 'mortals' to represent total presences
-	mortals+=immortals;
 
 	if (mortals < 1) {
 		whoStream << std::endl << "There aren't any beings within Middle-earth";
