@@ -3326,7 +3326,7 @@ roomstat (CHAR_DATA * ch, char *name)
   send_to_char (buf, ch);
 
   sprintbit ((long) rm->room_flags, room_bits, buf2);
-  sprintf (buf, "Rflags[%s]\n", buf2);
+  sprintf (buf, "Rflags[%s%s]\n", buf2, ch->room->noInvLimit ? "NoInvLimit" : "");
   send_to_char (buf, ch);
 
   if (rm->capacity > 0)

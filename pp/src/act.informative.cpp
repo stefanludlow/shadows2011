@@ -4310,10 +4310,11 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
       else
 	{
 	  sprintbit (ch->room->room_flags, room_bits, bitbuf);
-	  sprintf (buf, "#6%s#0 #2[%d: %s#6%s#2]#0",
+	  
+	  sprintf (buf, "#6%s#0 #2[%d: %s%s#6%s#2]#0",
 		   ch->room->name,
 		   ch->room->nVirtual,
-		   bitbuf, sector_types[ch->room->sector_type]);
+		   bitbuf, ch->room->noInvLimit ? "NoInvLimit " : "", sector_types[ch->room->sector_type]);
 
 	  send_to_char (buf, ch);
 

@@ -1024,7 +1024,7 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 			fprintf (fp, "T%d\n", j);
 		else
 			fprintf (fp, "D%d\n", j);
-
+			
 		if (troom->dir_option[j]->general_description)
 			fprintf (fp, "%s~\n", troom->dir_option[j]->general_description);
 		else
@@ -1065,6 +1065,9 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 			fprintf (fp, "%s~\n", troom->secrets[j]->stext);
 		}
 	}
+	
+	if (troom->noInvLimit)
+		fprintf (fp, "U\n");
 
 	for (exptr = troom->ex_description; exptr; exptr = exptr->next)
 		if (exptr->description)
@@ -4352,8 +4355,22 @@ do_rflags (CHAR_DATA * ch, char *argument, int cmd)
 	if (!*buf)
 	{
 		sprintbit (ch->room->room_flags, room_bits, buf2);
-		sprintf (buf3, "Current room flags: %s\n", buf2);
+		sprintf (buf3, "Current room flags: %s", buf2);
+		if (ch->room->noInvLimit)
+			strcat (buf3, "NoInvLimit");
+		strcat (buf3, "\n");
 		send_to_char (buf3, ch);
+		return;
+	}
+	
+		//Hibou -- Adding for unlimited buying
+	if (!str_cmp (buf, "noInvLimit"))
+	{
+		if (ch->room->noInvLimit)
+			ch->room->noInvLimit = 0;
+		else
+			ch->room->noInvLimit = 1;
+		send_to_char ("Unlimited buying toggled.\n", ch);
 		return;
 	}
 
@@ -4389,7 +4406,7 @@ do_rflags (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char ("Done.\n", ch);
 		return;
 	}
-
+	
 	if (buf[0] == '?')
 	{
 		sprintf (buf2, "The following room flags are available:\n\t\t\t");
@@ -4402,6 +4419,7 @@ do_rflags (CHAR_DATA * ch, char *argument, int cmd)
 		}
 		strcat (buf2, "\n");
 		send_to_char (buf2, ch);
+		send_to_char ("\nUse 'NoInvLimit' to allow a shopkeeper unlimited buying.", ch);
 		send_to_char ("\nYou may also specify a church name too.\n", ch);
 		return;
 	}

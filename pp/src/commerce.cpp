@@ -4416,11 +4416,11 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
 	    same_obj += tobj->count;
 	}
 
-      if (((IS_SET (obj->obj_flags.extra_flags, ITEM_STACK)
+	  if (((IS_SET (obj->obj_flags.extra_flags, ITEM_STACK)
 	    && ((same_obj + sell_count) > MAX_INV_COUNT))
 	   || (!IS_SET (obj->obj_flags.extra_flags, ITEM_STACK)
 	       && ((same_obj + sell_count) > (MAX_INV_COUNT / 4))))
-	  && GET_ITEM_TYPE (obj) != ITEM_TOSSABLE)
+	  && (GET_ITEM_TYPE (obj) != ITEM_TOSSABLE) && !ch->room->noInvLimit)
 	{
 	  name_to_ident (ch, buf2);
 	  sprintf (buf,
@@ -4430,11 +4430,11 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
 	  return;
 	}
 
-      if (objs_in_storage > 125)
+       if (objs_in_storage > 125 && !ch->room->noInvLimit)
 	{
 	  name_to_ident (ch, buf2);
 	  sprintf (buf,
-		   "%s I have too much stuff as it is.  Perhaps you'd like to purchase something instead?",
+			   "%s I have too much stuff as it is.  Perhaps you'd like to purchase something instead?",
 		   buf2);
 	  do_whisper (keeper, buf, 83);
 	  return;
