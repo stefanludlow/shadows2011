@@ -754,7 +754,7 @@ do_roll (CHAR_DATA * ch, char *argument, int cmd)
 
       if (buf[3] == 0)
 	{
-	//roll 1-30 vs ATTR: attribute of 15 will have a 50% chance of sucess
+	//roll 1-25 vs ATTR: attribute of 15 will have a 50% chance of sucess (Changed from 1-30 at the behest of Kite)
 	  int attr = 0;
 	  if (strcasecmp (buf, "str") == 0)
 	    {
@@ -793,7 +793,7 @@ do_roll (CHAR_DATA * ch, char *argument, int cmd)
 	      strcpy (buf, "???");
 	    }
 
-	  int roll = dice (1, MAX(30, attr)); 
+	  int roll = dice (1, MAX(25, attr)); 
 	  int diff = attr - roll;
 	  char output_ch [AVG_STRING_LENGTH] = "";
 	  char output_room [AVG_STRING_LENGTH] = "";

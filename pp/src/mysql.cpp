@@ -2945,12 +2945,13 @@ save_char_mysql (CHAR_DATA * ch)
   char wounds[MAX_STRING_LENGTH], lodged[MAX_STRING_LENGTH];
   char skills_buf[MAX_STRING_LENGTH], affects[2*MAX_STRING_LENGTH]; // double size needed for huge crafts list
   int i = 0, hooded = 0;
-
+  
   if (IS_NPC (ch) || IS_SET (ch->flags, FLAG_GUEST))
     return;
 
-	/* adjust last_logoff to now for offline healing tracking in event of crash */
-  ch->pc->last_logoff = time(0);
+	/* adjust last_logoff to now for offline healing tracking in event of crash, but ONLY if PC is online. */
+  if (ch->desc)
+	ch->pc->last_logoff = time(0);
 
   *wounds = '\0';
   *skills_buf = '\0';

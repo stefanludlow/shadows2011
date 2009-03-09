@@ -2737,7 +2737,7 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   if (obj->obj_flags.type_flag != ITEM_FOOD && IS_MORTAL (ch))
-    {
+    {	
       send_to_char ("That isn't food.  You can't eat it.\n", ch);
       return;
     }
@@ -2750,7 +2750,7 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
 
   if (ch->hunger == 20)
     {
-      act ("You are absolutely stuffed!", false, ch, 0, 0, TO_CHAR);
+      act ("You are already absolutely stuffed!", false, ch, 0, 0, TO_CHAR);
     }
 
   if (*argument != '(' && *argument)
