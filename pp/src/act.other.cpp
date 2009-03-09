@@ -498,6 +498,8 @@ if (ch->in_room == 66955 || ch->in_room == 66956 || ch->in_room == 66954 || ch->
     return;
 
   d->character = NULL;
+  if (ch)
+	ch = NULL;
 
   if (!d->acct || str_cmp(d->acct->name.c_str (), "Guest") == 0)
     {
