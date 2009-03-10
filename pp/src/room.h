@@ -66,6 +66,7 @@ struct room_data
   int search_sequence;		// used in track ()
   char *name;
   char *description;
+  bool noInvLimit;	// Toggles shopkeeper's ability to buy endlessly
   EXTRA_DESCR_DATA *ex_description;
   struct written_descr_data *wdesc;
   struct room_direction_data *dir_option[LAST_DIR + 1];

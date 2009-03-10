@@ -854,6 +854,9 @@ load_rooms (void)
 		      r_secret->stext = fread_string (fl);
 		      room->secrets[sdir] = r_secret;
 		    }
+		  
+		  else if (*chk == 'U')
+			  room->noInvLimit = 1;
 
 		  else if (*chk == 'E')	/* extra description field */
 		    {

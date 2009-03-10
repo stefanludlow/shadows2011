@@ -3219,6 +3219,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 
 	if (d->character->desc && d->character->desc != d)
 	{
+		SEND_TO_Q ("\n#6Your character was not gracefully removed from the world. Disconnecting.", d);
 		sprintf (buf, "%s already online, disconnecting old connection.",
 			GET_NAME (d->character));
 		system_log (buf, false);
