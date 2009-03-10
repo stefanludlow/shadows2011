@@ -427,7 +427,7 @@ fread_obj (FILE * fp)
       old_money = 1;
     }
 
-  if (!(obj = load_object (obj_vnum)))
+  if (!(obj = load_object_full (obj_vnum,false)))
     {
       if (!(obj = load_object (666)))
 	{
@@ -901,8 +901,6 @@ read_obj_list (int cur_wc, int cur_eqloc, int cur_eqlev, CHAR_DATA * ch,
 	    return;
 	  else if (holder)
 	    {
-	      if (ch)		// All non-player-held books handled by load_all_writing();
-		load_writing (obj);
 	      obj_to_obj (obj, holder);
 	    }
 	  else if (wc == POSSESS_ROOM)
@@ -916,8 +914,6 @@ read_obj_list (int cur_wc, int cur_eqloc, int cur_eqlev, CHAR_DATA * ch,
 	  else if (cur_eqloc == -1)
 	    {
 	      obj->in_room = NOWHERE;
-	      if (ch)
-		load_writing (obj);
 	      obj_to_char (obj, ch);
 	      if (eqloc == WEAR_PRIM || eqloc == WEAR_SEC
 		  || eqloc == WEAR_BOTH)
@@ -925,8 +921,6 @@ read_obj_list (int cur_wc, int cur_eqloc, int cur_eqlev, CHAR_DATA * ch,
 	    }
 	  else
 	    {
-	      if (ch)
-		load_writing (obj);
 	      obj->carried_by = ch;
 	      obj->in_room = NOWHERE;
 	      equip_char (ch, obj, eqloc);

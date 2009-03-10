@@ -748,8 +748,19 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
     new_obj->var_color = add_hash (color);
 }
 
+OBJ_DATA * load_object (int vnum)
+{
+	return load_object_full (vnum,true);
+}
+
+// if newWritingID is set, it will find an unused writing ID and assign it to the object
+// This was done because sometimes load_object is called to get the prototype, then ovals
+// are loaded afterwards. Thus it generates a new writing ID, then ignores it because it loads
+// up the writing from the ovals later.
+// all objects loaded in the initial fread from file already have ovals and call this 
+// function with false, to avoid duplicate work
 OBJ_DATA *
-load_object (int vnum)
+load_object_full (int vnum, bool newWritingID)
 {
   OBJ_DATA *proto;
   OBJ_DATA *new_obj;
@@ -799,36 +810,51 @@ load_object (int vnum)
   if (new_obj->clock && new_obj->morphto)
     new_obj->morphTime = time (0) + new_obj->clock * 15 * 60;
 
-  if (GET_ITEM_TYPE (new_obj) == ITEM_BOOK)
-    {
-      if (!new_obj->writing && new_obj->o.od.value[0] > 0)
+	// do not generate and do the expensive unused id function if the ovals will be set
+   // by another means, referencing existing writing.
+	if (newWritingID)
 	{
-	  CREATE (new_obj->writing, WRITING_DATA, 1);
-	  for (i = 1, writing = new_obj->writing; i <= new_obj->o.od.value[0];
-	       i++)
-	    {
-	      writing->message = add_hash ("blank");
-	      writing->author = add_hash ("blank");
-	      writing->date = add_hash ("blank");
-	      writing->ink = add_hash ("blank");
-	      writing->language = 0;
-	      writing->script = 0;
-	      writing->skill = 0;
-	      writing->torn = false;
-	      if (i != new_obj->o.od.value[0])
+		if (GET_ITEM_TYPE (new_obj) == ITEM_BOOK)
 		{
-		  CREATE (writing->next_page, WRITING_DATA, 1);
-		  writing = writing->next_page;
+			/* if there is no writing and it has more than 0 pages assigned to it */
+			if (!new_obj->writing && new_obj->o.od.value[0] > 0)
+			{
+				CREATE (new_obj->writing, WRITING_DATA, 1);
+				for (i = 1, writing = new_obj->writing; i <= new_obj->o.od.value[0]; i++)
+				{
+					writing->message = add_hash ("blank");
+					writing->author = add_hash ("blank");
+					writing->date = add_hash ("blank");
+					writing->ink = add_hash ("blank");
+					writing->language = 0;
+					writing->script = 0;
+					writing->skill = 0;
+					writing->torn = false;
+					if (i != new_obj->o.od.value[0])
+						{
+							CREATE (writing->next_page, WRITING_DATA, 1);
+							writing = writing->next_page;
+						}
+				}
+			}
+		} // if book
+
+		if (GET_ITEM_TYPE (new_obj) == ITEM_BOOK)
+		{
+			//std::ostringstream oss;
+			//oss << "#6Generating a new writing ID for book object vnum: " << new_obj->nVirtual << "#0\n";
+			//send_to_gods(oss.str().c_str());
+			new_obj->o.od.value[1] = unused_writing_id ();
 		}
-	    }
-	}
-    }
 
-  if (GET_ITEM_TYPE (new_obj) == ITEM_BOOK)
-    new_obj->o.od.value[1] = unused_writing_id ();
-
-  if (GET_ITEM_TYPE (new_obj) == ITEM_PARCHMENT)
-    new_obj->o.od.value[0] = unused_writing_id ();
+		if (GET_ITEM_TYPE (new_obj) == ITEM_PARCHMENT)
+		{
+			//std::ostringstream oss;
+			//oss << "#6Generating a new writing ID for parchment object vnum: " << new_obj->nVirtual << "#0\n";
+			//send_to_gods(oss.str().c_str());
+			new_obj->o.od.value[0] = unused_writing_id ();
+		}
+	} // end if new writing id section
 
   if (IS_SET (new_obj->obj_flags.extra_flags, ITEM_VARIABLE))
     insert_string_variables (new_obj, proto, 0);

@@ -1003,6 +1003,7 @@ AFFECTED_TYPE *is_crafting (CHAR_DATA * ch);
 void randomize_mobile (CHAR_DATA * mob);
 CHAR_DATA *load_mobile (int nVirtual);
 OBJ_DATA *load_object (int nVirtual);
+OBJ_DATA *load_object_full (int vnum, bool newWritingID);
 void soma_stat (CHAR_DATA * ch, AFFECTED_TYPE * af);
 void soma_ten_second_affect (CHAR_DATA * ch, AFFECTED_TYPE * af);
 void soma_rl_minute_affect (CHAR_DATA * ch, AFFECTED_TYPE * af);
