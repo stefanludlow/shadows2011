@@ -4364,7 +4364,7 @@ do_rflags (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	
 		//Hibou -- Adding for unlimited buying
-	if (!str_cmp (buf, "noInvLimit"))
+	if (!str_cmp (buf, "NoInvLimit"))
 	{
 		if (ch->room->noInvLimit)
 			ch->room->noInvLimit = 0;
