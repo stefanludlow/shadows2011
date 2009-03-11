@@ -286,6 +286,12 @@ do_omote (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+	if (!strcmp(argument,"normal"))
+	{
+		clear_omote(obj);
+		send_to_char ("Omote cleared.\n",ch);
+	}
+
 	result = swap_xmote_target (ch, argument, 3);
 	if (!result)
 		return;
@@ -301,6 +307,9 @@ do_omote (CHAR_DATA * ch, char *argument, int cmd)
 		(result[strlen (result) - 1] != '.') ? "." : "",
 		(obj->short_description[0] == '#') ? "#0" : "");
 
+	/* free old string */
+	clear_omote(obj);
+	/* add new one */
 	obj->omote_str = add_hash (buf);
 	sprintf (buf, "You omote: %s %s", obj->short_description, obj->omote_str);
 

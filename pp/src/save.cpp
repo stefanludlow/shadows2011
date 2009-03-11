@@ -777,9 +777,9 @@ fread_obj (FILE * fp)
 	{
 	  taf = obj->xaffected;
 	  while (taf->next)
-	    taf = taf->next;
+		taf = taf->next;
 	  taf->next = af;
-	}
+	  }
     }
 
   if (GET_ITEM_TYPE (obj) == ITEM_DRINKCON ||
