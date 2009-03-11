@@ -286,7 +286,7 @@ do_omote (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (!strcmp(argument,"normal"))
+	if (!strncmp(argument,"normal",6))
 	{
 		clear_omote(obj);
 		send_to_char ("Omote cleared.\n",ch);
