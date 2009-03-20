@@ -1525,8 +1525,17 @@ hit_char (CHAR_DATA * ch, CHAR_DATA * victim, int strike_parm)
       && AWAKE (victim) && victim->race != 84
       && victim->fighting != ch)
     {
-      send_to_char ("They are flying out of reach!\n", ch);
-      stop_fighting(ch);
+	if (is_with_group(victim->fighting))
+	{
+		TOGGLE_BIT(victim->act, ACT_FLYING);
+		hit_char(ch, victim, 0);
+		TOGGLE_BIT(victim->act, ACT_FLYING);
+	}
+	else
+	{
+		send_to_char ("They are flying out of reach!\n", ch);
+		stop_fighting(ch);
+	}
       return;
     }
 

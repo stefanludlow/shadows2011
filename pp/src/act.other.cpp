@@ -3858,7 +3858,15 @@ do_knock (CHAR_DATA * ch, char *argument, int cmd)
   if (!trigger_info)
     return;
 
-  key = room->dir_option[rev_dir[door]]->key;
+  room_direction_data* revdir = room->dir_option[rev_dir[door]];
+  if (revdir==NULL)
+  {
+	  std::ostringstream oss;
+	  oss << "#1Building error: The door between " << ch->in_room << " and " <<
+		  room->nVirtual << " is on a one-way exit.#0\n";
+	  send_to_gods(oss.str().c_str());
+  }
+  key = revdir->key;
 
   for (tch = room->people; tch; tch = tch->next_in_room)
     {

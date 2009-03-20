@@ -2209,8 +2209,8 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
     }
   else
     {
-      sprintf (ADD, "#2Cond:#0   %d,%d,%d",
-	       k->intoxication, k->hunger, k->thirst);
+      sprintf (ADD, "#2Cond:#0   %d,%d,%d,%d",
+	       k->intoxication, k->hunger, k->thirst, k->fatigue);
     }
 
   sprintf (ADD, "\n");
@@ -2271,6 +2271,9 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 
   if (!k->thirst)
     sprintf (ADD, ", thirsty");
+
+  if (!k->fatigue)
+    sprintf (ADD, ", tired");
 
   if (!IS_NPC (k))
     {

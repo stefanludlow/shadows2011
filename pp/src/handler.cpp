@@ -595,6 +595,10 @@ get_affect (const CHAR_DATA * ch, int affect_type)
 void
 affect_to_char (CHAR_DATA * ch, AFFECTED_TYPE * af)
 {
+	/* avoid hiding more than once */
+	if ((af->type == MAGIC_HIDDEN) && get_affect(ch,MAGIC_HIDDEN))
+		return;
+
   af->next = ch->hour_affects;
   ch->hour_affects = af;
 

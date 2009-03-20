@@ -779,6 +779,7 @@ char *fatigue_bar (CHAR_DATA * ch);
 char *mana_bar (CHAR_DATA * ch);
 int get_token (char **s, char *token);
 std::string resolved_host (char *ip);
+void mysql_save_sleep_tick( CHAR_DATA* ch );
 void mysql_secure_query (MYSQL * conn, char *query, int length);
 void retrieve_mysql_board_listing (CHAR_DATA * ch, char *board_name);
 void display_mysql_board_message (CHAR_DATA * ch, char *board_name,
