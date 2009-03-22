@@ -4736,6 +4736,7 @@ do_minit (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->intoxication = 0;
 	newmob->hunger = -1;
 	newmob->thirst = -1;
+	newmob->fatigue = -1;
 	newmob->equip = NULL;
 
 	open_skill (newmob, SKILL_PARRY);
@@ -7005,7 +7006,7 @@ give_mset_help (CHAR_DATA * ch)
 		"\n"
 		"     access         <room flags>\n"
 		"     noaccess       <room flags>\n"
-		"     conds          <drunk #> <full #> <thirst #>   U must use all three\n"
+		"     conds          <drunk #> <full #> <thirst #> <fatigue #>  U must use all four\n"
 		"     circle         <0..9>\n"
 		"     dam            <##d##>                Natural damage attack\n"
 		"     [fightmode]    <frantic | aggressive | normal | cautious | defensive>\n"
@@ -8892,17 +8893,10 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			}
 
 			if (atoi (buf) > 600)
-				edit_mob->pc->sleep_needed = atoi (buf);
+				edit_mob->fatigue = atoi (buf);
 			else
-				edit_mob->pc->sleep_needed = 100000 * atoi (buf);
+				edit_mob->fatigue = 100000 * atoi (buf);
 
-			if (sleep_needed_in_seconds (edit_mob) > 600 || atoi (buf) > 600)
-			{
-				sprintf (buf, "Sleep needed set to %d minutes, %d seconds.\n",
-					sleep_needed_in_seconds (edit_mob) / 60,
-					sleep_needed_in_seconds (edit_mob) % 60);
-				send_to_char (buf, ch);
-			}
 		}
 
 		else if (!str_cmp (subcmd, "wil"))
@@ -10258,6 +10252,20 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			}
 
 			edit_mob->thirst = atoi (buf);
+		}
+
+		else if (!str_cmp (subcmd, "fatigue"))
+		{
+
+			argument = one_argument (argument, buf);
+
+			if (!just_a_number (buf) && *buf != '-')
+			{
+				send_to_char ("Expected ... fatigue <num>\n", ch);
+				break;
+			}
+
+			edit_mob->fatigue = atoi (buf);
 		}
 
 		else if (!str_cmp (subcmd, "conds"))

@@ -4523,13 +4523,18 @@ do_sleep (CHAR_DATA * ch, char *argument, int cmd)
       third_person.append(char_short(ch));
       third_person[2] = toupper (third_person[2]);
       
+     if (ch->fatigue == 0)
+      {
+          send_to_char ("You are already fully rested.\n", ch);
+	   return;
+      }
+
       if (IS_SET (ch->act, ACT_MOUNT))
       {
 	third_person.append("#0 lowers #5");
 	third_person.append(HSHR(ch));
 	third_person.append("#0 head and falls asleep");
       }
-      else
 	third_person.append("#0 falls asleep");
 
       if (evaluate_emote_string (ch, &first_person, third_person, argument))

@@ -3048,11 +3048,19 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
   //  send_to_gods(buf);
   // send_to_gods(ch->name);
 
-  if (IS_SET (victim->act, ACT_FLYING) && !IS_SET (ch->act, ACT_FLYING)
-      && AWAKE (victim) && !(victim->fighting)) // and victim is not fighting you
+if (IS_SET (victim->act, ACT_FLYING) && !IS_SET (ch->act, ACT_FLYING)
+      && AWAKE (victim) && !(victim->fighting))
     {
-      send_to_char ("They are flying out of reach!\n", ch);
-      return;
+	
+	if (victim->fighting && is_with_group(victim->fighting))
+	{
+		hit_char (ch, victim, 0);
+	}
+	else
+ 	{
+		send_to_char ("They are flying out of reach!\n", ch);
+		return;
+	}
     }
 
 /**** removed to allow carts to be attacked 

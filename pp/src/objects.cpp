@@ -2675,10 +2675,14 @@ do_drink (CHAR_DATA * ch, char *argument, int cmd)
 	    ch->thirst = 0;
 	  if (ch->hunger < 0 && IS_MORTAL (ch))
 	    ch->hunger = 0;
+	  if (ch->fatigue < 0 && IS_MORTAL (ch))
+	    ch->fatigue = 0;
 	  if (ch->thirst > 20)
 		  ch->thirst = 20;
 	  if (ch->hunger > 20)
 		  ch->hunger = 20;
+	  if (ch->fatigue > 20)
+		  ch->fatigue = 20;
 
 	  if (ch->thirst == 20 && drink->o.fluid.water)
 		  send_to_char("You are completely satiated.\n", ch);
