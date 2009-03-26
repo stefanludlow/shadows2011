@@ -13002,6 +13002,159 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 void
+do_oclone (CHAR_DATA * ch, char *argument, int cmd)
+{
+	OBJ_DATA * newObj = new_object ( );
+	OBJ_DATA * source;
+	char buf[MAX_STRING_LENGTH];
+	char buf2[MAX_STRING_LENGTH];
+	int oldVNum;
+	int newVNum;
+	std::stringstream result;
+	
+	if (!ch->pc)
+	{
+		send_to_char ("This is a PC only command.\n", ch);
+		return;
+	}
+	
+	argument = one_argument (argument, buf);
+	argument = one_argument (argument, buf2);
+	
+	if (!*buf || !*buf2 || !atoi (buf) || !atoi (buf2))
+	{
+		send_to_char ("oclone <original vnum> <new vnum>   - copy an object prototype.\n", ch);
+		return;
+	}
+	
+	oldVNum = atoi (buf);
+	newVNum = atoi (buf2);
+	
+	if (!vtoo (oldVNum))
+	{
+		send_to_char ("No such prototype exists.\n", ch);
+		return;
+	}
+	
+	if (vtoo (newVNum))
+	{
+		send_to_char ("A prototype already exists with your target vnum.\n", ch);
+		return;
+	}
+	
+	if (newVNum == 0)
+	{
+		send_to_char ("You may not use VNum 0.\n", ch);
+		return;
+	}
+	
+	clear_object (newObj);
+	source = vtoo (oldVNum);
+	
+	newObj->nVirtual = newVNum;
+	newObj->zone = newVNum / ZONE_SIZE;
+	
+	newObj->clock = source->clock;
+	newObj->morphTime = source->morphTime;
+	newObj->morphto = source->morphto;
+	newObj->activation = source->activation;
+	newObj->quality = source->quality;
+	newObj->econ_flags = source->econ_flags;
+	newObj->size = source->size;
+	newObj->count = source->count;
+	newObj->obj_timer = source->obj_timer;
+	newObj->farthings = source->farthings;
+	newObj->silver = source->silver;
+	newObj->item_wear = source->item_wear;
+	newObj->open = source->open;
+	newObj->title_skill = source->title_skill;
+	newObj->title_language = source->title_language;
+	newObj->title_script = source->title_script;
+	newObj->material = source->material;
+	newObj->tmp_flags = source->tmp_flags;
+	newObj->writing_loaded = source->writing_loaded;
+	newObj->coldload_id = source->coldload_id;
+	newObj->sold_at = source->sold_at;
+	newObj->sold_by = source->sold_by;
+	
+	newObj->obj_flags = source->obj_flags;
+	
+	newObj->instances = 0;
+	newObj->next = NULL;
+	newObj->lnext = NULL;
+	newObj->hnext = NULL;
+	newObj->contains = NULL;
+	newObj->carried_by = NULL;
+	newObj->equiped_by = NULL;
+	
+	newObj->name = str_dup (source->name);
+	newObj->description = str_dup (source->description);
+	newObj->short_description = str_dup (source->short_description);
+	newObj->full_description = str_dup (source->full_description);
+	newObj->omote_str = str_dup (source->omote_str);
+	newObj->ink_color = str_dup (source->ink_color);
+	newObj->desc_keys = str_dup (source->desc_keys);
+	newObj->var_color = str_dup (source->var_color);
+	newObj->book_title = str_dup (source->book_title);
+	newObj->indoor_desc = str_dup (source->indoor_desc);
+	
+	if (source->ex_description) {
+		newObj->ex_description->keyword = str_dup (source->ex_description->keyword);
+		newObj->ex_description->description = str_dup (source->ex_description->description);
+	}
+	
+	if (source->wdesc) {
+		newObj->wdesc->language = source->wdesc->language;
+		newObj->wdesc->description = str_dup (source->wdesc->description);
+	}
+	
+	if (source->wounds) {
+		newObj->wounds->damage = source->wounds->damage;
+		newObj->wounds->bleeding = source->wounds->bleeding;
+		newObj->wounds->poison = source->wounds->poison;
+		newObj->wounds->infection = source->wounds->infection;
+		newObj->wounds->healerskill = source->wounds->healerskill;
+		newObj->wounds->bindskill = source->wounds->bindskill;
+		newObj->wounds->lasthealed = source->wounds->lasthealed;
+		newObj->wounds->lastbled = source->wounds->lastbled;
+		newObj->wounds->lastbound = source->wounds->lastbound;
+		newObj->wounds->location = str_dup (source->wounds->location);
+		newObj->wounds->type = str_dup (source->wounds->type);
+		newObj->wounds->name = str_dup (source->wounds->name);
+		newObj->wounds->severity = str_dup (source->wounds->severity);
+	}
+	
+	if (source->writing) {
+		newObj->writing->language = source->writing->language;
+		newObj->writing->script = source->writing->script;
+		newObj->writing->skill = source->writing->skill;
+		newObj->writing->torn = source->writing->torn;
+		newObj->writing->message = str_dup (source->writing->message);
+		newObj->writing->author = str_dup (source->writing->author);
+		newObj->writing->date = str_dup (source->writing->date);
+		newObj->writing->ink = str_dup (source->writing->ink);
+	}
+	
+	if (source->lodged) {
+		newObj->lodged->vnum = source->lodged->vnum;
+		newObj->lodged->location = str_dup (source->lodged->location);
+	} 
+	
+	if (source->clan_data) {
+		newObj->clan_data->name = str_dup (source->clan_data->name);
+		newObj->clan_data->rank = str_dup (source->clan_data->rank);
+	} 
+	
+	add_obj_to_hash (newObj);
+	ch->pc->edit_obj = newVNum;
+	
+	result << "Copied object #C" << source->nVirtual << "#0 ('#2" << source->short_description << "#0') to #C" << newObj->nVirtual << "#0." << std::endl;
+	send_to_char (result.str().c_str(), ch);
+
+	return;
+}
+
+void
 list_mob_resets (CHAR_DATA * ch, CHAR_DATA * mob)
 {
 	int reset_num = 0;

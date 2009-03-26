@@ -352,6 +352,7 @@ void do_origins (CHAR_DATA * ch, char *argument, int cmd);
 char *origins_list(CHAR_DATA * ch, OBJ_DATA * obj);
 void do_materials (CHAR_DATA * ch, char *argument, int cmd);
 void do_mclone (CHAR_DATA * ch, char *argument, int cmd);
+void do_oclone (CHAR_DATA * ch, char *argument, int cmd);
 void do_mcopy (CHAR_DATA * ch, char *argument, int cmd);
 void do_minit (CHAR_DATA * ch, char *argument, int cmd);
 void do_mlist (CHAR_DATA *ch, char *argument, int cmd);  /* olc.cpp */
