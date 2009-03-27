@@ -121,7 +121,6 @@ int mysql_safe_query(char *queryFormat, ...)
 					s = va_arg(arg,char*);
 					if (!s || !*s)
 					{
-						tempDataStream << " ";
 						break;
 					}
 					safeString = s;
