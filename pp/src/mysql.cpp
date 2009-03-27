@@ -90,72 +90,78 @@ refresh_db_connection (void)
 // Route ALL mysql queries through this wrapper to ensure they are escaped
 // properly, to thwart various SQL injection attacks.
 
-int
-mysql_safe_query (char *fmt, ...)
+int mysql_safe_query(char *queryFormat, ...)
 {
-  va_list argp;
-  int i = 0;
-  double j = 0;
-  char *s = 0, *out = 0, *p = 0;
-  char safe[2*MAX_STRING_LENGTH];
-  char query[2*MAX_STRING_LENGTH];
+	char *arg;
+	std::string queryStr = queryFormat;
+	size_t position = 0;
 
-  *query = '\0';
-  *safe = '\0';
+	va_start (arg, queryFormat);
 
-  va_start (argp, fmt);
-
-  for (p = fmt, out = query; *p != '\0'; p++)
-    {
-      if (*p != '%')
+	while ((position = queryStr.find('%', position)) != std::string::npos)
 	{
-	  *out++ = *p;
-	  continue;
+		if (queryStr.length() > position)
+		{
+			std::ostringstream tempDataStream;
+			std::string safeString;
+			char *s = '\0';
+
+			switch (queryStr[position+1])
+			{
+				case 'c':
+					tempDataStream << (char)va_arg(arg,int);
+					break;
+
+				case 'd':
+				case 'i':
+					tempDataStream << va_arg(arg,int);
+					break;
+
+				case 's':
+					s = va_arg(arg,char*);
+					if (!s || !*s)
+					{
+						tempDataStream << " ";
+						break;
+					}
+					safeString = s;
+					s = new char[(safeString.length()*2)+1]; // Requires at worst 2 bytes per character plus terminating character
+					mysql_real_escape_string(database, s, safeString.c_str(), (unsigned long)safeString.length());
+					tempDataStream << s;
+					delete s;
+					s = '\0';
+					break;
+
+				case 'f':
+					tempDataStream << va_arg(arg,double);
+					break;
+			}
+			if (tempDataStream.str().empty())
+			{
+				position++;
+				continue;
+			}
+			queryStr.replace(position, 2, tempDataStream.str());
+			position = position + tempDataStream.str().length();
+		}
+		else
+		{
+			break;
+		}
 	}
 
-      switch (*++p)
+	va_end(arg);
+
+	
+	int result = mysql_real_query (database, queryStr.c_str(), (unsigned long)queryStr.length());
+	// 0 on success, all else failure
+	if (result!=0)
 	{
-	case 'c':
-	  i = va_arg (argp, int);
-	  out += sprintf (out, "%c", i);;
-	  break;
-	case 's':
-	  s = va_arg (argp, char *);
-	  if (!s)
-	    {
-	      out += sprintf (out, " ");
-	      break;
-	    }
-	  mysql_real_escape_string (database, safe, s, strlen (s));
-	  out += sprintf (out, "%s", safe);
-	  break;
-	case 'd':
-	  i = va_arg (argp, int);
-	  out += sprintf (out, "%d", i);
-	  break;
-	case 'f':
-	  j = va_arg (argp, double);
-	  out += sprintf (out, "%f", j);
-	  break;
-	case '%':
-	  out += sprintf (out, "%%");
-	  break;
+		send_to_gods(queryStr.c_str());
 	}
-    }
-
-  *out = '\0';
-
-  va_end (argp);
-
-  int result = mysql_real_query (database, query, strlen (query));
-//  if (mysql_errno(database))
-//    {
-//      fprintf (stderr, "The library call 'mysql_real_query' failed to run "
-//	       "the query '%s' for the following reason: %s\n",
-//	       query, mysql_error (database));
-//    }
-  return (result);
+	return (result);
 }
+
 
 void load_obj_progs (void)
 {
