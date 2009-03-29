@@ -2873,6 +2873,8 @@ check_reboot (void)
 {
   DESCRIPTOR_DATA *d;
   FILE *fp;
+  AFFECTED_TYPE *af;
+
   bool block = false;
 
   for (d = descriptor_list; d; d = d->next)
@@ -2889,14 +2891,25 @@ check_reboot (void)
 	block = true;
       if (d->character->fighting && IS_NPC (d->character->fighting))
 	block = true;
-      if (d->character->subdue && IS_NPC (d->character->subdue))
-	block = true;
-      if (d->character->aiming_at && IS_NPC (d->character->aiming_at))
-	block = true;
-      if (d->character->following && IS_NPC (d->character->following))
-	block = true;
-      if (d->character->mount)
-	block = true;
+
+	  /* stop if crafting */
+	for (af = d->character->hour_affects; af; af = af->next)
+    {
+      if (af->type >= CRAFT_FIRST && af->type <= CRAFT_LAST
+	  && af->a.craft->timer)
+		{
+			block = true;
+		}
+    }
+
+  //    if (d->character->subdue && IS_NPC (d->character->subdue))
+//	block = true;
+  //    if (d->character->aiming_at && IS_NPC (d->character->aiming_at))
+//	block = true;
+//      if (d->character->following && IS_NPC (d->character->following))
+//	block = true;
+      //if (d->character->mount)
+	//block = true;
     }
 
   if (!block)
@@ -2919,6 +2932,7 @@ shutdown_request (int signo)
   FILE *fp;
 
   system_log ("Received USR2 - reboot request.", false);
+  send_to_gods ("#1Received USR2 - reboot request.#0\n");
 
   if (engine.in_build_mode ())
     {

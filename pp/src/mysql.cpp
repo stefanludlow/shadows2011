@@ -1906,7 +1906,7 @@ load_writing (OBJ_DATA * obj)
     id = (obj)->o.od.value[0];
 
   mysql_safe_query
-    ("SELECT * FROM player_writing WHERE db_key = %d ORDER BY db_key,page ASC",
+    ("SELECT * FROM player_writing WHERE db_key = %d ORDER BY page ASC",
      id);
 
   result = mysql_store_result (database);
@@ -1938,37 +1938,66 @@ load_writing (OBJ_DATA * obj)
     }
   else if (GET_ITEM_TYPE (obj) == ITEM_BOOK)
     {
-      if (!obj->writing)
-	CREATE (obj->writing, WRITING_DATA, 1);
-      while ((row = mysql_fetch_row (result)))
-	{
-	  writing = obj->writing;
-	  for (i = 1; i <= obj->o.od.value[0]; i++)
-	    {
-	      if (!writing->next_page && i + 1 <= obj->o.od.value[0])
-		{
-		  CREATE (writing->next_page, WRITING_DATA, 1);
-		}
-	      if (i == atoi (row[2]))
-		{
-		  writing->author = add_hash (row[1]);
-		  writing->date = add_hash (row[3]);
-		  writing->ink = add_hash (row[4]);
-		  writing->language = atoi (row[5]);
-		  writing->script = atoi (row[6]);
-		  writing->skill = atoi (row[7]);
-		  writing->message = add_hash (row[8]);
-		  break;
-		}
-	      writing = writing->next_page;
-	    }
-	}
-    }
+	      if (!obj->writing)
+               CREATE (obj->writing, WRITING_DATA, 1);
+
+		  /* iterate among all known pages, listed in ascending order */
+          writing = obj->writing;
+          row = mysql_fetch_row(result);
+          /* iterate pages */
+          for (i = 1; i <= obj->o.od.value[0]; i++)
+            {
+                        /* if the next page should exist (for the last iteration next_page
+                           should be left null */
+              if (!writing->next_page && ((i + 1) <= obj->o.od.value[0]))
+                  {
+                          CREATE (writing->next_page, WRITING_DATA, 1);
+                  }
+
+                  /* if the data specify info on this page, add in information */
+              if (row && (i == atoi(row[2])))
+                  {
+                        //std::ostringstream oss;
+                        //oss << "Loading written page on book " << id << " for page " << i << "\n";
+                        //  send_to_gods (oss.str().c_str());
+
+                  writing->author = add_hash (row[1]);
+				  writing->date = add_hash (row[3]);
+                  writing->ink = add_hash (row[4]);
+                  writing->language = atoi (row[5]);
+                  writing->script = atoi (row[6]);
+                  writing->skill = atoi (row[7]);
+                  writing->message = add_hash (row[8]);
+                  // load the next row to be considered on next loop
+                  row = mysql_fetch_row(result);
+                  }
+                  /* if the data do not exist, mark pages blank as in load_object_full */
+                  else
+                  {
+                        //  std::ostringstream oss;
+                        //  oss << "Adding blank page on book " << id << " for page " << i << "\n";
+                        //  send_to_gods (oss.str().c_str());
+
+                        writing->message = add_hash ("blank");
+                        writing->author = add_hash ("blank");
+                        writing->date = add_hash ("blank");
+                        writing->ink = add_hash ("blank");
+                        writing->language = 0;
+						writing->script = 0;
+                        writing->skill = 0;
+                        writing->torn = false;
+                  }
+              writing = writing->next_page;
+          } // for loop iterating pages
+  } // if book
 
   if (result)
     mysql_free_result (result);
   result = NULL;
 }
+
+
+
 
 void
 save_writing (OBJ_DATA * obj)
