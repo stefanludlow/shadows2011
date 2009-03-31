@@ -2938,6 +2938,12 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("Remove your pacifist flag, first...\n", ch);
       return;
     }
+	
+  if (IS_SET (ch->flags, FLAG_AUTOFLEE))
+	{
+	  send_to_char ("You throw yourself into combat, forgetting your vow to flee.\n", ch);
+	  ch->flags &= ~FLAG_AUTOFLEE;
+	}
 
   argument = one_argument (argument, buf);
 
@@ -3441,6 +3447,12 @@ do_kill (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("Remove your pacifist flag, first...\n", ch);
       return;
     }
+	
+  if (IS_SET (ch->flags, FLAG_AUTOFLEE))
+	{
+	  send_to_char ("You throw yourself into combat, forgetting your vow to flee.\n", ch);
+	  ch->flags &= ~FLAG_AUTOFLEE;
+	}
 
   if ((obj = get_equip (ch, WEAR_BOTH)))
     {
