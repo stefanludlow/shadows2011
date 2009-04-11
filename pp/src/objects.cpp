@@ -5101,7 +5101,12 @@ do_skin (CHAR_DATA * ch, char *argument, int cmd)
   char obj_name[MAX_INPUT_LENGTH];
   CHAR_DATA *tch;
   int hit_type = -1;
-
+  
+  if (obj_corpse->lodged) 
+  {
+	send_to_char("You need to remove what is lodged before skinning the corpse.\n", ch);
+	return;
+  }
 
   if (!((ch->right_hand && GET_ITEM_TYPE (ch->right_hand) == ITEM_WEAPON
 	 && ((hit_type = ch->right_hand->o.weapon.hit_type) == 0
