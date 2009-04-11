@@ -5102,6 +5102,16 @@ do_skin (CHAR_DATA * ch, char *argument, int cmd)
   CHAR_DATA *tch;
   int hit_type = -1;
   
+  /* Allow the user to enter a corpse name in case he wants to
+     say 2.corpse instead of just corpse */
+	 
+  argument = one_argument (argument, obj_name);
+
+  if (!*obj_name)
+    strcpy (obj_name, "corpse");
+
+  obj_corpse = get_obj_in_list_vis (ch, obj_name, ch->room->contents);
+  
   if (obj_corpse->lodged) 
   {
 	send_to_char("You need to remove what is lodged before skinning the corpse.\n", ch);
@@ -5127,16 +5137,6 @@ do_skin (CHAR_DATA * ch, char *argument, int cmd)
 	 ch);
       return;
     }
-
-  argument = one_argument (argument, obj_name);
-
-  /* Allow the user to enter a corpse name in case he wants to
-     say 2.corpse instead of just corpse */
-
-  if (!*obj_name)
-    strcpy (obj_name, "corpse");
-
-  obj_corpse = get_obj_in_list_vis (ch, obj_name, ch->room->contents);
 
   if (!obj_corpse)
     {
