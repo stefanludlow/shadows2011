@@ -2400,7 +2400,11 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 	     ch);
 	  return;
 	}
-      sprintf (buf, "You begin to carefully take aim at #5%s#0.",
+	if(target->fighting)
+      sprintf (buf, "You begin to carefully take aim at #5%s#0 who is fighting with #5%s#0.",
+	       char_short (target), char_short (target->fighting));
+	else
+	  sprintf (buf, "You begin to carefully take aim at #5%s#0.",
 	       char_short (target));
       act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
       sprintf (buf,
