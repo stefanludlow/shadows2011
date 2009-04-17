@@ -3049,23 +3049,11 @@ offline_healing (CHAR_DATA * ch, int since)
 
   healing_time = time (0) - since;
 
-  std::ostringstream oss;
-  oss << "Current time: " << time(0) << " Since time: " << since << "\n.";
-	oss << "Attempting offline healing on character " << ch->tname << " who last logged on ["
-		<< healing_time / 60 << "m" << healing_time%60 << "s] ago.\n";
-
   checks += (healing_time / ((BASE_PC_HEALING - ch->con / 6) * 60));	// BASE_PC is in minutes, not seconds.
-
-  oss << "Attempting " << checks << " healing checks.\n";
 
   /* wound reduction */
   for (wound = ch->wounds; wound; wound = next_wound)
     {
-		/*oss << "Attempting to heal a " << wound->severity << " " << wound->name << " on the "
-			<< wound->location << (wound->infection > 0 ?  "(I) " : " ") << " with "
-			<< wound->damage << " damage and " << wound->bleeding
-			<< " bleeding.\n";*/
-
       next_wound = wound->next;
 
       for (i = 0; i < checks; i++)
@@ -3075,8 +3063,6 @@ offline_healing (CHAR_DATA * ch, int since)
 	  }
 
     }
-
-  //oss << "Started with " << ch->damage << " bloodloss damage ";
 
   /* bloodloss reduction */
   for (i = 0; i < checks; i++)
@@ -3094,10 +3080,6 @@ offline_healing (CHAR_DATA * ch, int since)
 	    }
 	}
   }
-
-  //oss << "and ended with " << ch->damage << " bloodloss damage.\n";
-  send_to_room((char*)oss.str().c_str(),686);
-
 }
 
 

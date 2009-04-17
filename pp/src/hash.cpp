@@ -55,6 +55,8 @@ mobile_load_cues (MOB_DATA * mob)
   mob->cues = cues;
 }
 
+
+// UNUSED
 CHAR_DATA *
 fread_mobile (int vnum, const int *nZone, FILE * fp)
 {

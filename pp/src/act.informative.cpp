@@ -11048,16 +11048,23 @@ do_flip (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+  unsigned int page_arg=0;
   if (!*argument)
-    sprintf (argument, "%d", obj->open + 1);
+  {
+	  page_arg = obj->open + 1;
+  }
+  else
+  {
+	  page_arg = strtol (argument, NULL, 10);
+  }
 
-  if ((unsigned int) strtol (argument, NULL, 10) == obj->open)
+  if (page_arg == obj->open)
     {
       send_to_char ("It's already open to that page.\n", ch);
       return;
     }
 
-  if (atoi (argument) > obj->o.od.value[0])
+  if (page_arg > obj->o.od.value[0])
     {
       sprintf (buf, "There are only %d pages in this book.\n",
 	       obj->o.od.value[0]);
@@ -11065,20 +11072,16 @@ do_flip (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (!*argument)
-    {
-      send_to_char ("Which page did you wish to flip to?\n", ch);
-      return;
-    }
-
-  if ((unsigned int) strtol (argument, NULL, 10) > obj->open + 1)
+  if (page_arg > obj->open + 1)
     sprintf (buf,
 	     "You leaf carefully through #2%s#0 until you arrive at page %d.",
-	     obj->short_description, atoi (argument));
+	     obj->short_description, page_arg);
   else
     sprintf (buf, "You turn #2%s's#0 page.", obj->short_description);
+
   act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-  if ((unsigned int) strtol (argument, NULL, 10) > obj->open + 1)
+
+  if (page_arg > obj->open + 1)
     sprintf (buf,
 	     "%s#0 leafs carefully through #2%s#0 until %s arrives at the desired page.",
 	     char_short (ch), obj->short_description, HSSH (ch));
@@ -11087,7 +11090,7 @@ do_flip (CHAR_DATA * ch, char *argument, int cmd)
 	     obj->short_description);
   sprintf (buffer, "#5%s", CAP (buf));
   act (buffer, false, ch, obj, 0, TO_ROOM | _ACT_FORMAT);
-  obj->open = atoi (argument);
+  obj->open = page_arg;
 }
 
 void

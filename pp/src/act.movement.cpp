@@ -2770,9 +2770,15 @@ do_open (CHAR_DATA * ch, char *argument, int cmd)
 	    }
 	  if (!*dir || atoi (dir) <= 1)
 	    {
+			/* load on demand */
+            if (obj->o.od.value[0] && !obj->writing)
+            {
+                load_writing(obj);
+            }
+
 	      if (!obj->writing || !obj->o.od.value[0])
-		{
-		  sprintf (buf,
+		  {
+		   sprintf (buf,
 			   "You open #2%s#0, and notice that it has no pages.\n",
 			   obj->short_description);
 		  send_to_char (buf, ch);
