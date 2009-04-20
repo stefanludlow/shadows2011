@@ -8577,6 +8577,11 @@ do_swap (CHAR_DATA * ch, char *argument, int cmd)
     }
   else if (!str_cmp (buf, "worldfile") && isdigit (*argument))
     {
+	if (engine.in_build_mode ())
+	{
+	  send_to_char ("On the builder port?\n", ch);
+	  return;
+	}
       int z = strtol (argument,0,0);
       if (z == 99)
 	{
