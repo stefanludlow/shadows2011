@@ -13042,9 +13042,9 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 	
-	if (newVNum == 0)
+	if (newVNum < 0 || newVNum > 100000)
 	{
-		send_to_char ("You may not use VNum 0.\n", ch);
+		send_to_char ("VNums must be between 1 and 99999.\n", ch);
 		return;
 	}
 	
@@ -13072,12 +13072,18 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	newObj->title_script = source->title_script;
 	newObj->material = source->material;
 	newObj->tmp_flags = source->tmp_flags;
-	newObj->writing_loaded = source->writing_loaded;
 	newObj->coldload_id = source->coldload_id;
 	newObj->sold_at = source->sold_at;
 	newObj->sold_by = source->sold_by;
 	
 	newObj->obj_flags = source->obj_flags;
+	newObj->o.od.value[0] = source->o.od.value[0];
+	newObj->o.od.value[1] = source->o.od.value[1];
+	newObj->o.od.value[2] = source->o.od.value[2];
+	newObj->o.od.value[3] = source->o.od.value[3];
+	newObj->o.od.value[4] = source->o.od.value[4];
+	newObj->o.od.value[5] = source->o.od.value[5];
+	newObj->o.od.value[6] = source->o.od.value[6];
 	
 	newObj->instances = 0;
 	newObj->next = NULL;
