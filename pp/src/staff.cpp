@@ -3365,16 +3365,24 @@ roomstat (CHAR_DATA * ch, char *name)
   for (k = rm->people; k; k = k->next_in_room)
     {
       if (IS_NPC (k))
-	act ("NPC: $N", false, ch, 0, k, TO_CHAR);
+	  {
+		sprintf (buf, "NPC: $N (%d)", k->mob->nVirtual);
+		act (buf, false, ch, 0, k, TO_CHAR);
+		//act ("NPC: $N", false, ch, 0, k, TO_CHAR);
+	  }
       else
-	act ("PC:  $N", false, ch, 0, k, TO_CHAR);
+	  {
+		sprintf (buf, "PC: $N (%s)", k->tname);
+		act (buf, false, ch, 0, k, TO_CHAR);
+		//act ("PC:  $N", false, ch, 0, k, TO_CHAR);
+	  }
     }
   send_to_char ("\n", ch);
 
   send_to_char ("--------- Contents ---------\n", ch);
   for (j = rm->contents; j; j = j->next_content)
     {
-      sprintf (buf, "%s\n", j->name);
+      sprintf (buf, "%s (%d)\n", j->name, j->nVirtual);
       send_to_char (buf, ch);
     }
   send_to_char ("\n", ch);
