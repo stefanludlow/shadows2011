@@ -141,6 +141,7 @@ char_data::clear_char ()
 	this->intoxication = 0;
 	this->hunger = 0;
 	this->thirst = 0;
+	this->fatigue = 0;
 	this->last_room = 0;
 	this->attack_type = 0;
 	this->name = NULL;
@@ -473,7 +474,6 @@ pc_data::pc_data()
 	this->app_cost = 0;
 	this->chargen_flags = 0;
 	this->last_global_pc_msg = 0;
-	this->sleep_needed = 0;
 	this->auto_toll = 0;
 	this->doc_type = 0;
 	this->doc_index = -1;

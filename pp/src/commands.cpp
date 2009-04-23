@@ -318,6 +318,7 @@ const struct command_data commands[] = {
 	{"object", do_object, DEAD, C_LV1},
 	{"oinit", do_oinit, DEAD, C_LV1},
 	{"olist", do_olist, DEAD, C_LV1},
+	{"oclone", do_oclone, DEAD, C_LV1},
 	{"oset", do_oset, DEAD, C_LV1},
 	{"ounused", do_ounused, DEAD, C_LV1},
 	{"purge", do_purge, DEAD, C_LV1},

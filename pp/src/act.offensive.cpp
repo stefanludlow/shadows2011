@@ -2942,6 +2942,12 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("Remove your pacifist flag, first...\n", ch);
       return;
     }
+	
+  if (IS_SET (ch->flags, FLAG_AUTOFLEE))
+	{
+	  send_to_char ("You throw yourself into combat, forgetting your vow to flee.\n", ch);
+	  ch->flags &= ~FLAG_AUTOFLEE;
+	}
 
   argument = one_argument (argument, buf);
 
@@ -3052,11 +3058,19 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
   //  send_to_gods(buf);
   // send_to_gods(ch->name);
 
-  if (IS_SET (victim->act, ACT_FLYING) && !IS_SET (ch->act, ACT_FLYING)
-      && AWAKE (victim) && !(victim->fighting)) // and victim is not fighting you
+if (IS_SET (victim->act, ACT_FLYING) && !IS_SET (ch->act, ACT_FLYING)
+      && AWAKE (victim) && !(victim->fighting))
     {
-      send_to_char ("They are flying out of reach!\n", ch);
-      return;
+	
+	if (victim->fighting && is_with_group(victim->fighting))
+	{
+		hit_char (ch, victim, 0);
+	}
+	else
+ 	{
+		send_to_char ("They are flying out of reach!\n", ch);
+		return;
+	}
     }
 
 /**** removed to allow carts to be attacked 
@@ -3437,6 +3451,12 @@ do_kill (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("Remove your pacifist flag, first...\n", ch);
       return;
     }
+	
+  if (IS_SET (ch->flags, FLAG_AUTOFLEE))
+	{
+	  send_to_char ("You throw yourself into combat, forgetting your vow to flee.\n", ch);
+	  ch->flags &= ~FLAG_AUTOFLEE;
+	}
 
   if ((obj = get_equip (ch, WEAR_BOTH)))
     {

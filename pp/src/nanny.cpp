@@ -4301,6 +4301,7 @@ nanny_char_name_confirm (DESCRIPTOR_DATA * d, char *arg)
 	d->character->intoxication = 0;
 	d->character->thirst = 24;
 	d->character->hunger = 24;
+	d->character->fatigue = 24;
 
 	d->character->pc->load_count = 1;
 	save_char (d->character, false);

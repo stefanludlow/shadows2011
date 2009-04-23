@@ -2675,10 +2675,14 @@ do_drink (CHAR_DATA * ch, char *argument, int cmd)
 	    ch->thirst = 0;
 	  if (ch->hunger < 0 && IS_MORTAL (ch))
 	    ch->hunger = 0;
+	  if (ch->fatigue < 0 && IS_MORTAL (ch))
+	    ch->fatigue = 0;
 	  if (ch->thirst > 20)
 		  ch->thirst = 20;
 	  if (ch->hunger > 20)
 		  ch->hunger = 20;
+	  if (ch->fatigue > 20)
+		  ch->fatigue = 20;
 
 	  if (ch->thirst == 20 && drink->o.fluid.water)
 		  send_to_char("You are completely satiated.\n", ch);
@@ -5097,7 +5101,22 @@ do_skin (CHAR_DATA * ch, char *argument, int cmd)
   char obj_name[MAX_INPUT_LENGTH];
   CHAR_DATA *tch;
   int hit_type = -1;
+  
+  /* Allow the user to enter a corpse name in case he wants to
+     say 2.corpse instead of just corpse */
+	 
+  argument = one_argument (argument, obj_name);
 
+  if (!*obj_name)
+    strcpy (obj_name, "corpse");
+
+  obj_corpse = get_obj_in_list_vis (ch, obj_name, ch->room->contents);
+  
+  if (obj_corpse->lodged) 
+  {
+	send_to_char("You need to remove what is lodged before skinning the corpse.\n", ch);
+	return;
+  }
 
   if (!((ch->right_hand && GET_ITEM_TYPE (ch->right_hand) == ITEM_WEAPON
 	 && ((hit_type = ch->right_hand->o.weapon.hit_type) == 0
@@ -5118,16 +5137,6 @@ do_skin (CHAR_DATA * ch, char *argument, int cmd)
 	 ch);
       return;
     }
-
-  argument = one_argument (argument, obj_name);
-
-  /* Allow the user to enter a corpse name in case he wants to
-     say 2.corpse instead of just corpse */
-
-  if (!*obj_name)
-    strcpy (obj_name, "corpse");
-
-  obj_corpse = get_obj_in_list_vis (ch, obj_name, ch->room->contents);
 
   if (!obj_corpse)
     {

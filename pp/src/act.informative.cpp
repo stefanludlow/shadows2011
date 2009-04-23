@@ -624,21 +624,19 @@ char *frame_built[] = {
 
 
 char *verbal_intox[] =
-  { "sober", "tipsy", "slightly drunk", "drunk", "intoxicated",
-  "plastered"
-};
+  { "sober", "tipsy", "slightly drunk",
+    "drunk", "intoxicated", "plastered"};
 
 char *verbal_hunger[] =
-  { "starving", "hungry", "feeling slightly hungry", "feeling peckish",
-  "quite full",
-  "absolutely stuffed"
-};
+  { "starving", "hungry", "feeling slightly hungry",
+    "feeling peckish", "quite full", "absolutely stuffed"};
 
 char *verbal_thirst[] =
   { "dying of thirst", "quite parched", "feeling thirsty",
-  "feeling slightly thirsty",
-  "nicely quenched", "completely sated"
-};
+  "feeling slightly thirsty", "nicely quenched", "completely sated"};
+
+char *verbal_fatigue[] =
+{ "utterly drained", "exhausted", "feeling weary", "tired", "well rested", "refreshed"};
 
 void post_message (DESCRIPTOR_DATA * d);
 
@@ -4879,9 +4877,50 @@ get_comestible_range (int num)
   return 0;
 }
 
+//Fatigue uses a different calculation with larger numbers
+//for flexibility down the road for adjustments - Vader
 
-void
-hunger_thirst_process (CHAR_DATA * ch)
+int get_fatigue_range (int num)
+{
+  if (num == 0)
+    return 5;
+  if (num > 0 && num <= 375)
+    return 4;
+  if (num > 375 && num <= 750)
+    return 3;
+  if (num > 750 && num <= 1125)
+    return 2;
+  if (num > 1125 && num <= 1500)
+    return 1;
+  if (num >= 1500)
+    return 0;
+  return 0;
+}
+
+//Determine the state of the PC, and adjust fatigue accordingly - Vader
+int calculate_fatigue(CHAR_DATA * ch)
+{
+	//Average sleep time is 8 hours, leaving 16 hours awake. 1500(max fatigue)/16 ~= 95
+	//Average of standing and sitting needs to be 95 - Vader
+
+	//Subtract a fatigue modifier using con. (High con can stay awake longer than low con) - Vader
+	int fatigue = ((ch->con - 13) * 5);
+	if (fatigue < 0)
+		fatigue = 0;
+	if (GET_POS (ch) == POSITION_SLEEPING)
+		return - 1000;
+	if (GET_POS (ch) == POSITION_FIGHTING)
+		return 300 - fatigue;
+	if (GET_POS (ch) == POSITION_STANDING)
+		return 100 - fatigue;
+	if (GET_POS (ch) == POSITION_SITTING)
+		return 90 - fatigue;
+	if (GET_POS (ch) == POSITION_RESTING)
+		return 65 - fatigue;
+}
+
+//Prints out the updates for hunger, thirst, etc. with proper grammer.
+void hunger_thirst_process (CHAR_DATA * ch)
 {
   char buf[MAX_STRING_LENGTH] = { '\0' };
   char update_buf[MAX_STRING_LENGTH] = { '\0' };
@@ -4901,10 +4940,21 @@ hunger_thirst_process (CHAR_DATA * ch)
   if (get_comestible_range (ch->thirst) !=
       get_comestible_range (ch->thirst - 1))
     {
+      if (*update_buf && get_fatigue_range (ch->fatigue) == get_fatigue_range (ch->fatigue + calculate_fatigue(ch)))
+	sprintf (update_buf + strlen (update_buf), ", and ");
+      else if (*update_buf && get_fatigue_range (ch->fatigue) != get_fatigue_range (ch->fatigue + calculate_fatigue(ch)))
+	sprintf (update_buf + strlen (update_buf), ", ");
+      sprintf (update_buf + strlen (update_buf), "%s",
+	       verbal_thirst[get_comestible_range (ch->thirst - 1)]);
+    }
+
+  if (get_fatigue_range (ch->fatigue) !=
+      get_fatigue_range (ch->fatigue + calculate_fatigue(ch)) && ch->fatigue != -1)
+    {
       if (*update_buf)
 	sprintf (update_buf + strlen (update_buf), ", and ");
       sprintf (update_buf + strlen (update_buf), "%s",
-	       verbal_thirst[get_comestible_range (ch->thirst - 1)]);
+	       verbal_fatigue[get_fatigue_range (ch->fatigue + calculate_fatigue(ch))]);
     }
 
   if (*update_buf)
@@ -4917,11 +4967,25 @@ hunger_thirst_process (CHAR_DATA * ch)
     ch->hunger--;
   if (ch->thirst > 0)
     ch->thirst--;
-
+  if (ch->fatigue < 1500 && ch->fatigue > -1)
+	ch->fatigue += calculate_fatigue(ch);
   if (ch->thirst < -1)
     ch->thirst = 1;
   if (ch->hunger < -1)
     ch->hunger = 1;
+  if (ch->fatigue < -1)
+	ch->fatigue = 0;
+
+//When fatigue reaches the max, roll vs will to see if they fall sleep. - Vader
+  if (ch->fatigue >= 1500)
+    {
+	if(dice(1, 25) > ch->wil)
+	  do_sleep(ch,"", 0);
+    }
+
+//When fatigue is 0, the person no longer needs to sleep and must wake. - Vader
+  if (ch->fatigue == 0 && GET_POS (ch) == POSITION_SLEEPING)
+	do_wake(ch, "", 0);
 }
 
 char *
@@ -5045,11 +5109,13 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   /* Add support for listing, hunger, thirst, and intox. */
-  sprintf (buf, "You are #2%s#0, and #2%s#0.\n",
+  sprintf (buf, "You are #2%s#0, #2%s#0, and #2%s#0.\n",
 	   ch->hunger >=
 	   0 ? verbal_hunger[get_comestible_range (ch->hunger)] : "full",
 	   ch->thirst >=
-	   0 ? verbal_thirst[get_comestible_range (ch->thirst)] : "quenched");
+	   0 ? verbal_thirst[get_comestible_range (ch->thirst)] : "quenched",
+	   ch->fatigue >=
+	   0 ? verbal_fatigue[get_fatigue_range (ch->fatigue)] : "refreshed");
   send_to_char (buf, ch);
 
   if (!IS_SET (ch->flags, FLAG_GUEST))

@@ -352,6 +352,7 @@ void do_origins (CHAR_DATA * ch, char *argument, int cmd);
 char *origins_list(CHAR_DATA * ch, OBJ_DATA * obj);
 void do_materials (CHAR_DATA * ch, char *argument, int cmd);
 void do_mclone (CHAR_DATA * ch, char *argument, int cmd);
+void do_oclone (CHAR_DATA * ch, char *argument, int cmd);
 void do_mcopy (CHAR_DATA * ch, char *argument, int cmd);
 void do_minit (CHAR_DATA * ch, char *argument, int cmd);
 void do_mlist (CHAR_DATA *ch, char *argument, int cmd);  /* olc.cpp */
@@ -779,6 +780,7 @@ char *fatigue_bar (CHAR_DATA * ch);
 char *mana_bar (CHAR_DATA * ch);
 int get_token (char **s, char *token);
 std::string resolved_host (char *ip);
+void mysql_save_sleep_tick( CHAR_DATA* ch );
 void mysql_secure_query (MYSQL * conn, char *query, int length);
 void retrieve_mysql_board_listing (CHAR_DATA * ch, char *board_name);
 void display_mysql_board_message (CHAR_DATA * ch, char *board_name,
