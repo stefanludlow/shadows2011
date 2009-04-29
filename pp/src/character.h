@@ -59,6 +59,7 @@ public:
 	int app_cost;
 	int chargen_flags;
 	int last_global_pc_msg;
+	int sleep_needed;
 	int auto_toll;		/* Amount willing to pay if following */
 	int doc_type;			/* Not saved.  Current doc */
 	int doc_index;		/* Not saved.  type relative index */
@@ -205,7 +206,6 @@ public:
 	// Physical values
 	int hunger;
 	int thirst;
-	int fatigue;
 	int sex;
 	int age;
 	int race;

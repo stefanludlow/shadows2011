@@ -619,7 +619,6 @@ typedef signed char shortint;
 #define DRUNK			0
 #define FULL			1
 #define THIRST			2
-#define FATIGUE			3
 
 /* Bitvector for 'affected_by' */
 

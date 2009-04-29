@@ -20,6 +20,7 @@ void do_stronghold(CHAR_DATA * ch, char *argument, int cmd)
 	if (IS_MORTAL(ch))
 	{
 		send_to_char("Huh?\n",ch);
+		return;
 	}
 	Stronghold* s = new Stronghold();
 	std::ostringstream oss;

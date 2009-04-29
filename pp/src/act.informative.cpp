@@ -624,19 +624,21 @@ char *frame_built[] = {
 
 
 char *verbal_intox[] =
-  { "sober", "tipsy", "slightly drunk",
-    "drunk", "intoxicated", "plastered"};
+  { "sober", "tipsy", "slightly drunk", "drunk", "intoxicated",
+  "plastered"
+};
 
 char *verbal_hunger[] =
-  { "starving", "hungry", "feeling slightly hungry",
-    "feeling peckish", "quite full", "absolutely stuffed"};
+  { "starving", "hungry", "feeling slightly hungry", "feeling peckish",
+  "quite full",
+  "absolutely stuffed"
+};
 
 char *verbal_thirst[] =
   { "dying of thirst", "quite parched", "feeling thirsty",
-  "feeling slightly thirsty", "nicely quenched", "completely sated"};
-
-char *verbal_fatigue[] =
-{ "utterly drained", "exhausted", "feeling weary", "tired", "well rested", "refreshed"};
+  "feeling slightly thirsty",
+  "nicely quenched", "completely sated"
+};
 
 void post_message (DESCRIPTOR_DATA * d);
 
@@ -4877,50 +4879,9 @@ get_comestible_range (int num)
   return 0;
 }
 
-//Fatigue uses a different calculation with larger numbers
-//for flexibility down the road for adjustments - Vader
 
-int get_fatigue_range (int num)
-{
-  if (num == 0)
-    return 5;
-  if (num > 0 && num <= 375)
-    return 4;
-  if (num > 375 && num <= 750)
-    return 3;
-  if (num > 750 && num <= 1125)
-    return 2;
-  if (num > 1125 && num <= 1500)
-    return 1;
-  if (num >= 1500)
-    return 0;
-  return 0;
-}
-
-//Determine the state of the PC, and adjust fatigue accordingly - Vader
-int calculate_fatigue(CHAR_DATA * ch)
-{
-	//Average sleep time is 8 hours, leaving 16 hours awake. 1500(max fatigue)/16 ~= 95
-	//Average of standing and sitting needs to be 95 - Vader
-
-	//Subtract a fatigue modifier using con. (High con can stay awake longer than low con) - Vader
-	int fatigue = ((ch->con - 13) * 5);
-	if (fatigue < 0)
-		fatigue = 0;
-	if (GET_POS (ch) == POSITION_SLEEPING)
-		return - 1000;
-	if (GET_POS (ch) == POSITION_FIGHTING)
-		return 300 - fatigue;
-	if (GET_POS (ch) == POSITION_STANDING)
-		return 100 - fatigue;
-	if (GET_POS (ch) == POSITION_SITTING)
-		return 90 - fatigue;
-	if (GET_POS (ch) == POSITION_RESTING)
-		return 65 - fatigue;
-}
-
-//Prints out the updates for hunger, thirst, etc. with proper grammer.
-void hunger_thirst_process (CHAR_DATA * ch)
+void
+hunger_thirst_process (CHAR_DATA * ch)
 {
   char buf[MAX_STRING_LENGTH] = { '\0' };
   char update_buf[MAX_STRING_LENGTH] = { '\0' };
@@ -4940,21 +4901,10 @@ void hunger_thirst_process (CHAR_DATA * ch)
   if (get_comestible_range (ch->thirst) !=
       get_comestible_range (ch->thirst - 1))
     {
-      if (*update_buf && get_fatigue_range (ch->fatigue) == get_fatigue_range (ch->fatigue + calculate_fatigue(ch)))
-	sprintf (update_buf + strlen (update_buf), ", and ");
-      else if (*update_buf && get_fatigue_range (ch->fatigue) != get_fatigue_range (ch->fatigue + calculate_fatigue(ch)))
-	sprintf (update_buf + strlen (update_buf), ", ");
-      sprintf (update_buf + strlen (update_buf), "%s",
-	       verbal_thirst[get_comestible_range (ch->thirst - 1)]);
-    }
-
-  if (get_fatigue_range (ch->fatigue) !=
-      get_fatigue_range (ch->fatigue + calculate_fatigue(ch)) && ch->fatigue != -1)
-    {
       if (*update_buf)
 	sprintf (update_buf + strlen (update_buf), ", and ");
       sprintf (update_buf + strlen (update_buf), "%s",
-	       verbal_fatigue[get_fatigue_range (ch->fatigue + calculate_fatigue(ch))]);
+	       verbal_thirst[get_comestible_range (ch->thirst - 1)]);
     }
 
   if (*update_buf)
@@ -4967,25 +4917,11 @@ void hunger_thirst_process (CHAR_DATA * ch)
     ch->hunger--;
   if (ch->thirst > 0)
     ch->thirst--;
-  if (ch->fatigue < 1500 && ch->fatigue > -1)
-	ch->fatigue += calculate_fatigue(ch);
+
   if (ch->thirst < -1)
     ch->thirst = 1;
   if (ch->hunger < -1)
     ch->hunger = 1;
-  if (ch->fatigue < -1)
-	ch->fatigue = 0;
-
-//When fatigue reaches the max, roll vs will to see if they fall sleep. - Vader
-  if (ch->fatigue >= 1500)
-    {
-	if(dice(1, 25) > ch->wil)
-	  do_sleep(ch,"", 0);
-    }
-
-//When fatigue is 0, the person no longer needs to sleep and must wake. - Vader
-  if (ch->fatigue == 0 && GET_POS (ch) == POSITION_SLEEPING)
-	do_wake(ch, "", 0);
 }
 
 char *
@@ -5109,13 +5045,11 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   /* Add support for listing, hunger, thirst, and intox. */
-  sprintf (buf, "You are #2%s#0, #2%s#0, and #2%s#0.\n",
+  sprintf (buf, "You are #2%s#0, and #2%s#0.\n",
 	   ch->hunger >=
 	   0 ? verbal_hunger[get_comestible_range (ch->hunger)] : "full",
 	   ch->thirst >=
-	   0 ? verbal_thirst[get_comestible_range (ch->thirst)] : "quenched",
-	   ch->fatigue >=
-	   0 ? verbal_fatigue[get_fatigue_range (ch->fatigue)] : "refreshed");
+	   0 ? verbal_thirst[get_comestible_range (ch->thirst)] : "quenched");
   send_to_char (buf, ch);
 
   if (!IS_SET (ch->flags, FLAG_GUEST))
@@ -7981,7 +7915,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 			whoStream << " and it is an administrator." << std::endl;
 		}
 		else {
-			whoStream << ", and one of these is an administrator." << std::endl;
+			whoStream << ", of which #21#0 is an administrator." << std::endl;
 		}
 	}
 	else if (immortals > 1) {
@@ -8020,16 +7954,13 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (sphere == -1)
 		whoStream << "Outside of the scope of Arda [#6" << ch->in_room / 1000 << "#0] " << std::endl;
+
 	if (sphere == 1)
 	{
 		rd = vtor(3500);
 		roomCount(rd);
 		if (rd->occupants > 0)
 			whoStream << "In the Wardenry Bastion Commons, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
-		rd = vtor(8299);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In the Hawk and Dove Barn, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
 		rd = vtor(3271);
 		roomCount(rd);
 		if (rd->occupants > 0)
@@ -8061,6 +7992,13 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 			roomCount(rd);
 			if (rd->occupants > 0)
 				whoStream << "In the Keep's Kitchen, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		}
+		if (is_clan_member(ch, "hawk_and_dove"))
+		{
+			rd = vtor(8299);
+			roomCount(rd);
+			if (rd->occupants > 0)
+				whoStream << "In the Hawk and Dove Barn, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
 		}
 	}
 
@@ -9220,7 +9158,7 @@ void delayed_count_coin (CHAR_DATA * ch)
 	char buf[MAX_STRING_LENGTH] = { '\0' };
 	char buf2[MAX_STRING_LENGTH] = { '\0' };
 	OBJ_DATA* hand_obj_ary[2] = { ch->right_hand, ch->left_hand };
-	char* hand_str_ary[2] = { "right hand", "left_hand" };
+	char* hand_str_ary[2] = { "right hand", "left hand" };
 	OBJ_DATA *obj = NULL, *tobj = NULL;
 	int location = 0, money[2] = {0,0}, nmoney[4]; //money[] holds the count of various types of money the char has, other in slot 0 northman in slot 1
 	char currency_symbol = '\0';

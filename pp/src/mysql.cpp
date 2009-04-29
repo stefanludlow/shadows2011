@@ -2645,7 +2645,7 @@ load_char_mysql (const char *name)
   ch->pc->boat_virtual = atoi (row[52]);
   ch->speed = atoi (row[53]);
   ch->pc->mount_speed = atoi (row[54]);
-  ch->fatigue = atoi (row[55]);
+  ch->pc->sleep_needed = atoi (row[55]);
   ch->pc->auto_toll = atoi (row[56]);
   ch->coldload_id = atoi (row[57]);
   ch->affected_by = atoi (row[58]);
@@ -3053,7 +3053,7 @@ save_char_mysql (CHAR_DATA * ch)
 	 "nanny_state = %d, role = %d, role_summary = '%s', role_body = '%s', role_date = '%s', role_poster = '%s', role_cost = %d, app_cost = %d, level = %d, sex = %d, deity = %d, "
 	 "race = %d, room = %d, str = %d, intel = %d, wil = %d, con = %d, dex = %d, aur = %d, agi = %d, start_str = %d, start_intel = %d, start_wil = %d, start_con = %d, start_dex = %d, start_aur = %d, "
 	 "start_agi = %d, played = %d, birth = %d, time = %d, offense = %d, hit = %d, maxhit = %d, nat_attack_type = %d, move = %d, maxmove = %d, circle = %d, ppoints = %d, fightmode = %d, color = %d, "
-	 "speaks = %d, flags = %d, plrflags = %d, boatvnum = %d, speed = %d, mountspeed = %d, fatigue = %d, autotoll = %d, coldload = %d, affectedby = %d, "
+	 "speaks = %d, flags = %d, plrflags = %d, boatvnum = %d, speed = %d, mountspeed = %d, sleepneeded = %d, autotoll = %d, coldload = %d, affectedby = %d, "
 	 "affects = '%s', age = %d, intoxication = %d, hunger = %d, thirst = %d, height = %d, frame = %d, damage = %d, lastregen = %d, lastroom = %d, harness = %d, maxharness = %d, "
 	 "lastlogon = %d, lastlogoff = %d, lastdis = %d, lastconnect = %d, lastdied = %d, hooded = %d, immenter = '%s', immleave = '%s', sitelie = '%s', voicestr = '%s', clans = '%s', skills = '%s', "
 	 "wounds = '%s', lodged = '%s', writes = %d, profession = %d, was_in_room = %d, travelstr = '%s', bmi = %d, guardian_mode = %d, hire_storeroom = %d, hire_storeobj = %d, plan = '%s', goal = '%s', "
@@ -3076,7 +3076,7 @@ save_char_mysql (CHAR_DATA * ch)
 	 ch->max_hit, ch->nat_attack_type, ch->move, ch->max_move, ch->circle,
 	 ch->ppoints, ch->fight_mode, ch->color, ch->speaks, (int) ch->flags,
 	 (int) ch->plr_flags, ch->pc->boat_virtual, ch->speed,
-	 ch->pc->mount_speed, (int) ch->fatigue, ch->pc->auto_toll,
+	 ch->pc->mount_speed, (int) ch->pc->sleep_needed, ch->pc->auto_toll,
 	 (int) ch->coldload_id, (int) ch->affected_by, affects, ch->age,
 	 ch->intoxication, ch->hunger, ch->thirst, ch->height, ch->frame,
 	 ch->damage, (int) ch->lastregen, ch->last_room, ch->mana,
@@ -3105,7 +3105,7 @@ save_char_mysql (CHAR_DATA * ch)
 	 "nanny_state, role, role_summary, role_body, role_date, role_poster, role_cost, app_cost, level, sex, deity, "
 	 "race, room, str, intel, wil, con, dex, aur, agi, start_str, start_intel, start_wil, start_con, start_dex, start_aur, "
 	 "start_agi, played, birth, time, offense, hit, maxhit, nat_attack_type, move, maxmove, circle, ppoints, fightmode, color, "
-	 "speaks, flags, plrflags, boatvnum, speed, mountspeed, fatigue, autotoll, coldload, affectedby, "
+	 "speaks, flags, plrflags, boatvnum, speed, mountspeed, sleepneeded, autotoll, coldload, affectedby, "
 	 "affects, age, intoxication, hunger, thirst, height, frame, damage, lastregen, lastroom, harness, maxharness, "
 	 "lastlogon, lastlogoff, lastdis, lastconnect, lastdied, hooded, immenter, immleave, sitelie, voicestr, clans, skills, "
 	 "wounds, lodged, writes, profession, was_in_room, travelstr, bmi, hire_storeroom, hire_storeobj, plan, goal, role_id, "
@@ -3137,7 +3137,7 @@ save_char_mysql (CHAR_DATA * ch)
 	 ch->max_hit, ch->nat_attack_type, ch->move, ch->max_move, ch->circle,
 	 ch->ppoints, ch->fight_mode, ch->color, ch->speaks, (int) ch->flags,
 	 (int) ch->plr_flags, ch->pc->boat_virtual, ch->speed,
-	 ch->pc->mount_speed, (int) ch->fatigue, ch->pc->auto_toll,
+	 ch->pc->mount_speed, (int) ch->pc->sleep_needed, ch->pc->auto_toll,
 	 (int) ch->coldload_id, (int) ch->affected_by, affects, ch->age,
 	 ch->intoxication, ch->hunger, ch->thirst, ch->height, ch->frame,
 	 ch->damage, (int) ch->lastregen, ch->last_room, ch->mana,
@@ -4780,49 +4780,4 @@ void save_skills_mysql( CHAR_DATA * ch, bool isMob )
 				mysql_safe_query("INSERT INTO %s.skill_values SET char_num=%d, skill_num=%d, skill_value=%d, is_mob=%d", player_db.c_str(), c_num, i, ch->skills[i], isMob);
 			mysql_free_result( result );
 		}
-}
-
-/* This function is for analytical purposes only, it creates a bloated
-and unnecessary table, it should not be called for extended periods of
-time, but will be useful for studying any changes to the fatigue ticker
-- Vermonkey */
-
-void mysql_save_sleep_tick( CHAR_DATA* ch )
-{
-	int char_num;
-	char* state;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-
-	if (GET_POS (ch) == POSITION_SLEEPING)
-		state="sleep";
-	else if (GET_POS (ch) == POSITION_FIGHTING)
-		state="fight";
-	else if (GET_POS (ch) == POSITION_STANDING)
-		state="stand";
-	else if (GET_POS (ch) == POSITION_SITTING)
-		state="sit";
-	else if (GET_POS (ch) == POSITION_RESTING)
-		state="rest";
-	else
-		state="ERROR";
-	std::string player_db = engine.get_config ("player_db");
-	mysql_safe_query("SELECT char_num FROM %s.pfiles WHERE name = '%s'", player_db.c_str(), ch->tname );
-	result = mysql_store_result(database);
-
-	if(!result && !mysql_num_rows(result))
-	{
-		send_to_room("Character number could not be retrieved", 686);
-		return;
-	}
-
-	row = mysql_fetch_row(result);
-	mysql_free_result(result);
-	char_num = atoi(row[0]);
-	char query[MAX_STRING_LENGTH];
-	sprintf(query, "INSERT INTO %s.state_ratio (char_num, time, state) VALUES (%i, NOW(), '%s')", player_db.c_str(), char_num, state);
-	mysql_real_query (database, query, strlen (query));
-	result = mysql_store_result(database);
-	if(result)
-		mysql_free_result(result);
 }

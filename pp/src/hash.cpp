@@ -328,7 +328,6 @@ fread_mobile (int vnum, const int *nZone, FILE * fp)
   mob->intoxication = 0;
   mob->hunger = -1;
   mob->thirst = -1;
-  mob->fatigue = -1;
 
   mob->tmp_str = mob->str;
   mob->tmp_dex = mob->dex;

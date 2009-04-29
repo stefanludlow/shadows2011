@@ -165,7 +165,6 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 
   ch->hunger = -1;
   ch->thirst = -1;
-  ch->fatigue = -1;
 
   // If we're recreating, we're either recovering from a reboot or returning a dead
   // guest to the lounge, in which case we can skip a lot of this.

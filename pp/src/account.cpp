@@ -1,3 +1,10 @@
+/*----------------------------------------------------------------------------\
+|  account.c : Informational Module  	            www.shadowsofisildur.com|
+|  Copyright (C) 2009, Shadows of Isildur: Kite	                             |
+|  Derived under license from DIKU GAMMA (0.0).                               |
+\----------------------------------------------------------------------------*/
+
+
 #include <ctype.h>
 #include <stdlib.h>
 

@@ -1539,7 +1539,6 @@ load_a_saved_mobile (int nVirtual, FILE * fp, bool stable)
   key_table[n++].ptr = &mob->intoxication;
   key_table[n++].ptr = &mob->hunger;
   key_table[n++].ptr = &mob->thirst;
-  key_table[n++].ptr = &mob->fatigue;
   key_table[n++].ptr = &mob->sex;
   key_table[n++].ptr = &mob->height;
   key_table[n++].ptr = &mob->frame;
@@ -1807,7 +1806,6 @@ save_mobile (CHAR_DATA * mob, FILE * fp, char *save_reason, int extract)
   fprintf (fp, "Cond0            %d\n", mob->intoxication);
   fprintf (fp, "Cond1            %d\n", mob->hunger);
   fprintf (fp, "Cond2            %d\n", mob->thirst);
-  fprintf (fp, "Cond3            %d\n", mob->fatigue);
   fprintf (fp, "Sex              %d\n", mob->sex);
   fprintf (fp, "Height           %d\n", mob->height);
   fprintf (fp, "Frame            %d\n", mob->frame);

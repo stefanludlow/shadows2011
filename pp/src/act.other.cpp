@@ -3803,6 +3803,9 @@ do_knock (CHAR_DATA * ch, char *argument, int cmd)
   char key_name[MAX_STRING_LENGTH];
   CHAR_DATA *tch;
   ROOM_DATA *room;
+  ROOM_DIRECTION_DATA* linked_room;
+  bool return_door = false;
+  std::ostringstream knock_error;
 
   argument = one_argument (argument, buf);
   argument = one_argument (argument, dir);
@@ -3831,6 +3834,23 @@ do_knock (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+/*  for (int i = 0; i <= LAST_DIR; linked_room = vtor(target_room)->dir_option[i++])
+    {
+      if(linked_room && linked_room->to_room == ch->in_room && linked_room->exit_info & (EX_ISDOOR | EX_ISGATE))
+	 {
+	   return_door = true;
+	   break;
+	 }
+    }
+
+  if (!return_door)
+    {
+	knock_error << "AVOIDED POSSIBLE CRASH: From room " << ch->in_room << " to room " << target_room << std::endl;
+	send_to_gods (knock_error.str().c_str());
+	send_to_char ("#6KNOCK ERROR. Please petition your appropriate sphere in order to get this corrected.#0\n", ch);
+	return;
+    }
+*/
   sprintf (buf, "You hear tapping from the %s.\n\r", dirs[rev_dir[door]]);
   send_to_room (buf, target_room);
 

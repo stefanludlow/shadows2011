@@ -2209,8 +2209,8 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
     }
   else
     {
-      sprintf (ADD, "#2Cond:#0   %d,%d,%d,%d",
-	       k->intoxication, k->hunger, k->thirst, k->fatigue);
+      sprintf (ADD, "#2Cond:#0   %d,%d,%d",
+	       k->intoxication, k->hunger, k->thirst);
     }
 
   sprintf (ADD, "\n");
@@ -2271,9 +2271,6 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 
   if (!k->thirst)
     sprintf (ADD, ", thirsty");
-
-  if (!k->fatigue)
-    sprintf (ADD, ", tired");
 
   if (!IS_NPC (k))
     {
@@ -11293,19 +11290,19 @@ void do_wmotd(CHAR_DATA * ch, char *argument, int cmd)
   std::string msg_line;
 	std::string output;
  
-	std::ifstream fin( "MOTD" );
+	std::ifstream fin("MOTD");
 	
-	if( !fin )
-		{
-			system_log ("The MOTD could not be found", true);
-			send_to_char("The MOTD could not be found", ch);
-			return;
+	if(!fin)
+	{
+		system_log ("The MOTD could not be found", true);
+		send_to_char("The MOTD could not be found", ch);
+		return;
  	}
 
- while( getline(fin, msg_line) )
-		{
-		 output.append(msg_line);
-		}
+ while(getline(fin, msg_line))
+	{
+		output.append(msg_line);
+	}
 	
  	fin.close();
  
@@ -11326,7 +11323,7 @@ void do_wmotd(CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char
 				("Please enter the new MOTD; terminate with an '@'\n\n", ch);
 		send_to_char
-  	("1-------10--------20--------30--------40--------50--------60---65\n",
+  	("1-------10--------20--------30--------40--------50--------60--------70--------80\n",
    ch);
 	make_quiet (ch);
 
@@ -11341,9 +11338,8 @@ post_motd (DESCRIPTOR_DATA * d)
 {
   CHAR_DATA *ch;
   char buf[MAX_STRING_LENGTH];
-  char endl = {'\n'};
   
-  std::ofstream fout ("MOTD");
+  std::ofstream fout("MOTD");
   
   ch = d->character;
   ch->delay_info1 = 0;
@@ -11354,20 +11350,17 @@ post_motd (DESCRIPTOR_DATA * d)
       return;
     }
 
-	
-	if( !fout )
-		{
-			system_log ("MOTD could not be found", true);
-			send_to_char("MOTD could not be found", ch);
-			return;
+	if(!fout)
+	{
+		system_log ("MOTD could not be found", true);
+		send_to_char("MOTD could not be found", ch);
+		return;
  	}
 	
 	sprintf (buf, "%s", d->pending_message->message);
 	
-	fout << buf << endl;
- //fout.write(buf);
-	
- fout.close();
+	fout << buf << std::endl;	
+ 	fout.close();
  
 	d->pending_message = NULL;
  	

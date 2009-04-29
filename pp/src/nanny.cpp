@@ -3220,12 +3220,13 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	if (d->character->desc && d->character->desc != d)
 	{
 		SEND_TO_Q ("\n#6Your character was not gracefully removed from the world. Disconnecting.", d);
-		sprintf (buf, "%s already online, disconnecting old connection.",
-			GET_NAME (d->character));
+		if(GET_NAME (d->character))
+			sprintf (buf, "%s already online, disconnecting old connection.",GET_NAME (d->character));
+		else
+			sprintf(buf, "An unknown entity was online already, disconnecting old connection. ERR:VM001");
 		system_log (buf, false);
 		close_socket (d->character->desc);
 	}
-
 	for (td = descriptor_list; td; td = td->next)
 	{
 
@@ -4301,7 +4302,6 @@ nanny_char_name_confirm (DESCRIPTOR_DATA * d, char *arg)
 	d->character->intoxication = 0;
 	d->character->thirst = 24;
 	d->character->hunger = 24;
-	d->character->fatigue = 24;
 
 	d->character->pc->load_count = 1;
 	save_char (d->character, false);
@@ -6040,7 +6040,7 @@ void read_motd(DESCRIPTOR_DATA * d)
 	{
 		output.append("\n");
 		SEND_TO_Q (output.c_str(), d);
-
+		//SEND_TO_Q (get_text_buffer (NULL, text_list, "lib/MOTD"), d);
 	}
 
 	return;   

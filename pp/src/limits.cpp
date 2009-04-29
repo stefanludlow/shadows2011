@@ -63,12 +63,12 @@ move_gain (CHAR_DATA * ch)
 }
 
 int
-fatigue_in_seconds (CHAR_DATA * ch)
+sleep_needed_in_seconds (CHAR_DATA * ch)
 {
   if (!ch->pc)
     return 0;
 
-  return ch->fatigue / 100000;
+  return ch->pc->sleep_needed / 100000;
 }
 
 void
@@ -80,10 +80,10 @@ sleep_credit (CHAR_DATA * ch)
   if (!ch->pc || !ch->desc)
     return;
 
-  ch->fatigue -= (UPDATE_PULSE / 4) * 100000;
+  ch->pc->sleep_needed -= (UPDATE_PULSE / 4) * 100000;
 
-  if (ch->fatigue < 0)
-    ch->fatigue = 0;
+  if (ch->pc->sleep_needed < 0)
+    ch->pc->sleep_needed = 0;
 }
 
 void
@@ -104,15 +104,15 @@ sleep_need (CHAR_DATA * ch)
   /* If sleep needed is too long, assume that staff has set it
      this way. */
 
-  if (ch->fatigue > 10 * 60 * 100000)
+  if (ch->pc->sleep_needed > 10 * 60 * 100000)
     return;
 
   need = 5 * 60 * 100000 * (UPDATE_PULSE / 4) / (60 * 60 * 24);
 
-  ch->fatigue += need;
+  ch->pc->sleep_needed += need;
 
-  if (ch->fatigue > 10 * 60 * 100000)
-    ch->fatigue = 10 * 60 * 100000;
+  if (ch->pc->sleep_needed > 10 * 60 * 100000)
+    ch->pc->sleep_needed = 10 * 60 * 100000;
 }
 
 void
@@ -316,7 +316,7 @@ point_update (void)
 		}
 
 	      if ((GET_POS (ch) == REST || GET_POS (ch) == SIT) &&
-		  fatigue_in_seconds (ch) > 7 * 60 &&
+		  sleep_needed_in_seconds (ch) > 7 * 60 &&
 		  IS_MORTAL (ch) && !number (0, 8) &&
 		  !get_second_affect (ch, SA_STAND, NULL))
 		{
@@ -324,28 +324,28 @@ point_update (void)
 		  GET_POS (ch) = SLEEP;
 		}
 
-	      if (fatigue_in_seconds (ch) == 300 && IS_MORTAL (ch))
+	      if (sleep_needed_in_seconds (ch) == 300 && IS_MORTAL (ch))
 		{
 		  send_to_char ("You are feeling drowsy.\n", ch);
 		  // Adding this is 1 sec.  If we don't do this, the
 		     drowsy message appears every 5 seconds. //
-		  ch->fatigue += 100000;
+		  ch->pc->sleep_needed += 100000;
 		}
 
-	      else if (fatigue_in_seconds (ch) == 350 && IS_MORTAL (ch))
+	      else if (sleep_needed_in_seconds (ch) == 350 && IS_MORTAL (ch))
 		{
 		  send_to_char ("You are feeling sleepy.\n", ch);
-		  ch->fatigue += 100000;
+		  ch->pc->sleep_needed += 100000;
 		}
 
-	      else if (fatigue_in_seconds (ch) == 400 && IS_MORTAL (ch))
+	      else if (sleep_needed_in_seconds (ch) == 400 && IS_MORTAL (ch))
 		{
 		  send_to_char ("You are about to fall asleep.\n", ch);
-		  ch->fatigue += 100000;
+		  ch->pc->sleep_needed += 100000;
 		}
 
 	      else if (GET_POS (ch) >= REST && GET_POS (ch) != FIGHT &&
-		       fatigue_in_seconds (ch) > 6 * 60 &&
+		       sleep_needed_in_seconds (ch) > 6 * 60 &&
 		       number (0, 25) == 25 &&
 		       IS_MORTAL (ch) && ch->desc && ch->desc->original == ch)
 		{
@@ -781,10 +781,7 @@ else if (!IS_NPC(ch) && ch->pc->level == 0 && IS_SET (ch->flags, FLAG_ISADMIN))
       else 
 	{
 	  if (!IS_SET (ch->room->room_flags, OOC))
-	  {
 	    hunger_thirst_process (ch);
-	    mysql_save_sleep_tick(ch);
-	  }
 	}
 
       trigger (ch, "", TRIG_HOUR);
