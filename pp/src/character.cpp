@@ -898,3 +898,10 @@ unsigned int char_data::getWrapLength() {
 void char_data::setWrapLength(unsigned int length) {
 	wrapLength = length;
 }
+
+int char_data::get_char_num()
+{
+	if( mob )
+		return mob->nVirtual;
+	return pc->char_num;
+}

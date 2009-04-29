@@ -238,6 +238,7 @@ craft_command (CHAR_DATA * ch, char *command_args,
 {
   char *argument;
   char buf[MAX_STRING_LENGTH];
+  char buf2[MAX_STRING_LENGTH];
   CHAR_DATA *target_ch = NULL;
   OBJ_DATA *target_obj = NULL;
   SUBCRAFT_HEAD_DATA *subcraft;
@@ -387,8 +388,12 @@ for (i = 0; i <= 8; i++)
   	
   craft_affect->a.craft->phase = NULL;
 
-  player_log (ch, craft_affect->a.craft->subcraft->command,
-	      craft_affect->a.craft->subcraft->subcraft_name);
+	// Vermonkey's craft style logging revision
+	strcpy( buf, craft_affect->a.craft->subcraft->command );
+	strcat( buf, craft_affect->a.craft->subcraft->subcraft_name );
+	player_log( ch, "[CRAFT]", buf );
+//  player_log( ch, craft_affect->a.craft->subcraft->command,
+//	      craft_affect->a.craft->subcraft->subcraft_name);
 
   activate_phase (ch, craft_affect);
 }

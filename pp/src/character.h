@@ -9,6 +9,8 @@
 
 class pc_data {
 public:
+	int char_num;	//Our new UID
+	
 	ALIAS_DATA *aliases;
 	ALIAS_DATA *execute_alias;
 	
@@ -364,6 +366,8 @@ public:
 	// Lexing methods
 	unsigned int getWrapLength();
 	void setWrapLength(unsigned int length);
+	
+	int get_char_num();
 	
 };
 #endif

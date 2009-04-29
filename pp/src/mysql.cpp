@@ -2898,6 +2898,9 @@ load_char_mysql (const char *name)
 	if (row[98] && strlen (row[98]) > 1 && str_cmp (row[98], "(null)"))
 		ch->dmote_str = str_dup (row[98]);
 	
+	// Load our UID
+	ch->pc->char_num = atoi( row[101] );
+
 	// Determines the number of chars to wrap the screen to
 	ch->setWrapLength( atoi( row[102] ) );
 	// END Vermonkey
