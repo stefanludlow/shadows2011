@@ -67,12 +67,12 @@ extern rpie::server engine;
 #define RP_ZONE_ECHO	34	/* echo to a zone (indoor and/or outdoor) */
 #define RP_ATWRITE	35	/* leave a board message */
 #define RP_SYSTEM	36	/* submit a system message */
-#define RP_CLAN_ECHO	37	/* send a message to clan members */
+#define RP_CLAN	37	/* send a message to clan members */
 #define RP_TRANS_GROUP	38	/* send a message to clan members */
 #define RP_SET		39	
 #define RP_CRIMINALIZE  40      /* criminalize a person or room */
 #define RP_STRIP        41      /* takes a person's equipment and puts it all neatly in a bag */
-#define RP_CLAN         42      /* adds people to a clan at a certain rank */
+#define RP_CLAN_ECHO         42      /* adds people to a clan at a certain rank */
 #define RP_TAKEMONEY 43 /* Take money from a player's inventory TBA: Take money from room too */
 #define RP_DELAY 44 /* Delayed command just like scommand */
 #define RP_TEACH 45 /* Teach character skill */
