@@ -2589,6 +2589,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 							sqlch->tname, 0 /* no flags */, ch->tname,
 							ch->pc->account_name, date, "Logged petition", buf,
 							sqlch->tname);
+						unload_pc(sqlch);
 					}
 				} /* iterate rows of admins */
 
@@ -2650,6 +2651,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			}
 		}
 		send_to_char("#0",ch);
+		unload_pc(admin);
 		return;
 	}
 

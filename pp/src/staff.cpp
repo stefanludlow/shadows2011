@@ -6944,7 +6944,7 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
        
         }
     }
-  if (!str_cmp (subcmd, "scan"))
+  else if (!str_cmp (subcmd, "scan"))
     {
 	  if (!IS_SET (ch->plr_flags, QUIET_SCAN))
 		{  
@@ -6960,7 +6960,7 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
     
-  if (!str_cmp (subcmd, "hints"))
+  else if (!str_cmp (subcmd, "hints"))
     {
       if (!IS_SET (ch->plr_flags, NEWBIE_HINTS))
 	{
@@ -7423,7 +7423,7 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   else if (ch->pc && ch->pc->level
-	   && !strn_cmp (subcmd, "immortal", strlen (subcmd)))
+	   && !str_cmp (subcmd, "immortal"))
     {
       ch->pc->mortal_mode = 0;
       send_to_char ("Returning to immortal mode.\n", ch);
@@ -7541,9 +7541,6 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
 
   else
     {
-
-#define s(a) send_to_char (a "\n", ch);
-
       s ("\n   #6Movement:#0");
       s ("   Walk speeds  - trudge, pace, walk, jog, run, sprint");
       s ("   Mount speeds - walk, canter, trot, gallop, run");
@@ -7585,8 +7582,6 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
 	  s ("   Wiznet    - Toggles your presence on the wiznet");
 	}
     }
-
-#undef s
 }
 
 void

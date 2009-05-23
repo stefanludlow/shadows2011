@@ -2237,14 +2237,6 @@ unload_pc (CHAR_DATA * ch)
 
   if (loaded_list == ch)
   {
-	/* this is the first possible loaded_list bug 
-	    new code below to check its ranges - Grommit*/
-	  unsigned int chnext_hex = (unsigned int) chnext_hex;
-	  if ( chnext_hex > 0x400000 && chnext_hex < 0xc0000000 )
-	  {
-		  fprintf(stderr,"Error: loaded_list set to something bogus: 0x%08x. This was set in ch->next for the ch named %s\n", (unsigned int) loaded_list, ch->tname);
-	  }
-   /* end new code */
     loaded_list = ch->next;
   }
 
