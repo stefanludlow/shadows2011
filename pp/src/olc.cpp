@@ -12931,66 +12931,287 @@ do_job (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 {
-	int vnum;
+	int oldVNum, newVNum, i;
 	CHAR_DATA *newmob;
-	CHAR_DATA *source_mob;
+	CHAR_DATA *source;
+	std::stringstream result;
 	MOB_DATA *m;
-	char buf[MAX_STRING_LENGTH];
-
+	MOB_DATA *sm;
+	char buf[8];
+	char buf2[8];
+	
 	if (!ch->pc)
 	{
-		send_to_char ("This is a PC only command.\n", ch);
+		send_to_char ("This is a PC-only command.\n", ch);
 		return;
 	}
-
-	if (!(source_mob = vtom (ch->pc->edit_mob)))
-	{
-		send_to_char ("You must use 'mob' to target the source prototype.\n",
-			ch);
-		return;
-	}
-
+	
 	argument = one_argument (argument, buf);
-
-	if (!*buf || !atoi (buf))
+	argument = one_argument (argument, buf2);
+	
+	if (!*buf || !*buf2 || !atoi (buf) || !atoi (buf2))
 	{
-		send_to_char ("mclone <vnum>   - copy a mob prototype.\n", ch);
+		send_to_char ("mclone <original vnum> <new vnum>   - copy a mobile prototype.\n", ch);
 		return;
 	}
-
-	vnum = atoi (buf);
-
-	if (vtom (vnum))
+	
+	oldVNum = atoi (buf);
+	newVNum = atoi (buf2);
+	
+	if (!vtom (oldVNum))
 	{
-		send_to_char ("That prototype already exists.\n", ch);
+		send_to_char ("No such prototype exists.", ch);
 		return;
 	}
-
-	newmob = new_char (0);	/* MOB */
-
+	
+	if (vtom (newVNum))
+	{
+		send_to_char ("A mob prototype already exists with your target vnum.\n", ch);
+		return;
+	}
+	
+	if (newVNum < 1 || newVNum > 99999)
+	{
+		send_to_char ("VNums must be between 1 and 99999.\n", ch);
+		return;
+	}
+	
+	newmob = new_char (0); /* Creates mob. */
+	source = vtom (oldVNum);
 	m = newmob->mob;
+	sm = source->mob;
+	
+	m->nVirtual = newVNum;
+	m->zone = newVNum / ZONE_SIZE;
+	m->lnext = NULL;
+	m->hnext = NULL;
+	
+	for (i = 0; i <= 100; i++)
+	{
+		newmob->enforcement[i] = source->enforcement[i];
+	}
+	newmob->act = source->act;
+	
+	newmob->name = str_dup (source->name);
+	newmob->tname = str_dup (source->tname);
+	newmob->short_descr = str_dup (source->short_descr);
+	newmob->long_descr = str_dup (source->long_descr);
+	newmob->description = str_dup (source->description);
+	newmob->clans = str_dup (source->clans);
+	newmob->travel_str = str_dup (source->travel_str);
+	
+	newmob->str = source->str;
+	newmob->intel = source->intel;
+	newmob->wil = source->wil;
+	newmob->dex = source->dex;
+	newmob->con = source->con;
+	newmob->aur = source->aur;
+	newmob->agi = source->agi;
+	newmob->tmp_str = source->tmp_str;
+	newmob->tmp_intel = source->tmp_intel;
+	newmob->tmp_wil = source->tmp_wil;
+	newmob->tmp_dex = source->tmp_dex;
+	newmob->tmp_con = source->tmp_con;
+	newmob->tmp_aur = source->tmp_aur;
+	newmob->tmp_agi = source->tmp_agi;
+	
+	newmob->balance = source->balance;
+	newmob->bmi = source->bmi;
+	newmob->body_proto = source->body_proto;
+	newmob->body_type = source->body_type;
+	newmob->height = source->height;
+	newmob->frame = source->frame;
+	newmob->size = source->size;
+	
+	newmob->sex = source->sex;
+	newmob->age = source->age;
+	newmob->race = source->race;
+	newmob->hit = source->hit;
+	newmob->max_hit = source->max_hit;
+	newmob->move = source->move;
+	newmob->max_move = source->max_move;
+	newmob->armor = source->armor;
+	newmob->carry_weight = source->carry_weight;
+	newmob->carry_items = source->carry_items;
+	newmob->lastregen = source->lastregen;
+	
+	newmob->fight_percentage = source->fight_percentage;
+	newmob->primary_delay = source->primary_delay;
+	newmob->secondary_delay = source->secondary_delay;
+	newmob->fight_mode = source->fight_mode;
+	newmob->nat_attack_type = source->nat_attack_type;
+	newmob->natural_delay = source->natural_delay;
+	newmob->speed = source->speed;
+	newmob->defensive = source->defensive;
+	
+	if (source->spells)
+	{
+		for (i = 0; i <= MAX_LEARNED_SPELLS; i++)
+		{
+			newmob->spells[i][0] = source->spells[i][0];
+			newmob->spells[i][1] = source->spells[i][1];
+			newmob->spells[i][2] = source->spells[i][2];
+			newmob->spells[i][3] = source->spells[i][3];
+		}
+	}
+	
+	newmob->mana = source->mana;
+	newmob->max_mana = source->max_mana;
+	newmob->harness = source->harness;
+	newmob->max_harness = source->max_harness;
+	newmob->curse = source->curse;
+	
+	newmob->hire_storeroom = source->hire_storeroom;
+	newmob->hire_storeobj = source->hire_storeobj;
+	
+	newmob->speaks = source->speaks;
+	newmob->psionic_talents = source->psionic_talents;
+	for (i = 0; i <= MAX_SKILLS; i++)
+	{
+		newmob->skills[i] = source->skills[i];
+	}
+	newmob->offense = source->offense;
+	
+	newmob->morph_type = source->morph_type;
+	newmob->morph_time = source->morph_time;
+	newmob->morphto = source->morphto;
 
-	printf ("Copying mob prototype for %d chars\n", sizeof (CHAR_DATA));
-	fflush (stdout);
-	memcpy (newmob, source_mob, sizeof (CHAR_DATA));
-	printf ("Copying mob thingy for %d chars\n", sizeof (MOB_DATA));
-	fflush (stdout);
-	memcpy (m, source_mob->mob, sizeof (MOB_DATA));
-	printf ("All done.\n");
-	fflush (stdout);
-
-	newmob->mob = m;
-
-	newmob->mob->nVirtual = vnum;
-	newmob->mob->zone = vnum / ZONE_SIZE;
-	newmob->mob->lnext = NULL;
-	newmob->mob->hnext = NULL;
-
+	newmob->coldload_id = source->coldload_id;
+	newmob->flags = source->flags;
+	newmob->deity = source->deity;
+	newmob->color = source->color;
+	newmob->writes = source->writes;
+	
+	m->owner = str_dup (sm->owner);
+	
+	m->skinned_vnum = sm->skinned_vnum;
+	m->carcass_vnum = sm->carcass_vnum;
+	
+	m->damnodice = sm->damnodice;
+	m->damsizedice = sm->damsizedice;
+	m->damroll = sm->damroll;
+	m->min_height = sm->min_height;
+	m->max_height = sm->max_height;
+	m->size = sm->size;
+	
+	m->merch_seven = sm->merch_seven;
+	m->helm_room = sm->helm_room;
+	m->access_flags = sm->access_flags;
+	m->noaccess_flags = sm->noaccess_flags;
+	m->reset_zone = sm->reset_zone;
+	m->reset_cmd = sm->reset_cmd;
+	m->currency_type = sm->currency_type;
+	m->jail = sm->jail;
+	
+	if (sm->resets)
+	{
+			m->resets->type = sm->resets->type;
+			m->resets->command = str_dup (sm->resets->command);
+			m->resets->planned = sm->resets->planned;
+	}
+		
+	if (source->moves)
+	{
+		newmob->moves->dir = source->moves->dir;
+		newmob->moves->flags = source->moves->flags;
+		newmob->moves->desired_time = source->moves->desired_time;
+		newmob->moves->next = NULL;
+		newmob->moves->travel_str = str_dup (source->moves->travel_str);
+	}
+	
+	if (source->shop)
+	{
+		newmob->shop = new SHOP_DATA;
+		newmob->shop->markup = source->shop->markup;
+		newmob->shop->discount = source->shop->discount;
+		if (source->shop->shop_vnum)
+			newmob->shop->shop_vnum = source->shop->shop_vnum;
+		if (source->shop->store_vnum)
+			newmob->shop->store_vnum = source->shop->store_vnum;
+			
+		if (source->shop->no_such_item1)
+			newmob->shop->no_such_item1 = str_dup(source->shop->no_such_item1);
+		if (source->shop->no_such_item2)
+			newmob->shop->no_such_item2 = str_dup(source->shop->no_such_item2);
+		if (source->shop->missing_cash1)
+			newmob->shop->missing_cash1 = str_dup(source->shop->missing_cash1);
+		if (source->shop->missing_cash2)
+			newmob->shop->missing_cash2 = str_dup(source->shop->missing_cash2);
+		if (source->shop->do_not_buy)
+			newmob->shop->do_not_buy = str_dup(source->shop->do_not_buy);
+		if (source->shop->message_buy)
+			newmob->shop->message_buy = str_dup(source->shop->message_buy);
+		if (source->shop->message_sell)
+			newmob->shop->message_sell = str_dup(source->shop->message_sell);
+		
+		
+		if (source->shop->delivery)
+		{
+			for (i = 0; i <= MAX_DELIVERIES; i++)
+			{	
+				newmob->shop->delivery[i] = source->shop->delivery[i];
+			}
+		}
+		
+		if (source->shop->trades_in)
+		{
+			for (i = 0; i <= MAX_TRADES_IN; i++)
+			{
+				newmob->shop->trades_in[i] = source->shop->trades_in[i];
+			}
+		}
+		
+		newmob->shop->econ_flags1 = source->shop->econ_flags1;
+		newmob->shop->econ_flags2 = source->shop->econ_flags2;
+		newmob->shop->econ_flags3 = source->shop->econ_flags3;
+		newmob->shop->econ_flags4 = source->shop->econ_flags4;
+		newmob->shop->econ_flags5 = source->shop->econ_flags5;
+		newmob->shop->econ_flags6 = source->shop->econ_flags6;
+		newmob->shop->econ_flags7 = source->shop->econ_flags7;
+		newmob->shop->econ_markup1 = source->shop->econ_markup1;
+		newmob->shop->econ_markup2 = source->shop->econ_markup2;
+		newmob->shop->econ_markup3 = source->shop->econ_markup3;
+		newmob->shop->econ_markup4 = source->shop->econ_markup4;
+		newmob->shop->econ_markup5 = source->shop->econ_markup5;
+		newmob->shop->econ_markup6 = source->shop->econ_markup6;
+		newmob->shop->econ_markup7 = source->shop->econ_markup7;
+		newmob->shop->econ_discount1 = source->shop->econ_discount1;
+		newmob->shop->econ_discount2 = source->shop->econ_discount2;
+		newmob->shop->econ_discount3 = source->shop->econ_discount3;
+		newmob->shop->econ_discount4 = source->shop->econ_discount4;
+		newmob->shop->econ_discount5 = source->shop->econ_discount5;
+		newmob->shop->econ_discount6 = source->shop->econ_discount6;
+		newmob->shop->econ_discount7 = source->shop->econ_discount7;
+		newmob->shop->buy_flags = source->shop->buy_flags;
+		newmob->shop->nobuy_flags = source->shop->nobuy_flags;
+		if (source->shop->materials)
+		{
+			newmob->shop->materials = source->shop->materials;
+		}
+		
+		if (newmob->shop->negotiations)
+		{
+			newmob->shop->negotiations->obj_vnum = source->shop->negotiations->obj_vnum;
+			newmob->shop->negotiations->time_when_forgotten = source->shop->negotiations->time_when_forgotten;
+			newmob->shop->negotiations->price_delta = source->shop->negotiations->price_delta;
+			newmob->shop->negotiations->transactions = source->shop->negotiations->transactions;
+			newmob->shop->negotiations->true_if_buying = source->shop->negotiations->true_if_buying;
+			newmob->shop->negotiations->next = NULL;
+		}
+		
+		newmob->shop->opening_hour = source->shop->opening_hour;
+		newmob->shop->closing_hour = source->shop->closing_hour;
+		newmob->shop->exit = source->shop->exit;
+	}
+	
+	newmob->hunger = -1;
+	newmob->thirst = -1;
+	
 	add_mob_to_hash (newmob);
-
-	ch->pc->edit_mob = vnum;
-
-	send_to_char ("Mclone complete. #1IT IS CRUCIAL THAT YOU REBOOT NOW BEFORE DOING ANYTHING WITH EITHER THE SOURCE OR THE DESTINATION MOB#0.\n", ch);
+	
+	result << "Copied mobile #C" << sm->nVirtual << "#0 ('#2" << source->short_descr << "#0') to #C" << m->nVirtual << "#0." << std::endl;
+	send_to_char (result.str().c_str(), ch);
+	
 }
 
 void
@@ -13096,17 +13317,20 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	newObj->book_title = str_dup (source->book_title);
 	newObj->indoor_desc = str_dup (source->indoor_desc);
 	
-	if (source->ex_description) {
+	if (source->ex_description) 
+	{
 		newObj->ex_description->keyword = str_dup (source->ex_description->keyword);
 		newObj->ex_description->description = str_dup (source->ex_description->description);
 	}
 	
-	if (source->wdesc) {
+	if (source->wdesc) 
+	{
 		newObj->wdesc->language = source->wdesc->language;
 		newObj->wdesc->description = str_dup (source->wdesc->description);
 	}
 	
-	if (source->wounds) {
+	if (source->wounds) 
+	{
 		newObj->wounds->damage = source->wounds->damage;
 		newObj->wounds->bleeding = source->wounds->bleeding;
 		newObj->wounds->poison = source->wounds->poison;
@@ -13122,7 +13346,8 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 		newObj->wounds->severity = str_dup (source->wounds->severity);
 	}
 	
-	if (source->writing) {
+	if (source->writing) 
+	{
 		newObj->writing->language = source->writing->language;
 		newObj->writing->script = source->writing->script;
 		newObj->writing->skill = source->writing->skill;
@@ -13133,12 +13358,14 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 		newObj->writing->ink = str_dup (source->writing->ink);
 	}
 	
-	if (source->lodged) {
+	if (source->lodged) 
+	{
 		newObj->lodged->vnum = source->lodged->vnum;
 		newObj->lodged->location = str_dup (source->lodged->location);
 	} 
 	
-	if (source->clan_data) {
+	if (source->clan_data) 
+	{
 		newObj->clan_data->name = str_dup (source->clan_data->name);
 		newObj->clan_data->rank = str_dup (source->clan_data->rank);
 	} 
