@@ -1892,18 +1892,25 @@ load_writing (OBJ_DATA * obj)
   int id, i;
 
   if (obj->writing_loaded)
+   {
     return;
+	}
 
-  if (GET_ITEM_TYPE (obj) != ITEM_BOOK
-      && GET_ITEM_TYPE (obj) != ITEM_PARCHMENT)
+  if (GET_ITEM_TYPE (obj) != ITEM_BOOK && GET_ITEM_TYPE (obj) != ITEM_PARCHMENT)
+   {
     return;
+	}
 
   obj->writing_loaded = true;
 
   if (GET_ITEM_TYPE (obj) == ITEM_BOOK)
+   {
     id = (obj)->o.od.value[1];
+	}
   else
+   {
     id = (obj)->o.od.value[0];
+	}
 
   mysql_safe_query
     ("SELECT * FROM player_writing WHERE db_key = %d ORDER BY page ASC",
@@ -1913,7 +1920,9 @@ load_writing (OBJ_DATA * obj)
   if (!result || !mysql_num_rows (result))
     {
       if (result)
-	mysql_free_result (result);
+		{
+			mysql_free_result (result);
+	   }
       return;
     }
 
@@ -1921,26 +1930,33 @@ load_writing (OBJ_DATA * obj)
     {
       row = mysql_fetch_row (result);
       if (!row)
-	return;
+		{
+			return;
+		}
       if (!obj->writing)
-	CREATE (obj->writing, WRITING_DATA, 1);
-      writing = obj->writing;
-      writing->author = add_hash (row[1]);
-      writing->date = add_hash (row[3]);
-      writing->ink = add_hash (row[4]);
-      writing->language = atoi (row[5]);
-      writing->script = atoi (row[6]);
-      writing->skill = atoi (row[7]);
-      writing->message = add_hash (row[8]);
+		{
+			CREATE (obj->writing, WRITING_DATA, 1);
+				writing = obj->writing;
+				writing->author = add_hash (row[1]);
+				writing->date = add_hash (row[3]);
+				writing->ink = add_hash (row[4]);
+				writing->language = atoi (row[5]);
+				writing->script = atoi (row[6]);
+				writing->skill = atoi (row[7]);
+				writing->message = add_hash (row[8]);
+		}
       if (result)
-	mysql_free_result (result);
+		{
+			mysql_free_result (result);
+		}
       return;
     }
   else if (GET_ITEM_TYPE (obj) == ITEM_BOOK)
     {
 	      if (!obj->writing)
-               CREATE (obj->writing, WRITING_DATA, 1);
-
+			 {
+            CREATE (obj->writing, WRITING_DATA, 1);
+			 }
 		  /* iterate among all known pages, listed in ascending order */
           writing = obj->writing;
           row = mysql_fetch_row(result);
@@ -1992,7 +2008,9 @@ load_writing (OBJ_DATA * obj)
   } // if book
 
   if (result)
+   {
     mysql_free_result (result);
+	}
   result = NULL;
 }
 
@@ -2006,20 +2024,29 @@ save_writing (OBJ_DATA * obj)
   int i = 1;
 
   if (!obj->writing)
+   {
     return;
+	}
 
-  if (GET_ITEM_TYPE (obj) != ITEM_PARCHMENT
-      && GET_ITEM_TYPE (obj) != ITEM_BOOK)
+  if (GET_ITEM_TYPE (obj) != ITEM_PARCHMENT && GET_ITEM_TYPE (obj) != ITEM_BOOK)
+	{
     return;
+	}
 
   if (GET_ITEM_TYPE (obj) == ITEM_PARCHMENT)
     {
       writing = obj->writing;
       if (!writing || !writing->date || !str_cmp (writing->date, "blank")
-	  || !writing->language || !writing->script)
-	return;
+			|| !writing->language || !writing->script)
+	   {
+			return;
+		}
+			
       if (!obj->o.od.value[0])
-	obj->o.od.value[0] = unused_writing_id ();
+		{
+			obj->o.od.value[0] = unused_writing_id ();
+		}
+		
       mysql_safe_query ("DELETE FROM player_writing WHERE db_key = %d",
 			obj->o.od.value[0]);
       mysql_safe_query
@@ -2032,22 +2059,28 @@ save_writing (OBJ_DATA * obj)
   if (GET_ITEM_TYPE (obj) == ITEM_BOOK)
     {
       if (!obj->o.od.value[1])
-	obj->o.od.value[1] = unused_writing_id ();
-      mysql_safe_query ("DELETE FROM player_writing WHERE db_key = %d",
-			obj->o.od.value[1]);
-      for (writing = obj->writing; writing != NULL && i <= obj->o.od.value[0];
+		{
+			obj->o.od.value[1] = unused_writing_id ();
+		}
+		
+      mysql_safe_query ("DELETE FROM player_writing WHERE db_key = %d", obj->o.od.value[1]);
+      
+		for (writing = obj->writing; writing != NULL && i <= obj->o.od.value[0];
 	   writing = writing->next_page, i++)
 	{
-	  if (!writing || !writing->date || !str_cmp (writing->date, "blank")
-	      || !writing->language || !writing->script)
+	  if (!writing )
+		{
 	    continue;
+		}
 	  mysql_safe_query
 	    ("INSERT INTO player_writing VALUES (%d, '%s', %d, '%s', '%s', %d, "
 	     "%d, %d, '%s', %d)", obj->o.od.value[1], writing->author, i,
 	     writing->date, writing->ink, writing->language, writing->script,
 	     writing->skill, writing->message, (int) time (0));
 	  if (!writing->next_page)
+		{
 	    break;
+		}
 	}
     }
 

@@ -837,17 +837,11 @@ load_object_full (int vnum, bool newWritingID)
 							CREATE (writing->next_page, WRITING_DATA, 1);
 							writing = writing->next_page;
 						}
+					new_obj->o.od.value[1] = unused_writing_id ();
 				}
+				save_writing(new_obj);
 			}
 		} // if book
-
-		if (GET_ITEM_TYPE (new_obj) == ITEM_BOOK)
-		{
-			//std::ostringstream oss;
-			//oss << "#6Generating a new writing ID for book object vnum: " << new_obj->nVirtual << "#0\n";
-			//send_to_gods(oss.str().c_str());
-			new_obj->o.od.value[1] = unused_writing_id ();
-		}
 
 		if (GET_ITEM_TYPE (new_obj) == ITEM_PARCHMENT)
 		{
@@ -859,9 +853,13 @@ load_object_full (int vnum, bool newWritingID)
 	} // end if new writing id section
 
   if (IS_SET (new_obj->obj_flags.extra_flags, ITEM_VARIABLE))
+	{
     insert_string_variables (new_obj, proto, 0);
+	}
   else
+	{
     new_obj->var_color = 0;
+	}
 
   if (GET_ITEM_TYPE (new_obj) == ITEM_WEAPON)
     new_obj->obj_flags.extra_flags |= ITEM_NEWSKILLS;

@@ -2754,7 +2754,9 @@ do_open (CHAR_DATA * ch, char *argument, int cmd)
   argument_interpreter (argument, type, dir);
 
   if (!*type)
+	{
     send_to_char ("Open what?\n", ch);
+	}
 
   if (generic_find (type, FIND_OBJ_INV | FIND_OBJ_ROOM, ch, &victim, &obj))
     {
