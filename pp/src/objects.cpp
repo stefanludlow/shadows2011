@@ -5029,6 +5029,12 @@ do_draw (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
   else if (obj_destination == WEAR_PRIM || obj_destination == WEAR_SEC) {
+	// Hibou -- why did this break? Short-circuiting early, to avoid bugs.
+		if (ch->right_hand && ch->left_hand)
+		{
+			send_to_char ("You'll need a free hand to draw that weapon.\n", ch);
+			return;
+		}
      // Because wielded weapons only use one hand slot, check for two handed weapons before drawing a one handed weapon - Case
      if (ch->right_hand) {
         if (IS_SET (ch->right_hand->obj_flags.wear_flags, ITEM_WIELD) && (wieldHandCount(ch->race,ch->right_hand->o.od.value[3]) == 2)) {
@@ -5036,7 +5042,7 @@ do_draw (CHAR_DATA * ch, char *argument, int cmd)
            return;
         }
      }
-     else if (ch->left_hand) {
+     if (ch->left_hand) {
         if (IS_SET (ch->left_hand->obj_flags.wear_flags, ITEM_WIELD) && (wieldHandCount(ch->race,ch->left_hand->o.od.value[3]) == 2)) {
            send_to_char ("You'll need a free hand to draw that weapon.\n", ch);
            return;
