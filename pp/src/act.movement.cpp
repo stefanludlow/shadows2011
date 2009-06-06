@@ -4160,6 +4160,12 @@ do_stand (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("You can't move.\n", ch);
       return;
     }
+	
+	if(ch->delay_type == DEL_HIDE)
+	{
+		send_to_char ("You cannot move while looking for a place to hide.\n", ch);
+		return;
+	}
   
   if (*argument != '(')
     argument = one_argument (argument, buf);

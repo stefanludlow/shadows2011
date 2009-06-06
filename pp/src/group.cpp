@@ -526,6 +526,13 @@ followers_follow (CHAR_DATA * ch, int dir, int leave_time, int arrive_time)
 	       false, tch, 0, ch, TO_CHAR);
 	  return;
 	}
+	
+	if(tch->delay_type == DEL_HIDE)
+  {
+	act ("You can't follow $N while looking for a place to hide.",
+	       false, tch, 0, ch, TO_CHAR);
+	return;
+  }	
 
       else if (GET_POS (tch) < FIGHT)
 	return;

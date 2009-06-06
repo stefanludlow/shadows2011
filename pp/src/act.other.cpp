@@ -707,6 +707,8 @@ do_hide (CHAR_DATA * ch, char *argument, int cmd)
 {
   OBJ_DATA *obj;
   char buf[MAX_STRING_LENGTH];
+  AFFECTED_TYPE *af;
+  CHAR_DATA *tch;
 
   if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch))
     {
@@ -725,6 +727,12 @@ do_hide (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("This room offers no hiding spots.\n", ch);
       return;
     }
+	
+  if (get_affect(ch,MAGIC_HIDDEN))
+  {
+	 send_to_char ("You are already hidden.\n", ch);
+	 return;
+  }
 
   if (ch->aiming_at)
     {
@@ -734,6 +742,54 @@ do_hide (CHAR_DATA * ch, char *argument, int cmd)
       ch->aim = 0;
       return;
     }
+	
+	//remove any guarding the player is doing if they hide
+	if ((af = get_affect (ch, MAGIC_GUARD))
+		  && (tch = (CHAR_DATA *) af->a.spell.t) != NULL)
+	  {
+		  if (af->a.spell.modifier == 0)
+		  {
+			  act ("You cease to guard $N.", true, ch, 0, tch,
+				  TO_CHAR | _ACT_FORMAT);
+			  act ("$n ceases to guard you.", false, ch, 0, tch,
+				  TO_VICT | _ACT_FORMAT);
+			  act ("$n ceases to guard $N.", false, ch, 0, tch,
+				  TO_NOTVICT | _ACT_FORMAT);
+		  }
+		  else
+		  {
+			  act ("You cease to guard $p.", true, ch, (OBJ_DATA *) af->a.spell.t, 0, TO_CHAR | _ACT_FORMAT);
+			  act ("$n ceases to guard $p.", true, ch, (OBJ_DATA *) af->a.spell.t, 0, TO_ROOM | _ACT_FORMAT);
+		  }
+		  remove_affect_type (ch, MAGIC_GUARD);
+	  }
+	  
+	  //also remove anyone from guarding the player that is hiding
+	  for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+	  {
+			af = get_affect (tch, MAGIC_GUARD);
+			if (!af || af->a.spell.modifier == 1)
+				continue;
+
+		if ((CHAR_DATA *) af->a.spell.t == ch)
+      	{
+			if (af->a.spell.modifier == 0)
+		  {
+			  act ("You cease to guard $N.", true, tch, 0, ch,
+				  TO_CHAR | _ACT_FORMAT);
+			  act ("$n ceases to guard you.", false, tch, 0, ch,
+				  TO_VICT | _ACT_FORMAT);
+			  act ("$n ceases to guard $N.", false, tch, 0, ch,
+				  TO_NOTVICT | _ACT_FORMAT);
+		  }
+		  else
+		  {
+			  act ("You cease to guard $p.", true, tch, (OBJ_DATA *) af->a.spell.t, 0, TO_CHAR | _ACT_FORMAT);
+			  act ("$n ceases to guard $p.", true, tch, (OBJ_DATA *) af->a.spell.t, 0, TO_ROOM | _ACT_FORMAT);
+		  }
+		  remove_affect_type (tch, MAGIC_GUARD);
+      	}
+	  }
     
   argument = one_argument (argument, buf);
 
@@ -771,6 +827,7 @@ do_hide (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   send_to_char ("You start trying to conceal yourself.\n", ch);
+  act ("$n starts looking for a place to hide.", false, ch, 0, 0, TO_ROOM);
 
   ch->delay_type = DEL_HIDE;
   ch->delay = 5;
@@ -784,8 +841,6 @@ delayed_hide (CHAR_DATA * ch)
   OBJ_DATA *obj = NULL;
 
   ch->delay_type = 0;
-
-  send_to_char ("You settle down in what looks like a good spot.\n", ch);
 
   switch (ch->room->sector_type)
     {
@@ -885,12 +940,17 @@ delayed_hide (CHAR_DATA * ch)
 
   if (skill_use (ch, SKILL_HIDE, mod))
     {
+		send_to_char ("You settle down in what looks like a good spot.\n", ch);
 		if (!get_affect(ch,MAGIC_HIDDEN))
 		{
 			magic_add_affect (ch, MAGIC_HIDDEN, -1, 0, 0, 0, 0);
 		}
 		sprintf (buf, "[%s hides]", ch->tname);
 		act (buf, true, ch, 0, 0, TO_NOTVICT | TO_IMMS);
+  }
+  else
+  {
+		send_to_char ("You struggle to find a suitable place to hide.\n", ch);
   }
 
   room_light (ch->room);

@@ -5239,6 +5239,11 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 
   sprintf (buf, "You #2%s#0 when you travel.\n", speeds[ch->speed]);
   send_to_char (buf, ch);
+  
+  if (get_affect(ch,MAGIC_HIDDEN))
+  {
+		send_to_char ("You are currently #6hidden#0.\n", ch);
+  }
 
   if (IS_SET (ch->plr_flags, GROUP_CLOSED))
     send_to_char ("Your group is currently #2closed#0 to new members.\n", ch);

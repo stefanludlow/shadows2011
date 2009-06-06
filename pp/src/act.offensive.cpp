@@ -1435,9 +1435,14 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 
   if (get_affect (ch, MAGIC_HIDDEN))
     {
-      remove_affect_type (ch, MAGIC_HIDDEN);
-      send_to_char ("You emerge from concealment and prepare to fire.\n\n",
+	
+		//check against hide skill to see if the archer remains hidden
+		if (!skill_use (ch, SKILL_HIDE, 0))
+		{
+			remove_affect_type (ch, MAGIC_HIDDEN);
+			send_to_char ("In order to get a clear shot at your target you are forced to emerge from your hiding place.\n\n",
 		    ch);
+		}
     }
 
   
@@ -4005,6 +4010,13 @@ do_guard (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("That command cannot be used in an OOC area.\n", ch);
       return;
     }
+	
+  //can't guard anyone if you are hidden
+  if (get_affect(ch,MAGIC_HIDDEN))
+  {
+		send_to_char ("You cannot guard while hidden.", ch);
+		return;
+  }
 
   if ((af = get_affect (ch, AFFECT_GUARD_DIR)))
   {
@@ -4114,6 +4126,13 @@ do_guard (CHAR_DATA * ch, char *argument, int cmd)
 		    ch);
       return;
     }
+	
+	//can't guard somone who is hidden
+	if(target && get_affect(target ,MAGIC_HIDDEN))
+	{
+		send_to_char ("You cannot guard someone who is hiding.", ch);
+		return;
+	}
 
   if ((af = get_affect (ch, MAGIC_GUARD)))
     affect_remove (ch, af);
