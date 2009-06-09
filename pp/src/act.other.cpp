@@ -734,6 +734,12 @@ do_hide (CHAR_DATA * ch, char *argument, int cmd)
 	 return;
   }
 
+  if (ch->delay_type == DEL_HIDE)
+  {
+	 send_to_char ("You are already trying to hide.\n", ch);
+	 return;
+  }
+
   if (ch->aiming_at)
     {
       send_to_char ("You lose your aim as you move to conceal yourself.\n", ch);
