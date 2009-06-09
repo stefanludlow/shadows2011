@@ -2553,7 +2553,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 				"", buf, 0);
 
 			/* HM it to all applicable admins */
-			char date[AVG_STRING_LENGTH];
+			/*char date[AVG_STRING_LENGTH];
 
 			current_time = time (0);
 			ctime_r (&current_time, date);
@@ -2577,29 +2577,29 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 				{
 					row = mysql_fetch_row (result);
 					sqlch = load_pc(row[0]);
-					/* do not send to this admin if they are not assigned to this sphere */
+					/* do not send to this admin if they are not assigned to this sphere
 //					fprintf(stderr,"Checking %s for flag %d in their %d\n",sqlch->tname,(1<<sphereIndex),sqlch->petition_flags);
 					if (sqlch && IS_SET(sqlch->petition_flags,(1<<sphereIndex)))
 					{
 //						fprintf(stderr,"Sending HM to %s\n",sqlch->tname);
-						/* send the HM */
+						/* send the HM 
 						mysql_safe_query
 							("INSERT INTO hobbitmail (account, flags, from_line, from_account, sent_date, subject, message, timestamp, to_line)"
 							" VALUES ('%s', %d, '%s', '%s', '%s', '%s', '%s', UNIX_TIMESTAMP(), '%s' )",
-							sqlch->tname, 0 /* no flags */, ch->tname,
+							sqlch->tname, 0 /* no flags , ch->tname,
 							ch->pc->account_name, date, "Logged petition", buf,
 							sqlch->tname);
 						unload_pc(sqlch);
 					}
-				} /* iterate rows of admins */
+				} /* iterate rows of admins 
 
-				mysql_free_result(result); /* clear the result */
-			} /* successful query for admins */
+				mysql_free_result(result); /* clear the result 
+			} /* successful query for admins 
 			else
 			{
-				/*no admins found */
+				/*no admins found 
 				throw std::runtime_error("No admins found in act.comm.cpp, do_petition!");
-			}
+			}*/
 	
 		
 		} /* end of 'it wasn't sent' block */
