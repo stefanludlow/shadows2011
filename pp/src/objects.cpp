@@ -3450,6 +3450,16 @@ wear (CHAR_DATA * ch, OBJ_DATA * obj_object, int keyword)
       send_to_char ("You'll need to snuff that, first.\n", ch);
       return;
     }
+	 
+  if (ch->race == lookup_race_id ("Olog-Hai"))
+	{
+	if ((GET_ITEM_TYPE (obj_object) == ITEM_ARMOR && keyword != 4) 
+	   || (GET_ITEM_TYPE (obj_object) == ITEM_SHIELD && keyword != 20))
+	 {
+		send_to_char ("You cannot wear armor on that part of your body.\n", ch);
+		return;
+	 }
+	}
 
 
   if (keyword == 13 && obj_object->obj_flags.type_flag == ITEM_LIGHT)
