@@ -1566,10 +1566,7 @@ int check_account_flags (char *host);
 char *strip_small_minor(char * wounds, CHAR_DATA * ch);
 int room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch);
 int force_enter (CHAR_DATA *tch, ROOM_DATA *troom);
-
-//Hibou testing date function
-char *get_date( );
-
+std::string get_date( );
 
 void read_ticket (CHAR_DATA * ch, int tick_num);
 void search_ticket (CHAR_DATA * ch, char * chkvalue, int searchtype);
