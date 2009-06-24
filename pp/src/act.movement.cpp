@@ -3430,9 +3430,9 @@ do_unlock (CHAR_DATA * ch, char *argument, int cmd)
 			if (key && !key->o.od.value[1])
 				key->o.od.value[1] = obj->coldload_id;
 			obj->o.container.flags &= ~CONT_LOCKED;
-			sprintf(buf, "You open $p with %s.", key->short_description);
+			sprintf(buf, "You unlock $p with %s.", key->short_description);
 			act (buf, false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
-			sprintf(buf, "You open $p with %s.", key->short_description);
+			sprintf(buf, "$n unlocks $p with %s.", key->short_description);
 			act (buf, false, ch, obj, 0, TO_ROOM | _ACT_FORMAT);
 		}
 
