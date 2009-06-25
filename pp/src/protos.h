@@ -27,6 +27,7 @@
 
 #include <string>
 #include <stdio.h>
+#include <stdarg.h>
 
 #ifndef MACOSX
 #include <malloc.h>
@@ -603,6 +604,7 @@ void post_motd (DESCRIPTOR_DATA * d);
 void read_motd(DESCRIPTOR_DATA * d); 
 void do_subscribe (CHAR_DATA * ch, char *argument, int cmd);
 void do_unsubscribe (CHAR_DATA * ch, char *argument, int cmd);
+int multipleRoomCount (int amount, ...);
 
 
 //nanny.cpp
