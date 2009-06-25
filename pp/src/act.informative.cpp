@@ -7872,7 +7872,6 @@ int multipleRoomCount (int amount, ...) // Hibou -- For totalling occupants in M
 	ROOM_DATA *rd = new ROOM_DATA;
 	int total = 0;
 	int vnum;
-	char buf[256];
 	
 	if (amount < 1)
 	{
@@ -7888,14 +7887,9 @@ int multipleRoomCount (int amount, ...) // Hibou -- For totalling occupants in M
 		{
 			continue;
 		}
-		sprintf (buf, "Room: (%d)", vnum);
-		send_to_gods (buf);
-		*buf = '\0';
 		roomCount (rd);
 		if (rd->occupants > 0)
 		{
-			sprintf (buf, "Added one at %d!", vnum);
-			send_to_gods (buf);
 			total += rd->occupants;
 		}
 	}
