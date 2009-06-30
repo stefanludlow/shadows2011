@@ -28,6 +28,7 @@
 #include <string>
 #include <stdio.h>
 #include <stdarg.h>
+#include <stdlib.h>
 
 #ifndef MACOSX
 #include <malloc.h>

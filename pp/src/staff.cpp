@@ -9682,7 +9682,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 	{
 	  args = one_argument (args, buf);
 	  port_num = strtol (buf, 0, 10);
-	  if (port_num <= 0 || port_num >= INT_MAX)
+	  if (port_num <= 0 || port_num >= 65000)
 	    {
 	      send_to_char ("Expected a port number to search on. "
 			    "E.g. 4500, or 4501.\n", ch);

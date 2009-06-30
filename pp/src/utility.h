@@ -27,6 +27,7 @@
 #define _rpie_utility_h
 
 #include <string>
+#include <strings.h>
 #include <sstream>
 #include <vector>
 #include <stdexcept>
