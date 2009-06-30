@@ -98,6 +98,11 @@ bool Weather::weather_unification (int zone)
 		weather_info[zone] = weather_info[80];
 		zone_updated = true;
 	}
+	else if (zone == 12 || zone == 51 || zone == 54 || zone == 76)
+	{
+		weather_info[zone] = weather_info[14];
+		zone_updated = true;
+	}
   // End Japheth's changes
 
   return zone_updated;
