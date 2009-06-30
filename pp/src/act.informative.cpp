@@ -7843,13 +7843,13 @@ int kingdom_from_zone (CHAR_DATA *ch)
 	else if (zone == 42 || zone == 43)
 		return 2;
 	else if (zone == 1  || zone == 2  || zone == 3  || zone == 4  ||
-		  zone == 8  || zone == 10 || zone == 11 || zone == 13 ||
-		  zone == 14 || zone == 15 || zone == 18 || zone == 19 ||
-		  zone == 21 || zone == 22 || zone == 38 || zone == 51 ||
-		  zone == 54 ||
-		  zone == 70 || zone == 71 || zone == 72 || zone == 73 ||
-		  zone == 74 || zone == 75 || zone == 76 || zone == 77 ||
-		  zone == 78 || zone == 79 || zone == 96)
+		  zone == 8  || zone == 10 || zone == 11 || zone == 12 ||
+		  zone == 13 || zone == 14 || zone == 15 || zone == 18 || 
+		  zone == 19 || zone == 21 || zone == 22 || zone == 38 || 
+		  zone == 51 || zone == 54 || zone == 70 || zone == 71 || 
+		  zone == 72 || zone == 73 || zone == 74 || zone == 75 || 
+		  zone == 76 || zone == 77 || zone == 78 || zone == 79 ||
+		  zone == 96)
 		return 1;
 	else return -1;
 }
@@ -7857,7 +7857,7 @@ int kingdom_from_zone (CHAR_DATA *ch)
 //This helper function counts how many players are in the room.
 //Anytime a new room is reference with vtor, run this command. - Vader
 
-void roomCount (ROOM_DATA *rd)
+void roomCount(ROOM_DATA *rd)
 {
 	rd->occupants = 0;
 	for (CHAR_DATA *tch = rd->people; tch; tch = tch->next_in_room)
@@ -7865,38 +7865,6 @@ void roomCount (ROOM_DATA *rd)
 		if (!IS_NPC(tch) && IS_MORTAL(tch)) //Don't count NPC's or admin's. - Vader
 		rd->occupants++;
 	}
-	return;
-}
-
-int multipleRoomCount (int amount, ...) // Hibou -- For totalling occupants in MULTIPLE rooms.
-{
-	ROOM_DATA *rd = new ROOM_DATA;
-	int total = 0;
-	int vnum;
-	
-	if (amount < 1)
-	{
-		return 0;
-	}
-	
-	va_list vl;
-	va_start (vl, amount);
-	for (int i = 0; i < amount; i++)
-	{
-		vnum = va_arg (vl, int);
-		if ((rd = vtor (vnum)) == NULL)
-		{
-			continue;
-		}
-		roomCount (rd);
-		if (rd->occupants > 0)
-		{
-			total += rd->occupants;
-		}
-	}
-	va_end (vl);
-	//send_to_gods (total);
-	return total;
 }
 
 void do_who (CHAR_DATA * ch, char *argument, int cmd)
@@ -8069,11 +8037,6 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		roomCount(rd);
 		if (rd->occupants > 0)
 			whoStream << "In Grutz's Guttahs' cave, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
-		int j = multipleRoomCount (13, 40851, 40845, 40850, 40844, 40853, 40854, 40856, 40857, 40858, 40859, 40860, 40862, 40993);
-		if (j > 0)
-		{
-			whoStream << "In the fort over Durin's Bridge, there " << (j == 1 ? "is#2 " : "are#2 " ) << j << (j == 1 ? " #0player. " : " #0players. ") << std::endl;
-		}
 		if (is_clan_member(ch, "blackrend"))
 		{
 			rd = vtor(41207);

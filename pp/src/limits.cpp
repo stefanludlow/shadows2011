@@ -8,6 +8,7 @@
 #include <time.h>
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "structs.h"
 #include "account.h"
