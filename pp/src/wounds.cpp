@@ -3266,6 +3266,9 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
   
 	thisPtr->delay = time * heal_adj;
 	thisPtr->delay -= nHasClothProp; //faster if you're using a bandage
+	if (thisPtr->delay < 1) { // Let's avoid some really long delays - Case
+      thisPtr->delay = 1;
+   }
 }
 
 void

@@ -1,4 +1,5 @@
 #include "server.h"
+#include "protos.h"
 
 rpie::server::server ()
 {

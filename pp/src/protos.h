@@ -27,6 +27,8 @@
 
 #include <string>
 #include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
 
 #ifndef MACOSX
 #include <malloc.h>
@@ -603,6 +605,7 @@ void post_motd (DESCRIPTOR_DATA * d);
 void read_motd(DESCRIPTOR_DATA * d); 
 void do_subscribe (CHAR_DATA * ch, char *argument, int cmd);
 void do_unsubscribe (CHAR_DATA * ch, char *argument, int cmd);
+int multipleRoomCount (int amount, ...);
 
 
 //nanny.cpp
@@ -1566,10 +1569,7 @@ int check_account_flags (char *host);
 char *strip_small_minor(char * wounds, CHAR_DATA * ch);
 int room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch);
 int force_enter (CHAR_DATA *tch, ROOM_DATA *troom);
-
-//Hibou testing date function
-char *get_date( );
-
+std::string get_date( );
 
 void read_ticket (CHAR_DATA * ch, int tick_num);
 void search_ticket (CHAR_DATA * ch, char * chkvalue, int searchtype);
