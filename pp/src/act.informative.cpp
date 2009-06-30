@@ -7846,6 +7846,7 @@ int kingdom_from_zone (CHAR_DATA *ch)
 		  zone == 8  || zone == 10 || zone == 11 || zone == 13 ||
 		  zone == 14 || zone == 15 || zone == 18 || zone == 19 ||
 		  zone == 21 || zone == 22 || zone == 38 || zone == 51 ||
+		  zone == 54 ||
 		  zone == 70 || zone == 71 || zone == 72 || zone == 73 ||
 		  zone == 74 || zone == 75 || zone == 76 || zone == 77 ||
 		  zone == 78 || zone == 79 || zone == 96)
