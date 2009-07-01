@@ -7816,6 +7816,10 @@ void do_where (CHAR_DATA * ch, char *argument, int cmd) {
 
 	// Inorder traversal, with the key being the room number, puts it into room order
 	for (it = whereMap.begin(); it != whereMap.end(); it++) {
+		// Hibou - Truncating WHERE output, as requested by Kite
+		if (it->second.size() > 80) {
+			it->second = it->second.substr (0, it->second.find_last_of (" ", 80));
+		}
 		outputWhere << it->second << std::endl;
 	}
 	
