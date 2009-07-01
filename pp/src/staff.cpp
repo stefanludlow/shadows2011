@@ -46,13 +46,22 @@ const char *player_bits[] = {
   "\n"
 };
 
-const int SPHERE_COUNT = 8;
+const int SPHERE_COUNT = 6;
 
 /* flag is 1 << index */
-SPHERE_INFO spheres[] = { /* ONLY ADD TO THE END OF THIS OR YOU WILL SCREW UP CURRENT FLAGS */
+/*  SPHERE_INFO spheres[] = {  ONLY ADD TO THE END OF THIS OR YOU WILL SCREW UP CURRENT FLAGS 
 	{"MT",true},           
 	{"PelAnor",true},      
 	{"Northlands",true},
+	{"Mines",true},
+	{"Harad",true},
+	{"Battalions",true},
+	{"Guldur",false},
+	{"Undeep",false},
+}; */
+
+SPHERE_INFO spheres[] = {  //ONLY ADD TO THE END OF THIS OR YOU WILL SCREW UP CURRENT FLAGS 
+	{"Gondor",true},
 	{"Mines",true},
 	{"Harad",true},
 	{"Battalions",true},
