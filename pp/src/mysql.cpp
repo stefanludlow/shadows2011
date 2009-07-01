@@ -3287,7 +3287,7 @@ load_stayput_mobiles ()
                                         //temp_mob->next = character_list;
                                         //character_list = temp_mob;
 										if (temp_mob)
-											character_list.push_back(temp_mob);
+											character_list.push_front(temp_mob);
                                 }
                         }
                 }
@@ -3873,7 +3873,7 @@ do_mysql (CHAR_DATA * ch, char *argument, int cmd)
                                         //temp_mob->next = character_list;
                                         //character_list = temp_mob;
 										if (temp_mob)
-											character_list.push_back(temp_mob);
+											character_list.push_front(temp_mob);
                                 }
                         }
                 }

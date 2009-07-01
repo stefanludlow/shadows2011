@@ -457,7 +457,7 @@ load_mobile (int vnum)
   //new_mobile->next = character_list;
   //character_list = new_mobile;
   if (new_mobile)
-	character_list.push_back(new_mobile);
+	character_list.push_front(new_mobile);
 
   new_mobile->time.birth = time (0);
 

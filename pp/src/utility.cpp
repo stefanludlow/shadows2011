@@ -2278,7 +2278,7 @@ pc_to_game (CHAR_DATA * ch)
 		}
 	}
 
-	character_list.push_back(ch);
+	character_list.push_front(ch);
 
 	if (!ch->writes)
 	{
