@@ -67,6 +67,7 @@ SPHERE_INFO spheres[] = {  //ONLY ADD TO THE END OF THIS OR YOU WILL SCREW UP CU
 	{"Battalions",true},
 	{"Guldur",false},
 	{"Undeep",false},
+	{"Northlands",true},
 };
 
 extern rpie::server engine;
