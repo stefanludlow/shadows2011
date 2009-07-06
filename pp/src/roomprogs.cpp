@@ -4796,7 +4796,7 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 			if (is_clan_member(tch, buf))
 			{
 				send_to_char(formatted, tch);
-				send_to_char("\n", tch);
+				send_to_char("", tch);
 			}
 		}
 		mem_free(formatted);
@@ -4815,7 +4815,7 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 			if (is_clan_member(tch, buf))
 			{
 				send_to_char(formatted, tch);
-				send_to_char("\n", tch);
+				send_to_char("", tch);
 			}
 		}
 		mem_free(formatted);
@@ -4847,7 +4847,7 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 				continue;
 
 			send_to_char (formatted, d->character);
-			send_to_char("\n", d->character);
+			send_to_char ("", d->character);
 		}
 		mem_free(formatted);
 	}
@@ -4876,7 +4876,7 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 				continue;
 
 			send_to_char(formatted, d->character);
-			send_to_char("\n", d->character);
+			
 		}
 		mem_free(formatted);
 	}
