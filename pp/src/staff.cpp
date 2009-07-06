@@ -46,7 +46,7 @@ const char *player_bits[] = {
   "\n"
 };
 
-const int SPHERE_COUNT = 6;
+const int SPHERE_COUNT = 7;
 
 /* flag is 1 << index */
 /*  SPHERE_INFO spheres[] = {  ONLY ADD TO THE END OF THIS OR YOU WILL SCREW UP CURRENT FLAGS 
