@@ -4253,7 +4253,7 @@ setup_registry (void)
   add_registry (REG_SKILLS, SKILL_PARRY, "Parry");
   add_registry (REG_SKILLS, SKILL_PERFUMERY, "Perfumery");
   add_registry (REG_SKILLS, SKILL_POISONING, "Poisoning");
-  add_registry (REG_SKILLS, SKILL_POLEARM, "Polearm");
+  add_registry (REG_SKILLS, SKILL_POLEARM, "Polearm"); 
   add_registry (REG_SKILLS, SKILL_POTTERY, "Pottery");
   add_registry (REG_SKILLS, SKILL_PRESCIENCE, "Prescience");
   add_registry (REG_SKILLS, SKILL_SPEAK_PUKAEL, "Pukael");

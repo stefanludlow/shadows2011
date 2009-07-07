@@ -56,7 +56,7 @@ const int restricted_skills[] = {
 	0,				/* Medium-Pierce */
 	0,				/* Heavy-Pierce */
 	0,				/* Staff */
-	0,				/* Polearm */
+	-2,			/*	 Polearm -- Removed from use. Hibou 7/6/09 */
 	0,				/* Throwing */
 	-2,				/* Blowgun */
 	0,				/* Sling */
