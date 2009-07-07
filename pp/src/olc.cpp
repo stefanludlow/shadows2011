@@ -8453,7 +8453,7 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 {
 	const char * cues [] = 
 	{
-		"none", "notes", "flags", "memory",
+		"none", "notes", "flags", "memory", "on_reboot",
 		"on_hour", "on_time",
 		"on_health", "on_moves",
 		"on_command", "on_receive", "on_hear", "on_nod",

@@ -1730,6 +1730,7 @@ enum mob_cue {
   cue_notes,		// Freeform notes
   cue_flags,		// Flags (unimplemented)
   cue_memory,		// Var = Value
+  cue_on_reboot,
 
   // Scheduled Cues
   cue_on_hour,		// (hr/sun/moon) reflex

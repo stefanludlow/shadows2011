@@ -535,6 +535,24 @@ boot_db (void)
   print_mem_stats (NULL);
 
   booting = 0;
+  
+  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
+  {
+		CHAR_DATA *ch = *tch_iterator;
+		if (IS_NPC(ch) && ch->mob->cues)
+		{
+			typedef std::multimap<mob_cue,std::string>::const_iterator N;
+			std::pair<N,N> range = ch->mob->cues->equal_range (cue_on_reboot);
+			for (N n = range.first; n != range.second; n++)
+			{
+				std::string cue = n->second;
+				if (!cue.empty())
+				{
+					command_interpreter(ch, (char *) cue.c_str());
+				}
+			}	
+		}
+   }
 
   system_log ("Boot db -- DONE.", false);
 }
