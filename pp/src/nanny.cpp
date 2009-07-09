@@ -3466,6 +3466,11 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		d->character->hit = d->character->max_hit;
 		d->character->armor = 3;
 	}
+	
+	if (d->character->race == 86)
+	{
+		d->character->armor = 7;
+	}
 
 	if (d->character->pc->level)
 		show_unread_messages (d->character);

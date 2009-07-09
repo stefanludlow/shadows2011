@@ -2742,6 +2742,11 @@ copyover_recovery (void)
 
       if (IS_SET (d->character->flags, FLAG_GUEST))
 	d->character->color++;
+	
+		if (d->character->race == 86)
+		{
+			d->character->armor = 7;
+		}
 
       d->character->flags &= ~(FLAG_ENTERING | FLAG_LEAVING);
 
