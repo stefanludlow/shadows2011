@@ -1265,6 +1265,18 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 		}
 		return;
 	}
+	
+	/* Check to see if person is in a group. */
+	/* Usage: if in_group()   					  */
+	
+	else if (!strncmp (sarg, "in_group", 8))
+	{
+		if (!is_with_group (ch))
+		{
+			ifin[nNest] = 1;
+		}
+		return;
+	}
 
 	else if (!strncmp (sarg, "(count", 6))
 	{
@@ -6037,7 +6049,11 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 		variable = buf;
 		
 	argument = one_argument (argument, buf);
-	if (buf.find("obj") != std::string::npos)
+	if (buf.find("group_members") != std::string::npos)
+	{
+		value = MAKE_STRING (num_followers (ch) + 1);
+	}
+	else if (buf.find("obj") != std::string::npos)
 	{
 		OBJ_DATA *obj = NULL;
 		// Ascertain what object they want to target. With this command it is done using a vnum
