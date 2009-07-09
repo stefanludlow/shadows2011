@@ -6435,6 +6435,10 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 				return;
 		}
 	}
+	else if (buf.find("group_members") != std::string::npos)
+	{
+		value = MAKE_STRING (num_followers (ch) + 1);
+	}
 	
 	if (value.empty())
 		return;
