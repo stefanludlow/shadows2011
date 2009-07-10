@@ -90,7 +90,7 @@ refresh_db_connection (void)
 // Route ALL mysql queries through this wrapper to ensure they are escaped
 // properly, to thwart various SQL injection attacks.
 
-int
+/* int
 mysql_safe_query (char *fmt, ...)
 {
   va_list argp;
@@ -155,6 +155,72 @@ mysql_safe_query (char *fmt, ...)
 //	       query, mysql_error (database));
 //    }
   return (result);
+} */
+
+int mysql_safe_query (char *queryFormat, ...)
+{
+	char *arg;
+	std::string queryStr = queryFormat;
+	size_t position = 0;
+
+	va_start (arg, queryFormat);
+	
+	while ((position = queryStr.find('%', position)) != std::string::npos) {
+		if (queryStr.length() > position) {
+			std::ostringstream tempDataStream;
+			std::string safeString;
+			char *s = '\0';
+			
+			switch (queryStr[position+1]) {
+				case 'c':
+					tempDataStream << va_arg(arg,char);
+					break;
+				
+				case 'd':
+				case 'i':
+					tempDataStream << va_arg(arg,int);
+					break;
+				
+				case 's':
+					s = va_arg(arg,char *);
+
+					if (!s) {
+						tempDataStream << " ";
+						break;
+					}
+					safeString = s;
+
+					if (safeString.empty()) {
+						tempDataStream << " ";
+						break;
+					}
+					s = new char[(safeString.length()*2)+1]; // Requires at worst 2 bytes per character plus terminating character
+					mysql_real_escape_string(database, s, safeString.c_str(), (unsigned long)safeString.length());
+					tempDataStream << s;
+					delete [] s;
+					s = '\0';
+					break;
+				
+				case 'f':
+					tempDataStream << va_arg(arg,double);
+					break;
+			}
+			if (tempDataStream.str().empty()) {
+				position++;
+				continue;
+			}
+			queryStr.replace(position, 2, tempDataStream.str());
+			position = position + tempDataStream.str().length();
+		}
+		else {
+			break;
+		}
+	}
+
+	va_end(arg);
+
+	int result = mysql_real_query (database, queryStr.c_str(), (unsigned long)queryStr.length());
+	return (result);
 }
 
 void load_obj_progs (void)
