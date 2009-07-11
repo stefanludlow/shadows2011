@@ -433,15 +433,21 @@ if (ch->in_room == 66955 || ch->in_room == 66956 || ch->in_room == 66954 || ch->
 
 	clear_player_from_second_affects(ch);
   remove_affect_type (ch, MAGIC_SIT_TABLE);
-  for (CHAR_DATA *tch = vtor(ch->in_room)->people; tch; tch = tch->next_in_room)
-  {
+  
+  //for (CHAR_DATA *tch = vtor(ch->in_room)->people; tch; tch = tch->next_in_room)
+	for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
+	{
+	tch = *tch_iterator;
+  
 		AFFECTED_TYPE *af;
 		if ((af = get_affect(tch, MAGIC_GUARD)))
 		{
 			if (af->a.spell.modifier && (CHAR_DATA *) af->a.spell.t == ch)
+			{
 				remove_affect_type(tch, MAGIC_GUARD);
+			}
 		}
-  }
+	}
 
   act ("Goodbye, friend.. Come back soon!", false, ch, 0, 0, TO_CHAR);
   act ("$n leaves the area.", true, ch, 0, 0, TO_ROOM);

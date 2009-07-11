@@ -4084,7 +4084,7 @@ do_guard (CHAR_DATA * ch, char *argument, int cmd)
       else if ((af = get_affect (ch, MAGIC_GUARD))
 	       && (tch = (CHAR_DATA *) af->a.spell.t) != NULL)
 	{
-		if (af->a.spell.modifier == 0)
+		if (af->a.spell.modifier == 0 && tch->desc)
 		{
 	  act ("You cease to guard $N.", true, ch, 0, tch,
 	       TO_CHAR | _ACT_FORMAT);

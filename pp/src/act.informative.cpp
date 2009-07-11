@@ -7773,7 +7773,7 @@ do_locate (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 void do_where (CHAR_DATA * ch, char *argument, int cmd) {
-	Argument whereArg = argument;
+	Stringstack whereArg = argument;
 	
 	int RPP = -1; // Will be less than 0 if this is where aura
 	bool checkAura = false;

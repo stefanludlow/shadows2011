@@ -15,8 +15,8 @@ INCLUDE = -I/usr/local/mysql/include/ -I/usr/include/mysql/ -I/usr/include/opens
 LIBDIRS = -L/usr/lib64/mysql -L/usr/lib/mysql -L/usr/local/mysql/lib
 
 OBJS = \
-account.o act.comm.o act.informative.o act.movement.o \
-act.offensive.o act.other.o arena.o auctions.o character.o clan.o comm.o \
+account.o act.comm.o act.informative.o act.movement.o act.offensive.o \
+act.other.o arena.o argument.o auctions.o character.o clan.o comm.o \
 commands.o commerce.o constants.o control.o crafts.o \
 create_mobile.o creation.o db.o destruction.o \
 dwellings.o edit.o employment.o fight.o group.o guest.o \
@@ -51,5 +51,5 @@ clean:
 install:
 	cp -f ~shadows/shadows/pp/bin/server ~shadows/shadows/pp/bin/server.last
 	cp -f ~shadows/shadows/bp/bin/server ~shadows/shadows/bp/bin/server.last
-	cp -f ~shadows/shadows/rpi_engine/pp/bin/server ~shadows/shadows/pp/bin/server
-	cp -f ~shadows/shadows/rpi_engine/pp/bin/server ~shadows/shadows/bp/bin/server
+	cp -f ~shadows/shadows/tp/bin/server ~shadows/shadows/pp/bin/server
+	cp -f ~shadows/shadows/tp/bin/server ~shadows/shadows/bp/bin/server

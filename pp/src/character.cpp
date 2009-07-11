@@ -771,7 +771,7 @@ bool *char_data::checkClansForWho()
 	ret[1] = ret[2] = ret[3] = ret[4] = ret[5] = false;
 	if( clans )
 	{
-		Argument clansArgument = clans;
+		Stringstack clansArgument = clans;
 		while(!(clansArgument.isFinished()))
 		{
 			clansArgument.pop(); // Pop Clan Flags
@@ -798,7 +798,7 @@ int char_data::majorSphere()
 	return 0;
 	if( clans )
 	{
-		Argument clansArgument = clans;
+		Stringstack clansArgument = clans;
 		while(!(clansArgument.isFinished()))
 		{
 			clansArgument.pop(); // Pop Clan Flags

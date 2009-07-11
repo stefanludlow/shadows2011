@@ -31,6 +31,7 @@
 #include <sstream>
 #include <vector>
 #include <stdexcept>
+#include "argument.h"
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -147,123 +148,6 @@ MAX (const _value __x, const _value __y)
 // The following are defined in utility.cpp
 char* one_argument (char* argument, char* arg_first);
 std::string one_argument (std::string& argument, std::string& arg_first);
-
-// Prototype of the Argument class, written by Case '08
-const size_t ARGUMENT_SQUELCH_LIMIT = 5; // Done on construction and each pop, unless removeSpaces is false
-
-class Argument {
-private:
-	std::string argument;
-	std::vector<std::string> argumentMemory;
-	bool removeSpaces;
-	bool finished;
-	
-	// Removes spaces at the first position in the string
-	void squelch();
-
-public:
-	// Constructors
-	Argument();
-	Argument(std::string input);
-	Argument(const char *input);
-	Argument(std::string input, bool removeSpaces);
-	Argument(const char *input, bool removeSpaces);
-	
-	// Assignment operators
-	Argument& operator= (std::string input);
-	Argument& operator= (const char *input);
-	
-	// Comparison operator
-	bool operator== (const std::string compare) const;
-
-	// Static comparison methods for strings
-	bool static compare(const std::string compare, const std::string compare2) {
-		if ((strcasecmp(compare.c_str(), compare2.c_str())) == 0) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	bool static compare(const char *compare, const char *compare2) {
-		if ((strcasecmp(compare, compare2)) == 0) {
-			return true;
-		}
-		else {
-			return false;
-		}
-	}
-
-	/* Pop and PopSpeech split words off the input and store them
-	   PopSpeech calls pop() and then manipulates what pop() returns */
-	std::string pop(); // Splits off words
-	std::string popSpeech(); // Splits off words and is sensitive to " " and ' '
-	
-	// Recall past arguments
-	// Origin at zero
-	std::string recall(size_t indexArg);
-	std::string last();
-
-	// Swap integers out from a string
-	int toInt();
-	int toInt(size_t indexArg);
-	
-	// Return portions of the stored argument, either from an argument, between arguments or all of them
-	// Origin at zero
-	std::string printPartialArg(size_t begin);
-	std::string printPartialArg(size_t begin, size_t arguments);
-	std::string printArg();
-
-	// Allocate memory for a C string representation of either partialArg or remaining argument
-	// Use ArgumentPointers to store it and then later call .freeMemory()
-	char* allocateCStringRemainingArgument();
-	char* allocateCStringPartialArg(size_t begin);
-	char* allocateCStringPartialArg(size_t begin, size_t arguments);
-	
-	// Static method to help free allocated memory
-	void static freeArgumentPointer(char *pointer) {
-		free(pointer);
-		pointer = NULL;
-	}
-
-	// Pops the whole input, either with pop or popSpeech
-	void popAll();
-	void popAllSpeech();
-	
-	// Returns if the Argument is fully popped
-	bool isFinished();
-};
-
-class ArgumentPointers {
-private:
-	char *beginning;
-
-public:
-	char *string;
-	
-	ArgumentPointers(char *string) {
-		beginning = string;
-		this->string = string;
-	}
-
-	void operator++ () {
-		string++;
-	}
-
-	void operator-- () {
-		string--;
-	}
-
-	char* getBeginning() {
-		return beginning;
-	}
-
-	void freeMemory() {
-		Argument::freeArgumentPointer(beginning);
-	}
-};
-/* End of Argument - Case */
 
 struct ci_equal_to : std::binary_function <std::string, std::string, bool>
   {
