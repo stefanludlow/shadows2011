@@ -299,8 +299,7 @@ do_follow (CHAR_DATA * ch, char *argument, int cmd)
 }
 */
 
-char *
-tactical_status (CHAR_DATA * ch)
+std::string tactical_status (CHAR_DATA * ch)
 {
   CHAR_DATA *tch;
   AFFECTED_TYPE *af;
@@ -372,7 +371,7 @@ tactical_status (CHAR_DATA * ch)
 		}
 	}
 
-  return (char *) status.str().c_str();
+  return status.str();
 }
 
 void
