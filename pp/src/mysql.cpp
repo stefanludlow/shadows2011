@@ -185,13 +185,13 @@ int mysql_safe_query (char *queryFormat, ...)
 					s = va_arg(arg,char *);
 
 					if (!s) {
-						tempDataStream << " ";
+						tempDataStream << "";
 						break;
 					}
 					safeString = s;
 
 					if (safeString.empty()) {
-						tempDataStream << " ";
+						tempDataStream << "";
 						break;
 					}
 					s = new char[(safeString.length()*2)+1]; // Requires at worst 2 bytes per character plus terminating character
