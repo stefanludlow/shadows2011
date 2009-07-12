@@ -90,7 +90,7 @@ refresh_db_connection (void)
 // Route ALL mysql queries through this wrapper to ensure they are escaped
 // properly, to thwart various SQL injection attacks.
 
-/* int
+int
 mysql_safe_query (char *fmt, ...)
 {
   va_list argp;
@@ -155,9 +155,9 @@ mysql_safe_query (char *fmt, ...)
 //	       query, mysql_error (database));
 //    }
   return (result);
-} */
+} 
 
-int mysql_safe_query (char *queryFormat, ...)
+/* int mysql_safe_query (char *queryFormat, ...)
 {
 	char *arg;
 	std::string queryStr = queryFormat;
@@ -221,7 +221,7 @@ int mysql_safe_query (char *queryFormat, ...)
 
 	int result = mysql_real_query (database, queryStr.c_str(), (unsigned long)queryStr.length());
 	return (result);
-}
+} */
 
 void load_obj_progs (void)
 {
