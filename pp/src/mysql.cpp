@@ -123,7 +123,7 @@ mysql_safe_query (char *fmt, ...)
 	  s = va_arg (argp, char *);
 	  if (!s)
 	    {
-	      out += sprintf (out, " ");
+	      out += sprintf (out, "");
 	      break;
 	    }
 	  mysql_real_escape_string (database, safe, s, strlen (s));
@@ -237,7 +237,14 @@ void load_obj_progs (void)
 	{
 		room_prog prog;
 		prog.command = row[1];
-		prog.keys = row[2];
+		if (!strcmp(row[2], " ")) // God knows why this is the case?
+		{
+			prog.keys = "";
+		}
+		else
+		{
+			prog.keys = row[2];
+		}
 		prog.prog = row[3];
 		prog.type = atoi(row[4]);
 		obj_prog_list.insert (std::pair<int, room_prog>(atoi(row[0]), prog));
@@ -248,7 +255,7 @@ void save_obj_progs (void)
 {
 	if (!engine.in_build_mode())
 		return;
-	mysql_safe_query ("INSERT INTO obj_progs_backup SELECT * FROM obj_progs");
+	mysql_safe_query ("INSERT INTO obj_progs_backup SELECT *, NOW() FROM obj_progs");
 	mysql_safe_query ("DELETE FROM obj_progs");
 	for (std::multimap<int, room_prog>::iterator it = obj_prog_list.begin(); it != obj_prog_list.end(); it++)
 	{
