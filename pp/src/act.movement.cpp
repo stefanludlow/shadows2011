@@ -1655,15 +1655,24 @@ exit_room (CHAR_DATA * ch, int dir, int flags, int leave_time,
 
 	  mount = ch;
 	  rider = ch->mount;
+	  
+	  int speed;
 
+	  if (rider->pc)
+	  {
+			speed = rider->pc->mount_speed;
+	  }
+	  else
+	  {
+			speed = mount->speed;
+	  }
+	  
 	  sprintf (buf, "You make $N %s %s.",
-		   mount_speeds[rider->pc ? rider->pc->mount_speed :
-				mount->speed], dirs[dir]);
+		   mount_speeds[speed], dirs[dir]);
 	  act (buf, false, rider, 0, mount, TO_CHAR);
 
 	  sprintf (buf, "$n starts %s $N %s.",
-		   mount_speeds_ing[rider->pc ? rider->pc->mount_speed :
-				    mount->speed], dirs[dir]);
+		   mount_speeds_ing[speed], dirs[dir]);
 	  act (buf, false, rider, 0, mount, TO_NOTVICT);
 	}
 
