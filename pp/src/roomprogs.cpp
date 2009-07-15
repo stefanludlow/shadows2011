@@ -2967,11 +2967,11 @@ do_opkey (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (strArgument.empty())
+	/*if (strArgument.empty())
 	{
 		send_to_char("What keyword would you like to install?\n", ch);
 		return;
-	}
+	}*/
 
 	int count = 1;
 	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = obj_prog_list.equal_range(ivnum);
@@ -2981,7 +2981,15 @@ do_opkey (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			it->second.keys = add_hash((char *) strArgument.c_str());
 			std::string output;
-			output = "Installed keyword(s) [#6" + strArgument + "#0] for object prog number #6" + prognum + "#0 for Object vnum [#2" + vnum + "#0].\n";
+			if (strArgument.empty())
+			{
+				it->second.keys = '\0';
+				output = "Keyword removed.\n";
+			}
+			else
+			{
+				output = "Installed keyword(s) [#6" + strArgument + "#0] for object prog number #6" + prognum + "#0 for Object vnum [#2" + vnum + "#0].\n";
+			}
 			send_to_char(output.c_str(), ch);
 			return;
 		}
@@ -6049,11 +6057,7 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 		variable = buf;
 		
 	argument = one_argument (argument, buf);
-	if (buf.find("group_members") != std::string::npos)
-	{
-		value = MAKE_STRING (num_followers (ch) + 1);
-	}
-	else if (buf.find("obj") != std::string::npos)
+	if (buf.find("obj") != std::string::npos)
 	{
 		OBJ_DATA *obj = NULL;
 		// Ascertain what object they want to target. With this command it is done using a vnum
