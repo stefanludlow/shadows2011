@@ -64,7 +64,7 @@ SPHERE_INFO spheres[] = {  //ONLY ADD TO THE END OF THIS OR YOU WILL SCREW UP CU
 	{"Gondor",true},
 	{"Mines",true},
 	{"Harad",true},
-	{"Battalions",true},
+	{"Battalions",false},
 	{"Guldur",false},
 	{"Undeep",false},
 	{"Northlands",true},
