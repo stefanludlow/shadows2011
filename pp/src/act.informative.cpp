@@ -7866,7 +7866,7 @@ void roomCount(ROOM_DATA *rd)
 	rd->occupants = 0;
 	for (CHAR_DATA *tch = rd->people; tch; tch = tch->next_in_room)
 	{
-		if (!IS_NPC(tch) && IS_MORTAL(tch)) //Don't count NPC's or admin's. - Vader
+		if (!IS_NPC(tch) && !IS_LINKDEAD(tch) && IS_MORTAL(tch)) //Don't count NPC's or admin's. - Vader Also don't count linkdead people. --Blurr
 		rd->occupants++;
 	}
 }
