@@ -7883,12 +7883,6 @@ std::string gatheringPlace(int room_num, std::string name, ROOM_DATA *rd)
 	if (num_occu > 0)
 	{
 		placestream << "In " << name << ", there " << (num_occu == 1 ? "is#2 " : "are#2 ") << num_occu << (num_occu == 1 ? " #0player. " : " #0players.\n ") << std::endl;
-		/*output = "In ";
-		output.append(name);
-		output.append(", there ");
-		output.append(rd->occupants == 1 ? "is#2 " : "are#2 ");
-		output.append(num_occu);
-		output.append(rd->occupants == 1 ? " #0player. " : " #0players.\n ");*/
 	}
 	
 	return placestream.str();
@@ -8018,8 +8012,8 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	else if (sphere == 3)
 	{
-		whoStream << gatheringPlace(80129, "Drifting Lily Inn", rd);
-		whoStream << gatheringPlace(80239, "Drowning Corsair", rd);
+		whoStream << gatheringPlace(80129, "the Drifting Lily Inn", rd);
+		whoStream << gatheringPlace(80239, "the Drowning Corsair", rd);
 	}
 
 	else if (sphere == 4)
