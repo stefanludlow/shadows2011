@@ -467,12 +467,11 @@ end sleep code removed by grommit */
     if (!IS_NPC (ch) && ch->pc->app_cost && ch->desc)
 	{
 	  playing_time = real_time_passed (time (0) - ch->time.logon + ch->time.played, 0);
-	  if (playing_time.hour >= 10 && ch->desc->acct)
+	  if (playing_time.hour >= 12 && ch->desc->acct)
 	    {
 
-	      //ch->desc->acct->pay_application_cost (ch->pc->app_cost);
+	      ch->desc->acct->pay_application_cost (ch->pc->app_cost);
 	      ch->pc->app_cost = 0;
-	      save_char (ch, true);
 	    }
 	}
 

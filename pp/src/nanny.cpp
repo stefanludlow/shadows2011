@@ -4156,9 +4156,9 @@ nanny_race_confirm (DESCRIPTOR_DATA * d, char *arg)
 		create_menu_options (d);
 
 		if (atoi (lookup_race_variable (d->character->race, RACE_RPP_COST)) > 0)
-			d->character->pc->app_cost +=
-			MAX (atoi (lookup_race_variable (d->character->race, RACE_RPP_COST))
-			/ 2, 1);
+			d->character->pc->app_cost += (int)(atof (lookup_race_variable (d->character->race, RACE_RPP_COST)) / 2.0 + 0.5);
+		if (d->character->pc->app_cost == 1)
+			d->character->pc->app_cost = 0;
 
 		if (atoi (lookup_race_variable (d->character->race, RACE_MIN_AGE)) >
 			d->character->age)
