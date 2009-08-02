@@ -7914,7 +7914,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 				mortals++;
 			else
 				guests++;
-			if(clansphere == sphere)
+			if(clansphere == sphere && !((d->character->pc->level) > 0))
 				clanCount++;
 			if(d->character->pc->level > 0)
 			{
@@ -7991,7 +7991,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		whoStream << gatheringPlace(1108, "the Battered Shield", rd);
 		whoStream << gatheringPlace(1111, "the Gulded Lily", rd);
 		whoStream << gatheringPlace(3831, "the Copper Tankard Tavern", rd);	
-		whoStream << gatheringPlace(21170, "the Commons of the Rancid Snakebite Tavern", rd);
+		whoStream << gatheringPlace(54454, "the White Hart Tavern", rd);
 			
 		//Show battalion information to only those who can access it - Vader
 		if (is_clan_member(ch, "ithilien_battalion"))
@@ -7999,10 +7999,15 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 			whoStream << gatheringPlace(51162, "the Keep's Courtyard", rd);
 			whoStream << gatheringPlace(51169, "the Keep's Dining Hall", rd);
 			whoStream << gatheringPlace(51170, "the Keep's Kitchen", rd);
+			whoStream << gatheringPlace(54430, "the Mess Hall", rd);
 		}
 		if (is_clan_member(ch, "hawk_and_dove"))
 		{
 			whoStream << gatheringPlace(8299, "the Hawk and Dove Barn", rd);
+		}
+		if (is_clan_member(ch, "mt_lower_class"))
+		{
+			whoStream << gatheringPlace(21170, "the Commons of the Rancid Snakebite Tavern", rd);
 		}
 	}
 
