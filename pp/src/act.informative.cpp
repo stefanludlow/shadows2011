@@ -7990,7 +7990,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		rd = vtor(21170);
 		roomCount(rd);
 		if (rd->occupants > 0)
-			whoStream << "In the Commons of the Rancid Snakebute Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+			whoStream << "In the Commons of the Rancid Snakebite Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
 		//Show battalion information to only those who can access it - Vader
 		if (is_clan_member(ch, "ithilien_battalion"))
 		{
