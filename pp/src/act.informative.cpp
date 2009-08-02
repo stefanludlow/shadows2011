@@ -7871,6 +7871,30 @@ void roomCount(ROOM_DATA *rd)
 	}
 }
 
+std::string gatheringPlace(int room_num, std::string name, ROOM_DATA *rd)
+{
+	std::stringstream placestream;
+	
+	rd = vtor(room_num);
+	roomCount(rd);
+	
+	int num_occu = rd->occupants;
+	
+	if (num_occu > 0)
+	{
+		placestream << "In " << name << ", there " << (num_occu == 1 ? "is#2 " : "are#2 ") << num_occu << (num_occu == 1 ? " #0player. " : " #0players.\n ") << std::endl;
+		/*output = "In ";
+		output.append(name);
+		output.append(", there ");
+		output.append(rd->occupants == 1 ? "is#2 " : "are#2 ");
+		output.append(num_occu);
+		output.append(rd->occupants == 1 ? " #0player. " : " #0players.\n ");*/
+	}
+	
+	return placestream.str();
+	
+}
+
 void do_who (CHAR_DATA * ch, char *argument, int cmd)
 {
 	DESCRIPTOR_DATA *d = NULL;
@@ -7966,91 +7990,46 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		whoStream << "Outside of the scope of Arda [#6" << ch->in_room / 1000 << "#0] " << std::endl;
 
 	if (sphere == 1)
-	{
-		rd = vtor(3500);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In the Wardenry Bastion Commons, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
-		rd = vtor(3271);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In the Wardog Commons, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
-		rd = vtor(1108);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In the Battered Shield Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
-		rd = vtor(1111);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In the Gilded Lily Commons, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
-		rd = vtor(3831);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In the Copper Tankard Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
-		rd = vtor(21170);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In the Commons of the Rancid Snakebite Tavern, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+	{	
+
+		whoStream << gatheringPlace(3500, "the Wardenry Bastion Commons", rd);
+		whoStream << gatheringPlace(3271, "the Wardog Commons", rd);
+		whoStream << gatheringPlace(1108, "the Battered Shield", rd);
+		whoStream << gatheringPlace(1111, "the Gulded Lily", rd);
+		whoStream << gatheringPlace(3831, "the Copper Tankard Tavern", rd);	
+		whoStream << gatheringPlace(21170, "the Commons of the Rancid Snakebite Tavern", rd);
+			
 		//Show battalion information to only those who can access it - Vader
 		if (is_clan_member(ch, "ithilien_battalion"))
 		{
-			rd = vtor(51162);
-			roomCount(rd);
-			if (rd->occupants > 0)
-				whoStream << "In the Keep's Courtyard, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
-			rd = vtor(51169);
-			roomCount(rd);
-			if (rd->occupants > 0)
-				whoStream << "In the Keep's Dining Hall, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
-			rd = vtor(51170);
-			roomCount(rd);
-			if (rd->occupants > 0)
-				whoStream << "In the Keep's Kitchen, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+			whoStream << gatheringPlace(51162, "the Keep's Courtyard", rd);
+			whoStream << gatheringPlace(51169, "the Keep's Dining Hall", rd);
+			whoStream << gatheringPlace(51170, "the Keep's Kitchen", rd);
 		}
 		if (is_clan_member(ch, "hawk_and_dove"))
 		{
-			rd = vtor(8299);
-			roomCount(rd);
-			if (rd->occupants > 0)
-				whoStream << "In the Hawk and Dove Barn, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+			whoStream << gatheringPlace(8299, "the Hawk and Dove Barn", rd);
 		}
 	}
 
 	else if (sphere == 2)
-	{
-		rd = vtor(42002);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In Halburg's Rest Mead Hall, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+	{	
+		whoStream << gatheringPlace(42002, "Halburg's Rest Mead Hall", rd);
 	}
 	else if (sphere == 3)
 	{
-		rd = vtor(80129);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In the Drifting Lily Inn, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
-		rd = vtor(80239);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In the Drowning Corsair, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		whoStream << gatheringPlace(80129, "Drifting Lily Inn", rd);
+		whoStream << gatheringPlace(80239, "Drowning Corsair", rd);
 	}
 
 	else if (sphere == 4)
 	{
-		rd = vtor(41425);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In Da Bleedin' Fist Waterhole, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
-		rd = vtor(41470);
-		roomCount(rd);
-		if (rd->occupants > 0)
-			whoStream << "In Grutz's Guttahs' cave, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+		whoStream << gatheringPlace(41425, "Da Bleedin' Fist Waterhole", rd);
+		whoStream << gatheringPlace(41470, "Grutz's Guttahs' cave", rd);
+
 		if (is_clan_member(ch, "blackrend"))
 		{
-			rd = vtor(41207);
-			roomCount(rd);
-			if (rd->occupants > 0)
-				whoStream << "In Blackrend's Cave, there " << (rd->occupants == 1 ? "is#2 " : "are#2 ") << rd->occupants << (rd->occupants == 1 ? " #0player. " : " #0players. ") << std::endl;
+			whoStream << gatheringPlace(41207, "Blackrend's Cave", rd);
 		}
 	}
 
