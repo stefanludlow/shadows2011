@@ -1613,10 +1613,18 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
   if (IS_SET (type, TO_VICT))
     {
       tch = (CHAR_DATA *) vict_obj;
+		if (!IS_NPC (ch) && !ch->desc)
+		{
+			return;
+		}
       to = tch;
     }
   else if (IS_SET (type, TO_CHAR))
     {
+	 if (!IS_NPC (ch) && !ch->desc)
+	 {
+		return;
+	 }
       to = ch;
     }
   else if (!ch->room)

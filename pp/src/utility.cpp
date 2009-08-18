@@ -163,6 +163,29 @@ const int restricted_skills[] = {
 	-2				/* Astonomy */
 };
 
+bool IS_NPC (const CHAR_DATA *ch)
+{
+	if (!ch)
+	{
+		system_log ("IS_NPC error. Would have crashed. Hell yeah. Returning true.", true);
+		send_to_room ("IS_NPC went Whoopsie!", 686);
+		return true;
+	}
+	bool is = IS_SET(ch->act, ACT_ISNPC); // For debugging purposes with GDB. It doesn't like macros.
+	return is;
+}
+
+bool IS_NPC (CHAR_DATA *ch)
+{
+	if (!ch)
+	{
+		system_log ("IS_NPC error. Would have crashed. Hell yeah. Returning true.", true);
+		send_to_room ("IS_NPC went Whoopsie!", 686);
+		return true;
+	}
+	bool is = IS_SET(ch->act, ACT_ISNPC); // For debugging purposes with GDB. It doesn't like macros.
+	return is;
+}
 int GCD(int a, int b)
 {
 	while( 1 )

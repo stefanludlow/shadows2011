@@ -79,7 +79,7 @@
 
 #define SANA(obj) (strchr("aeiouyAEIOUY", *(obj)->name) ? "an" : "a")
 
-#define IS_NPC(ch) (IS_SET((ch)->act, ACT_ISNPC))
+
 #define IS_LINKDEAD(ch) (!(ch)->desc)
 
 #define GET_TRUST(ch)	(get_trust (ch))

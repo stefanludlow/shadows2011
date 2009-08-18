@@ -1701,5 +1701,9 @@ void control_fire_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
 			 int target_type);
 void control_water_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
 			  int target_type);
+			  
+// Let's give this a shot.
+bool IS_NPC (const CHAR_DATA *ch);
+bool IS_NPC (CHAR_DATA *ch);
 
 #endif // _rpie_protos_h_
