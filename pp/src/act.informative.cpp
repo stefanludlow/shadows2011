@@ -7882,7 +7882,7 @@ std::string gatheringPlace(int room_num, std::string name, ROOM_DATA *rd)
 	
 	if (num_occu > 0)
 	{
-		placestream << "In " << name << ", there " << (num_occu == 1 ? "is#2 " : "are#2 ") << num_occu << (num_occu == 1 ? " #0player. " : " #0players.\n ") << std::endl;
+		placestream << "In " << name << ", there " << (num_occu == 1 ? "is#2 " : "are#2 ") << num_occu << (num_occu == 1 ? " #0player. " : " #0players. ") << std::endl;
 	}
 	
 	return placestream.str();
@@ -7989,7 +7989,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		whoStream << gatheringPlace(3500, "the Wardenry Bastion Commons", rd);
 		whoStream << gatheringPlace(3271, "the Wardog Commons", rd);
 		whoStream << gatheringPlace(1108, "the Battered Shield", rd);
-		whoStream << gatheringPlace(1111, "the Gulded Lily", rd);
+		whoStream << gatheringPlace(1111, "the Gilded Lily", rd);
 		whoStream << gatheringPlace(3831, "the Copper Tankard Tavern", rd);	
 		whoStream << gatheringPlace(54454, "the White Hart Tavern", rd);
 			
