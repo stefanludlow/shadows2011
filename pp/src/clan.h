@@ -63,6 +63,8 @@ struct clan_data
 
 /* player interface */
 void do_clan (CHAR_DATA * ch, char *argument, int cmd);
+void do_checkPay (CHAR_DATA * ch, char *argument, int cmd);
+void do_setPay (CHAR_DATA * ch, char *argument, int cmd);
 void clan_forum_remove_all (CHAR_DATA * ch);
 
 char *get_shared_clan (CHAR_DATA * ch, CHAR_DATA * other);

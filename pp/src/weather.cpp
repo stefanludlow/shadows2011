@@ -65,7 +65,7 @@ initialize_weather_zones (void)
   zone_table[81].weather_type = WEATHER_DESERT;
   zone_table[82].weather_type = WEATHER_DESERT;
 
-  zone_table[42].weather_type = WEATHER_ARCTIC;
+  zone_table[42].weather_type = WEATHER_COLD;
 }
 
 bool Weather::weather_unification (int zone)
@@ -81,6 +81,11 @@ bool Weather::weather_unification (int zone)
   else if ( zone == 15)
     {
       weather_info[zone] = weather_info[2];
+      zone_updated = true;
+    }
+  else if ( zone == 43)
+    {
+      weather_info[zone] = weather_info[42];
       zone_updated = true;
     }
   else if ( zone == 65 || zone == 66)
@@ -103,6 +108,11 @@ bool Weather::weather_unification (int zone)
 		weather_info[zone] = weather_info[14];
 		zone_updated = true;
 	}
+ else if ( zone == 65 || zone == 66)
+    {
+      weather_info[zone] = weather_info[64];
+      zone_updated = true;
+    }
   // End Japheth's changes
 
   return zone_updated;

@@ -63,7 +63,7 @@
         \
 	!is_blind (sub) && \
 	!IS_SET (obj->flags, FLAG_WIZINVIS) && \
-	(weather_info[obj->room->zone].state != HEAVY_SNOW || IS_SET (obj->room->room_flags, INDOORS)) ) || \
+	((weather_info[obj->room->zone].state != HEAVY_SNOW && (!get_affect (sub, MAGIC_AFFECT_INFRAVISION) && !IS_SET (sub->affected_by, AFF_INFRAVIS))) || IS_SET (obj->room->room_flags, INDOORS))) || \
 	\
 	!IS_MORTAL (sub) )
 

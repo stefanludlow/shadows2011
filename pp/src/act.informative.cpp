@@ -2185,9 +2185,11 @@ list_obj_to_char (OBJ_DATA * list, CHAR_DATA * ch, int mode, int show)
 
   found = false;
 
-  if (!list
-      || (weather_info[ch->room->zone].state == HEAVY_SNOW && IS_MORTAL (ch)
-	  && !IS_SET (ch->room->room_flags, INDOORS)))
+  if (!list || (weather_info[ch->room->zone].state == HEAVY_SNOW 
+	&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+	&& !IS_SET (ch->affected_by, AFF_INFRAVIS))
+	&& IS_MORTAL (ch)
+	&& !IS_SET (ch->room->room_flags, INDOORS)))
     {
       if (show)
 	send_to_char ("Nothing.\n", ch);
@@ -2286,7 +2288,9 @@ list_char_to_char (CHAR_DATA * list, CHAR_DATA * ch, int mode)
   int count = 0, j = 0;
 
   if (IS_MORTAL (ch) && weather_info[ch->room->zone].state == HEAVY_SNOW
-      && !IS_SET (ch->room->room_flags, INDOORS))
+	&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+	&& !IS_SET (ch->affected_by, AFF_INFRAVIS))
+      	&& !IS_SET (ch->room->room_flags, INDOORS))
     return;
 
   for (i = list; i; i = i->next_in_room)
@@ -4138,6 +4142,8 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 	  sprintf (buf, "#6%s#0\n", ch->vehicle->room->name);
 	  send_to_char (buf, ch);
 	  if (weather_info[ch->vehicle->room->zone].state == HEAVY_SNOW
+	      && (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+	      && !IS_SET (ch->affected_by, AFF_INFRAVIS))
 	      && !IS_SET (ch->vehicle->room->room_flags, INDOORS)
 	      && IS_MORTAL (ch))
 	    {
@@ -4364,8 +4370,11 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 	  send_to_char (buf, ch);
 	}
 
-      if ((weather_info[ch->room->zone].state != HEAVY_SNOW
-	   || IS_SET (ch->room->room_flags, INDOORS)) || !IS_MORTAL (ch))
+      if (((weather_info[ch->room->zone].state != HEAVY_SNOW
+	   || get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+	   || IS_SET (ch->affected_by, AFF_INFRAVIS))
+	   || IS_SET (ch->room->room_flags, INDOORS))
+          || !IS_MORTAL (ch))
 	{
 	  sprintf (buf, "#6Exits:#0 ");
 
@@ -4415,7 +4424,9 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 
       if (weather_info[ch->room->zone].state == HEAVY_SNOW
 	  && !IS_SET (ch->room->room_flags, INDOORS)
-	  && IS_MORTAL (ch))
+	  && IS_MORTAL (ch)
+	  && (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+         && !IS_SET (ch->affected_by, AFF_INFRAVIS)))
 	{
 	  send_to_char (blizzard_description, ch);
 	}
@@ -4739,7 +4750,9 @@ do_exits (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (weather_info[ch->room->zone].state == HEAVY_SNOW
+  if (weather_info[ch->room->zone].state == HEAVY_SNOW 
+	&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+	&& !IS_SET (ch->affected_by, AFF_INFRAVIS))
       && !IS_SET (ch->room->room_flags, INDOORS) && IS_MORTAL (ch))
     {
       send_to_char ("You can't see a thing!\n", ch);
@@ -7842,7 +7855,7 @@ int kingdom_from_zone (CHAR_DATA *ch)
 		return 0;
 	else if (zone == 41 || zone == 40)
 		return 4;
-	else if (zone == 80 || zone == 81 || zone == 82)
+	else if (zone == 73 || zone == 80 || zone == 81 || zone == 82)
 		return 3;
 	else if (zone == 42 || zone == 43)
 		return 2;
@@ -7851,9 +7864,8 @@ int kingdom_from_zone (CHAR_DATA *ch)
 		  zone == 13 || zone == 14 || zone == 15 || zone == 18 || 
 		  zone == 19 || zone == 21 || zone == 22 || zone == 38 || 
 		  zone == 51 || zone == 54 || zone == 70 || zone == 71 || 
-		  zone == 72 || zone == 73 || zone == 74 || zone == 75 || 
-		  zone == 76 || zone == 77 || zone == 78 || zone == 79 ||
-		  zone == 96)
+		  zone == 72 || zone == 74 || zone == 75 || zone == 76 ||
+		  zone == 77 || zone == 78 || zone == 79 || zone == 96)
 		return 1;
 	else return -1;
 }
@@ -8068,7 +8080,9 @@ do_scan (CHAR_DATA * ch, char *argument, int cmd)
   if (is_sunlight_restricted (ch))
     return;
 
-  if (IS_SET (ch->room->room_flags, STIFLING_FOG))
+  if (IS_SET (ch->room->room_flags, STIFLING_FOG)
+      && (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+      && !IS_SET (ch->affected_by, AFF_INFRAVIS)))
     {
       send_to_char ("The thick fog in the area prevents any such attempt.\n",
 		    ch);
@@ -8077,7 +8091,9 @@ do_scan (CHAR_DATA * ch, char *argument, int cmd)
 
   if (IS_MORTAL (ch)
       && weather_info[ch->room->zone].state == HEAVY_SNOW
-      && !IS_SET (ch->room->room_flags, INDOORS))
+      && !IS_SET (ch->room->room_flags, INDOORS)
+      && (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+      && !IS_SET (ch->affected_by, AFF_INFRAVIS)))
     {
 
       send_to_char ("The onslaught of snow prevents any such attempt.\n", ch);
@@ -8299,21 +8315,25 @@ get_diagonal_scan_room (CHAR_DATA * ch, int nDirOne, int nDirTwo)
   ROOM_DATA *ptrTmpRoom = NULL;
 
   if ((ptrTmpExit = EXIT (ch, nDirOne))
-      && ((!IS_SET (ptrTmpExit->exit_info, EX_ISDOOR))
-      && (ptrTmpRoom = vtor (ptrTmpExit->to_room))
-      && (!IS_SET (ptrTmpRoom->room_flags, INDOORS))
-      && (ptrTmpRoom->sector_type != SECT_INSIDE)
-      && (ptrTmpRoom->sector_type != SECT_CITY)
-      && (ptrTmpRoom->sector_type != SECT_UNDERWATER)
-      && (!IS_SET (ptrTmpRoom->room_flags, STIFLING_FOG))
-      && (ptrTmpExit = ptrTmpRoom->dir_option[nDirTwo])
-      && (!IS_SET (ptrTmpExit->exit_info, EX_ISDOOR))
-      && (ptrTmpRoom = vtor (ptrTmpExit->to_room))
-      && (!IS_SET (ptrTmpRoom->room_flags, INDOORS))
-      && (ptrTmpRoom->sector_type != SECT_INSIDE)
-      && (ptrTmpRoom->sector_type != SECT_CITY)
-      && (ptrTmpRoom->sector_type != SECT_UNDERWATER)
-      && (!IS_SET (ptrTmpRoom->room_flags, STIFLING_FOG))))
+      	&& ((!IS_SET (ptrTmpExit->exit_info, EX_ISDOOR))
+      	&& (ptrTmpRoom = vtor (ptrTmpExit->to_room))
+      	&& (!IS_SET (ptrTmpRoom->room_flags, INDOORS))
+      	&& (ptrTmpRoom->sector_type != SECT_INSIDE)
+      	&& (ptrTmpRoom->sector_type != SECT_CITY)
+      	&& (ptrTmpRoom->sector_type != SECT_UNDERWATER)
+	&& (!IS_SET (ptrTmpRoom->room_flags, STIFLING_FOG)
+	&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+	&& !IS_SET (ch->affected_by, AFF_INFRAVIS)))
+      	&& (ptrTmpExit = ptrTmpRoom->dir_option[nDirTwo])
+      	&& (!IS_SET (ptrTmpExit->exit_info, EX_ISDOOR))
+      	&& (ptrTmpRoom = vtor (ptrTmpExit->to_room))
+      	&& (!IS_SET (ptrTmpRoom->room_flags, INDOORS))
+      	&& (ptrTmpRoom->sector_type != SECT_INSIDE)
+      	&& (ptrTmpRoom->sector_type != SECT_CITY)
+      	&& (ptrTmpRoom->sector_type != SECT_UNDERWATER)
+      	&& (!IS_SET (ptrTmpRoom->room_flags, STIFLING_FOG)
+	&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+	&& !IS_SET (ch->affected_by, AFF_INFRAVIS)))))
     {
 
       return ptrTmpRoom;
@@ -8448,9 +8468,11 @@ delayed_quick_scan (CHAR_DATA * ch)
 
       if (!(exit = EXIT (ch, dir))
 	  || (IS_SET (exit->exit_info, EX_ISDOOR)
-	      && IS_SET (exit->exit_info, EX_CLOSED))
+	  && IS_SET (exit->exit_info, EX_CLOSED))
 	  || !(next_room = vtor (exit->to_room))
-	  || (IS_SET (next_room->room_flags, STIFLING_FOG)))
+	  || (IS_SET (next_room->room_flags, STIFLING_FOG)
+	  && (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+	  && !IS_SET (ch->affected_by, AFF_INFRAVIS))))
 	{
 
 	  if (dir < 4)
@@ -8599,7 +8621,7 @@ delayed_scan (CHAR_DATA * ch)
       if (!could_see (ch, tch))
 	continue;
 
-      if (IS_SET (next_room->room_flags, STIFLING_FOG))
+      if ((IS_SET (next_room->room_flags, STIFLING_FOG) && (!get_affect (ch, MAGIC_AFFECT_INFRAVISION) && !IS_SET (ch->affected_by, AFF_INFRAVIS))))
 	continue;
 
       if (ch->skills[SKILL_SCAN] - penalty < number (1, 100)
@@ -8630,7 +8652,7 @@ delayed_scan (CHAR_DATA * ch)
       if (!could_see_obj (ch, tobj))
 	continue;
 
-      if (IS_SET (next_room->room_flags, STIFLING_FOG))
+      if ((IS_SET (next_room->room_flags, STIFLING_FOG) && (!get_affect (ch, MAGIC_AFFECT_INFRAVISION) && !IS_SET (ch->affected_by, AFF_INFRAVIS))))
 	continue;
 
       if (ch->skills[SKILL_SCAN] - penalty < number (1, 100))
@@ -8685,7 +8707,7 @@ delayed_scan (CHAR_DATA * ch)
       if (!could_see (ch, tch))
 	continue;
 
-      if (IS_SET (next_room->room_flags, STIFLING_FOG))
+      if (IS_SET (next_room->room_flags, STIFLING_FOG) && (!get_affect (ch, MAGIC_AFFECT_INFRAVISION) && !IS_SET (ch->affected_by, AFF_INFRAVIS)))
 	continue;
 
       if (ch->skills[SKILL_SCAN] - penalty < number (1, 100)
@@ -8716,7 +8738,7 @@ delayed_scan (CHAR_DATA * ch)
       if (!could_see_obj (ch, tobj))
 	continue;
 
-      if (IS_SET (next_room->room_flags, STIFLING_FOG))
+      if (IS_SET (next_room->room_flags, STIFLING_FOG) && (!get_affect (ch, MAGIC_AFFECT_INFRAVISION) && !IS_SET (ch->affected_by, AFF_INFRAVIS)))
 	continue;
 
       if (tobj->obj_flags.weight < 10000 && !CAN_WEAR (tobj, ITEM_TAKE))
@@ -8767,7 +8789,7 @@ delayed_scan (CHAR_DATA * ch)
       if (!could_see (ch, tch))
 	continue;
 
-      if (IS_SET (next_room->room_flags, STIFLING_FOG))
+      if (IS_SET (next_room->room_flags, STIFLING_FOG) && (!get_affect (ch, MAGIC_AFFECT_INFRAVISION) && !IS_SET (ch->affected_by, AFF_INFRAVIS)))
 	continue;
 
       if (ch->skills[SKILL_SCAN] - penalty < number (1, 100)

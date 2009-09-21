@@ -348,27 +348,29 @@ strcasecmp (char *s1, char *s2)
 }
 #endif
 
-// is_overcast 
+// is_overcast
 // returns true if the room is out of sunlight (petrification, etc)
-bool
-is_overcast (ROOM_DATA * room)
+bool is_overcast (ROOM_DATA * room)
 {
 	bool result = false;
 	int flags = room->room_flags;
 	int clouds = weather_info[room->zone].clouds;
 
 	if ((room->sector_type == SECT_INSIDE)
-		|| (flags & INDOORS)
-		|| (clouds == OVERCAST) 
-		|| (clouds == HEAVY_CLOUDS)
-		|| (flags & STIFLING_FOG))
+	   || (room->sector_type == SECT_FOREST)
+	   || (room->sector_type == SECT_CAVE)
+	   || (room->sector_type == SECT_PIT)
+	   || (room->sector_type == SECT_UNDERWATER)
+	   || (flags & INDOORS) || (flags & STIFLING_FOG)
+	   || (flags & DARK) || (flags & TUNNEL)
+	   || (flags & CAVE) || (clouds == OVERCAST)
+	   || (clouds == HEAVY_CLOUDS))
 	{
 		result = true;
 	}
 
 	return result;
 }
-
 // is_sunlight_restricted 
 // returns true if the character is currently suffering due to the sun.
 // TODO: move to char.h
@@ -3063,7 +3065,9 @@ can_see_obj (CHAR_DATA * ch, OBJ_DATA * obj)
 		!get_affect (ch, MAGIC_AFFECT_SEE_INVISIBLE))
 		return 0;
 
-	if (weather_info[ch->room->zone].state == HEAVY_SNOW
+	if ((weather_info[ch->room->zone].state == HEAVY_SNOW
+		&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+		&& !IS_SET (ch->affected_by, AFF_INFRAVIS)))
 		&& !IS_SET (ch->room->room_flags, INDOORS))
 		return 0;
 

@@ -3047,15 +3047,18 @@ randomize_mobile (CHAR_DATA * mob)
       make_frame (mob);
     }
 
-  mob->sex = number (1, 2);
-  if (IS_SET (mob->act, ACT_ENFORCER))
-    {
-      roll = number (1, 5);
-      if (roll == 5)
-	mob->sex = SEX_FEMALE;
-      else
-	mob->sex = SEX_MALE;
-    }
+  if (mob->sex == SEX_NEUTRAL)
+  {
+      mob->sex = number (1, 2);
+      if (IS_SET (mob->act, ACT_ENFORCER))
+      {
+         roll = number (1, 5);
+         if (roll == 5)
+            mob->sex = SEX_FEMALE;
+         else
+            mob->sex = SEX_MALE;
+      }
+  }
 
   mob->max_move = calc_lookup (mob, REG_MISC, MISC_MAX_MOVE);
   mob->move_points = mob->max_move;
