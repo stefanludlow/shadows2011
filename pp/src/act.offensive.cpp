@@ -2490,7 +2490,9 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
       if (is_sunlight_restricted (ch, room))
 	return;
 
-      if (IS_SET (room->room_flags, STIFLING_FOG))
+      if (IS_SET (room->room_flags, STIFLING_FOG)
+		  && !get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+		  && !IS_SET (ch->affected_by, AFF_INFRAVIS))
 	{
 	  send_to_char
 	    ("The stiflingly heavy fog in that area thwarts any such attempt.\n",
@@ -2524,7 +2526,10 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 	    }
 	  if (is_sunlight_restricted (ch, room))
 	    return;
-	  if (IS_SET (room->room_flags, STIFLING_FOG))
+
+	  if (IS_SET (room->room_flags, STIFLING_FOG)
+		  && !get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+		  && !IS_SET (ch->affected_by, AFF_INFRAVIS))
 	    {
 	      send_to_char
 		("The stiflingly heavy fog in that area thwarts any such attempt.\n",
@@ -2557,7 +2562,10 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 		}
 	      if (is_sunlight_restricted (ch, room))
 		return;
-	      if (IS_SET (room->room_flags, STIFLING_FOG))
+
+	      if (IS_SET (room->room_flags, STIFLING_FOG)
+		      && !get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+		      && !IS_SET (ch->affected_by, AFF_INFRAVIS))
 		{
 		  send_to_char
 		    ("The stiflingly heavy fog in that area thwarts any such attempt.\n",

@@ -1868,6 +1868,8 @@ get_room_desc_tag (CHAR_DATA * ch, ROOM_DATA * room)
 {
   if (IS_MORTAL (ch)
       && weather_info[room->zone].state == HEAVY_SNOW
+	&& !get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+	&& !IS_SET (ch->affected_by, AFF_INFRAVIS)
       && !IS_SET (room->room_flags, INDOORS))
     {
 

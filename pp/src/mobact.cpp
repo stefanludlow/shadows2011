@@ -1789,8 +1789,11 @@ acquire_archer_target (CHAR_DATA * ch, int i)
 	{
 	 // if (IS_SET (troom->room_flags, INDOORS))
 	   // continue;
-	  if (IS_SET (troom->room_flags, STIFLING_FOG))
+	  if (IS_SET (troom->room_flags, STIFLING_FOG)
+		  && !get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+		  && !IS_SET (ch->affected_by, AFF_INFRAVIS))
 	    return NULL;
+
 	  for (tch = troom->people; tch; tch = tch->next_in_room)
 	    {
 	      if (ch->room == tch->room && CAN_SEE (tch, ch)
@@ -1836,7 +1839,9 @@ acquire_distant_target (CHAR_DATA * ch, int i)
 
   troom = ch->room;
 
-  if (IS_SET (troom->room_flags, STIFLING_FOG))
+  if (IS_SET (troom->room_flags, STIFLING_FOG)
+	  && !get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+	  && !IS_SET (ch->affected_by, AFF_INFRAVIS))
     return NULL;
 
   if (!troom->dir_option[i])
@@ -1852,8 +1857,11 @@ acquire_distant_target (CHAR_DATA * ch, int i)
 
   for (j = 1; j <= 3; j++)
     {
-      if (IS_SET (troom->room_flags, STIFLING_FOG))
+      if (IS_SET (troom->room_flags, STIFLING_FOG)
+		  && !get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+		  && !IS_SET (ch->affected_by, AFF_INFRAVIS))
 	return NULL;
+
       for (tch = troom->people; tch; tch = tch->next_in_room)
 	{
 	  if (j == 2)
