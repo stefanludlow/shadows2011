@@ -4073,7 +4073,11 @@ void do_checkPay (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 	int employer = atoi(row[0]);
- 
+	if (!vtom (employer))
+	{ 
+		send_to_char("Pay Master is not defined.\n", ch);
+		return;
+	} 
 	// loop through all clan members search for job status.
 	CheckPay << "#6Players with jobs currently online:\n#0";
 	for (std::list<CHAR_DATA*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
@@ -4085,8 +4089,9 @@ void do_checkPay (CHAR_DATA * ch, char *argument, int cmd)
 				af = get_affect(tch, tJob);
 				if (af != NULL && af->a.job.employer == employer)
 				{
-					sprintf (buf, "\n%d. [#6%s#0] #5%s#0 (%s): #3%dcp #0every #2%d#0 days. (Job #2%d#0)\n",
-					index++, get_clan_rank_name(tch, clanname, clan_flags) ,tch->short_descr, tch->tname, af->a.job.cash, af->a.job.days,((af->type) - JOB_1 + 1));
+					get_clan(tch, clanname, &clan_flags);
+					sprintf (buf, "\n%d. [#6%s#0] #5%s#0: #3%dcp #0every #2%d#0 days. (Job #2%d#0)\n",
+					index++, get_clan_rank_name(tch, clanname, clan_flags) ,tch->short_descr, af->a.job.cash, af->a.job.days,((af->type) - JOB_1 + 1));
 					CheckPay << buf;
 				}
 			}
