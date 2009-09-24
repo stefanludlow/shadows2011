@@ -629,6 +629,10 @@ int get_currency_value( const int objnum );
 int get_currency_value( const OBJ_DATA* obj );
 void currency_print_line( const OBJ_DATA* obj, int* money, char* buffer, const char* wear_loc );
 char* coin_sdesc( const int objnum, const bool plural );
+int all_are_set( int holder, int flags );
+int nil_are_set( int holder, int flags );
+int any_are_set( int holder, int flags );
+int check_flags( int holder, int true_flags, int false_flags );
 //============END_AWESOME===============
 
 

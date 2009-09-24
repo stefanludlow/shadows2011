@@ -163,6 +163,54 @@ const int restricted_skills[] = {
 	-2				/* Astonomy */
 };
 
+int all_are_set(int holder, int flags)
+{
+	if((holder & flags) == flags)
+	{
+		return flags;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int nil_are_set(int holder, int flags)
+{
+	if((holder & flags) == 0)
+	{
+		return flags;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int any_are_set(int holder, int flags)
+{
+	if((holder & flags))
+	{
+		return flags;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+int check_flags(int holder,int true_flags, int false_flags)
+{
+	if(all_are_set(holder, true_flags) && nil_are_set(holder, false_flags))
+	{
+		return true_flags | false_flags;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 bool IS_NPC (const CHAR_DATA *ch)
 {
 	if (!ch)

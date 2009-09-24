@@ -2079,6 +2079,38 @@ initiate_move (CHAR_DATA * ch)
       return;
     }
 
+if (any_are_set(ch->act, ACT_VEHICLE)
+   && (target_room->sector_type >= SECT_PIT
+   || target_room->sector_type == SECT_SWAMP
+   || target_room->sector_type == SECT_MOUNTAIN
+   || target_room->sector_type == SECT_FOREST))
+{
+   bool can_move = false;
+
+   for (OBJ_DATA *tobj = target_room->contents; tobj; tobj = tobj->next_content)
+   {
+      if (tobj->nVirtual == 91686 || tobj->nVirtual == 91687)
+      {
+         can_move = true;
+         break;
+      }
+   }
+
+   if (!can_move)
+   {
+      act ("You can't go there.", true, ch, 0, 0, TO_CHAR);
+      
+      if (IS_RIDEE(ch))
+         act ("$N can't go there.", true, ch->mount, 0, ch, TO_CHAR);
+
+      if (IS_HITCHEE(ch))
+         act ("$N can't go there.", true, ch->hitcher, 0, ch, TO_CHAR);
+
+      clear_moves (ch);
+      return;
+   }
+}
+
   if (isguarded (ch->room, dir) && (IS_MORTAL (ch) || IS_NPC (ch)))
   {
 	  for (tch = ch->room->people; tch; tch = tch->next_in_room)
