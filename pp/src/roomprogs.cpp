@@ -6501,8 +6501,15 @@ r_setval (CHAR_DATA *ch, std::string argument)
 		}
 		else if (buf.find("desc") != std::string::npos)
 		{
-			mem_free(room->description);
-			room->description = str_dup(argument.c_str());
+			if(argument.substr(0, 9).compare("reformat") == 0)
+			{
+				reformat_desc (room->description, &room->description);
+			}
+			else
+			{
+				mem_free(room->description);
+				room->description = str_dup(argument.c_str());
+			}
 		}
 		else if (buf.find("sector") != std::string::npos)
 		{
