@@ -292,10 +292,10 @@ point_update (void)
 //	}
 
 //Sleep - disabled by  Grommit, to be used later */
-/*      if (GET_POS (ch) >= SLEEP)
+/*  */    if (GET_POS (ch) >= SLEEP)
 	{
 
-	  if (ch->pc)
+	  /*if (ch->pc)
 	    {
 
 	      if ((af = get_affect (ch, MAGIC_AFFECT_PARALYSIS)))
@@ -370,7 +370,7 @@ point_update (void)
 		sleep_credit (ch);
 	      else if (IS_MORTAL (ch))
 		sleep_need (ch);
-	    }
+	    }*/
 
 	  if (GET_POS (ch) == POSITION_SLEEPING && ch->desc &&
 	      ch->pc && ch->pc->dreams && !number (0, 5))
@@ -378,7 +378,7 @@ point_update (void)
 
 	  
 	}
-end sleep code removed by grommit */
+/*end sleep code removed by grommit */
 
 	if (GET_MOVE (ch) < GET_MAX_MOVE (ch))
 	    GET_MOVE (ch) = MIN (GET_MOVE (ch) + move_gain (ch), GET_MAX_MOVE (ch));
@@ -467,11 +467,12 @@ end sleep code removed by grommit */
     if (!IS_NPC (ch) && ch->pc->app_cost && ch->desc)
 	{
 	  playing_time = real_time_passed (time (0) - ch->time.logon + ch->time.played, 0);
-	  if (playing_time.hour >= 12 && ch->desc->acct)
+	  if (playing_time.hour >= 10 && ch->desc->acct)
 	    {
 
-	      ch->desc->acct->pay_application_cost (ch->pc->app_cost);
+	      //ch->desc->acct->pay_application_cost (ch->pc->app_cost);
 	      ch->pc->app_cost = 0;
+	      save_char (ch, true);
 	    }
 	}
 
