@@ -359,7 +359,7 @@ const struct command_data commands[] = {
 	{"classify", do_classify, DEAD, C_LV2},
 	{"clog", do_clog, DEAD, C_LV2},	/* Crafts Log */
 	{"craftspc", do_craftspc, DEAD, C_LV2},
-	{"cset", do_cset, DEAD, C_LV1},//dropped for newbie crafters
+	{"cset", do_cset, DEAD, C_LV5},//was level 1, movd to five for a craft audit
 	{"find", do_find, DEAD, C_LV2},
 	//{"freeze", do_freeze, DEAD, C_LV2},
 	{"locate", do_locate, DEAD, C_LV2},
@@ -450,7 +450,6 @@ const struct command_data commands[] = {
 	{"stayput", do_stayput, DEAD, C_LV4},
 	{"swap", do_swap, DEAD, C_LV4},
 	{"te_pit", do_te_pit, DEAD, C_LV4},
-	{"unban", do_unban, DEAD, C_LV4},
 	{"whap", do_whap, STAND, C_LV4},	/* Joke command */
 	{"wound", do_wound, DEAD, C_LV4},
 	{"writings", do_writings, DEAD, C_LV4},
@@ -466,6 +465,7 @@ const struct command_data commands[] = {
 	//{"print", do_print, DEAD, C_LV5},
 	{"replace", do_replace, DEAD, C_LV5},
 	{"roster", do_roster, DEAD, C_LV5},
+	{"unban", do_unban, DEAD, C_LV5},
 	{"watch", do_watch, DEAD, C_LV5},
   {"wizlock", do_wizlock, DEAD, C_LV5},
 	{"wmotd", do_wmotd, DEAD, C_LV5}, /* write the MOTD */
