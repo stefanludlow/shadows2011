@@ -553,6 +553,7 @@ mysql_player_search (int search_type, char *string, int timeframe)
   // Again, use real_query() here rather than safe_query() because the latter is
   // impractical and this command is for staff use only.
   fprintf(stderr, "%s\n", query);
+
   mysql_real_query (database, query, strlen (query));
 
   result = mysql_store_result (database);
