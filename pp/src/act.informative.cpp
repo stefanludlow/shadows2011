@@ -7878,7 +7878,12 @@ void roomCount(ROOM_DATA *rd)
 	rd->occupants = 0;
 	for (CHAR_DATA *tch = rd->people; tch; tch = tch->next_in_room)
 	{
-		if (!IS_NPC(tch) && !IS_LINKDEAD(tch) && IS_MORTAL(tch)) //Don't count NPC's or admin's. - Vader Also don't count linkdead people. --Blurr
+		if (!IS_NPC(tch))
+      	{
+        	if (!IS_LINKDEAD(tch) && IS_MORTAL(tch))
+            	rd->occupants++;
+      	}
+      	else if (tch->desc && tch->desc->original)
 		rd->occupants++;
 	}
 }
@@ -7926,8 +7931,10 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 				mortals++;
 			else
 				guests++;
-			if(clansphere == sphere && !((d->character->pc->level) > 0))
+				
+			if((clansphere == sphere) && (!(d->character->pc->level > 0)))
 				clanCount++;
+				
 			if(d->character->pc->level > 0)
 			{
 				immortals++;
@@ -7936,6 +7943,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 					availableAdminsStream << d->character->tname << std::endl;
 					availableAdmins = true;
 				}
+			
 			}
 		}
 	}
