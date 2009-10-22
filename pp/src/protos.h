@@ -759,6 +759,7 @@ int fread_number (FILE * fp);
 void update_crafts_file ();
 void list_all_crafts (CHAR_DATA * ch);
 void display_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft);
+void display_spec_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA *craft); 
 int craft_uses (SUBCRAFT_HEAD_DATA * craft, int vnum);
 int craft_produces (SUBCRAFT_HEAD_DATA * craft, int vnum);
 void craft_clan (CHAR_DATA * ch, char *argument, char *subcmd);
@@ -781,6 +782,7 @@ void craft_group (CHAR_DATA * ch, char *argument, char *subcmd);
 void craft_group_pain (CHAR_DATA * ch, int pain_cost);
 void craft_group_move (CHAR_DATA * ch, int move_cost, char *message);
 void craftstat (CHAR_DATA * ch, char *argument);
+void spec_craftstat (CHAR_DATA * ch, char *argument);
 void clan_rem_obj (OBJ_DATA *obj, OBJ_CLAN_DATA * targ);
 
 char *breath_bar (CHAR_DATA * ch);

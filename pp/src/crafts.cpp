@@ -954,29 +954,29 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 			if (!str_cmp (craft->subcraft_name, buf))
 				break;
 
-      if (!str_cmp (craft->craft_name, buf))
-	{
-	  category = true;
-	  break;
-	}
-    }
-
-  if (category)
-    {
-
-      sprintf (buf2, "\nWe have the following #6%s#0 crafts:\n\n", buf);
-      output.assign(buf2);
-			for (craft = crafts; craft; craft = craft->next)
+			if (!str_cmp (craft->craft_name, buf))
 				{
-					if (!str_cmp (craft->craft_name, buf))
-						{
-							sprintf (buf2,
-								"#6Subcraft:#0 %-24s #6Command:#0 %-20s\n",
-	     					craft->subcraft_name,
-	     					craft->command);
-							output.append(buf2);
-	    }
-	}
+				category = true;
+				break;
+				}
+    	}
+
+	if (category)
+		{
+	
+		  sprintf (buf2, "\nWe have the following #6%s#0 crafts:\n\n", buf);
+		  output.assign(buf2);
+				for (craft = crafts; craft; craft = craft->next)
+					{
+						if (!str_cmp (craft->craft_name, buf))
+							{
+								sprintf (buf2,
+									"#6Subcraft:#0 %-24s #6Command:#0 %-20s\n",
+								craft->subcraft_name,
+								craft->command);
+								output.append(buf2);
+			}
+		}
 
       page_string (ch->desc, output.c_str());
       return;
@@ -5187,5 +5187,149 @@ do_craftspc (CHAR_DATA * ch, char *argument, int cmd)
 			page_string (ch->desc, output.c_str());
 			return;
 		}
+	return;
+}
+
+//displays only header info and economic inforamtion
+void
+spec_craftstat (CHAR_DATA * ch, char *argument) 
+{
+	SUBCRAFT_HEAD_DATA *craft;
+	char buf[MAX_STRING_LENGTH];
+	
+	argument = one_argument (argument, buf);
+
+	if (!*buf)
+		{
+		send_to_char ("Which craft did you wish to view?", ch);
+		return;
+		}
+
+	
+			
+	for (craft = crafts; craft; craft = craft->next)
+		{
+		if (!str_cmp (craft->subcraft_name, buf))  //individual craft
+			{
+			display_spec_craft (ch, craft);
+			return;
+			}
+      	if (!str_cmp (craft->craft_name, buf)) //craft catagory
+			{
+	  		display_spec_craft (ch, craft);
+			}
+    	}
+
+
+	return;
+}
+
+void
+display_spec_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA *craft) 
+{
+	PHASE_DATA *phase;
+	char buf[MAX_STRING_LENGTH];
+	DEFAULT_ITEM_DATA *items;
+	int i, j, phasenum = 1;
+	float low_consumed_expense = 0;
+	float high_consumed_expense = 0;
+	float low_reusable_expense = 0;
+	float high_reusable_expense = 0;
+	float low_produced_value = 0;
+	float high_produced_value = 0;
+	float low_cost = 0;
+	float high_cost = 0;
+	float obj_value;
+
+/** displays information **/
+	*buf = '\0';
+
+	sprintf (b_buf, "#6Craft:#0 %s #6Subcraft:#0 %s #6Command:#0 %s\n",
+			craft->craft_name, craft->subcraft_name, craft->command);
+
+/** delay **/
+	if (craft->delay)
+		sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Hours\n", craft->delay);
+
+	if (craft->faildelay)
+		sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Hours\n", craft->faildelay);
+
+
+/** evaluates objects for each phase **/
+
+	for (phase = craft->phases; phase; phase = phase->next, phasenum++)
+		{
+
+		if (craft->obj_items)
+			{
+			for (i = 1; craft->obj_items[i]; i++)
+				{
+				items = craft->obj_items[i];
+		
+				if (items->phase != phase)
+					continue;
+		
+				if (items->items && items->items[0])
+					{
+		
+					for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+						{
+						if (items->items[j]
+							&& items->items[j] != items->item_counts)
+							{
+							OBJ_DATA *obj = vtoo (items->items[j]);
+				
+							if (obj)
+								{
+								obj_value = obj->farthings + (4*obj->silver);
+								if (!low_cost || (low_cost > obj_value))
+									{
+									low_cost = obj_value;
+									}
+								if (high_cost < obj_value)
+									{
+									high_cost = obj_value;
+									}
+								}//if (obj)
+							}//if (items->items[j])
+						} //for (j = 0;) 
+		
+					low_cost *= items->item_counts;
+					high_cost *= items->item_counts;
+		
+					if (IS_SET (items->flags, SUBCRAFT_USED))
+						{
+						low_consumed_expense += low_cost;
+						high_consumed_expense += high_cost;
+						}
+		
+					else if (IS_SET (items->flags, SUBCRAFT_PRODUCED)
+							|| IS_SET (items->flags, SUBCRAFT_GIVE))
+						{
+						low_produced_value += low_cost;
+						high_produced_value += high_cost;
+						}
+			
+					else
+						{
+						low_reusable_expense += low_cost;
+						high_reusable_expense += high_cost;
+						}
+					}//if (items->items && items->items[0])
+				}//for (i = 1; craft->obj_items[i]; i++)
+			}//if (craft->obj_items)
+
+		}//for (phase = craft->phases)
+
+	sprintf (b_buf + strlen (b_buf), 
+	"#6Reusable Material Costs:#0 % 7.2f - % 7.2f bits\n"
+	"#6Expended Material Costs:#0 % 7.2f - % 7.2f bits\n"
+	"#6Produced Material Value:#0 % 7.2f - % 7.2f bits\n\n",
+	low_reusable_expense, high_reusable_expense,
+	low_consumed_expense, high_consumed_expense,
+	low_produced_value, high_produced_value);
+	
+	page_string (ch->desc, b_buf);
+
 	return;
 }
