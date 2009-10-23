@@ -5271,7 +5271,8 @@ display_spec_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA *craft)
 		
 				if (items->items && items->items[0])
 					{
-		
+					low_cost = 0;
+					high_cost = 0;	
 					for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
 						{
 						if (items->items[j]
