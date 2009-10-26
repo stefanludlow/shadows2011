@@ -4447,6 +4447,7 @@ do_stat (CHAR_DATA * ch, char *argument, int cmd)
       s ("    a         account");
       s ("    e         email");
       s ("    f         craft");
+      s ("    k         special craft");
       s ("");
       
       return;
@@ -4476,6 +4477,9 @@ do_stat (CHAR_DATA * ch, char *argument, int cmd)
 	case 'f':
 	  craftstat (ch, arg2);
 	  return;
+	case 'k':
+	  spec_craftstat (ch, arg2);
+	  return;
 	default:
 	  s ("Usage: stat <room|char|mob|obj|acct|email|craft> name\n");
 	  s ("");
@@ -4486,6 +4490,7 @@ do_stat (CHAR_DATA * ch, char *argument, int cmd)
       s ("    a         account");
       s ("    e         email");
       s ("    f         craft");
+      s ("    k         special craft");
       s ("");
 	  return;
 	}
