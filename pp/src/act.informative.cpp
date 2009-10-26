@@ -7926,7 +7926,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 				mortals++;
 			else
 				guests++;
-			if(clansphere == sphere && !((d->character->pc->level) > 0))
+			if(((clansphere == sphere) && (!(d->character->pc->level > 0))) || ((clansphere == sphere) && (IS_NPC(d->character))))
 				clanCount++;
 			if(d->character->pc->level > 0)
 			{
