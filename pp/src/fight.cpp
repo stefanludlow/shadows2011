@@ -1819,9 +1819,9 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	if (IS_SET (src->act, ACT_VEHICLE))
 		return 0;
 
-	sprintf (AD, "%s [%d hp %d mvs] strike %d %s [%d hp %d mvs]  ",
-		GET_NAME (src), GET_HIT (src), GET_MOVE (src), attack_num,
-		GET_NAME (tar), GET_HIT (tar), GET_MOVE (tar));
+	// sprintf (AD, "%s [%d hp %d mvs] strike %d %s [%d hp %d mvs]  ",
+	//	GET_NAME (src), GET_HIT (src), GET_MOVE (src), attack_num,
+	//	GET_NAME (tar), GET_HIT (tar), GET_MOVE (tar));
 
 	attack_modifier = src->fight_percentage;
 	defense_modifier = tar->fight_percentage;
@@ -1850,11 +1850,11 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 		return 0;
 
 	if (attack_weapon)
-		sprintf (AD, "%s\n\r", attack_weapon->short_description);
+		;// sprintf (AD, "%s\n\r", attack_weapon->short_description);
 	else
 	{
 		attack = src->skills[SKILL_BRAWLING];	/* default attack */
-		sprintf (AD, "BRAWLING\n\r");
+		// sprintf (AD, "BRAWLING\n\r");
 	}
 
 	if (attack_weapon)
@@ -1863,10 +1863,10 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	if (attack < skill_level(src, SKILL_OFFENSE, 0))
 	{
 		attack = skill_level(src, SKILL_OFFENSE, 0);
-		sprintf (AD, "Using Offense %d ", (int) attack);
+		// sprintf (AD, "Using Offense %d ", (int) attack);
 	}
 
-	sprintf (AD, "ABase %d ", (int) attack);
+	// sprintf (AD, "ABase %d ", (int) attack);
 
 	/* Encumberance penalty */
 
@@ -1879,7 +1879,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	}
 
 	attack_modifier = attack_modifier * enc_tab[i].penalty;
-	sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
+	// sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
 	/* Move costs */    
 	/** 
 	move_cost = enc_tab[i].move + 2.0 for Frantic
@@ -1922,7 +1922,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 
 
 	attack_modifier = attack_modifier * fatchk;
-	sprintf (AD, "\nAtk Fatigue %3.2f real Fatigue  %3.2f", fatchk, fatigue[i].penalty);
+	// sprintf (AD, "\nAtk Fatigue %3.2f real Fatigue  %3.2f", fatchk, fatigue[i].penalty);
 
 
 
@@ -1932,7 +1932,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	{
 		skill_use(src, SKILL_DUAL, 0);
 		r1 = .60 + .40 * src->skills[SKILL_DUAL] / 100.0;
-		sprintf (AD, "Dual Pen %3.2f ", r1);
+		// sprintf (AD, "Dual Pen %3.2f ", r1);
 		attack_modifier = attack_modifier * r1;
 	}
 
@@ -1946,17 +1946,17 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	if (get_affect (src, MAGIC_AFFECT_FURY))
 	{
 		attack_modifier = attack_modifier * 1.25;
-		sprintf (AD, "* 1.25 [FURY] ");
+		// sprintf (AD, "* 1.25 [FURY] ");
 	}
 
 	if (get_affect (src, MAGIC_AFFECT_DIZZINESS))
 	{
 		attack_modifier = attack_modifier * 0.75;
-		sprintf (AD, "* 0.75 [DIZZINESS] ");
+		// sprintf (AD, "* 0.75 [DIZZINESS] ");
 	}
 
-	sprintf (AD, "FM %3.2f ", fight_tab[src->fight_mode].offense_modifier);
-	sprintf (AD, " = OFFENSE %3.0f\n", attack * attack_modifier / 100);
+	// sprintf (AD, "FM %3.2f ", fight_tab[src->fight_mode].offense_modifier);
+	// sprintf (AD, " = OFFENSE %3.0f\n", attack * attack_modifier / 100);
 
 	/* DEFENSE */
 
@@ -2091,7 +2091,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	if (tar->aiming_at)
 		defense -= 20;
 
-	sprintf (AD, "DBase %d ", (int) defense);
+	// sprintf (AD, "DBase %d ", (int) defense);
 
 
 	/* Encumberance penalty */
@@ -2104,7 +2104,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 			break;
 	}
 
-	sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
+	// sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
 	defense_modifier = defense_modifier * enc_tab[i].penalty;
 
 	/* Move costs */    
@@ -2143,7 +2143,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 		fatchk = 1.00;
 
 	defense_modifier = defense_modifier * fatchk;
-	sprintf (AD, "\nDef Fatigue %3.2f FatiguePen %3.2f", fatchk, fatigue[i].penalty);
+	// sprintf (AD, "\nDef Fatigue %3.2f FatiguePen %3.2f", fatchk, fatigue[i].penalty);
 
 
 
@@ -2153,21 +2153,21 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	defense_modifier = defense_modifier *
 		fight_tab[tar->fight_mode].defense_modifier;
 
-	sprintf (AD, "FM %3.2f ", fight_tab[tar->fight_mode].defense_modifier);
+	// sprintf (AD, "FM %3.2f ", fight_tab[tar->fight_mode].defense_modifier);
 
 	/* Hand delay modifier */
 
 	if (defense_hand == 1)
-		r1 = (100 - 5 * tar->primary_delay) / 100.0;
+		r1 = (100 - 1 * tar->primary_delay) / 100.0;
 	else
-		r1 = (100 - 5 * tar->secondary_delay) / 100.0;
+		r1 = (100 - 1 * tar->secondary_delay) / 100.0;
 
-	if (r1 < .25)			/* Maximum 75% penalty for being delayed. */
-		r1 = .25;
+	if (r1 < .75)   /* Maximum 25% penalty for being delayed. */
+		r1 = .75;
 
 	defense_modifier = defense_modifier * r1;
 
-	sprintf (AD, "DelayPen %3.2f ", r1);
+	// sprintf (AD, "DelayPen %3.2f ", r1);
 
 	defense = defense * defense_modifier / 100;
 	attack = attack * attack_modifier / 100;
@@ -2203,7 +2203,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 			defense -= 20;
 	}
 
-	sprintf (AD, " = DEFENSE %d\n", (int) defense);
+	// sprintf (AD, " = DEFENSE %d\n", (int) defense);
 
 	attack = figure_wound_skillcheck_penalties (src, (int) attack);
 	defense = figure_wound_skillcheck_penalties (tar, (int) defense);
@@ -2237,18 +2237,18 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	{
 		def_result = RESULT_NONE;
 		off_result = ignore_offense[off_success];
-		sprintf (AD, "IGNORE:  %s = %s\n",
-			cs_name[off_success], rs_name[off_result]);
+		// sprintf (AD, "IGNORE:  %s = %s\n",
+		//	cs_name[off_success], rs_name[off_result]);
 	}
 
 	else if (defense_hand == 1 && !defense_weapon)
 	{
 		off_result = dodge_offense[off_success][def_success];
 		def_result = dodge_defense[off_success][def_success];
-		sprintf (AD, "DODGE:  %s(%d) = %s(%d);    %s(%d) = %s(%d)\n",
-			cs_name[off_success], off_success, rs_name[off_result],
-			off_result, cs_name[def_success], def_success,
-			rs_name[def_result], def_result);
+		// sprintf (AD, "DODGE:  %s(%d) = %s(%d);    %s(%d) = %s(%d)\n",
+		//	cs_name[off_success], off_success, rs_name[off_result],
+		//	off_result, cs_name[def_success], def_success,
+		//	rs_name[def_result], def_result);
 	}
 
 	else if (defense_weapon)
@@ -2262,9 +2262,9 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 			def_result = RESULT_PARRY;
 		}
 
-		sprintf (AD, "BLOCK/PARRY:  %s = %s;    %s = %s\n",
-			cs_name[off_success], rs_name[off_result],
-			cs_name[def_success], rs_name[def_result]);
+		// sprintf (AD, "BLOCK/PARRY:  %s = %s;    %s = %s\n",
+		//	cs_name[off_success], rs_name[off_result],
+		//	cs_name[def_success], rs_name[def_result]);
 	}
 
 	figure_damage (src, tar, attack_weapon, off_result, &damage, &location);
@@ -2295,8 +2295,8 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 		else if (!attack_weapon || number (0, 1))
 			off_result = RESULT_STUMBLE;
 
-		if (off_result != RESULT_FUMBLE)
-			sprintf (AD, "offensive result -> %s\n", rs_name[off_result]);
+		//if (off_result != RESULT_FUMBLE)
+			// sprintf (AD, "offensive result -> %s\n", rs_name[off_result]);
 	}
 
 	if (def_result == RESULT_FUMBLE)
@@ -2313,8 +2313,8 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 		else if (!defense_weapon || number (0, 1))
 			def_result = RESULT_STUMBLE;
 
-		if (def_result != RESULT_FUMBLE)
-			sprintf (AD, "defensive result -> %s\n", rs_name[def_result]);
+		//if (def_result != RESULT_FUMBLE)
+	//		// sprintf (AD, "defensive result -> %s\n", rs_name[def_result]);
 	}
 
 	/* DA can occur only if defending a primary attacker */
@@ -2505,11 +2505,13 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 		off_result,
 		def_result, attack_num, fd, off_success, def_success);
 
-	sprintf (AD, "---------------------------------------\n");
+	//// sprintf (AD, "---------------------------------------\n");
 
+	/*
 	for (dch = src->room->people; dch; dch = dch->next_in_room)
 		if (IS_SET (dch->debug_mode, DEBUG_FIGHT))
 			send_to_char (fd, dch);
+	*/
 
 	if (tar->deleted)
 		return 1;
@@ -2850,21 +2852,15 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 
   else if (off_result == RESULT_FUMBLE)
     {
-      if ((tobj = get_equip (src, WEAR_PRIM)) == attack_weapon
-	  && !IS_SET (src->flags, FLAG_COMPETE))
+      if ((tobj = get_equip (src, WEAR_PRIM)) == attack_weapon)
 	obj_to_room (unequip_char (src, WEAR_PRIM), src->in_room);
-      else if ((tobj = get_equip (src, WEAR_SEC)) == attack_weapon
-	       && !IS_SET (src->flags, FLAG_COMPETE))
+      else if ((tobj = get_equip (src, WEAR_SEC)) == attack_weapon)
 	obj_to_room (unequip_char (src, WEAR_SEC), src->in_room);
-      else if ((tobj = get_equip (src, WEAR_BOTH)) == attack_weapon
-	       && !IS_SET (src->flags, FLAG_COMPETE))
+      else if ((tobj = get_equip (src, WEAR_BOTH)) == attack_weapon)
 	obj_to_room (unequip_char (src, WEAR_BOTH), src->in_room);
-      else if (!IS_SET (src->flags, FLAG_COMPETE))
 	system_log ("Disarm, but couldn't find weapons's hand. (attacker)",
 		    true);
 
-      if (!IS_SET (src->flags, FLAG_COMPETE))
-	{
 	  if (attack_weapon == src->right_hand)
 	    src->right_hand = NULL;
 	  else if (attack_weapon == src->left_hand)
@@ -2872,7 +2868,6 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 	  add_second_affect (SA_GET_OBJ, (10-(GET_DEX(src)/5)+number(2,4)), src, attack_weapon, "", 0);
 	  add_second_affect (SA_WEAR_OBJ, (13-(GET_DEX(src)/5)+number(2,5)), src, attack_weapon, "", 0);
 	  attack_weapon->tmp_flags |= SA_DROPPED;
-	}
     }
 
   else if (off_result == RESULT_WEAPON_BREAK)
@@ -2899,24 +2894,19 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 
   if (def_result == RESULT_FUMBLE)
     {
-      if (get_equip (tar, WEAR_PRIM) == defense_weapon
-	  && !IS_SET (tar->flags, FLAG_COMPETE))
+      if (get_equip (tar, WEAR_PRIM) == defense_weapon)
 	obj_to_room (unequip_char (tar, WEAR_PRIM), tar->in_room);
-      else if (get_equip (tar, WEAR_SEC) == defense_weapon
-	       && !IS_SET (tar->flags, FLAG_COMPETE))
+      else if (get_equip (tar, WEAR_SEC) == defense_weapon)
 	obj_to_room (unequip_char (tar, WEAR_SEC), tar->in_room);
-      else if (get_equip (tar, WEAR_BOTH) == defense_weapon
-	       && !IS_SET (tar->flags, FLAG_COMPETE))
+      else if (get_equip (tar, WEAR_BOTH) == defense_weapon)
 	obj_to_room (unequip_char (tar, WEAR_BOTH), tar->in_room);
-      else if (get_equip (tar, WEAR_SHIELD) == defense_weapon
-	       && !IS_SET (tar->flags, FLAG_COMPETE))
+      else if (get_equip (tar, WEAR_SHIELD) == defense_weapon)
 	obj_to_room (unequip_char (tar, WEAR_SHIELD), tar->in_room);
-      else if (!IS_SET (tar->flags, FLAG_COMPETE))
+      else 
 	system_log ("Disarm, but couldn't find weapons's hand. (defender)",
 		    true);
 
-      if (!IS_SET (tar->flags, FLAG_COMPETE))
-	{
+
 	  if (defense_weapon == tar->right_hand)
 	    tar->right_hand = NULL;
 	  else if (defense_weapon == tar->left_hand)
@@ -2924,7 +2914,6 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 	  add_second_affect (SA_GET_OBJ, (10-(GET_DEX(tar)/5)+number(2,4)), tar, defense_weapon, "", 0);
 	  add_second_affect (SA_WEAR_OBJ, (13-(GET_DEX(tar)/5)+number(2,5)), tar, defense_weapon, "", 0);
 	  defense_weapon->tmp_flags |= SA_DROPPED;
-	}
     }
 
   else if (def_result == RESULT_WEAPON_BREAK ||
@@ -3039,9 +3028,9 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
     {
       if (get_equip (tar, WEAR_PRIM) == defense_weapon ||
 	  get_equip (tar, WEAR_BOTH) == defense_weapon)
-	tar->primary_delay++;
+	tar->primary_delay += MAX(0, 7-GET_INT(tar)/3);
       else if (get_equip (tar, WEAR_SEC) == defense_weapon)
-	tar->secondary_delay++;
+	tar->secondary_delay += MAX(0, 7-GET_INT(tar)/3);
     }
 
   else if (def_result == RESULT_ADV)
@@ -3071,15 +3060,15 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
   else
     attack_delay += 20 - GET_DEX (src) + use_table[SKILL_BRAWLING].delay;
 
-  sprintf (AD, "AttDel %d ", attack_delay);
+  // sprintf (AD, "AttDel %d ", attack_delay);
 
   /* str+dex delay adjustment */
 
   delay_modifier = 100;
 
-  delay_modifier = delay_modifier - (GET_AGI (src) + GET_STR (src) + GET_DEX (src) - 25);
+  delay_modifier = delay_modifier - ((2*GET_AGI (src)) + GET_DEX (src) - 25);
 
-  sprintf (AD, "AGISTRDEXadj %d%% ", delay_modifier);
+  // sprintf (AD, "AGISTRDEXadj %d%% ", delay_modifier);
 
   attack_delay = attack_delay * delay_modifier / 100;
 
@@ -3101,15 +3090,15 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
   else if (i < 15)
     attack_delay += (15 - i);		/* Exhausted */
 
-  sprintf (AD, "Fatigue %d ", attack_delay);
+  // sprintf (AD, "Fatigue %d ", attack_delay);
 
   /* Fightmode delay adjustment */
 
   attack_delay += fight_tab[src->fight_mode].delay;
   attack_delay += number(0,3);
 
-  sprintf (AD, "FM %d = %d [%d] (2)=%d\n", attack_delay, attack_delay,
-	   attack_num, src->secondary_delay);
+  // sprintf (AD, "FM %d = %d [%d] (2)=%d\n", attack_delay, attack_delay,
+	  // attack_num, src->secondary_delay);
 
   if (attack_num == 1)
     src->primary_delay = attack_delay;
@@ -4390,7 +4379,7 @@ compete_strike (CHAR_DATA * src, CHAR_DATA * tar, struct stats_data *stats)
 void
 compete (CHAR_DATA * ch, CHAR_DATA * src, CHAR_DATA * tar, int iterations)
 {
-  int tick = 0;
+  long int tick = 0, seconds = 0;
   int i;
   OBJ_DATA *src_prim = NULL;
   OBJ_DATA *tar_prim = NULL;
@@ -4473,8 +4462,12 @@ compete (CHAR_DATA * ch, CHAR_DATA * src, CHAR_DATA * tar, int iterations)
 	{
 
 	  if (!(tick % 4))
+	  {
 	    second_affect_update ();
+		seconds++;
+	  }
 
+	  /*
 	  if (tick & 1)
 	    {
 	      if (compete_strike (src, tar, &src_stats))
@@ -4491,6 +4484,7 @@ compete (CHAR_DATA * ch, CHAR_DATA * src, CHAR_DATA * tar, int iterations)
 	      if (compete_strike (src, tar, &src_stats))
 		break;
 	    }
+	  */
 
 	  if (src->primary_delay)
 	    src->primary_delay--;
@@ -4503,6 +4497,12 @@ compete (CHAR_DATA * ch, CHAR_DATA * src, CHAR_DATA * tar, int iterations)
 
 	  if (tar->secondary_delay)
 	    tar->secondary_delay--;
+	  
+	  if (compete_strike(src, tar, &src_stats))
+		  break;
+
+	  if (compete_strike(tar, src, &tar_stats))
+		  break;
 
 	  tick++;
 	}
@@ -4510,16 +4510,57 @@ compete (CHAR_DATA * ch, CHAR_DATA * src, CHAR_DATA * tar, int iterations)
       GET_MOVE (src) = GET_MAX_MOVE (src);
       GET_MOVE (tar) = GET_MAX_MOVE (tar);
 
-      second_affect_update ();
-      second_affect_update ();
-      second_affect_update ();
-      second_affect_update ();
-      second_affect_update ();
-      second_affect_update ();
-      second_affect_update ();
-      second_affect_update ();
-      second_affect_update ();
-      second_affect_update ();
+	  SECOND_AFFECT *sa;
+	  sa = get_second_affect (tar, SA_GET_OBJ, NULL);
+	  if (sa)
+	  {
+		  sa->obj->tmp_flags &= ~SA_DROPPED;
+		  obj_from_room(&sa->obj, 1);
+		  obj_to_char(sa->obj, tar);
+
+		  sa = get_second_affect (tar, SA_WEAR_OBJ, NULL);
+		  if (sa)
+		  {
+			  if (wieldHandCount(tar->race,sa->obj->o.od.value[3]) == 1)
+			  {
+				  if (get_equip(tar,WEAR_PRIM))
+					  equip_char (tar, sa->obj, WEAR_SEC);
+				  else
+					  equip_char (tar, sa->obj, WEAR_PRIM);
+			  }
+			  else
+			  {
+				  equip_char (tar, sa->obj, WEAR_BOTH);
+			  }
+		  }
+	  }
+
+	  sa = get_second_affect (src, SA_GET_OBJ, NULL);
+	  if (sa)
+	  {
+		  sa->obj->tmp_flags &= ~SA_DROPPED;
+		  obj_from_room(&sa->obj, 1);
+		  obj_to_char(obj, src);
+
+		  sa = get_second_affect (src, SA_WEAR_OBJ, NULL);
+		  if (sa)
+		  {
+			  if (wieldHandCount(src->race,sa->obj->o.od.value[3]) == 1)
+			  {
+				  if (get_equip(src,WEAR_PRIM))
+					  equip_char (src, sa->obj, WEAR_SEC);
+				  else
+					  equip_char (src, sa->obj, WEAR_PRIM);
+			  }
+			  else
+			  {
+				  equip_char (src, sa->obj, WEAR_BOTH);
+			  }
+		  }
+	  }
+
+	  clear_player_from_second_affects(tar);
+	  clear_player_from_second_affects(src);
 
       if (src_prim && !get_equip (src, WEAR_PRIM))
 	{
@@ -4580,7 +4621,7 @@ compete (CHAR_DATA * ch, CHAR_DATA * src, CHAR_DATA * tar, int iterations)
 	{
 	  tar_stats.breaks++;
 	  obj = load_object (tar_shield->nVirtual);
-	  obj_to_char (obj, src);
+	  obj_to_char (obj, tar);
 	}
 
       tics++;
@@ -4630,11 +4671,15 @@ compete (CHAR_DATA * ch, CHAR_DATA * src, CHAR_DATA * tar, int iterations)
   src->flags &= ~FLAG_COMPETE;
   tar->flags &= ~FLAG_COMPETE;
 
+  mem_free(name);
+
+  /*
   for (obj = src->room->contents; obj; obj = next_obj)
     {
       next_obj = obj->next_content;
       extract_obj (obj);
     }
+	*/
 }
 
 void

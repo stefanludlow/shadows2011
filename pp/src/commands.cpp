@@ -404,7 +404,7 @@ const struct command_data commands[] = {
 	{"vboards", do_vboards, DEAD, C_LV2},
   {"wearloc", do_wearloc, DEAD, C_LV2},
  	//{"would", do_would, DEAD, C_LV2},
- 	//{"where", do_where, DEAD, C_LV2},
+ 	{"where", do_where, DEAD, C_LV2},
  	
  	/* Basic RPA Level 3: (players) */
 	{"addcraft", do_addcraft, DEAD, C_LV3},
