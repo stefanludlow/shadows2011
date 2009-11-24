@@ -104,14 +104,15 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 
   from_room = ch->in_room;
 
-	/* grommit - All characters get basic westron, EXCEPT ORCS*/	
+/******* taken care of in web-based chargen
+	// grommit - All characters get basic westron, EXCEPT ORCS	
   if (ch->skills[SKILL_SPEAK_WESTRON] < 20 && (ch->race > 121 || ch->race < 119))
 	{
 		ch->skills[SKILL_SPEAK_WESTRON] = 20 ; 
 		ch->pc->skills[SKILL_SPEAK_WESTRON] = 20;
     }
-
-  /* grommit - All characters are maxed at their native tongue*/
+*****************/
+  // grommit - All characters are maxed at their native tongue
 	int	native_tongue = get_native_tongue(ch);
 	if (native_tongue)
 	{
@@ -139,6 +140,7 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
       char_to_room (ch, ANGOST_START_LOC);
       ch->was_in_room = 0;
       add_clan (ch, "outpost_citizens", CLAN_MEMBER);
+      /* people without atliduk as native tongue get it at basic profficiency */
       if (!ch->skills[SKILL_SPEAK_ATLIDUK] || ch->skills[SKILL_SPEAK_ATLIDUK] < 20)
 	{
 	  ch->skills[SKILL_SPEAK_ATLIDUK] = 20;
@@ -153,13 +155,12 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	  ch->was_in_room = 0;
 	  add_clan (ch,"moria_dwellers",CLAN_MEMBER);
 
-	  /* no region-wide language is set */
-	  /* Grommit - make racial language adjustments here */ 
-	  if (ch->race == 121) /* Mordorian orc */
+	  // no region-wide language is set 
+	  // Grommit - make racial language adjustments here  
+	  if (ch->race == 121) // Mordorian orc 
 		  ch->skills[SKILL_SPEAK_BLACK_SPEECH]=20;
-	  if (ch->race == 120 || ch->race == 119) /* Mountain or mirkwood orcs */
+	  if (ch->race == 120 || ch->race == 119) // Mountain or mirkwood orcs
 		  ch->skills[SKILL_SPEAK_WESTRON]=10;
-
 	  commenced_in = 4;
   }
   else
@@ -169,7 +170,7 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
       ch->was_in_room = 0;
       add_clan (ch, "mt_citizens", CLAN_MEMBER);
 
-	  /* Grommit - Boost higher races in Gondor to 50 westron */	
+	  // Grommit - Boost higher races in Gondor to 50 westron 	
 	  if (ch->skills[SKILL_SPEAK_WESTRON] < 50 && ch->race > 0 )
 		{
 				ch->skills[SKILL_SPEAK_WESTRON] = 50 ; 
@@ -189,9 +190,9 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	     case 0:
 		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Gondor.]#0", char_short(ch));
 		   break;
-		 case 1:
-		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Tur Edendor.]#0", char_short(ch));
-		   break;
+	//	 case 1:
+	//	   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Tur Edendor.]#0", char_short(ch));
+	//	   break;
 		 case 2:
 		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Fahad'Jafari.]#0", char_short(ch));
 		   break;
