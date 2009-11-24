@@ -22,7 +22,134 @@ extern rpie::server engine;
 const char *weapon_theme[] =
   { "stab", "pierce", "chop", "bludgeon", "slash", "lash" };
 
+void obj_data::partial_deep_copy (OBJ_DATA *proto)
+{
+		if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
+		{
+			if (this->name)
+			{
+				mem_free(this->name);
+			}
+			this->name = str_dup(proto->name);
+		}
+		if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
+		{
+			if (this->short_description)
+			{
+				mem_free(this->short_description);
+			}
+			this->short_description = str_dup(proto->name);
+		}
+		if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
+		{
+			if (this->description)
+			{
+				mem_free(this->description);
+			}
+			this->description = str_dup(proto->name);
+		}
+		if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
+		{
+			if (this->full_description)
+			{
+				mem_free(this->full_description);
+			}
+			this->full_description = str_dup(proto->name);
+		}
 
+		if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
+			this->obj_flags.extra_flags = proto->obj_flags.extra_flags;
+
+		if (IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
+			insert_string_variables (this, proto, 0);
+		else
+			this->var_color = 0;
+
+		this->obj_flags.type_flag = proto->obj_flags.type_flag;
+
+		this->obj_flags.wear_flags = proto->obj_flags.wear_flags;
+
+		this->o.od.value[0] = proto->o.od.value[0];
+
+		if (GET_ITEM_TYPE (this) != ITEM_KEY)
+			this->o.od.value[1] = proto->o.od.value[1];
+
+		this->o.od.value[2] = proto->o.od.value[2];
+		this->o.od.value[3] = proto->o.od.value[3];
+		this->o.od.value[4] = proto->o.od.value[4];
+		this->o.od.value[5] = proto->o.od.value[5];
+
+		this->quality = proto->quality;
+		this->econ_flags = proto->econ_flags;
+
+		this->obj_flags.weight = proto->obj_flags.weight;
+
+		this->silver = proto->silver;
+		this->farthings = proto->farthings;
+
+		this->activation = proto->activation;
+
+		if (!this->equiped_by)
+			this->size = proto->size;
+
+		this->obj_flags.extra_flags |= ITEM_NEWSKILLS;
+
+}
+  
+void obj_data::deep_copy (OBJ_DATA *copy_from)
+{
+	memcpy(this, copy_from, sizeof(obj_data));
+
+	if (copy_from->short_description)
+	{
+		this->short_description = str_dup(copy_from->short_description);
+	}
+
+	if (copy_from->name)
+	{
+		this->name = str_dup(copy_from->name);
+	}
+
+	if (copy_from->description)
+	{
+		this->description = str_dup(copy_from->description);
+	}
+
+	if (copy_from->full_description)
+	{
+		this->full_description = str_dup(copy_from->full_description);
+	}
+
+	if (copy_from->omote_str)
+	{
+		this->omote_str = str_dup(copy_from->omote_str);
+	}
+
+	if (copy_from->ink_color)
+	{
+		this->ink_color = str_dup(copy_from->ink_color);
+	}
+
+	if (copy_from->desc_keys)
+	{
+		this->desc_keys = str_dup(copy_from->desc_keys);
+	}
+
+	if (copy_from->var_color)
+	{
+		this->var_color = str_dup(copy_from->var_color);
+	}
+
+	if (copy_from->book_title)
+	{
+		this->book_title = str_dup(copy_from->book_title);
+	}
+
+	if (copy_from->indoor_desc)
+	{
+		this->indoor_desc = str_dup(copy_from->indoor_desc);
+	}
+}
 
 
 // Determines the material type of a given object; called by GET_MATERIAL_TYPE().

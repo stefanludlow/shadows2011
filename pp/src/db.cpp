@@ -2901,6 +2901,8 @@ is_hashed (const char *string)
 char *
 add_hash (const char *string)
 {
+  return str_dup(string);
+
   struct hash_data *hash_entry;
   char *hashed_string;
 
@@ -2944,9 +2946,6 @@ str_dup (const char *string)
   //  if (string >= memory_base && string <= memory_top)
   //  return string;
 
-  ret = (char *) alloc (strlen (string) + 1, 15);
-  memcpy (ret, string, strlen (string) + 1);
-
-  return ret;
+  return strdup(string);
 }
 

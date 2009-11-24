@@ -1142,8 +1142,8 @@ Bad healers don't know how to use the kits and cause damage instead of healing i
 					else if ((ch->damage + 2) >= ch->max_hit)
 						adjust_wound (tch, wound, 1);
 						
-//50% chance to cause infections						
-					if (!wound->infection && dice(1, 10) <= 5)
+//50% chance to cause infections but elves don't get infected						
+					if (!wound->infection && dice(1, 10) <= 5 && !(tch->race >= 16 && tch->race <= 19 || tch->race == 93))
 						wound->infection = WOUND_INFECTIONS;
 						
 					wound->lasthealed = time (0);
@@ -2922,7 +2922,7 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
       && str_cmp (wound->severity, "minor") != STR_MATCH)
     {
 
-      if (hr * ch->con + wound->bindskill < number (1, 80))
+      if (hr * ch->con + wound->bindskill < number (1, 80) && !(ch->race >= 16 && ch->race <= 19 || ch->race == 93)) // Elves don't get infected - Case
 	{
 	  sprintf (buf,
 		   "The stinging sensation in the %s %s on your %s intensifies.",
@@ -2937,26 +2937,43 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
 
   needed = hr * ch->con;
   needed = MIN (needed, 95);	// the higher needed, the better chance of healing
+  // Changes to healing thanks to Power - Case
+  if (ch->race >= 16 && ch->race <= 19 || ch->race == 93) { // Elves heal faster
+	  needed += 25;
+  }
+  else if (ch->race == 23) { // Dwarves
+	  needed += 15;
+  }
+  else if (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29) { // Snaga, Orcs, Trolls, Uruk-Hai
+	  needed += 10;
+  }
+  else if (ch->race == 1 || ch->race == 3 || ch->race == 101) { // Dunedain and Black Numenoreans
+	  needed += 12;
+  }
+  // End Changes to healing thanks to Power
 
   roll = number (1, 120);
-  switch (GET_POS (ch))
-    {
-    case POSITION_SLEEPING:
-      roll -= 20;
-      break;
-    case POSITION_RESTING:
-      roll -= 10;
-      break;
-    case POSITION_SITTING:
-      roll -= 10;
-      break;
-    case POSITION_STANDING:
-      roll += 25;
-      break;
-    case POSITION_FIGHTING:
-      roll += 50;
-      break;
-    }
+  if (!((ch->race >= 16 && ch->race <= 19) || ch->race == 93 || 
+	  (ch->race >= 24 && ch->race <= 25) || ch->race == 28 || ch->race == 29)) { // Elves, Snaga, Trolls, Orcs, Uruk-Hai heal continuously - Case
+		  switch (GET_POS (ch))
+		  {
+		  case POSITION_SLEEPING:
+			  roll -= 20;
+			  break;
+		  case POSITION_RESTING:
+			  roll -= 10;
+			  break;
+		  case POSITION_SITTING:
+			  roll -= 10;
+			  break;
+		  case POSITION_STANDING:
+			  roll += 25;
+			  break;
+		  case POSITION_FIGHTING:
+			  roll += 50;
+			  break;
+		  }
+  }
   if (wound->type && *(wound->type) && !strn_cmp(wound->type, "stun", 4))
 	  roll -= 25; // Stun wounds heal much faster
   if (wound->healerskill && wound->healerskill != -1)
@@ -3049,7 +3066,7 @@ offline_healing (CHAR_DATA * ch, int since)
 
   healing_time = time (0) - since;
 
-  checks += (healing_time / ((BASE_PC_HEALING - ch->con / 6) * 60));	// BASE_PC is in minutes, not seconds.
+  checks += (healing_time / ((BASE_PC_STANDARD_HEALING - ch->con / 6) * 60));	// BASE_PC is in minutes, not seconds.
 
   /* wound reduction */
   for (wound = ch->wounds; wound; wound = next_wound)

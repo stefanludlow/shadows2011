@@ -5497,56 +5497,7 @@ redefine_objects (OBJ_DATA * proto)
 
 		change_count++;
 
-		if (!IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			obj->name = proto->name;
-		if (!IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			obj->short_description = proto->short_description;
-		if (!IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			obj->description = proto->description;
-		if (!IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			obj->full_description = proto->full_description;
-
-		if (!IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			obj->obj_flags.extra_flags = proto->obj_flags.extra_flags;
-
-		if (IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			insert_string_variables (obj, proto, 0);
-		else
-			obj->var_color = 0;
-
-		obj->obj_flags.type_flag = proto->obj_flags.type_flag;
-
-		obj->obj_flags.wear_flags = proto->obj_flags.wear_flags;
-
-		obj->o.od.value[0] = proto->o.od.value[0];
-
-		if (GET_ITEM_TYPE (obj) != ITEM_KEY)
-			obj->o.od.value[1] = proto->o.od.value[1];
-
-		obj->o.od.value[2] = proto->o.od.value[2];
-		obj->o.od.value[3] = proto->o.od.value[3];
-		obj->o.od.value[4] = proto->o.od.value[4];
-		obj->o.od.value[5] = proto->o.od.value[5];
-
-		obj->quality = proto->quality;
-		obj->econ_flags = proto->econ_flags;
-
-		obj->obj_flags.weight = proto->obj_flags.weight;
-		// obj->obj_flags.set_cost = proto->obj_flags.set_cost; // player-set
-
-		obj->silver = proto->silver;
-		obj->farthings = proto->farthings;
-
-		obj->activation = proto->activation;
-
-		obj->wdesc = proto->wdesc;
-
-		if (!obj->equiped_by)
-			obj->size = proto->size;
-
-		obj->obj_flags.extra_flags |= ITEM_NEWSKILLS;
-
-		// obj->xaffected = proto->xaffected; // Don't copy these
+		obj->partial_deep_copy(proto);
 	}
 
 	return change_count;
@@ -5570,75 +5521,7 @@ redefine_mobiles (CHAR_DATA * proto)
 
 		change_count++;
 
-		mob->name = proto->name;
-		mob->short_descr = proto->short_descr;
-		mob->long_descr = proto->long_descr;
-		mob->description = proto->description;
-
-		mob->act = proto->act;
-		mob->affected_by = proto->affected_by;
-		mob->mob->damnodice = proto->mob->damnodice;
-		mob->mob->damsizedice = proto->mob->damsizedice;
-		mob->position = proto->position;
-		mob->default_pos = proto->default_pos;
-		mob->hmflags = proto->hmflags;
-
-		mob->str = proto->str;
-		mob->dex = proto->dex;
-		mob->intel = proto->intel;
-		mob->aur = proto->aur;
-		mob->con = proto->con;
-		mob->wil = proto->wil;
-		mob->agi = proto->agi;
-
-		mob->flags = proto->flags;
-		mob->shop = proto->shop;
-
-		mob->hit = proto->hit;
-		mob->max_hit = proto->max_hit;
-		mob->move = proto->move;
-		mob->max_move = proto->max_move;
-		mob->armor = proto->armor;
-		mob->offense = proto->offense;
-		mob->mob->damroll = proto->mob->damroll;
-		mob->ppoints = proto->ppoints;
-		mob->nat_attack_type = proto->nat_attack_type;
-
-		mob->sex = proto->sex;
-		mob->clans = proto->clans;
-		mob->deity = proto->deity;
-
-		mob->circle = proto->circle;
-		mob->mob->skinned_vnum = proto->mob->skinned_vnum;
-		mob->mob->carcass_vnum = proto->mob->carcass_vnum;
-		mob->mob->merch_seven = proto->mob->merch_seven;
-		mob->mob->vehicle_type = proto->mob->vehicle_type;
-		mob->mob->helm_room = proto->mob->helm_room;
-		mob->natural_delay = proto->natural_delay;
-		mob->fight_mode = proto->fight_mode;
-		mob->race = proto->race;
-		mob->mob->access_flags = proto->mob->access_flags;
-		mob->speaks = proto->speaks;
-
-		/*
-		mob->height				  = proto->height;
-		mob->frame				  = proto->frame;
-		*/
-		mob->age = proto->age;
-
-		for (i = 0; i < MAX_SKILLS; i++)
-			mob->skills[i] = proto->skills[i];
-
-		mob->str = proto->str;
-		mob->dex = proto->dex;
-		mob->con = proto->con;
-		mob->wil = proto->wil;
-		mob->aur = proto->aur;
-		mob->intel = proto->intel;
-
-		mob->mob->currency_type = proto->mob->currency_type;
-
-		mob->prog = proto->prog;
+		mob->partial_deep_copy(proto);
 	}
 
 	return change_count;

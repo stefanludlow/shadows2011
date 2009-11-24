@@ -300,7 +300,7 @@ nanny_login_choice (DESCRIPTOR_DATA * d, char *argument)
 
 	else if (*buf == 'C')
 	{
-		if (!strstr (d->strClientHostname, "middle-earth.us")
+      if (!strstr (d->strClientHostname, "middle-earth.us")
 			&& reference_ip (NULL, d->strClientHostname))
 		{
 			SEND_TO_Q
@@ -2079,7 +2079,7 @@ nanny_read_message (DESCRIPTOR_DATA * d, char *argument)
 }
 
 #define PFILE_QUERY	"SELECT name,create_state FROM %s.pfiles WHERE account = '%s' AND create_state != 4 ORDER BY birth ASC"
-
+//CHARGEN - may want to change numbers on menu - change lib/text/menu1 to match
 void
 nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 {
@@ -2106,6 +2106,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 
 	argn = strtol (argument,0,10);
 
+//logging out
 	if (c == 'l' || argn == 10)
 	{
 		sprintf (buf, "%s [%s] has logged out.\n", d->acct->name.c_str (),
@@ -2117,6 +2118,8 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		close_socket (d);
 		return;
 	}
+	
+//ansi colors
 	else if (c == 'a' || argn == 7)
 	{
 		if (strcasecmp ("Unknown", d->acct->name.c_str ()) == 0)
@@ -2143,6 +2146,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
+//newsletter toggle
 	else if (c == 'n' || argn == 8)
 	{
 		if (strcasecmp ("Unknown", d->acct->name.c_str ()) == 0)
@@ -2165,6 +2169,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
+//change email address
 	else if (c == 'c' || argn == 5)
 	{
 		if (strcasecmp ("Unknown", d->acct->name.c_str()) == 0)
@@ -2182,6 +2187,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
+//guest access
 	else if (c == 'g' || argn == 2)
 	{
 		if (IS_SET (d->acct->flags, ACCOUNT_NOGUEST))
@@ -2231,6 +2237,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
+//enter the game with a live character
 	else if (c == 'e' || argn == 1)
 	{
 		std::string player_db = engine.get_config ("player_db");
@@ -2280,6 +2287,8 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		{
 			SEND_TO_Q ("\nWhich character would you like to log in?\n\n", d);
 			i = 1;
+			
+//see character application status
 			while ((row = mysql_fetch_row (result)))
 			{
 				if (atoi (row[1]) < 1)
@@ -2311,6 +2320,9 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		}
 	}
 
+//CHARGEN delete pending applciations
+//removed from menu - use web-based from now on.
+/********
 	else if (c == 'd' || argn == 4)
 	{
 		if (strcasecmp ("Unknown", d->acct->name.c_str ()) == 0)
@@ -2361,7 +2373,9 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 
 		return;
 	}
+**************/
 
+//hobbit mail
 	else if (c == 'h' || argn == 9)
 	{
 		if (strcasecmp ("Unknown", d->acct->name.c_str ()) == 0)
@@ -2378,6 +2392,8 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
+//CHARGEN create new characters - removed in favor of the web-based application
+/*************
 	else if (c == 'r' || argn == 3)
 	{
 		if (str_cmp ("Unknown", d->acct->name.c_str ()) == 0)
@@ -2422,7 +2438,9 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		d->connected = CON_NAME_CONFIRM;
 		return;
 	}
+***************/
 
+//new password
 	else if (c == 'm' || argn == 6)
 	{
 		if (str_cmp ("Unknown", d->acct->name.c_str ())==0)
@@ -2443,7 +2461,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 			("\n#1Sorry, but that isn't a valid option.#0\n\nYour Selection: ",
 			d);
 	}
-}
+} //end of nanny_connect_select -- menu options
 
 #define skill_lev(val) val >= 70 ? " Master " : val >= 50 ? " Adroit " : val >= 30 ? "Familiar" : " Novice "
 
@@ -2461,6 +2479,7 @@ nanny_reading_wait (DESCRIPTOR_DATA * d, char *argument)
 	return;
 }
 
+//not used with web-absed chargen
 void
 nanny_delete_pc (DESCRIPTOR_DATA * d, char *argument)
 {
@@ -2612,96 +2631,93 @@ equip_newbie (CHAR_DATA * ch)
 	int melee = 0, ranged = 0;
 
 	for (tobj = ch->equip; tobj; tobj = tobj->next_content)
-	{
+		{
 		if (tobj == ch->equip)
 			ch->equip = ch->equip->next_content;
 		else
 			ch->equip->next_content = tobj->next_content;
-	}
+		}
 
 	get_weapon_skills (ch, &melee, &ranged);
 
+//Starting in Harad
 	if (IS_SET(ch->plr_flags, START_HARAD))
-	{
+		{
 		if (ch->sex == 1)
-		{
-			if ((obj = load_object (6276)))
-				equip_char (ch, obj, WEAR_LEGS);
-			if ((obj = load_object (6213)))
-				equip_char (ch, obj, WEAR_BODY);
-			if ((obj = load_object (6097)))
-				equip_char (ch, obj, WEAR_FEET);
-			if ((obj = load_object (97312)))
-				equip_char (ch, obj, WEAR_WAIST);
-			if ((obj = load_object (1452)))
-				equip_char (ch, obj, WEAR_HEAD);
-			if ((obj = load_object (1180)))
 			{
+			if ((obj = load_object (6276))) //pants
+				equip_char (ch, obj, WEAR_LEGS);
+			if ((obj = load_object (6213))) //shirt
+				equip_char (ch, obj, WEAR_BODY);
+			if ((obj = load_object (6097)))//sandals
+				equip_char (ch, obj, WEAR_FEET);
+			if ((obj = load_object (97312)))//sash
+				equip_char (ch, obj, WEAR_WAIST);
+			if ((obj = load_object (1452)))//scarf
+				equip_char (ch, obj, WEAR_HEAD);
+			
+			if ((obj = load_object (1180)))//stachel
+				{
 				equip_char (ch, obj, WEAR_SHOULDER_R);
 				tobj = obj;
-			}
-		}
+				}
+			}//end male harad
 		else
-		{
-			if ((obj = load_object (6168)))
-				equip_char (ch, obj, WEAR_LEGS);
-			if ((obj = load_object (6253)))
-				equip_char (ch, obj, WEAR_BODY);
-			if ((obj = load_object (6096)))
-				equip_char (ch, obj, WEAR_FEET);
-			if ((obj = load_object (6249)))
-				equip_char (ch, obj, WEAR_WAIST);
-			if ((obj = load_object (6585)))
-				equip_char (ch, obj, WEAR_HEAD);
-			if ((obj = load_object (911)))
-				equip_char (ch, obj, WEAR_ABOUT);
-			if ((obj = load_object (1180)))
 			{
+			if ((obj = load_object (6168))) //skirt
+				equip_char (ch, obj, WEAR_LEGS);
+			if ((obj = load_object (6253))) //blouse
+				equip_char (ch, obj, WEAR_BODY);
+			if ((obj = load_object (6096))) //sandals
+				equip_char (ch, obj, WEAR_FEET);
+			if ((obj = load_object (6249))) //sash
+				equip_char (ch, obj, WEAR_WAIST);
+			if ((obj = load_object (6585))) //colored scarf
+				equip_char (ch, obj, WEAR_HEAD);
+			if ((obj = load_object (911))) //cloak
+				equip_char (ch, obj, WEAR_ABOUT);
+
+			if ((obj = load_object (1180))) //satchel
+				{
 				equip_char (ch, obj, WEAR_SHOULDER_R);
 				tobj = obj;
+				}
+			}//end female Harad
+
+		//general stachel contents	
+		if (tobj && (obj = load_object (80013))) //heavy silver coin
+			{
+			obj->count = 5;
+			obj_to_obj(obj, tobj);
 			}
-		}
-	}
-	else if (IS_SET (ch->plr_flags, START_MORDOR))
-	{
-		if ((obj = load_object (1343)))
-			equip_char (ch, obj, WEAR_WAIST);
-		if ((obj = load_object (5060)))
-			equip_char (ch, obj, WEAR_BODY);
-		if ((obj = load_object (6064)))
-			equip_char (ch, obj, WEAR_LEGS);
-		if ((obj = load_object (5009)))
-			equip_char (ch, obj, WEAR_FEET);
-		if ((obj = load_object (5112)))
-			equip_char (ch, obj, WEAR_ABOUT);
-		if ((obj = load_object (5091)))
-		{
-			equip_char (ch, obj, WEAR_BACK);
-			tobj = obj;
-		}
-	}
+		if (tobj && (obj = load_object (80012))) //thin silver coin
+			{
+			obj->count = number (3, 5);
+			obj_to_obj(obj, tobj);
+			}
+
+		}//end Harad
+
+//Start in Moria
 	/* set tobj at end of func for pack for money loading */
 	else if (IS_SET (ch->plr_flags, START_MORIA))
-	{
-		/* pants */
-		if ((obj = load_object (5011)))
+		{
+		if ((obj = load_object (5011))) //pants
 			equip_char (ch,obj, WEAR_LEGS);
 
-		/* cloak randomizer */
-		if (number(0,1))
-		{
+		if (number(0,1)) // cloak randomizer 
+			{
 			if ((obj = load_object (5112)))
-			equip_char (ch,obj, WEAR_ABOUT);
-		}
+				equip_char (ch,obj, WEAR_ABOUT);
+			}
 		else
-		{
+			{
 			if ((obj = load_object (40140)))
-			equip_char (ch,obj, WEAR_ABOUT);
-		}
+				equip_char (ch,obj, WEAR_ABOUT);
+			}
 
-		/* belt randomizer */
-		switch (number(1,4))
-		{
+		switch (number(1,4)) // belt randomizer
+			{
 			case 1:
 				if ((obj = load_object (40051)))
 					equip_char (ch,obj, WEAR_WAIST);
@@ -2718,11 +2734,10 @@ equip_newbie (CHAR_DATA * ch)
 				if ((obj = load_object (40136)))
 					equip_char (ch,obj, WEAR_WAIST);
 				break;
-		}
+			}
 
-		/* boots randomizer */
-		switch (number(1,3))
-		{
+		switch (number(1,3)) // boots randomizer 
+			{
 			case 1:
 				if ((obj = load_object (40066)))
 					equip_char (ch,obj, WEAR_FEET);
@@ -2735,232 +2750,217 @@ equip_newbie (CHAR_DATA * ch)
 				if ((obj = load_object (40050)))
 					equip_char (ch,obj, WEAR_FEET);
 				break;
-		}
+			}
 
-		/* tunic */
-		if ((obj = load_object (1010)))
+		if ((obj = load_object (1010))) // tunic 
 			equip_char (ch,obj, WEAR_BODY);
-		
-		/* backpack */
-		if ((obj = load_object (5091)))
+
+		if ((obj = load_object (5091))) // backpack
+			{
 			equip_char (ch,obj, WEAR_BACK );
-		tobj = obj; /* set this item as load point for pack contents */
-	}
+			tobj = obj; 
+			}
+			
+		/* moria money */
+/* 100 to 300 spread, thus 2 to 6 pieces of 50 */
+		if (tobj && (obj = load_object (5032))) //yrch token
+			{
+			obj->count = number (2, 6);
+			obj_to_obj (obj, tobj);
+			}
+			
+		}//end Moria 
+
+//start in Angost
 	else if (IS_SET (ch->plr_flags, START_ANGOST))
-	{
-		if (ch->sex == 1)
 		{
+		if (ch->sex == 1) //male Angost
+			{
 			if ((obj = load_colored_object(42121, "earthen brown")))
-				equip_char (ch, obj, WEAR_BODY);
-
+				equip_char (ch, obj, WEAR_BODY); //tunic
 			if ((obj = load_colored_object(42122, "earthen brown")))
-				equip_char (ch, obj, WEAR_LEGS);
-
+				equip_char (ch, obj, WEAR_LEGS); //trousers
 			if ((obj = load_colored_object(42124, "dark grey")))
-				equip_char (ch, obj, WEAR_ABOUT);
-
-			if ((obj = load_colored_object(98026, "brown")))
-				equip_char (ch, obj, WEAR_HANDS);
-
-			if ((obj = load_object (104)))
+				equip_char (ch, obj, WEAR_ABOUT); //cloak
+			if ((obj = load_colored_object(98026, "brown"))) 
+				equip_char (ch, obj, WEAR_HANDS); //gloves
+				
+			if ((obj = load_object (104))) //belt
 				equip_char (ch, obj, WEAR_WAIST);
-
-			if ((obj = load_object (42125)))
+			if ((obj = load_object (42125))) //sandals
 				equip_char (ch, obj, WEAR_FEET);
-
-			if ((obj = load_object (98)))
-			{
+			
+			if ((obj = load_object (98))) //sheathe
+				{
 				equip_char (ch, obj, WEAR_BELT_2);
 				sobj = obj;
-			}
+				}
 
 			if ((obj = load_colored_object (97036, "brown")))
-			{
-				equip_char (ch, obj, WEAR_BELT_1);
+				{
+				equip_char (ch, obj, WEAR_BELT_1); //pouch
 				tobj = obj;
+				}
 			}
-		}
-		else /* male/female */
-		{
+		else //female Angost
+			{
 			if ((obj = load_colored_object(42135, "earthen brown")))
-				equip_char (ch, obj, WEAR_BODY);
+				equip_char (ch, obj, WEAR_BODY); //dress
 			if ((obj = load_colored_object(6175, "brown")))
-				equip_char (ch, obj, WEAR_ARMS);
+				equip_char (ch, obj, WEAR_ARMS); //sleeves
 			if ((obj = load_colored_object(98825, "brown")))
-				equip_char (ch, obj, WEAR_LEGS);
-			if ((obj = load_object(97810)))
-				equip_char (ch, obj, WEAR_WAIST);
-			if ((obj = load_object (42125)))
+				equip_char (ch, obj, WEAR_LEGS); //leggings
+				
+			if ((obj = load_object(97810))) //belt
+				equip_char (ch, obj, WEAR_WAIST); 
+			if ((obj = load_object (42125))) //sandals
 				equip_char (ch, obj, WEAR_FEET);
-			if ((obj = load_object (42123)))
+			if ((obj = load_object (42123))) //cloak
 				equip_char (ch, obj, WEAR_ABOUT);
 
-			if ((obj = load_object (98)))
-			{
+			if ((obj = load_object (98))) //sheathe
+				{
 				equip_char (ch, obj, WEAR_BELT_2);
 				sobj = obj;
-			}
+				}
 
 			if ((obj = load_colored_object (97036, "brown")))
-			{
-				equip_char (ch, obj, WEAR_BELT_1);
+				{
+				equip_char (ch, obj, WEAR_BELT_1); //pouch
 				tobj = obj;
-			}
-		}
-	}
-	else /* no special start loc */
-	{
-		if ((obj = load_object (1002)))
-		{
-			equip_char (ch, obj, WEAR_BACK);
-			tobj = obj;
-		}
-		if ((obj = load_object (1010)))
-			equip_char (ch, obj, WEAR_BODY);
-		if ((obj = load_object (1011)))
-			equip_char (ch, obj, WEAR_LEGS);
-		if ((obj = load_object (1012)))
-			equip_char (ch, obj, WEAR_ABOUT);
-		if ((ch->race < 20 || ch->race > 22) && (obj = load_object (1013)))
-			equip_char (ch, obj, WEAR_FEET);
-		if ((obj = load_object (1014)))
-			equip_char (ch, obj, WEAR_WAIST);
-	}
-
-	if (IS_SET (ch->plr_flags, START_ANGOST))
-	{
-		if ((obj = load_object (1659)))
-		{
+				}
+			}//end female Angost
+		
+		//everyone in Angost
+		if ((obj = load_object (1659))) //filled waterskin
+			{
 			obj->o.od.value[1] = 20;
 			obj->o.od.value[2] = 34;
 			equip_char (ch, obj, WEAR_SHOULDER_L);
-		}
-
-		if (sobj && (obj = load_object (98508)))
-		{
-			obj_to_obj (obj, sobj);
-		}
-
-		if (tobj)
-		{
-			if ((obj = load_object (42133)))
+			}
+		
+		if (sobj && (obj = load_object (98508))) //longknife in sheathe
 			{
+			obj_to_obj (obj, sobj);
+			}
+		
+		if (tobj) //pouch contents
+			{
+			if ((obj = load_object (42133))) //shillings
+				{
 				obj->count = 40;
 				obj_to_obj(obj, tobj);
-			}
-			if ((obj = load_object (42132)))
-			{
+				}
+			if ((obj = load_object (42132))) //penny
+				{
 				obj->count = 10;
 				obj_to_obj(obj, tobj);
-			}
-			if ((obj = load_object (42131)))
-			{
+				}
+			if ((obj = load_object (42131))) //farthing
+				{
 				obj->count = 10;
 				obj_to_obj (obj, tobj);
-			}
-			if ((obj = load_object (42139)))
-			{
+				}
+			if ((obj = load_object (42139))) //jerky
+				{
 				obj->count = 6;
 				obj_to_obj (obj, tobj);
-			}
-
-			if ((obj = load_object (1070)))
+				}
+		
+			if ((obj = load_object (1070))) //torch
 				obj_to_obj (obj, tobj);
-
-			if ((obj = load_object (1598)))
-			{
+		
+			if ((obj = load_object (1598))) //dice
+				{
 				obj->count = 2;
 				obj_to_obj (obj, tobj);
+				}
+			}//end pouch contents
+			
+		} //end Angost
+		
+//starting in Gondor - also default case 
+	else 
+		{
+		if ((obj = load_object (1010))) //tunic
+			equip_char (ch, obj, WEAR_BODY);
+		if ((obj = load_object (1011))) //leggings
+			equip_char (ch, obj, WEAR_LEGS);
+		if ((obj = load_object (1012))) //cloak
+			equip_char (ch, obj, WEAR_ABOUT);
+
+		if ((ch->race < 20 || ch->race > 22) && (obj = load_object (1013)))
+			equip_char (ch, obj, WEAR_FEET); //boots (for humans only)
+
+		if ((obj = load_object (1014))) //belt
+			equip_char (ch, obj, WEAR_WAIST);
+			
+		if ((obj = load_object (1002))) //backpack
+			{
+			equip_char (ch, obj, WEAR_BACK);
+			tobj = obj;
 			}
-		}
-	}
-	else
-	{
+			
 		/* backpack gear...bread knife etc */
 		if (tobj)
-		{
-			if ((obj = load_object (804)))
-				obj_to_obj (obj, tobj);
-			if ((obj = load_object (804)))
-				obj_to_obj (obj, tobj);
-			if ((obj = load_object (804)))
-				obj_to_obj (obj, tobj);
-			if ((obj = load_object (804)))
-				obj_to_obj (obj, tobj);
-			if ((obj = load_object (1560)))
 			{
+			if ((obj = load_object (804))) //bread
+				obj_to_obj (obj, tobj);
+			if ((obj = load_object (804))) //bread
+				obj_to_obj (obj, tobj);
+			if ((obj = load_object (804))) //bread
+				obj_to_obj (obj, tobj);
+			if ((obj = load_object (804))) //bread
+				obj_to_obj (obj, tobj);
+			if ((obj = load_object (1560))) //gondorian waterskin
+				{
 				obj->o.od.value[1] = 7;
 				obj_to_obj (obj, tobj);
-			}
-			if ((obj = load_object (1015)))
+				}
+		
+			if ((obj = load_object (1015))) //knife
 				obj_to_obj (obj, tobj);
-			if ((obj = load_object (1070)))
+			if ((obj = load_object (1070))) //torch
 				obj_to_obj (obj, tobj);
-		}
-		if (IS_SET(ch->plr_flags, START_HARAD))
-		{
-			if (tobj && (obj = load_object (80013)))
-			{
-				obj->count = 5;
-				obj_to_obj(obj, tobj);
-			}
-			if (tobj && (obj = load_object (80012)))
-			{
-				obj->count = number (3, 5);
-				obj_to_obj(obj, tobj);
-			}
-		}
-		else if (IS_SET (ch->plr_flags, START_MORDOR))
-		{
-			// was 5033
-			if (tobj && (obj = load_object (66903)))
-			{
+				
+			if ((obj = load_object (1544))) //silver tree coin
+				{
 				obj->count = 2;
 				obj_to_obj (obj, tobj);
-			}
-			// was 5032
-			if (tobj && (obj = load_object (66902)))
-			{
-				obj->count = number (2, 4);
-				obj_to_obj (obj, tobj);
-			}
-		}
-		else if (IS_SET (ch->plr_flags, START_MORIA))
-		{
-			/* moria money */
-			/* wormwood wants 100 to 300 spread, thus 2 to 6 pieces of 50 */
-			if (tobj && (obj = load_object (5032)))
-			{
-				obj->count = number (2, 6);
-				obj_to_obj (obj, tobj);
-			}
-		}
-		else
-		{
-			if (tobj && (obj = load_object (1544)))
-			{
-				obj->count = 2;
-				obj_to_obj (obj, tobj);
-			}
-			if (tobj && (obj = load_object (1540)))
-			{
+				}
+			
+			if ((obj = load_object (1540))) //silver royal
+				{
 				obj->count = number (3, 6);
 				obj_to_obj (obj, tobj);
-			}
-		}
-	}
+				}
+			} //end gondor pack stuff
+		} //end gondor-default case
 
+//special case items
 	if (ch->skills[SKILL_HEALING] && (obj = load_object (HEALER_KIT_VNUM)))
 		obj_to_obj (obj, tobj);
-	if (ch->skills[SKILL_LITERACY])
-	{
+
+	if ((ch->skills[SKILL_SCRIPT_SARATI]) ||
+	(ch->skills[SKILL_SCRIPT_TENGWAR]) ||
+	(ch->skills[ SKILL_SCRIPT_BELERIAND_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_CERTHAS_DAERON]) ||
+	(ch->skills[SKILL_SCRIPT_ANGERTHAS_DAERON]) ||
+	(ch->skills[SKILL_SCRIPT_QUENYAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_ANGERTHAS_MORIA]) ||
+	(ch->skills[SKILL_SCRIPT_GONDORIAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_ARNORIAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_NUMENIAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_NORTHERN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_ANGERTHAS_EREBOR]))
+		{
 		if ((obj = load_object (1170)))
 			obj_to_obj (obj, tobj);
 		if ((obj = load_object (63)))
 			obj_to_obj (obj, tobj);
 		if ((obj = load_object (79)))
 			obj_to_obj (obj, tobj);
-	}
+		}
 
 	ch->right_hand = NULL;
 	ch->left_hand = NULL;
@@ -3121,6 +3121,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	if (d->character->pc->create_state == STATE_REJECTED)
 		d->character->pc->create_state = STATE_APPLYING;
 
+/***** CHARGEN they need to go to the web to work on thier application
 	if (d->character->pc->create_state == STATE_APPLYING)
 	{
 		d->character->desc = d;
@@ -3129,6 +3130,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		d->connected = CON_CREATION;
 		return;
 	}
+******/
 
 	if (d->character->pc->create_state == STATE_SUBMITTED)
 	{
@@ -3319,6 +3321,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
+//new character enters the game for the first time
 	if ((!d->character->in_room || d->character->in_room == NOWHERE) &&
 		!d->character->right_hand && !d->character->left_hand
 		&& !d->character->equip)
@@ -3326,6 +3329,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		reformat_desc (d->character->description, &d->character->description);
 		equip_newbie (d->character);
 	}
+
 
 	if (!d->character->skills[SKILL_LISTEN])
 		open_skill (d->character, SKILL_LISTEN);
@@ -3351,10 +3355,10 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 			}
 			else
 				char_to_room (d->character, OOC_LOUNGE);
-		}
+		}//end newbie
 		else
 			char_to_room (d->character, OOC_LOUNGE);
-	}
+	}//end nowhere check
 	else
 	{
 		char_to_room (d->character, d->character->in_room);
@@ -3389,6 +3393,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 
 	send_to_char ("\n", d->character);
 
+//special message for characters who took a role
 	if (d->character->pc->special_role)
 	{
 		outfit_new_char (d->character, d->character->pc->special_role);
@@ -3413,6 +3418,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 
 	do_look (d->character, "", 15);
 
+//normal start without role
 	if (!str_cmp (d->character->room->name, PREGAME_ROOM_NAME))
 	{
 		send_to_char ("\n", d->character);
@@ -3446,6 +3452,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 			system_log (buf, true);
 		}
 	}
+
 
 	show_waiting_prisoners (d->character);
 	notify_captors (d->character);
@@ -3680,6 +3687,8 @@ role_flag_descs (int bitflag)
 
 #define ADDBUF	buf + strlen (buf)
 
+//not used by web-based chargen
+//reviewers will use web based pages too
 void
 spitstat (CHAR_DATA * ch, DESCRIPTOR_DATA * recipient)
 {
@@ -3813,6 +3822,7 @@ spitstat (CHAR_DATA * ch, DESCRIPTOR_DATA * recipient)
 
 }
 
+//not used with web-based chargen
 void
 create_menu_options (DESCRIPTOR_DATA * d)
 {
@@ -3962,6 +3972,7 @@ create_menu_options (DESCRIPTOR_DATA * d)
 	d->connected = CON_CREATION;
 }
 
+//not used with web-based applications
 void
 attribute_priorities (DESCRIPTOR_DATA * d, char *arg)
 {
@@ -4053,6 +4064,7 @@ attribute_priorities (DESCRIPTOR_DATA * d, char *arg)
 	}
 }
 
+//not used with web-based chargen
 void
 sex_selection (DESCRIPTOR_DATA * d, char *arg)
 {
@@ -4069,6 +4081,7 @@ sex_selection (DESCRIPTOR_DATA * d, char *arg)
 		SEND_TO_Q ("Please choose MALE or FEMALE.\n", d);
 }
 
+//not used with web-based chargen
 void
 race_selection_screen (DESCRIPTOR_DATA * d)
 {
@@ -4120,6 +4133,7 @@ race_selection_screen (DESCRIPTOR_DATA * d)
 	mysql_free_result (result);
 }
 
+//not used with web-based chargen
 void
 nanny_race_confirm (DESCRIPTOR_DATA * d, char *arg)
 {
@@ -4178,6 +4192,8 @@ nanny_race_confirm (DESCRIPTOR_DATA * d, char *arg)
 	}
 }
 
+//not used with web-based chargen 
+//not used in a long time anyway
 void
 nanny_privacy_confirm (DESCRIPTOR_DATA * d, char *arg)
 {
@@ -4205,6 +4221,7 @@ nanny_privacy_confirm (DESCRIPTOR_DATA * d, char *arg)
 	create_menu_options (d);
 }
 
+//not used with web-based chargen
 void
 nanny_char_name_confirm (DESCRIPTOR_DATA * d, char *arg)
 {
@@ -4315,6 +4332,7 @@ nanny_char_name_confirm (DESCRIPTOR_DATA * d, char *arg)
 	d->connected = CON_RACE;
 }
 
+//not used with web-based chargen
 void
 nanny_special_role_selection (DESCRIPTOR_DATA * d, char *arg)
 {
@@ -4385,6 +4403,7 @@ nanny_special_role_selection (DESCRIPTOR_DATA * d, char *arg)
 	return;
 }
 
+//not used with web-based chargen
 void
 nanny_special_role_confirm (DESCRIPTOR_DATA * d, char *arg)
 {
@@ -4437,6 +4456,7 @@ nanny_special_role_confirm (DESCRIPTOR_DATA * d, char *arg)
 	}
 }
 
+//not used with web-based chargen
 void
 race_selection (DESCRIPTOR_DATA * d, char *arg)
 {
@@ -4584,6 +4604,7 @@ race_selection (DESCRIPTOR_DATA * d, char *arg)
 	mysql_free_result (result);
 }
 
+//not used with web-based chargen
 void
 age_selection (DESCRIPTOR_DATA * d, char *arg)
 {
@@ -4617,6 +4638,7 @@ age_selection (DESCRIPTOR_DATA * d, char *arg)
 	ch->age = atoi (buf);
 }
 
+//not used with web-based chargen
 int
 available_roles (int points)
 {
@@ -4631,6 +4653,8 @@ available_roles (int points)
 	return 0;
 }
 
+
+//not use with web-based chargen
 void
 location_selection (DESCRIPTOR_DATA * d, char *argument)
 {
@@ -4672,7 +4696,7 @@ location_selection (DESCRIPTOR_DATA * d, char *argument)
 
 	d->connected = CON_CREATION;
 }
-
+//not used with web-based chargen
 void
 height_frame_selection (DESCRIPTOR_DATA * d, char *argument)
 {
@@ -4729,6 +4753,7 @@ height_frame_selection (DESCRIPTOR_DATA * d, char *argument)
 	d->connected = CON_CREATION;
 }
 
+//not used with web-based chargen
 int
 pickable_skill (CHAR_DATA * ch, const char *buf)
 {
@@ -4743,6 +4768,7 @@ pickable_skill (CHAR_DATA * ch, const char *buf)
 	return 0;
 }
 
+//not used with web-based chargen
 int
 picks_entitled (CHAR_DATA * ch)
 {
@@ -4752,7 +4778,7 @@ picks_entitled (CHAR_DATA * ch)
 		return 6;
 }
 
-
+//not used with web-based chargen
 /*                                                                          *
 * function: profession_display                                             *
 *                                                                          *
@@ -4831,6 +4857,7 @@ profession_display (DESCRIPTOR_DATA * d)
 	return;
 }
 
+//not used with web-based chargen
 /*                                                                          *
 * function: profession_selection                                           *
 *                                                                          *
@@ -4936,8 +4963,9 @@ profession_selection (DESCRIPTOR_DATA * d, char *argument)
 	return;
 }
 
-
-int get_native_tongue(CHAR_DATA* ch)
+//not used with web-based chargen
+int 
+get_native_tongue(CHAR_DATA* ch)
 {
 	/* retrieve the default racial tongue */
 	char* native_tongue = lookup_race_variable (ch->race, RACE_NATIVE_TONGUE);
@@ -4969,7 +4997,7 @@ int get_native_tongue(CHAR_DATA* ch)
 	return atoi(native_tongue);	
 }
 
-
+//not used with web-based chargen
 void
 skill_selection (DESCRIPTOR_DATA * d, char *argument)
 {
@@ -5110,6 +5138,7 @@ skill_selection (DESCRIPTOR_DATA * d, char *argument)
 	skill_display (d);
 }
 
+//not used with web-based chargen
 void
 skill_display (DESCRIPTOR_DATA * d)
 {
@@ -5173,6 +5202,7 @@ skill_display (DESCRIPTOR_DATA * d)
 	d->connected = CON_SKILLS;
 }
 
+//not used with web-based chargen
 void
 create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 {
@@ -5191,7 +5221,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 		create_menu_options (d);
 		return;
 	}
-
+	
 	arg = one_argument (arg, key);
 
 	if (!*key)
@@ -5884,9 +5914,10 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	case CON_CHG_EMAIL_CNF:
 		nanny_change_email_confirm (d, argument);
 		break;
-	case CON_DELETE_PC:
-		nanny_delete_pc (d, argument);
-		break;
+//CHARGEN CHANGES BELOW
+	//case CON_DELETE_PC:
+	//	nanny_delete_pc (d, argument);
+	//	break;
 	case CON_CHOOSE_PC:
 		nanny_choose_pc (d, argument);
 		break;
@@ -5896,30 +5927,30 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	case CON_READING_WAIT:
 		nanny_reading_wait (d, argument);
 		break;
-	case CON_RACE_CONFIRM:
-		nanny_race_confirm (d, argument);
-		break;
-	case CON_PRIV_CONFIRM:
-		nanny_privacy_confirm (d, argument);
-		break;
-	case CON_NAME_CONFIRM:
-		nanny_char_name_confirm (d, argument);
-		break;
-	case CON_TERMINATE_CONFIRM:
-		nanny_terminate (d, argument);
-		break;
+	//case CON_RACE_CONFIRM:
+	//	nanny_race_confirm (d, argument);
+	//	break;
+	//case CON_PRIV_CONFIRM:
+	//	nanny_privacy_confirm (d, argument);
+	//	break;
+	//case CON_NAME_CONFIRM:
+	//	nanny_char_name_confirm (d, argument);
+	//	break;
+	//case CON_TERMINATE_CONFIRM:
+	//	nanny_terminate (d, argument);
+	//	break;
 	case CON_RETIRE:
 		nanny_retire (d, argument);
 		break;
-	case CON_RACE_SELECT:
-		race_selection (d, argument);
-		break;
-	case CON_SPECIAL_ROLE_SELECT:
-		nanny_special_role_selection (d, argument);
-		break;
-	case CON_SPECIAL_ROLE_CONFIRM:
-		nanny_special_role_confirm (d, argument);
-		break;
+	//case CON_RACE_SELECT:
+	//	race_selection (d, argument);
+	//	break;
+	//case CON_SPECIAL_ROLE_SELECT:
+	//	nanny_special_role_selection (d, argument);
+	//	break;
+	//case CON_SPECIAL_ROLE_CONFIRM:
+	//	nanny_special_role_confirm (d, argument);
+	//	break;
 	case CON_CREATE_GUEST:
 		nanny_create_guest (d, argument);
 		break;
@@ -5942,6 +5973,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 		nanny_read_message (d, argument);
 		break;
 
+/************ following will not be used with web based chargen 
 	case CON_PLAYER_NEW:
 		d->connected = CON_CREATION;
 		create_menu_options (d);
@@ -6008,6 +6040,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	case CON_CREATION:
 		create_menu_actions (d, argument);
 		break;
+***************** end of cases used in web-based chargen *******/
 
 	case CON_WEB_CONNECTION:
 		/*                      web_process (d, argument); */

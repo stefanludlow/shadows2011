@@ -2939,7 +2939,7 @@ randomize_mobile (CHAR_DATA * mob)
 		   mob->con = attr_starters[2];
 		   mob->wil = attr_starters[3];
 		   mob->intel = attr_starters[4];
-		   mob->aur = attr_starters[5];
+		   mob->aur = 1; //attr_starters[5]; November 21st 2009 hack for Power Code TODO - Case
 		   mob->agi = attr_starters[6];
 
 		   mob->tmp_str = mob->str;
@@ -3032,7 +3032,7 @@ randomize_mobile (CHAR_DATA * mob)
       mob->con = 12;
       mob->wil = 12;
       mob->intel = 12;
-      mob->aur = 12;
+      mob->aur = 1; // November 21st 2009 hack for Power Code TODO - Case
       mob->agi = 12;
 
       mob->tmp_str = mob->str;

@@ -615,6 +615,255 @@ mob_data::mob_data()
 
 mob_data::~mob_data()
 {
+	if (this->owner && *this->owner)
+	{
+		mem_free(this->owner);
+	}
+}
+
+// This function is only intended to be called by redefine_mobiles()
+void char_data::partial_deep_copy (CHAR_DATA *proto)
+{
+		if (this->name)
+		{
+			mem_free(this->name);
+		}
+		this->name = str_dup(proto->name);
+		
+		if (this->short_descr)
+		{
+			mem_free(this->short_descr);
+		}
+		this->short_descr = str_dup(proto->short_descr);
+		
+		if (this->long_descr)
+		{
+			mem_free(this->long_descr);
+		}
+		this->long_descr = str_dup(proto->long_descr);
+		
+		if (this->description)
+		{
+			mem_free(this->description);
+		}
+		this->description = str_dup(proto->description);
+		
+		if (this->clans)
+		{
+			mem_free(this->clans);
+		}
+		this->clans = str_dup(proto->clans);
+
+		this->act = proto->act;
+		this->mob->damnodice = proto->mob->damnodice;
+		this->mob->damsizedice = proto->mob->damsizedice;
+		this->position = proto->position;
+		this->default_pos = proto->default_pos;
+		this->hmflags = proto->hmflags;
+
+		this->str = proto->str;
+		this->dex = proto->dex;
+		this->intel = proto->intel;
+		this->aur = proto->aur;
+		this->con = proto->con;
+		this->wil = proto->wil;
+		this->agi = proto->agi;
+
+		this->flags = proto->flags;
+		this->shop = proto->shop;
+
+		this->hit = proto->hit;
+		this->max_hit = proto->max_hit;
+		this->move = proto->move;
+		this->max_move = proto->max_move;
+		this->armor = proto->armor;
+		this->offense = proto->offense;
+		this->mob->damroll = proto->mob->damroll;
+		this->ppoints = proto->ppoints;
+		this->nat_attack_type = proto->nat_attack_type;
+
+		this->sex = proto->sex;
+		this->deity = proto->deity;
+
+		this->circle = proto->circle;
+		this->mob->skinned_vnum = proto->mob->skinned_vnum;
+		this->mob->carcass_vnum = proto->mob->carcass_vnum;
+		this->mob->merch_seven = proto->mob->merch_seven;
+		this->mob->vehicle_type = proto->mob->vehicle_type;
+		this->mob->helm_room = proto->mob->helm_room;
+		this->natural_delay = proto->natural_delay;
+		this->fight_mode = proto->fight_mode;
+		this->race = proto->race;
+		this->mob->access_flags = proto->mob->access_flags;
+		this->speaks = proto->speaks;
+
+		/*
+		this->height				  = proto->height;
+		this->frame				  = proto->frame;
+		*/
+		this->age = proto->age;
+
+		for (int i = 0; i < MAX_SKILLS; i++)
+			this->skills[i] = proto->skills[i];
+
+		this->str = proto->str;
+		this->dex = proto->dex;
+		this->con = proto->con;
+		this->wil = proto->wil;
+		this->aur = proto->aur;
+		this->intel = proto->intel;
+
+		this->mob->currency_type = proto->mob->currency_type;
+}
+
+void char_data::deep_copy (CHAR_DATA *copy_from)
+{
+	// Lazy way of getting everything non-dynamic across. One advantage of this approach is that people who add members to char_data don't have to add them here unless they use dynamic memory.
+	mob_data *tmob = this->mob;
+	pc_data *tpc = this->pc;
+	memcpy (this, copy_from, sizeof(CHAR_DATA));
+	this->mob = tmob;
+	this->pc = tpc;
+
+	if (copy_from->delay_who)
+	{
+		this->delay_who = str_dup(copy_from->delay_who);
+	}
+
+	if (copy_from->delay_who2)
+	{
+		this->delay_who2 = str_dup(copy_from->delay_who2);
+	}
+
+	if (copy_from->casting_arg)
+	{
+		this->casting_arg = str_dup(copy_from->casting_arg);
+	}
+
+	if (copy_from->name)
+	{
+		this->name = str_dup(copy_from->name);
+	}
+
+	if (copy_from->tname)
+	{
+		this->tname = str_dup(copy_from->tname);
+	}
+
+	if (copy_from->short_descr)
+	{
+		this->short_descr = str_dup(copy_from->short_descr);
+	}
+
+	if (copy_from->long_descr)
+	{
+		this->long_descr = str_dup(copy_from->long_descr);
+	}
+
+	if (copy_from->pmote_str)
+	{
+		this->pmote_str = str_dup(copy_from->pmote_str);
+	}
+
+	if (copy_from->voice_str)
+	{
+		this->voice_str = str_dup(copy_from->voice_str);
+	}
+
+	if (copy_from->description)
+	{
+		this->description = str_dup(copy_from->description);
+	}
+
+	if (copy_from->clans)
+	{
+		this->clans = str_dup(copy_from->clans);
+	}
+
+	if (copy_from->enemy_direction)
+	{
+		this->enemy_direction = str_dup(copy_from->enemy_direction);
+	}
+
+	if (copy_from->combat_log)
+	{
+		this->combat_log = str_dup(copy_from->combat_log);
+	}
+
+	if (copy_from->travel_str)
+	{
+		this->travel_str = str_dup(copy_from->travel_str);
+	}
+
+	if (copy_from->dmote_str)
+	{
+		this->dmote_str = str_dup(copy_from->dmote_str);
+	}
+
+	if (copy_from->plan)
+	{
+		this->plan = new std::string (*copy_from->plan);
+	}
+
+	if (copy_from->goal)
+	{
+		this->goal = new std::string (*copy_from->goal);
+	}
+
+	if (copy_from->pc && this->pc)
+	{
+		this->pc->deep_copy(copy_from->pc);
+	}
+
+	if (copy_from->mob && this->mob)
+	{
+		this->mob->deep_copy(copy_from->mob);
+	}
+}
+
+void pc_data::deep_copy (pc_data *copy_from)
+{
+	memcpy(this, copy_from, sizeof(pc_data));
+
+	if (copy_from->creation_comment)
+	{
+		this->creation_comment = str_dup(copy_from->creation_comment);
+	}
+
+	if (copy_from->imm_enter)
+	{
+		this->imm_enter = str_dup(copy_from->imm_enter);
+	}
+
+	if (copy_from->imm_leave)
+	{
+		this->imm_leave = str_dup(copy_from->imm_leave);
+	}
+
+	if (copy_from->site_lie)
+	{
+		this->site_lie = str_dup(copy_from->site_lie);
+	}
+
+	if (copy_from->account_name)
+	{
+		this->account_name = str_dup(copy_from->account_name);
+	}
+
+	if (copy_from->msg)
+	{
+		this->msg = str_dup(copy_from->msg);
+	}
+}
+
+void mob_data::deep_copy (mob_data *copy_from)
+{
+	memcpy(this, copy_from, sizeof(mob_data));
+
+	if (copy_from->owner)
+	{
+		this->owner = str_dup(copy_from->owner);
+	}
 }
 
 bool char_data::getNaughtyFlag() {

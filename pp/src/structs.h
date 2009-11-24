@@ -190,7 +190,10 @@ typedef signed char shortint;
 
 #define BLEEDING_INTERVAL 1	/* 1 minute per "bleeding pulse". */
 #define BASE_SPECIAL_HEALING 30	/* Increased healing rate, for special mobs/PCs. */
-#define BASE_PC_HEALING 40	/* Number of minutes per healing pulse for standard PCs. */
+#define BASE_PC_ELF_HEALING 15      // -
+#define BASE_PC_DWARF_HEALING 20    //  | November 21st, Power changes - Case
+#define BASE_PC_ORCTROLL_HEALING 30 // -
+#define BASE_PC_STANDARD_HEALING 40	/* Number of minutes per healing pulse for standard PCs. */
 
 /* debug parameters */
 
@@ -1710,6 +1713,9 @@ struct obj_data
   int sold_at;
   int sold_by;
   OBJ_CLAN_DATA *clan_data;
+
+  void deep_copy (OBJ_DATA *copy_from);
+  void partial_deep_copy (OBJ_DATA *copy_from);
 };
 
 

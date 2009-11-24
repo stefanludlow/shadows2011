@@ -433,8 +433,8 @@ do_title (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   skill =
-    (ch->skills[ch->writes] * 0.50) + (ch->skills[ch->speaks] * 0.30) +
-    (ch->skills[SKILL_LITERACY] * 0.20);
+    (ch->skills[ch->writes] * 0.70) + (ch->skills[ch->speaks] * 0.30); //+
+    //(ch->skills[SKILL_LITERACY] * 0.20); // Removing Literacy - Case
   skill = (int) skill;
   skill = MIN (95, (int) skill);
 
@@ -1413,8 +1413,7 @@ decipher_script (CHAR_DATA * ch, int script, int language, int skill)
   skill_use (ch, language, 0);
   skill_use (ch, SKILL_LITERACY, 0);
 
-  if (((ch->skills[script] * .50) + (ch->skills[language] * .30) +
-       (ch->skills[SKILL_LITERACY] * .20)) >= check)
+  if (((ch->skills[script] * .70) + (ch->skills[language] * .30) ) >= check) //+ (ch->skills[SKILL_LITERACY] * .20)
     return 1;
   else
     return 0;
@@ -4975,6 +4974,8 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
   struct time_info_data birth_date;
   static char *verbal_stats[] =
     { "horrible", "bad", "poor", "avg", "good", "great", "peak", "superhuman", "legendary", "epic" };
+  //static char *power_verbal_stats = {"void", "flicker", "spark", "flame", "fire", "flare", "brilliant", "blinding", "consuming"}; Reference - Case
+  //static char *dark_power_verbal_stats = {"void", "flicker", "trace", "shadow", "darkness"}; // Perhaps for evil dudes? - Case
 
   birth_date = time_info;
 
@@ -5019,23 +5020,63 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
     {
       if (IS_MORTAL (ch))
 	sprintf (buf,
-		 "Str[#2%s#0] Dex[#2%s#0] Con[#2%s#0] Int[#2%s#0] Wil[#2%s#0] Aur[#2%s#0] Agi[#2%s#0]\n",
+		 "Str[#2%s#0] Dex[#2%s#0] Con[#2%s#0] Int[#2%s#0] Wil[#2%s#0] Agi[#2%s#0]\n",
 		 verbal_stats[get_stat_range (GET_STR (ch))],
 		 verbal_stats[get_stat_range (GET_DEX (ch))],
 		 verbal_stats[get_stat_range (GET_CON (ch))],
 		 verbal_stats[get_stat_range (GET_INT (ch))],
 		 verbal_stats[get_stat_range (GET_WIL (ch))],
-		 verbal_stats[get_stat_range (GET_AUR (ch))],
 		 verbal_stats[get_stat_range (GET_AGI (ch))]);
       else
 	sprintf (buf,
-		 "Str[#2%d#0] Dex[#2%d#0] Con[#2%d#0] Int[#2%d#0] Wil[#2%d#0] Aur[#2%d#0] Agi[#2%d#0]\n",
+		 "Str[#2%d#0] Dex[#2%d#0] Con[#2%d#0] Int[#2%d#0] Wil[#2%d#0] Aura/Power[#2%d#0] Agi[#2%d#0]\n",
 		 GET_STR (ch), GET_DEX (ch), GET_CON (ch), GET_INT (ch),
 		 GET_WIL (ch), GET_AUR (ch), GET_AGI (ch));
 
       send_to_char ("\n", ch);
       send_to_char (buf, ch);
     }
+
+  // November 22nd 2009, Segment to display power - Case
+  if (!IS_SET (ch->flags, FLAG_GUEST)) {
+	  int pcAur = GET_AUR(ch);
+
+	  if (pcAur < 4) {
+		  send_to_char("Your soul #1flickers#0 as a candle, raw and untapped.", ch);
+	  }
+	  else if (ch->race >= 16 && ch->race <= 19 || ch->race == 93) { // If elf - Case
+		  if (pcAur < 25) {
+			  send_to_char("#6Your soul burns outward from your body brilliantly.#0", ch);
+		  }
+		  else if (pcAur < 32) {
+			  send_to_char("#6Blinding power burns outwards from your body.#0", ch);
+		  }
+		  else {
+			  send_to_char("#6Your soul burns as consumingly as Anor.#0", ch);
+		  }
+	  }
+	 
+	  else if (pcAur < 7) {
+		  send_to_char("Your soul #1sparks#0 like embers flying free of a fire.", ch);
+	  }
+	  else if (pcAur < 11) {
+		  send_to_char("Your soul burns with #1flames#0.", ch);
+	  }
+	  else if (pcAur < 16) {
+		  send_to_char("Your soul burns with potent #9fire#0.", ch);
+	  }
+	  else if (pcAur < 19) {
+		  send_to_char("Power #9flares#0 within your soul.", ch);
+	  }
+	  else if (pcAur < 32) {
+		  send_to_char("#9Potency roars through your soul.#0", ch);
+	  }
+	  else {
+		  send_to_char("#9Your soul burns as consumingly as Anor.#0", ch);
+	  }
+	  send_to_char("\n", ch);
+	  // End of Power messages - Case
+  }
 
   if (IS_SET (ch->flags, FLAG_GUEST))
     {
@@ -10983,9 +11024,9 @@ post_writing (DESCRIPTOR_DATA * d)
     }
 
   mod =
-    (skill_level(ch, ch->writes, 0) * 0.50) + 
-    (skill_level(ch, ch->speaks, 0) * 0.30) +
-    (skill_level(ch, SKILL_LITERACY, 0) * 0.20);
+    (skill_level(ch, ch->writes, 0) * 0.70) + 
+    (skill_level(ch, ch->speaks, 0) * 0.30);
+    //(skill_level(ch, SKILL_LITERACY, 0) * 0.20);
 
 
   mod = (float) MIN (95, (int) mod);

@@ -2557,14 +2557,15 @@ setup_new_character (CHAR_DATA * tch)
   tch->tmp_dex = tch->dex;
   tch->tmp_agi = tch->agi;
 
-  tch->max_hit = 50 + CONSTITUTION_MULTIPLIER * GET_CON (tch);
+  tch->max_hit = 50 + CONSTITUTION_MULTIPLIER * GET_CON (tch) + (MIN(GET_AUR(tch),18) * 4);
 
   tch->max_move = calc_lookup (tch, REG_MISC, MISC_MAX_MOVE);
 
   tch->hit = GET_MAX_HIT (tch);
   tch->move = GET_MAX_MOVE (tch);
 
-  int nat_tongue = get_native_tongue(tch); /* this is race0 aware */
+/****** set up in web-based CHARGEN already
+  int nat_tongue = get_native_tongue(tch); // this is race0 aware 
   if (nat_tongue)
   {
      tch->skills[nat_tongue] = calc_lookup (tch, REG_CAP, i);
@@ -2613,10 +2614,11 @@ setup_new_character (CHAR_DATA * tch)
 	}
     }
 
+******* end of web-based cahrgen section *******/
   for (i = 1; i <= LAST_SKILL; i++)
     tch->pc->skills[i] = tch->skills[i];
 
-  fix_offense (tch);
+  fix_offense (tch); //sets up value for ch->offense
 
   tch->fight_mode = 2;
 
@@ -2645,6 +2647,7 @@ setup_new_character (CHAR_DATA * tch)
 }
 
 void
+
 answer_application (CHAR_DATA * ch, char *argument, int cmd)
 {
   CHAR_DATA *tch, *tmp_ch;
@@ -3871,55 +3874,97 @@ sense_activity (CHAR_DATA * user, int talent)
 void
 do_sense (CHAR_DATA * ch, char *argument, int cmd)
 {
-  CHAR_DATA *tch;
-  char buf[MAX_STRING_LENGTH];
-  char *adjs[] = { "dim", "dull", "glimmering", "gleaming", "bright",
-    "radiant", "brilliant", "breathtakingly bright", "stunningly brilliant",
-    "overwhelmingly radiant", "blinding"
-  };
-  int aura;
+	CHAR_DATA *tch;
+	char buf[MAX_STRING_LENGTH];
+	//char *adjs[] = { "dim", "dull", "glimmering", "gleaming", "bright",
+	//  "radiant", "brilliant", "breathtakingly bright", "stunningly brilliant",
+	//  "overwhelmingly radiant", "blinding"
+	//};
+	//int aura;
 
-  if (!real_skill (ch, SKILL_SENSITIVITY))
-    {
-      send_to_char ("You strain, but sense nothing.\n\r", ch);
-      return;
-    }
+	if (!real_skill (ch, SKILL_SENSITIVITY))
+	{
+		send_to_char ("You strain, but sense nothing.\n\r", ch);
+		return;
+	}
 
-  argument = one_argument (argument, buf);
+	argument = one_argument (argument, buf);
 
-  if (!(tch = get_char_room_vis (ch, buf)))
-    {
-      send_to_char ("You don't see that person here.\n\r", ch);
-      return;
-    }
+	if (!(tch = get_char_room_vis (ch, buf)))
+	{
+		send_to_char ("You don't see that person here.\n\r", ch);
+		return;
+	}
 
-  if (GET_HIT (ch) + GET_MOVE (ch) < 10)
-    {
-      send_to_char ("You don't feel strong enough at the moment.\n\r", ch);
-      return;
-    }
+	if (GET_HIT (ch) + GET_MOVE (ch) < 10)
+	{
+		send_to_char ("You don't feel strong enough at the moment.\n\r", ch);
+		return;
+	}
 
-  weaken (ch, 0, 10, buf);
-  sense_activity (ch, SKILL_SENSITIVITY);
+	weaken (ch, 0, 10, buf);
+	sense_activity (ch, SKILL_SENSITIVITY);
 
-  if (!skill_use (ch, SKILL_SENSITIVITY, 0))
-    {
-      act ("You cannot muster a sense of $N's spiritual strength.", false,
-	   ch, 0, tch, TO_CHAR);
-      return;
-    }
+	if (!skill_use (ch, SKILL_SENSITIVITY, 0))
+	{
+		act ("You cannot muster a sense of $N's spiritual strength.", false,
+			ch, 0, tch, TO_CHAR);
+		return;
+	}
 
-  aura = MIN (GET_AUR (tch), 22);
+	int pcAur = GET_AUR(tch);
+	std::ostringstream streamAur;
+	streamAur << "You sense that " << (ch == tch ? "your" : "$N's") << " spirit ";
 
-  if (aura <= 9)
-    aura = 12;
-  else if (aura <= 13)
-    aura = 13;
+	if (pcAur < 2) {
+		streamAur << "is devoid of power.";
+	}
+	else if (tch->race >= 16 && tch->race <= 19 || tch->race == 93) { // If elf - Case
+		if (pcAur < 25) {
+			streamAur << "#6burns outward from " << (ch == tch ? "your" : "their") << " body brilliantly#0.";
+		}
+		else if (pcAur < 32) {
+			streamAur << "#6burns outward from " << (ch == tch ? "your" : "their") << " body blindingly#0.";
+		}
+		else {
+			streamAur << "#6burns as consumingly as Anor#0.";
+		}
+	}
+	else if (pcAur < 4) {
+		streamAur << "#1flickers#0 with power occasionally.";
+	}
+	else if (pcAur < 7) {
+		streamAur << "holds a #1spark#0 of power.";
+	}
+	else if (pcAur < 11) {
+		streamAur << "guides #1flames#0 of power through " << (ch == tch ? "your" : "their") << " veins.";
+	}
+	else if (pcAur < 16) {
+		streamAur << "burns with potent #9fire#0.";
+	}
+	else if (pcAur < 19) {
+		streamAur << "#9flares#0 with power.";
+	}
+	else if (pcAur < 32) {
+		streamAur << "#9roars with power#0.";
+	}
+	else {
+		streamAur << "#9burns as consumingly as Anor#0.";
+	}
+	streamAur << "\n";
+	strncpy(buf, streamAur.str().c_str(), 200); // Arbitrary copy length - Case
 
-  sprintf (buf, "You sense that %s spirit is %s.\n",
-	   ch == tch ? "your" : "$N's", adjs[aura - 12]);
+	// aura = MIN (GET_AUR (tch), 22);
 
-  act (buf, false, ch, 0, tch, TO_CHAR);
+	//if (aura <= 9)
+	//  aura = 12;
+	//else if (aura <= 13)
+	//  aura = 13;
+
+	//sprintf (buf, "You sense that %s spirit is %s.\n",
+	//  ch == tch ? "your" : "$N's", adjs[aura - 12]);
+
+	act (buf, false, ch, 0, tch, TO_CHAR);
 }
 
 void

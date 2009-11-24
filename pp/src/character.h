@@ -83,6 +83,8 @@ public:
 
 	pc_data();
 	~pc_data();
+
+	void deep_copy (pc_data *copy_from);
 };
 
 class mob_data {
@@ -124,6 +126,8 @@ public:
 	std::multimap<mob_cue,std::string> *cues;
 	mob_data();
 	~mob_data();
+
+	void deep_copy (mob_data *copy_from);
 };
 
 class char_data {
@@ -343,6 +347,9 @@ public:
 	void clear_char();
 	char_data();
 	~char_data();
+
+	void deep_copy (CHAR_DATA *copy_from);
+	void partial_deep_copy (CHAR_DATA *copy_from);
 	
 	std::pair<int, std::string> reportWhere(bool checkClan, int RPP, std::string whichClan);
 	

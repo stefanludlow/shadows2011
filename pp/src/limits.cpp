@@ -388,11 +388,20 @@ point_update (void)
       int new_damage = 0;
       if (ch->damage)
 		{
-			int base = (get_affect (ch, MAGIC_AFFECT_REGENERATION)
-				  ||ch->skills[SKILL_EMPATHIC_HEAL]) 
-				? BASE_SPECIAL_HEALING
-				: BASE_PC_HEALING;
-	  
+			// Power changes to healing - Case
+			int base = BASE_PC_STANDARD_HEALING;
+
+			if (ch->race >= 16 && ch->race <= 19 || ch->race == 93) {
+				base = BASE_PC_ELF_HEALING;
+			}
+			else if (ch->race == 23) {
+				base = BASE_PC_DWARF_HEALING;
+			}
+			else if (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29) {
+				base = BASE_PC_ORCTROLL_HEALING;
+			}
+			// End Power changes to healing
+
 			healing_time = real_time_passed (time (0) - ch->lastregen, 0);
 			if (healing_time.minute >= (base - ch->con / 6))
 			{
@@ -587,9 +596,19 @@ point_update (void)
 			} // end bleeding update
       		
 			// commence healing update
-			int base = (get_affect (ch, MAGIC_AFFECT_REGENERATION) || ch->skills[SKILL_EMPATHIC_HEAL])
-						? BASE_SPECIAL_HEALING 
-						: BASE_PC_HEALING;
+			// Power changes to healing - Case
+			int base = BASE_PC_STANDARD_HEALING;
+
+			if (ch->race >= 16 && ch->race <= 19 || ch->race == 93) {
+				base = BASE_PC_ELF_HEALING;
+			}
+			else if (ch->race == 23) {
+				base = BASE_PC_DWARF_HEALING;
+			}
+			else if (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29) {
+				base = BASE_PC_ORCTROLL_HEALING;
+			}
+			// End Power changes to healing
 
 			if (healing_time.minute >= (base + (wound->damage / 3) 
 				      - (GET_CON (ch) / 7) 
