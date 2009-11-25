@@ -3459,9 +3459,9 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 
 	if ((d->character->race >= 0 && d->character->race <= 29)
 		&& (d->character->max_hit !=
-		50 + d->character->con * CONSTITUTION_MULTIPLIER))
+		50 + (d->character->con * CONSTITUTION_MULTIPLIER)) + (MIN(d->character->aur,25) * 4))
 	{
-		d->character->max_hit = 50 + d->character->con * CONSTITUTION_MULTIPLIER;	// All humanoids are roughly the same,
+		d->character->max_hit = 50 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur,25) * 4);	// All humanoids are roughly the same,
 		d->character->hit = d->character->max_hit;	// in terms of wound-endurance.
 	}
 
@@ -3469,7 +3469,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	{
 		if (d->character->race == 28)
 			d->character->max_hit =
-			200 + d->character->con * CONSTITUTION_MULTIPLIER;
+			200 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur,25) * 4);
 		d->character->hit = d->character->max_hit;
 		d->character->armor = 3;
 	}

@@ -352,7 +352,7 @@ affect_modify (CHAR_DATA * ch, int type, int loc, int mod, int bitv,
 	GET_CON (ch) += mod;
 //POWER CHANGE NEEDED HERE??
 	if (!IS_NPC (ch))
-	  ch->max_hit = 50 + CONSTITUTION_MULTIPLIER * GET_CON (ch);
+	  ch->max_hit = 50 + (CONSTITUTION_MULTIPLIER * GET_CON (ch)) + (MIN(GET_AUR (ch), 25) * 4);
 	else
 	  {
 	    ch->max_hit += mod * 6;

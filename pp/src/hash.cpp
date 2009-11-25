@@ -217,7 +217,7 @@ fread_mobile (int vnum, const int *nZone, FILE * fp)
   if ((mob->race >= 0 && mob->race <= 29 && mob->race != 28)
       || mob->race == 94)
     {				/* Humanoid NPCs. */
-      mob->max_hit = 50 + mob->con * CONSTITUTION_MULTIPLIER + (MIN(mob->aur, 18) * 4); // Arbitrary power HP boost - Case
+      mob->max_hit = 50 + mob->con * CONSTITUTION_MULTIPLIER + (MIN(mob->aur, 25) * 4); // Arbitrary power HP boost - Case
       mob->hit = mob->max_hit;
     }
 

@@ -3023,12 +3023,12 @@ load_char_mysql (const char *name)
 
   if (ch->race == 28)
     {
-      ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),18) * 4);
+      ch->max_hit = 200 + (GET_CON (ch) * CONSTITUTION_MULTIPLIER) + (MIN(GET_AUR(ch),25) * 4);
       ch->armor = 3;
     }
   else
     {
-      ch->max_hit = 50 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),18) * 4);
+      ch->max_hit = 50 + (GET_CON (ch) * CONSTITUTION_MULTIPLIER) + (MIN(GET_AUR(ch),25) * 4);
       ch->armor = 0;
     }
 
@@ -4234,6 +4234,39 @@ do_mysql (CHAR_DATA * ch, char *argument, int cmd)
 	    obj->o.od.value[1] = 0;
 	}
     }
+  
+  //sets all NPC on the PP with aura/power to 1
+   if (!str_cmp(argument, "powerhack-pp"))
+{
+   std::list<char_data*>::iterator it;
+   for (it = character_list.begin(); it != character_list.end(); it++)
+   {
+         if (IS_NPC(*it))
+         {
+              // NOTE: I assuming that this is what you've stored power as (ch->power). Change this line as appropriate if I'm wrong
+              (*it)->aur = 1;
+         }
+   }
+   save_stayput_mobiles();
+   send_to_char("Successfully set all stayputs to 1 power.",ch); 
+   return;
+}
+
+// sets all NPC prototypes on BP with aura/ppwer = 1
+if (!str_cmp(argument, "powerhack-bp"))
+{
+   CHAR_DATA *mob;
+   CHAR_DATA *mob_tab[ZONE_SIZE];
+   for (int i = 0; i < 1000; i++)
+   {
+        for (mob = mob_tab[i]; mob; mob = mob->mob->hnext)
+        {
+             mob->aur = 1;
+        }
+    }
+    send_to_char("Successfully set all prototypes to 1 power. Don't forget to zsave all!",ch);
+    return;
+}
 }
 
 MESSAGE_DATA *

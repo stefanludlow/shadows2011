@@ -2557,7 +2557,7 @@ setup_new_character (CHAR_DATA * tch)
   tch->tmp_dex = tch->dex;
   tch->tmp_agi = tch->agi;
 
-  tch->max_hit = 50 + CONSTITUTION_MULTIPLIER * GET_CON (tch) + (MIN(GET_AUR(tch),18) * 4);
+  tch->max_hit = 50 + (CONSTITUTION_MULTIPLIER * GET_CON (tch)) + (MIN(GET_AUR(tch),25) * 4);
 
   tch->max_move = calc_lookup (tch, REG_MISC, MISC_MAX_MOVE);
 
@@ -2647,7 +2647,6 @@ setup_new_character (CHAR_DATA * tch)
 }
 
 void
-
 answer_application (CHAR_DATA * ch, char *argument, int cmd)
 {
   CHAR_DATA *tch, *tmp_ch;
