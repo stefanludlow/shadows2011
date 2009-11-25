@@ -2078,7 +2078,8 @@ nanny_read_message (DESCRIPTOR_DATA * d, char *argument)
 	}
 }
 
-#define PFILE_QUERY	"SELECT name,create_state FROM %s.pfiles WHERE account = '%s' AND create_state != 4 ORDER BY birth ASC"
+//changed to display only active characters
+#define PFILE_QUERY	"SELECT name, create_state FROM %s.pfiles WHERE account = '%s' AND create_state = 2 ORDER BY birth ASC"
 //CHARGEN - may want to change numbers on menu - change lib/text/menu1 to match
 void
 nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
@@ -2291,6 +2292,8 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 //see character application status
 			while ((row = mysql_fetch_row (result)))
 			{
+			
+		//only active characters will be displayed, so this section is redundant	
 				if (atoi (row[1]) < 1)
 					sprintf (state, "#3(Pending)#0");
 				else if (atoi (row[1]) == 1)
