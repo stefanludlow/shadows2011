@@ -7870,16 +7870,22 @@ int kingdom_from_zone (CHAR_DATA *ch)
 	else return -1;
 }
 
-//This helper function counts how many players are in the room.
-//Anytime a new room is reference with vtor, run this command. - Vader
+//This helper function counts how many players are in the room. - Vader
 
 void roomCount(ROOM_DATA *rd)
 {
 	rd->occupants = 0;
 	for (CHAR_DATA *tch = rd->people; tch; tch = tch->next_in_room)
 	{
-		if (!IS_NPC(tch) && !IS_LINKDEAD(tch) && IS_MORTAL(tch)) //Don't count NPC's or admin's. - Vader Also don't count linkdead people. --Blurr
-		rd->occupants++;
+		//Don't count NPC's, admin's, and linkdead people.
+		//Count admin's if they are switched into NPC's. 
+		if (!IS_NPC(tch))
+		{
+			if (!IS_LINKDEAD(tch) && IS_MORTAL(tch))
+				rd->occupants++;
+		}
+		else if (tch->desc && tch->desc->original)
+			rd->occupants++;
 	}
 }
 
@@ -7926,9 +7932,9 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 				mortals++;
 			else
 				guests++;
-			if(clansphere == sphere && !((d->character->pc->level) > 0))
+			if (!IS_NPC(d->character) && clansphere == sphere && !(d->character->pc->level > 0))
 				clanCount++;
-			if(d->character->pc->level > 0)
+			if (d->character->pc->level > 0)
 			{
 				immortals++;
 				if(IS_SET( d->character->flags, FLAG_AVAILABLE ))
