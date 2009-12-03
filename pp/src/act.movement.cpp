@@ -2070,10 +2070,10 @@ initiate_move (CHAR_DATA * ch)
       act ("You can't go there.", true, ch, 0, 0, TO_CHAR);
 
       if (IS_RIDEE (ch))
-	act ("$N can't go there.", true, ch->mount, 0, ch, TO_CHAR);
+	 act ("$N can't go there.", true, ch->mount, 0, ch, TO_CHAR);
 
       if (IS_HITCHEE (ch))
-	act ("$N can't go there.", true, ch->hitcher, 0, ch, TO_CHAR);
+	 act ("$N can't go there.", true, ch->hitcher, 0, ch, TO_CHAR);
 
       clear_moves (ch);
       return;
@@ -2103,8 +2103,11 @@ if (any_are_set(ch->act, ACT_VEHICLE)
       if (IS_RIDEE(ch))
          act ("$N can't go there.", true, ch->mount, 0, ch, TO_CHAR);
 
-      if (IS_HITCHEE(ch))
-         act ("$N can't go there.", true, ch->hitcher, 0, ch, TO_CHAR);
+      if (IS_HITCHEE (ch))
+      {
+	 act ("$N can't go there.", true, ch->hitcher, 0, ch, TO_CHAR);
+	 clear_moves (ch->hitcher);
+      }
 
       clear_moves (ch);
       return;

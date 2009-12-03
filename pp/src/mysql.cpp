@@ -553,6 +553,7 @@ mysql_player_search (int search_type, char *string, int timeframe)
   // Again, use real_query() here rather than safe_query() because the latter is
   // impractical and this command is for staff use only.
   fprintf(stderr, "%s\n", query);
+
   mysql_real_query (database, query, strlen (query));
 
   result = mysql_store_result (database);
@@ -2756,7 +2757,7 @@ load_char_mysql (const char *name)
   ch->coldload_id = atoi (row[57]);
   ch->affected_by = atoi (row[58]);
 
-  if (row[59] != NULL && str_cmp (row[59], "~") && str_cmp (row[59], " "))
+  if (str_cmp (row[59], "~") && str_cmp (row[59], " "))
     {
       while (1)
 	{
@@ -2844,16 +2845,16 @@ load_char_mysql (const char *name)
   if (atoi (row[76]) > 0)
     ch->affected_by |= AFF_HOODED;
 
-    if (row[77] != NULL && strlen (row[77]) > 1)
-		ch->pc->imm_enter = str_dup (row[77]);
-	if (row[78] != NULL && strlen (row[78]) > 1)
-		ch->pc->imm_leave = str_dup (row[78]);
-	if (row[79] != NULL && strlen (row[79]) > 1)
-		ch->pc->site_lie = str_dup (row[79]);
-	if (row[80] != NULL && strlen (row[80]) > 1 && str_cmp (row[80], "(null)"))
-		ch->voice_str = str_dup (row[80]);
+  if (strlen (row[77]) > 1)
+    ch->pc->imm_enter = str_dup (row[77]);
+  if (strlen (row[78]) > 1)
+    ch->pc->imm_leave = str_dup (row[78]);
+  if (strlen (row[79]) > 1)
+    ch->pc->site_lie = str_dup (row[79]);
+  if (strlen (row[80]) > 1 && str_cmp (row[80], "(null)"))
+    ch->voice_str = str_dup (row[80]);
 
-  if (row[81] != NULL && str_cmp (row[81], "~") && str_cmp (row[81], " "))
+  if (str_cmp (row[81], "~") && str_cmp (row[81], " "))
     {
       while (1)
 	{
@@ -2865,7 +2866,7 @@ load_char_mysql (const char *name)
 	}
     }
 
-  if (row[82] != NULL && str_cmp (row[82], "~") && str_cmp (row[82], " "))
+  if (str_cmp (row[82], "~") && str_cmp (row[82], " "))
     {
       while (1)
 	{
@@ -2884,7 +2885,7 @@ load_char_mysql (const char *name)
 	}
     }
 
-  if (row[83] != NULL && str_cmp (row[83], "~") && str_cmp (row[83], " "))
+  if (str_cmp (row[83], "~") && str_cmp (row[83], " "))
     {
       while (1)
 	{
@@ -2928,38 +2929,38 @@ load_char_mysql (const char *name)
 	}
     }
 
-  if (row[84] != NULL && str_cmp (row[84], "~") && str_cmp (row[84], " "))
-  {
-	  while (1)
-	  {
-		  if (!row[84] || !*row[84])
-			  break;
-		  get_line (&row[84], buf);
-		  if (!*buf)
-			  break;
+  if (str_cmp (row[84], "~") && str_cmp (row[84], " "))
+    {
+      while (1)
+	{
+	  if (!row[84] || !*row[84])
+	    break;
+	  get_line (&row[84], buf);
+	  if (!*buf)
+	    break;
 
-		  sscanf (buf, "%s %d", location, &i);
+	  sscanf (buf, "%s %d", location, &i);
 
-		  if (!*location)
-			  continue;
+	  if (!*location)
+	    continue;
 
-		  CREATE (lodged, LODGED_OBJECT_INFO, 36);
-		  lodged->next = NULL;
+	  CREATE (lodged, LODGED_OBJECT_INFO, 36);
+	  lodged->next = NULL;
 
-		  lodged->location = str_dup (location);
-		  lodged->vnum = i;
+	  lodged->location = str_dup (location);
+	  lodged->vnum = i;
 
-		  if (!ch->lodged)
-			  ch->lodged = lodged;
-		  else
-		  {
-			  tmplodged = ch->lodged;
-			  while (tmplodged->next)
-				  tmplodged = tmplodged->next;
-			  tmplodged->next = lodged;
-		  }
-	  }
-  }
+	  if (!ch->lodged)
+	    ch->lodged = lodged;
+	  else
+	    {
+	      tmplodged = ch->lodged;
+	      while (tmplodged->next)
+		tmplodged = tmplodged->next;
+	      tmplodged->next = lodged;
+	    }
+	}
+    }
 
   ch->writes = atoi (row[85]);
 
@@ -3023,12 +3024,12 @@ load_char_mysql (const char *name)
 
   if (ch->race == 28)
     {
-      ch->max_hit = 200 + (GET_CON (ch) * CONSTITUTION_MULTIPLIER) + (MIN(GET_AUR(ch),25) * 4);
+      ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER;
       ch->armor = 3;
     }
   else
     {
-      ch->max_hit = 50 + (GET_CON (ch) * CONSTITUTION_MULTIPLIER) + (MIN(GET_AUR(ch),25) * 4);
+      ch->max_hit = 50 + GET_CON (ch) * CONSTITUTION_MULTIPLIER;
       ch->armor = 0;
     }
 
@@ -4234,39 +4235,6 @@ do_mysql (CHAR_DATA * ch, char *argument, int cmd)
 	    obj->o.od.value[1] = 0;
 	}
     }
-  
-  //sets all NPC on the PP with aura/power to 1
-   if (!str_cmp(argument, "powerhack-pp"))
-{
-   std::list<char_data*>::iterator it;
-   for (it = character_list.begin(); it != character_list.end(); it++)
-   {
-         if (IS_NPC(*it))
-         {
-              // NOTE: I assuming that this is what you've stored power as (ch->power). Change this line as appropriate if I'm wrong
-              (*it)->aur = 1;
-         }
-   }
-   save_stayput_mobiles();
-   send_to_char("Successfully set all stayputs to 1 power.",ch); 
-   return;
-}
-
-// sets all NPC prototypes on BP with aura/ppwer = 1
-if (!str_cmp(argument, "powerhack-bp"))
-{
-   CHAR_DATA *mob;
-   CHAR_DATA *mob_tab[ZONE_SIZE];
-   for (int i = 0; i < 1000; i++)
-   {
-        for (mob = mob_tab[i]; mob; mob = mob->mob->hnext)
-        {
-             mob->aur = 1;
-        }
-    }
-    send_to_char("Successfully set all prototypes to 1 power. Don't forget to zsave all!",ch);
-    return;
-}
 }
 
 MESSAGE_DATA *
