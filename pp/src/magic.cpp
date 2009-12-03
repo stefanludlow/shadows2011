@@ -2564,6 +2564,8 @@ setup_new_character (CHAR_DATA * tch)
   tch->hit = GET_MAX_HIT (tch);
   tch->move = GET_MAX_MOVE (tch);
 
+  refresh_race_configuration (tch); //for innate abilities
+  
 /****** set up in web-based CHARGEN already
   int nat_tongue = get_native_tongue(tch); // this is race0 aware 
   if (nat_tongue)
@@ -2573,8 +2575,6 @@ setup_new_character (CHAR_DATA * tch)
   }
 
   // Define all race-specific characteristics
-
-  refresh_race_configuration (tch);
 
   open_skill (tch, SKILL_SEARCH);
   starting_skill_boost (tch, SKILL_SEARCH);

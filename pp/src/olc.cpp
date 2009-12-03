@@ -4721,14 +4721,14 @@ do_minit (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->dex = mob_start_stat;
 	newmob->intel = mob_start_stat;
 	newmob->wil = mob_start_stat;
-	newmob->aur = mob_start_stat;
+	newmob->aur = 1; //changed for POWER
 	newmob->con = mob_start_stat;
 	newmob->agi = mob_start_stat;
 	newmob->tmp_str = mob_start_stat;
 	newmob->tmp_dex = mob_start_stat;
 	newmob->tmp_intel = mob_start_stat;
 	newmob->tmp_wil = mob_start_stat;
-	newmob->tmp_aur = mob_start_stat;
+	newmob->tmp_aur = 1;//changed for POWER
 	newmob->tmp_con = mob_start_stat;
 	newmob->tmp_agi = mob_start_stat;
 	newmob->mob->damnodice = 1;
