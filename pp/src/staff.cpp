@@ -2200,7 +2200,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
   send_to_char (buf, ch);
   send_to_char ("\n", ch);
 
-  sprintf (buf, "#2Aur:#0 %d/%d", GET_AUR (k), k->aur);
+  sprintf (buf, "#2Agi:#0 %d/%d", GET_AGI (k), k->agi);
   pad_buffer (buf, 25);
   sprintf (ADD, "#2Armor:#0 %d", k->armor);
   pad_buffer (buf, 53);
@@ -2208,7 +2208,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
   send_to_char (buf, ch);
   send_to_char ("\n", ch);
 
-  sprintf (buf, "#2Agi:#0 %d/%d", GET_AGI (k), k->agi);
+  sprintf (buf, "#2Sum:#0 %d", k->str + k->dex + k->con + k->intel + k->wil + k->agi);
 
   pad_buffer (buf, 25);
   sprintf (ADD, "#2Room:#0  %d", k->in_room);
@@ -2229,9 +2229,8 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
   if (IS_NPC (k))
     {
       *buf = '\0';
-      sprintf (buf, "#2Sum:#0 %d",
-	       k->str + k->dex + k->con + k->intel + k->wil +
-	       k->aur + k->agi);
+      
+      sprintf (buf, "#2Pow:#0 %d", k->aur);
       pad_buffer (buf, 25);
       sprintf (buf + strlen (buf), "#2Carc:#0  %d", k->mob->carcass_vnum);
       pad_buffer (buf, 53);
@@ -2251,9 +2250,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
   else if (k->pc)
     {
       *buf = '\0';
-      sprintf (buf, "#2Sum:#0 %d",
-	       k->str + k->dex + k->con + k->intel + k->wil +
-	       k->aur + k->agi);
+      sprintf (buf, "#2Pow:#0 %d", k->aur);      
       pad_buffer (buf, 25);
       if (k->pc->level > 5)
 	{
