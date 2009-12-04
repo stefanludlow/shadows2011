@@ -433,8 +433,7 @@ do_title (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   skill =
-    (ch->skills[ch->writes] * 0.70) + (ch->skills[ch->speaks] * 0.30); //+
-    //(ch->skills[SKILL_LITERACY] * 0.20); // Removing Literacy - Case
+    (ch->skills[ch->writes] * 0.70) + (ch->skills[ch->speaks] * 0.30); 
   skill = (int) skill;
   skill = MIN (95, (int) skill);
 
@@ -1411,9 +1410,8 @@ decipher_script (CHAR_DATA * ch, int script, int language, int skill)
 
   skill_use (ch, script, 0);
   skill_use (ch, language, 0);
-  //skill_use (ch, SKILL_LITERACY, 0);
 
-  if (((ch->skills[script] * .70) + (ch->skills[language] * .30) ) >= check) //+ (ch->skills[SKILL_LITERACY] * .20)
+  if (((ch->skills[script] * .70) + (ch->skills[language] * .30) ) >= check) 
     return 1;
   else
     return 0;
@@ -1488,8 +1486,6 @@ reading_check (CHAR_DATA * ch, OBJ_DATA * obj, WRITING_DATA * writing,
       skill_use (ch, writing->script, 0);
       if (!number (0, 1))
 	skill_use (ch, writing->language, 0);
-      //if (!number (0, 2))
-	//skill_use (ch, SKILL_LITERACY, 0);
     }
 
   sprintf (output, "%s", writing->message);
@@ -11026,7 +11022,6 @@ post_writing (DESCRIPTOR_DATA * d)
   mod =
     (skill_level(ch, ch->writes, 0) * 0.70) + 
     (skill_level(ch, ch->speaks, 0) * 0.30);
-    //(skill_level(ch, SKILL_LITERACY, 0) * 0.20);
 
 
   mod = (float) MIN (95, (int) mod);
@@ -11068,8 +11063,6 @@ post_writing (DESCRIPTOR_DATA * d)
   skill_use (ch, ch->writes, 0);
   if (!number (0, 1))
     skill_use (ch, ch->speaks, 0);
-  //if (!number (0, 2))
-    //skill_use (ch, SKILL_LITERACY, 0);
 
   save_writing (obj);
 }
@@ -11400,11 +11393,6 @@ do_scribe (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
- // if (ch->skills[SKILL_LITERACY] < 10)
-   // {
-     // send_to_char ("You aren't literate enough to do that.\n", ch);
-     // return;
-    //}
 
   for (i = SKILL_SCRIPT_SARATI; i <= SKILL_SCRIPT_ANGERTHAS_EREBOR; i++)
     if (ch->skills[i])
