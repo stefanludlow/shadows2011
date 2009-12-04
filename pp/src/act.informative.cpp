@@ -5037,8 +5037,8 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
   if (!IS_SET (ch->flags, FLAG_GUEST)) {
 	  int pcAur = GET_AUR(ch);
 
-	  if (pcAur < 4) {
-		  send_to_char("Your soul #1flickers#0 as a candle, raw and untapped.", ch);
+	  if (pcAur < 2) {
+		  send_to_char("You are devoid of power.", ch);
 	  }
 	  else if (ch->race >= 16 && ch->race <= 19 || ch->race == 93) { // If elf - Case
 		  if (pcAur < 25) {
@@ -5052,11 +5052,14 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 		  }
 	  }
 	 
+          else if (pcAur < 4) {
+                   send_to_char(There is a #1flicker#0 of power within you.", ch);
+          }
 	  else if (pcAur < 7) {
-		  send_to_char("Your soul #1sparks#0 like embers flying free of a fire.", ch);
+		  send_to_char("There is a #1spark#0 of power within you.", ch);
 	  }
 	  else if (pcAur < 11) {
-		  send_to_char("Your soul burns with #1flames#0.", ch);
+		  send_to_char("You can feel the #1flames#0 of the power in your veins.", ch);
 	  }
 	  else if (pcAur < 16) {
 		  send_to_char("Your soul burns with potent #9fire#0.", ch);
@@ -5065,14 +5068,13 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 		  send_to_char("Power #9flares#0 within your soul.", ch);
 	  }
 	  else if (pcAur < 32) {
-		  send_to_char("#9Potency roars through your soul.#0", ch);
+		  send_to_char("#9Potency roars through your veins.#0", ch);
 	  }
 	  else {
 		  send_to_char("#9Your soul burns as consumingly as Anor.#0", ch);
 	  }
 	  send_to_char("\n", ch);
-	  // End of Power messages - Case
-  }
+  }// End of Power messages - Case
 
   if (IS_SET (ch->flags, FLAG_GUEST))
     {
