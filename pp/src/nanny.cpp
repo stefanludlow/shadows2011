@@ -3477,10 +3477,13 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		d->character->armor = 3;
 	}
 	
-	if (d->character->race == 86)
+	if (d->character->race == 86)//Olag-hai
 	{
-		d->character->armor = 7;
-	}
+        d->character->max_hit =
+            50 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 18) * 4);
+        d->character->hit = d->character->max_hit;
+	d->character->armor = 7;	
+}
 
 	if (d->character->pc->level)
 		show_unread_messages (d->character);
