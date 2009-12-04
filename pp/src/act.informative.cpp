@@ -5053,7 +5053,7 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 	  }
 	 
           else if (pcAur < 4) {
-                   send_to_char(There is a #1flicker#0 of power within you.", ch);
+                   send_to_char("There is a #1flicker#0 of power within you.", ch);
           }
 	  else if (pcAur < 7) {
 		  send_to_char("There is a #1spark#0 of power within you.", ch);
