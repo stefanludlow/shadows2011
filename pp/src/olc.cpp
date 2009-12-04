@@ -8582,7 +8582,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				edit_mob->mob->currency_type = CURRENCY_MORGUL;
 				send_to_char
-					("That mobile will now deal in Yrcish currency (Blacks).\n",
+					("That mobile will now deal in Orcish currency (Blacks).\n",
 					ch);
 			}
 			else if (!str_cmp (buf, "gondorian") || !str_cmp (buf, "copper"))
@@ -8616,7 +8616,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			else
 			{
 				send_to_char
-					("Specify Yrcish, Gondorian, Haradaic or Numenorean currency.\n", ch);
+					("Specify Orcish, Gondorian, Haradaic or Numenorean currency.\n", ch);
 				return;
 			}
 		}
