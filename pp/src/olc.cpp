@@ -3718,9 +3718,10 @@ do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 	half_chop (argument, buf1, buf2);
 	if (!*buf2)
 	{
-		send_to_char ("Usage:  rcret <dir> <difficulty>\n", ch);
+		send_to_char ("Usage:  rcret <dir> <[difficulty | 'remove']>\n", ch);
 		return;
 	}
+
 	dif = atoi (buf2);
 
 	switch (*buf1)
@@ -3762,6 +3763,12 @@ do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (vtor (ch->in_room)->secrets[dir])
 	{
+		if (!strcmp(buf2, "remove"))
+		{
+			send_to_char("Secret exit removed.\n", ch);
+			vtor (ch->in_room)->secrets[dir] = 0;
+			return;
+		}
 		send_to_char ("The old secret description was: \n\n", ch);
 		send_to_char (vtor (ch->in_room)->secrets[dir]->stext, ch);
 		r_secret = vtor (ch->in_room)->secrets[dir];
@@ -3782,7 +3789,6 @@ do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 
 	send_to_char ("Done.\n", ch);
 }
-
 void
 do_rexit (CHAR_DATA * ch, char *argument, int cmd)
 {
@@ -4721,14 +4727,14 @@ do_minit (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->dex = mob_start_stat;
 	newmob->intel = mob_start_stat;
 	newmob->wil = mob_start_stat;
-	newmob->aur = mob_start_stat;
+	newmob->aur = 1; //changed for POWER
 	newmob->con = mob_start_stat;
 	newmob->agi = mob_start_stat;
 	newmob->tmp_str = mob_start_stat;
 	newmob->tmp_dex = mob_start_stat;
 	newmob->tmp_intel = mob_start_stat;
 	newmob->tmp_wil = mob_start_stat;
-	newmob->tmp_aur = mob_start_stat;
+	newmob->tmp_aur = 1;//changed for POWER
 	newmob->tmp_con = mob_start_stat;
 	newmob->tmp_agi = mob_start_stat;
 	newmob->mob->damnodice = 1;
@@ -5497,56 +5503,7 @@ redefine_objects (OBJ_DATA * proto)
 
 		change_count++;
 
-		if (!IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			obj->name = proto->name;
-		if (!IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			obj->short_description = proto->short_description;
-		if (!IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			obj->description = proto->description;
-		if (!IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			obj->full_description = proto->full_description;
-
-		if (!IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			obj->obj_flags.extra_flags = proto->obj_flags.extra_flags;
-
-		if (IS_SET (obj->obj_flags.extra_flags, ITEM_VARIABLE))
-			insert_string_variables (obj, proto, 0);
-		else
-			obj->var_color = 0;
-
-		obj->obj_flags.type_flag = proto->obj_flags.type_flag;
-
-		obj->obj_flags.wear_flags = proto->obj_flags.wear_flags;
-
-		obj->o.od.value[0] = proto->o.od.value[0];
-
-		if (GET_ITEM_TYPE (obj) != ITEM_KEY)
-			obj->o.od.value[1] = proto->o.od.value[1];
-
-		obj->o.od.value[2] = proto->o.od.value[2];
-		obj->o.od.value[3] = proto->o.od.value[3];
-		obj->o.od.value[4] = proto->o.od.value[4];
-		obj->o.od.value[5] = proto->o.od.value[5];
-
-		obj->quality = proto->quality;
-		obj->econ_flags = proto->econ_flags;
-
-		obj->obj_flags.weight = proto->obj_flags.weight;
-		// obj->obj_flags.set_cost = proto->obj_flags.set_cost; // player-set
-
-		obj->silver = proto->silver;
-		obj->farthings = proto->farthings;
-
-		obj->activation = proto->activation;
-
-		obj->wdesc = proto->wdesc;
-
-		if (!obj->equiped_by)
-			obj->size = proto->size;
-
-		obj->obj_flags.extra_flags |= ITEM_NEWSKILLS;
-
-		// obj->xaffected = proto->xaffected; // Don't copy these
+		obj->partial_deep_copy(proto);
 	}
 
 	return change_count;
@@ -5570,75 +5527,7 @@ redefine_mobiles (CHAR_DATA * proto)
 
 		change_count++;
 
-		mob->name = proto->name;
-		mob->short_descr = proto->short_descr;
-		mob->long_descr = proto->long_descr;
-		mob->description = proto->description;
-
-		mob->act = proto->act;
-		mob->affected_by = proto->affected_by;
-		mob->mob->damnodice = proto->mob->damnodice;
-		mob->mob->damsizedice = proto->mob->damsizedice;
-		mob->position = proto->position;
-		mob->default_pos = proto->default_pos;
-		mob->hmflags = proto->hmflags;
-
-		mob->str = proto->str;
-		mob->dex = proto->dex;
-		mob->intel = proto->intel;
-		mob->aur = proto->aur;
-		mob->con = proto->con;
-		mob->wil = proto->wil;
-		mob->agi = proto->agi;
-
-		mob->flags = proto->flags;
-		mob->shop = proto->shop;
-
-		mob->hit = proto->hit;
-		mob->max_hit = proto->max_hit;
-		mob->move = proto->move;
-		mob->max_move = proto->max_move;
-		mob->armor = proto->armor;
-		mob->offense = proto->offense;
-		mob->mob->damroll = proto->mob->damroll;
-		mob->ppoints = proto->ppoints;
-		mob->nat_attack_type = proto->nat_attack_type;
-
-		mob->sex = proto->sex;
-		mob->clans = proto->clans;
-		mob->deity = proto->deity;
-
-		mob->circle = proto->circle;
-		mob->mob->skinned_vnum = proto->mob->skinned_vnum;
-		mob->mob->carcass_vnum = proto->mob->carcass_vnum;
-		mob->mob->merch_seven = proto->mob->merch_seven;
-		mob->mob->vehicle_type = proto->mob->vehicle_type;
-		mob->mob->helm_room = proto->mob->helm_room;
-		mob->natural_delay = proto->natural_delay;
-		mob->fight_mode = proto->fight_mode;
-		mob->race = proto->race;
-		mob->mob->access_flags = proto->mob->access_flags;
-		mob->speaks = proto->speaks;
-
-		/*
-		mob->height				  = proto->height;
-		mob->frame				  = proto->frame;
-		*/
-		mob->age = proto->age;
-
-		for (i = 0; i < MAX_SKILLS; i++)
-			mob->skills[i] = proto->skills[i];
-
-		mob->str = proto->str;
-		mob->dex = proto->dex;
-		mob->con = proto->con;
-		mob->wil = proto->wil;
-		mob->aur = proto->aur;
-		mob->intel = proto->intel;
-
-		mob->mob->currency_type = proto->mob->currency_type;
-
-		mob->prog = proto->prog;
+		mob->partial_deep_copy(proto);
 	}
 
 	return change_count;
@@ -8699,7 +8588,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				edit_mob->mob->currency_type = CURRENCY_MORGUL;
 				send_to_char
-					("That mobile will now deal in Yrcish currency (Blacks).\n",
+					("That mobile will now deal in Orcish currency (Blacks).\n",
 					ch);
 			}
 			else if (!str_cmp (buf, "gondorian") || !str_cmp (buf, "copper"))
@@ -8733,7 +8622,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			else
 			{
 				send_to_char
-					("Specify Yrcish, Gondorian, Haradaic or Numenorean currency.\n", ch);
+					("Specify Orcish, Gondorian, Haradaic or Numenorean currency.\n", ch);
 				return;
 			}
 		}

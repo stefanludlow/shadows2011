@@ -3776,350 +3776,357 @@ do_rollcall (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 /**************************************************************\
-* Function: do_setPay						*
-* Purpose:  This function allows a clan leader to set the pay	*
-*           for his/her members.					*
+* Function: do_setPay                 				*
+* Purpose:  This function allows a clan leader to set the pay  *
+*           for his/her members.               			*
 \**************************************************************/
 
 void do_setPay (CHAR_DATA * ch, char *argument, int cmd)
 {
 	int clan_flags, index, tmp, job;
-	char clanname[MAX_STRING_LENGTH];
-	AFFECTED_TYPE* af;
-	MYSQL_RES *result;
-	MYSQL_ROW row;
-	CLAN_DATA* tclan;
-	Stringstack arg = argument;
-	bool finished = false;
+   	char clanname[MAX_STRING_LENGTH];
+   	AFFECTED_TYPE* af;
+   	MYSQL_RES *result;
+   	MYSQL_ROW row;
+   	CLAN_DATA* tclan;
+   	Stringstack arg = argument;
+   	bool finished = false;
 
-	if (IS_NPC (ch))
-	{
-		return;
-	}
+   	if (IS_NPC (ch))
+   	{
+      		return;
+   	}
 
-	if(!*argument || arg.pop() == "?")
-	{
-		std::string helpStr =	"#6Add Job:\n"
-						" <name>\t\t\tName of the employee\n"
-						" '<clan name>'\t\tClan the employee will be working for\n"
-						" <pay amount>\t\tpay PC in cash by amount\n"
-						" <pay-period-days>\t# of days between payday\n"
-						"\n""Delete Job:\n"
-						" <name>\t\t\tName of the employee\n"
-						" '<clan name>'\t\tClan the employee was working for\n"
-						" delete\n#0";
-		send_to_char (helpStr.c_str(), ch);
-		return;
-	} 
+   	if(!*argument || arg.pop() == "?")
+   	{
+      		std::string helpStr =   "#6Add Job:\n"
+                  			   " <name>\t\t\tName of the employee\n"
+              			   " '<clan name>'\t\tClan the employee will be working for\n"
+              			   " <pay amount>\t\tpay PC in cash by amount\n"
+              			   " <pay-period-days>\t# of days between payday\n"
+              			   "\n""Delete Job:\n"
+              			   " <name>\t\t\tName of the employee\n"
+               			   " '<clan name>'\t\tClan the employee was working for\n"
+               			   " delete\n#0";
+      		send_to_char (helpStr.c_str(), ch);
+      		return;
+   	}
 
-	// Get Player Name (Online Players only)
-	bool isFound = false;
-	CHAR_DATA *tch;
-	for(std::list<CHAR_DATA*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
-	{
-		tch = *tch_iterator;
-		if (tch->deleted)
-		{
-			continue;
-		}
-		if (isname(arg.recall(0).c_str(), tch->tname))
-		{
-			isFound = true;
-			break;
-		}
-	}
-	if(!isFound || IS_NPC(tch))
-	{
-		send_to_char ("Player not found or not online.\n", ch);
-		return;
-	}
-	else if (tch == ch)
-	{
-		send_to_char ("Giving yourself a job? Unthinkable.\n", ch);
-		return;
-	} 
+   	// Get Player Name (Online Players only)
+   	bool isFound = false;
+   	CHAR_DATA *tch;
 
-	// Get Clan Name
-	if(arg.isFinished()) // Is this the end of the argument?
-	{
-		send_to_char("You must specify a clan name.\n", ch);
-		return;
-	} 
+   	for(std::list<CHAR_DATA*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
+   	{
+      		tch = *tch_iterator;
+      		if (tch->deleted)
+      		{
+         		continue;
+      		}
+      		if (isname(arg.recall(0).c_str(), tch->tname))
+      		{
+         		isFound = true;
+         		break;
+      		}
+   	}
 
-	arg.popSpeech(); // Moves to the next word in the argument, allowing quote use
-	std::strcpy (clanname, arg.recall(1).c_str());
+   	if(!isFound || IS_NPC(tch))
+   	{
+      		send_to_char ("Player not found or not online.\n", ch);
+      		return;
+   	}
+   	else if (tch == ch)
+   	{
+      		send_to_char ("Giving yourself a job? Unthinkable.\n", ch);
+      		return;
+   	}
+
+   	// Get Clan Name
+   	if(arg.isFinished()) // Is this the end of the argument?
+   	{
+      		send_to_char("You must specify a clan name.\n", ch);
+      		return;
+   	}
+
+   	arg.popSpeech(); // Moves to the next word in the argument, allowing quote use
+   	std::strcpy (clanname, arg.recall(1).c_str());
+   	
 	// Check Clan Powers
-	if(!get_clan_long_short(ch, clanname, &clan_flags))
-	{
-		send_to_char ("You are not a member of that clan.\n", ch);
-		return;
-	}
-
-	else if(!IS_SET(clan_flags, CLAN_LEADER)
-		&& (clan_flags < CLAN_CORPORAL || clan_flags > CLAN_COMMANDER)
-		&& !IS_SET(clan_flags, CLAN_MASTER)
-		&& !IS_SET(clan_flags, CLAN_JOURNEYMAN))
-	{
-		send_to_char ("You are not a leader of that clan.\n", ch);
-		return;
-	}
+   	if(!get_clan_long_short(ch, clanname, &clan_flags))
+   	{
+      		send_to_char ("You are not a member of that clan.\n", ch);
+      		return;
+   	}
+   	else if(!IS_SET(clan_flags, CLAN_LEADER)
+      		&& (clan_flags < CLAN_CORPORAL || clan_flags > CLAN_COMMANDER)
+     		&& !IS_SET(clan_flags, CLAN_MASTER)
+      		&& !IS_SET(clan_flags, CLAN_JOURNEYMAN))
+   	{
+      		send_to_char ("You are not a leader of that clan.\n", ch);
+      		return;
+   	}
+   
 	if (!get_clan_long_short(tch, clanname, &clan_flags))
-	{
-		send_to_char("They are not a member of that clan.\n", ch);
-		return;
-	}
+   	{
+      		send_to_char("They are not a member of that clan.\n", ch);
+      		return;
+   	}
 
-	//Keep clan_name as the short name
-	if ((tclan = get_clandef_long (clanname)))
-		strcpy (clanname, tclan->name);
+   	//Keep clan_name as the short name
+   	if ((tclan = get_clandef_long (clanname)))
+      		strcpy (clanname, tclan->name);
 
-	//Get Pay Master
-	std::string player_db = engine.get_config ("player_db");
-	mysql_safe_query("SELECT IF(pay_master IS NULL, 0, pay_master) AS pay_master FROM %s.clans WHERE name='%s'", player_db.c_str(), clanname);
-	result = mysql_store_result (database);
-	if (!result || !mysql_num_rows (result) || !(row = mysql_fetch_row(result)) || !row[0])
-	{
-		if (result)
-			mysql_free_result (result);
-		send_to_char ("Pay Master is not defined.\n", ch);
-		return;
-	}
+   	//Get Pay Master
+   	std::string player_db = engine.get_config ("player_db");
+	//Some clans return a NULL paymaster. Search sets NULL to 0 if such is the case - Vader
+   	mysql_safe_query("SELECT IF(pay_master IS NULL, 0, pay_master) AS pay_master FROM %s.clans WHERE name='%s'", player_db.c_str(), clanname);
+   	result = mysql_store_result (database);
+   	if (!result || !mysql_num_rows (result) || !(row = mysql_fetch_row(result)) || !row[0])
+   	{
+      		if (result)
+         	mysql_free_result (result);
+      		send_to_char ("Pay Master is not defined.\n", ch);
+      		return;
+   	}
 
-	int employer = atoi(row[0]);
-	if (!vtom (employer))
-	{ 
-		send_to_char("Pay Master is not defined.\n", ch);
-		mysql_free_result(result);
-		return;
-	} 
+   	int employer = atoi(row[0]);
+   	if (!vtom (employer))
+   	{
+      		send_to_char("Pay Master is not defined.\n", ch);
+      		mysql_free_result(result);
+      		return;
+   	}
 
-	if (arg.isFinished())
-	{
-		send_to_char("Use #6delete#0 to remove a current\njob or enter the #6pay amount#0.\n", ch);
-		mysql_free_result(result);
-		return;
-	}
+   	if (arg.isFinished())
+   	{
+      		send_to_char("Use #6delete#0 to remove a current\njob or enter the #6pay amount#0.\n", ch);
+      		mysql_free_result(result);
+      		return;
+   	}
 
-	// Check for delete
-	if(arg.pop() == "delete")
-	{
-		for (job = JOB_1; job <= JOB_3; job++)
-		{
-			af = get_affect(tch, job);
-			if (af != NULL && af->a.job.employer == employer)
-			{
-				affect_remove(tch, af);
-				send_to_char("Job removed.\n", ch);
-				mysql_free_result(result);
-				return;
-			}
-		}
-		send_to_char("That job wasn't assigned.\n", ch);
-		mysql_free_result(result);
-		return;
-	}
+   	// Check for delete
+   	if(arg.pop() == "delete")
+   	{
+      		for (job = JOB_1; job <= JOB_3; job++)
+      		{
+         		af = get_affect(tch, job);
+         		if (af != NULL && af->a.job.employer == employer)
+         		{
+            			affect_remove(tch, af);
+            			send_to_char("Job removed.\n", ch);
+            			mysql_free_result(result);
+            			return;
+         		}
+      		}
+      		send_to_char("That job wasn't assigned.\n", ch);
+      		mysql_free_result(result);
+      		return;
+   	}
 
-	//Get Cash amount
-	int count = arg.toInt();
-	if(!count || count < 0)
-	{
-		send_to_char("How much did you wish to pay them?\n", ch);
-		mysql_free_result(result);
-		return;
-	} 
-	if (count > 500)
-	{
-		send_to_char("That cash amount is a bit high.\n", ch);
-		mysql_free_result(result);
-		return;
-	} 
+   	//Get Cash amount
+   	int count = arg.toInt();
+   	if(!count || count < 0)
+   	{
+      		send_to_char("How much did you wish to pay them?\n", ch);
+      		mysql_free_result(result);
+      		return;
+   	}
+   	if (count > 500)
+   	{
+      		send_to_char("That cash amount is a bit high.\n", ch);
+      		mysql_free_result(result);
+      		return;
+   	}
 
-	//Get Pay period
-	if (arg.isFinished())
-	{
-		send_to_char("Specify the number of days until payday.\n", ch);
-		mysql_free_result(result);
-		return;
-	}
-	arg.pop();
-	int days = arg.toInt();
-	if(!days || days < 0)
-	{
-		send_to_char("Specify the number of days until payday.\n", ch);
-		mysql_free_result(result);
-		return;
-	} 
+   	//Get Pay period
+   	if (arg.isFinished())
+   	{
+      		send_to_char("Specify the number of days until payday.\n", ch);
+      		mysql_free_result(result);
+      		return;
+   	}
+   	arg.pop();
+   	int days = arg.toInt();
+   	if(!days || days < 0)
+   	{
+      		send_to_char("Specify the number of days until payday.\n", ch);
+      		mysql_free_result(result);
+      		return;
+   	}
 
-	int pay_date = time_info.month * 30 + time_info.day + time_info.year * 12 * 30 + days;
+   	int pay_date = time_info.month * 30 + time_info.day + time_info.year * 12 * 30 + days;
 
-	//Add Job
-	for (job = JOB_1; job <= JOB_3; job++)
-	{
-		af = get_affect(tch, job);
-		if (af != NULL && af->a.job.employer == employer)
-		{
-			send_to_char("A job from this clan already exists.\nPlease delete this job first in order to change it.\n", ch);
-			mysql_free_result(result);
-			return;
-		}
-		else if (af == NULL)
-			break;
-	}
-	if (af != NULL)
-	{
-		send_to_char("This player cannot have any more paydays.", ch);
-		mysql_free_result(result);
-		return;
-	}
-	job_add_affect(tch, job, days, pay_date, count, 0, 0, employer);
-	send_to_char("Job successfully added.\n", ch);
-	mysql_free_result(result);
+   	//Add Job
+   	for (job = JOB_1; job <= JOB_3; job++)
+   	{
+      		af = get_affect(tch, job);
+      		if (af != NULL && af->a.job.employer == employer)
+      		{
+         		send_to_char("A job from this clan already exists.\nPlease delete this job first in order to change it.\n", ch);
+         		mysql_free_result(result);
+         		return;
+      		}
+      		else if (af == NULL)
+         		break;
+   	}
+   	if (af != NULL)
+   	{
+      		send_to_char("This player cannot have any more paydays.", ch);
+      		mysql_free_result(result);
+      		return;
+   	}
+
+   	job_add_affect(tch, job, days, pay_date, count, 0, 0, employer);
+   	send_to_char("Job successfully added.\n", ch);
+   	mysql_free_result(result);
 }
 
 /*********************************************************************\
-* Function: do_checkPay							*
-* Purpose:  This function allows a clan leader to check the		*
-*           various pay amount and pay shcedules for their		*
-*           members.								*
+* Function: do_checkPay                     				*
+* Purpose:  This function allows a clan leader to check the      	*
+*           various pay amount and pay shcedules for their      	*
+*           members.                        				*
 \*********************************************************************/
 
 void do_checkPay (CHAR_DATA * ch, char *argument, int cmd)
 {
-	int clan_flags = 0, index = 1, job, payday, cash, count, tEmployer, ovnum;
-	MYSQL_RES *result;
-	MYSQL_RES *p_result;
-	MYSQL_ROW row;
-	MYSQL_ROW p_row;
-	CLAN_DATA *tclan;
-	CHAR_DATA *tch;
-	OBJ_DATA *cost;
-	AFFECTED_TYPE* af;
-	char buf[MAX_STRING_LENGTH], clanname[MAX_STRING_LENGTH];
-	std::ostringstream CheckPay;
-	Stringstack arg;
+   	int clan_flags = 0, index = 1, job, payday, cash, count, tEmployer, ovnum;
+   	MYSQL_RES *result;
+   	MYSQL_RES *p_result;
+   	MYSQL_ROW row;
+   	MYSQL_ROW p_row;
+   	CLAN_DATA *tclan;
+   	CHAR_DATA *tch;
+   	OBJ_DATA *cost;
+   	AFFECTED_TYPE* af;
+   	char buf[MAX_STRING_LENGTH], clanname[MAX_STRING_LENGTH];
+   	std::ostringstream CheckPay;
+   	Stringstack arg;
 
-	//NPCs cannot use this command.
-	if (IS_NPC (ch))
-	{
-		return;
-	}
-	
-	//checkPay takes only 1 argument. It's faster to use one_argument in such cases.
-	argument = one_argument(argument, clanname);
-	
-	//Display soft help if either no argument or '?' is entered.
-	if(!*clanname || clanname == "?")
-	{
-		send_to_char ("Usage: checkpay \"<clan name>\"\n", ch);
-		return;
-	} 
- 	
-	//Player must be a member and leader of the clan they are attempting to get job info for.
-	if (!get_clan_long_short (ch, clanname, &clan_flags))
-	{
-		send_to_char ("You are not a member of that clan.\n", ch);
-		return;
-	}
+   	//NPCs cannot use this command.
+   	if (IS_NPC (ch))
+   	{
+      		return;
+   	}
+   
+   	//checkPay takes only 1 argument. It's faster to use one_argument in such cases.
+   	argument = one_argument(argument, clanname);
+   	
+   	//Display soft help if either no argument or '?' is entered.
+   	if(!*clanname || clanname == "?")
+   	{
+      		send_to_char ("Usage: checkpay \"<clan name>\"\n", ch);
+      		return;
+   	}
+   
+   	//Player must be a member and leader of the clan they are attempting to get job info for.
+   	if (!get_clan_long_short (ch, clanname, &clan_flags))
+   	{
+      		send_to_char ("You are not a member of that clan.\n", ch);
+      		return;
+   	}
 
-	if(!IS_SET(clan_flags, CLAN_LEADER)
-	&& (clan_flags < CLAN_CORPORAL || clan_flags > CLAN_COMMANDER)
-	&& !IS_SET(clan_flags, CLAN_MASTER)
-	&& !IS_SET(clan_flags, CLAN_JOURNEYMAN))
-	{
-		send_to_char ("You are not a leader of that clan.\n", ch);
-		return;
-	}
-  
-	//Keep clan_name as the short name
-	if ((tclan = get_clandef_long (clanname)))
-		strcpy (clanname, tclan->name);
+   	if(!IS_SET(clan_flags, CLAN_LEADER)
+   		&& (clan_flags < CLAN_CORPORAL || clan_flags > CLAN_COMMANDER)
+   		&& !IS_SET(clan_flags, CLAN_MASTER)
+   		&& !IS_SET(clan_flags, CLAN_JOURNEYMAN))
+   	{
+      		send_to_char ("You are not a leader of that clan.\n", ch);
+      		return;
+   	}
  
-	//Return the paymaster vnum for the clan entered. If pay_master is NULL, return 0 instead.
-	std::string player_db = engine.get_config ("player_db");
-	mysql_safe_query("SELECT IF(pay_master IS NULL, 0, pay_master) AS pay_master FROM %s.clans WHERE name='%s'", player_db.c_str(), clanname);
-	result = mysql_store_result (database);
+   	//Keep clan_name as the short name
+   	if ((tclan = get_clandef_long (clanname)))
+      		strcpy (clanname, tclan->name);
 
-	if (!result || !mysql_num_rows (result) || !(row = mysql_fetch_row(result)) || !row[0])
-	{
-		if (result)
-			mysql_free_result (result);
-		send_to_char ("Pay Master is not defined.\n", ch);
-		return;
-	}
+   	//Return the paymaster vnum for the clan entered. If pay_master is NULL, return 0 instead.
+   	std::string player_db = engine.get_config ("player_db");
+   	mysql_safe_query("SELECT IF(pay_master IS NULL, 0, pay_master) AS pay_master FROM %s.clans WHERE name='%s'", player_db.c_str(), clanname);
+   	result = mysql_store_result (database);
 
-	int employer = atoi(row[0]);
-	if (!vtom (employer))
-	{ 
-		send_to_char("Pay Master is not defined.\n", ch);
-		mysql_free_result(result);
-		return;
-	} 
+   	if (!result || !mysql_num_rows (result) || !(row = mysql_fetch_row(result)) || !row[0])
+   	{
+      		if (result)
+         		mysql_free_result (result);
+      		send_to_char ("Pay Master is not defined.\n", ch);
+      		return;
+   	}
+
+   	int employer = atoi(row[0]);
+   	if (!vtom (employer))
+   	{
+      		send_to_char("Pay Master is not defined.\n", ch);
+      		mysql_free_result(result);
+      		return;
+   	}
 
 
-	/*In order to retrieve job information without using load_pc() to get CHAR_DATA, we must find the appropriate Affect string and pass it
-	as an argument. To do this we use the following mysql query. The affects field contains job information, all crafts, skill blocks,
-	pending notifies, etc. The query searches through this list to find a match to the employer vnum of the clan, then steps back 30
-	positions before stepping forward to find a string that matches "Affect/t60" (Jobs always begin with this string. A few other affects
-	do as well, this is why we must find the employer number first; this also makes sure we have the correct job) then will return "Affect\t60"
-	to "\n" (indicating the end of the job string) as the payday.
-		Limits: Level (NO IMMS), lastlogon (2 Weeks), strlen (In the rare occurance that the paydate contains the employer vnum)*/
+   	/*In order to retrieve job information without using load_pc() to get CHAR_DATA, we must find the appropriate Affect string and pass it
+   	as an argument. To do this we use the following mysql query. The affects field contains job information, all crafts, skill blocks,
+   	pending notifies, etc. The query searches through this list to find a match to the employer vnum of the clan, then steps back between 24 to 30
+   	positions (this varies based on where the job is located in the affects field) before stepping forward to find a string that matches "Affect\t60"
+	(Jobs always begin with this string. A few other affects do as well, this is why we must find the employer number first; this also makes sure we have the correct job)
+	then will return "Affect\t60" to "\n" (indicating the end of the job string) as the payday.
+      	
+	Limits: Level (NO IMMS), lastlogon (2 Weeks), strlen (In the rare occurance that the employer vnum is found elsewhere)*/
 
-	mysql_safe_query(
-		"SELECT name, rank, sdesc, create_state, SUBSTRING( affects, strpos, ( LOCATE( '\\n', affects, strpos) - strpos ) ) AS payday"
- 		" FROM ("
-		"SELECT"
-			" name, sdesc, create_state, affects,"
-			" TRIM(BOTH '\\'' FROM SUBSTRING_INDEX(LEFT(clans,LOCATE('%s',clans)-2),' ',-1)) AS rank,"
-			" LOCATE( 'Affect\\t60', affects, ( LOCATE( '%d', affects ) - 30 ) ) AS strpos,"
-			" LOCATE( '%d', affects) AS strpos2 FROM %s.pfiles"
-			" WHERE lastlogon > (UNIX_TIMESTAMP() - 1209600) AND level = 0 AND clans LIKE '%%%s%%'"
-		") AS subqry WHERE strpos2 - strpos > 20 ORDER BY rank", clanname, employer, employer, player_db.c_str(), clanname);
+   	mysql_safe_query(
+      		"SELECT name, rank, sdesc, create_state, SUBSTRING(affects, strpos, (LOCATE('\\n', affects, strpos) - strpos)) AS payday"
+      		" FROM ("
+      			"SELECT"
+         			" name, sdesc, create_state, affects,"
+         			" TRIM(BOTH '\\'' FROM SUBSTRING_INDEX(LEFT(clans,LOCATE('%s',clans)-2),' ',-1)) AS rank,"
+         			" LOCATE('Affect\t60', affects, LOCATE('%d', affects) - IF(LOCATE('%d', affects) < 30, LOCATE('%d', affects) - 1, 30)) AS strpos,"
+         			" LOCATE('%d', affects) AS strpos2 FROM %s.pfiles"
+         			" WHERE lastlogon > (UNIX_TIMESTAMP() - 1209600) AND level = 0 AND clans LIKE '%%%s%%'"
+      			") AS subqry WHERE strpos2 - strpos > 20 ORDER BY rank", clanname, employer, employer, employer, employer, player_db.c_str(), clanname);
 
-	p_result = mysql_store_result(database);
+   	p_result = mysql_store_result(database);
 
-  	if (!p_result || !mysql_num_rows (p_result))
-    	{
-      		if (p_result)
-			mysql_free_result (p_result);
-		mysql_free_result(result);
-	      	send_to_char ("No names were found.\n", ch);
-	      	return;
-	}
+     	if (!p_result || !mysql_num_rows (p_result))
+       {
+        	if (p_result)
+         	mysql_free_result (p_result);
+      		mysql_free_result(result);
+            	send_to_char ("No names were found.\n", ch);
+            	return;
+   	}
 
-	// loop through all clan members search for job status.
-	CheckPay << "#6Clan members with jobs:\n#0";
-	while (p_row = mysql_fetch_row (p_result))
-	{
-		arg = p_row[4];						//Pass the job string as a Stringstack to break it down into integer fields.
-		arg.findAndReplace("Affect\t", "");			//Jobs are returned as "Affect\t600 30 854623 30 0 11087 0". Remove the beginning so we are left with "600 30 854623 30 0 11087 0"
-		arg.popAll();							//Popping the entire argument leaves fewer lines of code than popping one at a time. Possibly more efficient?
-		job = atoi(arg.recall(0).c_str());				//The first argument is the job. 600 = job 1, 601 = job 2, 603 = job 3
-		payday = atoi(arg.recall(1).c_str());			//Payday is the days between payday, not the date. This is the second argument of the job string.
-										//Recall(2) is skipped. It's not needed in this function.
-		cash = atoi(arg.recall(3).c_str());			//Cash is the total amount of cp that the employee gets.
-		if (!cash)							//If there is a cash value of 0, then the employee gets paid out of thin air and we take the next value.
-		{
-			count = atoi(arg.recall(4).c_str());		//Count is the number of objects recieved from the job, not necessarily the total amount of cp (could be paid in 5's, not 1's)
-			ovnum = atoi(arg.recall(6).c_str());		//If cash amount is 0, then there will be an ovnum in the job
-										//(ovnums can only be assigned in a job by staff and do_job makes sure count and ovnum are entered together)
-			cost = vtoo(ovnum);					//Get the object that matches the ovnum. Again, do_job makes sure this is legit.
-			count *= cost->farthings + cost->silver * 4;	//Multiply the number of objects by the object cost to determine to total amount the employee gets.
-		}
-		if (cash)
-			count = cash;						//If cash is true, make count equal cash.
-		if (atoi(p_row[3]) == STATE_APPROVED)			//Only print out players jobs that are still alive.
-		{
-			sprintf (buf, "\n%d. [#6%s#0] #5%s#0: #3%dcp #0every #2%d#0 days",
-			index++, p_row[1], p_row[2], count, payday);
-			if (!cash)
-				sprintf (buf + strlen(buf), "#1!#0");	//Jobs that get paid out of thin air will end in a red '!'. WE DON'T WANT THESE TYPE OF JOBS.
-			else
-				sprintf(buf + strlen(buf), ".");		//Regular jobs end in a period.
-		}
-		CheckPay << buf;
-	}
-	send_to_char(CheckPay.str().c_str(), ch);
-	mysql_free_result (result);
-	mysql_free_result (p_result);
-	return;
+   	// loop through all clan members search for job status.
+   	CheckPay << "#6Clan members with jobs:\n#0";
+   	while (p_row = mysql_fetch_row (p_result))
+   	{
+      		arg = p_row[4];                  		  	   //Pass the job string as a Stringstack to break it down into integer fields.
+      		arg.findAndReplace("Affect\t", "");         	   //Jobs are returned as "Affect\t600 30 854623 30 0 11087 0". Remove the beginning so we are left with "600 30 854623 30 0 11087 0"
+      		arg.popAll();                     		  	   //Popping the entire argument leaves fewer lines of code than popping one at a time. Possibly more efficient?
+      		job = atoi(arg.recall(0).c_str());          	   //The first argument is the job. 600 = job 1, 601 = job 2, 603 = job 3
+      		payday = atoi(arg.recall(1).c_str());       	   //Payday is the days between payday, not the date. This is the second argument of the job string.
+       				                       	   //Recall(2) is skipped. It's not needed in this function.
+      		cash = atoi(arg.recall(3).c_str());         	   //Cash is the total amount of cp that the employee gets.
+      		if (!cash)                     		  	   //If there is a cash value of 0, then the employee gets paid out of thin air and we take the next value.
+      		{
+         		count = atoi(arg.recall(4).c_str()); 	   //Count is the number of objects recieved from the job, not necessarily the total amount of cp (could be paid in 5's, not 1's)
+         		ovnum = atoi(arg.recall(6).c_str()); 	   //If cash amount is 0, then there will be an ovnum in the job
+                              				  	   //(ovnums can only be assigned in a job by staff and do_job makes sure count and ovnum are entered together)
+         		cost = vtoo(ovnum);				   //Get the object that matches the ovnum. Again, do_job makes sure this is legit.
+         		count *= cost->farthings + cost->silver * 4; //Multiply the number of objects by the object cost to determine to total amount the employee gets.
+      		}
+      		if (cash)
+         		count = cash;                  		   //If cash is true, make count equal cash.
+      		if (atoi(p_row[3]) == STATE_APPROVED)         	   //Only print out players jobs that are still alive.
+      		{
+         		sprintf (buf, "\n%d. [#6%s#0] #5%s#0: #3%dcp #0every #2%d#0 days",
+         			index++, p_row[1], p_row[2], count, payday);
+         		if (!cash)
+            			sprintf (buf + strlen(buf), "#1!#0"); //Jobs that get paid out of thin air will end in a red '!'. WE DON'T WANT THESE TYPE OF JOBS.
+         		else
+            			sprintf(buf + strlen(buf), ".");      //Regular jobs end in a period.
+      		}
+      		CheckPay << buf;
+   	}
+
+   	send_to_char(CheckPay.str().c_str(), ch);
+   	mysql_free_result (result);
+   	mysql_free_result (p_result);
+   	return;
 }

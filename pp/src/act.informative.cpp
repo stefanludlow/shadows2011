@@ -433,8 +433,7 @@ do_title (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   skill =
-    (ch->skills[ch->writes] * 0.50) + (ch->skills[ch->speaks] * 0.30) +
-    (ch->skills[SKILL_LITERACY] * 0.20);
+    (ch->skills[ch->writes] * 0.70) + (ch->skills[ch->speaks] * 0.30); 
   skill = (int) skill;
   skill = MIN (95, (int) skill);
 
@@ -1411,10 +1410,8 @@ decipher_script (CHAR_DATA * ch, int script, int language, int skill)
 
   skill_use (ch, script, 0);
   skill_use (ch, language, 0);
-  skill_use (ch, SKILL_LITERACY, 0);
 
-  if (((ch->skills[script] * .50) + (ch->skills[language] * .30) +
-       (ch->skills[SKILL_LITERACY] * .20)) >= check)
+  if (((ch->skills[script] * .70) + (ch->skills[language] * .30) ) >= check) 
     return 1;
   else
     return 0;
@@ -1489,8 +1486,6 @@ reading_check (CHAR_DATA * ch, OBJ_DATA * obj, WRITING_DATA * writing,
       skill_use (ch, writing->script, 0);
       if (!number (0, 1))
 	skill_use (ch, writing->language, 0);
-      if (!number (0, 2))
-	skill_use (ch, SKILL_LITERACY, 0);
     }
 
   sprintf (output, "%s", writing->message);
@@ -4975,6 +4970,8 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
   struct time_info_data birth_date;
   static char *verbal_stats[] =
     { "horrible", "bad", "poor", "avg", "good", "great", "peak", "superhuman", "legendary", "epic" };
+  //static char *power_verbal_stats = {"void", "flicker", "spark", "flame", "fire", "flare", "brilliant", "blinding", "consuming"}; Reference - Case
+  //static char *dark_power_verbal_stats = {"void", "flicker", "trace", "shadow", "darkness"}; // Perhaps for evil dudes? - Case
 
   birth_date = time_info;
 
@@ -5019,23 +5016,65 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
     {
       if (IS_MORTAL (ch))
 	sprintf (buf,
-		 "Str[#2%s#0] Dex[#2%s#0] Con[#2%s#0] Int[#2%s#0] Wil[#2%s#0] Aur[#2%s#0] Agi[#2%s#0]\n",
+		 "Str[#2%s#0] Dex[#2%s#0] Con[#2%s#0] Int[#2%s#0] Wil[#2%s#0] Agi[#2%s#0]\n",
 		 verbal_stats[get_stat_range (GET_STR (ch))],
 		 verbal_stats[get_stat_range (GET_DEX (ch))],
 		 verbal_stats[get_stat_range (GET_CON (ch))],
 		 verbal_stats[get_stat_range (GET_INT (ch))],
 		 verbal_stats[get_stat_range (GET_WIL (ch))],
-		 verbal_stats[get_stat_range (GET_AUR (ch))],
 		 verbal_stats[get_stat_range (GET_AGI (ch))]);
       else
 	sprintf (buf,
-		 "Str[#2%d#0] Dex[#2%d#0] Con[#2%d#0] Int[#2%d#0] Wil[#2%d#0] Aur[#2%d#0] Agi[#2%d#0]\n",
+		 "Str[#2%d#0] Dex[#2%d#0] Con[#2%d#0] Int[#2%d#0] Wil[#2%d#0] Aura/Power[#2%d#0] Agi[#2%d#0]\n",
 		 GET_STR (ch), GET_DEX (ch), GET_CON (ch), GET_INT (ch),
 		 GET_WIL (ch), GET_AUR (ch), GET_AGI (ch));
 
       send_to_char ("\n", ch);
       send_to_char (buf, ch);
     }
+
+  // November 22nd 2009, Segment to display power - Case
+  if (!IS_SET (ch->flags, FLAG_GUEST)) {
+	  int pcAur = GET_AUR(ch);
+
+	  if (pcAur < 2) {
+		  send_to_char("You are devoid of power.", ch);
+	  }
+	  else if (ch->race >= 16 && ch->race <= 19 || ch->race == 93) { // If elf - Case
+		  if (pcAur < 25) {
+			  send_to_char("#6Your soul burns outward from your body brilliantly.#0", ch);
+		  }
+		  else if (pcAur < 32) {
+			  send_to_char("#6Blinding power burns outwards from your body.#0", ch);
+		  }
+		  else {
+			  send_to_char("#6Your soul burns as consumingly as Anor.#0", ch);
+		  }
+	  }
+	 
+          else if (pcAur < 4) {
+                   send_to_char("There is a #1flicker#0 of power within you.", ch);
+          }
+	  else if (pcAur < 7) {
+		  send_to_char("There is a #1spark#0 of power within you.", ch);
+	  }
+	  else if (pcAur < 11) {
+		  send_to_char("You can feel the #1flames#0 of the power in your veins.", ch);
+	  }
+	  else if (pcAur < 16) {
+		  send_to_char("Your soul burns with potent #9fire#0.", ch);
+	  }
+	  else if (pcAur < 19) {
+		  send_to_char("Power #9flares#0 within your soul.", ch);
+	  }
+	  else if (pcAur < 32) {
+		  send_to_char("#9Potency roars through your veins.#0", ch);
+	  }
+	  else {
+		  send_to_char("#9Your soul burns as consumingly as Anor.#0", ch);
+	  }
+	  send_to_char("\n", ch);
+  }// End of Power messages - Case
 
   if (IS_SET (ch->flags, FLAG_GUEST))
     {
@@ -7870,22 +7909,21 @@ int kingdom_from_zone (CHAR_DATA *ch)
 	else return -1;
 }
 
-//This helper function counts how many players are in the room. - Vader
+//This helper function counts how many players are in the room.
+//Anytime a new room is reference with vtor, run this command. - Vader
 
 void roomCount(ROOM_DATA *rd)
 {
 	rd->occupants = 0;
 	for (CHAR_DATA *tch = rd->people; tch; tch = tch->next_in_room)
 	{
-		//Don't count NPC's, admin's, and linkdead people.
-		//Count admin's if they are switched into NPC's. 
 		if (!IS_NPC(tch))
-		{
-			if (!IS_LINKDEAD(tch) && IS_MORTAL(tch))
-				rd->occupants++;
-		}
-		else if (tch->desc && tch->desc->original)
-			rd->occupants++;
+      	{
+        	if (!IS_LINKDEAD(tch) && IS_MORTAL(tch))
+            	rd->occupants++;
+      	}
+      	else if (tch->desc && tch->desc->original)
+		rd->occupants++;
 	}
 }
 
@@ -7932,9 +7970,11 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 				mortals++;
 			else
 				guests++;
-			if (!IS_NPC(d->character) && clansphere == sphere && !(d->character->pc->level > 0))
+				
+			if((clansphere == sphere) && (!(d->character->pc->level > 0)))
 				clanCount++;
-			if (d->character->pc->level > 0)
+				
+			if(d->character->pc->level > 0)
 			{
 				immortals++;
 				if(IS_SET( d->character->flags, FLAG_AVAILABLE ))
@@ -7942,6 +7982,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 					availableAdminsStream << d->character->tname << std::endl;
 					availableAdmins = true;
 				}
+			
 			}
 		}
 	}
@@ -8003,8 +8044,6 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (sphere == 1)
 	{	
-
-		whoStream << gatheringPlace(3500, "the Wardenry Bastion Commons", rd);
 		whoStream << gatheringPlace(3271, "the Wardog Commons", rd);
 		whoStream << gatheringPlace(1108, "the Battered Shield", rd);
 		whoStream << gatheringPlace(1111, "the Gilded Lily", rd);
@@ -8027,6 +8066,9 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			whoStream << gatheringPlace(21170, "the Commons of the Rancid Snakebite Tavern", rd);
 		}
+		if (is_clan_member(ch, "z3_astirian_wardens"))
+		{
+			whoStream << gatheringPlace(8805, "the Pelennor Bastion Commons", rd);
 	}
 
 	else if (sphere == 2)
@@ -10981,9 +11023,8 @@ post_writing (DESCRIPTOR_DATA * d)
     }
 
   mod =
-    (skill_level(ch, ch->writes, 0) * 0.50) + 
-    (skill_level(ch, ch->speaks, 0) * 0.30) +
-    (skill_level(ch, SKILL_LITERACY, 0) * 0.20);
+    (skill_level(ch, ch->writes, 0) * 0.70) + 
+    (skill_level(ch, ch->speaks, 0) * 0.30);
 
 
   mod = (float) MIN (95, (int) mod);
@@ -11025,8 +11066,6 @@ post_writing (DESCRIPTOR_DATA * d)
   skill_use (ch, ch->writes, 0);
   if (!number (0, 1))
     skill_use (ch, ch->speaks, 0);
-  if (!number (0, 2))
-    skill_use (ch, SKILL_LITERACY, 0);
 
   save_writing (obj);
 }
@@ -11357,11 +11396,6 @@ do_scribe (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
-  if (ch->skills[SKILL_LITERACY] < 10)
-    {
-      send_to_char ("You aren't literate enough to do that.\n", ch);
-      return;
-    }
 
   for (i = SKILL_SCRIPT_SARATI; i <= SKILL_SCRIPT_ANGERTHAS_EREBOR; i++)
     if (ch->skills[i])
