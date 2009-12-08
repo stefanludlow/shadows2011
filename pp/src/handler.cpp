@@ -350,9 +350,8 @@ affect_modify (CHAR_DATA * ch, int type, int loc, int mod, int bitv,
 	break;
       case APPLY_CON:
 	GET_CON (ch) += mod;
-//POWER CHANGE NEEDED HERE??
 	if (!IS_NPC (ch))
-	  ch->max_hit = 50 + (CONSTITUTION_MULTIPLIER * GET_CON (ch)) + (MIN(GET_AUR (ch), 25) * 4);
+	  ch->max_hit = 50 + CONSTITUTION_MULTIPLIER * GET_CON (ch) + (MIN(GET_AUR(ch),18) * 4); // Arbitrary power HP boost - Case
 	else
 	  {
 	    ch->max_hit += mod * 6;
@@ -2429,7 +2428,7 @@ get_char_room_vis2 (CHAR_DATA * ch, int vnum, char *name)
 }
 
 CHAR_DATA *
-get_char_vis (CHAR_DATA * ch, char *name)
+get_char_vis (CHAR_DATA * ch, const char *name)
 {
   CHAR_DATA *i;
   int j, number;

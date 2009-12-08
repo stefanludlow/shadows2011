@@ -28,8 +28,6 @@
 #include "group.h"
 #include "utility.h"
 
-
-
 CHAR_DATA *loaded_list = NULL;
 
 /*

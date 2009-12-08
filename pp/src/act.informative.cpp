@@ -433,7 +433,8 @@ do_title (CHAR_DATA * ch, char *argument, int cmd)
     }
 
   skill =
-    (ch->skills[ch->writes] * 0.70) + (ch->skills[ch->speaks] * 0.30); 
+    (ch->skills[ch->writes] * 0.70) + (ch->skills[ch->speaks] * 0.30); //+
+    //(ch->skills[SKILL_LITERACY] * 0.20); // Removing Literacy - Case
   skill = (int) skill;
   skill = MIN (95, (int) skill);
 
@@ -1410,8 +1411,9 @@ decipher_script (CHAR_DATA * ch, int script, int language, int skill)
 
   skill_use (ch, script, 0);
   skill_use (ch, language, 0);
+  skill_use (ch, SKILL_LITERACY, 0);
 
-  if (((ch->skills[script] * .70) + (ch->skills[language] * .30) ) >= check) 
+  if (((ch->skills[script] * .70) + (ch->skills[language] * .30) ) >= check) //+ (ch->skills[SKILL_LITERACY] * .20)
     return 1;
   else
     return 0;
@@ -1486,6 +1488,8 @@ reading_check (CHAR_DATA * ch, OBJ_DATA * obj, WRITING_DATA * writing,
       skill_use (ch, writing->script, 0);
       if (!number (0, 1))
 	skill_use (ch, writing->language, 0);
+      if (!number (0, 2))
+	skill_use (ch, SKILL_LITERACY, 0);
     }
 
   sprintf (output, "%s", writing->message);
@@ -5037,10 +5041,10 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
   if (!IS_SET (ch->flags, FLAG_GUEST)) {
 	  int pcAur = GET_AUR(ch);
 
-	  if (pcAur < 2) {
-		  send_to_char("You are devoid of power.", ch);
+	  if (pcAur < 4) {
+		  send_to_char("Your soul #1flickers#0 like a candle, raw and untapped.", ch);
 	  }
-	  else if (ch->race >= 16 && ch->race <= 19 || ch->race == 93) { // If elf - Case
+	  else if (isElf(ch)) { // If elf - Case
 		  if (pcAur < 25) {
 			  send_to_char("#6Your soul burns outward from your body brilliantly.#0", ch);
 		  }
@@ -5051,15 +5055,12 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 			  send_to_char("#6Your soul burns as consumingly as Anor.#0", ch);
 		  }
 	  }
-	 
-          else if (pcAur < 4) {
-                   send_to_char("There is a #1flicker#0 of power within you.", ch);
-          }
+
 	  else if (pcAur < 7) {
-		  send_to_char("There is a #1spark#0 of power within you.", ch);
+		  send_to_char("Your soul #1sparks#0 like embers flying free of a fire.", ch);
 	  }
 	  else if (pcAur < 11) {
-		  send_to_char("You can feel the #1flames#0 of the power in your veins.", ch);
+		  send_to_char("Your soul burns with #1flames#0.", ch);
 	  }
 	  else if (pcAur < 16) {
 		  send_to_char("Your soul burns with potent #9fire#0.", ch);
@@ -5068,7 +5069,7 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 		  send_to_char("Power #9flares#0 within your soul.", ch);
 	  }
 	  else if (pcAur < 32) {
-		  send_to_char("#9Potency roars through your veins.#0", ch);
+		  send_to_char("#9Potency roars through your soul.#0", ch);
 	  }
 	  else {
 		  send_to_char("#9Your soul burns as consumingly as Anor.#0", ch);
@@ -7828,7 +7829,7 @@ void do_where (CHAR_DATA * ch, char *argument, int cmd) {
 	Stringstack whereArg = argument;
 	
 	int RPP = -1; // Will be less than 0 if this is where aura
-	bool checkAura = false;
+	bool checkPower = false;
 	bool checkClan = false; // Wait until my clan update - Case
 	std::string whichClan = "";
 
@@ -7843,13 +7844,13 @@ void do_where (CHAR_DATA * ch, char *argument, int cmd) {
 	}
 	
 	// Check for 'aura'
-	if (whereArg.pop() == "aura") {
-		checkAura = true;
+	if (whereArg.pop() == "power") {
+		checkPower = true;
 	}
 
 	for (descriptor_data *d = descriptor_list; d; d = d->next) {
 		if (d->character && (d->connected == CON_PLYNG) && (d->character->in_room != NOWHERE)) {
-			if (!checkAura) {
+			if (!checkPower) {
 				RPP = d->acct->get_rpp();
 			}
 			std::pair<int, std::string> reportPair = d->character->reportWhere(checkClan, RPP, whichClan);
@@ -11024,6 +11025,7 @@ post_writing (DESCRIPTOR_DATA * d)
   mod =
     (skill_level(ch, ch->writes, 0) * 0.70) + 
     (skill_level(ch, ch->speaks, 0) * 0.30);
+    //(skill_level(ch, SKILL_LITERACY, 0) * 0.20);
 
 
   mod = (float) MIN (95, (int) mod);
@@ -11065,6 +11067,8 @@ post_writing (DESCRIPTOR_DATA * d)
   skill_use (ch, ch->writes, 0);
   if (!number (0, 1))
     skill_use (ch, ch->speaks, 0);
+  if (!number (0, 2))
+    skill_use (ch, SKILL_LITERACY, 0);
 
   save_writing (obj);
 }
@@ -11395,6 +11399,11 @@ do_scribe (CHAR_DATA * ch, char *argument, int cmd)
       return;
     }
 
+  if (ch->skills[SKILL_LITERACY] < 10)
+    {
+      send_to_char ("You aren't literate enough to do that.\n", ch);
+      return;
+    }
 
   for (i = SKILL_SCRIPT_SARATI; i <= SKILL_SCRIPT_ANGERTHAS_EREBOR; i++)
     if (ch->skills[i])
