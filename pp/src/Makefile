@@ -53,3 +53,11 @@ install:
 	cp -f ~shadows/shadows/bp/bin/server ~shadows/shadows/bp/bin/server.last
 	cp -f ~shadows/shadows/rpi_engine/pp/bin/server ~shadows/shadows/pp/bin/server
 	cp -f ~shadows/shadows/rpi_engine/pp/bin/server ~shadows/shadows/bp/bin/server
+
+#does not create a .last. Use when updating a second time without a reboot/crash
+#occuring first. Goal is to keep the .last edition the same as the currently 
+#running, for gdb'ing its core.
+
+updatedinstall:
+	cp -f ~shadows/shadows/rpi_engine/pp/bin/server ~shadows/shadows/pp/bin/server
+	cp -f ~shadows/shadows/rpi_engine/pp/bin/server ~shadows/shadows/bp/bin/server
