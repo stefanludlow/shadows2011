@@ -2566,14 +2566,13 @@ setup_new_character (CHAR_DATA * tch)
 
   refresh_race_configuration (tch); //for innate abilities
   
-/****** set up in web-based CHARGEN already
   int nat_tongue = get_native_tongue(tch); // this is race0 aware 
   if (nat_tongue)
   {
      tch->skills[nat_tongue] = calc_lookup (tch, REG_CAP, i);
      tch->pc->skills[nat_tongue] = calc_lookup (tch, REG_CAP, i);
   }
-
+/*************set up in chargen now
   // Define all race-specific characteristics
 
   open_skill (tch, SKILL_SEARCH);

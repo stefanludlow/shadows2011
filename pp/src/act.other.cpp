@@ -104,14 +104,12 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 
   from_room = ch->in_room;
 
-/******* taken care of in web-based chargen
 	// grommit - All characters get basic westron, EXCEPT ORCS	
   if (ch->skills[SKILL_SPEAK_WESTRON] < 20 && (ch->race > 121 || ch->race < 119))
 	{
 		ch->skills[SKILL_SPEAK_WESTRON] = 20 ; 
 		ch->pc->skills[SKILL_SPEAK_WESTRON] = 20;
     }
-*****************/
   // grommit - All characters are maxed at their native tongue
 	int	native_tongue = get_native_tongue(ch);
 	if (native_tongue)
