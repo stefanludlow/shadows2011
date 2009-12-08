@@ -570,7 +570,7 @@ nanny_check_password (DESCRIPTOR_DATA * d, char *argument)
 			}
 		}
 		SEND_TO_Q
-			("\n\nIncorrect password - have you forgotten it? Please hobbitmail Kite or PM him at http://www.shadowsofisildur.com/forums/",
+			("\n\nIncorrect password - have you forgotten it? Please hobbitmail Kite or PM him at http://www.middle-earth.us/soiforums/",
 			d);
 		d->acct->password_attempt++;
 		return;
@@ -1061,7 +1061,7 @@ setup_new_account (account  *acct)
 		"\n"
 		"Also, note that this username and account combination will allow\n"
 		"you to log into our web-based discussion forum, located at:\n\n"
-		"http://www.shadowsofisildur.com/forums/\n"
+		"http://www.middle-earth.com/soiforums/\n"
 		"\n"
 		"Feel free to hop on in and join in our discussions!\n"
 		"\n"

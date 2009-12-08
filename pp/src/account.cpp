@@ -1,5 +1,5 @@
 /*----------------------------------------------------------------------------\
-|  account.c : Informational Module  	            www.shadowsofisildur.com|
+|  account.cpp : Informational Module  	            www.middle-earth.us      |
 |  Copyright (C) 2009, Shadows of Isildur: Kite	                             |
 |  Derived under license from DIKU GAMMA (0.0).                               |
 \----------------------------------------------------------------------------*/
