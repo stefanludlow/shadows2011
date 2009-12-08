@@ -3718,9 +3718,10 @@ do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 	half_chop (argument, buf1, buf2);
 	if (!*buf2)
 	{
-		send_to_char ("Usage:  rcret <dir> <difficulty>\n", ch);
+		send_to_char ("Usage:  rcret <dir> <[difficulty | 'remove']>\n", ch);
 		return;
 	}
+
 	dif = atoi (buf2);
 
 	switch (*buf1)
@@ -3762,6 +3763,12 @@ do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (vtor (ch->in_room)->secrets[dir])
 	{
+		if (!strcmp(buf2, "remove"))
+		{
+			send_to_char("Secret exit removed.\n", ch);
+			vtor (ch->in_room)->secrets[dir] = 0;
+			return;
+		}
 		send_to_char ("The old secret description was: \n\n", ch);
 		send_to_char (vtor (ch->in_room)->secrets[dir]->stext, ch);
 		r_secret = vtor (ch->in_room)->secrets[dir];
@@ -3782,7 +3789,6 @@ do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 
 	send_to_char ("Done.\n", ch);
 }
-
 void
 do_rexit (CHAR_DATA * ch, char *argument, int cmd)
 {
@@ -4721,14 +4727,14 @@ do_minit (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->dex = mob_start_stat;
 	newmob->intel = mob_start_stat;
 	newmob->wil = mob_start_stat;
-	newmob->aur = mob_start_stat;
+	newmob->aur = 1; //changed for POWER
 	newmob->con = mob_start_stat;
 	newmob->agi = mob_start_stat;
 	newmob->tmp_str = mob_start_stat;
 	newmob->tmp_dex = mob_start_stat;
 	newmob->tmp_intel = mob_start_stat;
 	newmob->tmp_wil = mob_start_stat;
-	newmob->tmp_aur = mob_start_stat;
+	newmob->tmp_aur = 1;//changed for POWER
 	newmob->tmp_con = mob_start_stat;
 	newmob->tmp_agi = mob_start_stat;
 	newmob->mob->damnodice = 1;
