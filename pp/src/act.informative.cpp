@@ -8046,7 +8046,6 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	if (sphere == 1)
 	{	
 
-		whoStream << gatheringPlace(3500, "the Wardenry Bastion Commons", rd);
 		whoStream << gatheringPlace(3271, "the Wardog Commons", rd);
 		whoStream << gatheringPlace(1108, "the Battered Shield", rd);
 		whoStream << gatheringPlace(1111, "the Gilded Lily", rd);
@@ -8068,6 +8067,10 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		if (is_clan_member(ch, "mt_lower_class"))
 		{
 			whoStream << gatheringPlace(21170, "the Commons of the Rancid Snakebite Tavern", rd);
+		}
+		if (is_clan_member(ch, "z3_astirian_wardens"))
+		{
+			whoStream << gatheringPlace(8805, "the Wardenry Bastion Commons", rd);
 		}
 	}
 
