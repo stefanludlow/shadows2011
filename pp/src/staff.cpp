@@ -956,189 +956,243 @@ do_roll (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_deduct (CHAR_DATA * ch, char *argument, int cmd)
 {
-  CHAR_DATA *tch;
-  account *acct;
-  char buf[MAX_STRING_LENGTH];
-  bool loaded = false;
+	CHAR_DATA *tch;
+	account *acct;
+	char buf[MAX_STRING_LENGTH];
+	bool loaded = false;
+	bool deductPower = false;
 
-  if (!*argument)
-    {
-      send_to_char ("Who would you like to deduct?\n", ch);
-      return;
-    }
 
-  if (IS_NPC (ch))
-    {
-      send_to_char ("This is a PC-only command.\n", ch);
-      return;
-    }
+	Stringstack args = argument;
 
-  argument = one_argument (argument, buf);
-
-  /// \todo Only lookup PCs, as there may be an NPC with the same keyword
-  /// Or better yet make this command lookup by account name
-  if (!(tch = get_char_room_vis (ch, buf)) && !(tch = get_char_vis (ch, buf)))
-    {
-      if (!(tch = load_pc (buf)))
+	if (args.pop() == "")
 	{
-	  send_to_char ("No PC with that name was found. "
-	     "Is it spelled correctly?\n", ch);
-	  return;
+		send_to_char ("Who would you like to deduct?\n", ch);
+		return;
 	}
-      else
-	loaded = true;
-    }
-  
-  if (!tch->pc || !tch->pc->account_name || !tch->pc->account_name[0])
-    {
-      send_to_char ("No PC with that name was found. "
-		    "Is it spelled correctly?\n", ch);
-	  if (loaded)
-		  unload_pc(tch);
-      return;
-    }
 
-  acct = new account (tch->pc->account_name);
+	deductPower = (args == "power");
 
-  if (!acct->is_registered ())
-    {
-      delete acct;
-      act
-	("Hmm... there seems to be a problem with that character's account. Please notify the staff.",
-	 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-	  if (loaded)
-		  unload_pc(tch);
-      return;
-    }
+	if (deductPower && args.pop() == "") {
+		send_to_char ("Who would you like to deduct?\n", ch);
+		return;
+	}
 
-  argument = one_argument (argument, buf);
+	if (IS_NPC (ch))
+	{
+		send_to_char ("This is a PC-only command.\n", ch);
+		return;
+	}
 
-  if (!isdigit (*buf))
-    {
-      delete acct;
-      send_to_char
-	("You must specify a number of roleplay points to deduct.\n", ch);
-	  if (loaded)
-		  unload_pc(tch);
-      return;
-    }
+	/// \todo Only lookup PCs, as there may be an NPC with the same keyword
+	/// Or better yet make this command lookup by account name
+	if (!(tch = get_char_room_vis (ch, args.last().c_str())) && !(tch = get_char_vis (ch, args.last().c_str())))
+	{
+		if (!(tch = load_pc (args.last().c_str())))
+		{
+			send_to_char ("No PC with that name was found. "
+				"Is it spelled correctly?\n", ch);
+			return;
+		}
+		else
+			loaded = true;
+	}
 
-  int deduction = strtol(buf, 0, 10);
-  if (deduction < 1 || deduction > acct->get_rpp ())
-    {
-      delete acct;
-      act
-	("The specified number must be greater than 0 and less than or equal to the named character's RP point total.",
-	 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-	  if (loaded)
-		  unload_pc(tch);
-      return;
-    }
+	if (!tch->pc || !tch->pc->account_name || !tch->pc->account_name[0])
+	{
+		send_to_char ("No PC with that name was found. "
+			"Is it spelled correctly?\n", ch);
+		if (loaded)
+			unload_pc(tch);
+		return;
+	}
 
-  acct->deduct_rpp (deduction);
-  delete acct;
+	if (!deductPower) {
 
-  if (loaded)
-    unload_pc (tch);
+	acct = new account (tch->pc->account_name);
 
-  send_to_char
-    ("#1The specified number of points have been removed from their account.\n",
-     ch);
-  send_to_char
-    ("Please be sure to leave a note explaining why on their pfile.#0\n", ch);
+	if (!acct->is_registered ())
+	{
+		delete acct;
+		act
+			("Hmm... there seems to be a problem with that character's account. Please notify the staff.",
+			false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		if (loaded)
+			unload_pc(tch);
+		return;
+	}
 
-  sprintf (buf, "write %s Roleplay Point Deduction.", tch->tname);
-  command_interpreter (ch, buf);
+	argument = one_argument (argument, buf);
 
+	if (!isdigit (*buf))
+	{
+		delete acct;
+		send_to_char
+			("You must specify a number of roleplay points to deduct.\n", ch);
+		if (loaded)
+			unload_pc(tch);
+		return;
+	}
+
+	int deduction = strtol(buf, 0, 10);
+	if (deduction < 1 || deduction > acct->get_rpp ())
+	{
+		delete acct;
+		act
+			("The specified number must be greater than 0 and less than or equal to the named character's RP point total.",
+			false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		if (loaded)
+			unload_pc(tch);
+		return;
+	}
+
+	acct->deduct_rpp (deduction);
+	delete acct;
+
+	if (loaded)
+		unload_pc (tch);
+
+	send_to_char
+		("#1The specified number of points have been removed from their account.\n",
+		ch);
+	send_to_char
+		("Please be sure to leave a note explaining why on their pfile.#0\n", ch);
+
+	sprintf (buf, "write %s Roleplay Point Deduction: %d", tch->tname, deduction);
+	command_interpreter (ch, buf);
+	}
+	else if (GET_TRUST(ch) >= 5) {
+		int deduction = 1;
+
+		if (args.pop() != "") {
+			deduction = ((args.toInt() < 0) ? 1 : args.toInt());
+		}
+		tch->aur -= deduction;
+		tch->aur = ((tch->aur < 0) ? 0 : tch->aur);
+
+		if (loaded) {
+			unload_pc (tch);
+		}
+		send_to_char
+			("#1The specified number of points have been removed from their power.\n",
+			ch);
+		send_to_char
+			("Please be sure to leave a note explaining why on their pfile.#0\n", ch);
+
+		sprintf (buf, "write %s Power Reduction: %d", tch->tname, deduction);
+		command_interpreter (ch, buf);
+	}
 }
 
 void
 do_award (CHAR_DATA * ch, char *argument, int cmd)
 {
-  CHAR_DATA *tch;
-  char buf[MAX_STRING_LENGTH];
-  account *acct;
-  bool loaded = false;
+	CHAR_DATA *tch;
+	char buf[MAX_STRING_LENGTH];
+	account *acct;
+	bool loaded = false;
+	bool awardPower = false;
 
-  if (!*argument)
-    {
-      send_to_char ("Who would you like to award?\n", ch);
-      return;
-    }
+	Stringstack args = argument;
 
-  if (IS_NPC (ch))
-    {
-      send_to_char ("This is a PC-only command.\n", ch);
-      return;
-    }
-
-  argument = one_argument (argument, buf);
-
-  if (!(tch = get_char_room_vis (ch, buf)) && !(tch = get_char_vis (ch, buf)))
-    {
-      if (!(tch = load_pc (buf)))
+	if (args.pop() == "")
 	{
-	  send_to_char
-	    ("No PC with that name was found. Is it spelled correctly?\n",
-	     ch);
-	  return;
+		send_to_char ("Who would you like to award?\n", ch);
+		return;
 	}
-      else
-	loaded = true;
-    }
+	
+	awardPower = (args == "power");
 
-  if (IS_NPC (tch))
-    {
-      send_to_char ("This command only works for player characters.\n", ch);
-	  if (loaded)
-		  unload_pc(tch);
-      return;
-    }
+	if (awardPower && args.pop() == "") {
+		send_to_char ("Who would you like to award?\n", ch);
+		return;
+	}
+		
+	if (IS_NPC (ch))
+	{
+		send_to_char ("This is a PC-only command.\n", ch);
+		return;
+	}
 
-  acct = new account (tch->pc->account_name);
+	if (!(tch = get_char_room_vis (ch, args.last().c_str())) && !(tch = get_char_vis (ch, args.last().c_str())))
+	{
+		if (!(tch = load_pc (args.last().c_str())))
+		{
+			send_to_char
+				("No PC with that name was found. Is it spelled correctly?\n",
+				ch);
+			return;
+		}
+		else
+			loaded = true;
+	}
 
-  if (!acct->is_registered ())
-    {
-      delete acct;
-      act
-	("Hmm... there seems to be a problem with that character's account. Please notify the staff.",
-	 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-	  if (loaded)
-		  unload_pc(tch);
-      return;
-    }
+	if (IS_NPC (tch))
+	{
+		send_to_char ("This command only works for player characters.\n", ch);
+		if (loaded)
+			unload_pc(tch);
+		return;
+	}
 
-  if (!str_cmp (tch->pc->account_name, ch->pc->account_name) 
-      && !engine.in_test_mode ())
-    {
-      delete acct;
-      send_to_char
-	("Adding roleplay points to your own account is against policy.\n",
-	 ch);
-	  if (loaded)
-		  unload_pc(tch);
-      return;
-    }
+	if (!awardPower) {
+		acct = new account (tch->pc->account_name);
 
-  if (tch->desc && tch->desc->acct
-      && IS_SET (tch->desc->acct->flags, ACCOUNT_RPPDISPLAY))
-    send_to_char
-      ("#6Congratulations, you've just been awarded a roleplay point!#0\n",
-       tch);
-  acct->award_rpp ();
-  delete acct;
+		if (!acct->is_registered ())
+		{
+			delete acct;
+			act
+				("Hmm... there seems to be a problem with that character's account. Please notify the staff.",
+				false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			if (loaded)
+				unload_pc(tch);
+			return;
+		}
 
-  if (loaded)
-    unload_pc (tch);
+		if (!str_cmp (tch->pc->account_name, ch->pc->account_name) 
+			&& !engine.in_test_mode ())
+		{
+			delete acct;
+			send_to_char
+				("Adding roleplay points to your own account is against policy.\n",
+				ch);
+			if (loaded)
+				unload_pc(tch);
+			return;
+		}
 
-  send_to_char
-    ("#2A roleplay point has been added to that character's account.\n", ch);
-  send_to_char
-    ("Please be sure to leave a note explaining why on their pfile.#0\n", ch);
+		if (tch->desc && tch->desc->acct
+			&& IS_SET (tch->desc->acct->flags, ACCOUNT_RPPDISPLAY))
+			send_to_char
+			("#6Congratulations, you've just been awarded a roleplay point!#0\n",
+			tch);
+		acct->award_rpp ();
+		delete acct;
 
-  sprintf (buf, "write %s Roleplay Point.", tch->tname);
-  command_interpreter (ch, buf);
+		if (loaded)
+			unload_pc (tch);
 
+		send_to_char
+			("#2A roleplay point has been added to that character's account.\n", ch);
+		send_to_char
+			("Please be sure to leave a note explaining why on their pfile.#0\n", ch);
+		sprintf (buf, "write %s Roleplay Point.", tch->tname);
+		command_interpreter (ch, buf);
+	}
+	else if (GET_TRUST(ch) >= 5) {
+		tch->aur++;
+
+		if (loaded) {
+			unload_pc (tch);
+		}
+
+		send_to_char
+			("#2A point of power has been added to that character.\n", ch);
+		send_to_char
+			("Please be sure to leave a note explaining why on their pfile.#0\n", ch);
+		sprintf (buf, "write %s Power Increase.", tch->tname);
+		command_interpreter (ch, buf);
+	}
 }
 
 void
@@ -2004,8 +2058,7 @@ do_goto (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 void
-pad_buffer (char *buf, int pad_stop)
-{
+pad_buffer (char *buf, int pad_stop) {
   int to_pad;
   char *p;
 
@@ -2227,42 +2280,41 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
   send_to_char (buf, ch);
 
   if (IS_NPC (k))
-    {
-      *buf = '\0';
-      
-      sprintf (buf, "#2Pow:#0 %d", k->aur);
-      pad_buffer (buf, 25);
-      sprintf (buf + strlen (buf), "#2Carc:#0  %d", k->mob->carcass_vnum);
-      pad_buffer (buf, 53);
-      sprintf (ADD, "#2Skin:#0   %d", k->mob->skinned_vnum);
-      sprintf (ADD, "\n");
-      send_to_char (buf, ch);
-      *buf = '\0';
-      pad_buffer (buf, 21);
-      sprintf (buf + strlen (buf), "#2Att:#0   %s",
-	       attack_names[k->nat_attack_type]);
-      pad_buffer (buf, 49);
-      sprintf (ADD, "#2NDam:#0   %dd%d", k->mob->damnodice,
-	       k->mob->damsizedice);
-      sprintf (ADD, "\n");
-      send_to_char (buf, ch);
-    }
+  {
+	  *buf = '\0';
+	  sprintf (buf, "#2Pow:#0 %d", k->aur);
+	  pad_buffer (buf, 25);
+	  sprintf (buf + strlen (buf), "#2Carc:#0  %d", k->mob->carcass_vnum);
+	  pad_buffer (buf, 53);
+	  sprintf (ADD, "#2Skin:#0   %d", k->mob->skinned_vnum);
+	  sprintf (ADD, "\n");
+	  send_to_char (buf, ch);
+	  *buf = '\0';
+	  pad_buffer (buf, 21);
+	  sprintf (buf + strlen (buf), "#2Att:#0   %s",
+		  attack_names[k->nat_attack_type]);
+	  pad_buffer (buf, 49);
+	  sprintf (ADD, "#2NDam:#0   %dd%d", k->mob->damnodice,
+		  k->mob->damsizedice);
+	  sprintf (ADD, "\n");
+	  send_to_char (buf, ch);
+  }
   else if (k->pc)
-    {
-      *buf = '\0';
-      sprintf (buf, "#2Pow:#0 %d", k->aur);      
-      pad_buffer (buf, 25);
-      if (k->pc->level > 5)
-	{
-	  strcat (buf, "#2Level:#0 Implementor");
-	}
-      else
-	{
-	  sprintf (buf + strlen (buf), "#2Level:#0 %d", k->pc->level);
-	}
-      sprintf (ADD, "\n");
-      send_to_char (buf, ch);
-    }
+  {
+	  *buf = '\0';
+	  sprintf (buf, "#2Pow:#0 %d", k->aur);
+	  pad_buffer (buf, 25);
+	  if (k->pc->level > 5)
+	  {
+		  strcat (buf, "#2Level:#0 Implementor");
+	  }
+	  else
+	  {
+		  sprintf (buf + strlen (buf), "#2Level:#0 %d", k->pc->level);
+	  }
+	  sprintf (ADD, "\n");
+	  send_to_char (buf, ch);
+  }
 
   sprintf (buf, "\n#2Clans:#0  [%s]\n", k->clans
 	   && *k->clans ? k->clans : "");

@@ -4721,14 +4721,14 @@ do_minit (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->dex = mob_start_stat;
 	newmob->intel = mob_start_stat;
 	newmob->wil = mob_start_stat;
-	newmob->aur = 1; //changed for POWER
+	newmob->aur = mob_start_stat;
 	newmob->con = mob_start_stat;
 	newmob->agi = mob_start_stat;
 	newmob->tmp_str = mob_start_stat;
 	newmob->tmp_dex = mob_start_stat;
 	newmob->tmp_intel = mob_start_stat;
 	newmob->tmp_wil = mob_start_stat;
-	newmob->tmp_aur = 1;//changed for POWER
+	newmob->tmp_aur = mob_start_stat;
 	newmob->tmp_con = mob_start_stat;
 	newmob->tmp_agi = mob_start_stat;
 	newmob->mob->damnodice = 1;
@@ -10558,26 +10558,32 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			}
 		}
 
-		else if (!str_cmp (subcmd, "aur"))
+		else if (!str_cmp (subcmd, "pow"))
 		{
 			argument = one_argument (argument, buf);
 
-			if (atoi (buf) < 1)
-			{
-				send_to_char ("Expected a positive value.\n", ch);
-				return;
-			}
+			if (GET_TRUST(ch) >= 5) {
+				if (atoi (buf) < 1)
+				{
+					send_to_char ("Expected a positive value.\n", ch);
+					return;
+				}
 
-			if (*buf == '0' || atoi (buf))
-			{
-				delta = edit_mob->aur - atoi (buf);
-				edit_mob->aur = atoi (buf);
-				GET_AUR (edit_mob) -= delta;
+				if (*buf == '0' || atoi (buf))
+				{
+					delta = edit_mob->aur - atoi (buf);
+					edit_mob->aur = atoi (buf);
+					GET_AUR (edit_mob) -= delta;
+				}
+				else
+				{
+					send_to_char ("Expected a value for aur.\n", ch);
+					break;
+				}
 			}
-			else
-			{
-				send_to_char ("Expected a value for aur.\n", ch);
-				break;
+			else {
+				send_to_char("Your admin level is not high enough to edit power.\n", ch);
+				return;
 			}
 		}
 

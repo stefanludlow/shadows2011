@@ -915,7 +915,7 @@ void char_from_room (CHAR_DATA * ch);
 void char_to_room (CHAR_DATA * ch, int room);
 CHAR_DATA *get_char_room_vis (CHAR_DATA * ch, const char *name);
 CHAR_DATA *get_char_room_vis2 (CHAR_DATA * ch, int vnum, char *name);
-CHAR_DATA *get_char_vis (CHAR_DATA * ch, char *name);
+CHAR_DATA *get_char_vis (CHAR_DATA * ch, const char *name);
 void soma_ten_second_affect (CHAR_DATA * ch, AFFECTED_TYPE * af);
 void soma_rl_minute_affect (CHAR_DATA * ch, AFFECTED_TYPE * af);
 void read_spell (PHASE_DATA * phase, char *argument);
@@ -1712,4 +1712,16 @@ void control_water_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
 bool IS_NPC (const CHAR_DATA *ch);
 bool IS_NPC (CHAR_DATA *ch);
 
+/* Race Boolean Inlines - Case */
+bool inline isElf(char_data *ch) {
+	return (ch->race >= 16 && ch->race <= 19 || ch->race == 93);
+}
+
+bool inline isDwarf(char_data *ch) {
+	return (ch->race == 23);
+}
+
+bool inline isOrkin(char_data *ch) {
+	return (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29);
+}
 #endif // _rpie_protos_h_
