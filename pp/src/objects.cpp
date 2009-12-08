@@ -38,7 +38,7 @@ void obj_data::partial_deep_copy (OBJ_DATA *proto)
 			{
 				mem_free(this->short_description);
 			}
-			this->short_description = str_dup(proto->name);
+			this->short_description = str_dup(proto->short_description);
 		}
 		if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
 		{
@@ -46,7 +46,7 @@ void obj_data::partial_deep_copy (OBJ_DATA *proto)
 			{
 				mem_free(this->description);
 			}
-			this->description = str_dup(proto->name);
+			this->description = str_dup(proto->description);
 		}
 		if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
 		{
@@ -54,7 +54,7 @@ void obj_data::partial_deep_copy (OBJ_DATA *proto)
 			{
 				mem_free(this->full_description);
 			}
-			this->full_description = str_dup(proto->name);
+			this->full_description = str_dup(proto->full_description);
 		}
 
 		if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
