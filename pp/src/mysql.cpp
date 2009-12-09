@@ -2664,21 +2664,6 @@ refresh_race_configuration (CHAR_DATA * tch)
 
 	apply_race_affects (tch);
 
-	if (lookup_race_variable (tch->race, RACE_STR_MOD))
-		tch->str += atoi (lookup_race_variable (tch->race, RACE_STR_MOD));
-	if (lookup_race_variable (tch->race, RACE_CON_MOD))
-		tch->con += atoi (lookup_race_variable (tch->race, RACE_CON_MOD));
-	if (lookup_race_variable (tch->race, RACE_DEX_MOD))
-		tch->dex += atoi (lookup_race_variable (tch->race, RACE_DEX_MOD));
-	if (lookup_race_variable (tch->race, RACE_AGI_MOD))
-		tch->agi += atoi (lookup_race_variable (tch->race, RACE_AGI_MOD));
-	if (lookup_race_variable (tch->race, RACE_INT_MOD))
-		tch->intel += atoi (lookup_race_variable (tch->race, RACE_INT_MOD));
-	if (lookup_race_variable (tch->race, RACE_WIL_MOD))
-		tch->wil += atoi (lookup_race_variable (tch->race, RACE_WIL_MOD));
-	if (lookup_race_variable (tch->race, RACE_AUR_MOD))
-		tch->aur += atoi (lookup_race_variable (tch->race, RACE_AUR_MOD));
-
 	if ((tch->height = calculate_race_height (tch)) == -1)
 		tch->height = calculate_size_height (tch);
 
