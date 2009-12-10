@@ -5042,7 +5042,7 @@ skill_selection (DESCRIPTOR_DATA * d, char *argument)
 			skill_display (d);
 			return;
 		}
-		if (ch->skills[SKILL_LITERACY])
+		if (ch->skills[SKILL_LITERACY]) //NB Literacy has been removed
 		{
 			if (!ch->skills[SKILL_SCRIPT_SARATI]
 			&& !ch->skills[SKILL_SCRIPT_TENGWAR]
@@ -5097,7 +5097,7 @@ skill_selection (DESCRIPTOR_DATA * d, char *argument)
 			ch->skills[skill] = 0;
 			ch->pc->skills[skill] = 0;
 
-			if (skill == SKILL_LITERACY)
+			if (skill == SKILL_LITERACY) //NB - Literacy has been removed
 			{
 				ch->skills[SKILL_SCRIPT_SARATI] = 0;
 				ch->skills[SKILL_SCRIPT_TENGWAR] = 0;

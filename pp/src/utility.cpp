@@ -510,7 +510,7 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 			return 1;
 		if (skill == SKILL_SPEAK_BLACK_SPEECH) /* mordorians get this, others can't pick it */
 			return 1;
-		if (skill == SKILL_LITERACY) /* no writing */
+		if (skill == SKILL_LITERACY) /* no writing */ // NB - Literacy has been removed
 			return 1;
 	}
 
@@ -619,7 +619,7 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 	}
 	else if (restricted_skills[skill] == -5)
 	{				// Scripts
-		if (!real_skill (ch, SKILL_LITERACY))
+	  if (!real_skill (ch, SKILL_LITERACY)) // NB - Literacy has been removed
 			return 1;
 		if (skill == SKILL_SCRIPT_NUMENIAN_TENGWAR)
 			return 0;
