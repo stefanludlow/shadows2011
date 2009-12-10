@@ -2664,6 +2664,11 @@ refresh_race_configuration (CHAR_DATA * tch)
 
 	apply_race_affects (tch);
 
+	/* Commented out Dec 09 2009
+	 * This code is used to adjust races, but the racial modifiers are now
+	 * being handled with a php chargen application.
+	 * Uncomment these to have a functioning RPI_ENGINE
+
 	if (lookup_race_variable (tch->race, RACE_STR_MOD))
 		tch->str += atoi (lookup_race_variable (tch->race, RACE_STR_MOD));
 	if (lookup_race_variable (tch->race, RACE_CON_MOD))
@@ -2678,6 +2683,7 @@ refresh_race_configuration (CHAR_DATA * tch)
 		tch->wil += atoi (lookup_race_variable (tch->race, RACE_WIL_MOD));
 	if (lookup_race_variable (tch->race, RACE_AUR_MOD))
 		tch->aur += atoi (lookup_race_variable (tch->race, RACE_AUR_MOD));
+	*/
 
 	if ((tch->height = calculate_race_height (tch)) == -1)
 		tch->height = calculate_size_height (tch);
