@@ -942,7 +942,7 @@ delayed_treatment (CHAR_DATA * ch)
 	{
 		treat_effect =  2;
 	}
-	else if ((roll <= skill_level (ch, SKILL_HEALING, 0) + 10) || (wound->healerskill > 35) || (healerSkillLevel > 50))
+	else if ((roll <= skill_level (ch, SKILL_HEALING, 0) + 10) || (healerSkillLevel > 50))
 	{
 		treat_effect =  1;
 	}
@@ -1091,8 +1091,9 @@ delayed_treatment (CHAR_DATA * ch)
 			}
 			/**
 			Poor healers try hard, but they can't do much more than stop the bleeding and sort of make the wound look better. At least they don't cause infections.
+			Decently treated wounds cannot be made worse at this point - Case
 			**/
-			else if (treat_effect == 1)
+			else if (treat_effect == 1 || (wound->healerskill > 40))
 			{
 				if (mode)
 				{
