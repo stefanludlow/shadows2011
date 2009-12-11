@@ -12696,6 +12696,12 @@ do_job (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+	if (IS_NPC(ch))
+	{
+		send_to_char ("This command is for PC's only.\n", ch);
+		return;
+	}
+
 	if (!(edit_mob = ch->pc->edit_player))
 	{
 		send_to_char ("Start by using the MOB command on a PC.\n", ch);
