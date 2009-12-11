@@ -1611,8 +1611,8 @@ alloc (int bytes, int dtype)
 
 	strncpy (p, "ZZZZ", 4);
 
-	if (x1)
-		printf ("+ @ %Xd  bytes = %d\n", (unsigned int) p, bytes);
+	//if (x1)
+	//	printf ("+ @ %Xd  bytes = %d\n", (unsigned int) p, bytes);
 
 	bytes_allocated += bytes;
 
