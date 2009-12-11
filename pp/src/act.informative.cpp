@@ -8067,7 +8067,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		}
 		if (is_clan_member(ch, "z3_astirian_wardens"))
 		{
-			whoStream << gatheringPlace(8805, "the Wardenry Bastion Commons", rd);
+			whoStream << gatheringPlace(8805, "the Pelennor Bastion Commons", rd);
 		}
 	}
 
