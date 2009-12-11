@@ -1322,7 +1322,7 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 		if (engine.in_build_mode ())
 		{
 			std::ostringstream oss;
-			oss << "cd " << engine.get_base_path() << "/regions; git-commit -a -m \"Changes committed by ";
+			oss << "cd " << engine.get_base_path() << "/regions; git commit -a -m \"Changes committed by ";
 			if (!ch || !ch->tname)
 				oss << "System";
 			else
