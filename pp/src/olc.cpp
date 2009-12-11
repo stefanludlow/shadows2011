@@ -1378,7 +1378,7 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 		{
 			std::ostringstream oss;
 			oss << "cd " << engine.get_base_path() << "/regions; git add *."
-				<< num << " ; git-commit -m \"Changes committed by ";
+				<< num << " ; git commit -m \"Changes committed by ";
 			if (!ch || !ch->tname)
 				oss << "System";
 			else
