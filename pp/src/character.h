@@ -286,9 +286,9 @@ public:
 	int default_pos;
 	int delay_type;
 	int delay;
-	int delay_info1;
-	int delay_info2;
-	int delay_info3;
+	long delay_info1;
+	long delay_info2;
+	long delay_info3;
 	int was_in_room;
 	int intoxication;
 	int last_room;
