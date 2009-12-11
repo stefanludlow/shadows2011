@@ -1897,7 +1897,10 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	if ((number (1, 100) > 50) && (movecost <= 1))
 		movecost = 1;
 
-	src->move = src->move - movecost;
+	if (!isElf(src) && !isDwarf(src)) {
+		src->move = src->move - movecost;
+	}
+
 	if (src->move < 0)
 		src->move = 0;
 
@@ -2121,7 +2124,10 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	if ((number (1, 100) > 50) && (movecost <= 1))
 		movecost = 1;
 
-	tar->move = tar->move - movecost;
+	if (!isElf(tar) && !isDwarf(tar)) {
+		tar->move = tar->move - movecost;
+	}
+
 	if (tar->move < 0)
 		tar->move = 0;
 	/* Fatigue penalty */
