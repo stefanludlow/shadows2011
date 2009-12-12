@@ -1938,7 +1938,7 @@ struct affect_spell_type
   int modifier;			/* This is added to apropriate ability          */
   int location;			/* Tells which ability to change(APPLY_XXX)     */
   int bitvector;		/* Tells which bits to set (AFF_XXX)            */
-  int t;			/* Extra information                        */
+  long t;			/* Extra information                        */
   int sn;			/* Acquired by spell number                                     */
   int technique;
   int form;
