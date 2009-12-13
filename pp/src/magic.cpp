@@ -2524,10 +2524,12 @@ check_psionic_talents (CHAR_DATA * ch)
   mem_free (date);
 }
 
+/* Changed from age based boost to power (aura) based boost, with random factor  -- Huan*/
 void
 starting_skill_boost (CHAR_DATA * ch, int skill)
 {
-  ch->skills[skill] += MIN (30, age (ch).year) / 2 + number (5, 15);
+//ch->skills[skill] += MIN (30, age (ch).year) / 2 + number (5, 15);
+	ch->skills[skill] += GET_AUR(ch) + number (10, 20);
 }
 
 void
