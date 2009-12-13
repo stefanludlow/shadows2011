@@ -3114,6 +3114,13 @@ load_char_mysql (const char *name)
 	if (ch->speaks == SKILL_HEALING)
 		ch->speaks = SKILL_SPEAK_WESTRON;
 
+	//temp hack to fix missing climb skill -- remove Jan 2010
+	if (!ch->skills[SKILL_CLIMB])
+		{
+		open_skill (ch, SKILL_CLIMB);
+		starting_skill_boost (ch, SKILL_CLIMB);
+		}	
+	
 	mysql_free_result (result);
 	/*
 	if ( lookup_race_variable (ch->race, RACE_LAST_MODIFIED) &&
