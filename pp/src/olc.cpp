@@ -12145,7 +12145,7 @@ do_rmove (CHAR_DATA * ch, char *argument, int cmd)
 	int dir;
 	int target_room_num;
 
-	extern ROOM_DATA *wld_tab[];
+	//extern ROOM_DATA *wld_tab[];
 
 	argument = one_argument (argument, buf);
 
@@ -12170,30 +12170,31 @@ do_rmove (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char ("Target room already exists.\n", ch);
 		return;
 	}
+	// Commented out by Case, trying to use vtor for all lookups
+	//if (vtor(room->nVirtual) == room) { // If wld_tab nVirtual == room then
+	//	//wld_tab[room->nVirtual % ZONE_SIZE] = room->hnext;
+	//}
+	//else
+	//{
+	//	printf ("%d %d\n", (long int) wld_tab[room->nVirtual % ZONE_SIZE],
+	//		room->nVirtual % ZONE_SIZE);
+	//	for (troom = wld_tab[room->nVirtual % ZONE_SIZE]; troom;
+	//		troom = troom->hnext)
+	//	{
 
-	if (wld_tab[room->nVirtual % ZONE_SIZE] == room)
-		wld_tab[room->nVirtual % ZONE_SIZE] = room->hnext;
-	else
-	{
-		printf ("%d %d\n", (long int) wld_tab[room->nVirtual % ZONE_SIZE],
-			room->nVirtual % ZONE_SIZE);
-		for (troom = wld_tab[room->nVirtual % ZONE_SIZE]; troom;
-			troom = troom->hnext)
-		{
+	//		printf ("%d v %d\n", troom->hnext->nVirtual, room->nVirtual);
 
-			printf ("%d v %d\n", troom->hnext->nVirtual, room->nVirtual);
+	//		fflush (stdout);
 
-			fflush (stdout);
+	//		if (troom->hnext->nVirtual == room->nVirtual)
+	//			break;
+	//	}
 
-			if (troom->hnext->nVirtual == room->nVirtual)
-				break;
-		}
+	//	troom->hnext = room->hnext;
 
-		troom->hnext = room->hnext;
-
-		room->hnext = wld_tab[target_room_num % ZONE_SIZE];
-		wld_tab[target_room_num % ZONE_SIZE] = room;
-	}
+	//	room->hnext = wld_tab[target_room_num % ZONE_SIZE];
+	//	wld_tab[target_room_num % ZONE_SIZE] = room;
+	//} 
 
 	for (tch = room->people; tch; tch = tch->next_in_room)
 	{
