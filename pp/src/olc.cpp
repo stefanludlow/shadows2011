@@ -6382,6 +6382,24 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 			}
 
 		}
+
+		else if (!str_cmp (subcmd, "super"))
+		{
+			argument = one_argument (argument, buf);
+
+			if (*buf == '0' || atoi (buf))
+			  {
+			    OBJ_DATA* proto = vtoo(edit_obj->nVirtual);
+			    if (proto)
+			      proto->super_vnum = atoi (buf);
+			  }
+			else
+			{
+				send_to_char ("Expected super vnum.\n", ch);
+				break;
+			}
+		}
+
 		/*              
 		else if ( !str_cmp (subcmd, "mdesc") ) {
 

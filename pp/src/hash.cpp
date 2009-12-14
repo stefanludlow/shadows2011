@@ -878,6 +878,8 @@ load_object_full (int vnum, bool newWritingID)
 
   vtoo (new_obj->nVirtual)->instances++;
 
+  new_obj->super_vnum=0;
+
   return new_obj;
 }
 

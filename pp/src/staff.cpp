@@ -4367,6 +4367,15 @@ objstat (CHAR_DATA * ch, char *name)
 	       ((float)j->obj_flags.set_cost) / 100.0);
       send_to_char (buf, ch);
     }
+
+  //always show
+  OBJ_DATA* super = vtoo(j->super_vnum);
+  while (super)
+    {
+      sprintf (buf, "\nThis object is a [#2%s#0] (vnum: %d).\n", super->short_description, super->nVirtual);
+      send_to_char(buf,ch);
+      super = vtoo(super->super_vnum);
+    }
 }
 
 /*                                                                          *

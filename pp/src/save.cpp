@@ -218,6 +218,9 @@ fwrite_a_obj (OBJ_DATA * obj, FILE * fp)
   if (obj->coldload_id)
     modifiers++;
 
+  if (obj->super_vnum)
+    modifiers++;
+
   fprintf (fp, "Id       %d %d %d\n", obj->nVirtual, affect_count, modifiers);
 
   if (obj->coldload_id)
@@ -357,6 +360,9 @@ fwrite_a_obj (OBJ_DATA * obj, FILE * fp)
 	  continue;
 	}
     }
+
+  if (obj->super_vnum)
+    fprintf (fp, "Super_vnum %d\n", obj->super_vnum);
 }
 
 void
@@ -726,6 +732,10 @@ fread_obj (FILE * fp)
 	  lodged->location = add_hash (fread_word (fp));
 	  lodged->vnum = fread_number (fp);
 	  continue;
+	}
+      else if (!strcmp (p, "Super_vnum"))
+	{
+	  obj->super_vnum = fread_number(fp);
 	}
 	else if (!strcmp (p, "DONE"))
 	{
