@@ -1963,7 +1963,7 @@ struct affect_job_type
   int pay_date;
   int cash;
   int count;
-  int object_vnum;
+  long object_vnum; //hack to fix union - Grommit. Please refactor all this
   int employer;
 };
 
