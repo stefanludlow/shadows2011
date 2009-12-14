@@ -4368,7 +4368,6 @@ objstat (CHAR_DATA * ch, char *name)
       send_to_char (buf, ch);
     }
 
-  //always show
   OBJ_DATA* super = vtoo(j->super_vnum);
   while (super)
     {

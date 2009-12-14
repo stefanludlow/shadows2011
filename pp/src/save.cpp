@@ -218,9 +218,6 @@ fwrite_a_obj (OBJ_DATA * obj, FILE * fp)
   if (obj->coldload_id)
     modifiers++;
 
-  if (obj->super_vnum)
-    modifiers++;
-
   fprintf (fp, "Id       %d %d %d\n", obj->nVirtual, affect_count, modifiers);
 
   if (obj->coldload_id)
@@ -360,9 +357,6 @@ fwrite_a_obj (OBJ_DATA * obj, FILE * fp)
 	  continue;
 	}
     }
-
-  if (obj->super_vnum)
-    fprintf (fp, "Super_vnum %d\n", obj->super_vnum);
 }
 
 void
