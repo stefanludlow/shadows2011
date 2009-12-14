@@ -109,21 +109,38 @@ void clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exit
 int clone_contiguous_rblock (ROOM_DATA * start_room, int from_dir);
 int delete_contiguous_rblock (ROOM_DATA * start_room, int from_dir, int outside_vnum);
 
-ROOM_DATA* loadRoom(int vnum);
+//ROOM_DATA* loadRoom(int vnum);
 extern ROOM_DATA * globalRoomArray[];
+extern OBJ_DATA * globalObjectArray[];
 
-inline ROOM_DATA * vtor(int characterRVirtual)
+// Constant time lookup functions - Case
+inline ROOM_DATA * vtor(int roomVirtual)
 {
 	static ROOM_DATA *room = NULL;
 	
-	if (characterRVirtual < 100000)
+	if (roomVirtual < 100000)
 	{
-		room = globalRoomArray[characterRVirtual];
+		room = globalRoomArray[roomVirtual];
 
-		if (room != NULL && (room->nVirtual == characterRVirtual))
+		if (room != NULL && (room->nVirtual == roomVirtual)) {
 			return (room);	
+		}
 	}
-	return loadRoom(characterRVirtual);
+	//return loadRoom(roomVirtual);
+	return NULL;
+}
+
+inline OBJ_DATA * vtoo(int objectVirtual) {
+	static OBJ_DATA *object = NULL;
+
+	if (objectVirtual < 110000) {
+		object = globalObjectArray[objectVirtual];
+
+		if (object != NULL && (object->nVirtual == objectVirtual)) {
+			return object;
+		}
+	}
+	return NULL;
 }
 
 

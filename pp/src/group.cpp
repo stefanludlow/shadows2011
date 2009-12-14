@@ -145,6 +145,160 @@ do_follow (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 
+//void
+//do_follow (CHAR_DATA * ch, char *argument, int cmd)
+//{
+//	char buf[MAX_STRING_LENGTH];
+//	CHAR_DATA *leader = NULL, *orig_leader = NULL;
+//
+//	argument = one_argument (argument, buf);
+//
+//	if (!*buf)
+//	{
+//		send_to_char ("Follow whom?\n", ch);
+//		return;
+//	}
+//
+//	if (!(leader = get_char_room_vis (ch, buf)))
+//	{
+//		send_to_char ("There is nobody here by that name.\n", ch);
+//		return;
+//	}
+//
+//	if (IS_MORTAL (ch) && leader != ch
+//		&& IS_SET (leader->plr_flags, GROUP_CLOSED))
+//	{
+//		send_to_char
+//			("That individual's group is currently closed to new followers.\n",
+//			ch);
+//		act ("$n just attempted to join your group.", true, ch, 0, leader,
+//			TO_VICT | _ACT_FORMAT);
+//		return;
+//	}
+//
+//	bool wizinvis = IS_SET (ch->flags, FLAG_WIZINVIS);
+//
+//	if (leader != ch)
+//	{
+//		if (leader->following == ch)
+//		{
+//			send_to_char
+//				("You'll need to ask them to stop following you first.\n", ch);
+//			return;
+//		}
+//
+//		// TAKE ME TO YOUR LEADER
+//		orig_leader = leader;
+//		while (leader->following)
+//		{
+//			leader = leader->following;
+//		}
+//
+//		if (IS_MORTAL (ch) && leader != ch
+//			&& IS_SET (leader->plr_flags, GROUP_CLOSED))
+//		{
+//			send_to_char ("That individual's group is "
+//				"currently closed to new followers.\n",
+//				ch);
+//			act ("$n just attempted to join your group.", 
+//				true, ch, 0, leader, TO_VICT | _ACT_FORMAT);
+//
+//			return;
+//		}
+//
+//		ch->following = leader;
+//		leader->group->insert (ch);
+//
+//		// copy ch's local following to leader
+//		std::set<CHAR_DATA*>::iterator i;
+//		ROOM_DATA *here = ch->room;
+//		for (i = ch->group->begin (); i != ch->group->end (); ++i)
+//		{
+//			CHAR_DATA *tch = (*i);
+//			if (tch->following == ch)
+//			{
+//				if (tch->room == here)
+//				{
+//					tch->following = leader;
+//					leader->group->insert (tch);
+//					act ("You fall into stride with the group's new leader, $N.",
+//						false, tch, 0, leader, TO_CHAR | _ACT_FORMAT);
+//				}
+//				else
+//				{
+//					tch->following = 0;
+//				}
+//			}
+//		}
+//		ch->group->clear ();
+//
+//		if (wizinvis)
+//		{
+//			if (orig_leader != leader)
+//			{
+//				sprintf (buf,
+//					"You will secretly follow #5%s#0's group's "
+//					"current leader, $N.",
+//					char_short (orig_leader));
+//				act (buf, false, ch, 0, ch->following, TO_CHAR | _ACT_FORMAT);
+//			}
+//			else
+//			{
+//				act ("You will secretly follow $N.", 
+//					false, ch, 0, ch->following, TO_CHAR | _ACT_FORMAT);
+//			}
+//		}
+//		else
+//		{
+//			if (orig_leader != leader)
+//			{
+//				sprintf (buf,
+//					"You begin following #5%s's#0 group's "
+//					"current leader, $N.",
+//					char_short (orig_leader));
+//				act (buf, false, ch, 0, ch->following, TO_CHAR | _ACT_FORMAT);
+//			}
+//			else
+//			{
+//				act ("You begin following $N.", 
+//					false, ch, 0, ch->following, TO_CHAR | _ACT_FORMAT);
+//			}
+//
+//			act ("$n falls into stride with you.", 
+//				false, ch, 0, ch->following, TO_VICT | _ACT_FORMAT);
+//
+//			act ("$n falls into stride with $N.", 
+//				false, ch, 0, ch->following, TO_NOTVICT | _ACT_FORMAT);
+//		}
+//		return;
+//	}
+//
+//	// leader == ch
+//	if ((ch->following) && (ch->following != ch))
+//	{
+//		act ("You will no longer follow $N.", 
+//			false, ch, 0, ch->following, TO_CHAR | _ACT_FORMAT);
+//
+//		if (!wizinvis && ch->room == ch->following->room)
+//		{
+//			act ("$n is no longer following you.", 
+//				false, ch, 0, ch->following, TO_VICT | _ACT_FORMAT);
+//			act ("$n stops following $N.", 
+//				false, ch, 0, ch->following, TO_NOTVICT | _ACT_FORMAT);
+//		}
+//		ch->following->group->erase (ch);
+//	}
+//	else
+//	{
+//		send_to_char ("You aren't following anyone!\n", ch);
+//	}
+//
+//	ch->group->erase (ch);
+//	ch->following = 0;
+//	return;
+//}
+
+
 std::string tactical_status (CHAR_DATA * ch)
 {
   CHAR_DATA *tch;
