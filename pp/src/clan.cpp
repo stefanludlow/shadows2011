@@ -1908,6 +1908,10 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		{
 			return "Squire-recruit of the Wardenry";
 		}
+		if (!str_cmp (clan, "earmhyde"))
+		  {
+		    return "Thrall";
+		  }
 		return "Recruit";
 	}
 
@@ -1987,6 +1991,11 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 				return "Harba";
 			}
 		}
+		if (!str_cmp (clan, "earmhyde"))
+		  {
+		    return "Thrall";
+		  }
+
 		return "Private";
 	}
 
@@ -2062,6 +2071,11 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 				return "Sayf";
 			}
 		}
+		if (!str_cmp (clan, "earmhyde"))
+		  {
+		    return "Dawnthrall";
+		  }
+
   		return "Corporal";
 	}
 
@@ -2074,7 +2088,7 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		}
 		if (!str_cmp (clan, "dalewatch"))
 		{
-			return "Hundredman";
+			return "Hundredsman";
 		}
 		if (!str_cmp (clan, "bar_caged"))
 		{
@@ -2154,7 +2168,13 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 			{
 				return "Qasir";
 			}
+		
 		}
+		if (!str_cmp (clan, "earmhyde"))
+		  {
+		    return "Plegythrall";
+		  }
+
   		return "Sergeant";
 	}
 
@@ -2167,7 +2187,7 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		}
 		if (!str_cmp(clan, "dalewatch"))
 		{
-			return "Heafodman";
+			return "Thain";
 		}
 		if (!str_cmp (clan, "bar_caged"))
 		{
@@ -2233,6 +2253,11 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 				return "Ashum";
 			}
 		}
+		if (!str_cmp (clan, "earmhyde"))
+		  {
+		    return "Heathrall";
+		  }
+
 		return "Lieutenant";
 	}
 
@@ -2293,6 +2318,15 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 				return "Badikh";
 			}
 		}
+		if (!str_cmp(clan,"dalewatch"))
+		  {
+		    return "Jarl";
+		  }
+		if (!str_cmp (clan, "earmhyde"))
+		  {
+		    return "Hundredsman";
+		  }
+
 		return "Captain";
 	}
       
@@ -2334,6 +2368,15 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 				return "Dahab'Jundi";
 			}
 		}
+		if (!str_cmp(clan,"dalewatch"))
+		  {
+		    return "Heafodman";
+		  }
+		if (!str_cmp (clan, "earmhyde"))
+		  {
+		    return "Heafodman";
+		  }
+
 		return "General";
 	}
       
@@ -2395,6 +2438,11 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 				return "Sha";
 			}
 		}
+		if (!str_cmp (clan, "earmhyde"))
+		  {
+		    return "Ealdorman";
+		  }
+
   		return "Commander";
 	}
 
@@ -2435,6 +2483,11 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
   	{
 		if (!str_cmp (clan, "mordor_char"))
 			return "Freeman";
+		if (!str_cmp (clan, "earmhyde"))
+		  {
+		    return "Domestic";
+		  }
+
 		return "Membership";
 	}
 
