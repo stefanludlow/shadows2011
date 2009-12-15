@@ -2702,6 +2702,7 @@ struct social_data
 #define STAYPUT_FILE	"stayput"
 
 #define ZONE_SIZE	1000
+#define OBJECT_ZONE_SIZE 1100
 #define MAX_TRADE	5
 #define MAX_PROD	5
 

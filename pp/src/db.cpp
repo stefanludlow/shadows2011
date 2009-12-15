@@ -47,7 +47,7 @@ int mem_allocated = 0;
 int mem_freed = 0;
 
 //ROOM_DATA *wld_tab[ZONE_SIZE]; // I've tried to remove reliance on this - Case
-OBJ_DATA *obj_tab[ZONE_SIZE];
+OBJ_DATA *obj_tab[OBJECT_ZONE_SIZE]; // Expanded for the 110k globalObjectArray. Top 10k objects are object categories - Case
 CHAR_DATA *mob_tab[ZONE_SIZE];
 
 ROLE_DATA *role_list = NULL;
@@ -98,6 +98,7 @@ int next_obj_coldload_id = 0;
 int count_max_online = 0;
 char max_online_date [AVG_STRING_LENGTH] = "";
 int MAX_ZONE = 100;
+int OBJECT_MAX_ZONE = 110;
 int second_affect_active = 0;
 int hash_dup_strings = 0;
 int hash_dup_length = 0;
@@ -304,7 +305,7 @@ add_mob_to_hash (CHAR_DATA * add_mob)
 //	if (nVirtual < 0)
 //		return NULL;
 //
-//	for (obj = obj_tab[nVirtual % ZONE_SIZE]; obj; obj = obj->hnext)
+//	for (obj = obj_tab[nVirtual % OBJECT_ZONE_SIZE]; obj; obj = obj->hnext)
 //		if (obj->nVirtual == nVirtual)
 //			return (obj);
 //
@@ -342,7 +343,7 @@ add_obj_to_hash (OBJ_DATA * add_obj)
 		globalObjectArray[add_obj->nVirtual] = add_obj;
 	}
 
-	hash = add_obj->nVirtual % ZONE_SIZE;
+	hash = add_obj->nVirtual % OBJECT_ZONE_SIZE;
 
 	add_obj->hnext = obj_tab[hash];
 	obj_tab[hash] = add_obj;
@@ -782,8 +783,11 @@ load_rooms (void)
 	for (i = 0; i < ZONE_SIZE; i++)
 	{
 		//wld_tab[i] = NULL;
-		obj_tab[i] = NULL;
 		mob_tab[i] = NULL;
+	}
+
+	for (i = 0; i < OBJECT_ZONE_SIZE; i++) {
+		obj_tab[i] = NULL;
 	}
 
 	for (zon = 0; zon < MAX_ZONE; zon++)
@@ -2464,7 +2468,7 @@ boot_objects ()
 	int zone;
 	FILE *fp;
 
-	for (zone = 0; zone < MAX_ZONE; zone++)
+	for (zone = 0; zone < OBJECT_MAX_ZONE; zone++)
 	{
 
 		sprintf (buf, "%s/objs.%d", REGIONS, zone);

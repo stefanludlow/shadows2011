@@ -25,6 +25,7 @@
 
 #define ROOM_MAX		100000
 #define ZONE_SIZE		1000
+#define OBJECT_ZONE_SIZE 1100
 
 #define s(a) send_to_char (a "\n", ch);
 
@@ -947,6 +948,9 @@ fwrite_object (OBJ_DATA * tobj, FILE * fp)
 			tobj->clan_data->name, tobj->clan_data->rank);
 	}
 
+	if (tobj->super_vnum > 0) {
+		fprintf(fp, "S\n%d\n", tobj->super_vnum); // Super vnum storage - Case											  
+	}											  // Would prefer something better than 'S', but when in Rome.
 
 	if (tobj->wdesc)
 		fprintf (fp, "W\n%d\n%s~\n",
@@ -2677,9 +2681,9 @@ do_olist (CHAR_DATA * ch, char *argument, int cmd)
 		if (isdigit (*buf))
 		{
 
-			if ((zone = atoi (buf)) >= MAX_ZONE)
+			if ((zone = atoi (buf)) >= OBJECT_MAX_ZONE)
 			{
-				send_to_char ("Zone not in range 0..99\n", ch);
+				send_to_char ("Zone not in range 0..110\n", ch);
 				return;
 			}
 
@@ -2727,7 +2731,7 @@ do_olist (CHAR_DATA * ch, char *argument, int cmd)
 
 			argument = one_argument (argument, buf);
 
-			if (!isdigit (*buf) || atoi (buf) >= MAX_ZONE)
+			if (!isdigit (*buf) || atoi (buf) >= OBJECT_MAX_ZONE)
 			{
 				send_to_char ("Expected valid zone after 'z'.\n", ch);
 				return;
@@ -4814,9 +4818,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	else
 		vnum = atol (arg);
-	if ((vnum < 0) || (vnum > 99999))
+	if ((vnum < 0) || (vnum > 110000))
 	{
-		send_to_char ("Vnum must be between 0 and 99999.\n", ch);
+		send_to_char ("Vnum must be between 0 and 110000.\n", ch);
 		return;
 	}
 
@@ -4868,7 +4872,7 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 	clear_object (newobj);
 
 	newobj->nVirtual = vnum;
-	newobj->zone = vnum / ZONE_SIZE;
+	newobj->zone = vnum / OBJECT_ZONE_SIZE;
 
 	add_obj_to_hash (newobj);
 
@@ -5287,7 +5291,7 @@ do_munused (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_ounused (CHAR_DATA * ch, char *argument, int cmd)
 {
-	int unused[ZONE_SIZE];
+	int unused[OBJECT_ZONE_SIZE];
 	int zone;
 	int line_entry;
 	int i;
@@ -5299,7 +5303,7 @@ do_ounused (CHAR_DATA * ch, char *argument, int cmd)
 	if (!*buf)
 		zone = vtor (ch->in_room)->zone;
 
-	else if (!just_a_number (buf) || atoi (buf) < 0 || atoi (buf) >= MAX_ZONE)
+	else if (!just_a_number (buf) || atoi (buf) < 0 || atoi (buf) >= OBJECT_MAX_ZONE)
 	{
 		send_to_char ("Syntax:  runused [zone #]\n", ch);
 		return;
@@ -5308,15 +5312,15 @@ do_ounused (CHAR_DATA * ch, char *argument, int cmd)
 	else
 		zone = atoi (buf);
 
-	for (i = 0; i < ZONE_SIZE; i++)
+	for (i = 0; i < OBJECT_ZONE_SIZE; i++)
 		unused[i] = 0;
 
 	for (obj = full_object_list; obj; obj = obj->lnext)
 		if (obj->zone == zone)
-			unused[obj->nVirtual % ZONE_SIZE] = 1;
+			unused[obj->nVirtual % OBJECT_ZONE_SIZE] = 1;
 
 	sprintf (buf, "  ");
-	for (i = 0, line_entry = -2; i < ZONE_SIZE; i++)
+	for (i = 0, line_entry = -2; i < OBJECT_ZONE_SIZE; i++)
 	{
 
 		if (unused[i])
@@ -5327,7 +5331,7 @@ do_ounused (CHAR_DATA * ch, char *argument, int cmd)
 		if (line_entry == 11)
 			strcat (buf, "\n  ");
 
-		sprintf (buf + strlen (buf), "%-4d ", i + ZONE_SIZE * zone);
+		sprintf (buf + strlen (buf), "%-4d ", i + OBJECT_ZONE_SIZE * zone);
 	}
 
 	strcat (buf, "\n");
@@ -6382,21 +6386,42 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 			}
 
 		}
-
-		else if (!str_cmp (subcmd, "super"))
-		{
+	
+		// Implementation of object categories. Requires code to save builders from themselves - Case
+		else if (!str_cmp (subcmd, "inherits")) {
 			argument = one_argument (argument, buf);
 
-			if (*buf == '0' || atoi (buf))
-			  {
+			if (*buf == '0' || atoi (buf)) {
 			    OBJ_DATA* proto = vtoo(edit_obj->nVirtual);
-			    if (proto)
-			      proto->super_vnum = atoi (buf);
-			  }
-			else
-			{
-				send_to_char ("Expected super vnum.\n", ch);
-				break;
+				int inheritedVNum = atoi(buf);
+
+				if (inheritedVNum > 99999 && vtoo(inheritedVNum) != NULL) { // Any object could be a category, but I'm keeping it simple
+					std::set<int> chainedInts;								// and just using any vnum 100k and over to mark categories - Case
+					chainedInts.insert(edit_obj->nVirtual);
+					chainedInts.insert(inheritedVNum);
+					OBJ_DATA * loopCheck = vtoo(inheritedVNum);
+
+					while(loopCheck != NULL && loopCheck->super_vnum > 0) {
+						if (chainedInts.count(loopCheck->super_vnum) > 0) {
+							send_to_char("This object cannot inherit from that category because it would form an infinite loop.\n", ch);
+							return;
+						}
+						chainedInts.insert(loopCheck->super_vnum);
+						loopCheck = vtoo(loopCheck->super_vnum);
+					}
+					proto->super_vnum = atoi(buf);
+				}
+				else if (inheritedVNum == 0) {
+					proto->super_vnum = 0;
+				}
+				else {
+					send_to_char("That category object does not exist\n", ch);
+					return;
+				}
+			}
+			else {
+				send_to_char ("Expected the virtual number of a category object.\n", ch);
+				return;
 			}
 		}
 
@@ -11552,7 +11577,7 @@ replace_object (int src, int tar, CHAR_DATA * ch)
 	int zone;
 	int cmd_no;
 	int replace_count = 0;
-	int affected_zone[100];	/* Wanna use MAX_ZONE, but there
+	int affected_zone[110];	/* Wanna use MAX_ZONE, but there
 							a bug on the photobooks computer,
 							forcing me to use 100 */
 	char cmd;
@@ -11572,7 +11597,7 @@ replace_object (int src, int tar, CHAR_DATA * ch)
 		return;
 	}
 
-	for (zone = 0; zone < MAX_ZONE; zone++)
+	for (zone = 0; zone < OBJECT_MAX_ZONE; zone++)
 	{
 
 		affected_zone[zone] = 0;
@@ -11619,7 +11644,7 @@ replace_object (int src, int tar, CHAR_DATA * ch)
 		"(WARNING:  There could be more:)\n", ch);
 	*buf = '\0';
 
-	for (zone = 0; zone < MAX_ZONE; zone++)
+	for (zone = 0; zone < OBJECT_MAX_ZONE; zone++)
 	{
 		if (affected_zone[zone])
 			sprintf (buf + strlen (buf), "   %2d", zone);
@@ -12226,7 +12251,7 @@ do_rmove (CHAR_DATA * ch, char *argument, int cmd)
 	for (tobj = room->contents; tobj; tobj = tobj->next_content)
 	{
 		tobj->in_room = target_room_num;
-		tobj->zone = target_room_num / ZONE_SIZE;
+		tobj->zone = target_room_num / OBJECT_ZONE_SIZE;
 	}
 
 	/* Relink rooms */
@@ -13175,9 +13200,9 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 	
-	if (newVNum < 0 || newVNum > 100000)
+	if (newVNum < 0 || newVNum >= 110000)
 	{
-		send_to_char ("VNums must be between 1 and 99999.\n", ch);
+		send_to_char ("VNums must be between 1 and 110000.\n", ch);
 		return;
 	}
 	
@@ -13185,7 +13210,7 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	source = vtoo (oldVNum);
 	
 	newObj->nVirtual = newVNum;
-	newObj->zone = newVNum / ZONE_SIZE;
+	newObj->zone = newVNum / OBJECT_ZONE_SIZE;
 	
 	newObj->clock = source->clock;
 	newObj->morphTime = source->morphTime;

@@ -71,6 +71,8 @@ const char *attrs[] = {
 	"\n"
 };
 
+bool inheritedObject (int objectVirtual, int objectToFind);
+
 int
 missing_craft_items (CHAR_DATA * ch, AFFECTED_TYPE * af)
 {
@@ -2431,7 +2433,7 @@ OBJ_DATA *
 obj_list_vnum (CHAR_DATA * ch, OBJ_DATA * list, int vnum)
 {
 	for (; list; list = list->next_content)
-		if (list->nVirtual == vnum && CAN_SEE_OBJ (ch, list))
+		if (inheritedObject(list->nVirtual, vnum) && CAN_SEE_OBJ (ch, list))
 			return list;
 
 	return NULL;
@@ -2441,7 +2443,7 @@ OBJ_DATA *
 obj_list_vnum_dark (OBJ_DATA * list, int vnum)
 {
 	for (; list; list = list->next_content)
-		if (list->nVirtual == vnum)
+		if (inheritedObject(list->nVirtual, vnum))
 			return list;
 
 	return NULL;
@@ -2449,22 +2451,42 @@ obj_list_vnum_dark (OBJ_DATA * list, int vnum)
 
 
 int
-craft__count_available_objs (CHAR_DATA * ch, int vnum)
-{
+craft__count_available_objs (CHAR_DATA * ch, int vnum) {
 	int nTally = 0;
 	OBJ_DATA *ptrObj = NULL;
 
-	nTally += (ch->right_hand
-		&& ch->right_hand->nVirtual == vnum) ? ch->right_hand->count : 0;
-	nTally += (ch->left_hand
-		&& ch->left_hand->nVirtual == vnum) ? ch->left_hand->count : 0;
-	for (ptrObj = ch->room->contents; ptrObj != NULL;
-		ptrObj = ptrObj->next_content)
-	{
-		nTally += (ptrObj->nVirtual == vnum) ? ptrObj->count : 0;
+	nTally += (ch->right_hand && inheritedObject(ch->right_hand->nVirtual, vnum)) ? ch->right_hand->count : 0;
+	nTally += (ch->left_hand && inheritedObject(ch->left_hand->nVirtual, vnum)) ? ch->left_hand->count : 0;
+
+	for (ptrObj = ch->room->contents; ptrObj != NULL; ptrObj = ptrObj->next_content) {
+		nTally += (inheritedObject(ptrObj->nVirtual, vnum) ? ptrObj->count : 0);
 	}
+
 	return nTally;
 }
+
+// Takes an object vnum and tries to find objectToFind in its inheritance chain - Case
+bool inheritedObject (int objectVirtual, int objectToFind) { 
+	static OBJ_DATA *object;
+
+	object = vtoo(objectVirtual);
+
+	if (object == NULL) {
+		return false;
+	}
+
+	do {
+		if (object->nVirtual == objectToFind) {
+			return true;
+		}
+		else {
+			object = vtoo(object->super_vnum);
+		}
+	}while (object != NULL);
+
+	return false;
+}
+
 
 OBJ_DATA *
 get_item_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, PHASE_DATA * phase)
@@ -2542,9 +2564,9 @@ get_item_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, PHASE_DATA * phase)
 
 		if (IS_SET (item->flags, SUBCRAFT_WIELDED))
 		{
-			if (((tobj = get_equip (ch, WEAR_BOTH)) && tobj->nVirtual == vnum)
-				|| ((tobj = get_equip (ch, WEAR_PRIM)) && tobj->nVirtual == vnum)
-				|| ((tobj = get_equip (ch, WEAR_SEC)) && tobj->nVirtual == vnum))
+			if (((tobj = get_equip (ch, WEAR_BOTH)) && inheritedObject(tobj->nVirtual, vnum))
+				|| ((tobj = get_equip (ch, WEAR_PRIM)) && inheritedObject(tobj->nVirtual, vnum))
+				|| ((tobj = get_equip (ch, WEAR_SEC)) && inheritedObject(tobj->nVirtual, vnum)))
 			{
 				if (item->item_counts > tobj->count)
 					continue;
@@ -2560,7 +2582,7 @@ get_item_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, PHASE_DATA * phase)
 		{
 			for (tobj = ch->equip; tobj; tobj = tobj->next_content)
 			{
-				if (tobj->nVirtual != vnum)
+				if (!inheritedObject(tobj->nVirtual, vnum))
 					continue;
 				if (item->item_counts > tobj->count)
 					continue;
@@ -2585,16 +2607,16 @@ get_item_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, PHASE_DATA * phase)
 		/* Grab this item wherever it is */
 
 		if (((tobj = obj_list_vnum_dark (ch->right_hand, vnum)) &&
-			tobj->nVirtual == vnum) ||
+			inheritedObject(tobj->nVirtual, vnum)) ||
 			((tobj = obj_list_vnum (ch, ch->left_hand, vnum)) &&
-			tobj->nVirtual == vnum) ||
+			inheritedObject(tobj->nVirtual, vnum)) ||
 			((tobj = obj_list_vnum (ch, ch->room->contents, vnum)) &&
-			tobj->nVirtual == vnum) ||
+			inheritedObject(tobj->nVirtual, vnum)) ||
 			((tobj = get_equip (ch, WEAR_BOTH)) &&
-			tobj->nVirtual == vnum) ||
+			inheritedObject(tobj->nVirtual, vnum)) ||
 			((tobj = get_equip (ch, WEAR_PRIM)) &&
-			tobj->nVirtual == vnum) ||
-			((tobj = get_equip (ch, WEAR_SEC)) && tobj->nVirtual == vnum))
+			inheritedObject(tobj->nVirtual, vnum)) ||
+			((tobj = get_equip (ch, WEAR_SEC)) && inheritedObject(tobj->nVirtual, vnum)))
 		{
 			if (item->item_counts > tobj->count)
 				continue;
@@ -2670,9 +2692,9 @@ get_key_start_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, PHASE_DATA * phase,
 
 		if (IS_SET (item->flags, SUBCRAFT_WIELDED))
 		{
-			if (((tobj = get_equip (ch, WEAR_BOTH)) && tobj->nVirtual == vnum)
-				|| ((tobj = get_equip (ch, WEAR_PRIM)) && tobj->nVirtual == vnum)
-				|| ((tobj = get_equip (ch, WEAR_SEC)) && tobj->nVirtual == vnum))
+			if (((tobj = get_equip (ch, WEAR_BOTH)) && inheritedObject(tobj->nVirtual, vnum))
+				|| ((tobj = get_equip (ch, WEAR_PRIM)) && inheritedObject(tobj->nVirtual, vnum))
+				|| ((tobj = get_equip (ch, WEAR_SEC)) && inheritedObject(tobj->nVirtual, vnum)))
 			{
 				if (item->item_counts > tobj->count)
 					continue;
@@ -2713,16 +2735,16 @@ get_key_start_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, PHASE_DATA * phase,
 		/* Grab this item wherever it is */
 
 		if (((tobj = obj_list_vnum_dark (ch->right_hand, vnum)) &&
-			tobj->nVirtual == vnum) ||
+			inheritedObject(tobj->nVirtual, vnum)) ||
 			((tobj = obj_list_vnum (ch, ch->left_hand, vnum)) &&
-			tobj->nVirtual == vnum) ||
+			inheritedObject(tobj->nVirtual, vnum)) ||
 			((tobj = obj_list_vnum (ch, ch->room->contents, vnum)) &&
-			tobj->nVirtual == vnum) ||
+			inheritedObject(tobj->nVirtual, vnum)) ||
 			((tobj = get_equip (ch, WEAR_BOTH)) &&
-			tobj->nVirtual == vnum) ||
+			inheritedObject(tobj->nVirtual, vnum)) ||
 			((tobj = get_equip (ch, WEAR_PRIM)) &&
-			tobj->nVirtual == vnum) ||
-			((tobj = get_equip (ch, WEAR_SEC)) && tobj->nVirtual == vnum))
+			inheritedObject(tobj->nVirtual, vnum)) ||
+			((tobj = get_equip (ch, WEAR_SEC)) && inheritedObject(tobj->nVirtual, vnum)))
 		{
 			if (item->item_counts > tobj->count)
 				continue;

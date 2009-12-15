@@ -127,7 +127,7 @@ initialize_materials (void)
 void
 do_materialhack (CHAR_DATA *ch, char * argument, int cmd)
 {
-	extern OBJ_DATA *obj_tab[ZONE_SIZE];
+	extern OBJ_DATA *obj_tab[OBJECT_ZONE_SIZE];
 	OBJ_DATA *obj;
 	for (int i = 0; i <= 999; i++)
 	{

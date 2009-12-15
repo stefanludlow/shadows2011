@@ -78,6 +78,7 @@ extern int global_moon_light;
 extern int moon_light[];
 extern int desc_weather[];
 extern int MAX_ZONE;
+extern int OBJECT_MAX_ZONE;
 extern int new_auctions;
 extern int sold_auctions;
 extern int auction_bids;

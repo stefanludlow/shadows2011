@@ -133,7 +133,7 @@ inline ROOM_DATA * vtor(int roomVirtual)
 inline OBJ_DATA * vtoo(int objectVirtual) {
 	static OBJ_DATA *object = NULL;
 
-	if (objectVirtual < 110000) {
+	if (objectVirtual < 110000 && objectVirtual > 0) {
 		object = globalObjectArray[objectVirtual];
 
 		if (object != NULL && (object->nVirtual == objectVirtual)) {
