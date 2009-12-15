@@ -1963,7 +1963,7 @@ struct affect_job_type
   int pay_date;
   int cash;
   int count;
-  int object_vnum;
+  long object_vnum; //long to fit union
   int employer;
 };
 
@@ -1973,7 +1973,7 @@ struct affect_table_type
   int uu2;
   int uu3;
   int uu4;
-  OBJ_DATA *obj;
+  OBJ_DATA *obj; //happens to be long already
   int uu6;
 };
 
@@ -1983,7 +1983,7 @@ struct affect_smell_type
   int aroma_strength;
   int uu3;
   int uu4;
-  int uu5;
+  long uu5;  //long to fit union
   int uu6;
 };
 
@@ -1993,7 +1993,7 @@ struct affect_paralyze
   int minutes_until_paralyzed;
   int uu3;
   int uu4;
-  int uu5;
+  long uu5; //long to fit union
   int sn;
 };
 
@@ -2009,7 +2009,7 @@ struct affect_hidden_type
   int hidden_value;
   int coldload_id;
   int uu4;
-  int uu5;
+  long uu5; //long to fit union
   int uu6;
 };
 
@@ -2019,7 +2019,7 @@ struct affect_toll_type
   int dir;
   int room_num;			/* for verification */
   int charge;			/* Cost for others to pass toll crossing */
-  int uu5;
+  long uu5; //long to fit union
   int uu6;
 };
 
@@ -2029,7 +2029,7 @@ struct affect_room_type
   int uu2;
   int uu3;
   int uu4;
-  int uu5;
+  long uu5; //long to fit union
   int uu6;
 };
 
@@ -2088,6 +2088,8 @@ enum AGENT_METHOD {
   If latency == duration the affected is a carrier.
 
 */
+
+/* may need editing for union - Grommit Dec09 */
 struct affect_soma_type
 {				/* SOMA EFFECTS TBA */
   int duration;			/* rl hours */
@@ -2127,20 +2129,6 @@ struct affected_type
   union affected_union a;
   AFFECTED_TYPE *next;
 };
-
-#ifdef HAHA
-struct affected_type
-{
-  int type;			/* The type of spell that caused this           */
-  int duration;			/* For how long its effects will last           */
-  int modifier;			/* This is added to apropriate ability          */
-  int location;			/* Tells which ability to change(APPLY_XXX)     */
-  int bitvector;		/* Tells which bits to set (AFF_XXX)            */
-  int t;			/* Extra information                        */
-  int sn;			/* Acquired by spell number                                     */
-  AFFECTED_TYPE *next;
-};
-#endif
 
 struct second_affect
 {

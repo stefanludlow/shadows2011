@@ -2856,7 +2856,7 @@ load_char_mysql (const char *name)
 			{
 				af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
 
-				sscanf (buf, "Affect %d %d %d %d %d %d %d\n",
+				sscanf (buf, "Affect %d %d %d %d %d %d %ld\n",
 					&af->type,
 					&af->a.spell.duration,
 					&af->a.spell.modifier,
@@ -3201,7 +3201,7 @@ save_char_mysql (CHAR_DATA * ch)
 			af->type != MAGIC_GUARD &&
 			af->type != AFFECT_SHADOW &&
 			(af->type > CRAFT_LAST || af->type < CRAFT_FIRST))
-			sprintf (buf + strlen (buf), "Affect	%d %d %d %d %d %d %d\n",
+			sprintf (buf + strlen (buf), "Affect	%d %d %d %d %d %d %ld\n",
 			af->type, af->a.spell.duration, af->a.spell.modifier,
 			af->a.spell.location, af->a.spell.bitvector,
 			af->a.spell.sn, af->a.spell.t);

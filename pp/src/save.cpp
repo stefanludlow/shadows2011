@@ -1838,7 +1838,7 @@ save_mobile (CHAR_DATA * mob, FILE * fp, char *save_reason, int extract)
 	af->type != MAGIC_WATCH1 &&
 	af->type != MAGIC_WATCH2 &&
 	af->type != MAGIC_WATCH3 && af->type != MAGIC_GUARD)
-      fprintf (fp, "Affect       %d %d %d %d %d %d %d\n",
+      fprintf (fp, "Affect       %d %d %d %d %d %d %ld\n",
 	       af->type,
 	       af->a.spell.duration,
 	       af->a.spell.modifier,
