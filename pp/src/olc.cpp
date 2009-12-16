@@ -6395,14 +6395,14 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 			    OBJ_DATA* proto = vtoo(edit_obj->nVirtual);
 				int inheritedVNum = atoi(buf);
 
-				if (inheritedVNum == edit_obj->nVirtual) {
-					send_to_char("This object cannot inherit from that category because it would form an infinite loop.\n", ch);
-					return;
-				}
-
 				// Any object could be a category, but I'm keeping it simple
 				// and just using any vnum 100k and over to mark categories - Case
-				if (inheritedVNum > 99999 && vtoo(inheritedVNum) != NULL) { 
+				if (inheritedVNum > 99999 && vtoo(inheritedVNum) != NULL) {
+					if (inheritedVNum == edit_obj->nVirtual) {
+						send_to_char("This object cannot inherit from that category because it would form an infinite loop.\n", ch);
+						return;
+					}
+
 					std::set<int> chainedInts;								
 					chainedInts.insert(edit_obj->nVirtual);
 					chainedInts.insert(inheritedVNum);
@@ -6422,7 +6422,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 					proto->super_vnum = 0;
 				}
 				else {
-					send_to_char("That category object does not exist\n", ch);
+					send_to_char("That object does not exist or is not a category\n", ch);
 					return;
 				}
 			}
