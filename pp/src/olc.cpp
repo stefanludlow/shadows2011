@@ -6395,8 +6395,15 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 			    OBJ_DATA* proto = vtoo(edit_obj->nVirtual);
 				int inheritedVNum = atoi(buf);
 
-				if (inheritedVNum > 99999 && vtoo(inheritedVNum) != NULL) { // Any object could be a category, but I'm keeping it simple
-					std::set<int> chainedInts;								// and just using any vnum 100k and over to mark categories - Case
+				if (inheritedVNum == edit_obj->nVirtual) {
+					send_to_char("This object cannot inherit from that category because it would form an infinite loop.\n", ch);
+					return;
+				}
+
+				// Any object could be a category, but I'm keeping it simple
+				// and just using any vnum 100k and over to mark categories - Case
+				if (inheritedVNum > 99999 && vtoo(inheritedVNum) != NULL) { 
+					std::set<int> chainedInts;								
 					chainedInts.insert(edit_obj->nVirtual);
 					chainedInts.insert(inheritedVNum);
 					OBJ_DATA * loopCheck = vtoo(inheritedVNum);

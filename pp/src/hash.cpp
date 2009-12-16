@@ -1217,7 +1217,8 @@ fread_object (int vnum, int nZone, FILE * fp)
 		if (peak_char != 'S')
 			break;
 		
-		fscanf (fp, "%d\n", obj->super_vnum);
+		fscanf (fp, "%s\n", chk);
+		obj->super_vnum = fread_number(fp);
 	}
 	while (1);
 

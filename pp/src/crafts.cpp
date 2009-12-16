@@ -3538,7 +3538,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 		nObjectTally = item->item_counts;
 		nObjectVnum = obj_list[i]->nVirtual;
 		if (nObjectTally && ch->right_hand
-			&& ch->right_hand->nVirtual == nObjectVnum)
+			&& inheritedObject(ch->right_hand->nVirtual, nObjectVnum))
 		{
 			if (ch->right_hand->count <= nObjectTally)
 			{
@@ -3553,7 +3553,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 		}
 
 		if (nObjectTally && ch->left_hand
-			&& ch->left_hand->nVirtual == nObjectVnum)
+			&& inheritedObject(ch->left_hand->nVirtual, nObjectVnum))
 		{
 			if (ch->left_hand->count <= nObjectTally)
 			{
@@ -3571,7 +3571,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 		{
 			for (ptrObj = ch->room->contents; nObjectTally && ptrObj != NULL;)
 			{
-				if (ptrObj->nVirtual == nObjectVnum)
+				if (inheritedObject(ptrObj->nVirtual, nObjectVnum))
 				{
 					if (ptrObj->count <= nObjectTally)
 					{
