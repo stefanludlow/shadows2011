@@ -985,11 +985,11 @@ delayed_treatment (CHAR_DATA * ch)
 						sprintf (buf,
 							"You treat the wound expertly, making it look considerably better.");
 						adjust_wound (tch, wound, kit->o.od.value[3] * -2);
-						
+
 					}
 					else {
 						sprintf (buf,
-						"You treat and dress the wound expertly.");
+							"You treat and dress the wound expertly.");
 						adjust_wound (tch, wound, -3);
 					}
 					act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);

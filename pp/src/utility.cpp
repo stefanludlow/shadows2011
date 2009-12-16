@@ -403,14 +403,14 @@ bool is_overcast (ROOM_DATA * room)
 	int clouds = weather_info[room->zone].clouds;
 
 	if ((room->sector_type == SECT_INSIDE)
-	   || (room->sector_type == SECT_FOREST)
-	   || (room->sector_type == SECT_CAVE)
-	   || (room->sector_type == SECT_PIT)
-	   || (room->sector_type == SECT_UNDERWATER)
-	   || (flags & INDOORS) || (flags & STIFLING_FOG)
-	   || (flags & DARK) || (flags & TUNNEL)
-	   || (flags & CAVE) || (clouds == OVERCAST)
-	   || (clouds == HEAVY_CLOUDS))
+		|| (room->sector_type == SECT_FOREST)
+		|| (room->sector_type == SECT_CAVE)
+		|| (room->sector_type == SECT_PIT)
+		|| (room->sector_type == SECT_UNDERWATER)
+		|| (flags & INDOORS) || (flags & STIFLING_FOG)
+		|| (flags & DARK) || (flags & TUNNEL)
+		|| (flags & CAVE) || (clouds == OVERCAST)
+		|| (clouds == HEAVY_CLOUDS))
 	{
 		result = true;
 	}
@@ -619,7 +619,7 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 	}
 	else if (restricted_skills[skill] == -5)
 	{				// Scripts
-	  if (!real_skill (ch, SKILL_LITERACY)) // NB - Literacy has been removed
+		if (!real_skill (ch, SKILL_LITERACY)) // NB - Literacy has been removed
 			return 1;
 		if (skill == SKILL_SCRIPT_NUMENIAN_TENGWAR)
 			return 0;
@@ -3920,7 +3920,7 @@ std::string get_date( )
 	std::string suf;
 	std::ostringstream date_buf;
 	int day;
-	
+
 	day = time_info.day + 1;
 	if (day == 1 || (day % 10) == 1)
 	{
@@ -3936,7 +3936,7 @@ std::string get_date( )
 	}
 	/* else if (day < 20)
 	{
-		suf = "th";
+	suf = "th";
 	} */
 	else
 	{
@@ -3967,7 +3967,7 @@ std::string get_date( )
 	{
 		date_buf << day << suf << " " << month_short_name[time_info.month] << ", " << time_info.year << " SR";
 	}
-	
+
 
 	return date_buf.str();
 }

@@ -29,29 +29,29 @@
 inline bool
 are_grouped (const CHAR_DATA* a, const CHAR_DATA* b)
 {
-  // todo: remove need for sanity check 
-  if (a && b && a != b)
-    {
-      CHAR_DATA *af = a->following;
-      CHAR_DATA *bf = b->following;
-      
-      return (af == b || bf == a || (af && af == bf));
-    }
-  return false;
+	// todo: remove need for sanity check 
+	if (a && b && a != b)
+	{
+		CHAR_DATA *af = a->following;
+		CHAR_DATA *bf = b->following;
+
+		return (af == b || bf == a || (af && af == bf));
+	}
+	return false;
 }
 
 inline bool
 is_group_leader (const CHAR_DATA* ch)
 {
-  CHAR_DATA *tch = NULL;
+	CHAR_DATA *tch = NULL;
 
-  for (tch = ch->room->people; tch; tch = tch->next_in_room)
-    {
-      if (tch->following == ch)
-	return 1;
-    }
+	for (tch = ch->room->people; tch; tch = tch->next_in_room)
+	{
+		if (tch->following == ch)
+			return 1;
+	}
 
-  return 0;
+	return 0;
 }
 
 

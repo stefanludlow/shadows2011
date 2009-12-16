@@ -1205,7 +1205,7 @@ fread_object (int vnum, int nZone, FILE * fp)
 			obj->clan_data = newclan;
 	}
 	while (1);
-	
+
 	// Shamefully stealing the above codeblock for super vnums - Case
 	do {
 		while ((peak_char = getc (fp)) == ' ' || peak_char == '\t' ||
@@ -1216,7 +1216,7 @@ fread_object (int vnum, int nZone, FILE * fp)
 
 		if (peak_char != 'S')
 			break;
-		
+
 		fscanf (fp, "%s\n", chk);
 		obj->super_vnum = fread_number(fp);
 	}

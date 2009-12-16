@@ -14,5 +14,5 @@
 void
 do_hire (CHAR_DATA * ch, char *argument, int cmd)
 {
-  send_to_char ("Coming soon.\n", ch);
+	send_to_char ("Coming soon.\n", ch);
 }

@@ -82,11 +82,11 @@
 #define MAX_SPECIAL_ROLES		50
 
 #define CONSTITUTION_MULTIPLIER		3	/* Damage absorption limit for any */
-						/* humanoid N/PC is 50 + (con+power) x multiplier */
+/* humanoid N/PC is 50 + (con+power) x multiplier */
 
 #define COMBAT_BRUTALITY        1.85	/* A quick way to adjust the brutality of */
-					/* combat; a setting of 175% seems pretty nasty, */
-					/* brutish, and short. Be careful with this! */
+/* combat; a setting of 175% seems pretty nasty, */
+/* brutish, and short. Be careful with this! */
 
 /* color system */
 

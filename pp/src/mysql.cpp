@@ -2310,7 +2310,7 @@ perform_pfile_update (CHAR_DATA * ch)
 	for (i = 1; i <= LAST_SKILL; i++)
 		ch->pc->skills[i] = ch->skills[i];
 
-	
+
 	// Stat fix code - Case, should be removed after a few weeks
 	int attributeTotal = (ch->str + ch->dex + ch->agi + ch->con + ch->wil + ch->intel);
 	int race = ch->race;
@@ -2665,24 +2665,24 @@ refresh_race_configuration (CHAR_DATA * tch)
 	apply_race_affects (tch);
 
 	/* Commented out Dec 09 2009
-	 * This code is used to adjust races, but the racial modifiers are now
-	 * being handled with a php chargen application.
-	 * Uncomment these to have a functioning RPI_ENGINE
+	* This code is used to adjust races, but the racial modifiers are now
+	* being handled with a php chargen application.
+	* Uncomment these to have a functioning RPI_ENGINE
 
 	if (lookup_race_variable (tch->race, RACE_STR_MOD))
-		tch->str += atoi (lookup_race_variable (tch->race, RACE_STR_MOD));
+	tch->str += atoi (lookup_race_variable (tch->race, RACE_STR_MOD));
 	if (lookup_race_variable (tch->race, RACE_CON_MOD))
-		tch->con += atoi (lookup_race_variable (tch->race, RACE_CON_MOD));
+	tch->con += atoi (lookup_race_variable (tch->race, RACE_CON_MOD));
 	if (lookup_race_variable (tch->race, RACE_DEX_MOD))
-		tch->dex += atoi (lookup_race_variable (tch->race, RACE_DEX_MOD));
+	tch->dex += atoi (lookup_race_variable (tch->race, RACE_DEX_MOD));
 	if (lookup_race_variable (tch->race, RACE_AGI_MOD))
-		tch->agi += atoi (lookup_race_variable (tch->race, RACE_AGI_MOD));
+	tch->agi += atoi (lookup_race_variable (tch->race, RACE_AGI_MOD));
 	if (lookup_race_variable (tch->race, RACE_INT_MOD))
-		tch->intel += atoi (lookup_race_variable (tch->race, RACE_INT_MOD));
+	tch->intel += atoi (lookup_race_variable (tch->race, RACE_INT_MOD));
 	if (lookup_race_variable (tch->race, RACE_WIL_MOD))
-		tch->wil += atoi (lookup_race_variable (tch->race, RACE_WIL_MOD));
+	tch->wil += atoi (lookup_race_variable (tch->race, RACE_WIL_MOD));
 	if (lookup_race_variable (tch->race, RACE_AUR_MOD))
-		tch->aur += atoi (lookup_race_variable (tch->race, RACE_AUR_MOD));
+	tch->aur += atoi (lookup_race_variable (tch->race, RACE_AUR_MOD));
 	*/
 
 	if ((tch->height = calculate_race_height (tch)) == -1)
@@ -2856,7 +2856,7 @@ load_char_mysql (const char *name)
 			{
 				af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
 
-				sscanf (buf, "Affect %d %d %d %d %d %d %ld\n",
+				sscanf (buf, "Affect %d %d %d %d %d %d %d\n",
 					&af->type,
 					&af->a.spell.duration,
 					&af->a.spell.modifier,
@@ -3116,11 +3116,11 @@ load_char_mysql (const char *name)
 
 	//temp hack to fix missing climb skill -- remove Jan 2010
 	if (!ch->skills[SKILL_CLIMB])
-		{
+	{
 		open_skill (ch, SKILL_CLIMB);
 		starting_skill_boost (ch, SKILL_CLIMB);
-		}	
-	
+	}	
+
 	mysql_free_result (result);
 	/*
 	if ( lookup_race_variable (ch->race, RACE_LAST_MODIFIED) &&
@@ -3201,7 +3201,7 @@ save_char_mysql (CHAR_DATA * ch)
 			af->type != MAGIC_GUARD &&
 			af->type != AFFECT_SHADOW &&
 			(af->type > CRAFT_LAST || af->type < CRAFT_FIRST))
-			sprintf (buf + strlen (buf), "Affect	%d %d %d %d %d %d %ld\n",
+			sprintf (buf + strlen (buf), "Affect	%d %d %d %d %d %d %d\n",
 			af->type, af->a.spell.duration, af->a.spell.modifier,
 			af->a.spell.location, af->a.spell.bitvector,
 			af->a.spell.sn, af->a.spell.t);

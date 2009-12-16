@@ -1028,7 +1028,7 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 			fprintf (fp, "T%d\n", j);
 		else
 			fprintf (fp, "D%d\n", j);
-			
+
 		if (troom->dir_option[j]->general_description)
 			fprintf (fp, "%s~\n", troom->dir_option[j]->general_description);
 		else
@@ -1069,7 +1069,7 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 			fprintf (fp, "%s~\n", troom->secrets[j]->stext);
 		}
 	}
-	
+
 	if (troom->noInvLimit)
 		fprintf (fp, "U\n");
 
@@ -4192,8 +4192,6 @@ do_rlinkrm (CHAR_DATA * ch, char *argument, int cmd)
 	char buf[256];
 	int dir;
 	int cha_rnum, old_rnum;
-	ROOM_DATA* room=NULL;
-	ROOM_DATA* troom=NULL;
 
 	one_argument (argument, buf);
 
@@ -4235,10 +4233,9 @@ do_rlinkrm (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	cha_rnum = ch->in_room;
-	room = vtor(ch->in_room);
-	if ((room) && room->dir_option[dir])
+	if (vtor (ch->in_room)->dir_option[dir])
 	{
-		old_rnum = room->dir_option[dir]->to_room;
+		old_rnum = vtor (ch->in_room)->dir_option[dir]->to_room;
 	}
 	else
 	{
@@ -4246,13 +4243,8 @@ do_rlinkrm (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (room)
-	  room->dir_option[dir] = 0;
-
-	troom = vtor(old_rnum);
-	if (troom)
-	  troom->dir_option[rev_dir[dir]] = 0;
-
+	vtor (cha_rnum)->dir_option[dir] = 0;
+	vtor (old_rnum)->dir_option[rev_dir[dir]] = 0;
 	send_to_char ("Done.\n", ch);
 }
 
@@ -4380,8 +4372,8 @@ do_rflags (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char (buf3, ch);
 		return;
 	}
-	
-		//Hibou -- Adding for unlimited buying
+
+	//Hibou -- Adding for unlimited buying
 	if (!str_cmp (buf, "NoInvLimit"))
 	{
 		if (ch->room->noInvLimit)
@@ -4424,7 +4416,7 @@ do_rflags (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char ("Done.\n", ch);
 		return;
 	}
-	
+
 	if (buf[0] == '?')
 	{
 		sprintf (buf2, "The following room flags are available:\n\t\t\t");
@@ -6394,13 +6386,13 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 			}
 
 		}
-	
+
 		// Implementation of object categories. Requires code to save builders from themselves - Case
 		else if (!str_cmp (subcmd, "inherits")) {
 			argument = one_argument (argument, buf);
 
 			if (*buf == '0' || atoi (buf)) {
-			    OBJ_DATA* proto = vtoo(edit_obj->nVirtual);
+				OBJ_DATA* proto = vtoo(edit_obj->nVirtual);
 				int inheritedVNum = atoi(buf);
 
 				// Any object could be a category, but I'm keeping it simple
@@ -12899,59 +12891,59 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	MOB_DATA *sm;
 	char buf[8];
 	char buf2[8];
-	
+
 	if (!ch->pc)
 	{
 		send_to_char ("This is a PC-only command.\n", ch);
 		return;
 	}
-	
+
 	argument = one_argument (argument, buf);
 	argument = one_argument (argument, buf2);
-	
+
 	if (!*buf || !*buf2 || !atoi (buf) || !atoi (buf2))
 	{
 		send_to_char ("mclone <original vnum> <new vnum>   - copy a mobile prototype.\n", ch);
 		return;
 	}
-	
+
 	oldVNum = atoi (buf);
 	newVNum = atoi (buf2);
-	
+
 	if (!vtom (oldVNum))
 	{
 		send_to_char ("No such prototype exists.", ch);
 		return;
 	}
-	
+
 	if (vtom (newVNum))
 	{
 		send_to_char ("A mob prototype already exists with your target vnum.\n", ch);
 		return;
 	}
-	
+
 	if (newVNum < 1 || newVNum > 99999)
 	{
 		send_to_char ("VNums must be between 1 and 99999.\n", ch);
 		return;
 	}
-	
+
 	newmob = new_char (0); /* Creates mob. */
 	source = vtom (oldVNum);
 	m = newmob->mob;
 	sm = source->mob;
-	
+
 	m->nVirtual = newVNum;
 	m->zone = newVNum / ZONE_SIZE;
 	m->lnext = NULL;
 	m->hnext = NULL;
-	
+
 	for (i = 0; i <= 100; i++)
 	{
 		newmob->enforcement[i] = source->enforcement[i];
 	}
 	newmob->act = source->act;
-	
+
 	newmob->name = str_dup (source->name);
 	newmob->tname = str_dup (source->tname);
 	newmob->short_descr = str_dup (source->short_descr);
@@ -12959,7 +12951,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->description = str_dup (source->description);
 	newmob->clans = str_dup (source->clans);
 	newmob->travel_str = str_dup (source->travel_str);
-	
+
 	newmob->str = source->str;
 	newmob->intel = source->intel;
 	newmob->wil = source->wil;
@@ -12974,7 +12966,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->tmp_con = source->tmp_con;
 	newmob->tmp_aur = source->tmp_aur;
 	newmob->tmp_agi = source->tmp_agi;
-	
+
 	newmob->balance = source->balance;
 	newmob->bmi = source->bmi;
 	newmob->body_proto = source->body_proto;
@@ -12982,7 +12974,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->height = source->height;
 	newmob->frame = source->frame;
 	newmob->size = source->size;
-	
+
 	newmob->sex = source->sex;
 	newmob->age = source->age;
 	newmob->race = source->race;
@@ -12994,7 +12986,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->carry_weight = source->carry_weight;
 	newmob->carry_items = source->carry_items;
 	newmob->lastregen = source->lastregen;
-	
+
 	newmob->fight_percentage = source->fight_percentage;
 	newmob->primary_delay = source->primary_delay;
 	newmob->secondary_delay = source->secondary_delay;
@@ -13003,7 +12995,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->natural_delay = source->natural_delay;
 	newmob->speed = source->speed;
 	newmob->defensive = source->defensive;
-	
+
 	if (source->spells)
 	{
 		for (i = 0; i <= MAX_LEARNED_SPELLS; i++)
@@ -13014,16 +13006,16 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 			newmob->spells[i][3] = source->spells[i][3];
 		}
 	}
-	
+
 	newmob->mana = source->mana;
 	newmob->max_mana = source->max_mana;
 	newmob->harness = source->harness;
 	newmob->max_harness = source->max_harness;
 	newmob->curse = source->curse;
-	
+
 	newmob->hire_storeroom = source->hire_storeroom;
 	newmob->hire_storeobj = source->hire_storeobj;
-	
+
 	newmob->speaks = source->speaks;
 	newmob->psionic_talents = source->psionic_talents;
 	for (i = 0; i <= MAX_SKILLS; i++)
@@ -13031,7 +13023,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 		newmob->skills[i] = source->skills[i];
 	}
 	newmob->offense = source->offense;
-	
+
 	newmob->morph_type = source->morph_type;
 	newmob->morph_time = source->morph_time;
 	newmob->morphto = source->morphto;
@@ -13041,19 +13033,19 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->deity = source->deity;
 	newmob->color = source->color;
 	newmob->writes = source->writes;
-	
+
 	m->owner = str_dup (sm->owner);
-	
+
 	m->skinned_vnum = sm->skinned_vnum;
 	m->carcass_vnum = sm->carcass_vnum;
-	
+
 	m->damnodice = sm->damnodice;
 	m->damsizedice = sm->damsizedice;
 	m->damroll = sm->damroll;
 	m->min_height = sm->min_height;
 	m->max_height = sm->max_height;
 	m->size = sm->size;
-	
+
 	m->merch_seven = sm->merch_seven;
 	m->helm_room = sm->helm_room;
 	m->access_flags = sm->access_flags;
@@ -13062,14 +13054,14 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	m->reset_cmd = sm->reset_cmd;
 	m->currency_type = sm->currency_type;
 	m->jail = sm->jail;
-	
+
 	if (sm->resets)
 	{
-			m->resets->type = sm->resets->type;
-			m->resets->command = str_dup (sm->resets->command);
-			m->resets->planned = sm->resets->planned;
+		m->resets->type = sm->resets->type;
+		m->resets->command = str_dup (sm->resets->command);
+		m->resets->planned = sm->resets->planned;
 	}
-		
+
 	if (source->moves)
 	{
 		newmob->moves->dir = source->moves->dir;
@@ -13078,7 +13070,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 		newmob->moves->next = NULL;
 		newmob->moves->travel_str = str_dup (source->moves->travel_str);
 	}
-	
+
 	if (source->shop)
 	{
 		newmob->shop = new SHOP_DATA;
@@ -13088,7 +13080,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 			newmob->shop->shop_vnum = source->shop->shop_vnum;
 		if (source->shop->store_vnum)
 			newmob->shop->store_vnum = source->shop->store_vnum;
-			
+
 		if (source->shop->no_such_item1)
 			newmob->shop->no_such_item1 = str_dup(source->shop->no_such_item1);
 		if (source->shop->no_such_item2)
@@ -13103,8 +13095,8 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 			newmob->shop->message_buy = str_dup(source->shop->message_buy);
 		if (source->shop->message_sell)
 			newmob->shop->message_sell = str_dup(source->shop->message_sell);
-		
-		
+
+
 		if (source->shop->delivery)
 		{
 			for (i = 0; i <= MAX_DELIVERIES; i++)
@@ -13112,7 +13104,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 				newmob->shop->delivery[i] = source->shop->delivery[i];
 			}
 		}
-		
+
 		if (source->shop->trades_in)
 		{
 			for (i = 0; i <= MAX_TRADES_IN; i++)
@@ -13120,7 +13112,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 				newmob->shop->trades_in[i] = source->shop->trades_in[i];
 			}
 		}
-		
+
 		newmob->shop->econ_flags1 = source->shop->econ_flags1;
 		newmob->shop->econ_flags2 = source->shop->econ_flags2;
 		newmob->shop->econ_flags3 = source->shop->econ_flags3;
@@ -13148,7 +13140,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			newmob->shop->materials = source->shop->materials;
 		}
-		
+
 		if (newmob->shop->negotiations)
 		{
 			newmob->shop->negotiations->obj_vnum = source->shop->negotiations->obj_vnum;
@@ -13158,20 +13150,20 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 			newmob->shop->negotiations->true_if_buying = source->shop->negotiations->true_if_buying;
 			newmob->shop->negotiations->next = NULL;
 		}
-		
+
 		newmob->shop->opening_hour = source->shop->opening_hour;
 		newmob->shop->closing_hour = source->shop->closing_hour;
 		newmob->shop->exit = source->shop->exit;
 	}
-	
+
 	newmob->hunger = -1;
 	newmob->thirst = -1;
-	
+
 	add_mob_to_hash (newmob);
-	
+
 	result << "Copied mobile #C" << sm->nVirtual << "#0 ('#2" << source->short_descr << "#0') to #C" << m->nVirtual << "#0." << std::endl;
 	send_to_char (result.str().c_str(), ch);
-	
+
 }
 
 void
@@ -13184,49 +13176,49 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	int oldVNum;
 	int newVNum;
 	std::stringstream result;
-	
+
 	if (!ch->pc)
 	{
 		send_to_char ("This is a PC only command.\n", ch);
 		return;
 	}
-	
+
 	argument = one_argument (argument, buf);
 	argument = one_argument (argument, buf2);
-	
+
 	if (!*buf || !*buf2 || !atoi (buf) || !atoi (buf2))
 	{
 		send_to_char ("oclone <original vnum> <new vnum>   - copy an object prototype.\n", ch);
 		return;
 	}
-	
+
 	oldVNum = atoi (buf);
 	newVNum = atoi (buf2);
-	
+
 	if (!vtoo (oldVNum))
 	{
 		send_to_char ("No such prototype exists.\n", ch);
 		return;
 	}
-	
+
 	if (vtoo (newVNum))
 	{
 		send_to_char ("A prototype already exists with your target vnum.\n", ch);
 		return;
 	}
-	
+
 	if (newVNum < 0 || newVNum >= 110000)
 	{
 		send_to_char ("VNums must be between 1 and 110000.\n", ch);
 		return;
 	}
-	
+
 	clear_object (newObj);
 	source = vtoo (oldVNum);
-	
+
 	newObj->nVirtual = newVNum;
 	newObj->zone = newVNum / OBJECT_ZONE_SIZE;
-	
+
 	newObj->clock = source->clock;
 	newObj->morphTime = source->morphTime;
 	newObj->morphto = source->morphto;
@@ -13248,7 +13240,7 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	newObj->coldload_id = source->coldload_id;
 	newObj->sold_at = source->sold_at;
 	newObj->sold_by = source->sold_by;
-	
+
 	newObj->obj_flags = source->obj_flags;
 	newObj->o.od.value[0] = source->o.od.value[0];
 	newObj->o.od.value[1] = source->o.od.value[1];
@@ -13257,7 +13249,7 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	newObj->o.od.value[4] = source->o.od.value[4];
 	newObj->o.od.value[5] = source->o.od.value[5];
 	newObj->o.od.value[6] = source->o.od.value[6];
-	
+
 	newObj->instances = 0;
 	newObj->next = NULL;
 	newObj->lnext = NULL;
@@ -13265,7 +13257,7 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	newObj->contains = NULL;
 	newObj->carried_by = NULL;
 	newObj->equiped_by = NULL;
-	
+
 	newObj->name = str_dup (source->name);
 	newObj->description = str_dup (source->description);
 	newObj->short_description = str_dup (source->short_description);
@@ -13276,19 +13268,19 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	newObj->var_color = str_dup (source->var_color);
 	newObj->book_title = str_dup (source->book_title);
 	newObj->indoor_desc = str_dup (source->indoor_desc);
-	
+
 	if (source->ex_description) 
 	{
 		newObj->ex_description->keyword = str_dup (source->ex_description->keyword);
 		newObj->ex_description->description = str_dup (source->ex_description->description);
 	}
-	
+
 	if (source->wdesc) 
 	{
 		newObj->wdesc->language = source->wdesc->language;
 		newObj->wdesc->description = str_dup (source->wdesc->description);
 	}
-	
+
 	if (source->wounds) 
 	{
 		newObj->wounds->damage = source->wounds->damage;
@@ -13305,7 +13297,7 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 		newObj->wounds->name = str_dup (source->wounds->name);
 		newObj->wounds->severity = str_dup (source->wounds->severity);
 	}
-	
+
 	if (source->writing) 
 	{
 		newObj->writing->language = source->writing->language;
@@ -13317,22 +13309,22 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 		newObj->writing->date = str_dup (source->writing->date);
 		newObj->writing->ink = str_dup (source->writing->ink);
 	}
-	
+
 	if (source->lodged) 
 	{
 		newObj->lodged->vnum = source->lodged->vnum;
 		newObj->lodged->location = str_dup (source->lodged->location);
 	} 
-	
+
 	if (source->clan_data) 
 	{
 		newObj->clan_data->name = str_dup (source->clan_data->name);
 		newObj->clan_data->rank = str_dup (source->clan_data->rank);
 	} 
-	
+
 	add_obj_to_hash (newObj);
 	ch->pc->edit_obj = newVNum;
-	
+
 	result << "Copied object #C" << source->nVirtual << "#0 ('#2" << source->short_description << "#0') to #C" << newObj->nVirtual << "#0." << std::endl;
 	send_to_char (result.str().c_str(), ch);
 

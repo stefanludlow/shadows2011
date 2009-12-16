@@ -12,13 +12,13 @@ Stringstack::Stringstack(std::string input) {
 	argument = input;
 	removeSpaces = true;
 	finished = false;
-	
+
 	Stringstack::trim(argument);
 }
 
 Stringstack::Stringstack(const char *input) {
 	std::string temp = input;
-	
+
 	argument = temp;
 	removeSpaces = true;
 	finished = false;
@@ -28,7 +28,7 @@ Stringstack::Stringstack(const char *input) {
 
 Stringstack::Stringstack(std::istream &input) {
 	std::string temp;
-	
+
 	getline(input, temp);
 	argument = temp;
 	removeSpaces = true;
@@ -42,7 +42,7 @@ Stringstack::Stringstack(std::string input, bool removeSpaces) {
 	argument = input;
 	this->removeSpaces = removeSpaces;
 	finished = false;
-	
+
 	if (removeSpaces) {
 		Stringstack::trim(argument);
 	}
@@ -60,7 +60,7 @@ Stringstack::Stringstack(const char *input, bool removeSpaces) {
 
 Stringstack::Stringstack(std::istream &input, bool removeSpaces) {
 	std::string temp;
-	
+
 	getline(input, temp);
 	argument = temp;
 	this->removeSpaces = removeSpaces;
@@ -216,7 +216,7 @@ std::vector<std::string> Stringstack::batchFind(const std::vector<std::string> &
 
 std::vector<std::pair<std::string, int> > Stringstack::batchFindAndCount(const std::vector<std::string> &strings) {
 	std::vector<std::pair<std::string, int> > output;
-	
+
 	if (strings.size() > 0) {
 		size_t stringsSize = strings.size();
 		int tempCount = 0;

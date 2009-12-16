@@ -516,7 +516,7 @@ personalize_emote (CHAR_DATA * src, char *emote)
 			continue;
 		if (get_affect (tch, MAGIC_SENT))
 			continue;
-	// Hibou's potential emote fix.
+		// Hibou's potential emote fix.
 		if (IS_NPC(src)) {
 			act (copy, false, tch, 0, 0, TO_ROOM | TO_CHAR | _ACT_FORMAT);
 			continue; }
@@ -1058,7 +1058,7 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		sprintf (buf, "%s", argument);
 		i = 1;
-		
+
 		while (isspace (buf[i])) {
 			i++;
 		}
@@ -2558,7 +2558,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			current_time = time (0);
 			ctime_r (&current_time, date);
 			if (strlen (date) > 1)
-				date[strlen (date) - 1] = '\0';
+			date[strlen (date) - 1] = '\0';
 
 			int row_count = 0;
 			CHAR_DATA* sqlch = 0;
@@ -2568,44 +2568,44 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			std::string player_db = engine.get_config ("player_db");
 
 			mysql_safe_query ("SELECT name FROM %s.pfiles WHERE level>0",
-				player_db.c_str ());
+			player_db.c_str ());
 
 			if ((result = mysql_store_result (database)) != NULL)
 			{
-				row_count = mysql_num_rows(result);
-				for (int i=0; i<row_count; i++)
-				{
-					row = mysql_fetch_row (result);
-					sqlch = load_pc(row[0]);
-					/* do not send to this admin if they are not assigned to this sphere
-//					fprintf(stderr,"Checking %s for flag %d in their %d\n",sqlch->tname,(1<<sphereIndex),sqlch->petition_flags);
-					if (sqlch && IS_SET(sqlch->petition_flags,(1<<sphereIndex)))
-					{
-//						fprintf(stderr,"Sending HM to %s\n",sqlch->tname);
-						/* send the HM 
-						mysql_safe_query
-							("INSERT INTO hobbitmail (account, flags, from_line, from_account, sent_date, subject, message, timestamp, to_line)"
-							" VALUES ('%s', %d, '%s', '%s', '%s', '%s', '%s', UNIX_TIMESTAMP(), '%s' )",
-							sqlch->tname, 0 /* no flags , ch->tname,
-							ch->pc->account_name, date, "Logged petition", buf,
-							sqlch->tname);
-						unload_pc(sqlch);
-					}
-				} /* iterate rows of admins 
+			row_count = mysql_num_rows(result);
+			for (int i=0; i<row_count; i++)
+			{
+			row = mysql_fetch_row (result);
+			sqlch = load_pc(row[0]);
+			/* do not send to this admin if they are not assigned to this sphere
+			//					fprintf(stderr,"Checking %s for flag %d in their %d\n",sqlch->tname,(1<<sphereIndex),sqlch->petition_flags);
+			if (sqlch && IS_SET(sqlch->petition_flags,(1<<sphereIndex)))
+			{
+			//						fprintf(stderr,"Sending HM to %s\n",sqlch->tname);
+			/* send the HM 
+			mysql_safe_query
+			("INSERT INTO hobbitmail (account, flags, from_line, from_account, sent_date, subject, message, timestamp, to_line)"
+			" VALUES ('%s', %d, '%s', '%s', '%s', '%s', '%s', UNIX_TIMESTAMP(), '%s' )",
+			sqlch->tname, 0 /* no flags , ch->tname,
+			ch->pc->account_name, date, "Logged petition", buf,
+			sqlch->tname);
+			unload_pc(sqlch);
+			}
+			} /* iterate rows of admins 
 
-				mysql_free_result(result); /* clear the result 
+			mysql_free_result(result); /* clear the result 
 			} /* successful query for admins 
 			else
 			{
-				/*no admins found 
-				throw std::runtime_error("No admins found in act.comm.cpp, do_petition!");
+			/*no admins found 
+			throw std::runtime_error("No admins found in act.comm.cpp, do_petition!");
 			}*/
-	
-		
+
+
 		} /* end of 'it wasn't sent' block */
 
-	/* clean up and sent echo back to user */
-	mem_free (p); // char*
+		/* clean up and sent echo back to user */
+		mem_free (p); // char*
 
 		sprintf (buf, "You petitioned: %s\n", CAP (argument));
 		reformat_string (buf, &p);
@@ -2617,7 +2617,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			if (emergencyPetition)
 			{
 				send_to_char("#1No one was present to receive your emergency petition.\n"
-				"Please petition your sphere to have your request logged for review.\n#0",ch);
+					"Please petition your sphere to have your request logged for review.\n#0",ch);
 			}
 			else
 			{
@@ -2625,9 +2625,9 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			}
 
 		}
-	
+
 		return;
-		
+
 	}
 	/* not a sphere...first check if it's an admin, otherwise splat them the sphere list */
 
@@ -2678,11 +2678,11 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 	std::stringstream petitionStream;
 
 	petitionStream << "#6[" << (ch->getNaughtyFlag() ? "#1!" : "#6_")
-	<< (ch->getRPFlag() ? "#2R" : "#6_") << (ch->getPlotFlag() ? "#3P" : "#6_")
-	<< "#6]";
+		<< (ch->getRPFlag() ? "#2R" : "#6_") << (ch->getPlotFlag() ? "#3P" : "#6_")
+		<< "#6]";
 
 	sprintf (buf, "%s#5[Private Petition: %s]#0 %s\n", petitionStream.str().c_str(),
-	IS_NPC (ch) ? ch->short_descr : GET_NAME (ch), CAP (argument));
+		IS_NPC (ch) ? ch->short_descr : GET_NAME (ch), CAP (argument));
 
 	reformat_string (buf, &p);
 	send_to_char (p, admin);

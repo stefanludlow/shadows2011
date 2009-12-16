@@ -271,7 +271,7 @@ typedef signed char shortint;
 #define WEATHER_HOT		5
 #define WEATHER_DESERT		6
 
-	/* Weather-room descrition constants - see weather_room in constants.c */
+/* Weather-room descrition constants - see weather_room in constants.c */
 
 #define		WR_DESCRIPTIONS		12	/* Doesn't include WR_NORMAL */
 
@@ -1343,12 +1343,12 @@ typedef signed char shortint;
 
 struct body_info
 {
-  char part[AVG_STRING_LENGTH];
-  int damage_mult;
-  int damage_div;
-  int percent;
-  int wear_loc1;
-  int wear_loc2;
+	char part[AVG_STRING_LENGTH];
+	int damage_mult;
+	int damage_div;
+	int percent;
+	int wear_loc1;
+	int wear_loc2;
 };
 
 #define RESULT_CS       1
@@ -1397,397 +1397,397 @@ struct body_info
 
 struct forage_data
 {
-  long virt;
-  int sector;
-  struct forage_data *next;
+	long virt;
+	int sector;
+	struct forage_data *next;
 };
 
 struct extra_descr_data
 {
-  char *keyword;
-  char *description;
-  struct extra_descr_data *next;
+	char *keyword;
+	char *description;
+	struct extra_descr_data *next;
 };
 
 struct time_data
 {
-  time_t birth;			/* This represents the characters age                */
-  time_t logon;			/* Time of the last logon (used to calculate played) */
-  long played;			/* This is the total accumulated time played in secs */
+	time_t birth;			/* This represents the characters age                */
+	time_t logon;			/* Time of the last logon (used to calculate played) */
+	long played;			/* This is the total accumulated time played in secs */
 };
 
 struct writing_data
 {
-  char *message;
-  char *author;
-  char *date;
-  char *ink;
-  int language;
-  int script;
-  bool torn;
-  int skill;
-  WRITING_DATA *next_page;
+	char *message;
+	char *author;
+	char *date;
+	char *ink;
+	int language;
+	int script;
+	bool torn;
+	int skill;
+	WRITING_DATA *next_page;
 };
 
 struct written_descr_data	/* for descriptions written in languages */
 {
-  byte language;
-  char *description;
+	byte language;
+	char *description;
 };
 
 struct obj_flag_data
 {
-  byte type_flag;
-  bitflag wear_flags;
-  int extra_flags;
-  int weight;
-  int set_cost; // set by an npc-shopkeeper or imm
-  long bitvector;
+	byte type_flag;
+	bitflag wear_flags;
+	int extra_flags;
+	int weight;
+	int set_cost; // set by an npc-shopkeeper or imm
+	long bitvector;
 };
 
 struct armor_data
 {
-  int armor_value;
-  int armor_type;
-  int v2;
-  int v3;
-  int v4;
+	int armor_value;
+	int armor_type;
+	int v2;
+	int v3;
+	int v4;
 
 };
 
 struct weapon_data
 {
-  int handedness;
-  int dice;
-  int sides;
-  int use_skill;
-  int hit_type;
-  int delay;
-  int basedamage;
-  int attackclass;
-  int defenseclass;
-  int range;
+	int handedness;
+	int dice;
+	int sides;
+	int use_skill;
+	int hit_type;
+	int delay;
+	int basedamage;
+	int attackclass;
+	int defenseclass;
+	int range;
 };
 
 struct light_data
 {
-  int capacity;
-  int hours;
-  int liquid;
-  int on;
-  int v4;
-  int v5;
+	int capacity;
+	int hours;
+	int liquid;
+	int on;
+	int v4;
+	int v5;
 };
 
 struct drink_con_data
 {
-  int capacity;
-  int volume;
-  int liquid;
-  int spell_1;
-  int spell_2;
-  int spell_3;
+	int capacity;
+	int volume;
+	int liquid;
+	int spell_1;
+	int spell_2;
+	int spell_3;
 };
 
 struct fountain_data
 {
-  int capacity;
-  int volume;
-  int liquid;
-  int spell_1;
-  int spell_2;
-  int spell_3;
+	int capacity;
+	int volume;
+	int liquid;
+	int spell_1;
+	int spell_2;
+	int spell_3;
 };
 
 struct container_data
 {
-  int capacity;
-  int flags;
-  int key;
-  int pick_penalty;
-  int v4;  int table_max_sitting;
+	int capacity;
+	int flags;
+	int key;
+	int pick_penalty;
+	int v4;  int table_max_sitting;
 };
 
 struct clan_container_data
 {
-  int capacity;
-  int flags;
-  int key;
-  int pick_penalty;
-  int v4;
-  int v5;
+	int capacity;
+	int flags;
+	int key;
+	int pick_penalty;
+	int v4;
+	int v5;
 };
 struct cloak_data
 {
-  int v0;
-  int v1;
-  int v2;
-  int v3;
-  int v4;
+	int v0;
+	int v1;
+	int v2;
+	int v3;
+	int v4;
 };
 
 struct ticket_data
 {
-  int ticket_num;
-  int keeper_vnum;
-  int stable_date;
-  int v3;
-  int v4;
-  int v5;
+	int ticket_num;
+	int keeper_vnum;
+	int stable_date;
+	int v3;
+	int v4;
+	int v5;
 };
 
 struct perfume_data
 {
-  int type;
-  int duration;
-  int aroma_strength;
-  int doses;
-  int v5;
-  int v6;
+	int type;
+	int duration;
+	int aroma_strength;
+	int doses;
+	int v5;
+	int v6;
 };
 
 struct food_data
 {
-  int food_value;
-  int spell1;
-  int spell2;
-  int spell3;
-  int spell4;
-  int bites;
+	int food_value;
+	int spell1;
+	int spell2;
+	int spell3;
+	int spell4;
+	int bites;
 };
 
 struct poison_obj_data
 {
-  int poison1;
-  int poison2;
-  int poison3;
-  int poison4;
-  int poison5;
-  int doses;
+	int poison1;
+	int poison2;
+	int poison3;
+	int poison4;
+	int poison5;
+	int doses;
 };
 
 struct fluid_data
 {
-  int alcohol;
-  int water;
-  int food;
-  int v3;
-  int v4;
-  int v5;
+	int alcohol;
+	int water;
+	int food;
+	int v3;
+	int v4;
+	int v5;
 };
 
 struct lodged_object_info
 {
-  char *location;
-  int vnum;
-  LODGED_OBJECT_INFO *next;
+	char *location;
+	int vnum;
+	LODGED_OBJECT_INFO *next;
 };
 
 struct lodged_missile_info
 {
-  int vnum;
-  LODGED_MISSILE_INFO *next;
+	int vnum;
+	LODGED_MISSILE_INFO *next;
 };
 
 struct wound_data
 {
-  char *location;
-  char *type;
-  char *name;
-  char *severity;
-  int damage;
-  int bleeding;
-  int poison;
-  int infection;
-  int healerskill;
-  int bindskill;
-  int lasthealed;
-  int lastbled;
-  int lastbound;
-  WOUND_DATA *next;
+	char *location;
+	char *type;
+	char *name;
+	char *severity;
+	int damage;
+	int bleeding;
+	int poison;
+	int infection;
+	int healerskill;
+	int bindskill;
+	int lasthealed;
+	int lastbled;
+	int lastbound;
+	WOUND_DATA *next;
 };
 
 struct repair_data
 {
-  unsigned short int nCraftMinutes;
-  unsigned short int nUses;
-  unsigned char nMendBonus;
-  unsigned char nMinSkillNeeded;
-  unsigned char nRequiresClan;
-  unsigned char bAnyoneMayUse;
-  unsigned int flgDamageTypes;
-  unsigned int flgMaterialSkills;
-  unsigned char arrItemType[4];
-  unsigned int nUnused;
+	unsigned short int nCraftMinutes;
+	unsigned short int nUses;
+	unsigned char nMendBonus;
+	unsigned char nMinSkillNeeded;
+	unsigned char nRequiresClan;
+	unsigned char bAnyoneMayUse;
+	unsigned int flgDamageTypes;
+	unsigned int flgMaterialSkills;
+	unsigned char arrItemType[4];
+	unsigned int nUnused;
 };
 
 struct default_obj_data
 {
-  int value[6];
+	int value[6];
 };
 
 union obj_info
 {
-  struct weapon_data weapon;
-  struct drink_con_data drinkcon;
-  struct container_data container;
-  struct default_obj_data od;
-  struct light_data light;
-  struct armor_data armor;
-  struct cloak_data cloak;
-  struct ticket_data ticket;
-  struct perfume_data perfume;
-  struct poison_obj_data poison;
-  struct food_data food;
-  struct fluid_data fluid;
-  struct fountain_data fountain;
-  struct repair_data repair;
-  struct clan_container_data locker;
+	struct weapon_data weapon;
+	struct drink_con_data drinkcon;
+	struct container_data container;
+	struct default_obj_data od;
+	struct light_data light;
+	struct armor_data armor;
+	struct cloak_data cloak;
+	struct ticket_data ticket;
+	struct perfume_data perfume;
+	struct poison_obj_data poison;
+	struct food_data food;
+	struct fluid_data fluid;
+	struct fountain_data fountain;
+	struct repair_data repair;
+	struct clan_container_data locker;
 };
 
 struct obj_clan_data
 {
-  char *name;
-  char *rank;
-  OBJ_CLAN_DATA *next;
+	char *name;
+	char *rank;
+	OBJ_CLAN_DATA *next;
 };
 /* ======================== Structure for object ========================= */
 struct obj_data
 {
-  int deleted;
-  int nVirtual;
-  int zone;
-  int in_room;
-  int instances;		/* Proto-only field; keeps track of loaded instances */
-  int order_time;		/* Proto-only field to track time required to order item */
-  struct obj_flag_data obj_flags;
-  union obj_info o;
-  AFFECTED_TYPE *xaffected;
-  char *name;
-  char *description;
-  char *short_description;
-  char *full_description;
-  char *omote_str;
-  EXTRA_DESCR_DATA *ex_description;
-  WRITTEN_DESCR_DATA *wdesc;
-  CHAR_DATA *carried_by;
-  CHAR_DATA *equiped_by;
-  OBJ_DATA *in_obj;
-  OBJ_DATA *contains;
-  OBJ_DATA *next_content;
-  OBJ_DATA *next;
-  OBJ_DATA *hnext;
-  OBJ_DATA *lnext;
-  int clock;
-  int morphTime;
-  int morphto;
-  int location;
-  int contained_wt;
-  int activation;		/* Affect applied when picked up */
-  int quality;
-  int econ_flags;		/* Flag means used enhanced prices */
-  int size;
-  int count;			/* How many this obj represents */
-  int obj_timer;
-  float farthings;		/* Partial value in farthings    */
-  float silver;			/* Partial value in silver coins */
-  WOUND_DATA *wounds;		/* For corpses */
-  int item_wear;		/* Percentile; 100%, brand new */
-  WRITING_DATA *writing;
-  char *ink_color;
-  unsigned int open;		// 0 closed, 1+ open/page number
-  OBJ_DATA *loaded;
-  LODGED_OBJECT_INFO *lodged;
-  char *desc_keys;
-  char *var_color;
-  char *book_title;
-  int title_skill;
-  int title_language;
-  int title_script;
-  int material;
-  int tmp_flags;
-  bool writing_loaded;
-  int coldload_id;
-  OBJECT_DAMAGE *damage;
-  char *indoor_desc;
-  int sold_at;
-  int sold_by;
-  OBJ_CLAN_DATA *clan_data;
-  int super_vnum;           // Vnum of parent class for object inheritance, e.g. a red brick fireplace inherits from 'fireplace' object.
+	int deleted;
+	int nVirtual;
+	int zone;
+	int in_room;
+	int instances;		/* Proto-only field; keeps track of loaded instances */
+	int order_time;		/* Proto-only field to track time required to order item */
+	struct obj_flag_data obj_flags;
+	union obj_info o;
+	AFFECTED_TYPE *xaffected;
+	char *name;
+	char *description;
+	char *short_description;
+	char *full_description;
+	char *omote_str;
+	EXTRA_DESCR_DATA *ex_description;
+	WRITTEN_DESCR_DATA *wdesc;
+	CHAR_DATA *carried_by;
+	CHAR_DATA *equiped_by;
+	OBJ_DATA *in_obj;
+	OBJ_DATA *contains;
+	OBJ_DATA *next_content;
+	OBJ_DATA *next;
+	OBJ_DATA *hnext;
+	OBJ_DATA *lnext;
+	int clock;
+	int morphTime;
+	int morphto;
+	int location;
+	int contained_wt;
+	int activation;		/* Affect applied when picked up */
+	int quality;
+	int econ_flags;		/* Flag means used enhanced prices */
+	int size;
+	int count;			/* How many this obj represents */
+	int obj_timer;
+	float farthings;		/* Partial value in farthings    */
+	float silver;			/* Partial value in silver coins */
+	WOUND_DATA *wounds;		/* For corpses */
+	int item_wear;		/* Percentile; 100%, brand new */
+	WRITING_DATA *writing;
+	char *ink_color;
+	unsigned int open;		// 0 closed, 1+ open/page number
+	OBJ_DATA *loaded;
+	LODGED_OBJECT_INFO *lodged;
+	char *desc_keys;
+	char *var_color;
+	char *book_title;
+	int title_skill;
+	int title_language;
+	int title_script;
+	int material;
+	int tmp_flags;
+	bool writing_loaded;
+	int coldload_id;
+	OBJECT_DAMAGE *damage;
+	char *indoor_desc;
+	int sold_at;
+	int sold_by;
+	OBJ_CLAN_DATA *clan_data;
+	int super_vnum;           // Vnum of parent class for object inheritance, e.g. a red brick fireplace inherits from 'fireplace' object.
 
-  void deep_copy (OBJ_DATA *copy_from);
-  void partial_deep_copy (OBJ_DATA *copy_from);
+	void deep_copy (OBJ_DATA *copy_from);
+	void partial_deep_copy (OBJ_DATA *copy_from);
 };
 
 
 struct room_direction_data
 {
-  char *general_description;
-  char *keyword;
-  int exit_info;
-  int key;
-  int pick_penalty;
-  int to_room;
+	char *general_description;
+	char *keyword;
+	int exit_info;
+	int key;
+	int pick_penalty;
+	int to_room;
 };
 
 #include "room.h"
 
 enum mob_cue {
-  cue_none,
-  cue_notes,		// Freeform notes
-  cue_flags,		// Flags (unimplemented)
-  cue_memory,		// Var = Value
-  cue_on_reboot,
+	cue_none,
+	cue_notes,		// Freeform notes
+	cue_flags,		// Flags (unimplemented)
+	cue_memory,		// Var = Value
+	cue_on_reboot,
 
-  // Scheduled Cues
-  cue_on_hour,		// (hr/sun/moon) reflex
-  cue_on_time,		// (min/%) reflex
+	// Scheduled Cues
+	cue_on_hour,		// (hr/sun/moon) reflex
+	cue_on_time,		// (min/%) reflex
 
-  // Personal Cues
-  cue_on_health,	// (hp%) reflex
-  cue_on_moves,		// (mp%) reflex
+	// Personal Cues
+	cue_on_health,	// (hp%) reflex
+	cue_on_moves,		// (mp%) reflex
 
-  // Socials
-  cue_on_command,	// (command key (with rvnum)) reflex
-  cue_on_receive,	// (vnum) reflex
-  cue_on_hear,		// (phrase) reflex
-  cue_on_nod,		// (nodder) reflex
+	// Socials
+	cue_on_command,	// (command key (with rvnum)) reflex
+	cue_on_receive,	// (vnum) reflex
+	cue_on_hear,		// (phrase) reflex
+	cue_on_nod,		// (nodder) reflex
 
-  // Crime Cues
-  cue_on_theft,
-  cue_on_witness,	// (pick,steal,assault)
+	// Crime Cues
+	cue_on_theft,
+	cue_on_witness,	// (pick,steal,assault)
 
-  // Combat Cues
-  cue_on_engage,
-  cue_on_flee,
-  cue_on_scan,		// (specific enemy) reflex
-  cue_on_hit		// reflex
-  
+	// Combat Cues
+	cue_on_engage,
+	cue_on_flee,
+	cue_on_scan,		// (specific enemy) reflex
+	cue_on_hit		// reflex
+
 };
 
 #include "character.h"
 
 struct prog_vars
 {
-  char *name;
-  int value;
-  struct prog_vars *next;
+	char *name;
+	int value;
+	struct prog_vars *next;
 };
 
 struct room_prog
 {
-  char *command;		/* List of commands to trigger this program */
-  char *keys;			/* List of valid arguments, NULL always executes */
-  char *prog;			/* The program itself */
-  struct prog_vars *vars;
-  struct room_prog *next;	/* next program for this room */
-  int type;			/* Only used for mprogs. 1 is personal, 0 is whole-room */
+	char *command;		/* List of commands to trigger this program */
+	char *keys;			/* List of valid arguments, NULL always executes */
+	char *prog;			/* The program itself */
+	struct prog_vars *vars;
+	struct room_prog *next;	/* next program for this room */
+	int type;			/* Only used for mprogs. 1 is personal, 0 is whole-room */
 };
 
 struct secret
 {
-  int diff;			/* difficulty (search skill abil) */
-  char *stext;
+	int diff;			/* difficulty (search skill abil) */
+	char *stext;
 };
 
 #define MAX_DELIVERIES			200
@@ -1795,64 +1795,64 @@ struct secret
 
 struct negotiation_data
 {
-  int ch_coldload_id;
-  int obj_vnum;
-  int time_when_forgotten;
-  int price_delta;
-  int transactions;
-  int true_if_buying;
-  struct negotiation_data *next;
+	int ch_coldload_id;
+	int obj_vnum;
+	int time_when_forgotten;
+	int price_delta;
+	int transactions;
+	int true_if_buying;
+	struct negotiation_data *next;
 };
 
 struct shop_data
 {
-  float markup;			/* Objects sold are multiplied by this  */
-  float discount;		/* Objects bought are muliplied by this */
-  int shop_vnum;		/* Rvnum of shop                                                */
-  int store_vnum;		/* Rvnum of inventory                                   */
-  char *no_such_item1;		/* Message if keeper hasn't got an item */
-  char *no_such_item2;		/* Message if player hasn't got an item */
-  char *missing_cash1;		/* Message if keeper hasn't got cash    */
-  char *missing_cash2;		/* Message if player hasn't got cash    */
-  char *do_not_buy;		/* If keeper dosn't buy such things.    */
-  char *message_buy;		/* Message when player buys item                */
-  char *message_sell;		/* Message when player sells item               */
-  int delivery[MAX_DELIVERIES];	/* Merchant replaces these      */
-  int trades_in[MAX_TRADES_IN];	/* item_type that can buy       */
-  int econ_flags1;		/* Bits which enhance price             */
-  int econ_flags2;
-  int econ_flags3;
-  int econ_flags4;
-  int econ_flags5;
-  int econ_flags6;
-  int econ_flags7;
-  float econ_markup1;		/* Sell markup for flagged items        */
-  float econ_markup2;
-  float econ_markup3;
-  float econ_markup4;
-  float econ_markup5;
-  float econ_markup6;
-  float econ_markup7;
-  float econ_discount1;		/* Buy markup for flagged items         */
-  float econ_discount2;
-  float econ_discount3;
-  float econ_discount4;
-  float econ_discount5;
-  float econ_discount6;
-  float econ_discount7;
-  int buy_flags;		/* Any econ flags set here are traded */
-  int nobuy_flags;		/* Any econ flags set here aren't traded */
-  int materials;		/* Item materials the shop trades in - MATERIALS in structs.h */
-  NEGOTIATION_DATA *negotiations;	/* Haggling information                         */
-  int opening_hour;
-  int closing_hour;
-  int exit;
+	float markup;			/* Objects sold are multiplied by this  */
+	float discount;		/* Objects bought are muliplied by this */
+	int shop_vnum;		/* Rvnum of shop                                                */
+	int store_vnum;		/* Rvnum of inventory                                   */
+	char *no_such_item1;		/* Message if keeper hasn't got an item */
+	char *no_such_item2;		/* Message if player hasn't got an item */
+	char *missing_cash1;		/* Message if keeper hasn't got cash    */
+	char *missing_cash2;		/* Message if player hasn't got cash    */
+	char *do_not_buy;		/* If keeper dosn't buy such things.    */
+	char *message_buy;		/* Message when player buys item                */
+	char *message_sell;		/* Message when player sells item               */
+	int delivery[MAX_DELIVERIES];	/* Merchant replaces these      */
+	int trades_in[MAX_TRADES_IN];	/* item_type that can buy       */
+	int econ_flags1;		/* Bits which enhance price             */
+	int econ_flags2;
+	int econ_flags3;
+	int econ_flags4;
+	int econ_flags5;
+	int econ_flags6;
+	int econ_flags7;
+	float econ_markup1;		/* Sell markup for flagged items        */
+	float econ_markup2;
+	float econ_markup3;
+	float econ_markup4;
+	float econ_markup5;
+	float econ_markup6;
+	float econ_markup7;
+	float econ_discount1;		/* Buy markup for flagged items         */
+	float econ_discount2;
+	float econ_discount3;
+	float econ_discount4;
+	float econ_discount5;
+	float econ_discount6;
+	float econ_discount7;
+	int buy_flags;		/* Any econ flags set here are traded */
+	int nobuy_flags;		/* Any econ flags set here aren't traded */
+	int materials;		/* Item materials the shop trades in - MATERIALS in structs.h */
+	NEGOTIATION_DATA *negotiations;	/* Haggling information                         */
+	int opening_hour;
+	int closing_hour;
+	int exit;
 };
 
 struct room_extra_data
 {
-  char *alas[6];
-  char *weather_desc[WR_DESCRIPTIONS];
+	char *alas[6];
+	char *weather_desc[WR_DESCRIPTIONS];
 };
 
 #define PC_TRACK	( 1 << 0 )
@@ -1861,329 +1861,341 @@ struct room_extra_data
 
 struct track_data
 {
-  shortint race;
-  shortint from_dir;
-  shortint to_dir;
-  shortint hours_passed;
-  shortint speed;
-  bitflag flags;
-  TRACK_DATA *next;
+	shortint race;
+	shortint from_dir;
+	shortint to_dir;
+	shortint hours_passed;
+	shortint speed;
+	bitflag flags;
+	TRACK_DATA *next;
 };
 
 struct reset_time_data
 {
-  int month;
-  int day;
-  int minute;
-  int hour;
-  int second;
-  int flags;
+	int month;
+	int day;
+	int minute;
+	int hour;
+	int second;
+	int flags;
 };
 
 struct time_info_data
 {
-  int hour;
-  int day;
-  int month;
-  int year;
-  int season;
-  int minute;
-  int holiday;
+	int hour;
+	int day;
+	int month;
+	int year;
+	int season;
+	int minute;
+	int holiday;
 };
 
 struct memory_data
 {
-  char *name;
-  struct memory_data *next;
+	char *name;
+	struct memory_data *next;
 };
 
 struct char_ability_data
 {
-  int str;
-  int intel;
-  int wil;
-  int dex;
-  int con;
-  int aur;
-  int agi;
+	int str;
+	int intel;
+	int wil;
+	int dex;
+	int con;
+	int aur;
+	int agi;
 };
 
 struct newbie_hint
 {
-  char *hint;
-  NEWBIE_HINT *next;
+	char *hint;
+	NEWBIE_HINT *next;
 };
 
 struct role_data
 {
-  char *summary;
-  char *body;
-  char *poster;
-  char *date;
-  int cost;
-  int timestamp;
-  int id;
-  ROLE_DATA *next;
+	char *summary;
+	char *body;
+	char *poster;
+	char *date;
+	int cost;
+	int timestamp;
+	int id;
+	ROLE_DATA *next;
 };
 
 struct known_spell_data
 {
-  char *name;
-  int rating;
-  struct known_spell_data *next;
+	char *name;
+	int rating;
+	struct known_spell_data *next;
 };
 
 struct affect_spell_type
 {
-  int duration;			/* For how long its effects will last           */
-  int modifier;			/* This is added to apropriate ability          */
-  int location;			/* Tells which ability to change(APPLY_XXX)     */
-  int bitvector;		/* Tells which bits to set (AFF_XXX)            */
-  long t;			/* Extra information                        */
-  int sn;			/* Acquired by spell number                                     */
-  int technique;
-  int form;
-  int magnitude;
-  int discipline;
-  int mana_cost;
+	int duration;			/* For how long its effects will last           */
+	int modifier;			/* This is added to apropriate ability          */
+	int location;			/* Tells which ability to change(APPLY_XXX)     */
+	int bitvector;		/* Tells which bits to set (AFF_XXX)            */
+	long t;			/* Extra information                        */
+	int sn;			/* Acquired by spell number                                     */
+	int technique;
+	int form;
+	int magnitude;
+	int discipline;
+	int mana_cost;
 };
 
 struct enchantment_data
 {
-  char *name;
-  int original_hours;
-  int current_hours;
-  int power_source;
-  int caster_skill;
-  ENCHANTMENT_DATA *next;
+	char *name;
+	int original_hours;
+	int current_hours;
+	int power_source;
+	int caster_skill;
+	ENCHANTMENT_DATA *next;
 };
 
 struct affect_job_type
 {
-  int days;
-  int pay_date;
-  int cash;
-  int count;
-  long object_vnum; //long to fit union
-  int employer;
+	int days;
+	int pay_date;
+	int cash;
+	int count;
+	int object_vnum;
+	int employer;
 };
 
 struct affect_table_type
 {
-  int uu1;
-  int uu2;
-  int uu3;
-  int uu4;
-  OBJ_DATA *obj; //happens to be long already
-  int uu6;
+	int uu1;
+	int uu2;
+	int uu3;
+	int uu4;
+	OBJ_DATA *obj;
+	int uu6;
 };
 
 struct affect_smell_type
 {
-  int duration;
-  int aroma_strength;
-  int uu3;
-  int uu4;
-  long uu5;  //long to fit union
-  int uu6;
+	int duration;
+	int aroma_strength;
+	int uu3;
+	int uu4;
+	int uu5;
+	int uu6;
 };
 
 struct affect_paralyze
 {
-  int duration;
-  int minutes_until_paralyzed;
-  int uu3;
-  int uu4;
-  long uu5; //long to fit union
-  int sn;
+	int duration;
+	int minutes_until_paralyzed;
+	int uu3;
+	int uu4;
+	int uu5;
+	int sn;
 };
 
 struct affect_shadow_type
 {
-  CHAR_DATA *shadow;		/* target begin shadowed              */
-  int edge;			/* -1, center.  0-5 edge by direction */
+	CHAR_DATA *shadow;		/* target begin shadowed              */
+	int edge;			/* -1, center.  0-5 edge by direction */
 };
 
 struct affect_hidden_type
 {
-  int duration;
-  int hidden_value;
-  int coldload_id;
-  int uu4;
-  long uu5; //long to fit union
-  int uu6;
+	int duration;
+	int hidden_value;
+	int coldload_id;
+	int uu4;
+	int uu5;
+	int uu6;
 };
 
 struct affect_toll_type
 {
-  int duration;			/* Generally forever. */
-  int dir;
-  int room_num;			/* for verification */
-  int charge;			/* Cost for others to pass toll crossing */
-  long uu5; //long to fit union
-  int uu6;
+	int duration;			/* Generally forever. */
+	int dir;
+	int room_num;			/* for verification */
+	int charge;			/* Cost for others to pass toll crossing */
+	int uu5;
+	int uu6;
 };
 
 struct affect_room_type
 {
-  int duration;
-  int uu2;
-  int uu3;
-  int uu4;
-  long uu5; //long to fit union
-  int uu6;
+	int duration;
+	int uu2;
+	int uu3;
+	int uu4;
+	int uu5;
+	int uu6;
 };
 
 struct affect_craft_type
 {
-  int timer;
-  int skill_check;
-  PHASE_DATA *phase;
-  SUBCRAFT_HEAD_DATA *subcraft;
-  CHAR_DATA *target_ch;
-  OBJ_DATA *target_obj;
+	int timer;
+	int skill_check;
+	PHASE_DATA *phase;
+	SUBCRAFT_HEAD_DATA *subcraft;
+	CHAR_DATA *target_ch;
+	OBJ_DATA *target_obj;
 };
 
 struct affect_listen_type
 {				/* For muting and later, directed listening */
-  int duration;			/* Always on if it exists */
-  int on;			/* nonzero is on */
+	int duration;			/* Always on if it exists */
+	int on;			/* nonzero is on */
 };
 
 struct affect_herbed_type
 {				/* For counting the number of herbs found in rooms */
-  int duration;
-  int timesHerbed;
+	int duration;
+	int timesHerbed;
 };
 
 /* Agent FX - let the suffering begin (soon)
 enum AGENT_FORM {
-	AGENT_NONE=0,
-	AGENT_FUME,
-	AGENT_POWDER,
-	AGENT_SOLID,
-	AGENT_SALVE,
-	AGENT_LIQUID,
-	AGENT_SPRAY
+AGENT_NONE=0,
+AGENT_FUME,
+AGENT_POWDER,
+AGENT_SOLID,
+AGENT_SALVE,
+AGENT_LIQUID,
+AGENT_SPRAY
 };
 enum AGENT_METHOD {
-	AGENT_NONE=0,
-	AGENT_INJECTED,
-	AGENT_INHALED,
-	AGENT_INGESTED,
-	AGENT_INWOUND,
-	AGENT_TOUCHED
+AGENT_NONE=0,
+AGENT_INJECTED,
+AGENT_INHALED,
+AGENT_INGESTED,
+AGENT_INWOUND,
+AGENT_TOUCHED
 };
 ****************************************/
 
 /*
-  SOMATIC RESPONSES by Sighentist
+SOMATIC RESPONSES by Sighentist
 
-  Basically the idea here, is that the magnitude of the effect is
-  enveloped over time. So after a delay, the effect begins to grow
-  in strength until it reaches a peak. After cresting the peak the
-  strength weakens to a fraction of the peak strength. It remains
-  fixed there until the effect begins to wear off completely.
+Basically the idea here, is that the magnitude of the effect is
+enveloped over time. So after a delay, the effect begins to grow
+in strength until it reaches a peak. After cresting the peak the
+strength weakens to a fraction of the peak strength. It remains
+fixed there until the effect begins to wear off completely.
 
-  Notes:
-  If latency == duration the affected is a carrier.
+Notes:
+If latency == duration the affected is a carrier.
 
 */
-
-/* may need editing for union - Grommit Dec09 */
 struct affect_soma_type
 {				/* SOMA EFFECTS TBA */
-  int duration;			/* rl hours */
-  unsigned short int latency;	/* rl hours of delay  */
+	int duration;			/* rl hours */
+	unsigned short int latency;	/* rl hours of delay  */
 
-  unsigned short int minute;	/* timer  */
-  unsigned short int max_power;	/* type-dependant value */
-  unsigned short int lvl_power;	/* fraction of max_power */
-  unsigned short int atm_power;	/* the current power */
+	unsigned short int minute;	/* timer  */
+	unsigned short int max_power;	/* type-dependant value */
+	unsigned short int lvl_power;	/* fraction of max_power */
+	unsigned short int atm_power;	/* the current power */
 
-  unsigned short int attack;	/* minutes to amp to max_power */
-  unsigned short int decay;	/* minutes to decay to lvl_power */
-  unsigned short int sustain;	/* minutes to lvl_power drops */
-  unsigned short int release;	/* minutes to end of effect */
+	unsigned short int attack;	/* minutes to amp to max_power */
+	unsigned short int decay;	/* minutes to decay to lvl_power */
+	unsigned short int sustain;	/* minutes to lvl_power drops */
+	unsigned short int release;	/* minutes to end of effect */
 };
 
 union affected_union
 {
-  struct affect_spell_type spell;
-  struct affect_job_type job;
-  struct affect_table_type table;
-  struct affect_shadow_type shadow;
-  struct affect_paralyze paralyze;
-  struct affect_smell_type smell;
-  struct affect_hidden_type hidden;
-  struct affect_room_type room;
-  struct affect_toll_type toll;
-  struct affect_craft_type *craft;
-  struct affect_listen_type listening;
-  struct affect_herbed_type herbed;
-  struct affect_soma_type soma;
+	struct affect_spell_type spell;
+	struct affect_job_type job;
+	struct affect_table_type table;
+	struct affect_shadow_type shadow;
+	struct affect_paralyze paralyze;
+	struct affect_smell_type smell;
+	struct affect_hidden_type hidden;
+	struct affect_room_type room;
+	struct affect_toll_type toll;
+	struct affect_craft_type *craft;
+	struct affect_listen_type listening;
+	struct affect_herbed_type herbed;
+	struct affect_soma_type soma;
 };
 
 struct affected_type
 {
-  int type;
-  union affected_union a;
-  AFFECTED_TYPE *next;
+	int type;
+	union affected_union a;
+	AFFECTED_TYPE *next;
 };
+
+#ifdef HAHA
+struct affected_type
+{
+	int type;			/* The type of spell that caused this           */
+	int duration;			/* For how long its effects will last           */
+	int modifier;			/* This is added to apropriate ability          */
+	int location;			/* Tells which ability to change(APPLY_XXX)     */
+	int bitvector;		/* Tells which bits to set (AFF_XXX)            */
+	int t;			/* Extra information                        */
+	int sn;			/* Acquired by spell number                                     */
+	AFFECTED_TYPE *next;
+};
+#endif
 
 struct second_affect
 {
-  int type;
-  int seconds;
-  CHAR_DATA *ch;
-  OBJ_DATA *obj;
-  char *info;
-  int info2;
-  SECOND_AFFECT *next;
-  
-   bool operator== (second_affect &rhs)
-   {
+	int type;
+	int seconds;
+	CHAR_DATA *ch;
+	OBJ_DATA *obj;
+	char *info;
+	int info2;
+	SECOND_AFFECT *next;
+
+	bool operator== (second_affect &rhs)
+	{
 		if (this->type != rhs.type || this->seconds != rhs.seconds || this->ch != rhs.ch || this->obj != rhs.obj || this->info2 != rhs.info2 || this->info != rhs.info)
 			return false;
 		return true;
-   }
+	}
 };
 
 struct var_data
 {
-  char *name;
-  int value;
-  int type;
-  struct var_data *next;
+	char *name;
+	int value;
+	int type;
+	struct var_data *next;
 };
 
 #define MPF_BROKEN		(1 << 0)
 
 struct mobprog_data
 {
-  char *trigger_name;
-  char *prog;
-  char *line;
-  int busy;
-  int flags;
-  int mob_virtual;
-  struct mobprog_data *next;
-  struct mobprog_data *next_full_prog;
+	char *trigger_name;
+	char *prog;
+	char *line;
+	int busy;
+	int flags;
+	int mob_virtual;
+	struct mobprog_data *next;
+	struct mobprog_data *next_full_prog;
 };
 
 struct dream_data
 {
-  char *dream;
-  DREAM_DATA *next;
+	char *dream;
+	DREAM_DATA *next;
 };
 
 struct site_info
 {
-  char *name;
-  char *banned_by;
-  int banned_on;
-  int banned_until;
-  SITE_INFO *next;
+	char *name;
+	char *banned_by;
+	int banned_on;
+	int banned_until;
+	SITE_INFO *next;
 };
 
 #define CHARGEN_INT_FIRST		( 1 << 0 )
@@ -2234,21 +2246,21 @@ struct site_info
 
 struct threat_data
 {
-  CHAR_DATA *source;
-  int level;
-  THREAT_DATA *next;
+	CHAR_DATA *source;
+	int level;
+	THREAT_DATA *next;
 };
 
 struct attacker_data
 {
-  CHAR_DATA *attacker;
-  ATTACKER_DATA *next;
+	CHAR_DATA *attacker;
+	ATTACKER_DATA *next;
 };
 
 struct sighted_data
 {
-  CHAR_DATA *target;
-  SIGHTED_DATA *next;
+	CHAR_DATA *target;
+	SIGHTED_DATA *next;
 };
 
 /* ======================================================================== */
@@ -2257,9 +2269,9 @@ struct sighted_data
 
 struct constant_data
 {
-  char constant_name[AVG_STRING_LENGTH];
-  char description[AVG_STRING_LENGTH];
-  void **index;
+	char constant_name[AVG_STRING_LENGTH];
+	char description[AVG_STRING_LENGTH];
+	void **index;
 };
 
 #define args( list )	list
@@ -2269,22 +2281,22 @@ typedef int SPELL_PURE args ((CHAR_DATA * ch, CHAR_DATA * victim));
 
 struct spell_data
 {
-  char *name;			/* Name of skill              */
-  SPELL_FUN *spell_fun;		/* Spell pointer (for spells) */
-  int target;			/* Legal targets              */
-  int piety_cost;		/* Minimum mana used          */
-  int delay;			/* Waiting time BEFORE use     */
-  char *msg_off;		/* Wear off message           */
+	char *name;			/* Name of skill              */
+	SPELL_FUN *spell_fun;		/* Spell pointer (for spells) */
+	int target;			/* Legal targets              */
+	int piety_cost;		/* Minimum mana used          */
+	int delay;			/* Waiting time BEFORE use     */
+	char *msg_off;		/* Wear off message           */
 };
 
 struct spell_table_data
 {
-  char *name;
-  SPELL_PURE *spell_fun;
-  int discipline;
-  int energy_source;
-  long cost;
-  int target;
+	char *name;
+	SPELL_PURE *spell_fun;
+	int discipline;
+	int energy_source;
+	long cost;
+	int target;
 };
 
 #define STR_ONE_LINE		2001
@@ -2300,30 +2312,30 @@ typedef struct race_data RACE_TABLE_ENTRY;
 
 struct race_data
 {
-  int id;
-  char *name;
-  bool pc_race;
-  int starting_locs;
-  int rpp_cost;
-  char *created_by;
-  int last_modified;
-  int race_size;
-  int body_proto;
-  int innate_abilities;
-  int str_mod;
-  int con_mod;
-  int dex_mod;
-  int agi_mod;
-  int int_mod;
-  int wil_mod;
-  int aur_mod;
-  int native_tongue;
-  int min_age;
-  int max_age;
-  int min_ht;
-  int max_ht;
-  int fem_ht_adj;
-  RACE_TABLE_ENTRY *next;
+	int id;
+	char *name;
+	bool pc_race;
+	int starting_locs;
+	int rpp_cost;
+	char *created_by;
+	int last_modified;
+	int race_size;
+	int body_proto;
+	int innate_abilities;
+	int str_mod;
+	int con_mod;
+	int dex_mod;
+	int agi_mod;
+	int int_mod;
+	int wil_mod;
+	int aur_mod;
+	int native_tongue;
+	int min_age;
+	int max_age;
+	int min_ht;
+	int max_ht;
+	int fem_ht_adj;
+	RACE_TABLE_ENTRY *next;
 };
 
 /* Body prototypes for wound location definitions */
@@ -2387,7 +2399,7 @@ struct race_data
 
 struct religion_data
 {
-  char *tree[30];
+	char *tree[30];
 };
 
 #define MAX_REGISTRY        50
@@ -2396,49 +2408,49 @@ typedef struct registry_data REGISTRY_DATA;
 
 struct registry_data
 {
-  int value;
-  char *string;
-  REGISTRY_DATA *next;
+	int value;
+	char *string;
+	REGISTRY_DATA *next;
 };
 
 struct fight_data
 {
-  char name[AVG_STRING_LENGTH];
-  float offense_modifier;
-  float defense_modifier;
-  int delay;
+	char name[AVG_STRING_LENGTH];
+	float offense_modifier;
+	float defense_modifier;
+	int delay;
 };
 
 struct language_data
 {
-  char name[AVG_STRING_LENGTH];
+	char name[AVG_STRING_LENGTH];
 };
 
 struct poison_data
 {
-  int poison_type;
-  int duration_die_1;
-  int duration_die_2;
-  int effect_die_1;
-  int effect_die_2;
-  POISON_DATA *next;
+	int poison_type;
+	int duration_die_1;
+	int duration_die_2;
+	int effect_die_1;
+	int effect_die_2;
+	POISON_DATA *next;
 };
 
 struct encumberance_info
 {
-  int str_mult_wt;		/* if wt <= str * str_mult, then element applies */
-  int defense_pct;
-  int delay;
-  int offense_pct;
-  int move;
-  float penalty;
-  char *encumbered_status;
+	int str_mult_wt;		/* if wt <= str * str_mult, then element applies */
+	int defense_pct;
+	int delay;
+	int offense_pct;
+	int move;
+	float penalty;
+	char *encumbered_status;
 };
 
 #define NUM_BUCKETS 1024
 #define ENCUMBERANCE_ENTRIES	6
 
-	/* The FLAG_ bits are saved with the player character */
+/* The FLAG_ bits are saved with the player character */
 
 #define FLAG_KEEPER			( 1 << 0 )
 #define FLAG_COMPACT		( 1 << 1 )	/* Player in compact mode */
@@ -2599,40 +2611,40 @@ struct encumberance_info
 
 struct command_data
 {
-  char *command;
-  void (*proc) (CHAR_DATA * ch, char *argument, int cmd);
-  int min_position;
-  int flags;
+	char *command;
+	void (*proc) (CHAR_DATA * ch, char *argument, int cmd);
+	int min_position;
+	int flags;
 };
 
 struct social_data
 {
-  char *social_command;
-  int hide;
-  int min_victim_position;	/* Position of victim */
+	char *social_command;
+	int hide;
+	int min_victim_position;	/* Position of victim */
 
-  /* No argument was supplied */
+	/* No argument was supplied */
 
-  char *char_no_arg;
-  char *others_no_arg;
+	char *char_no_arg;
+	char *others_no_arg;
 
-  /* An argument was there, and a victim was found */
+	/* An argument was there, and a victim was found */
 
-  char *char_found;		/* if NULL, read no further, ignore args */
-  char *others_found;
-  char *vict_found;
+	char *char_found;		/* if NULL, read no further, ignore args */
+	char *others_found;
+	char *vict_found;
 
-  /* An argument was there, but no victim was found */
+	/* An argument was there, but no victim was found */
 
-  char *not_found;
+	char *not_found;
 
-  /* The victim turned out to be the character */
+	/* The victim turned out to be the character */
 
-  char *char_auto;
-  char *others_auto;
+	char *char_auto;
+	char *others_auto;
 };
 
-	/* data files used by the game system */
+/* data files used by the game system */
 
 #define DFLT_DIR               	"lib"	/* default data directory     */
 #define NEWS_FILE       	"news"	/* for the 'news' command     */
@@ -2694,63 +2706,63 @@ struct social_data
 #define MAX_TRADE	5
 #define MAX_PROD	5
 
-		/* structure for the reset commands */
+/* structure for the reset commands */
 
 struct reset_affect
 {
-  char *craft_name;
-  int type;
-  int duration;
-  int modifier;
-  int location;
-  int bitvector;
-  int t;
-  int sn;
+	char *craft_name;
+	int type;
+	int duration;
+	int modifier;
+	int location;
+	int bitvector;
+	int t;
+	int sn;
 };
 
 struct reset_com
 {
-  char command;			/* current command                      */
-  bool if_flag;			/* if true: exe only if preceding exe'd */
-  int arg1;			/* (Can be ptr to reset_affect data)    */
-  int arg2;			/* Arguments to the command             */
-  int arg3;			/*                                      */
-  int arg4;			/*                                      */
-  int arg5;			/*                                      */
-  int enabled;			/* true if this reset should be used    */
+	char command;			/* current command                      */
+	bool if_flag;			/* if true: exe only if preceding exe'd */
+	int arg1;			/* (Can be ptr to reset_affect data)    */
+	int arg2;			/* Arguments to the command             */
+	int arg3;			/*                                      */
+	int arg4;			/*                                      */
+	int arg5;			/*                                      */
+	int enabled;			/* true if this reset should be used    */
 
-  /*
-   *  Commands:              *
-   *  'M': Read a mobile     *
-   *  'O': Read an object    *
-   *  'G': Give obj to mob   *
-   *  'P': Put obj in obj    *
-   *  'G': Obj to char       *
-   *  'E': Obj to char equip *
-   *  'D': Set state of door *
-   *  'C': Craft (an affect) *
-   *  'A': Affect            *
-   *  'R': Room #            *
-   *  'r': Room Affect       *
-   *  'm': Mob reset (timed, reply variety)
-   */
+	/*
+	*  Commands:              *
+	*  'M': Read a mobile     *
+	*  'O': Read an object    *
+	*  'G': Give obj to mob   *
+	*  'P': Put obj in obj    *
+	*  'G': Obj to char       *
+	*  'E': Obj to char equip *
+	*  'D': Set state of door *
+	*  'C': Craft (an affect) *
+	*  'A': Affect            *
+	*  'R': Room #            *
+	*  'r': Room Affect       *
+	*  'm': Mob reset (timed, reply variety)
+	*/
 };
 
-	/* zone definition structure. for the 'zone-table'   */
+/* zone definition structure. for the 'zone-table'   */
 
 #define MAX_MSGS_PER_BOARD		5000
 #define MAX_LANG_PER_BOARD		  10
 
 struct board_data
 {
-  char *name;
-  char *title;
-  int level;
-  int next_virtual;
-  int msg_nums[MAX_MSGS_PER_BOARD];
-  char *msg_titles[MAX_MSGS_PER_BOARD];
-  int language[MAX_LANG_PER_BOARD];
-  BOARD_DATA *next;
+	char *name;
+	char *title;
+	int level;
+	int next_virtual;
+	int msg_nums[MAX_MSGS_PER_BOARD];
+	char *msg_titles[MAX_MSGS_PER_BOARD];
+	int language[MAX_LANG_PER_BOARD];
+	BOARD_DATA *next;
 };
 
 #define MF_READ		( 1 << 0 )
@@ -2762,14 +2774,14 @@ struct board_data
 
 struct mudmail_data
 {
-  long flags;
-  char *from;
-  char *from_account;
-  char *date;
-  char *subject;
-  char *message;
-  MUDMAIL_DATA *next_message;
-  char *target;
+	long flags;
+	char *from;
+	char *from_account;
+	char *date;
+	char *subject;
+	char *message;
+	MUDMAIL_DATA *next_message;
+	char *target;
 };
 
 
@@ -2785,24 +2797,24 @@ struct mudmail_data
 
 struct fatigue_data
 {
-  int percent;
-  float penalty;
-  char name[AVG_STRING_LENGTH];
+	int percent;
+	float penalty;
+	char name[AVG_STRING_LENGTH];
 };
 
 struct use_table_data
 {
-  int delay;
+	int delay;
 };
 
-	/* NOTE:  If adding a new COMBAT_, update cs_name in fight.c */
+/* NOTE:  If adding a new COMBAT_, update cs_name in fight.c */
 
 #define SUC_CF				0
 #define SUC_MF				1
 #define SUC_MS				2
 #define SUC_CS				3
 
-	/* NOTE:  If adding a new RESULT_, update rs_name in fight.c */
+/* NOTE:  If adding a new RESULT_, update rs_name in fight.c */
 
 #define RESULT_NONE			0
 #define RESULT_ADV			1
@@ -2826,13 +2838,13 @@ struct use_table_data
 
 struct combat_msg_data
 {
-  int off_result;
-  int def_result;
-  int table;
-  char *def_msg;
-  char *off_msg;
-  char *other_msg;
-  COMBAT_MSG_DATA *next;
+	int off_result;
+	int def_result;
+	int table;
+	char *def_msg;
+	char *off_msg;
+	char *other_msg;
+	COMBAT_MSG_DATA *next;
 };
 
 
@@ -2847,42 +2859,42 @@ struct combat_msg_data
 
 struct map_free_backstab_dt
 {
-  int origin;
-  CHAR_DATA *attacker;
-  int hid;
-  int backstabed;
+	int origin;
+	CHAR_DATA *attacker;
+	int hid;
+	int backstabed;
 };
 
 struct combat_data
 {
-  int prog;
-  union
-  {
-    struct map_free_backstab_dt backstab;
-  } c;
+	int prog;
+	union
+	{
+		struct map_free_backstab_dt backstab;
+	} c;
 };
 
 struct move_data
 {
-  int dir;
-  int flags;
-  int desired_time;
-  MOVE_DATA *next;
-  char *travel_str;
+	int dir;
+	int flags;
+	int desired_time;
+	MOVE_DATA *next;
+	char *travel_str;
 };
 
 struct qe_data
 {				/* Quarter second events data structure */
-  CHAR_DATA *ch;
-  int dir;
-  int speed_type;
-  int flags;
-  ROOM_DATA *from_room;
-  int event_time;
-  int arrive_time;
-  int move_cost;
-  QE_DATA *next;
-  char *travel_str;
+	CHAR_DATA *ch;
+	int dir;
+	int speed_type;
+	int flags;
+	ROOM_DATA *from_room;
+	int event_time;
+	int arrive_time;
+	int move_cost;
+	QE_DATA *next;
+	char *travel_str;
 };
 
 #define MF_WALK			( 1 << 0 )
@@ -2906,7 +2918,7 @@ struct qe_data
 typedef int PP ();
 typedef int PP_ch (CHAR_DATA * ch, int success, int psn);
 typedef int PP_ch_victim (CHAR_DATA * ch, CHAR_DATA * victim, int success,
-			  int psn);
+						  int psn);
 typedef int PP_ch_obj (CHAR_DATA * ch, OBJ_DATA * obj, int success, int psn);
 
 #define FRAME_FEATHER		0
@@ -2928,30 +2940,30 @@ typedef int PP_ch_obj (CHAR_DATA * ch, OBJ_DATA * obj, int success, int psn);
 
 struct mob_race_data
 {
-  char race_name[AVG_STRING_LENGTH];
-  int male_ht_dice;
-  int male_ht_sides;
-  int male_ht_constant;
-  int male_fr_dice;
-  int male_fr_sides;
-  int male_fr_constant;
-  int female_ht_dice;
-  int female_ht_sides;
-  int female_ht_constant;
-  int female_fr_dice;
-  int female_fr_sides;
-  int female_fr_constant;
-  int can_subdue;
+	char race_name[AVG_STRING_LENGTH];
+	int male_ht_dice;
+	int male_ht_sides;
+	int male_ht_constant;
+	int male_fr_dice;
+	int male_fr_sides;
+	int male_fr_constant;
+	int female_ht_dice;
+	int female_ht_sides;
+	int female_ht_constant;
+	int female_fr_dice;
+	int female_fr_sides;
+	int female_fr_constant;
+	int can_subdue;
 };
 
 struct cbt
 {
-  char bt[100];
+	char bt[100];
 };
 
 struct ibt
 {
-  int i[25];
+	int i[25];
 };
 
 #define CRIME_KILL			1	/* 5 hours, see criminalize() */
@@ -2965,10 +2977,10 @@ struct ibt
 
 struct memory_t
 {
-  int dtype;
-  int entry;
-  int bytes;
-  int time_allocated;
+	int dtype;
+	int entry;
+	int bytes;
+	int time_allocated;
 };
 
 #define PHASE_CANNOT_LEAVE_ROOM ( 1 << 0 )
@@ -2976,7 +2988,7 @@ struct memory_t
 #define PHASE_REQUIRE_ON_SELF   ( 1 << 2 )
 #define PHASE_REQUIRE_GREATER	( 1 << 3 )
 
-		/* These flags apply to objects within a phase */
+/* These flags apply to objects within a phase */
 
 #define SUBCRAFT_IN_ROOM		( 1 << 0 )
 #define SUBCRAFT_GIVE			( 1 << 1 )	// Give to Crafter's hands on production
@@ -2990,7 +3002,7 @@ struct memory_t
 
 #define CRAFT_MOB_SETOWNER		( 1 << 0 )
 
-		/* Subcraft flags */
+/* Subcraft flags */
 
 #define SCF_TARGET_OBJ			( 1 << 0 )	/* Target object */
 #define SCF_TARGET_CHAR			( 1 << 1 )	/* Target character */
@@ -3005,78 +3017,78 @@ struct memory_t
 
 struct subcraft_head_data
 {
-  char *craft_name;
-  char *subcraft_name;
-  char *command;
-  char *failure;		/* Failure message for subcraft */
-  char *failobjs;		/* String of failure object numbers */
-  char *failmobs;		/* String of failure object numbers */
-  char *help;
-  char *clans;
-  PHASE_DATA *phases;
-  DEFAULT_ITEM_DATA *obj_items[MAX_ITEMS_PER_SUBCRAFT];
-  int subcraft_flags;
-  long crafts_start;
-  long crafts_end;
-  int sectors[25];
-  int seasons[7];
-  int opening[25];
-  int race[25];
-  int weather[9];
-  int failmob;			/* VNUM of mob it loads up on failure */
-  int delay;
-  int faildelay;
-  int key_index;
-  int key_first;			/* which one of the items lists is the key*/
-  int key_end;	/* which production item list will be indexed for the key*/
-  DEFAULT_ITEM_DATA *fails[MAX_ITEMS_PER_SUBCRAFT];
-  int followers; /* number of people following the caller if the craft */
-  SUBCRAFT_HEAD_DATA *next;
+	char *craft_name;
+	char *subcraft_name;
+	char *command;
+	char *failure;		/* Failure message for subcraft */
+	char *failobjs;		/* String of failure object numbers */
+	char *failmobs;		/* String of failure object numbers */
+	char *help;
+	char *clans;
+	PHASE_DATA *phases;
+	DEFAULT_ITEM_DATA *obj_items[MAX_ITEMS_PER_SUBCRAFT];
+	int subcraft_flags;
+	long crafts_start;
+	long crafts_end;
+	int sectors[25];
+	int seasons[7];
+	int opening[25];
+	int race[25];
+	int weather[9];
+	int failmob;			/* VNUM of mob it loads up on failure */
+	int delay;
+	int faildelay;
+	int key_index;
+	int key_first;			/* which one of the items lists is the key*/
+	int key_end;	/* which production item list will be indexed for the key*/
+	DEFAULT_ITEM_DATA *fails[MAX_ITEMS_PER_SUBCRAFT];
+	int followers; /* number of people following the caller if the craft */
+	SUBCRAFT_HEAD_DATA *next;
 };
 
 struct phase_data
 {
-  char *first;			/* First person message */
-  char *second;			/* Second person message */
-  char *third;			/* Third person message */
-  char *self;			/* If targets self, use this as first */
-  char *second_failure;		/* Failure message to 2nd person */
-  char *third_failure;		/* Failure message to 3rd persons */
-  char *failure;		/* Failure message for phase */
-  int flags;			/* PHase flags */
-  int phase_seconds;		/* Time in seconds of phase */
-  int skill;			/* Only used for skill checks */
-  int attr; 		/* Used for attribute check (like skill) */
-  int dice;			/* dice v skill */
-  int sides;			/* sides v skill (diceDsides v skill) */
-  int targets;			/* Spell target flags */
-  int duration;			/* Hours on spell */
-  int power;			/* Power of spell.  eg -3 to +3 str */
-  int hit_cost;			/* Hit cost of phase */
-  int move_cost;		/* Move cost of phase */
-  int spell_type;		/* Spell number */
-  int open_skill;		/* Skill to open (crafter or target) */
-  int req_skill;		/* Required skill */
-  int req_skill_value;		/* Value req_skill must be > or < */
-  int attribute;		/* Used for attribute check (like skill) */
-  DEFAULT_ITEM_DATA *tool;	/* Usable tools */
-  int load_mob;			/* Mob VNUM */
-  int nMobFlags;		/* Mob Flags (Stayput, Set Owner) */
-  char *group_mess;		/* message to groups followers */
-  char *fail_group_mess; /* Failure message for groups */
-  PHASE_DATA *next;
+	char *first;			/* First person message */
+	char *second;			/* Second person message */
+	char *third;			/* Third person message */
+	char *self;			/* If targets self, use this as first */
+	char *second_failure;		/* Failure message to 2nd person */
+	char *third_failure;		/* Failure message to 3rd persons */
+	char *failure;		/* Failure message for phase */
+	int flags;			/* PHase flags */
+	int phase_seconds;		/* Time in seconds of phase */
+	int skill;			/* Only used for skill checks */
+	int attr; 		/* Used for attribute check (like skill) */
+	int dice;			/* dice v skill */
+	int sides;			/* sides v skill (diceDsides v skill) */
+	int targets;			/* Spell target flags */
+	int duration;			/* Hours on spell */
+	int power;			/* Power of spell.  eg -3 to +3 str */
+	int hit_cost;			/* Hit cost of phase */
+	int move_cost;		/* Move cost of phase */
+	int spell_type;		/* Spell number */
+	int open_skill;		/* Skill to open (crafter or target) */
+	int req_skill;		/* Required skill */
+	int req_skill_value;		/* Value req_skill must be > or < */
+	int attribute;		/* Used for attribute check (like skill) */
+	DEFAULT_ITEM_DATA *tool;	/* Usable tools */
+	int load_mob;			/* Mob VNUM */
+	int nMobFlags;		/* Mob Flags (Stayput, Set Owner) */
+	char *group_mess;		/* message to groups followers */
+	char *fail_group_mess; /* Failure message for groups */
+	PHASE_DATA *next;
 };
 
 #define MAX_DEFAULT_ITEMS		20
 
 struct default_item_data
 {
-  int flags;			/* See SUBCRAFT_ flags */
-  int items[MAX_DEFAULT_ITEMS];	/* Up to 20 default items */
-  short item_counts;		/* instances of items */
-  PHASE_DATA *phase;		/* Phase mentioned */
-  int key_index;		/* index for key items */
-  char *color;
+	int flags;			/* See SUBCRAFT_ flags */
+	int items[MAX_DEFAULT_ITEMS];	/* Up to 20 default items */
+	short item_counts;		/* instances of items */
+	PHASE_DATA *phase;		/* Phase mentioned */
+	int key_index;		/* index for key items */
+	char *color;
 };
 
 
@@ -3084,10 +3096,10 @@ struct default_item_data
 
 struct alias_data
 {
-  char *command;
-  char *line;
-  ALIAS_DATA *next_line;
-  ALIAS_DATA *next_alias;
+	char *command;
+	char *line;
+	ALIAS_DATA *next_line;
+	ALIAS_DATA *next_alias;
 };
 
 #define RESET_TIMED		1
@@ -3095,19 +3107,19 @@ struct alias_data
 
 struct reset_data
 {
-  int type;
-  char *command;
-  int planned;			/* Gets set a minute before reset activates */
-  RESET_TIME_DATA when;
-  RESET_DATA *next;
+	int type;
+	char *command;
+	int planned;			/* Gets set a minute before reset activates */
+	RESET_TIME_DATA when;
+	RESET_DATA *next;
 };
 
 struct text_data
 {
-  char *filename;
-  char *name;
-  char *text;
-  TEXT_DATA *next;
+	char *filename;
+	char *name;
+	char *text;
+	TEXT_DATA *next;
 };
 
 #define EDIT_TYPE_DOCUMENT	0
@@ -3118,62 +3130,62 @@ struct text_data
 
 struct help_info
 {
-  char *keyword;
-  char *master_list;
-  int required_level;
-  char *info;
-  HELP_INFO *master_element;
-  HELP_INFO *next;
+	char *keyword;
+	char *master_list;
+	int required_level;
+	char *info;
+	HELP_INFO *master_element;
+	HELP_INFO *next;
 };
 
 struct help_data
 {
-  char *keyword;
-  char *keywords;
-  char *help_info;		/* Will be null if main_element used */
-  HELP_DATA *master_element;	/* Contains actual help_info */
-  HELP_DATA *next;
+	char *keyword;
+	char *keywords;
+	char *help_info;		/* Will be null if main_element used */
+	HELP_DATA *master_element;	/* Contains actual help_info */
+	HELP_DATA *next;
 };
 
 struct name_switch_data
 {
-  char *old_name;
-  char *new_name;
-  NAME_SWITCH_DATA *next;
+	char *old_name;
+	char *new_name;
+	NAME_SWITCH_DATA *next;
 };
 
 #define ECON_ZONES 13
 struct econ_data
 {
-  char flag_name[AVG_STRING_LENGTH];
-  struct
-  {
-    float markup;
-    float discount;
-  } obj_econ_info[ECON_ZONES];
+	char flag_name[AVG_STRING_LENGTH];
+	struct
+	{
+		float markup;
+		float discount;
+	} obj_econ_info[ECON_ZONES];
 };
 
 struct zone_data
 {
-  char *name;			/* name of this zone                  */
-  char *lead;			/* Name of the project lead             */
-  int lifespan;			/* how long between resets (minutes)  */
-  int age;			/* current age of this zone (minutes) */
-  int top;
-  int frozen;
-  unsigned long flags;
-  int reset_mode;		/* conditions for reset (see below)   */
-  struct reset_com *cmd;	/* command table for reset                  */
-  int jailer;
-  int jail_room_num;
-  ROOM_DATA *jail_room;
-  int earth_mod;
-  int wind_mod;
-  int fire_mod;
-  int water_mod;
-  int shadow_mod;
-  int player_in_zone;
-  int weather_type;
+	char *name;			/* name of this zone                  */
+	char *lead;			/* Name of the project lead             */
+	int lifespan;			/* how long between resets (minutes)  */
+	int age;			/* current age of this zone (minutes) */
+	int top;
+	int frozen;
+	unsigned long flags;
+	int reset_mode;		/* conditions for reset (see below)   */
+	struct reset_com *cmd;	/* command table for reset                  */
+	int jailer;
+	int jail_room_num;
+	ROOM_DATA *jail_room;
+	int earth_mod;
+	int wind_mod;
+	int fire_mod;
+	int water_mod;
+	int shadow_mod;
+	int player_in_zone;
+	int weather_type;
 };
 
 #endif //_rpie_structs_h

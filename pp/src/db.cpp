@@ -338,7 +338,7 @@ add_obj_to_hash (OBJ_DATA * add_obj)
 	}
 
 	last_obj = add_obj;
-	
+
 	if (globalObjectArray[add_obj->nVirtual] == NULL) {
 		globalObjectArray[add_obj->nVirtual] = add_obj;
 	}

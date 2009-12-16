@@ -301,40 +301,40 @@ do_follow (CHAR_DATA * ch, char *argument, int cmd)
 
 std::string tactical_status (CHAR_DATA * ch)
 {
-  CHAR_DATA *tch;
-  AFFECTED_TYPE *af;
-  std::ostringstream status;
-  int i = 0;
+	CHAR_DATA *tch;
+	AFFECTED_TYPE *af;
+	std::ostringstream status;
+	int i = 0;
 
 	if (get_affect (ch, MAGIC_HIDDEN))
 	{
 		status << " #1(hidden)#0";
-   }
+	}
 
 	if ((af = get_affect (ch, MAGIC_GUARD)))
 	{
-	  tch = (CHAR_DATA*) af->a.spell.t;
-	  status << " #6(guarding: " << tch->short_descr << ")#0";
+		tch = (CHAR_DATA*) af->a.spell.t;
+		status << " #6(guarding: " << tch->short_descr << ")#0";
 	}
 
 	if ((af = get_affect (ch, AFFECT_GUARD_DIR)))
 	{
-	  status << " #6(guarding: " << dirs[af->a.shadow.edge] << ")#0";
+		status << " #6(guarding: " << dirs[af->a.shadow.edge] << ")#0";
 	}
 
 	for (tch = ch->room->people; tch; tch = tch->next_in_room)
 	{
 		if ((af = get_affect (tch, MAGIC_GUARD)) && ((CHAR_DATA *) af->a.spell.t) == ch)
-		i++;
+			i++;
 	}
 
 	if (i > 0)
 	{
-      if (i == 1)
+		if (i == 1)
 		{
 			status << " #2(guarded)#0";
 		}
-      else if (i > 1)
+		else if (i > 1)
 		{
 			status << " #2(guarded x " << i << ")#0";
 		}
@@ -353,25 +353,25 @@ std::string tactical_status (CHAR_DATA * ch)
 		{
 			continue;
 		}
-      if (tch->fighting == ch)
+		if (tch->fighting == ch)
 		{
 			i++;
 		}
 	}
 
 	if (i > 0)
-   {
+	{
 		if (i == 1)
 		{
 			status << " #1(engaged)#0";
 		}
-      else if (i > 1)
+		else if (i > 1)
 		{
 			status << " #1(engaged x " << i << ")#0";
 		}
 	}
 
-  return status.str();
+	return status.str();
 }
 
 void
@@ -388,7 +388,7 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (is_abbrev (arg, "open"))
 		{
-	  		if (!IS_SET (ch->plr_flags, GROUP_CLOSED))
+			if (!IS_SET (ch->plr_flags, GROUP_CLOSED))
 			{
 				send_to_char ("Your group is already open!\n", ch);
 				return;
@@ -397,7 +397,7 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 			send_to_char ("You will now allow people to follow you.\n", ch);
 			return;
 		}
-		
+
 		else if (is_abbrev (arg, "close"))
 		{
 			if (IS_SET (ch->plr_flags, GROUP_CLOSED))
@@ -409,13 +409,13 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 			send_to_char ("You will no longer allow people to follow you.\n", ch);
 			return;
 		}
-		
+
 		else if (is_abbrev (arg, "retreat"))
 		{
 			char direction_arg[AVG_STRING_LENGTH] = "";
 			int direction = 0;
 			argument = one_argument (argument, direction_arg);
-		  
+
 			if (!*direction_arg || (direction = index_lookup (dirs, direction_arg)) == -1 )
 			{
 				send_to_char ("Order a retreat in which direction?\n", ch);
@@ -432,7 +432,7 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 						retreat (tch, direction, ch);
 					}
 				}
-				
+
 				if (ordered)
 				{
 					retreat (ch, direction, ch);
@@ -465,12 +465,12 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			continue;
 		}
-		
+
 		if (found != false)
 		{
 			buf << "," << std::endl;
 		}
-		
+
 		buf << "   #5" << char_short (tch) << "#0 [" << wound_total (tch, false) << "]" << tactical_status (tch);
 		found = true;
 	}
@@ -489,130 +489,130 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 void
 followers_follow (CHAR_DATA * ch, int dir, int leave_time, int arrive_time)
 {
-  CHAR_DATA *tch;
-  ROOM_DATA *room_exit;
+	CHAR_DATA *tch;
+	ROOM_DATA *room_exit;
 
-  for (tch = ch->room->people; tch; tch = tch->next_in_room)
-    {
-      if (tch == ch || GET_FLAG (tch, FLAG_LEAVING))
-	continue;
-
-      if (tch->following != ch)
+	for (tch = ch->room->people; tch; tch = tch->next_in_room)
 	{
-	  if (!IS_RIDEE (tch) || tch->mount->following != ch)
-	    continue;
+		if (tch == ch || GET_FLAG (tch, FLAG_LEAVING))
+			continue;
+
+		if (tch->following != ch)
+		{
+			if (!IS_RIDEE (tch) || tch->mount->following != ch)
+				continue;
+		}
+
+		if (IS_HITCHEE (tch))
+			continue;
+
+		/* Check if this mob tch is allow to go to target room */
+
+		if (IS_NPC (tch) && CAN_GO (tch, dir) && !isguarded (ch->room, dir) &&
+			(room_exit = vtor (EXIT (tch, dir)->to_room)))
+		{
+
+			if (IS_MERCHANT (tch) &&
+				IS_SET (room_exit->room_flags, NO_MERCHANT))
+				continue;
+
+			if (tch->mob->access_flags &&
+				!(tch->mob->access_flags & room_exit->room_flags))
+				continue;
+
+			if (IS_SET (tch->act, ACT_STAY_ZONE) &&
+				tch->room->zone != room_exit->zone)
+				continue;
+		}
+
+		if (GET_POS (tch) == SIT)
+		{
+			act ("You can't follow $N while sitting.",
+				false, tch, 0, ch, TO_CHAR);
+			return;
+		}
+
+		else if (GET_POS (tch) == REST)
+		{
+			act ("You can't follow $N while resting.",
+				false, tch, 0, ch, TO_CHAR);
+			return;
+		}
+
+		if(tch->delay_type == DEL_HIDE)
+		{
+			act ("You can't follow $N while looking for a place to hide.",
+				false, tch, 0, ch, TO_CHAR);
+			return;
+		}	
+
+		else if (GET_POS (tch) < FIGHT)
+			return;
+
+		if (get_affect (tch, MAGIC_HIDDEN) && real_skill (tch, SKILL_SNEAK))
+		{
+			if (odds_sqrt (skill_level (tch, SKILL_SNEAK, 0)) >= number (1, 100)
+				|| !would_reveal (tch))
+			{
+				magic_add_affect (tch, MAGIC_SNEAK, -1, 0, 0, 0, 0);
+			}
+			else
+			{
+				remove_affect_type (tch, MAGIC_HIDDEN);
+				act ("$n attempts to be stealthy.", true, tch, 0, 0, TO_ROOM);
+			}
+		}
+
+		move (tch, "", dir, leave_time + arrive_time);
 	}
-
-      if (IS_HITCHEE (tch))
-	continue;
-
-      /* Check if this mob tch is allow to go to target room */
-
-      if (IS_NPC (tch) && CAN_GO (tch, dir) && !isguarded (ch->room, dir) &&
-	  (room_exit = vtor (EXIT (tch, dir)->to_room)))
-	{
-
-	  if (IS_MERCHANT (tch) &&
-	      IS_SET (room_exit->room_flags, NO_MERCHANT))
-	    continue;
-
-	  if (tch->mob->access_flags &&
-	      !(tch->mob->access_flags & room_exit->room_flags))
-	    continue;
-
-	  if (IS_SET (tch->act, ACT_STAY_ZONE) &&
-	      tch->room->zone != room_exit->zone)
-	    continue;
-	}
-
-      if (GET_POS (tch) == SIT)
-	{
-	  act ("You can't follow $N while sitting.",
-	       false, tch, 0, ch, TO_CHAR);
-	  return;
-	}
-
-      else if (GET_POS (tch) == REST)
-	{
-	  act ("You can't follow $N while resting.",
-	       false, tch, 0, ch, TO_CHAR);
-	  return;
-	}
-	
-	if(tch->delay_type == DEL_HIDE)
-  {
-	act ("You can't follow $N while looking for a place to hide.",
-	       false, tch, 0, ch, TO_CHAR);
-	return;
-  }	
-
-      else if (GET_POS (tch) < FIGHT)
-	return;
-
-      if (get_affect (tch, MAGIC_HIDDEN) && real_skill (tch, SKILL_SNEAK))
-	{
-	  if (odds_sqrt (skill_level (tch, SKILL_SNEAK, 0)) >= number (1, 100)
-	      || !would_reveal (tch))
-	    {
-	      magic_add_affect (tch, MAGIC_SNEAK, -1, 0, 0, 0, 0);
-	    }
-	  else
-	    {
-	      remove_affect_type (tch, MAGIC_HIDDEN);
-	      act ("$n attempts to be stealthy.", true, tch, 0, 0, TO_ROOM);
-	    }
-	}
-
-      move (tch, "", dir, leave_time + arrive_time);
-    }
 }
 
 void
 follower_catchup (CHAR_DATA * ch)
 {
-  CHAR_DATA *tch;
-  QE_DATA *qe;
+	CHAR_DATA *tch;
+	QE_DATA *qe;
 
-  if (!ch->room)
-    return;
+	if (!ch->room)
+		return;
 
-  for (tch = ch->room->people; tch; tch = tch->next_in_room)
-    if (ch->following == tch)
-      break;
+	for (tch = ch->room->people; tch; tch = tch->next_in_room)
+		if (ch->following == tch)
+			break;
 
-  if (!tch || !GET_FLAG (tch, FLAG_LEAVING) || !CAN_SEE (tch, ch)
-      || IS_SWIMMING (tch))
-    return;
+	if (!tch || !GET_FLAG (tch, FLAG_LEAVING) || !CAN_SEE (tch, ch)
+		|| IS_SWIMMING (tch))
+		return;
 
-  for (qe = quarter_event_list; qe->ch != tch; qe = qe->next)
-    ;
+	for (qe = quarter_event_list; qe->ch != tch; qe = qe->next)
+		;
 
-  if (!qe)
-    return;
+	if (!qe)
+		return;
 
-  if (ch->aiming_at)
-    {
-      send_to_char ("You lose your aim as you move.\n", ch);
-      ch->aiming_at->targeted_by = NULL;
-      ch->aiming_at = NULL;
-      ch->aim = 0;
-    }
-
-  if (get_affect (ch, MAGIC_HIDDEN) && real_skill (ch, SKILL_SNEAK))
-    {
-      if (odds_sqrt (skill_level (ch, SKILL_SNEAK, 0)) >= number (1, 100)
-	  || !would_reveal (ch))
+	if (ch->aiming_at)
 	{
-	  magic_add_affect (ch, MAGIC_SNEAK, -1, 0, 0, 0, 0);
+		send_to_char ("You lose your aim as you move.\n", ch);
+		ch->aiming_at->targeted_by = NULL;
+		ch->aiming_at = NULL;
+		ch->aim = 0;
 	}
-      else
-	{
-	  remove_affect_type (ch, MAGIC_HIDDEN);
-	  act ("$n attempts to be stealthy.", true, ch, 0, 0, TO_ROOM);
-	}
-    }
 
-  move (ch, "", qe->dir, qe->event_time + qe->arrive_time);
+	if (get_affect (ch, MAGIC_HIDDEN) && real_skill (ch, SKILL_SNEAK))
+	{
+		if (odds_sqrt (skill_level (ch, SKILL_SNEAK, 0)) >= number (1, 100)
+			|| !would_reveal (ch))
+		{
+			magic_add_affect (ch, MAGIC_SNEAK, -1, 0, 0, 0, 0);
+		}
+		else
+		{
+			remove_affect_type (ch, MAGIC_HIDDEN);
+			act ("$n attempts to be stealthy.", true, ch, 0, 0, TO_ROOM);
+		}
+	}
+
+	move (ch, "", qe->dir, qe->event_time + qe->arrive_time);
 }
 
 
@@ -620,22 +620,22 @@ follower_catchup (CHAR_DATA * ch)
 void
 stop_followers (CHAR_DATA * ch)
 {
-  CHAR_DATA *tch;
+	CHAR_DATA *tch;
 
-  //for (tch = character_list; tch; tch = tch->next)
-  for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
-    {
-	tch = *tch_iterator;
-      if (tch->deleted)
-	  continue;
+	//for (tch = character_list; tch; tch = tch->next)
+	for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
+	{
+		tch = *tch_iterator;
+		if (tch->deleted)
+			continue;
 
-      if (tch->following == ch)
-	tch->following = 0;
-    }
-  //  if (ch->group)
-  //    {
-  //    ch->group->clear ();
-  //  }
+		if (tch->following == ch)
+			tch->following = 0;
+	}
+	//  if (ch->group)
+	//    {
+	//    ch->group->clear ();
+	//  }
 }
 
 int num_followers (CHAR_DATA * ch)
@@ -643,19 +643,19 @@ int num_followers (CHAR_DATA * ch)
 	CHAR_DATA		*top_leader = NULL;
 	CHAR_DATA		*tch = NULL;
 	int group_count = 0;  
-	
-	if (!(top_leader = ch->following))
-    top_leader = ch;
-    
-	for (tch = top_leader->room->people; tch; tch = tch->next_in_room)
-    {
-      if (tch->following != top_leader)
-	continue;
-      if (!CAN_SEE (ch, tch))
-	continue;
-     	group_count = group_count + 1;
 
-    }
+	if (!(top_leader = ch->following))
+		top_leader = ch;
+
+	for (tch = top_leader->room->people; tch; tch = tch->next_in_room)
+	{
+		if (tch->following != top_leader)
+			continue;
+		if (!CAN_SEE (ch, tch))
+			continue;
+		group_count = group_count + 1;
+
+	}
 
 	return (group_count);
 

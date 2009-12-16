@@ -624,96 +624,96 @@ mob_data::~mob_data()
 // This function is only intended to be called by redefine_mobiles()
 void char_data::partial_deep_copy (CHAR_DATA *proto)
 {
-		if (this->name)
-		{
-			mem_free(this->name);
-		}
-		this->name = str_dup(proto->name);
-		
-		if (this->short_descr)
-		{
-			mem_free(this->short_descr);
-		}
-		this->short_descr = str_dup(proto->short_descr);
-		
-		if (this->long_descr)
-		{
-			mem_free(this->long_descr);
-		}
-		this->long_descr = str_dup(proto->long_descr);
-		
-		if (this->description)
-		{
-			mem_free(this->description);
-		}
-		this->description = str_dup(proto->description);
-		
-		if (this->clans)
-		{
-			mem_free(this->clans);
-		}
-		this->clans = str_dup(proto->clans);
+	if (this->name)
+	{
+		mem_free(this->name);
+	}
+	this->name = str_dup(proto->name);
 
-		this->act = proto->act;
-		this->mob->damnodice = proto->mob->damnodice;
-		this->mob->damsizedice = proto->mob->damsizedice;
-		this->position = proto->position;
-		this->default_pos = proto->default_pos;
-		this->hmflags = proto->hmflags;
+	if (this->short_descr)
+	{
+		mem_free(this->short_descr);
+	}
+	this->short_descr = str_dup(proto->short_descr);
 
-		this->str = proto->str;
-		this->dex = proto->dex;
-		this->intel = proto->intel;
-		this->aur = proto->aur;
-		this->con = proto->con;
-		this->wil = proto->wil;
-		this->agi = proto->agi;
+	if (this->long_descr)
+	{
+		mem_free(this->long_descr);
+	}
+	this->long_descr = str_dup(proto->long_descr);
 
-		this->flags = proto->flags;
-		this->shop = proto->shop;
+	if (this->description)
+	{
+		mem_free(this->description);
+	}
+	this->description = str_dup(proto->description);
 
-		this->hit = proto->hit;
-		this->max_hit = proto->max_hit;
-		this->move = proto->move;
-		this->max_move = proto->max_move;
-		this->armor = proto->armor;
-		this->offense = proto->offense;
-		this->mob->damroll = proto->mob->damroll;
-		this->ppoints = proto->ppoints;
-		this->nat_attack_type = proto->nat_attack_type;
+	if (this->clans)
+	{
+		mem_free(this->clans);
+	}
+	this->clans = str_dup(proto->clans);
 
-		this->sex = proto->sex;
-		this->deity = proto->deity;
+	this->act = proto->act;
+	this->mob->damnodice = proto->mob->damnodice;
+	this->mob->damsizedice = proto->mob->damsizedice;
+	this->position = proto->position;
+	this->default_pos = proto->default_pos;
+	this->hmflags = proto->hmflags;
 
-		this->circle = proto->circle;
-		this->mob->skinned_vnum = proto->mob->skinned_vnum;
-		this->mob->carcass_vnum = proto->mob->carcass_vnum;
-		this->mob->merch_seven = proto->mob->merch_seven;
-		this->mob->vehicle_type = proto->mob->vehicle_type;
-		this->mob->helm_room = proto->mob->helm_room;
-		this->natural_delay = proto->natural_delay;
-		this->fight_mode = proto->fight_mode;
-		this->race = proto->race;
-		this->mob->access_flags = proto->mob->access_flags;
-		this->speaks = proto->speaks;
+	this->str = proto->str;
+	this->dex = proto->dex;
+	this->intel = proto->intel;
+	this->aur = proto->aur;
+	this->con = proto->con;
+	this->wil = proto->wil;
+	this->agi = proto->agi;
 
-		/*
-		this->height				  = proto->height;
-		this->frame				  = proto->frame;
-		*/
-		this->age = proto->age;
+	this->flags = proto->flags;
+	this->shop = proto->shop;
 
-		for (int i = 0; i < MAX_SKILLS; i++)
-			this->skills[i] = proto->skills[i];
+	this->hit = proto->hit;
+	this->max_hit = proto->max_hit;
+	this->move = proto->move;
+	this->max_move = proto->max_move;
+	this->armor = proto->armor;
+	this->offense = proto->offense;
+	this->mob->damroll = proto->mob->damroll;
+	this->ppoints = proto->ppoints;
+	this->nat_attack_type = proto->nat_attack_type;
 
-		this->str = proto->str;
-		this->dex = proto->dex;
-		this->con = proto->con;
-		this->wil = proto->wil;
-		this->aur = proto->aur;
-		this->intel = proto->intel;
+	this->sex = proto->sex;
+	this->deity = proto->deity;
 
-		this->mob->currency_type = proto->mob->currency_type;
+	this->circle = proto->circle;
+	this->mob->skinned_vnum = proto->mob->skinned_vnum;
+	this->mob->carcass_vnum = proto->mob->carcass_vnum;
+	this->mob->merch_seven = proto->mob->merch_seven;
+	this->mob->vehicle_type = proto->mob->vehicle_type;
+	this->mob->helm_room = proto->mob->helm_room;
+	this->natural_delay = proto->natural_delay;
+	this->fight_mode = proto->fight_mode;
+	this->race = proto->race;
+	this->mob->access_flags = proto->mob->access_flags;
+	this->speaks = proto->speaks;
+
+	/*
+	this->height				  = proto->height;
+	this->frame				  = proto->frame;
+	*/
+	this->age = proto->age;
+
+	for (int i = 0; i < MAX_SKILLS; i++)
+		this->skills[i] = proto->skills[i];
+
+	this->str = proto->str;
+	this->dex = proto->dex;
+	this->con = proto->con;
+	this->wil = proto->wil;
+	this->aur = proto->aur;
+	this->intel = proto->intel;
+
+	this->mob->currency_type = proto->mob->currency_type;
 }
 
 void char_data::deep_copy (CHAR_DATA *copy_from)
@@ -885,7 +885,7 @@ void char_data::toggleNaughtyFlag() {
 		naughtyFlag = true;
 	}
 }
-	
+
 void char_data::toggleRPFlag() {
 	if (RPFlag) {
 		RPFlag = false;
@@ -905,13 +905,13 @@ void char_data::togglePlotFlag() {
 }
 
 std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std::string whichClan) {
-	
+
 	bool underwater = (room->sector_type == SECT_RIVER
-						|| room->sector_type == SECT_LAKE
-						|| room->sector_type == SECT_OCEAN
-						|| room->sector_type == SECT_REEF
-						|| room->sector_type == SECT_UNDERWATER);
-	
+		|| room->sector_type == SECT_LAKE
+		|| room->sector_type == SECT_OCEAN
+		|| room->sector_type == SECT_REEF
+		|| room->sector_type == SECT_UNDERWATER);
+
 	int characterNameColour = 0;
 
 	if ((pc && pc->level > 0 && !fighting)) {
@@ -935,7 +935,7 @@ std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std:
 	else {
 		characterNameColour = 0;
 	}
-	
+
 	char characterState = '_';
 
 	switch (GET_POS (this)) {
@@ -968,7 +968,7 @@ std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std:
 	std::stringstream reportStream;
 
 	reportStream << "#" << characterNameColour;
-	
+
 	int blankLineSize = 15 - strlen(tname); // 15 characters alloted to display the name, down from 17
 
 	if (blankLineSize < 1) {
@@ -981,7 +981,7 @@ std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std:
 			reportStream << " ";
 		}
 	}
-	
+
 	if (RPP < 0) {
 		if (aur < 10) {
 			reportStream << "#3[ " << aur << "]";
@@ -996,7 +996,7 @@ std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std:
 	else {
 		reportStream << "#3[" << RPP << "]";
 	}
-	
+
 	reportStream << " #0" << characterState;
 	reportStream << (getNaughtyFlag() ? "#1!" : "#0_");	// Flag to watch player for bad behaviour
 	reportStream << (getRPFlag() ? "#2R" : "#0_");	// Flag to watch player for possible award
@@ -1026,15 +1026,15 @@ bool *char_data::checkClansForWho()
 			clansArgument.pop(); // Pop Clan Flags
 			clansArgument.pop(); // Pop Clan Name
 			if( clansArgument == "mt_citizens" )
-			ret[1] = true;
+				ret[1] = true;
 			else if( clansArgument == "outpost_citizens" )
-			ret[2] = true;
+				ret[2] = true;
 			else if( clansArgument == "fahad_jafari" )
-			ret[3] = true;
+				ret[3] = true;
 			else if( clansArgument == "moria_orks" )
-			ret[4] = true;
+				ret[4] = true;
 			else if( clansArgument == "mordor_char" )
-			ret[5] = true;
+				ret[5] = true;
 		}
 	}
 	return ret;
@@ -1044,7 +1044,7 @@ bool *char_data::checkClansForWho()
 int char_data::majorSphere()
 {
 	if( IS_SET(flags,FLAG_GUEST) )
-	return 0;
+		return 0;
 	if( clans )
 	{
 		Stringstack clansArgument = clans;
