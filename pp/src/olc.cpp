@@ -4188,7 +4188,8 @@ do_rlinkrm (CHAR_DATA * ch, char *argument, int cmd)
 	char buf[256];
 	int dir;
 	int cha_rnum, old_rnum;
-	ROOM_DATA * room=NULL, troom=NULL;
+	ROOM_DATA* room=NULL;
+	ROOM_DATA* troom=NULL;
 
 	one_argument (argument, buf);
 
