@@ -878,6 +878,8 @@ load_object_full (int vnum, bool newWritingID)
 
 	vtoo (new_obj->nVirtual)->instances++;
 
+	new_obj->super_vnum = vtoo(new_obj->nVirtual)->super_vnum;
+
 	return new_obj;
 }
 
@@ -1203,6 +1205,24 @@ fread_object (int vnum, int nZone, FILE * fp)
 			obj->clan_data = newclan;
 	}
 	while (1);
+	
+	// Shamefully stealing the above codeblock for super vnums - Case
+	do {
+		while ((peak_char = getc (fp)) == ' ' || peak_char == '\t' ||
+			peak_char == '\n')
+			;
+
+		ungetc (peak_char, fp);
+
+		if (peak_char != 'S')
+			break;
+		
+		fscanf (fp, "%s\n", chk);
+		obj->super_vnum = fread_number(fp);
+	}
+	while (1);
+
+
 
 	if (tmp > 20)
 		printf ("Object %d has %d affects\n", obj->nVirtual, tmp);

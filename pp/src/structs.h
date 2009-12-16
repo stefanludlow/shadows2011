@@ -1713,6 +1713,7 @@ struct obj_data
   int sold_at;
   int sold_by;
   OBJ_CLAN_DATA *clan_data;
+  int super_vnum;           // Vnum of parent class for object inheritance, e.g. a red brick fireplace inherits from 'fireplace' object.
 
   void deep_copy (OBJ_DATA *copy_from);
   void partial_deep_copy (OBJ_DATA *copy_from);
@@ -2689,6 +2690,7 @@ struct social_data
 #define STAYPUT_FILE	"stayput"
 
 #define ZONE_SIZE	1000
+#define OBJECT_ZONE_SIZE 1100
 #define MAX_TRADE	5
 #define MAX_PROD	5
 

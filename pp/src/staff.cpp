@@ -4367,6 +4367,21 @@ objstat (CHAR_DATA * ch, char *name)
 			((float)j->obj_flags.set_cost) / 100.0);
 		send_to_char (buf, ch);
 	}
+
+	OBJ_DATA* super = vtoo(j->super_vnum);
+	std::stringstream inheritStream;
+	
+	if (super != NULL) {
+		inheritStream << "\nThis object inherits from #2" << super->short_description << "#0 (VNum: " << super->nVirtual << ")";
+		super = vtoo(super->super_vnum);
+		
+		while (super != NULL) {
+			inheritStream << "\n  -> which inherits from #2" << super->short_description << "#0 (VNum: " << super->nVirtual << ")";
+			super = vtoo(super->super_vnum);
+		}
+		inheritStream << "\n";
+		send_to_char(inheritStream.str().c_str(), ch);
+	}
 }
 
 /*                                                                          *

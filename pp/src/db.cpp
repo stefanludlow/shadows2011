@@ -35,6 +35,7 @@
 extern rpie::server engine;
 
 ROOM_DATA * globalRoomArray[100000] = {NULL};
+OBJ_DATA * globalObjectArray[110000] = {NULL}; // Arrays to handle rooms/object prototypes so lookup is constant time - Case
 
 int MAX_MEMORY;
 int PERM_MEMORY_SIZE;
@@ -45,8 +46,8 @@ int mob_start_stat = 12;	/* Different on Koldryn's port */
 int mem_allocated = 0;
 int mem_freed = 0;
 
-ROOM_DATA *wld_tab[ZONE_SIZE];
-OBJ_DATA *obj_tab[ZONE_SIZE];
+//ROOM_DATA *wld_tab[ZONE_SIZE]; // I've tried to remove reliance on this - Case
+OBJ_DATA *obj_tab[OBJECT_ZONE_SIZE]; // Expanded for the 110k globalObjectArray. Top 10k objects are object categories - Case
 CHAR_DATA *mob_tab[ZONE_SIZE];
 
 ROLE_DATA *role_list = NULL;
@@ -97,6 +98,7 @@ int next_obj_coldload_id = 0;
 int count_max_online = 0;
 char max_online_date [AVG_STRING_LENGTH] = "";
 int MAX_ZONE = 100;
+int OBJECT_MAX_ZONE = 110;
 int second_affect_active = 0;
 int hash_dup_strings = 0;
 int hash_dup_length = 0;
@@ -196,17 +198,17 @@ return NULL;
 //}
 
 
-ROOM_DATA* loadRoom (int vnum)
-{
-	ROOM_DATA* room = 0;
-	for (room = wld_tab[vnum % ZONE_SIZE]; room; room = room->hnext) {
-		if (room->nVirtual == vnum) {
-			globalRoomArray[vnum] = room;
-			return room;
-		}
-	}
-	return NULL;
-}
+//ROOM_DATA* loadRoom (int vnum)
+//{
+//	ROOM_DATA* room = 0;
+//	for (room = wld_tab[vnum % ZONE_SIZE]; room; room = room->hnext) {
+//		if (room->nVirtual == vnum) {
+//			globalRoomArray[vnum] = room;
+//			return room;
+//		}
+//	}
+//	return NULL;
+//}
 
 
 
@@ -237,10 +239,13 @@ add_room_to_hash (ROOM_DATA * add_room)
 
 	last_room = add_room;
 
-	hash = add_room->nVirtual % ZONE_SIZE;
+	if (globalRoomArray[add_room->nVirtual] == NULL) {
+		globalRoomArray[add_room->nVirtual] = add_room;
+	}
+	//hash = add_room->nVirtual % ZONE_SIZE;
 
-	add_room->hnext = wld_tab[hash];
-	wld_tab[hash] = add_room;
+	//add_room->hnext = wld_tab[hash];
+	//wld_tab[hash] = add_room;
 }
 
 CHAR_DATA *
@@ -291,20 +296,21 @@ add_mob_to_hash (CHAR_DATA * add_mob)
 	mob_tab[hash] = add_mob;
 }
 
-OBJ_DATA *
-vtoo (int nVirtual)
-{
-	OBJ_DATA *obj;
-
-	if (nVirtual < 0)
-		return NULL;
-
-	for (obj = obj_tab[nVirtual % ZONE_SIZE]; obj; obj = obj->hnext)
-		if (obj->nVirtual == nVirtual)
-			return (obj);
-
-	return NULL;
-}
+// Inline version in room.h - Case
+//OBJ_DATA *
+//vtoo (int nVirtual)
+//{
+//	OBJ_DATA *obj;
+//
+//	if (nVirtual < 0)
+//		return NULL;
+//
+//	for (obj = obj_tab[nVirtual % OBJECT_ZONE_SIZE]; obj; obj = obj->hnext)
+//		if (obj->nVirtual == nVirtual)
+//			return (obj);
+//
+//	return NULL;
+//}
 
 void
 add_obj_to_hash (OBJ_DATA * add_obj)
@@ -332,8 +338,12 @@ add_obj_to_hash (OBJ_DATA * add_obj)
 	}
 
 	last_obj = add_obj;
+	
+	if (globalObjectArray[add_obj->nVirtual] == NULL) {
+		globalObjectArray[add_obj->nVirtual] = add_obj;
+	}
 
-	hash = add_obj->nVirtual % ZONE_SIZE;
+	hash = add_obj->nVirtual % OBJECT_ZONE_SIZE;
 
 	add_obj->hnext = obj_tab[hash];
 	obj_tab[hash] = add_obj;
@@ -772,9 +782,12 @@ load_rooms (void)
 
 	for (i = 0; i < ZONE_SIZE; i++)
 	{
-		wld_tab[i] = NULL;
-		obj_tab[i] = NULL;
+		//wld_tab[i] = NULL;
 		mob_tab[i] = NULL;
+	}
+
+	for (i = 0; i < OBJECT_ZONE_SIZE; i++) {
+		obj_tab[i] = NULL;
 	}
 
 	for (zon = 0; zon < MAX_ZONE; zon++)
@@ -2455,7 +2468,7 @@ boot_objects ()
 	int zone;
 	FILE *fp;
 
-	for (zone = 0; zone < MAX_ZONE; zone++)
+	for (zone = 0; zone < OBJECT_MAX_ZONE; zone++)
 	{
 
 		sprintf (buf, "%s/objs.%d", REGIONS, zone);

@@ -727,6 +727,10 @@ fread_obj (FILE * fp)
 			lodged->vnum = fread_number (fp);
 			continue;
 		}
+		else if (!strcmp (p, "Super_vnum"))
+		{
+			obj->super_vnum = fread_number(fp);
+		}
 		else if (!strcmp (p, "DONE"))
 		{
 			fseek (fp, nFilePosition, SEEK_SET);
