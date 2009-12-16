@@ -2856,8 +2856,9 @@ craft_uses (SUBCRAFT_HEAD_DATA * craft, int vnum)
 			continue;
 		for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 		{
-			if (craft->obj_items[i]->items[j] == vnum)
+			if (inheritedObject(craft->obj_items[i]->items[j], vnum)) {
 				return 1;
+			}
 		}
 	}
 
@@ -2879,7 +2880,7 @@ craft_produces (SUBCRAFT_HEAD_DATA * craft, int vnum)
 			continue;
 		for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 		{
-			if (craft->obj_items[i]->items[j] == vnum)
+			if (inheritedObject(craft->obj_items[i]->items[j], vnum))
 				return 1;
 		}
 	}
