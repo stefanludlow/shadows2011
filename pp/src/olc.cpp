@@ -4188,6 +4188,7 @@ do_rlinkrm (CHAR_DATA * ch, char *argument, int cmd)
 	char buf[256];
 	int dir;
 	int cha_rnum, old_rnum;
+	ROOM_DATA * room=NULL, troom=NULL;
 
 	one_argument (argument, buf);
 
@@ -4229,9 +4230,10 @@ do_rlinkrm (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	cha_rnum = ch->in_room;
-	if (vtor (ch->in_room)->dir_option[dir])
+	room = vtor(ch->in_room);
+	if ((room) && room->dir_option[dir])
 	{
-		old_rnum = vtor (ch->in_room)->dir_option[dir]->to_room;
+		old_rnum = room->dir_option[dir]->to_room;
 	}
 	else
 	{
@@ -4239,8 +4241,13 @@ do_rlinkrm (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	vtor (cha_rnum)->dir_option[dir] = 0;
-	vtor (old_rnum)->dir_option[rev_dir[dir]] = 0;
+	if (room)
+	  room->dir_option[dir] = 0;
+
+	troom = vtor(old_rnum);
+	if (troom)
+	  troom->dir_option[rev_dir[dir]] = 0;
+
 	send_to_char ("Done.\n", ch);
 }
 
