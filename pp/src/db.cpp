@@ -341,12 +341,11 @@ add_obj_to_hash (OBJ_DATA * add_obj)
 
 	if (globalObjectArray[add_obj->nVirtual] == NULL) {
 		globalObjectArray[add_obj->nVirtual] = add_obj;
+		
+		hash = add_obj->nVirtual % OBJECT_ZONE_SIZE;
+		add_obj->hnext = obj_tab[hash];
+		obj_tab[hash] = add_obj;
 	}
-
-	hash = add_obj->nVirtual % OBJECT_ZONE_SIZE;
-
-	add_obj->hnext = obj_tab[hash];
-	obj_tab[hash] = add_obj;
 }
 
 /*************************************************************************
