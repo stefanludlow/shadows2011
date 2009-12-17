@@ -432,7 +432,7 @@ const char *sizes[] = {
 
 const char *sizes_named[] = {
 	"\01",			/* Binary 1 (^A) should be hard to enter for players */
-	"XX-Small",  //1 
+	"XX-Small",  //1
 	"X-Small",   //2
 	"Small",     //3
 	"Medium",    //4
@@ -742,7 +742,7 @@ do_classify (CHAR_DATA * ch, char *argument, int cmd)
 					sprintf (buf3, "%s %s", obj->name, buf2);
 					if (obj->name && strlen (obj->name) > 1)
 						mem_free (obj->name);
-					obj->name = str_dup (buf3);
+					obj->name = strdup (buf3);
 					update = false;
 				}
 			}
@@ -796,7 +796,7 @@ do_classify (CHAR_DATA * ch, char *argument, int cmd)
 	if (obj->name && strlen (obj->name) > 1)
 		mem_free (obj->name);
 
-	obj->name = str_dup (buf2);
+	obj->name = strdup (buf2);
 
 	send_to_char ("Done.\n", ch);
 }
@@ -1658,7 +1658,7 @@ do_order (CHAR_DATA * ch, char *argument, int cmd)
 		ch->delay_info2 = (int) val_in_farthings;
 		ch->delay_ch = keeper;
 		if (*color)
-			ch->delay_who = str_dup (color);
+			ch->delay_who = strdup (color);
 
 		return;
 	}
@@ -1743,7 +1743,7 @@ do_order (CHAR_DATA * ch, char *argument, int cmd)
 
 				sprintf(buf2, "  #1%5d  %s     #2%-55.55s#0", obj->nVirtual, amount.c_str(), obj_short_desc (obj));
 			}
-			else 
+			else
 			{
 
 				sprintf (buf2, "  #1%5d   %7.2f cp%s  #2%-55.55s#0",
@@ -1941,13 +1941,13 @@ vnpc_customer (CHAR_DATA * keeper, int purse)
 		/* order another if they can afford it */
 		if (keeper_has_money (keeper, delivery_cost))
 		{
-			subtract_keeper_money (keeper, delivery_cost); 
+			subtract_keeper_money (keeper, delivery_cost);
 			OBJ_DATA *obj = load_object (target_item);
 			/* set the cost to the same as before */
 			obj->obj_flags.set_cost = tobj->obj_flags.set_cost;
 			obj_to_room (obj, keeper->shop->store_vnum);
 
-			mysql_safe_query 
+			mysql_safe_query
 				("INSERT INTO %s.receipts "
 				"(time, shopkeep, transaction, who, customer, vnum, "
 				"item, qty, cost, room, gametime, port) "
@@ -2511,7 +2511,7 @@ money_to_storeroom (CHAR_DATA * keeper, int amount)
 		else if (keeper->mob->currency_type == CURRENCY_EDEN)
 		{
 			obj = load_object (66905);
-		} 
+		}
 		else if (keeper->mob->currency_type == CURRENCY_HARAD)
 		{
 			obj = load_object (80015);
@@ -2717,7 +2717,7 @@ subtract_keeper_money (CHAR_DATA * keeper, int cost)
 		else if (keeper->mob->currency_type == CURRENCY_EDEN)
 		{
 			obj = load_object (66905);
-		} 
+		}
 		else if (keeper->mob->currency_type == CURRENCY_HARAD)
 		{
 			obj = load_object (80015);
@@ -3540,7 +3540,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 		ch->delay_ch = keeper;
 		obj->count = orig_count;
 		if (GET_ITEM_TYPE (obj) == ITEM_NPC_OBJECT)
-			ch->delay_who = str_dup (name);
+			ch->delay_who = strdup (name);
 		return;
 	}
 
@@ -3562,7 +3562,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 	obj_from_room (&tobj, buy_count);
 	int port = engine.get_port ();
 
-	mysql_safe_query 
+	mysql_safe_query
 		("INSERT INTO %s.receipts "
 		"(time, shopkeep, transaction, who, customer, vnum, "
 		"item, qty, cost, room, gametime, port) "
@@ -3701,7 +3701,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 		horse->act |= ACT_STAYPUT;
 		sprintf (buf, "%s %s", horse->name, name);
 		mem_free (horse->name);
-		horse->name = str_dup (buf);
+		horse->name = strdup (buf);
 		if (get_clan (ch, "mordor_char", &flags))
 		{
 			add_clan (horse, "mordor_char", CLAN_MEMBER);
@@ -3714,7 +3714,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 			hitch_char (ch, horse);
 		if (!IS_NPC (ch))
 		{
-			horse->mob->owner = str_dup (ch->tname);
+			horse->mob->owner = strdup (ch->tname);
 			save_char (ch, true);
 		}
 		return;
@@ -4118,7 +4118,7 @@ keeper_money_to_char (CHAR_DATA * keeper, CHAR_DATA * ch, int money)
 
 	*buf = '\0';
 	int bit = coins[5], copper = coins[4], royal = coins[3], tree = coins[2], crown = coins[1], mithril = coins[0], hundredpiece = coins[0];
-	// a small note, the above line and the reasons for it are the cause of 
+	// a small note, the above line and the reasons for it are the cause of
 	// the mis-printing of mithril hundredpieces... No, I'm not fixing it,
 	// it comes from a really stupid cause, and I simply don't have the time
 	// to fix it.  Oh, did I mention I knowingly introduced it?
@@ -5110,7 +5110,7 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
 		"EXTRACT(DAY FROM gametime) as day "
 		"FROM %s.receipts "
 		"WHERE shopkeep = '%d' AND port = '%d' "
-		"ORDER BY time DESC;", 
+		"ORDER BY time DESC;",
 		(engine.get_config ("player_log_db")).c_str (),
 		keeper->mob->nVirtual, port);
 
@@ -5433,7 +5433,7 @@ do_stable (CHAR_DATA * ch, char *argument, int cmd)
 	sprintf (buf + strlen (buf),
 		"\n\n#6OOC: To retrieve your mount, GIVE this ticket to the ostler\n"
 		"     with whom you stabled it; be sure you don't lose this!#0");
-	ticket->full_description = str_dup (buf);
+	ticket->full_description = strdup (buf);
 
 	act ("$N gives you $p.", false, ch, ticket, keeper, TO_CHAR | _ACT_FORMAT);
 	act ("You give $N $p.", false, keeper, ticket, ch, TO_CHAR | _ACT_FORMAT);
@@ -7492,7 +7492,7 @@ do_payroll (CHAR_DATA * ch, char *argument, int cmd)
 
 	/* Detail */
 	int port = engine.get_port ();
-	mysql_safe_query 
+	mysql_safe_query
 		("SELECT time, shopkeep, customer, "
 		"amount, room, gametime, port, "
 		"EXTRACT(YEAR FROM gametime) as year, "
@@ -7500,7 +7500,7 @@ do_payroll (CHAR_DATA * ch, char *argument, int cmd)
 		"EXTRACT(DAY FROM gametime) as day "
 		"FROM %s.payroll "
 		"WHERE shopkeep = '%d' AND port = '%d' "
-		"ORDER BY time DESC;", 
+		"ORDER BY time DESC;",
 		(engine.get_config ("player_log_db")).c_str (),
 		keeper->mob->nVirtual, port);
 
@@ -7579,7 +7579,7 @@ do_payroll (CHAR_DATA * ch, char *argument, int cmd)
 				"    Current coin on hand:  #2%d cp#0.\n",
 				month_short_name[(int) last_month],
 				(int) last_year,
-				payrollAmt, 
+				payrollAmt,
 				payrollTAmt,
 				keeper_has_money (keeper, 0));
 		}

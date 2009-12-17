@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  act.movement.c : Movement Module                   www.middle-earth.us | 
+|  act.movement.c : Movement Module                   www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -153,7 +153,7 @@ drowned (CHAR_DATA * ch)
 	float damage = 0.0;
 	int roll = 0;
 
-	if (!IS_MORTAL (ch) 
+	if (!IS_MORTAL (ch)
 		|| IS_SET (ch->affected_by, AFF_BREATHE_WATER)
 		|| number (0, 9)
 		|| (IS_SET (ch->act, ACT_FLYING) && !(ch->room->sector_type == SECT_UNDERWATER))
@@ -995,7 +995,7 @@ enter_room (QE_DATA * qe)
 		if (qe->travel_str)
 			mem_free (qe->travel_str);
 		mem_free (qe); // QE_DATA*
-		qe = NULL; 
+		qe = NULL;
 
 		return;
 	}
@@ -1132,7 +1132,7 @@ enter_room (QE_DATA * qe)
 			if (ch->targeted_by->delay_who
 				&& strlen (ch->targeted_by->delay_who) > 1)
 				mem_free (ch->targeted_by->delay_who);
-			ch->targeted_by->delay_who = str_dup (dirs[qe->dir]);
+			ch->targeted_by->delay_who = strdup (dirs[qe->dir]);
 
 			sprintf (buf,
 				"You carefully hold your aim as your quarry moves away...\n");
@@ -1499,8 +1499,8 @@ enter_room (QE_DATA * qe)
 			room_exit = EXIT (ch, DOWN);
 
 			/* Don't automatically fall through doors */
-			if (!room_exit 
-				|| IS_SET (room_exit->exit_info, EX_ISDOOR) 
+			if (!room_exit
+				|| IS_SET (room_exit->exit_info, EX_ISDOOR)
 				|| IS_SET (room_exit->exit_info, EX_ISGATE))
 				break;
 
@@ -2047,8 +2047,8 @@ initiate_move (CHAR_DATA * ch)
 	}
 	//if (!(target_room->capacity == 0))
 	//{
-	//	if (!room_avail(target_room, NULL, ch) 
-	//		&& !(GET_TRUST(ch)) 
+	//	if (!room_avail(target_room, NULL, ch)
+	//		&& !(GET_TRUST(ch))
 	//		&& !force_enter(ch, target_room))
 	//	{
 	//		send_to_char("There isn't enough room for you.", ch);
@@ -2378,7 +2378,7 @@ initiate_move (CHAR_DATA * ch)
 
 	exit_room (ch, dir, flags, exit_speed, enter_speed, speed_name,
 		needed_movement,
-		strlen (travel_str) ? str_dup (travel_str) : NULL);
+		strlen (travel_str) ? strdup (travel_str) : NULL);
 }
 
 int
@@ -2889,7 +2889,7 @@ do_open (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				send_to_room ("The entryway is opened from the other side.",
 					obj->o.od.value[0]);
-				vtor (obj->o.od.value[0])->dir_option[OUTSIDE]->exit_info &= 
+				vtor (obj->o.od.value[0])->dir_option[OUTSIDE]->exit_info &=
 					~EX_CLOSED;
 			}
 			return;
@@ -2942,7 +2942,7 @@ do_open (CHAR_DATA * ch, char *argument, int cmd)
 			send_to_room (buf, obj->in_room);
 		}
 
-		if (!IS_SET (EXIT (ch, door)->exit_info, EX_ISDOOR) 
+		if (!IS_SET (EXIT (ch, door)->exit_info, EX_ISDOOR)
 			&& !IS_SET (EXIT (ch, door)->exit_info, EX_ISGATE))
 			send_to_char ("That's impossible, I'm afraid.\n", ch);
 		else if (!IS_SET (EXIT (ch, door)->exit_info, EX_CLOSED))
@@ -3060,7 +3060,7 @@ do_close (CHAR_DATA * ch, char *argument, int cmd)
 				if (obj->o.od.value[0] > 0 && vtor (obj->o.od.value[0])) {
 					send_to_room ("The entryway is closed from the other side.",
 						obj->o.od.value[0]);
-					vtor (obj->o.od.value[0])->dir_option[OUTSIDE]->exit_info |= 
+					vtor (obj->o.od.value[0])->dir_option[OUTSIDE]->exit_info |=
 						EX_CLOSED;
 				}
 				return;
@@ -3263,7 +3263,7 @@ do_lock (CHAR_DATA * ch, char *argument, int cmd)
 			if (obj->o.od.value[0] > 0) {
 				send_to_room ("The entryway is unlocked from the other side.",
 					obj->o.od.value[0]);
-				vtor (obj->o.od.value[0])->dir_option[OUTSIDE]->exit_info |= 
+				vtor (obj->o.od.value[0])->dir_option[OUTSIDE]->exit_info |=
 					EX_LOCKED;
 			}
 			return;
@@ -3454,7 +3454,7 @@ do_unlock (CHAR_DATA * ch, char *argument, int cmd)
 			if (obj->o.od.value[0] > 0) {
 				send_to_room ("The entryway is unlocked from the other side.",
 					obj->o.od.value[0]);
-				vtor (obj->o.od.value[0])->dir_option[OUTSIDE]->exit_info &= 
+				vtor (obj->o.od.value[0])->dir_option[OUTSIDE]->exit_info &=
 					~EX_LOCKED;
 			}
 			return;
@@ -3709,7 +3709,7 @@ void do_pick (CHAR_DATA * ch, char *argument, int cmd) {
 		return;
 	}
 
-	if (!IS_SET (EXIT (ch, dir)->exit_info, EX_ISDOOR) 
+	if (!IS_SET (EXIT (ch, dir)->exit_info, EX_ISDOOR)
 		&& !IS_SET (EXIT (ch, dir)->exit_info, EX_ISGATE)) {
 			send_to_char ("No door in that direction.\n", ch);
 			return;
@@ -3922,7 +3922,7 @@ enter_vehicle (CHAR_DATA * ch, CHAR_DATA * ent_mob)
 	}
 
 	if (ch == ent_mob)
-		return;  //you can't enter yourself 
+		return;  //you can't enter yourself
 
 	if (!room_avail(vtor (ent_mob->mob->nVirtual), NULL, ch))
 	{
@@ -4268,7 +4268,7 @@ do_stand (CHAR_DATA * ch, char *argument, int cmd)
 
 			if (evaluate_emote_string(ch, &first_person, third_person, argument))
 				GET_POS (ch) = STAND;
-			else 
+			else
 				return;
 
 			break;
@@ -4300,7 +4300,7 @@ do_stand (CHAR_DATA * ch, char *argument, int cmd)
 		}
 		if (evaluate_emote_string(ch, &first_person, third_person, argument))
 			GET_POS (ch) = STAND;
-		else 
+		else
 			return;
 
 		break;
@@ -4425,7 +4425,7 @@ do_sit (CHAR_DATA * ch, char *argument, int cmd)
 
 			af->a.table.obj = obj;
 
-			GET_POS (ch) = SIT;	
+			GET_POS (ch) = SIT;
 		}
 
 		return;
@@ -4463,7 +4463,7 @@ do_sit (CHAR_DATA * ch, char *argument, int cmd)
 			third_person.append("#0 stops resting");
 			if (evaluate_emote_string (ch, &first_person, third_person, argument))
 				GET_POS (ch) = POSITION_SITTING;
-			else 
+			else
 				return;
 		}
 		break;
@@ -4873,7 +4873,7 @@ int rooms_scanned = 0;
 int
 track_room (ROOM_DATA * from_room, int to_room)
 {
-int room_set_1[5000];		// These hardly need to be more than 
+int room_set_1[5000];		// These hardly need to be more than
 int room_set_2[5000];		// about 200 elements...5000 tb safe
 int *rooms;
 int *torooms;
@@ -5189,7 +5189,7 @@ case 3:   // bn
 case 4:   // corsair
 case 5:   // dunlending
 case 6:   // gondorian human
-case 9:   // northman 
+case 9:   // northman
 case 13:  // woodman?
 case 16:  // noldo
 case 17:  // sinda
@@ -5956,12 +5956,12 @@ If RIDE skill is 0 for PC, he cannot attempt
 to mount a horse with RIDE skill < 33
 PC               Break       If PC tries to bridle a mount with no TAME:
 If PC's BREAK < 50, mount shies away, else
-If PC passes BREAK skill check:                
+If PC passes BREAK skill check:
 TAME is opened on mount, and is bridled
-else 
-PC gets kicked for 2d12 and fails bridle     
-NOTE:  I intended to create a break command, but 
-never did, so BREAK skill isn't complete. 
+else
+PC gets kicked for 2d12 and fails bridle
+NOTE:  I intended to create a break command, but
+never did, so BREAK skill isn't complete.
 mob              Tame        If mount has TAME >= 33, PC can always mount.
 If mount has 0 < TAME < 33, mount will shy bridle
 1d100 < mount's TAME * 3
@@ -6329,7 +6329,7 @@ room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
 	{
 		if (IS_NPC(tch))
 			tot_wt = carrying(tch)/100 + 200;
-		else	
+		else
 			tot_wt = carrying(tch)/100 + get_weight(tch)/100;
 	}
 
@@ -6344,7 +6344,7 @@ room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
 		{
 			if (IS_NPC(temp_char))
 				tot_wt = tot_wt + carrying(temp_char)/100 + 200;
-			else	
+			else
 				tot_wt = tot_wt + carrying(temp_char)/100 + get_weight(temp_char)/100;
 			count++;
 		}
@@ -6354,7 +6354,7 @@ room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch)
 
 	troom->occupants = (int)(wt_count); //weight in pounds
 
-	if (wt_count >= (troom->capacity * 200)) 
+	if (wt_count >= (troom->capacity * 200))
 	{
 		return (0); //there is no room
 	}
@@ -6412,7 +6412,7 @@ force_enter (CHAR_DATA *tch, ROOM_DATA *troom)
 		{
 			send_to_char ("You manage to squeeze your way in.\n", tch);
 			return (1); //they squeezed their way in
-		}		
+		}
 		else
 			return (0); //they couldn't get in
 	}

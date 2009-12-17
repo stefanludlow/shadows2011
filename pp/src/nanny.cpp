@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  nanny.c : Login Menu and Chargen Module            www.middle-earth.us | 
+|  nanny.c : Login Menu and Chargen Module            www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -40,17 +40,17 @@ char echo_on_str[] = { (char) IAC, (char) WONT, (char) TELOPT_ECHO,
 
 int new_accounts = 0;
 
-/* Check for duplicate passwords 
-select aa.username, aa.user_password 
-from forum_users aa, forum_users bb 
-where aa.username != bb.username AND aa.user_password = bb.user_password 
-group by aa.username, aa.user_password 
+/* Check for duplicate passwords
+select aa.username, aa.user_password
+from forum_users aa, forum_users bb
+where aa.username != bb.username AND aa.user_password = bb.user_password
+group by aa.username, aa.user_password
 order by user_password, username;
 
 Logins per day:
-select account,ip,firsttime,lasttime, count,has_pwd,count/datediff(lasttime,firsttime) as lpd 
-from ip 
-order by  lpd desc 
+select account,ip,firsttime,lasttime, count,has_pwd,count/datediff(lasttime,firsttime) as lpd
+from ip
+order by  lpd desc
 limit 60;
 */
 
@@ -208,15 +208,15 @@ if ( tyme_passed > 100 && tyme_passed < 21600 ) // more than 100 for people logg
 {
 sprintf (buf, "Less than a day has passed in Middle-Earth since your last departure.\n");
 SEND_TO_Q (buf, d);
-}  
+}
 else if (tyme_passed > 21599 && tyme_passed < 43200)
-{        
+{
 sprintf (buf, "A single day has passed in Middle-Earth since your last departure.\n" );
 SEND_TO_Q (buf, d);
 }
 else if (tyme_passed > 43199 && tyme_passed < 2160000)
-{ 
-tyme_passed = tyme_passed / 21600;     
+{
+tyme_passed = tyme_passed / 21600;
 sprintf (buf, "%d days have passed in Middle-Earth since your last departure.\n", tyme_passed);
 SEND_TO_Q (buf, d);
 }
@@ -243,7 +243,7 @@ encrypt_buf (const char *buf)
 {
 	//  extern char *crypt (const char *key, const char *salt);
 
-	return str_dup (crypt (buf, "CR"));
+	return strdup (crypt (buf, "CR"));
 }
 
 int
@@ -400,7 +400,7 @@ nanny_ask_password (DESCRIPTOR_DATA * d, char *argument)
 		}
 	}
 
-	if (str_cmp (CAP (argument), "Anonymous")) 
+	if (str_cmp (CAP (argument), "Anonymous"))
 	{
 		d->acct = new account (argument);
 	}
@@ -419,7 +419,7 @@ nanny_ask_password (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	/* 
+	/*
 	*  WE HAVE AN ACCOUNT CONNECTION
 	*     1st timer: count = 1, has_pwd = 0, logins = 0, fails = 0
 	*     otherwise: has_pwd = 0, count++
@@ -427,7 +427,7 @@ nanny_ask_password (DESCRIPTOR_DATA * d, char *argument)
 	int port = engine.get_port ();
 	if (d->acct && d->acct->is_registered () && d->acct->name.length ())
 	{
-		mysql_safe_query 
+		mysql_safe_query
 			("INSERT INTO %s.ip "
 			"  VALUES('%s','%s','%s',NOW(),NOW(),1,0,0,%d,0,0) "
 			"  ON DUPLICATE KEY "
@@ -497,12 +497,12 @@ nanny_check_password (DESCRIPTOR_DATA * d, char *argument)
 	if (!check_password (argument, d->acct->password.c_str ()))
 	{
 
-		/* 
+		/*
 		*  WE HAVE A LOGIN FAILURE
 		*     1st timer: count = 1, has_pwd = 0, logins = 0, fails = 1 (this should never happen)
 		*     otherwise: has_pwd = 0, fails++ (count already incremented)
 		*/
-		mysql_safe_query 
+		mysql_safe_query
 			("INSERT INTO %s.ip "
 			"  VALUES('%s','%s','%s',NOW(),NOW(),1,0,0,%d,0,1) "
 			"  ON DUPLICATE KEY "
@@ -636,26 +636,26 @@ nanny_check_password (DESCRIPTOR_DATA * d, char *argument)
 	send_to_gods (buf);
 	system_log (buf, false);
 
-	/* 
-	*  WE HAVE A LOGIN 
+	/*
+	*  WE HAVE A LOGIN
 	*     1st timer: count = 1, has_pwd = 1, logins = 1 (this should never happen)
 	*     otherwise: has_pwd = 1, logins++ (count already incremented)
 	*/
 	std::string pwd = argument;
-	std::string drupal_pass = 
+	std::string drupal_pass =
 		"UPDATE forum_users "
 		"SET pass = MD5('" + pwd + "') "
 		"WHERE username = '" + d->acct->name + "'" ;
 	mysql_safe_query ((char *)drupal_pass.c_str ());
 
-	mysql_safe_query 
+	mysql_safe_query
 		("INSERT INTO %s.ip "
 		"  VALUES('%s','%s','%s',NOW(),NOW(),1,0,1,%d,1,0) "
 		"  ON DUPLICATE KEY UPDATE lasttime = NOW(), "
 		"    logins = logins + 1, has_pwd = 1,host = '%s';",
 		(engine.get_config ("player_log_db")).c_str (),
-		d->acct->name.c_str (), 
-		d->strClientHostname, 
+		d->acct->name.c_str (),
+		d->strClientHostname,
 		d->strClientIpAddr, port,
 		d->strClientHostname);
 
@@ -751,7 +751,7 @@ nanny_new_account (DESCRIPTOR_DATA * d, char *argument)
 		sprintf (buf2, "\nApply for a login account named %s? [y/n]  ", buf);
 		SEND_TO_Q (buf2, d);
 		d->connected = CON_ACCT_POLICIES;
-		d->stored = str_dup (buf);
+		d->stored = strdup (buf);
 	}
 	else
 	{
@@ -788,7 +788,7 @@ nanny_account_policies (DESCRIPTOR_DATA * d, char *argument)
 	{
 		d->acct = new account;
 		d->acct->set_name (d->stored);
-		d->stored = str_dup ("");
+		d->stored = strdup ("");
 		d->acct->created_on = time (0);
 		SEND_TO_Q (get_text_buffer (NULL, text_list, "account_policies"), d);
 		SEND_TO_Q ("Do you agree? (y/n) ", d);
@@ -1047,7 +1047,7 @@ setup_new_account (account  *acct)
 	char buf2[MAX_STRING_LENGTH];
 	char email[MAX_STRING_LENGTH];
 
-	password = str_dup (generate_password (1, (char **) "8"));
+	password = strdup (generate_password (1, (char **) "8"));
 
 	sprintf (buf, "Greetings,\n"
 		"\n"
@@ -1093,7 +1093,7 @@ setup_new_account (account  *acct)
 	acct->get_last_ip_sql_safe (escaped_last_ip);
 
 	mysql_set_server_option(database,MYSQL_OPTION_MULTI_STATEMENTS_ON);
-	std::string insert_query = 
+	std::string insert_query =
 		"SELECT (@next_id:=(MAX(user_id)+1)) AS next_id FROM forum_users; "
 
 		"INSERT INTO forum_users "
@@ -1144,7 +1144,7 @@ char *password;
 char buf[MAX_STRING_LENGTH];
 char email[MAX_STRING_LENGTH];
 
-password = str_dup (generate_password (1, (char **) "8"));
+password = strdup (generate_password (1, (char **) "8"));
 
 sprintf (buf, "Greetings,\n"
 "\n"
@@ -1191,18 +1191,18 @@ nanny_account_setup (DESCRIPTOR_DATA * d, char *argument)
 			d->strClientHostname);
 		system_log (buf, false);
 
-		/* 
+		/*
 		*  WE HAVE AN ACCOUNT CREATED
 		*     1st timer: count = 1, is_new = 1, has_pwd = 0, logins = 0, fails = 0
 		*     otherwise: not possible!
 		*/
 		int port = engine.get_port ();
-		mysql_safe_query 
+		mysql_safe_query
 			("INSERT INTO %s.ip "
 			"  VALUES('%s','%s','%s',NOW(),NOW(),1,1,0,%d,0,0);",
 			(engine.get_config ("player_log_db")).c_str (),
-			d->acct->name.c_str (), 
-			d->strClientHostname, 
+			d->acct->name.c_str (),
+			d->strClientHostname,
 			d->strClientIpAddr,
 			port);
 
@@ -1617,13 +1617,13 @@ nanny_composing_message (DESCRIPTOR_DATA * d, char *argument)
 		date[strlen (date) - 1] = '\0';
 
 	message = new MUDMAIL_DATA;
-	message->from = str_dup (d->pending_message->poster);
-	message->subject = str_dup (d->pending_message->subject);
-	message->message = str_dup (d->pending_message->message);
-	message->from_account = str_dup (d->acct->name.c_str ());
-	message->date = str_dup (date);
+	message->from = strdup (d->pending_message->poster);
+	message->subject = strdup (d->pending_message->subject);
+	message->message = strdup (d->pending_message->message);
+	message->from_account = strdup (d->acct->name.c_str ());
+	message->date = strdup (date);
 	message->flags = 0;
-	message->target = str_dup (d->pending_message->target);
+	message->target = strdup (d->pending_message->target);
 
 	acct = new account (d->stored);
 
@@ -1662,7 +1662,7 @@ nanny_composing_message (DESCRIPTOR_DATA * d, char *argument)
 
 	delete acct;
 
-	d->stored = str_dup ("");
+	d->stored = strdup ("");
 
 	display_hobbitmail_inbox (d, d->acct);
 
@@ -1844,8 +1844,8 @@ nanny_compose_mail_to (DESCRIPTOR_DATA * d, char *argument)
 	}
 
 	d->pending_message = new MESSAGE_DATA;
-	d->pending_message->target = str_dup (argument);
-	d->stored = str_dup (acct->name.c_str ());
+	d->pending_message->target = strdup (argument);
+	d->stored = strdup (acct->name.c_str ());
 	delete acct;
 	unload_pc (tch);
 
@@ -1899,18 +1899,18 @@ nanny_mail_menu (DESCRIPTOR_DATA * d, char *argument)
 
 		std::ostringstream message_query_stream;
 
-		message_query_stream << 
+		message_query_stream <<
 			"SELECT account,flags,from_line,from_account,"
 			"sent_date, subject,message, timestamp, id,"
 			"DATE_FORMAT(FROM_UNIXTIME(timestamp + "
 #ifndef MACOSX
-			<< (timezone + (int)(d->acct->timezone * 3600)) << 
+			<< (timezone + (int)(d->acct->timezone * 3600)) <<
 #else
 			<<
 #endif
 			"),\"%a %b %d %T %Y\") AS sent_date,to_line "
 			" FROM hobbitmail WHERE account = '"
-			<< escaped_name << 
+			<< escaped_name <<
 			"' ORDER BY timestamp DESC";
 
 		std::string message_query_string = message_query_stream.str ();
@@ -2040,10 +2040,10 @@ nanny_read_message (DESCRIPTOR_DATA * d, char *argument)
 			return;
 		}
 		row = mysql_fetch_row (result);
-		d->stored = str_dup (row[0]);
+		d->stored = strdup (row[0]);
 
 		d->pending_message = new MESSAGE_DATA;
-		d->pending_message->target = str_dup (row[1]);
+		d->pending_message->target = strdup (row[1]);
 		mysql_free_result (result);
 		result = NULL;
 		d->connected = CON_COMPOSE_SUBJECT;
@@ -2247,7 +2247,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 			" WHERE account = '%s'"
 			" AND create_state = %d",
 			player_db.c_str (),
-			d->acct->name.c_str (), 
+			d->acct->name.c_str (),
 			STATE_SUSPENDED);
 
 		if ((result = mysql_store_result (database)))
@@ -2268,8 +2268,8 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 			}
 		}
 
-		mysql_safe_query (PFILE_QUERY, 
-			player_db.c_str (), 
+		mysql_safe_query (PFILE_QUERY,
+			player_db.c_str (),
 			d->acct->name.c_str ());
 		result = mysql_store_result (database);
 
@@ -2293,7 +2293,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 			while ((row = mysql_fetch_row (result)))
 			{
 
-				//only active characters will be displayed, so this section is redundant	
+				//only active characters will be displayed, so this section is redundant
 				if (atoi (row[1]) < 1)
 					sprintf (state, "#3(Pending)#0");
 				else if (atoi (row[1]) == 1)
@@ -2687,7 +2687,7 @@ equip_newbie (CHAR_DATA * ch)
 			}
 		}//end female Harad
 
-		//general stachel contents	
+		//general stachel contents
 		if (tobj && (obj = load_object (80013))) //heavy silver coin
 		{
 			obj->count = 5;
@@ -2708,7 +2708,7 @@ equip_newbie (CHAR_DATA * ch)
 		if ((obj = load_object (5011))) //pants
 			equip_char (ch,obj, WEAR_LEGS);
 
-		if (number(0,1)) // cloak randomizer 
+		if (number(0,1)) // cloak randomizer
 		{
 			if ((obj = load_object (5112)))
 				equip_char (ch,obj, WEAR_ABOUT);
@@ -2739,7 +2739,7 @@ equip_newbie (CHAR_DATA * ch)
 			break;
 		}
 
-		switch (number(1,3)) // boots randomizer 
+		switch (number(1,3)) // boots randomizer
 		{
 		case 1:
 			if ((obj = load_object (40066)))
@@ -2755,13 +2755,13 @@ equip_newbie (CHAR_DATA * ch)
 			break;
 		}
 
-		if ((obj = load_object (1010))) // tunic 
+		if ((obj = load_object (1010))) // tunic
 			equip_char (ch,obj, WEAR_BODY);
 
 		if ((obj = load_object (5091))) // backpack
 		{
 			equip_char (ch,obj, WEAR_BACK );
-			tobj = obj; 
+			tobj = obj;
 		}
 
 		/* moria money */
@@ -2772,7 +2772,7 @@ equip_newbie (CHAR_DATA * ch)
 			obj_to_obj (obj, tobj);
 		}
 
-	}//end Moria 
+	}//end Moria
 
 	//start in Angost
 	else if (IS_SET (ch->plr_flags, START_ANGOST))
@@ -2785,7 +2785,7 @@ equip_newbie (CHAR_DATA * ch)
 				equip_char (ch, obj, WEAR_LEGS); //trousers
 			if ((obj = load_colored_object(42124, "dark grey")))
 				equip_char (ch, obj, WEAR_ABOUT); //cloak
-			if ((obj = load_colored_object(98026, "brown"))) 
+			if ((obj = load_colored_object(98026, "brown")))
 				equip_char (ch, obj, WEAR_HANDS); //gloves
 
 			if ((obj = load_object (104))) //belt
@@ -2815,7 +2815,7 @@ equip_newbie (CHAR_DATA * ch)
 				equip_char (ch, obj, WEAR_LEGS); //leggings
 
 			if ((obj = load_object(97810))) //belt
-				equip_char (ch, obj, WEAR_WAIST); 
+				equip_char (ch, obj, WEAR_WAIST);
 			if ((obj = load_object (42125))) //sandals
 				equip_char (ch, obj, WEAR_FEET);
 			if ((obj = load_object (42123))) //cloak
@@ -2882,8 +2882,8 @@ equip_newbie (CHAR_DATA * ch)
 
 	} //end Angost
 
-	//starting in Gondor - also default case 
-	else 
+	//starting in Gondor - also default case
+	else
 	{
 		if ((obj = load_object (1010))) //tunic
 			equip_char (ch, obj, WEAR_BODY);
@@ -3401,9 +3401,9 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	{
 		outfit_new_char (d->character, d->character->pc->special_role);
 		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
-		d->pending_message->poster = str_dup (GET_NAME (d->character));
+		d->pending_message->poster = strdup (GET_NAME (d->character));
 		d->pending_message->subject =
-			str_dup ("Special Role Selected in Chargen.");
+			strdup ("Special Role Selected in Chargen.");
 		sprintf (buf,
 			"Role Name: %s\n" "Role Cost: %d points\n" "Posted By: %s\n"
 			"Posted On: %s\n" "\n" "%s\n",
@@ -3412,7 +3412,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 			d->character->pc->special_role->poster,
 			d->character->pc->special_role->date,
 			d->character->pc->special_role->body);
-		d->pending_message->message = str_dup (buf);
+		d->pending_message->message = strdup (buf);
 		add_message_to_mysql_player_notes (d->character->tname,
 			d->character->tname,
 			d->pending_message);
@@ -3482,7 +3482,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		d->character->max_hit =
 			50 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 18) * 4);
 		d->character->hit = d->character->max_hit;
-		d->character->armor = 7;	
+		d->character->armor = 7;
 	}
 
 	if (d->character->pc->level)
@@ -3499,20 +3499,20 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 			date[strlen (date) - 1] = '\0';
 
 		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
-		d->pending_message->poster = str_dup (GET_NAME (d->character));
-		d->pending_message->subject = str_dup ("Background Information.");
+		d->pending_message->poster = strdup (GET_NAME (d->character));
+		d->pending_message->subject = strdup ("Background Information.");
 		d->pending_message->message =
-			str_dup (d->character->pc->creation_comment);
-		d->pending_message->date = str_dup (date);
+			strdup (d->character->pc->creation_comment);
+		d->pending_message->date = strdup (date);
 		add_message_to_mysql_player_notes (d->character->tname,
 			d->character->tname,
 			d->pending_message);
 
 		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
-		d->pending_message->poster = str_dup (GET_NAME (d->character));
-		d->pending_message->subject = str_dup ("My Background.");
+		d->pending_message->poster = strdup (GET_NAME (d->character));
+		d->pending_message->subject = strdup ("My Background.");
 		d->pending_message->message =
-			str_dup (d->character->pc->creation_comment);
+			strdup (d->character->pc->creation_comment);
 		post_to_mysql_journal (d);
 
 		d->character->pc->creation_comment = NULL;
@@ -3629,7 +3629,7 @@ nanny_change_email (DESCRIPTOR_DATA * d, char *argument)
 		sprintf (buf, "\nIs the address %s correct? [y/n] ", argument);
 		SEND_TO_Q (buf, d);
 
-		d->stored = str_dup (argument);
+		d->stored = strdup (argument);
 
 		d->connected = CON_CHG_EMAIL_CNF;
 		return;
@@ -4198,7 +4198,7 @@ nanny_race_confirm (DESCRIPTOR_DATA * d, char *arg)
 	}
 }
 
-//not used with web-based chargen 
+//not used with web-based chargen
 //not used in a long time anyway
 void
 nanny_privacy_confirm (DESCRIPTOR_DATA * d, char *arg)
@@ -4391,10 +4391,10 @@ nanny_special_role_selection (DESCRIPTOR_DATA * d, char *arg)
 	}
 
 	d->character->pc->special_role = new ROLE_DATA;
-	d->character->pc->special_role->summary = str_dup (role->summary);
-	d->character->pc->special_role->body = str_dup (role->body);
-	d->character->pc->special_role->poster = str_dup (role->poster);
-	d->character->pc->special_role->date = str_dup (role->date);
+	d->character->pc->special_role->summary = strdup (role->summary);
+	d->character->pc->special_role->body = strdup (role->body);
+	d->character->pc->special_role->poster = strdup (role->poster);
+	d->character->pc->special_role->date = strdup (role->date);
 	d->character->pc->special_role->cost = role->cost;
 	d->character->pc->special_role->id = role->id;
 
@@ -4970,7 +4970,7 @@ profession_selection (DESCRIPTOR_DATA * d, char *argument)
 }
 
 //not used with web-based chargen
-int 
+int
 get_native_tongue(CHAR_DATA* ch)
 {
 	/* retrieve the default racial tongue */
@@ -5000,7 +5000,7 @@ get_native_tongue(CHAR_DATA* ch)
 	}
 
 	/* otherwise return the racial native */
-	return atoi(native_tongue);	
+	return atoi(native_tongue);
 }
 
 //not used with web-based chargen
@@ -5241,7 +5241,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 	if (ch->name && !isname (ch->tname, ch->name))
 	{
 		sprintf (buf, "%s %s", ch->tname, ch->name);
-		ch->name = str_dup (buf);
+		ch->name = strdup (buf);
 	}
 
 	else if (!str_cmp (key, "quit"))
@@ -5583,7 +5583,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 		/*
 		if ( d->character->pc->nanny_state && is_newbie (d->character) )
 		d->character->pc->nanny_state = STATE_PRIVACY;
-		else 
+		else
 		*/
 		d->character->pc->nanny_state = 0;
 
@@ -5754,7 +5754,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 
 		/* grommit changed to use helper func */
 		if (get_native_tongue(ch))
-			ch->speaks = get_native_tongue(ch); 
+			ch->speaks = get_native_tongue(ch);
 
 		/* grommit moved it here - set start flag if one was not picked (e.g. for races w/o a choice) */
 		if (num_starting_locs (ch->race) <= 1
@@ -5979,7 +5979,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 		nanny_read_message (d, argument);
 		break;
 
-		/************ following will not be used with web based chargen 
+		/************ following will not be used with web based chargen
 		case CON_PLAYER_NEW:
 		d->connected = CON_CREATION;
 		create_menu_options (d);
@@ -6087,5 +6087,5 @@ void read_motd(DESCRIPTOR_DATA * d)
 		//SEND_TO_Q (get_text_buffer (NULL, text_list, "lib/MOTD"), d);
 	}
 
-	return;   
+	return;
 }

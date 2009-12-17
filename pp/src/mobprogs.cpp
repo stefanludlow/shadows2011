@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  mobprogs.c : Mobile Scripting Module               www.middle-earth.us | 
+|  mobprogs.c : Mobile Scripting Module               www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -191,7 +191,7 @@ setvar (CHAR_DATA * mob, char *var_name, int value, int type)
 
 		var = (VAR_DATA *) alloc (sizeof (VAR_DATA), 20);
 
-		var->name = str_dup (var_name);
+		var->name = strdup (var_name);
 
 		if (*var_name == '_')
 		{
@@ -233,7 +233,7 @@ define_variable (CHAR_DATA * mob, MOBPROG_DATA * program, char *argument)
 	else
 	{
 		system_log ("Mob program with a variable problem.", true);
-		program->line = str_dup (current_line);
+		program->line = strdup (current_line);
 		program->flags |= MPF_BROKEN;
 	}
 
@@ -242,7 +242,7 @@ define_variable (CHAR_DATA * mob, MOBPROG_DATA * program, char *argument)
 	if (!*var_name)
 	{
 		system_log ("Variable name problem; no var_name.", true);
-		program->line = str_dup (current_line);
+		program->line = strdup (current_line);
 		program->flags |= MPF_BROKEN;
 	}
 
@@ -1241,7 +1241,7 @@ mob_string_token (char **argument, char *arg_first, int *quoted)
 	while (isspace (**argument))
 		(*argument)++;
 
-	/* If the next character is (, then we're probably dealing with a 
+	/* If the next character is (, then we're probably dealing with a
 	function. */
 
 	if (**argument == '(')
@@ -1351,7 +1351,7 @@ assignment (CHAR_DATA * mob, MOBPROG_DATA * program, char *target_name,
 		sprintf (buf, "trigger %s, mob %d", program->trigger_name,
 			mob->mob->nVirtual);
 		system_log (buf, true);
-		program->line = str_dup (current_line);
+		program->line = strdup (current_line);
 		program->flags  |= MPF_BROKEN;
 		return;
 	}
@@ -1359,7 +1359,7 @@ assignment (CHAR_DATA * mob, MOBPROG_DATA * program, char *target_name,
 	if (!mob_get_token (p, buf, MT_EQUAL))
 	{
 		system_log ("Assignment needs equal.", true);
-		program->line = str_dup (current_line);
+		program->line = strdup (current_line);
 		program->flags |= MPF_BROKEN;
 		return;
 	}
@@ -1385,7 +1385,7 @@ assignment (CHAR_DATA * mob, MOBPROG_DATA * program, char *target_name,
 		if (target->value)
 			mem_free ((char *) target->value);
 
-		target->value = (long int) str_dup (buf);
+		target->value = (long int) strdup (buf);
 	}
 }
 
@@ -1708,14 +1708,14 @@ add_replace_mobprog_data (CHAR_DATA * ch, CHAR_DATA * mob,
 		else
 			mob->prog = prog;
 
-		prog->trigger_name = str_dup (trigger_name);
+		prog->trigger_name = strdup (trigger_name);
 		prog->next = NULL;
 
 	}
 	else
 		mem_free (prog->prog);
 
-	prog->prog = str_dup (prog_data);
+	prog->prog = strdup (prog_data);
 	prog->busy = 0;
 }
 

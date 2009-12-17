@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  dwellings.c : auto-genned player dwellings/areas   www.middle-earth.us | 
+|  dwellings.c : auto-genned player dwellings/areas   www.middle-earth.us |
 |  Copyright (C) 2005, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -25,8 +25,8 @@ clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits)
 	targ_room->room_flags = source_room->room_flags;
 	targ_room->sector_type = source_room->sector_type;
 
-	targ_room->name = str_dup (source_room->name);
-	targ_room->description = str_dup (source_room->description);
+	targ_room->name = strdup (source_room->name);
+	targ_room->description = strdup (source_room->description);
 
 	targ_room->zone = targ_room->nVirtual / ZONE_SIZE;
 
@@ -38,9 +38,9 @@ clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits)
 				continue;
 			targ_room->dir_option[i] = new room_direction_data;
 			targ_room->dir_option[i]->general_description =
-				str_dup (source_room->dir_option[i]->general_description);
+				strdup (source_room->dir_option[i]->general_description);
 			targ_room->dir_option[i]->keyword =
-				str_dup (source_room->dir_option[i]->keyword);
+				strdup (source_room->dir_option[i]->keyword);
 			targ_room->dir_option[i]->exit_info =
 				source_room->dir_option[i]->exit_info;
 			targ_room->dir_option[i]->key = source_room->dir_option[i]->key;
@@ -55,8 +55,8 @@ clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits)
 		for (exptr = source_room->ex_description; exptr; exptr = exptr->next)
 		{
 			extra = new EXTRA_DESCR_DATA;
-			extra->keyword = str_dup (exptr->keyword);
-			extra->description = str_dup (exptr->description);
+			extra->keyword = strdup (exptr->keyword);
+			extra->description = strdup (exptr->description);
 			extra->next = targ_room->ex_description;
 			targ_room->ex_description = extra;
 		}
@@ -69,7 +69,7 @@ clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits)
 		{
 			if (source_room->extra->weather_desc[i])
 				targ_room->extra->weather_desc[i] =
-				str_dup (source_room->extra->weather_desc[i]);
+				strdup (source_room->extra->weather_desc[i]);
 		}
 	}
 	else
@@ -194,8 +194,8 @@ generate_dwelling_room (OBJ_DATA * dwelling)
 
 	room->dir_option[OUTSIDE] = new room_direction_data;
 
-	room->dir_option[OUTSIDE]->general_description = str_dup ("");
-	room->dir_option[OUTSIDE]->keyword = str_dup ("entryway");
+	room->dir_option[OUTSIDE]->general_description = strdup ("");
+	room->dir_option[OUTSIDE]->keyword = strdup ("entryway");
 	room->dir_option[OUTSIDE]->exit_info |= (1 << 0);
 	room->dir_option[OUTSIDE]->key = dwelling->o.od.value[3];
 	room->dir_option[OUTSIDE]->to_room = dwelling->in_room;

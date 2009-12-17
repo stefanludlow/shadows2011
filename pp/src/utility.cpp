@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  utility.c : Utility Module                         www.middle-earth.us | 
+|  utility.c : Utility Module                         www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -157,7 +157,7 @@ const int restricted_skills[] = {
 	0,				/* Gambling */
 	-2,				/* Bonecarving */
 	0,				/* Gardening */
-	0,				/* Sleight */ 
+	0,				/* Sleight */
 	-2				/* Astonomy */
 };
 
@@ -417,7 +417,7 @@ bool is_overcast (ROOM_DATA * room)
 
 	return result;
 }
-// is_sunlight_restricted 
+// is_sunlight_restricted
 // returns true if the character is currently suffering due to the sun.
 // TODO: move to char.h
 bool
@@ -427,7 +427,7 @@ is_sunlight_restricted (CHAR_DATA * ch, ROOM_DATA * room)
 
 	if (sun_light && (ch->affected_by & AFF_SUNLIGHT_PEN))
 	{
-		if (!is_overcast (ch->room) 
+		if (!is_overcast (ch->room)
 			|| (room && !is_overcast (room)))
 		{
 			send_to_char ("The brilliant flame of Anor interferes "
@@ -480,7 +480,7 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 			return 1;
 	}
 
-	// no dual wield skill if you can't one hand the weapon 
+	// no dual wield skill if you can't one hand the weapon
 	if (skill == SKILL_DUAL)
 	{
 		/* bug: if we ever move something other than LIGHT_ / MEDIUM_ / HEAVY_ to one handed, dual not pickable */
@@ -893,7 +893,7 @@ dice (unsigned int number, unsigned int size)
 }
 
 /* returns: 0 if equal, 1 if arg1 > arg2, -1 if arg1 < arg2  */
-/* scan 'till found different or end of both                 
+/* scan 'till found different or end of both
 int str_cmp(char *arg1, char *arg2)
 {
 register int chk, i;
@@ -1489,7 +1489,7 @@ alloc (int bytes, int dtype)
 			printf ("unspace");
 			break;
 		case 15:
-			printf ("str_dup: ");
+			printf ("strdup: ");
 			break;
 		case 16:
 			printf ("CREATE");
@@ -2213,33 +2213,33 @@ Proposed:
 
 Used:
 
-61: XXS XXS XXS XXS XXS XXS XXS XXS XXS XXS 
-68:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS 
-75:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS 
-82:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS 
-89:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS 
-96:  XS  XS  XS  XS  XS  XS  XS  XS   S   S 
-103:  XS  XS  XS  XS  XS  XS   S   S   S   S 
-110:  XS  XS  XS  XS   S   S   S   S   S   S 
-117:  XS  XS  XS   S   S   S   S   S   S   S 
-124:  XS   S   S   S   S   S   S   S   S   S 
-131:   S   S   S   S   S   S   S   S   M   M 
-138:   S   S   S   S   S   S   M   M   M   M 
-145:   S   S   S   S   M   M   M   M   M   M 
-152:   S   S   S   M   M   M   M   M   M   M 
-159:   S   M   M   M   M   M   M   M   M   M 
-166:   M   M   M   M   M   M   M   M   M   L 
-173:   M   M   M   M   M   M   M   M   L   L 
-180:   M   M   M   M   M   M   L   L   L   L 
-187:   M   M   M   M   L   L   L   L   L   L 
-194:   M   M   L   L   L   L   L   L   L   L 
-201:   M   L   L   L   L   L   L   L   L   L 
-208:   L   L   L   L   L   L   L   L   L  XL 
-215:   L   L   L   L   L   L   L  XL  XL  XL 
-222:   L   L   L   L   L  XL  XL  XL  XL  XL 
-229:   L   L   L   L  XL  XL  XL  XL  XL  XL 
-236: XXL XXL XXL XXL XXL XXL XXL XXL XXL XXL 
-40  44  48  52  56  60  64  68  72  76 
+61: XXS XXS XXS XXS XXS XXS XXS XXS XXS XXS
+68:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS
+75:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS
+82:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS
+89:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS
+96:  XS  XS  XS  XS  XS  XS  XS  XS   S   S
+103:  XS  XS  XS  XS  XS  XS   S   S   S   S
+110:  XS  XS  XS  XS   S   S   S   S   S   S
+117:  XS  XS  XS   S   S   S   S   S   S   S
+124:  XS   S   S   S   S   S   S   S   S   S
+131:   S   S   S   S   S   S   S   S   M   M
+138:   S   S   S   S   S   S   M   M   M   M
+145:   S   S   S   S   M   M   M   M   M   M
+152:   S   S   S   M   M   M   M   M   M   M
+159:   S   M   M   M   M   M   M   M   M   M
+166:   M   M   M   M   M   M   M   M   M   L
+173:   M   M   M   M   M   M   M   M   L   L
+180:   M   M   M   M   M   M   L   L   L   L
+187:   M   M   M   M   L   L   L   L   L   L
+194:   M   M   L   L   L   L   L   L   L   L
+201:   M   L   L   L   L   L   L   L   L   L
+208:   L   L   L   L   L   L   L   L   L  XL
+215:   L   L   L   L   L   L   L  XL  XL  XL
+222:   L   L   L   L   L  XL  XL  XL  XL  XL
+229:   L   L   L   L  XL  XL  XL  XL  XL  XL
+236: XXL XXL XXL XXL XXL XXL XXL XXL XXL XXL
+40  44  48  52  56  60  64  68  72  76
 
 */
 
@@ -3191,8 +3191,8 @@ add_text (TEXT_DATA ** list, char *filename, char *document_name)
 
 	*list = text;
 
-	text->filename = str_dup (filename);
-	text->name = str_dup (document_name);
+	text->filename = strdup (filename);
+	text->name = strdup (document_name);
 	text->text = doc;
 
 	return text;
@@ -3288,7 +3288,7 @@ load_help_file (FILE * fp)
 			{
 
 				master_element = (HELP_DATA *) alloc (sizeof (HELP_DATA), 36);
-				master_element->keywords = str_dup (buf);
+				master_element->keywords = strdup (buf);
 
 				if (!list)
 					list = master_element;
@@ -3302,7 +3302,7 @@ load_help_file (FILE * fp)
 
 			element->master_element = master_element;
 			element->help_info = NULL;
-			element->keyword = str_dup (topic);
+			element->keyword = strdup (topic);
 
 			last_element->next = element;
 			last_element = element;
@@ -3321,7 +3321,7 @@ load_help_file (FILE * fp)
 			strcat (b_buf, buf);
 		}
 
-		master_element->help_info = str_dup (b_buf);
+		master_element->help_info = strdup (b_buf);
 
 		if (buf[1] == '~')
 			break;
@@ -3533,7 +3533,7 @@ add_combat_log (CHAR_DATA * ch, char *msg)
 		return;
 
 	if (!ch->combat_log)
-		ch->combat_log = str_dup ("\n");
+		ch->combat_log = strdup ("\n");
 
 	p = ch->combat_log;
 
@@ -3563,7 +3563,7 @@ add_combat_log (CHAR_DATA * ch, char *msg)
 	if (ch->combat_log)
 		mem_free (ch->combat_log);
 
-	ch->combat_log = str_dup (buf);
+	ch->combat_log = strdup (buf);
 }
 
 int
@@ -3829,7 +3829,7 @@ swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd)
 			tochar = true;
 		}
 		else
-			*(p++) = *(argument++); 
+			*(p++) = *(argument++);
 	}
 
 	*p = '\0';
@@ -3873,7 +3873,7 @@ swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd)
 				{
 					buf[0] = toupper (buf[0]);
 				}
-			}  
+			}
 		}
 	}
 	else
@@ -3885,7 +3885,7 @@ swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd)
 		&& buf[strlen (buf) - 1] != '?')
 		strcat (buf, ".");
 
-	//argument = temp; 
+	//argument = temp;
 	sprintf (argument, "%s", buf);
 
 	return (argument);
@@ -3917,7 +3917,7 @@ bool ciStringEqual (const std::string & s1, const std::string & s2)
 }  // end of ciStringEqual
 
 // Hibou -- Returns the date in an in-character context.
-std::string get_date( ) 
+std::string get_date( )
 {
 	std::string suf;
 	std::ostringstream date_buf;

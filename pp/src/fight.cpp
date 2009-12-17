@@ -166,7 +166,7 @@ const char *break_def[] = {
 	"knock aside", "knocks aside",	/* slash */
 	"maneuver around", "maneuvers around",	/* lash */
 	"force through", "forces through"  /* natural */
-};				
+};
 
 /* original
 
@@ -816,14 +816,14 @@ make_statue (CHAR_DATA * ch)
 		sprintf (buf, "statue npc_%s", buf2);
 	}
 
-	statue->name = str_dup (buf);
+	statue->name = strdup (buf);
 
 	sprintf (buf, "An eerily lifelike statue of %s looms here.",
 		ch->short_descr);
-	statue->description = str_dup (buf);
+	statue->description = strdup (buf);
 
 	sprintf (buf, "an eerily lifelike statue of %s", ch->short_descr);
-	statue->short_description = str_dup (buf);
+	statue->short_description = strdup (buf);
 
 	for (wound = ch->wounds; wound; wound = wound->next)
 	{
@@ -941,13 +941,13 @@ make_corpse (CHAR_DATA * ch)
 		sprintf (buf, "corpse npc %s", GET_NAMES (ch));
 	}
 
-	corpse->name = str_dup (buf);
+	corpse->name = strdup (buf);
 
 	sprintf (buf, "The corpse of %s is lying here.", ch->short_descr);
-	corpse->description = str_dup (buf);
+	corpse->description = strdup (buf);
 
 	sprintf (buf, "the corpse of %s", ch->short_descr);
-	corpse->short_description = str_dup (buf);
+	corpse->short_description = strdup (buf);
 
 	for (wound = ch->wounds; wound; wound = wound->next)
 	{
@@ -1880,8 +1880,8 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 
 	attack_modifier = attack_modifier * enc_tab[i].penalty;
 	// sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
-	/* Move costs */    
-	/** 
+	/* Move costs */
+	/**
 	move_cost = enc_tab[i].move + 2.0 for Frantic
 	move_cost = enc_tab[i].move + 1.5 for Aggressive
 	move_cost = enc_tab[i].move + 1.0 for Normal
@@ -1893,7 +1893,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 
 
 
-	/* 50% chance to lose a move if they would have lost no points */  
+	/* 50% chance to lose a move if they would have lost no points */
 	if ((number (1, 100) > 50) && (movecost <= 1))
 		movecost = 1;
 
@@ -2110,8 +2110,8 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	// sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
 	defense_modifier = defense_modifier * enc_tab[i].penalty;
 
-	/* Move costs */    
-	/** 
+	/* Move costs */
+	/**
 	move_cost = enc_tab[i].move + 2.0 for Frantic
 	move_cost = enc_tab[i].move + 1.5 for Aggressive
 	move_cost = enc_tab[i].move + 1.0 for Normal
@@ -2120,7 +2120,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	**/
 
 	movecost = int (enc_tab[i].move + (0.5) * (4 - tar->fight_mode));
-	/* 50% chance to lose a move if they would have lost no points */  
+	/* 50% chance to lose a move if they would have lost no points */
 	if ((number (1, 100) > 50) && (movecost <= 1))
 		movecost = 1;
 
@@ -2908,7 +2908,7 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 			obj_to_room (unequip_char (tar, WEAR_BOTH), tar->in_room);
 		else if (get_equip (tar, WEAR_SHIELD) == defense_weapon)
 			obj_to_room (unequip_char (tar, WEAR_SHIELD), tar->in_room);
-		else 
+		else
 			system_log ("Disarm, but couldn't find weapons's hand. (defender)",
 			true);
 
@@ -3168,15 +3168,15 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 
 				else if(attack_weapon->o.weapon.dice > 1)
 					dam +=
-					dice (attack_weapon->o.weapon.dice, 
-					attack_weapon->o.weapon.sides + 1); 
+					dice (attack_weapon->o.weapon.dice,
+					attack_weapon->o.weapon.sides + 1);
 			}
 			else if ((attack_weapon->o.od.value[3] == SKILL_HEAVY_EDGE
 				|| attack_weapon->o.od.value[3] == SKILL_HEAVY_BLUNT
 				|| attack_weapon->o.od.value[3] == SKILL_HEAVY_PIERCE)
 				&& (attack_weapon->location == WEAR_PRIM || WEAR_SEC))
 			{
-				if (attack_weapon->o.weapon.sides < 2) 
+				if (attack_weapon->o.weapon.sides < 2)
 				{
 					attack_weapon->o.weapon.sides = 2;
 				}
@@ -3188,8 +3188,8 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 
 				else if(attack_weapon->o.weapon.dice > 1)
 					dam +=
-					dice (attack_weapon->o.weapon.dice, 
-					attack_weapon->o.weapon.sides - 1); 
+					dice (attack_weapon->o.weapon.dice,
+					attack_weapon->o.weapon.sides - 1);
 			}
 			else
 				dam +=
@@ -3257,7 +3257,7 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 	else if (!attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
 		dam += weapon_nat_attack_table[src->nat_attack_type] [eq->o.armor.armor_type];
 
-	if (number(0,1))  
+	if (number(0,1))
 	{
 		eq = get_equip (tar, wear_loc2);
 
@@ -3339,7 +3339,7 @@ weaken (CHAR_DATA * victim, uint16 hp_penalty, uint16 mp_penalty,
 	char buf[MAX_STRING_LENGTH];
 
 	/* dwarves and elves immune to endurance loss */
-	if (victim->race == 23 || (victim->race >=16 && victim->race <= 19)  || victim->race==93) 
+	if (victim->race == 23 || (victim->race >=16 && victim->race <= 19)  || victim->race==93)
 	{
 		mp_penalty = 0;
 	}

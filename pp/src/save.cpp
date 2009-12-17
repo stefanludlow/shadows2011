@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  save.c : World Save Module                         www.middle-earth.us | 
+|  save.c : World Save Module                         www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -206,7 +206,7 @@ fwrite_a_obj (OBJ_DATA * obj, FILE * fp)
 		}
 		else // both valid so strcmp possible. Save if different.
 		{
-			// if strcmp is not zero, there is a non-zero difference between them and 
+			// if strcmp is not zero, there is a non-zero difference between them and
 			// thus the object's version should be saved
 			saveMkey = ( strcmp(obj->desc_keys, proto->desc_keys) != 0 );
 		}
@@ -1080,7 +1080,7 @@ load_online_stats ()
 	fscanf (fp, "%d\n", &count_max_online);
 	char *tmpdate = fread_string (fp);
 	strcpy (max_online_date, tmpdate);
-	mem_free (tmpdate); // char* 
+	mem_free (tmpdate); // char*
 	fclose (fp);
 }
 
@@ -1755,7 +1755,7 @@ load_a_saved_mobile (int nVirtual, FILE * fp, bool stable)
 		{
 			p = mob->clans;
 			p2 = p;
-			mob->clans = str_dup ("");
+			mob->clans = strdup ("");
 
 			while (1)
 			{

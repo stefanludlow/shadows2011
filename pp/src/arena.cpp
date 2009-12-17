@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  arena.c : Arena Combat Processor                   www.middle-earth.us | 
+|  arena.c : Arena Combat Processor                   www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -1046,19 +1046,19 @@ arena__do_enter (CHAR_DATA * ch, char *argument, int cmd)
 		ch->race = 0;
 		send_to_char ("#6\nYou have been placed on the Human team!#0\n", ch);
 		humans++;
-		ch->description = str_dup (vtom (5999)->description);
+		ch->description = strdup (vtom (5999)->description);
 	}
 	else if (roll == 2)
 	{
 		if (!number (0, 9))
 		{
 			ch->race = 119;
-			ch->description = str_dup (vtom (5997)->description);
+			ch->description = strdup (vtom (5997)->description);
 		}
 		else
 		{
 			ch->race = 120;
-			ch->description = str_dup (vtom (5998)->description);
+			ch->description = strdup (vtom (5998)->description);
 		}
 		send_to_char ("#1\nYou have been placed on the Orcish team!#0\n", ch);
 		orcs++;
@@ -1090,7 +1090,7 @@ arena__do_enter (CHAR_DATA * ch, char *argument, int cmd)
 	char_to_room (ch, 5142);
 	sprintf (buf, "%s %s", ch->name, ch->tname);
 	mem_free (ch->name);
-	ch->name = str_dup (buf);
+	ch->name = strdup (buf);
 	return;
 }
 
@@ -1302,10 +1302,10 @@ te_pit_last (void)
 	char_to_room (keeper, 66951);
 
 	/**
-	66236  an in-progress token     
-	66237  a warg-won token         
-	66238  a orc-won token          
-	66239  a human-won token   
+	66236  an in-progress token
+	66237  a warg-won token
+	66238  a orc-won token
+	66239  a human-won token
 
 	*/
 	if (orcswin)
@@ -1356,7 +1356,7 @@ te_pit_last (void)
 		send_to_room (buf2, 66952);
 		send_to_room (buf2, 66951);
 	}
-} 
+}
 
 void
 te_pit_third (void)
@@ -1491,7 +1491,7 @@ te_pit_first (void)
 	obj_to_room(load_object (5002), 66955);
 	obj_to_room(load_object (5045), 66953);
 	obj_to_room(load_object (5419), 66956);
-	obj_to_room(load_object (5501), 66953); 
+	obj_to_room(load_object (5501), 66953);
 	obj_to_room(load_object (6005), 66953);
 	obj_to_room(load_object (6005), 66956);
 	obj_to_room(load_object (6006), 66953);
@@ -1821,7 +1821,7 @@ te_pit_cleanup (void)
 				extract_char (tch);
 			else
 			{
-				//strip all gear 	
+				//strip all gear
 				if (tch->right_hand)
 				{
 					obj = tch->right_hand;
@@ -1839,8 +1839,8 @@ te_pit_cleanup (void)
 					obj = tch->equip;
 					extract_obj (unequip_char (tch, obj->location));
 				}
-				//move nekkid player to locker room		
-				char_from_room (tch); 	
+				//move nekkid player to locker room
+				char_from_room (tch);
 				char_to_room (tch, 66960);
 				act
 					("\n#2As the other survivors of the battle are herded up by the Slavers before the gates, you are escorted back to the locker room, and your gladiator gear is taken from you. You are told that you will find the prize for surving the battle in your bag.#0",
@@ -2240,7 +2240,7 @@ te_pit_do_enter (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 
-	// number of entrants checked and clans assigned 
+	// number of entrants checked and clans assigned
 	if (ch->race == 0 ||
 		ch->race == 1 ||
 		ch->race == 101 ||
@@ -2256,7 +2256,7 @@ te_pit_do_enter (CHAR_DATA * ch, char *argument, int cmd)
 			te_pit_human_max_count--;
 			humans++;
 		}
-		else 
+		else
 		{
 			send_to_char ("#6\nThere is not enough room on the Human team!#0\n", ch);
 			return;
@@ -2266,7 +2266,7 @@ te_pit_do_enter (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (te_pit_orc_max_count > 0)
 		{
-			add_clan (ch, "orcslaves", CLAN_MEMBER);   
+			add_clan (ch, "orcslaves", CLAN_MEMBER);
 			send_to_char ("#1\nYou have been placed on the Orcish team!#0\n", ch);
 			te_pit_orc_max_count--;
 			orcs++;
@@ -2291,11 +2291,11 @@ te_pit_do_enter (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		sprintf (buf, "A gladiator's bag, labeled '%s %s' sits here.",
 			PITBAG_DESC_PREPEND, ch->short_descr);
-		bag->description = str_dup (buf);
+		bag->description = strdup (buf);
 
 		sprintf (buf, "a bag labeled '%s %s'", PITBAG_DESC_PREPEND,
 			ch->short_descr);
-		bag->short_description = str_dup (buf);
+		bag->short_description = strdup (buf);
 
 
 		if (ch->right_hand)
@@ -2320,9 +2320,9 @@ te_pit_do_enter (CHAR_DATA * ch, char *argument, int cmd)
 			if (bag)
 				obj_to_obj (unequip_char (ch, obj->location), bag);
 		}
-		obj = load_object (66262);	
+		obj = load_object (66262);
 		obj_to_obj (obj, bag); //winners token is added.
-		obj_to_room (bag, 66960); 
+		obj_to_room (bag, 66960);
 	}
 
 
@@ -2334,6 +2334,6 @@ te_pit_do_enter (CHAR_DATA * ch, char *argument, int cmd)
 	char_to_room (ch, 66953);
 	sprintf (buf, "%s %s", ch->name, ch->tname);
 	mem_free (ch->name);
-	ch->name = str_dup (buf);
+	ch->name = strdup (buf);
 	return;
-} 
+}

@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  act.offensive.c : Violence Module                  www.middle-earth.us | 
+|  act.offensive.c : Violence Module                  www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -247,7 +247,7 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 		//if ((dir == 6) && (ch->in_room > 100000))
 		//	troom = vtor(ch->was_in_room);
 
-		/*** harsh way to deal with throwing things out without crashing the game	**/	
+		/*** harsh way to deal with throwing things out without crashing the game	**/
 		if ((dir == 6) && (ch->in_room > 100000))
 		{
 			obj_from_char (&tobj, 0);
@@ -263,7 +263,7 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
-		if (exit 
+		if (exit
 			&& IS_SET (exit->exit_info, EX_ISDOOR)
 			&& IS_SET (exit->exit_info, EX_CLOSED)
 			&& !IS_SET (exit->exit_info, EX_ISGATE))
@@ -336,7 +336,7 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 				return;
 			}
 
-			if (exit 
+			if (exit
 				&& IS_SET (exit->exit_info, EX_CLOSED)
 				&& !IS_SET (exit->exit_info, EX_ISGATE))
 			{
@@ -641,8 +641,8 @@ do_whirl (CHAR_DATA * ch, char *argument, int cmd)
 	ch->whirling = 1;
 }
 
-/** There is no block from a critical hit. 
-** If you are under cover, all other shots are misses. 
+/** There is no block from a critical hit.
+** If you are under cover, all other shots are misses.
 ** If you are not under cover, then you have a chance to block missiles with your shield.
 **/
 int
@@ -714,7 +714,7 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
 
 	skill_use (ch, ch_skill, 0);
 
-	// Weather effects 
+	// Weather effects
 	if (weather_info[ch->room->zone].fog == THIN_FOG)
 		att_modifier += 5;
 	if (weather_info[ch->room->zone].fog == THICK_FOG)
@@ -728,21 +728,21 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
 
 	// Sector type effects
 	if (target->room->sector_type == SECT_ROAD)
-		att_modifier += 5; 
-	if (target->room->sector_type ==SECT_TRAIL) 
-		att_modifier += 5; 
+		att_modifier += 5;
+	if (target->room->sector_type ==SECT_TRAIL)
+		att_modifier += 5;
 	if (target->room->sector_type ==SECT_FIELD)
-		att_modifier += 10; 
+		att_modifier += 10;
 	if (target->room->sector_type ==SECT_WOODS)
-		att_modifier += 15; 
-	if (target->room->sector_type ==SECT_FOREST) 
-		att_modifier += 25; 
+		att_modifier += 15;
+	if (target->room->sector_type ==SECT_FOREST)
+		att_modifier += 25;
 	if (target->room->sector_type ==SECT_HILLS)
-		att_modifier += 15; 
-	if (target->room->sector_type ==SECT_MOUNTAIN) 
-		att_modifier += 20; 
+		att_modifier += 15;
+	if (target->room->sector_type ==SECT_MOUNTAIN)
+		att_modifier += 20;
 	if (target->room->sector_type ==SECT_SWAMP)
-		att_modifier += -10; 
+		att_modifier += -10;
 	if (target->room->sector_type ==SECT_HEATH)
 		att_modifier += -5;
 
@@ -1407,7 +1407,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 	if (IS_IMPLEMENTOR (target) && !IS_NPC (target) && !IS_NPC (ch))
 		target = ch;
 
-	if (ch->in_room != target->in_room) 
+	if (ch->in_room != target->in_room)
 	{
 		ranged = 1;
 	}
@@ -1583,17 +1583,17 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 	if (ranged && ch->delay_who)
 	{
 		if (!str_cmp (ch->delay_who, "north"))
-			from_direction = str_dup ("the south");
+			from_direction = strdup ("the south");
 		else if (!str_cmp (ch->delay_who, "east"))
-			from_direction = str_dup ("the west");
+			from_direction = strdup ("the west");
 		else if (!str_cmp (ch->delay_who, "south"))
-			from_direction = str_dup ("the north");
+			from_direction = strdup ("the north");
 		else if (!str_cmp (ch->delay_who, "west"))
-			from_direction = str_dup ("the east");
+			from_direction = strdup ("the east");
 		else if (!str_cmp (ch->delay_who, "up"))
-			from_direction = str_dup ("below");
+			from_direction = strdup ("below");
 		else if (!str_cmp (ch->delay_who, "down"))
-			from_direction = str_dup ("above");
+			from_direction = strdup ("above");
 		if (ch->delay_who && strlen (ch->delay_who) > 1)
 			mem_free (ch->delay_who);
 		ch->delay_who = NULL;
@@ -1683,7 +1683,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 				}
 				group_size++;
 			}
-		}    
+		}
 	}
 
 	//Potentially changed target if orginal is being guarded
@@ -1700,7 +1700,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			//bonus given based on aur of the shieldman
 			if (skill_use (tch, SKILL_BLOCK, -tch->aur))
-				target = tch;      	
+				target = tch;
 		}
 	}
 
@@ -1902,7 +1902,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 				if (result == CRITICAL_HIT)
 					sprintf (buf2,
 					"%s#0 comes whirring through the air from %s, headed straight toward #5%s#0.\n\nThe missile %s %s %s!",
-					ammo->short_description, from_direction, 
+					ammo->short_description, from_direction,
 					char_short (target), can_lodge ? "lodges deeply in" : "firmly strikes", HSHR (target),
 					expand_wound_loc (strike_location));
 				else
@@ -2150,7 +2150,7 @@ npc_ranged_retaliation (CHAR_DATA * target, CHAR_DATA * ch)
 {
 	/* If the target's a NPC:
 	if they're a mount, or on a mount, add treat to both the rider and the mount.
-	otherwise, if the target is not a mount, not fleeing, not leaving, not entering, not fighting, 
+	otherwise, if the target is not a mount, not fleeing, not leaving, not entering, not fighting,
 	and not following, add_threat and charge the shooter.
 	*/
 
@@ -2161,7 +2161,7 @@ npc_ranged_retaliation (CHAR_DATA * target, CHAR_DATA * ch)
 		{
 			add_threat (target->mount, ch, 7);
 			add_threat (target, ch, 7);
-		} 
+		}
 		else if (!IS_SET (target->act, ACT_MOUNT) && !target->fighting &&
 			!IS_SET (target->flags, FLAG_ENTERING) &&
 			!IS_SET (target->flags, FLAG_LEAVING) &&
@@ -2220,7 +2220,7 @@ is_combat_ready (CHAR_DATA * ch)
 
 
 //      Function: npc_ranged_response
-// 
+//
 //      Called By
 //              do_throw - IF a missile was released UNLESS the victim is killed.
 //              fire_sling - IF a missile was released UNLESS the victim is killed.
@@ -2236,9 +2236,9 @@ npc_ranged_response (CHAR_DATA * npc, CHAR_DATA * retal_ch)
 		return;
 
 	// Deal with the specified NPC's reaction first.
-	// Evade -IF- morale is broken 
-	//       -OR- the attacker is not visible 
-	//       -OR- the victim is not aggro, an enforcer, combat ready, or following 
+	// Evade -IF- morale is broken
+	//       -OR- the attacker is not visible
+	//       -OR- the victim is not aggro, an enforcer, combat ready, or following
 	// Else Retaliate
 	// Unless they are under cover. IF undercover, do nothing (ie. stay undercover)
 
@@ -2246,7 +2246,7 @@ npc_ranged_response (CHAR_DATA * npc, CHAR_DATA * retal_ch)
 		|| (!IS_SET (npc->act, ACT_ENFORCER)
 		&& !IS_SET (npc->act, ACT_AGGRESSIVE)
 		&& !is_combat_ready (npc)
-		&& !npc->following) 
+		&& !npc->following)
 		|| !CAN_SEE (npc, retal_ch))
 
 	{
@@ -2270,7 +2270,7 @@ npc_ranged_response (CHAR_DATA * npc, CHAR_DATA * retal_ch)
 			|| (!IS_SET (tch->act, ACT_ENFORCER)
 			&& !IS_SET (tch->act, ACT_AGGRESSIVE)
 			&& !is_combat_ready (tch)
-			&& !tch->following) 
+			&& !tch->following)
 			|| !CAN_SEE (tch, retal_ch))
 
 		{
@@ -2474,12 +2474,12 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
-		ch->delay_who = str_dup (dirs[dir]);
+		ch->delay_who = strdup (dirs[dir]);
 
 		room = vtor (EXIT (ch, dir)->to_room);
 
 		exit = EXIT (ch, dir);
-		if (exit 
+		if (exit
 			&& IS_SET (exit->exit_info, EX_CLOSED)
 			&& !IS_SET (exit->exit_info, EX_ISGATE))
 		{
@@ -2509,7 +2509,7 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char ("You don't see them within range.\n", ch);
 				return;
 			}
-			if (exit 
+			if (exit
 				&& IS_SET (exit->exit_info, EX_CLOSED)
 				&& !IS_SET (exit->exit_info, EX_ISGATE))	    {
 					send_to_char ("Your view is blocked.\n", ch);
@@ -2545,7 +2545,7 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 					send_to_char ("You don't see them within range.\n", ch);
 					return;
 				}
-				if (exit 
+				if (exit
 					&& IS_SET (exit->exit_info, EX_CLOSED)
 					&& !IS_SET (exit->exit_info, EX_ISGATE))		{
 						send_to_char ("Your view is blocked.\n", ch);
@@ -2581,7 +2581,7 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 						send_to_char ("You don't see them within range.\n", ch);
 						return;
 					}
-					if (exit 
+					if (exit
 						&& IS_SET (exit->exit_info, EX_CLOSED)
 						&& !IS_SET (exit->exit_info, EX_ISGATE))		    {
 							send_to_char ("Your view is blocked.\n", ch);
@@ -2671,7 +2671,7 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 		else if (dir == 4)
 			target->cover_from_dir = 5;
 		else if (dir == 5)
-			target->cover_from_dir = 4;		
+			target->cover_from_dir = 4;
 
 		notify_guardians (ch, target, 3);
 		return;
@@ -2754,15 +2754,15 @@ do_unload (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (IS_NPC(ch) && IS_SET(ch->act,ACT_STAYPUT))
 		{
-			// stayputted mobs autogen arrows and bolts. Thus an unload would 
-			// cause an increment in size until the quiver was overfull 
+			// stayputted mobs autogen arrows and bolts. Thus an unload would
+			// cause an increment in size until the quiver was overfull
 		}
 		else
 		{
 			obj_to_obj (arrow, quiver);
 		}
 	}
-	else 
+	else
 	{
 		sprintf (buf, "You unload #2%s#0.\n", obj_short_desc (bow));
 		send_to_char (buf, ch);
@@ -3078,7 +3078,7 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	/**** removed to allow carts to be attacked 
+	/**** removed to allow carts to be attacked
 	if (IS_SET (victim->act, ACT_VEHICLE))
 	{
 	send_to_char ("How do you propose to kill an inanimate object, hmm?\n",
@@ -3119,7 +3119,7 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			set_fighting (victim, ch);
 			notify_guardians (ch, victim, cmd);
-			act ("$N engages $n in combat.", false, 
+			act ("$N engages $n in combat.", false,
 				victim, 0, ch, TO_NOTVICT | _ACT_FORMAT);
 		}
 
@@ -3588,7 +3588,7 @@ do_kill (CHAR_DATA * ch, char *argument, int cmd)
 		if (!victim->fighting) {
 			set_fighting (victim, ch);
 			notify_guardians (ch, victim, 1);
-			act ("$N engages $n in combat.", false, 
+			act ("$N engages $n in combat.", false,
 				victim, 0, ch, TO_NOTVICT | _ACT_FORMAT);
 		}
 		hit_char (ch, victim, 0);
@@ -3740,7 +3740,7 @@ retreat (CHAR_DATA* ch, int direction, CHAR_DATA* leader)
 		}
 		else
 		{
-			remove_affect_type (ch, AFFECT_GROUP_RETREAT);  
+			remove_affect_type (ch, AFFECT_GROUP_RETREAT);
 		}
 	}
 
@@ -3760,7 +3760,7 @@ retreat (CHAR_DATA* ch, int direction, CHAR_DATA* leader)
 				"at the command of #5%s#0.\n",
 				dirs[direction], char_short(leader));
 		}
-		send_to_char (message, ch);	  
+		send_to_char (message, ch);
 		sprintf (message, "$n's group begins to fall back to the %s.",
 			dirs[direction]);
 		act (message, false, ch, 0, 0, TO_ROOM);
@@ -3770,13 +3770,13 @@ retreat (CHAR_DATA* ch, int direction, CHAR_DATA* leader)
 		sprintf(message,
 			"You attempt to retreat %sward.\n",
 			dirs[direction]);
-		send_to_char (message, ch);	  
+		send_to_char (message, ch);
 		sprintf (message, "$n begins to fall back to the %s.",
 			dirs[direction]);
 		act (message, false, ch, 0, 0, TO_ROOM);
 	}
 
-	if (ch->fighting) 
+	if (ch->fighting)
 	{
 		duration = 20;
 
@@ -3806,7 +3806,7 @@ retreat (CHAR_DATA* ch, int direction, CHAR_DATA* leader)
 		duration -= number (1, ch->agi);
 
 		magic_add_affect (ch, AFFECT_GROUP_RETREAT, duration, 0, 0, 0, direction);
-	}    
+	}
 	else
 	{
 		do_move (ch, "", direction);

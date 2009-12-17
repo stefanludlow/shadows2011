@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  act.other.c : Miscellaneous Module                 www.middle-earth.us | 
+|  act.other.c : Miscellaneous Module                 www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -104,10 +104,10 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 
 	from_room = ch->in_room;
 
-	// grommit - All characters get basic westron, EXCEPT ORCS	
+	// grommit - All characters get basic westron, EXCEPT ORCS
 	if (ch->skills[SKILL_SPEAK_WESTRON] < 20 && (ch->race > 121 || ch->race < 119))
 	{
-		ch->skills[SKILL_SPEAK_WESTRON] = 20 ; 
+		ch->skills[SKILL_SPEAK_WESTRON] = 20 ;
 		ch->pc->skills[SKILL_SPEAK_WESTRON] = 20;
 	}
 	// grommit - All characters are maxed at their native tongue
@@ -153,9 +153,9 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 		ch->was_in_room = 0;
 		add_clan (ch,"moria_dwellers",CLAN_MEMBER);
 
-		// no region-wide language is set 
-		// Grommit - make racial language adjustments here  
-		if (ch->race == 121) // Mordorian orc 
+		// no region-wide language is set
+		// Grommit - make racial language adjustments here
+		if (ch->race == 121) // Mordorian orc
 			ch->skills[SKILL_SPEAK_BLACK_SPEECH]=20;
 		if (ch->race == 120 || ch->race == 119) // Mountain or mirkwood orcs
 			ch->skills[SKILL_SPEAK_WESTRON]=10;
@@ -168,12 +168,12 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 		ch->was_in_room = 0;
 		add_clan (ch, "mt_citizens", CLAN_MEMBER);
 
-		// Grommit - Boost higher races in Gondor to 50 westron 	
+		// Grommit - Boost higher races in Gondor to 50 westron
 		if (ch->skills[SKILL_SPEAK_WESTRON] < 50 && ch->race > 0 )
 		{
-			ch->skills[SKILL_SPEAK_WESTRON] = 50 ; 
+			ch->skills[SKILL_SPEAK_WESTRON] = 50 ;
 			ch->pc->skills[SKILL_SPEAK_WESTRON] = 50;
-		}	
+		}
 	}
 
 	ch->plr_flags &= ~NEWBIE;
@@ -627,11 +627,11 @@ do_sneak (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	// Heads up to the player sneaking into a no-hide room, 
+	// Heads up to the player sneaking into a no-hide room,
 	// as long as they can see inside
 	ROOM_DATA * dest = vtor (ch->room->dir_option[dir]->to_room);
 	if (dest && IS_SET (dest->room_flags, NOHIDE) && *argument != '!'
-		&& (IS_LIGHT (dest) 
+		&& (IS_LIGHT (dest)
 		|| get_affect (ch, MAGIC_AFFECT_INFRAVISION)
 		|| IS_SET (ch->affected_by, AFF_INFRAVIS)))
 	{
@@ -639,7 +639,7 @@ do_sneak (CHAR_DATA * ch, char *argument, int cmd)
 		sprintf (message, "   As you quietly approach the area ahead, "
 			"you notice that there \nare no hiding places available.  "
 			"If you wish to sneak out of this \narea into the one "
-			"ahead, then: #6 sneak %s !#0\n", buf); 
+			"ahead, then: #6 sneak %s !#0\n", buf);
 		send_to_char (message, ch);
 		return;
 	}
@@ -1004,11 +1004,11 @@ delayed_hide_obj (CHAR_DATA * ch)
 /**********************************************************************
 * CASE 1:
 * Usage: palm <item>
-*        will get item from room. 
+*        will get item from room.
 *             Uses Sleight
 *
 * CASE 2:
-* Usage: palm <item> into <container> 
+* Usage: palm <item> into <container>
 *        will put item into container in the room, including tables
 *              Uses Sleight
 *
@@ -1088,7 +1088,7 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 	argument = one_argument (argument, buf); //into or from
 
 	if (!*buf)
-	{				
+	{
 		/****** CASE 1: palm <item> (from room) *******/
 		if (!(tobj = get_obj_in_list_vis (ch, objtarget, ch->room->contents)))
 		{
@@ -1124,7 +1124,7 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 
 		obj_from_room (&tobj, 0);
 		clear_omote (tobj);
-		act ("You carefully attempt to palm $p.", false, ch, tobj, 0, 
+		act ("You carefully attempt to palm $p.", false, ch, tobj, 0,
 			TO_CHAR | _ACT_FORMAT);
 
 		/* Alert the staff of the theft */
@@ -1145,19 +1145,19 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 	} //CASE 1:
 
 
-	/****** CASE 2, 3, 4 & 5: 
+	/****** CASE 2, 3, 4 & 5:
 	palm <item> [from | into] [target?] <container>
-	*****/		
+	*****/
 	if (!str_cmp (buf, "into"))
 	{
 		//container/target name
-		argument = one_argument (argument, contbuf); 
+		argument = one_argument (argument, contbuf);
 		into = true;
 	}
 	else if (!str_cmp (buf, "from"))
 	{
 		//container/target name
-		argument = one_argument (argument, contbuf); 
+		argument = one_argument (argument, contbuf);
 		from = true;
 	}
 	else
@@ -1199,7 +1199,7 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	else
 	{
-		targchk = true; //there is a target PC CASE 3 & 5				
+		targchk = true; //there is a target PC CASE 3 & 5
 	}
 
 	/*** CASE 2: palm <item> into <container> ***/
@@ -1227,7 +1227,7 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 				continue;
 			if (!skill_use (ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100) || skill_use (tch, SKILL_SCAN, 20))
 			{
-				sprintf(buf, "You try to palm $p into $P, but are spotted by #5%s#0 before you can get to it!", char_short(tch)); 
+				sprintf(buf, "You try to palm $p into $P, but are spotted by #5%s#0 before you can get to it!", char_short(tch));
 				act (buf, true, ch, tobj, cobj, TO_CHAR | _ACT_FORMAT);
 				act ("You catch $n trying to get near $p beneath your notice, but stop the rogue in the act!", true, ch, tobj, tch, TO_VICT | _ACT_FORMAT);
 				act ("$N catches $n trying to get near $p beneath $S notice, but prevents them from doing so.", true, ch, tobj, tch, TO_NOTVICT | _ACT_FORMAT);
@@ -1255,7 +1255,7 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 				(ch, SKILL_SLEIGHT, tobj->obj_flags.weight / 100))
 				act ("$n attempts to surreptitiously place $p atop $P.",
 				false, ch, tobj, cobj, TO_ROOM | _ACT_FORMAT);
-		}	
+		}
 		else
 		{
 			act ("You carefully slide $p into $P.", false, ch, tobj,
@@ -1288,12 +1288,12 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 		else if (ch->left_hand == tobj)
 			ch->left_hand = NULL;
 		obj_to_obj (tobj, cobj);
-		return;		
+		return;
 	}//CASE 2
 
 	/*** CASE 3: palm <item> into <targetPC> <container> ***/
 	// item is tobj
-	// tch is targetPC 
+	// tch is targetPC
 	// cobj is container
 	if (into && targchk)
 	{
@@ -1390,15 +1390,15 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 			ch->right_hand = NULL;
 		else if (ch->left_hand == tobj)
 			ch->left_hand = NULL;
-		obj_to_obj (tobj, cobj);	
-		return; 
+		obj_to_obj (tobj, cobj);
+		return;
 	} //CASE 3
 
 	/*** CASE 4: palm <item> from <container> ***/
 	// item is tobj
-	// cobj is container	
+	// cobj is container
 	if (from && !targchk && contchk)
-	{ 					
+	{
 		if (!(tobj = get_obj_in_list_vis (ch, objtarget, cobj->contains)))
 		{
 			send_to_char ("You don't see such an item in that container.\n",
@@ -1439,7 +1439,7 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 
 		obj_from_obj (&tobj, 0); //rmoves tobj from wherever it is
 		obj_to_char (tobj, ch);
-		return; 
+		return;
 
 	}// CASE 4
 
@@ -1518,7 +1518,7 @@ do_palm (CHAR_DATA * ch, char *argument, int cmd)
 				ch);
 			return;
 		}
-		return;	
+		return;
 	} // CASE 5
 
 	return;
@@ -1757,7 +1757,7 @@ do_steal (CHAR_DATA * ch, char *argument, int cmd)
 					extract_obj(tobj);
 					}
 					}
-					else { 
+					else {
 					count = tobj->count;
 					count = MAX (1, tobj->count);
 					amount = number(1,count);
@@ -1973,7 +1973,7 @@ do_typo (CHAR_DATA * ch, char *argument, int cmd)
 
 
 	/* Match a valid option then invert...thus, if does not match any option here */
-	if (!( !strcasecmp(arg,"Code") || !strcasecmp(arg,"Room") || !strcasecmp(arg,"Craft") || 
+	if (!( !strcasecmp(arg,"Code") || !strcasecmp(arg,"Room") || !strcasecmp(arg,"Craft") ||
 		!strcasecmp(arg,"Mob") || !strcasecmp(arg,"Object") || !strcasecmp(arg,"Misc") ))
 	{
 		send_to_char ("Usage: typo <category> <title>\n"
@@ -2228,7 +2228,7 @@ add_second_affect (int type, int seconds, CHAR_DATA * ch, OBJ_DATA * obj,
 	sa.info2 = info2;
 
 	if (info)
-		sa.info = str_dup (info);
+		sa.info = strdup (info);
 	else
 		sa.info = NULL;
 
@@ -2741,7 +2741,7 @@ payday (CHAR_DATA * ch, CHAR_DATA * employer, AFFECTED_TYPE * af)
 	if (af->a.job.cash)
 	{
 		if (employer)
-		{	
+		{
 			if (keeper_has_money(employer, af->a.job.cash))
 			{
 				keeper_money_to_char(employer, ch, af->a.job.cash);
@@ -2775,7 +2775,7 @@ payday (CHAR_DATA * ch, CHAR_DATA * employer, AFFECTED_TYPE * af)
 			obj_to_char (obj, ch);
 			sprintf (buf, "You are paid %d coppers.\n", af->a.job.cash);
 			send_to_char (buf, ch);
-			paid = true;	
+			paid = true;
 		} // there is not an employer
 	} //paid in cash
 
@@ -3119,11 +3119,11 @@ do_initiate (CHAR_DATA * ch, char *argument, int cmd)
 * mode:
 * 0 - initial learning of skill
 * 1 - know skill, learn additional points to the skill
-* 
+*
 ******************************************/
 void teach_skill (CHAR_DATA * student, int skill, CHAR_DATA * teacher)
 {
-	int mode; 	
+	int mode;
 	int modifier = 0;
 	float multi = 0.0;
 	float percentage;
@@ -3152,8 +3152,8 @@ void teach_skill (CHAR_DATA * student, int skill, CHAR_DATA * teacher)
 		{
 			send_to_char("You are not advanced enough beyond your student to educate them further.\n", teacher);
 			return;
-		}	
-	}	
+		}
+	}
 	else //learning new skill
 	{
 		mode = 0;
@@ -3289,7 +3289,7 @@ void teach_skill (CHAR_DATA * student, int skill, CHAR_DATA * teacher)
 			teacher);
 		sprintf (buf, "$N teach you something new about '%s'.", skills[skill]);
 		act (buf, false, student, 0, teacher, TO_CHAR | _ACT_FORMAT);
-	}	
+	}
 
 	return;
 
@@ -3485,7 +3485,7 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	//Spells 
+	//Spells
 
 	if (sn != -1)
 	{
@@ -3604,7 +3604,7 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			send_to_char ("They don't know enought about several things.\n\r", ch);
 			return;
-		} /// \todo Check if the above condition is always true. 
+		} /// \todo Check if the above condition is always true.
 		break;
 
 	case SKILL_RITUAL:
@@ -3664,7 +3664,7 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
 	case SKILL_SCRIPT_ANGERTHAS_EREBOR:
 		break;
 
-		//Langauges     
+		//Langauges
 	case SKILL_SPEAK_ATLIDUK:
 	case SKILL_SPEAK_ADUNAIC:
 	case SKILL_SPEAK_HARADAIC:
@@ -4104,7 +4104,7 @@ do_accuse (CHAR_DATA * ch, char *argument, int cmd)
 
 			af->a.spell.duration = hours;
 		}
-		else 
+		else
 		{
 			magic_add_affect (victim, MAGIC_CRIM_BASE + ch->room->zone,
 				hours, 0, 0, 0, 0);
@@ -4248,7 +4248,7 @@ do_pardon (CHAR_DATA * ch, char *argument, int cmd)
 	send_to_char ("Ok.\n\r", ch);
 }
 
-/* nod_log 
+/* nod_log
 
 room = guard room
 seeker_sdescs = (hooded) descs
@@ -4325,15 +4325,15 @@ do_nod (CHAR_DATA * ch, char *argument, int cmd)
 		CAN_SEE (victim, ch) &&
 		is_brother (ch, victim) && has_a_key (victim) && !victim->desc)
 	{
-		if ((get_affect (ch, MAGIC_CRIM_BASE + ch->room->zone) 
-			|| get_affect (ch, MAGIC_CRIM_HOODED + ch->room->zone)) 
-			&& is_area_enforcer(victim)) 
+		if ((get_affect (ch, MAGIC_CRIM_BASE + ch->room->zone)
+			|| get_affect (ch, MAGIC_CRIM_HOODED + ch->room->zone))
+			&& is_area_enforcer(victim))
 		{
 			if (is_hooded(ch))
 			{
 				do_say (victim, "(sternly) Show yer face.", 0);
 			}
-			else 
+			else
 			{
 				do_alert (victim, "", 0);
 				do_say (victim, "(sourly) You ain't gettin' away so easy, you lout.", 0);
@@ -4450,7 +4450,7 @@ do_camp (CHAR_DATA * ch, char *argument, int cmd)
 	sector_type = ch->room->sector_type;
 
 	///\TODO Check the necessity of this code. I believe it is a relic
-	/// from a former implementation  of camp which added room progs to 
+	/// from a former implementation  of camp which added room progs to
 	/// the room.
 	if (engine.in_build_mode ())
 	{
@@ -4582,7 +4582,7 @@ do_tables (CHAR_DATA * ch, char *argument, int cmd)
 			af_table = get_affect (tmp, MAGIC_SIT_TABLE);
 			if (af_table && is_at_table (tmp, obj) && tmp != ch)
 			{
-				char* charShort = str_dup(char_short(tmp));
+				char* charShort = strdup(char_short(tmp));
 
 				sprintf (buf2, "    #5%s#0 is seated here.\n",
 					CAP (charShort));
@@ -4640,7 +4640,7 @@ do_corpses (CHAR_DATA * ch, char *argument, int cmd)
 * gives value to a flag that is used by do_aim
 
 ************************/
-void 
+void
 do_cover (CHAR_DATA *ch, char *argument, int cmd)
 {
 	OBJ_DATA *obj = NULL;
@@ -4690,24 +4690,24 @@ do_cover (CHAR_DATA *ch, char *argument, int cmd)
 	switch (dir)
 	{
 	case 0:
-		dir_word = str_dup("north");
+		dir_word = strdup("north");
 		break;
 	case 1:
-		dir_word = str_dup("east");
+		dir_word = strdup("east");
 		break;
-	case 2:	
-		dir_word = str_dup( "south");
+	case 2:
+		dir_word = strdup( "south");
 		break;
-	case 3:		
-		dir_word = str_dup("west");
+	case 3:
+		dir_word = strdup("west");
 		break;
-	case 4:	
-		dir_word = str_dup("up");
+	case 4:
+		dir_word = strdup("up");
 		break;
-	case 5:	
-		dir_word = str_dup( "down");
+	case 5:
+		dir_word = strdup( "down");
 		break;
-	}	
+	}
 	/** taking cover behind an object **/
 	arg2 = add_hash(argument);
 
@@ -4781,30 +4781,30 @@ delayed_cover (CHAR_DATA * ch)
 	switch (ch->delay_info1)
 	{
 	case 0:
-		direct = str_dup("north");
+		direct = strdup("north");
 		aff_type = AFFECT_COVER_NORTH;
 		break;
 	case 1:
-		direct = str_dup("east");
+		direct = strdup("east");
 		aff_type = AFFECT_COVER_EAST;
 		break;
-	case 2:	
-		direct = str_dup( "south");
+	case 2:
+		direct = strdup( "south");
 		aff_type = AFFECT_COVER_SOUTH;
 		break;
-	case 3:		
-		direct = str_dup("west");
+	case 3:
+		direct = strdup("west");
 		aff_type = AFFECT_COVER_WEST;
 		break;
-	case 4:	
-		direct = str_dup("up");
+	case 4:
+		direct = strdup("up");
 		aff_type = AFFECT_COVER_UP;
 		break;
-	case 5:	
-		direct = str_dup( "down");
+	case 5:
+		direct = strdup( "down");
 		aff_type = AFFECT_COVER_DOWN;
 		break;
-	}	
+	}
 
 	if (ch->delay_info2 == 0)
 	{
@@ -4826,7 +4826,7 @@ delayed_cover (CHAR_DATA * ch)
 			direct, obj_short_desc (tobj));
 		ch->pmote_str = add_hash(buf);
 		GET_POS (ch) = SIT;
-	}			
+	}
 
 	switch (ch->room->sector_type) //how much cover in the terrain
 	{
@@ -4858,7 +4858,7 @@ delayed_cover (CHAR_DATA * ch)
 		mod = 30;
 		break;
 	case SECT_SWAMP:		//trees
-		mod = 10;				
+		mod = 10;
 		break;
 	case SECT_PASTURE:	//ditches, fences
 		mod = 5;
@@ -4879,13 +4879,13 @@ delayed_cover (CHAR_DATA * ch)
 
 
 	//50% chance to find cover inside, 80% in mountains
-	check = number (1, 100);		
+	check = number (1, 100);
 	check = check + mod;
 
 	/** If the character is -taking cover-, they can only be under 1 cover at a time. **/
 	if (check > 50)
 	{
-		remove_cover(ch, 0);  
+		remove_cover(ch, 0);
 		magic_add_affect (ch, aff_type, -1, 0, 0, 0, 0);
 		ch->cover_from_dir = ch->delay_info1;
 		sprintf (buf, "[%s covered from %s]", ch->tname, direct);
@@ -4911,7 +4911,7 @@ remove_cover (CHAR_DATA *ch, int type)
 		{
 			remove_affect_type (ch, index);
 			//cover from this direction is no cover at all
-			ch->cover_from_dir = -1; 
+			ch->cover_from_dir = -1;
 		}
 		return;
 	}
@@ -4923,7 +4923,7 @@ remove_cover (CHAR_DATA *ch, int type)
 		//cover from this direction is no cover at all
 		ch->cover_from_dir = -1;
 		return;
-	}		
+	}
 
 	return;
 }
@@ -4944,7 +4944,7 @@ under_cover (CHAR_DATA *ch)
 
 	return (0);
 }
-// Command Ownership, for transfering ownership of mobs 
+// Command Ownership, for transfering ownership of mobs
 // Syntax: OWNERSHIP TRANSFER <mob> <character> or OWNERSHIP SET <mob> <character>
 
 void do_ownership (CHAR_DATA *ch, char *argument, int command)
@@ -4999,7 +4999,7 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 			send_to_char ("Cannot find mobile with keyword \"#2", ch);
 			send_to_char (ThisArgument.c_str(), ch);
 			send_to_char ("#0\".\n", ch);
-			return;		
+			return;
 		}
 	}
 
@@ -5040,7 +5040,7 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 	}
 
 	if (!target)
-	{	
+	{
 		send_to_char ("You do not see a person with the keyword \"#2", ch);
 		send_to_char (ThisArgument.c_str(), ch);
 		send_to_char ("#0\" to transfer #5", ch);
@@ -5053,7 +5053,7 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 	{
 
 		ThisArgument[0] = toupper(ThisArgument[0]);
-		owned_mob->mob->owner = str_dup (ThisArgument.c_str());
+		owned_mob->mob->owner = strdup (ThisArgument.c_str());
 		send_to_char ("Setting ownership of #5", ch);
 		send_to_char (char_short(owned_mob), ch);
 		send_to_char ("#0 to \"#2", ch);
@@ -5083,7 +5083,7 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 
 		Output.assign(target->tname);
 		Output[0] = toupper(Output[0]);
-		owned_mob->mob->owner = str_dup (Output.c_str());
+		owned_mob->mob->owner = strdup (Output.c_str());
 		send_to_char ("You transfer ownership of #5", ch);
 		send_to_char (char_short(owned_mob), ch);
 		send_to_char ("#0 to #5", ch);

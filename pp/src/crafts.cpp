@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  crafts.c : Crafting Module                         www.middle-earth.us | 
+|  crafts.c : Crafting Module                         www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  All original code, derived under license from DIKU GAMMA (0.0).        |
 \------------------------------------------------------------------------*/
@@ -377,7 +377,7 @@ craft_command (CHAR_DATA * ch, char *command_args,
 		}
 	}
 
-	/** other requirements **/  
+	/** other requirements **/
 	if (missing_craft_items (ch, craft_affect))
 		return;
 
@@ -547,14 +547,14 @@ do_materials (CHAR_DATA * ch, char *argument, int cmd)
 
 	/** group **/
 	if (craft->followers > 0)
-	{      
+	{
 		snprintf (buf, MAX_STRING_LENGTH,
 			"#6Requires#0 %d followers.\n",
 			craft->followers);
-		send_to_char (buf, ch);	 
+		send_to_char (buf, ch);
 	}
 
-	/**weather*/  
+	/**weather*/
 	for (i = 0; i <= 8; i++)
 	{
 		if (craft->weather[i] > 0)
@@ -583,13 +583,13 @@ do_materials (CHAR_DATA * ch, char *argument, int cmd)
 			phase_num, phase->phase_seconds);
 
 		if ( phase->skill  > 0)
-		{      
+		{
 			snprintf (buf + strlen (buf), MAX_STRING_LENGTH,
 				", %s skill utilized.\n",
 				skills[phase->skill]);
 		}
 		else if ( phase->attribute > -1 )
-		{      
+		{
 			snprintf (buf + strlen (buf), MAX_STRING_LENGTH,
 				", %s attribute tested.\n",
 				attrs[phase->attribute]);
@@ -658,7 +658,7 @@ do_materials (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char (buf, ch);
 			}
 
-			if (phase->skill > 0) 
+			if (phase->skill > 0)
 			{
 				snprintf (buf, MAX_STRING_LENGTH,  "Skill: %s vs %dd%d\n",
 					skills[phase->skill],
@@ -757,7 +757,7 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 				page_string (ch->desc, output.c_str());
 		}//if (!*buf)
 
-		//Listing individual crafts 
+		//Listing individual crafts
 
 		else
 		{
@@ -1655,7 +1655,7 @@ read_extended_text (FILE * fp, char *first_line)
 		fgets (buf, MAX_STRING_LENGTH - 1, fp);
 	}
 
-	return str_dup (line);
+	return strdup (line);
 }
 
 void
@@ -1697,7 +1697,7 @@ subcraft_line (FILE * fp_reg, char *line)
 		subcraft->clans = add_hash ("");
 
 		argument = one_argument (argument, buf);
-		subcraft->craft_name = str_dup (buf);
+		subcraft->craft_name = strdup (buf);
 
 		argument = one_argument (argument, buf);
 
@@ -1710,7 +1710,7 @@ subcraft_line (FILE * fp_reg, char *line)
 		}
 
 		argument = one_argument (argument, buf);
-		subcraft->subcraft_name = str_dup (buf);
+		subcraft->subcraft_name = strdup (buf);
 
 		argument = one_argument (argument, buf);
 
@@ -1723,7 +1723,7 @@ subcraft_line (FILE * fp_reg, char *line)
 		}
 
 		argument = one_argument (argument, buf);
-		subcraft->command = str_dup (buf);
+		subcraft->command = strdup (buf);
 
 		return;
 	}
@@ -2090,7 +2090,7 @@ subcraft_line (FILE * fp_reg, char *line)
 			system_log (buf, true);
 		}
 
-		if ( phase->attribute > -1  && (phase->dice < 1 || phase->sides < 1) ) 
+		if ( phase->attribute > -1  && (phase->dice < 1 || phase->sides < 1) )
 		{
 			phase->dice = 1;
 			phase->sides = 100;
@@ -2466,7 +2466,7 @@ craft__count_available_objs (CHAR_DATA * ch, int vnum) {
 }
 
 // Takes an object vnum and tries to find objectToFind in its inheritance chain - Case
-bool inheritedObject (int objectVirtual, int objectToFind) { 
+bool inheritedObject (int objectVirtual, int objectToFind) {
 	static OBJ_DATA *object;
 
 	object = vtoo(objectVirtual);
@@ -2507,7 +2507,7 @@ get_item_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, PHASE_DATA * phase)
 		{
 
 			/* if produced later, add to list, so it can be used by another phase */
-			for (tmp_phase = phase->next; 
+			for (tmp_phase = phase->next;
 				tmp_phase;
 				tmp_phase = tmp_phase->next)
 				if (tmp_phase == item->phase)
@@ -2684,7 +2684,7 @@ get_key_start_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, PHASE_DATA * phase,
 					continue;
 				else
 				{
-					ch->craft_index = j;	
+					ch->craft_index = j;
 					return tobj;
 				}
 			}
@@ -2700,7 +2700,7 @@ get_key_start_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, PHASE_DATA * phase,
 					continue;
 				else
 				{
-					ch->craft_index = j;			
+					ch->craft_index = j;
 					return tobj;
 				}
 			}
@@ -2776,7 +2776,7 @@ get_key_end_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, PHASE_DATA * phase, i
 		if (item->phase != phase)
 			continue;
 
-		for (tmp_phase = phase->next; 
+		for (tmp_phase = phase->next;
 			tmp_phase;
 			tmp_phase = tmp_phase->next)
 		{
@@ -3339,7 +3339,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 			continue;
 
 		// one item from obj_items
-		if (i == subcraft->key_first) 
+		if (i == subcraft->key_first)
 		{
 			obj_list[i] = get_key_start_obj (ch, item, phase, ch->craft_index);
 			continue;
@@ -3353,7 +3353,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 
 		else
 		{
-			obj_list[i] = get_item_obj (ch, item, phase); 
+			obj_list[i] = get_item_obj (ch, item, phase);
 		}
 	}
 
@@ -3532,7 +3532,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 		if (obj_list[i] && obj_list[i]->var_color
 			&& str_cmp (obj_list[i]->var_color, "none"))
 		{
-			item->color = str_dup (obj_list[i]->var_color);
+			item->color = strdup (obj_list[i]->var_color);
 		}
 
 		/* Purge Consumed Craft Items */
@@ -3694,7 +3694,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 
 			if (IS_SET (phase->nMobFlags, CRAFT_MOB_SETOWNER))
 			{
-				mob->mob->owner = str_dup (ch->tname);
+				mob->mob->owner = strdup (ch->tname);
 			}
 		}
 	}
@@ -3815,12 +3815,12 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 			}
 
 			else
-				act ("$n abruptly stops $s craft.", false, ch, 0, target_ch, TO_NOTVICT | _ACT_FORMAT);  
+				act ("$n abruptly stops $s craft.", false, ch, 0, target_ch, TO_NOTVICT | _ACT_FORMAT);
 		}
 
 		/** old style failure system **/
 		else
-		{ 
+		{
 
 			/* 1st person failure message - old style */
 			if (phase->failure)
@@ -3885,10 +3885,10 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 			else
 				act ("$n abruptly stops $s craft.", false, ch, 0, target_ch, TO_NOTVICT | _ACT_FORMAT);
 
-			/* Group fail message */	
+			/* Group fail message */
 
-			if ((subcraft->followers > 0) 
-				&& (num_followers (ch) >= subcraft->followers) 
+			if ((subcraft->followers > 0)
+				&& (num_followers (ch) >= subcraft->followers)
 				&& phase->fail_group_mess)
 			{
 				craft_prepare_message (ch, buf, ch, target_ch, tch,
@@ -3900,7 +3900,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 				act (buf, false, ch, 0, 0, TO_GROUP | _ACT_FORMAT);
 			}
 
-			/* Load failure objects */    	
+			/* Load failure objects */
 			count = 0;
 			p = subcraft->failobjs;
 
@@ -4069,10 +4069,10 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 		act (buf, false, tch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	}
 
-	/* Group members message */	
+	/* Group members message */
 
-	if ((subcraft->followers > 0) 
-		&& (num_followers (ch) >= subcraft->followers) 
+	if ((subcraft->followers > 0)
+		&& (num_followers (ch) >= subcraft->followers)
 		&& phase->group_mess)
 	{
 		craft_prepare_message (ch, buf, ch, target_ch, tch,
@@ -4266,7 +4266,7 @@ craft_sectors (CHAR_DATA * ch, char *argument, char *subcmd)
 	if (j == -2)
 	{
 		craft->sectors[i] = 0;
-		send_to_char 
+		send_to_char
 			("Craft no longer requires the specified sector.\n",
 			ch);
 		return;
@@ -4274,7 +4274,7 @@ craft_sectors (CHAR_DATA * ch, char *argument, char *subcmd)
 
 	else if (i == -1 && j == -1)
 	{
-		send_to_char 
+		send_to_char
 			("That craft's list of required sectors is currently full.\n",
 			ch);
 		return;
@@ -4329,7 +4329,7 @@ craft_seasons (CHAR_DATA * ch, char *argument, char *subcmd)
 	if (j == -2)
 	{
 		craft->seasons[i] = 0;
-		send_to_char 
+		send_to_char
 			("Craft no longer requires the specified season.\n",
 			ch);
 		return;
@@ -4506,8 +4506,8 @@ craft_clan (CHAR_DATA * ch, char *argument, char *subcmd)
 	{
 		if (!*buf2)
 		{
-			craft->clans = 
-				str_dup (remove_clan_from_string (craft->clans, buf));
+			craft->clans =
+				strdup (remove_clan_from_string (craft->clans, buf));
 			send_to_char
 				("The specified clan requirement has been removed.\n",
 				ch);
@@ -4525,9 +4525,9 @@ craft_clan (CHAR_DATA * ch, char *argument, char *subcmd)
 		else
 		{
 			craft->clans =
-				str_dup (remove_clan_from_string (craft->clans, buf));
+				strdup (remove_clan_from_string (craft->clans, buf));
 			craft->clans =
-				str_dup (add_clan_to_string (craft->clans, buf, flags));
+				strdup (add_clan_to_string (craft->clans, buf, flags));
 			send_to_char
 				("The rank requirement for the specified clan has been updated.\n",
 				ch);
@@ -4551,12 +4551,12 @@ craft_clan (CHAR_DATA * ch, char *argument, char *subcmd)
 		if (flags)
 		{
 			craft->clans =
-				str_dup (add_clan_to_string (craft->clans, buf, flags));
+				strdup (add_clan_to_string (craft->clans, buf, flags));
 		}
 		else
 		{
 			craft->clans =
-				str_dup (add_clan_to_string (craft->clans, buf, CLAN_MEMBER));
+				strdup (add_clan_to_string (craft->clans, buf, CLAN_MEMBER));
 		}
 
 		send_to_char
@@ -4629,7 +4629,7 @@ craft_failure (CHAR_DATA * ch, char *argument, char *subcmd)
 
 	else if (!*argument && !craft->failure)
 	{
-		send_to_char 
+		send_to_char
 			("What do you want the header failure message to be?\n",
 			ch);
 		return;
@@ -4679,7 +4679,7 @@ craft_failobjs (CHAR_DATA * ch, char *argument, char *subcmd)
 	}
 
 	return;
-}  
+}
 
 
 /** failure mobs stored in a string, NOT array **/
@@ -4791,7 +4791,7 @@ craft_key (CHAR_DATA * ch, char *argument, char *subcmd)
 	if (craft->key_first == 0)
 	{
 		send_to_char
-			("The craft's key objects lists have been deleted.\n", 
+			("The craft's key objects lists have been deleted.\n",
 			ch);
 		craft->key_end = -1;
 		craft->key_first = -1;
@@ -4838,7 +4838,7 @@ craft_key_product (CHAR_DATA * ch, char *argument, char *subcmd)
 	if (craft->key_end == 0)
 	{
 		send_to_char
-			("The craft's key objects lists have been deleted.\n", 
+			("The craft's key objects lists have been deleted.\n",
 			ch);
 		craft->key_end = -1;
 		craft->key_first = -1;
@@ -4895,7 +4895,7 @@ craft_weather (CHAR_DATA * ch, char *argument, char *subcmd)
 	if (j == -2)
 	{
 		craft->weather[i] = 0;
-		send_to_char 
+		send_to_char
 			("Craft no longer requires the specified weather.\n",
 			ch);
 		return;
@@ -4949,7 +4949,7 @@ craft_group (CHAR_DATA * ch, char *argument, char *subcmd)
 	if (craft->followers == 0)
 	{
 		send_to_char
-			("The craft's group requiremnt have been deleted.\n", 
+			("The craft's group requiremnt have been deleted.\n",
 			ch);
 		return;
 	}
@@ -5010,7 +5010,7 @@ craft_group_pain (CHAR_DATA * ch, int pain_cost)
 }
 
 void
-craftstat (CHAR_DATA * ch, char *argument) 
+craftstat (CHAR_DATA * ch, char *argument)
 {
 	int i;
 	AFFECTED_TYPE *af;
@@ -5182,7 +5182,7 @@ do_craftspc (CHAR_DATA * ch, char *argument, int cmd)
 
 	argument = one_argument(argument, buf);
 
-	tch = load_pc(buf);	
+	tch = load_pc(buf);
 	if (tch)
 	{
 		sprintf (buf2,
@@ -5215,7 +5215,7 @@ do_craftspc (CHAR_DATA * ch, char *argument, int cmd)
 
 //displays only header info and economic inforamtion
 void
-spec_craftstat (CHAR_DATA * ch, char *argument) 
+spec_craftstat (CHAR_DATA * ch, char *argument)
 {
 	SUBCRAFT_HEAD_DATA *craft;
 	char buf[MAX_STRING_LENGTH];
@@ -5248,7 +5248,7 @@ spec_craftstat (CHAR_DATA * ch, char *argument)
 }
 
 void
-display_spec_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA *craft) 
+display_spec_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA *craft)
 {
 	PHASE_DATA *phase;
 	char buf[MAX_STRING_LENGTH];
@@ -5295,7 +5295,7 @@ display_spec_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA *craft)
 				if (items->items && items->items[0])
 				{
 					low_cost = 0;
-					high_cost = 0;	
+					high_cost = 0;
 					for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
 					{
 						if (items->items[j]
@@ -5316,7 +5316,7 @@ display_spec_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA *craft)
 								}
 							}//if (obj)
 						}//if (items->items[j])
-					} //for (j = 0;) 
+					} //for (j = 0;)
 
 					low_cost *= items->item_counts;
 					high_cost *= items->item_counts;
@@ -5345,7 +5345,7 @@ display_spec_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA *craft)
 
 	}//for (phase = craft->phases)
 
-	sprintf (b_buf + strlen (b_buf), 
+	sprintf (b_buf + strlen (b_buf),
 		"#6Reusable Material Costs:#0 % 7.2f - % 7.2f bits\n"
 		"#6Expended Material Costs:#0 % 7.2f - % 7.2f bits\n"
 		"#6Produced Material Value:#0 % 7.2f - % 7.2f bits\n\n",

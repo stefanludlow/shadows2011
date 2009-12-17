@@ -105,7 +105,7 @@ reformat_say_string (char *source, char **target, CHAR_DATA * to)
 		result[strlen (result) - 1] != '?')
 		result[strlen (result)] = '.';
 
-	*target = str_dup (result);
+	*target = strdup (result);
 }
 
 #include <memory>
@@ -143,7 +143,7 @@ do_ooc (CHAR_DATA * ch, char *argument, int cmd)
 		std::string formatted = argument;
 		formatted[0] = toupper (formatted[0]);
 		char *p = 0;
-		char *s = str_dup (formatted.c_str ());
+		char *s = strdup (formatted.c_str ());
 		reformat_say_string (s, &p, 0);
 		sprintf (buf, "$n says, out of character,\n   \"%s\"", p + i);
 		act (buf, false, ch, 0, 0, TO_ROOM);
@@ -178,7 +178,7 @@ do_pmote (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	else if (IS_NPC(ch) && argument)
-	{	
+	{
 		ch->pmote_str = add_hash (argument);
 	}
 
@@ -377,7 +377,7 @@ void do_think (CHAR_DATA * ch, char *argument, int cmd) {
 		else if (GET_TRUST(tch) && !(tch->hasMortalBody())) { /* L5 PCs can use telepath but are not excluded from skill_telepathy */
 			continue;
 		}
-		else if (skill_use (tch, SKILL_TELEPATHY, ch->skills[SKILL_TELEPATHY] / 3) 
+		else if (skill_use (tch, SKILL_TELEPATHY, ch->skills[SKILL_TELEPATHY] / 3)
 			|| (IS_NPC (ch) && tch->skills[SKILL_TELEPATHY])) {
 				send_to_char (buf2, tch);
 		}
@@ -574,7 +574,7 @@ do_emote (CHAR_DATA * ch, char *argument, int cmd)
 		if (!result)
 			return;
 
-		sprintf (buf, "%s", result);  
+		sprintf (buf, "%s", result);
 
 
 		personalize_emote (ch, buf); //adjusts for "you" if needed
@@ -1024,8 +1024,8 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 
 	/* We modify *argument, make sure we don't */
 	/*  have a problem with const arguments   */
-	//  strcpy (argbuf, argument);	
-	//  argument = argbuf;		
+	//  strcpy (argbuf, argument);
+	//  argument = argbuf;
 
 	while (isspace (*argument))
 		argument++;
@@ -1252,12 +1252,12 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (buf4[strlen (buf4) - 1] == '?')
 		{
-			utters[cmd] = str_dup ("ask");
+			utters[cmd] = strdup ("ask");
 			allocd = true;
 		}
 		else if (buf4[strlen (buf4) - 1] == '!')
 		{
-			utters[cmd] = str_dup ("exclaim");
+			utters[cmd] = strdup ("exclaim");
 			allocd = true;
 		}
 	}
@@ -1265,12 +1265,12 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (buf4[strlen (buf4) - 1] == '?')
 		{
-			utters[cmd] = str_dup ("ask");
+			utters[cmd] = strdup ("ask");
 			allocd = true;
 		}
 		else if (buf4[strlen (buf4) - 1] == '!')
 		{
-			utters[cmd] = str_dup ("emphatically tell");
+			utters[cmd] = strdup ("emphatically tell");
 			allocd = true;
 		}
 	}
@@ -1709,7 +1709,7 @@ do_ichat (CHAR_DATA * ch, char *argument, int cmd)
 	else
 	{
 		/// Use the admin's wiznet flag (ignore the NPC's)
-		bool ch_wiznet_set = 
+		bool ch_wiznet_set =
 			(IS_NPC(ch) && ch->desc->original)
 			? GET_FLAG (ch->desc->original, FLAG_WIZNET)
 			: GET_FLAG (ch, FLAG_WIZNET);
@@ -1725,12 +1725,12 @@ do_ichat (CHAR_DATA * ch, char *argument, int cmd)
 		if (IS_NPC (ch) && ch->desc->original)
 		{
 			sprintf (buf1, "#1[Wiznet: %s (%s)]#0 %s\n",
-				GET_NAME (ch->desc->original), 
+				GET_NAME (ch->desc->original),
 				GET_NAME (ch), CAP (argument));
 		}
 		else
 		{
-			sprintf (buf1, "#1[Wiznet: %s]#0 %s\n", 
+			sprintf (buf1, "#1[Wiznet: %s]#0 %s\n",
 				GET_NAME (ch), CAP (argument));
 		}
 
@@ -1746,7 +1746,7 @@ do_ichat (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				*s_buf = '\0';
 
-				bool tch_wiznet_set = 
+				bool tch_wiznet_set =
 					(i->original)
 					? GET_FLAG (i->original, FLAG_WIZNET)
 					: GET_FLAG (i->character, FLAG_WIZNET);
@@ -1763,7 +1763,7 @@ do_ichat (CHAR_DATA * ch, char *argument, int cmd)
 						CHAR_DATA *tch = (i->original)
 							? (i->original)
 							: (i->character);
-						sprintf 
+						sprintf
 							(s_buf, "#2[%s is not listening to the wiznet.]#0\n",
 							GET_NAME (tch));
 					}
@@ -2482,7 +2482,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 	if (!strcasecmp(buf,"emergency"))
 	{
 		sphereName="#1Emergency#0";
-		emergencyPetition = true;	
+		emergencyPetition = true;
 	}
 
 	/* check to see if the word matched a sphere. if so, go with it, otherwise check for admin name */
@@ -2582,7 +2582,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			if (sqlch && IS_SET(sqlch->petition_flags,(1<<sphereIndex)))
 			{
 			//						fprintf(stderr,"Sending HM to %s\n",sqlch->tname);
-			/* send the HM 
+			/* send the HM
 			mysql_safe_query
 			("INSERT INTO hobbitmail (account, flags, from_line, from_account, sent_date, subject, message, timestamp, to_line)"
 			" VALUES ('%s', %d, '%s', '%s', '%s', '%s', '%s', UNIX_TIMESTAMP(), '%s' )",
@@ -2591,13 +2591,13 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			sqlch->tname);
 			unload_pc(sqlch);
 			}
-			} /* iterate rows of admins 
+			} /* iterate rows of admins
 
-			mysql_free_result(result); /* clear the result 
-			} /* successful query for admins 
+			mysql_free_result(result); /* clear the result
+			} /* successful query for admins
 			else
 			{
-			/*no admins found 
+			/*no admins found
 			throw std::runtime_error("No admins found in act.comm.cpp, do_petition!");
 			}*/
 
@@ -2751,7 +2751,7 @@ do_shout (CHAR_DATA *ch, char * arg, int cmd)
 
 	argument[0] = toupper(argument[0]);
 	char *buf;
-	char *orig = str_dup((char *) argument.c_str());
+	char *orig = strdup((char *) argument.c_str());
 	reformat_say_string (orig, &buf, 0);
 	mem_free(orig);
 	argument = buf;
@@ -2784,7 +2784,7 @@ do_shout (CHAR_DATA *ch, char * arg, int cmd)
 		output = MAKE_STRING("#5") + MAKE_STRING(char_short(ch)) + MAKE_STRING("#0 ");
 		output[2] = toupper(output[2]);
 		if (GET_TRUST(tch) && GET_FLAG(tch, FLAG_SEE_NAME))
-		{	
+		{
 			output += MAKE_STRING("(") + MAKE_STRING(GET_NAME(ch)) + ") ";
 		}
 		output += "shouts,";
@@ -2813,7 +2813,7 @@ do_shout (CHAR_DATA *ch, char * arg, int cmd)
 		{
 			output += MAKE_STRING("\n    \"") + toplayer + "\"\n";
 		}
-		send_to_char(output.c_str(), tch);	
+		send_to_char(output.c_str(), tch);
 	}
 
 	if (ch->in_room == 5144 || ch->in_room == 5201 || ch->in_room == 5200)
@@ -2846,7 +2846,7 @@ do_shout (CHAR_DATA *ch, char * arg, int cmd)
 				}
 				output = MAKE_STRING("You hear a ") + sex_string + MAKE_STRING("voice ");
 				if (GET_TRUST(tch) && GET_FLAG(tch, FLAG_SEE_NAME))
-				{	
+				{
 					output += MAKE_STRING("(") + MAKE_STRING(GET_NAME(ch)) + ") ";
 				}
 				if (!IS_SET(ch->room->room_flags, OOC))
@@ -2907,7 +2907,7 @@ do_shout (CHAR_DATA *ch, char * arg, int cmd)
 					}
 					output = MAKE_STRING("You hear a ") + sex_string + MAKE_STRING("voice ");
 					if (GET_TRUST(tch) && GET_FLAG(tch, FLAG_SEE_NAME))
-					{	
+					{
 						output += MAKE_STRING("(") + MAKE_STRING(GET_NAME(ch)) + ") ";
 					}
 					if (!IS_SET(ch->room->room_flags, OOC))
@@ -3692,7 +3692,7 @@ bool evaluate_emote_string (CHAR_DATA * ch, std::string * first_person, std::str
 		}
 		first_person->assign(error_string);
 	}
-	else 
+	else
 		first_person->assign(argument);
 
 	return true;

@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  edit.c : Visual Editing Module                     www.middle-earth.us | 
+|  edit.c : Visual Editing Module                     www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -198,7 +198,7 @@ ve_deconstruct (DESCRIPTOR_DATA * c)
 		tmp_c = *text;
 		*text = '\0';
 
-		c->lines->line[line_no] = str_dup (p);
+		c->lines->line[line_no] = strdup (p);
 
 		*text = tmp_c;
 
@@ -349,10 +349,10 @@ ve_insert_line (DESCRIPTOR_DATA * c, int lines_offset)
 
 	for (i = 1; i < lines_offset; i++)
 		if (!c->lines->line[i])
-			c->lines->line[i] = str_dup ("");
+			c->lines->line[i] = strdup ("");
 
 	ptr = c->lines->line[lines_offset];
-	c->lines->line[lines_offset] = str_dup ("");
+	c->lines->line[lines_offset] = strdup ("");
 
 	for (i = lines_offset + 1; ptr; i++)
 	{
@@ -558,7 +558,7 @@ ve_insert_char (DESCRIPTOR_DATA * c, char add_char)
 
 	for (int i = 1; i < lines_offset; i++) /* This may be a little wasteful */
 		if (!c->lines->line[i])
-			c->lines->line[i] = str_dup ("");
+			c->lines->line[i] = strdup ("");
 
 	if (strlen (line_ptr) >= 80)
 	{
@@ -585,7 +585,7 @@ ve_insert_char (DESCRIPTOR_DATA * c, char add_char)
 	if (strlen (line_ptr) > insert_index)
 		strcat (buf1, &line_ptr[insert_index]);
 
-	c->lines->line[lines_offset] = str_dup (buf1);
+	c->lines->line[lines_offset] = strdup (buf1);
 
 	mem_free (line_ptr);
 
@@ -641,7 +641,7 @@ ve_delete_char (DESCRIPTOR_DATA * c, size_t backup)
 
 	mem_free (line_ptr);
 
-	c->lines->line[lines_offset] = str_dup (buf);
+	c->lines->line[lines_offset] = strdup (buf);
 
 	ve_goto (c, c->line, 1);
 
@@ -672,7 +672,7 @@ ve_newline (DESCRIPTOR_DATA * c)
 
 		for (i = 1; i <= lines_offset + 1; i++)
 			if (!c->lines->line[i])
-				c->lines->line[i] = str_dup ("");
+				c->lines->line[i] = strdup ("");
 
 		if (c->line > 22)
 		{
@@ -713,7 +713,7 @@ ve_newline (DESCRIPTOR_DATA * c)
 
 	mem_free (c->lines->line[lines_offset]);
 
-	c->lines->line[lines_offset] = str_dup (buf);
+	c->lines->line[lines_offset] = strdup (buf);
 
 	ve_refresh_screen (c);
 }

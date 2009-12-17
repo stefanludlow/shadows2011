@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  character.cpp : Character Module                   www.middle-earth.us | 
+|  character.cpp : Character Module                   www.middle-earth.us |
 |  Copyright (C) 2008, Shadows of Isildur: Japheth and Case               |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -300,7 +300,7 @@ char_data::~char_data ()
 		this->pmote_str = NULL;
 	}
 
-	if (this->plan) 
+	if (this->plan)
 	{
 		delete this->plan;
 		this->plan = 0;
@@ -358,21 +358,21 @@ char_data::~char_data ()
 		CHAR_DATA* proto = vtom(this->mob->nVirtual);
 		if (proto)
 		{
-			if (this->tname && *this->tname 
+			if (this->tname && *this->tname
 				&& this->tname != proto->tname)
 			{
 				mem_free (this->tname);
 				this->tname = NULL;
 			}
 
-			if (this->name && *this->name 
+			if (this->name && *this->name
 				&& this->name != proto->name)
 			{
 				mem_free (this->name);
 				this->name = NULL;
 			}
 
-			if (this->short_descr && *this->short_descr 
+			if (this->short_descr && *this->short_descr
 				&& this->short_descr != proto->short_descr )
 			{
 				mem_free (this->short_descr);
@@ -393,7 +393,7 @@ char_data::~char_data ()
 				this->description = NULL;
 			}
 		}
-		else 
+		else
 		{
 			fprintf (stderr, "Proto not defined for NPC %d?\n", this->mob->nVirtual);
 		}
@@ -628,31 +628,31 @@ void char_data::partial_deep_copy (CHAR_DATA *proto)
 	{
 		mem_free(this->name);
 	}
-	this->name = str_dup(proto->name);
+	this->name = strdup(proto->name);
 
 	if (this->short_descr)
 	{
 		mem_free(this->short_descr);
 	}
-	this->short_descr = str_dup(proto->short_descr);
+	this->short_descr = strdup(proto->short_descr);
 
 	if (this->long_descr)
 	{
 		mem_free(this->long_descr);
 	}
-	this->long_descr = str_dup(proto->long_descr);
+	this->long_descr = strdup(proto->long_descr);
 
 	if (this->description)
 	{
 		mem_free(this->description);
 	}
-	this->description = str_dup(proto->description);
+	this->description = strdup(proto->description);
 
 	if (this->clans)
 	{
 		mem_free(this->clans);
 	}
-	this->clans = str_dup(proto->clans);
+	this->clans = strdup(proto->clans);
 
 	this->act = proto->act;
 	this->mob->damnodice = proto->mob->damnodice;
@@ -727,77 +727,77 @@ void char_data::deep_copy (CHAR_DATA *copy_from)
 
 	if (copy_from->delay_who)
 	{
-		this->delay_who = str_dup(copy_from->delay_who);
+		this->delay_who = strdup(copy_from->delay_who);
 	}
 
 	if (copy_from->delay_who2)
 	{
-		this->delay_who2 = str_dup(copy_from->delay_who2);
+		this->delay_who2 = strdup(copy_from->delay_who2);
 	}
 
 	if (copy_from->casting_arg)
 	{
-		this->casting_arg = str_dup(copy_from->casting_arg);
+		this->casting_arg = strdup(copy_from->casting_arg);
 	}
 
 	if (copy_from->name)
 	{
-		this->name = str_dup(copy_from->name);
+		this->name = strdup(copy_from->name);
 	}
 
 	if (copy_from->tname)
 	{
-		this->tname = str_dup(copy_from->tname);
+		this->tname = strdup(copy_from->tname);
 	}
 
 	if (copy_from->short_descr)
 	{
-		this->short_descr = str_dup(copy_from->short_descr);
+		this->short_descr = strdup(copy_from->short_descr);
 	}
 
 	if (copy_from->long_descr)
 	{
-		this->long_descr = str_dup(copy_from->long_descr);
+		this->long_descr = strdup(copy_from->long_descr);
 	}
 
 	if (copy_from->pmote_str)
 	{
-		this->pmote_str = str_dup(copy_from->pmote_str);
+		this->pmote_str = strdup(copy_from->pmote_str);
 	}
 
 	if (copy_from->voice_str)
 	{
-		this->voice_str = str_dup(copy_from->voice_str);
+		this->voice_str = strdup(copy_from->voice_str);
 	}
 
 	if (copy_from->description)
 	{
-		this->description = str_dup(copy_from->description);
+		this->description = strdup(copy_from->description);
 	}
 
 	if (copy_from->clans)
 	{
-		this->clans = str_dup(copy_from->clans);
+		this->clans = strdup(copy_from->clans);
 	}
 
 	if (copy_from->enemy_direction)
 	{
-		this->enemy_direction = str_dup(copy_from->enemy_direction);
+		this->enemy_direction = strdup(copy_from->enemy_direction);
 	}
 
 	if (copy_from->combat_log)
 	{
-		this->combat_log = str_dup(copy_from->combat_log);
+		this->combat_log = strdup(copy_from->combat_log);
 	}
 
 	if (copy_from->travel_str)
 	{
-		this->travel_str = str_dup(copy_from->travel_str);
+		this->travel_str = strdup(copy_from->travel_str);
 	}
 
 	if (copy_from->dmote_str)
 	{
-		this->dmote_str = str_dup(copy_from->dmote_str);
+		this->dmote_str = strdup(copy_from->dmote_str);
 	}
 
 	if (copy_from->plan)
@@ -827,32 +827,32 @@ void pc_data::deep_copy (pc_data *copy_from)
 
 	if (copy_from->creation_comment)
 	{
-		this->creation_comment = str_dup(copy_from->creation_comment);
+		this->creation_comment = strdup(copy_from->creation_comment);
 	}
 
 	if (copy_from->imm_enter)
 	{
-		this->imm_enter = str_dup(copy_from->imm_enter);
+		this->imm_enter = strdup(copy_from->imm_enter);
 	}
 
 	if (copy_from->imm_leave)
 	{
-		this->imm_leave = str_dup(copy_from->imm_leave);
+		this->imm_leave = strdup(copy_from->imm_leave);
 	}
 
 	if (copy_from->site_lie)
 	{
-		this->site_lie = str_dup(copy_from->site_lie);
+		this->site_lie = strdup(copy_from->site_lie);
 	}
 
 	if (copy_from->account_name)
 	{
-		this->account_name = str_dup(copy_from->account_name);
+		this->account_name = strdup(copy_from->account_name);
 	}
 
 	if (copy_from->msg)
 	{
-		this->msg = str_dup(copy_from->msg);
+		this->msg = strdup(copy_from->msg);
 	}
 }
 
@@ -862,7 +862,7 @@ void mob_data::deep_copy (mob_data *copy_from)
 
 	if (copy_from->owner)
 	{
-		this->owner = str_dup(copy_from->owner);
+		this->owner = strdup(copy_from->owner);
 	}
 }
 
@@ -929,7 +929,7 @@ std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std:
 	else if (IS_SET (plr_flags, NEW_PLAYER_TAG)) {
 		characterNameColour = 2;
 	}
-	else if (IS_GUIDE (this)) { //If the person is a guide 
+	else if (IS_GUIDE (this)) { //If the person is a guide
 		characterNameColour = 3;
 	}
 	else {

@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  wounds.c : Wounds Module                           www.middle-earth.us | 
+|  wounds.c : Wounds Module                           www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  All original code, derived under license from DIKU GAMMA (0.0).        |
 \------------------------------------------------------------------------*/
@@ -311,34 +311,34 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 				}
 			}
 
-			wound->location = str_dup (location);
+			wound->location = strdup (location);
 			wound->damage = impact;
 
 			if (type == 2 || type == 4)
-				wound->type = str_dup ("slash");
+				wound->type = strdup ("slash");
 			else if (type == 0 || type == 1)
-				wound->type = str_dup ("pierce");
+				wound->type = strdup ("pierce");
 			else if (type == 3)
-				wound->type = str_dup ("blunt");
+				wound->type = strdup ("blunt");
 			else if (type == 5)
-				wound->type = str_dup ("frost");
+				wound->type = strdup ("frost");
 			else if (type == 6)
-				wound->type = str_dup ("fire");
+				wound->type = strdup ("fire");
 			else if (type == 7)
-				wound->type = str_dup ("bite");
+				wound->type = strdup ("bite");
 			else if (type == 8)
-				wound->type = str_dup ("claw");
+				wound->type = strdup ("claw");
 			else if (type == 9)
-				wound->type = str_dup ("fist");
+				wound->type = strdup ("fist");
 			else if (type == 10)
-				wound->type = str_dup("stun");
+				wound->type = strdup("stun");
 			else if (!str_cmp(location, "bloodloss"))
-				wound->type = str_dup("bloodloss");
-			else 
-				wound->type = str_dup("bloodloss");
+				wound->type = strdup("bloodloss");
+			else
+				wound->type = strdup("bloodloss");
 
-			wound->name = str_dup (name);
-			wound->severity = str_dup (severity);
+			wound->name = strdup (name);
+			wound->severity = strdup (severity);
 
 			if (!str_cmp (severity, "severe") && !bleeding && str_cmp(wound->type, "stun"))
 				wound->bleeding = number (2, 3);
@@ -387,9 +387,9 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 			// We only want ones that have the flag (<NN)
 			typedef std::multimap<mob_cue,std::string>::const_iterator N;
 			std::pair<N,N> range = ch->mob->cues->equal_range (cue_on_health);
-			if (range.first != range.second) 
+			if (range.first != range.second)
 			{
-				// Want to only execute the health cue the first time health 
+				// Want to only execute the health cue the first time health
 				// drops below NN
 				int old_health = 100 - (int((old_damage * 100.0) / (ch->max_hit)));
 				int new_health = 100 - (int((curdamage * 100.0) / (ch->max_hit)));
@@ -411,7 +411,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 						}
 					}
 				} // for N n
-			} //if (range.first != range.second) 
+			} //if (range.first != range.second)
 		} //if (IS_NPC (ch) && ch->mob->cues)
 
 
@@ -815,7 +815,7 @@ adjust_wound (CHAR_DATA * ch, WOUND_DATA * wound, int amount)
 	sprintf (buf, "%s", downsized_wound (ch, wound));
 	mem_free (wound->severity);
 	wound->severity = NULL;
-	wound->severity = str_dup (buf);
+	wound->severity = strdup (buf);
 
 	if (amount < 0)
 		return 0;
@@ -937,7 +937,7 @@ delayed_treatment (CHAR_DATA * ch)
 	if (roll <= skill_level (ch, SKILL_HEALING, 0) - 15)
 	{
 		treat_effect =  3;
-	}	
+	}
 	else if (roll <= skill_level (ch, SKILL_HEALING, 0) - 0 || (healerSkillLevel > 70))
 	{
 		treat_effect =  2;
@@ -1029,7 +1029,7 @@ delayed_treatment (CHAR_DATA * ch)
 
 			/***
 			Normal healers can use a kit and heal points back to the wound, but not as effectively as better healers.
-			**/      
+			**/
 			else if (treat_effect == 2)
 			{
 				if (mode)
@@ -1116,8 +1116,8 @@ delayed_treatment (CHAR_DATA * ch)
 			}
 			/***
 			Bad healers don't know how to use the kits and cause damage instead of healing it, and preventing better healers from fixing it until the wound needs treatment again. Additionally, they have a chance to cause infections
-			**/         
-			else 
+			**/
+			else
 			{
 				if (mode)
 				{
@@ -1136,13 +1136,13 @@ delayed_treatment (CHAR_DATA * ch)
 					act (buf2, false, ch, 0, tch, TO_VICT | _ACT_FORMAT);
 					wound->healerskill = -1;
 				}
-				//Make the wound worse, but not enough to kill the player				
+				//Make the wound worse, but not enough to kill the player
 				if ((ch->damage + 3) >= ch->max_hit)
 					adjust_wound (tch, wound, 2);
 				else if ((ch->damage + 2) >= ch->max_hit)
 					adjust_wound (tch, wound, 1);
 
-				//50% chance to cause infections but elves don't get infected						
+				//50% chance to cause infections but elves don't get infected
 				if (!wound->infection && dice(1, 10) <= 5 && !(tch->race >= 16 && tch->race <= 19 || tch->race == 93))
 					wound->infection = WOUND_INFECTIONS;
 
@@ -2000,7 +2000,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 		else
 		{
 			tch = get_char_room_vis (ch, arg);
-		}	
+		}
 
 		if (!tch)
 		{
@@ -2050,7 +2050,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				totdam += damage;
 			}
-			else 
+			else
 			{
 				totdam += (damage / 2);
 				stun += damage;
@@ -2125,7 +2125,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 				sprintf (buf2 + strlen(buf2), " #4(Very Poorly Bo)#0 ");
 			}
 
-			// only immortals get to see points of damage           
+			// only immortals get to see points of damage
 			if (!IS_MORTAL(ch) && (wound->bleeding))
 			{
 				sprintf (buf, " #1(Bl:%d)#0 ", wound->bleeding);
@@ -2185,7 +2185,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 			}
 		}
 
-		// Only immortals can see damage points    
+		// Only immortals can see damage points
 
 		if (!IS_MORTAL(ch))
 		{
@@ -2219,7 +2219,7 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 			unload_pc (tch);
 	}
 
-	//Non-healer mortals and healers who are fighting see this information    
+	//Non-healer mortals and healers who are fighting see this information
 	else
 	{				// Japheth's Diagnose Additions, originally conceived by Zapata
 
@@ -2953,7 +2953,7 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
 	// End Changes to healing thanks to Power
 
 	roll = number (1, 120);
-	if (!((ch->race >= 16 && ch->race <= 19) || ch->race == 93 || 
+	if (!((ch->race >= 16 && ch->race <= 19) || ch->race == 93 ||
 		ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29
 		|| (ch->race >= 119 && ch->race <= 121))) { // Elves, Snaga, Trolls, Orcs, Uruk-Hai heal continuously - Case
 			switch (GET_POS (ch))
@@ -3035,7 +3035,7 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
 			sprintf (buf, "%s", downsized_wound (ch, wound));
 			mem_free (wound->severity);
 			wound->severity = NULL;
-			wound->severity = str_dup (buf);
+			wound->severity = strdup (buf);
 		}
 	}
 	else if (roll > needed && WOUND_INFECTIONS)
@@ -3122,7 +3122,7 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 	char strTargetKeyword[AVG_STRING_LENGTH] = "\0";
 
 	// Check for ACT_NOBIND Flag (usually on animals)
-	// 
+	//
 	// TODO: Determine if the NoBindFlag is redundant based on
 	// race body type. Is there any reason this can't just check 'humanoid'?
 
@@ -3257,7 +3257,7 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 			act ("$n crouches beside $N, trying to stop $S's bleeding.", false, thisPtr, 0, pTargetActor, TO_NOTVICT | _ACT_FORMAT);
 			act ("$n crouches beside you, trying to stop your bleeding.", false, thisPtr, 0, pTargetActor, TO_VICT | _ACT_FORMAT);
 		}
-	} 
+	}
 	else // bind yourself
 	{
 		if (nHasClothProp)
@@ -3270,7 +3270,7 @@ char__do_bind (CHAR_DATA * thisPtr, char *argument, int cmd)
 			act("You apply pressure to your wounds, attempting to stem the bleeding.",false, thisPtr, 0, 0, TO_CHAR | _ACT_FORMAT);
 			act("$n apply pressure to $s wounds, attempting to stem the bleeding.",false, thisPtr, 0, 0, TO_ROOM | _ACT_FORMAT);
 		}
-	} 
+	}
 
 	thisPtr->flags |= FLAG_BINDING;
 
@@ -3387,7 +3387,7 @@ delayed_bind (CHAR_DATA * thisPtr)
 
 				// bonus for having both helpful skills
 				pWound->bindskill += (thisPtr->skills[SKILL_HEALING] &&
-					thisPtr->skills[SKILL_EMPATHIC_HEAL]) 
+					thisPtr->skills[SKILL_EMPATHIC_HEAL])
 					? (((100 - pWound->bindskill) *
 					MIN (thisPtr->skills[SKILL_HEALING],
 					thisPtr->skills[SKILL_EMPATHIC_HEAL])) /100) : 0;
@@ -3480,8 +3480,8 @@ delayed_bind (CHAR_DATA * thisPtr)
 }
 
 
-char * 
-strip_small_minor(char * wounds, CHAR_DATA * ch) 
+char *
+strip_small_minor(char * wounds, CHAR_DATA * ch)
 {
 	std::string woundstr, temp_string;
 	int jdex, kdex, temp_dex, rdex;
@@ -3509,7 +3509,7 @@ strip_small_minor(char * wounds, CHAR_DATA * ch)
 		if (woundstr.find("small", 0) == std::string::npos)
 			jdex = woundstr.find("minor", 0);
 		else
-			jdex = woundstr.find("small", 0); 		
+			jdex = woundstr.find("small", 0);
 
 		if (woundstr[jdex - 2] == 'a')
 			temp_dex = jdex;	//begining of substring to be removed
@@ -3533,27 +3533,27 @@ strip_small_minor(char * wounds, CHAR_DATA * ch)
 			jdex++;
 		} // while (woundstr[jdex] != ','
 
-		// deleting a string at the begining or in the middle							
-		if (woundstr[jdex] == ',')  
+		// deleting a string at the begining or in the middle
+		if (woundstr[jdex] == ',')
 		{
 			// We delete the string we don't want, including the preceding "a " and trailing space
 			temp_string.push_back(woundstr[jdex]);
 			temp_string = " a " + temp_string;
-			woundstr.erase(temp_dex - 2, temp_string.length()); 
+			woundstr.erase(temp_dex - 2, temp_string.length());
 		}
 
-		//Deleting the last segment in the string.		
+		//Deleting the last segment in the string.
 		else if (woundstr[jdex] == '.') // we are removing a string that is the end
 		{
 			// We delete the string we don't want, including the preceding "a "
 			temp_string = " a " + temp_string;
-			woundstr.erase(temp_dex - 2, temp_string.length());  
+			woundstr.erase(temp_dex - 2, temp_string.length());
 
 
 			kdex = woundstr.rfind(",");
 			if (kdex != std::string::npos)
 			{
-				woundstr.erase(kdex);	
+				woundstr.erase(kdex);
 				woundstr.insert(woundstr.length(), ".");
 			}
 
@@ -3564,12 +3564,12 @@ strip_small_minor(char * wounds, CHAR_DATA * ch)
 			}
 
 		}
-		//Deal with two special cases							
+		//Deal with two special cases
 		kdex = woundstr.find(" has and ");
 		if (kdex != std::string::npos)
 		{
-			woundstr.erase(kdex+4, 4);	
-		}		
+			woundstr.erase(kdex+4, 4);
+		}
 
 		kdex = woundstr.find(".");
 		if (kdex == std::string::npos)

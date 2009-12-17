@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  guest.c : guest login generation routines          www.middle-earth.us | 
+|  guest.c : guest login generation routines          www.middle-earth.us |
 |  Copyright (C) 2005, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -88,7 +88,7 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 
 	randomize_mobile (ch);
 
-	ch->pc->account_name = str_dup (d->acct->name.c_str ());
+	ch->pc->account_name = strdup (d->acct->name.c_str ());
 
 	if (is_guide (d->acct->name.c_str ()))
 		ch->pc->is_guide = true;
@@ -141,11 +141,11 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 
 	if (ch->pc->is_guide)
 		ch->description =
-		str_dup
+		strdup
 		("One of our friendly player #BGuides#0 is here, awaiting questions.\n");
 	else
 		ch->description =
-		str_dup
+		strdup
 		("Another Guest is here, passing through. Be sure to welcome them!\n");
 
 	ch->plr_flags |= NEWBIE_HINTS;

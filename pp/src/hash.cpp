@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  hash.c : Central Hash Module                       www.middle-earth.us | 
+|  hash.c : Central Hash Module                       www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -32,11 +32,11 @@ mobile_load_cues (MOB_DATA * mob)
 {
 	std::multimap<mob_cue,std::string> * cues = new std::multimap<mob_cue,std::string>;
 	std::string world_db = engine.get_config ("world_db");
-	mysql_safe_query 
+	mysql_safe_query
 		( "SELECT cue+0, reflex"
 		" FROM %s.cues"
 		" WHERE mid = %d "
-		" ORDER BY cue, id ASC", 
+		" ORDER BY cue, id ASC",
 		world_db.c_str (), mob->nVirtual);
 
 	MYSQL_RES *result = mysql_store_result (database);
@@ -360,7 +360,7 @@ fread_mobile (int vnum, const int *nZone, FILE * fp)
 
 	p = mob->clans;
 	p2 = p;
-	mob->clans = str_dup ("");
+	mob->clans = strdup ("");
 
 	while (*p2)
 	{
@@ -476,18 +476,18 @@ load_mobile (int vnum)
 
 	if (IS_SET (new_mobile->flags, FLAG_VARIABLE))
 	{
-		new_mobile->str = proto->str; 
-		new_mobile->dex = proto->dex; 
-		new_mobile->intel = proto->intel; 
-		new_mobile->aur = proto->aur; 
-		new_mobile->agi = proto->agi; 
-		new_mobile->con = proto->con; 
-		new_mobile->wil = proto->wil; 
+		new_mobile->str = proto->str;
+		new_mobile->dex = proto->dex;
+		new_mobile->intel = proto->intel;
+		new_mobile->aur = proto->aur;
+		new_mobile->agi = proto->agi;
+		new_mobile->con = proto->con;
+		new_mobile->wil = proto->wil;
 		randomize_mobile (new_mobile);
 		new_mobile->flags &= ~FLAG_VARIABLE;
 	}
 
-	new_mobile->clans = str_dup (proto->clans);
+	new_mobile->clans = strdup (proto->clans);
 
 	new_mobile->move = new_mobile->max_move;
 
@@ -669,7 +669,7 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
 		}
 
 		mem_free (new_obj->full_description);
-		new_obj->full_description = str_dup (buf2);
+		new_obj->full_description = strdup (buf2);
 	}
 
 	*buf2 = '\0';
@@ -701,7 +701,7 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
 		}
 
 		mem_free (new_obj->name);
-		new_obj->name = str_dup (buf2);
+		new_obj->name = strdup (buf2);
 	}
 
 	if ((IS_SET (new_obj->obj_flags.extra_flags, ITEM_MASK)
@@ -759,7 +759,7 @@ OBJ_DATA * load_object (int vnum)
 // This was done because sometimes load_object is called to get the prototype, then ovals
 // are loaded afterwards. Thus it generates a new writing ID, then ignores it because it loads
 // up the writing from the ovals later.
-// all objects loaded in the initial fread from file already have ovals and call this 
+// all objects loaded in the initial fread from file already have ovals and call this
 // function with false, to avoid duplicate work
 OBJ_DATA *
 load_object_full (int vnum, bool newWritingID)
@@ -1460,7 +1460,7 @@ reset_zone (int zone)
 
 				reset->type = RESET_REPLY;
 
-				reset->command = str_dup ((char *) ZCMD.arg2);
+				reset->command = strdup ((char *) ZCMD.arg2);
 
 				reset->when.month = -1;
 				reset->when.day = -1;

@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  db.c : Database Module                             www.middle-earth.us | 
+|  db.c : Database Module                             www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -314,7 +314,7 @@ add_obj_to_hash (OBJ_DATA * add_obj)
 
 	if (globalObjectArray[add_obj->nVirtual] == NULL) {
 		globalObjectArray[add_obj->nVirtual] = add_obj;
-		
+
 		hash = add_obj->nVirtual % OBJECT_ZONE_SIZE;
 		add_obj->hnext = obj_tab[hash];
 		obj_tab[hash] = add_obj;
@@ -519,7 +519,7 @@ boot_db (void)
 				{
 					command_interpreter(ch, (char *) cue.c_str());
 				}
-			}	
+			}
 		}
 	}
 
@@ -706,13 +706,13 @@ create_room_zero (void)
 
 	room = allocate_room (0);
 	room->zone = 0;
-	room->name = str_dup ("Heaven");
-	room->description = str_dup ("You are in heaven.\n");
+	room->name = strdup ("Heaven");
+	room->description = strdup ("You are in heaven.\n");
 
 	if (str_cmp (zone_table[0].name, "Empty Zone"))
 		return;
 
-	zone_table[0].name = str_dup ("Heaven");
+	zone_table[0].name = strdup ("Heaven");
 	zone_table[0].top = 0;
 	zone_table[0].lifespan = 0;
 	zone_table[0].reset_mode = 0;
@@ -806,7 +806,7 @@ load_rooms (void)
 
 				room->contents = 0;
 				room->people = 0;
-				room->capacity = 0;	
+				room->capacity = 0;
 				room->light = 0;
 
 				for (tmp = 0; tmp <= LAST_DIR; tmp++)
@@ -936,7 +936,7 @@ load_rooms (void)
 					else if (*chk == 'C')
 					{	/* Capacity of room */
 						fscanf (fl, "%d\n", &tmp);
-						room->capacity = tmp;	
+						room->capacity = tmp;
 
 					}
 					else if (*chk == 'S')	/* end of current room */
@@ -1001,7 +1001,7 @@ allocate_room (int nVirtual)
 	else
 #endif
 		add_room_to_hash (new_room);
-	if (new_room->nVirtual < 100000) {	
+	if (new_room->nVirtual < 100000) {
 		globalRoomArray[new_room->nVirtual] = (new_room);
 	}
 
@@ -1156,7 +1156,7 @@ boot_zones (void)
 				while (*buf && isspace (buf[strlen (buf) - 1]))
 					buf[strlen (buf) - 1] = '\0';
 
-				zone_table[zon].cmd[cmd_no].arg1 = (long int) str_dup (buf);
+				zone_table[zon].cmd[cmd_no].arg1 = (long int) strdup (buf);
 
 				cmd_no++;
 
@@ -1191,7 +1191,7 @@ boot_zones (void)
 					while (isspace (*p))
 						p++;
 
-					zone_table[zon].cmd[cmd_no].arg2 = (long int) str_dup (p);
+					zone_table[zon].cmd[cmd_no].arg2 = (long int) strdup (p);
 				}
 
 				else
@@ -1338,7 +1338,7 @@ autosave (void)
 inline bool
 is_valid_string_char (char c)
 {
-	return ((c >= 32 && c <= 126) 
+	return ((c >= 32 && c <= 126)
 		|| (c >= 9 && c <= 13));
 	/// \todo Allow valid extended characters (c >= 0xC0 && c <= 0xFC)
 }
@@ -1623,7 +1623,7 @@ mem_free (ch->pmote_str);
 ch->pmote_str = NULL;
 }
 
-if (ch->plan) 
+if (ch->plan)
 {
 delete ch->plan;
 ch->plan = 0;
@@ -1635,7 +1635,7 @@ ch->goal = 0;
 }
 
 // for the typical mob proto (loaded at boot time)
-// these pointers are in perm memory and do not get 
+// these pointers are in perm memory and do not get
 // deleted. however newly minit'd mobs share memory
 // that is not protected, so freeing here will corrupt
 // the proto if it is not saved.
@@ -1676,21 +1676,21 @@ else
 CHAR_DATA* proto = vtom(ch->mob->nVirtual);
 if (proto)
 {
-if (ch->tname && *ch->tname 
+if (ch->tname && *ch->tname
 && ch->tname != proto->tname)
 {
 mem_free (ch->tname);
 ch->tname = NULL;
 }
 
-if (ch->name && *ch->name 
+if (ch->name && *ch->name
 && ch->name != proto->name)
 {
 mem_free (ch->name);
 ch->name = NULL;
 }
 
-if (ch->short_descr && *ch->short_descr 
+if (ch->short_descr && *ch->short_descr
 && ch->short_descr != proto->short_descr )
 {
 mem_free (ch->short_descr);
@@ -1711,7 +1711,7 @@ mem_free (ch->description);
 ch->description = NULL;
 }
 }
-else 
+else
 {
 fprintf (stderr, "Proto not defined for NPC %d?\n", ch->mob->nVirtual);
 }

@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  roomprogs.c : Room Scripting Module                www.middle-earth.us | 
+|  roomprogs.c : Room Scripting Module                www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -29,7 +29,7 @@
 extern rpie::server engine;
 
 /* script program commands */
-#define MAKE_STRING(msg) (((std::ostringstream&) (std::ostringstream() << std::boolalpha << msg)).str())  
+#define MAKE_STRING(msg) (((std::ostringstream&) (std::ostringstream() << std::boolalpha << msg)).str())
 #define RP_ATECHO 	0
 #define RP_GIVE		1
 #define RP_TAKE		2
@@ -69,7 +69,7 @@ extern rpie::server engine;
 #define RP_SYSTEM	36	/* submit a system message */
 #define RP_CLAN	37	/* send a message to clan members */
 #define RP_TRANS_GROUP	38	/* send a message to clan members */
-#define RP_SET		39	
+#define RP_SET		39
 #define RP_CRIMINALIZE  40      /* criminalize a person or room */
 #define RP_STRIP        41      /* takes a person's equipment and puts it all neatly in a bag */
 #define RP_CLAN_ECHO         42      /* adds people to a clan at a certain rank */
@@ -241,7 +241,7 @@ is_variable_in_list (room_prog_var *& variable_list, std::string variable_name)
 		if (!tvar->name.compare(variable_name))
 			return true;
 	}
-	return false; 
+	return false;
 }
 
 std::string
@@ -298,7 +298,7 @@ add_variable_to_list (room_prog_var *& variable_list, std::string variable_name,
 	room_prog_var *tvar;
 
 	if (!variable_list)
-	{	
+	{
 		variable_list = new room_prog_var;
 		variable_list->name = variable_name;
 		variable_list->data = variable_data;
@@ -421,7 +421,7 @@ r_isname (char *str, char *namelist)
 	}
 }
 
-// called by command_interpreter if there is a 
+// called by command_interpreter if there is a
 // program in the user's room.
 int
 r_program (CHAR_DATA * ch, char *argument)
@@ -469,7 +469,7 @@ m_prog (CHAR_DATA * ch, char * argument)
 		return 0;
 
 	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range;
-	range = mob_prog_list.equal_range(ch->mob->nVirtual); 
+	range = mob_prog_list.equal_range(ch->mob->nVirtual);
 	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
 	{
 		if (!it->second.type)
@@ -1378,7 +1378,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 	/* will return true if wanted time is equal to or greater than "time". Current zone is -1. */
 
 	else if (!strncmp (sarg, "wanted", 6))
-	{ 
+	{
 		int zone = atol(rbuf);
 		int test = atol(dbuf);
 
@@ -2824,7 +2824,7 @@ do_opadd (CHAR_DATA *ch, char *argument, int cmd)
 	prog.prog = "";
 	prog.keys = "";
 	prog.command = "";
-	prog.type = 5;	
+	prog.type = 5;
 
 	obj_prog_list.insert(std::pair<int, room_prog>(atoi(vnum.c_str()), prog));
 	int prog_num = 0;
@@ -3641,7 +3641,7 @@ r_set (CHAR_DATA * ch, char *argument, room_prog_var *& variable_list)
 			&& (*p == ' ' || *p == 'd'))
 		{
 			random_number[which_random] = dice (rolls, die);
-		}      
+		}
 	}
 	else if (!strncmp(var, "count", 5))
 	{
@@ -3729,12 +3729,12 @@ r_tally (CHAR_DATA *ch, std::string argument, room_prog_var *&variable_list)
 	ROOM_DATA *room = NULL;
 	argument = one_argument(argument, buf);
 	if (buf.find("-1") != std::string::npos) // -1 means trigger puller
-	{	
+	{
 		tch = ch;
 		room = ch->room;
 		argument = one_argument(argument, buf); // Ignore next input
 	}
-	else 
+	else
 	{
 		std::string strroom;
 		argument = one_argument(argument, strroom);
@@ -3764,7 +3764,7 @@ r_tally (CHAR_DATA *ch, std::string argument, room_prog_var *&variable_list)
 				}
 			}
 		}
-		else 
+		else
 		{
 			tch = get_char_room_vis2 (ch, room->nVirtual, (char *) buf.c_str());
 		}
@@ -3823,24 +3823,24 @@ r_tally (CHAR_DATA *ch, std::string argument, room_prog_var *&variable_list)
 // }
 
 
-void 
-r_atecho(CHAR_DATA *ch, char *argument) 
-{ 
-	char   loc_str[MAX_INPUT_LENGTH] = {'\0'}; 
-	char   loc_str1[MAX_INPUT_LENGTH] = {'\0'}; 
-	char    *ploc_str; 
-	char   *ploc_str1; 
-	char   buf[MAX_INPUT_LENGTH] = {'\0'}; 
-	char   test_dat[2] = "-"; 
-	char   mt1[MAX_INPUT_LENGTH] = "              "; 
-	int    room_span = 0; 
-	int    first_room = 0; 
-	int   last_room = 0; 
+void
+r_atecho(CHAR_DATA *ch, char *argument)
+{
+	char   loc_str[MAX_INPUT_LENGTH] = {'\0'};
+	char   loc_str1[MAX_INPUT_LENGTH] = {'\0'};
+	char    *ploc_str;
+	char   *ploc_str1;
+	char   buf[MAX_INPUT_LENGTH] = {'\0'};
+	char   test_dat[2] = "-";
+	char   mt1[MAX_INPUT_LENGTH] = "              ";
+	int    room_span = 0;
+	int    first_room = 0;
+	int   last_room = 0;
 
-	half_chop(argument, loc_str, buf); 
-	ploc_str = loc_str; 
-	ploc_str1 = loc_str1; 
-	strcat(buf,"\n\r"); 
+	half_chop(argument, loc_str, buf);
+	ploc_str = loc_str;
+	ploc_str1 = loc_str1;
+	strcat(buf,"\n\r");
 
 	std::string bufchange = buf;
 	while (bufchange.find("$n") != std::string::npos)
@@ -3850,52 +3850,52 @@ r_atecho(CHAR_DATA *ch, char *argument)
 
 	sprintf (buf, "%s", bufchange.c_str());
 
-	// buf is ready to go.  it's the echo that gets sent out to the rooms. 
+	// buf is ready to go.  it's the echo that gets sent out to the rooms.
 
-	while(1) 
-	{ 
-		if (!strncmp(ploc_str, test_dat, 1)) // if it's a '-' set the room_span flag 
-			room_span = true; 
-		for (; ispunct(*ploc_str); ploc_str++); // bypass any punctuation 
-		for (; isdigit(*ploc_str1 = *ploc_str); ploc_str++, ploc_str1++); // read room # into loc_str1 
+	while(1)
+	{
+		if (!strncmp(ploc_str, test_dat, 1)) // if it's a '-' set the room_span flag
+			room_span = true;
+		for (; ispunct(*ploc_str); ploc_str++); // bypass any punctuation
+		for (; isdigit(*ploc_str1 = *ploc_str); ploc_str++, ploc_str1++); // read room # into loc_str1
 
-		if ( !isdigit(*loc_str1) ) { 
-			return; 
-		} 
+		if ( !isdigit(*loc_str1) ) {
+			return;
+		}
 
-		if ( !vtor (strtol(loc_str1, NULL, 10)) ) { 
-			system_log("ERROR: Room not found in r_atecho", true); 
-			//   return; 
-		} 
-		else { 
-			strcat(buf,"\n\r"); 
-			send_to_room (buf, vtor (strtol(loc_str1, NULL, 10))->nVirtual); 
-		} 
+		if ( !vtor (strtol(loc_str1, NULL, 10)) ) {
+			system_log("ERROR: Room not found in r_atecho", true);
+			//   return;
+		}
+		else {
+			strcat(buf,"\n\r");
+			send_to_room (buf, vtor (strtol(loc_str1, NULL, 10))->nVirtual);
+		}
 
 
-		if(room_span) { // if room_span is set, the last room echoed to was the end of the span 
-			// go echo to the rooms in between now. 
-			last_room = strtol(loc_str1, NULL, 10); // set the last room as an integer 
+		if(room_span) { // if room_span is set, the last room echoed to was the end of the span
+			// go echo to the rooms in between now.
+			last_room = strtol(loc_str1, NULL, 10); // set the last room as an integer
 
-			// iterate through the span of rooms 
-			while(first_room + 1 < last_room) { 
-				if ( !vtor (first_room + 1) ) { // does the room exist? 
-					first_room++; // increment even if the room doesn't exist 
-				} 
-				else { 
-					send_to_room(buf, vtor (first_room + 1)->nVirtual); 
-					first_room++; 
-				} 
-			} 
-			room_span = 0;    // reset the trigger 
-		} 
+			// iterate through the span of rooms
+			while(first_room + 1 < last_room) {
+				if ( !vtor (first_room + 1) ) { // does the room exist?
+					first_room++; // increment even if the room doesn't exist
+				}
+				else {
+					send_to_room(buf, vtor (first_room + 1)->nVirtual);
+					first_room++;
+				}
+			}
+			room_span = 0;    // reset the trigger
+		}
 
-		first_room = strtol(loc_str1, NULL, 10); // set first_room as the last room echoed to 
-		strcpy(loc_str1, mt1); // overwrite loc_str1 
-		ploc_str1 = loc_str1; // reset the pointer 
-	} 
-	return; 
-} 
+		first_room = strtol(loc_str1, NULL, 10); // set first_room as the last room echoed to
+		strcpy(loc_str1, mt1); // overwrite loc_str1
+		ploc_str1 = loc_str1; // reset the pointer
+	}
+	return;
+}
 
 
 void
@@ -4103,7 +4103,7 @@ r_load_clone (CHAR_DATA * ch, char *argument)
 
 	CHAR_DATA* i = ch->room->people;
 	for (; i; i = i->next_in_room)
-	{      
+	{
 		if (i->deleted)
 			continue;
 
@@ -4145,7 +4145,7 @@ r_load_clone (CHAR_DATA * ch, char *argument)
 			obj_to_room (clone, holder->room->nVirtual);
 		else if (recipient)
 			obj_to_char (clone, recipient);
-		else 
+		else
 			extract_obj (clone);
 	}
 
@@ -4503,9 +4503,9 @@ r_transmob (CHAR_DATA * ch, char *argument)
 * r_trans_group
 *
 * trans_group <mob> <from> <to>
-* 
+*
 * if <mob> is -1 assumes program user, and <from> is ignored
-* 
+*
 */
 void
 r_trans_group (CHAR_DATA * ch, char * argument)
@@ -4579,7 +4579,7 @@ r_trans_group (CHAR_DATA * ch, char * argument)
 	{
 		if (tmp_ch->following == leader || tmp_ch == leader)
 		{
-			if (tmp_ch->mount) 
+			if (tmp_ch->mount)
 			{
 				transfer_queue[queue++] = tmp_ch->mount;
 			}
@@ -4593,10 +4593,10 @@ r_trans_group (CHAR_DATA * ch, char * argument)
 			}
 			transfer_queue[queue++] = tmp_ch;
 		}
-	}  
+	}
 
 	// move them
-	do 
+	do
 	{
 		char_from_room (transfer_queue[--queue]);
 		char_to_room (transfer_queue[queue], destination_rnum);
@@ -4636,19 +4636,19 @@ r_zone_echo (CHAR_DATA * ch, char *argument)
 				case SECT_UNDERWATER:
 				case SECT_PIT:
 					break;
-				default:		
+				default:
 					send_to_room (argument, room->nVirtual);
 					break;
 				}
-			}            
+			}
 	}
-	else 
+	else
 	{
 		int sector_flag = parse_argument (sector_types, sector);
 		if (sector_flag >= 0)
 		{
 			for (ROOM_DATA *room = full_room_list; room; room = room->lnext)
-				if (room->people && room->zone == zone 
+				if (room->people && room->zone == zone
 					&& room->sector_type == sector_flag)
 					send_to_room (argument, room->nVirtual);
 		}
@@ -4656,7 +4656,7 @@ r_zone_echo (CHAR_DATA * ch, char *argument)
 }
 
 void
-r_atwrite (CHAR_DATA * ch, char *argument) 
+r_atwrite (CHAR_DATA * ch, char *argument)
 {
 	std::string strArgument = argument, board, title;
 	MYSQL_RES *result;
@@ -4767,7 +4767,7 @@ r_atwrite (CHAR_DATA * ch, char *argument)
 		mysql_safe_query ("INSERT INTO boards VALUES ('%s', %d, '%s', '%s', '%s', '%s', '%s', %d)", (char *) board.c_str(), free_slot, (char *) title.c_str(), "System", date, date_buf, (char *) strArgument.c_str(), (int) time(0));
 
 		if (result)
-			mysql_free_result (result);		
+			mysql_free_result (result);
 	}
 
 	mem_free(date);
@@ -4780,7 +4780,7 @@ r_system (CHAR_DATA * ch, char *argument)
 	char buf [AVG_STRING_LENGTH];
 	char *token = index (argument, '@');
 
-	if (token) 
+	if (token)
 	{
 		token[0] = 0;
 		sprintf (buf, "#6%s#5%s#0#6%s#0\n", argument, ch->tname, token+1);
@@ -4793,7 +4793,7 @@ r_system (CHAR_DATA * ch, char *argument)
 }
 
 void
-r_clan_echo (CHAR_DATA * ch, char *argument) 
+r_clan_echo (CHAR_DATA * ch, char *argument)
 {
 	CHAR_DATA *tch;
 	char buf [MAX_STRING_LENGTH];
@@ -5081,10 +5081,10 @@ r_strip (CHAR_DATA *ch, char *argument)
 		if (bag && (ch->right_hand || ch->left_hand || ch->equip))
 		{
 			sprintf (buf, "A bag belonging to %s sits here.", ch->short_descr);
-			bag->description = str_dup (buf);
+			bag->description = strdup (buf);
 
 			sprintf (buf, "a bag labeled '%s'", ch->short_descr);
-			bag->short_description = str_dup (buf);
+			bag->short_description = strdup (buf);
 
 			if (ch->right_hand)
 			{
@@ -5162,7 +5162,7 @@ r_clan (CHAR_DATA *ch, char *argument)
 			flags = CLAN_JOURNEYMAN;
 		else if (!strncmp (arg2, "master", 6))
 			flags = CLAN_MASTER;
-		else 
+		else
 			flags = CLAN_MEMBER;
 
 		add_clan(ch, arg1, flags);
@@ -5576,14 +5576,14 @@ r_transobj (CHAR_DATA *ch, char *argument)
 }
 
 // objvnum <room> <keyword or number> <variable>
-void 
+void
 r_objvnum (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 {
 	OBJ_DATA *obj;
 	ROOM_DATA *room;
 	std::string buf;
 
-	// Room first. -1 means actor's room. 
+	// Room first. -1 means actor's room.
 	argument = one_argument(argument, buf);
 	if (buf.empty())
 		return;
@@ -5635,14 +5635,14 @@ r_objvnum (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 }
 
 // randomobj <room> <variable>
-void 
+void
 r_randomobj (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 {
 	OBJ_DATA *obj;
 	ROOM_DATA *room;
 	std::string buf;
 
-	// Room first. -1 means actor's room. 
+	// Room first. -1 means actor's room.
 	argument = one_argument(argument, buf);
 	if (buf.empty())
 		return;
@@ -5828,14 +5828,14 @@ prog_object_properties (OBJ_DATA *obj, std::string argument, std::string& output
 	}
 	else if (buf.find("mkey") != std::string::npos)
 	{
-		if (obj->desc_keys)	
+		if (obj->desc_keys)
 			output = obj->desc_keys;
 	}
 	else if (buf.find("months") != std::string::npos)
 	{
 		int morphtime = obj->morphTime - time(0);
 		morphtime /= 3600;
-		output = MAKE_STRING(morphtime / (24*30));			
+		output = MAKE_STRING(morphtime / (24*30));
 	}
 	else if (buf.find("days") != std::string::npos)
 	{
@@ -5913,29 +5913,29 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 			buf2.erase(buf2.find(argument), argument.length());
 			buf2 = argument + buf2;
 			mem_free(obj->name);
-			obj->name = str_dup(buf2.c_str());
+			obj->name = strdup(buf2.c_str());
 		}
 		else
 		{
 			std::string buf2 = obj->name;
 			mem_free(obj->name);
-			obj->name = str_dup((argument + buf2).c_str());
+			obj->name = strdup((argument + buf2).c_str());
 		}
 	}
 	else if (buf.find("sdesc") != std::string::npos)
 	{
 		mem_free(obj->short_description);
-		obj->short_description = str_dup(argument.c_str());
+		obj->short_description = strdup(argument.c_str());
 	}
 	else if (buf.find("ldesc") != std::string::npos)
 	{
 		mem_free(obj->description);
-		obj->description = str_dup(argument.c_str());
+		obj->description = strdup(argument.c_str());
 	}
 	else if (buf.find("desc") != std::string::npos)
 	{
 		mem_free(obj->full_description);
-		obj->full_description = str_dup(argument.c_str());
+		obj->full_description = strdup(argument.c_str());
 	}
 	else if (buf.find("material") != std::string::npos)
 	{
@@ -5946,7 +5946,7 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 			{
 				obj->material = it->first;
 				break;
-			}		
+			}
 		}
 	}
 	else if (buf.find("weight") != std::string::npos)
@@ -6341,7 +6341,7 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 				case 2:
 					value = "female";
 					break;
-				}		
+				}
 			}
 			else if (buf.find("inv") != std::string::npos || buf.find("worn") != std::string::npos)
 			{
@@ -6395,7 +6395,7 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 					if (buf.empty())
 						return;
 					if (buf.find("rhand") != std::string::npos)
-					{	
+					{
 						obj = tch->right_hand;
 					}
 					else if (buf.find("lhand") != std::string::npos)
@@ -6496,7 +6496,7 @@ r_setval (CHAR_DATA *ch, std::string argument)
 		if (buf.find("name") != std::string::npos)
 		{
 			mem_free(room->name);
-			room->name = str_dup(argument.c_str());
+			room->name = strdup(argument.c_str());
 		}
 		else if (buf.find("desc") != std::string::npos)
 		{
@@ -6507,7 +6507,7 @@ r_setval (CHAR_DATA *ch, std::string argument)
 			else
 			{
 				mem_free(room->description);
-				room->description = str_dup(argument.c_str());
+				room->description = strdup(argument.c_str());
 			}
 		}
 		else if (buf.find("sector") != std::string::npos)
@@ -6548,22 +6548,22 @@ r_setval (CHAR_DATA *ch, std::string argument)
 			if (buf.find("name") != std::string::npos)
 			{
 				mem_free(tch->tname);
-				tch->tname = str_dup (argument.c_str());
+				tch->tname = strdup (argument.c_str());
 			}
 			else if (buf.find("sdesc") != std::string::npos)
 			{
 				mem_free(tch->short_descr);
-				tch->short_descr = str_dup (argument.c_str());
+				tch->short_descr = strdup (argument.c_str());
 			}
 			else if (buf.find("ldesc") != std::string::npos)
 			{
 				mem_free(tch->long_descr);
-				tch->long_descr = str_dup (argument.c_str());
+				tch->long_descr = strdup (argument.c_str());
 			}
 			else if (buf.find("desc") != std::string::npos)
 			{
 				mem_free(tch->description);
-				tch->description = str_dup (argument.c_str());
+				tch->description = strdup (argument.c_str());
 			}
 			else if (buf.find("height") != std::string::npos)
 			{
@@ -6621,7 +6621,7 @@ r_setval (CHAR_DATA *ch, std::string argument)
 				else if (argument.find("male") != std::string::npos)
 					tch->sex = 1;
 				else if (argument.find("female") != std::string::npos)
-					tch->sex = 2;		
+					tch->sex = 2;
 			}
 			else if (buf.find("inv") != std::string::npos || buf.find("worn") != std::string::npos)
 			{

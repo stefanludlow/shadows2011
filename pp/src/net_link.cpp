@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  net_link.c : Data Structures                       www.middle-earth.us | 
+|  net_link.c : Data Structures                       www.middle-earth.us |
 |  Copyright (C) 2005, Shadows of Isildur: Sighentist                     |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -77,22 +77,22 @@ new_descriptor (int s)
 	*ip = '\0';
 	strcpy (ip, inet_ntoa (sock.sin_addr));
 
-	newd->strClientIpAddr = str_dup (ip);
-	newd->strClientHostname = str_dup (ip);
+	newd->strClientIpAddr = strdup (ip);
+	newd->strClientHostname = strdup (ip);
 
 	std::string resolved_hostname = resolved_host (newd->strClientHostname);
 	if (resolved_hostname.empty ())
 	{
 		from = gethostbyaddr ((char *) &sock.sin_addr,
-			sizeof ((char *) & sock.sin_addr), 
+			sizeof ((char *) & sock.sin_addr),
 			AF_INET);
 		if (from && *from->h_name != '-')
 		{
 			mysql_safe_query ("INSERT INTO resolved_hosts "
-				"VALUES ('%s', '%s', %d)", 
+				"VALUES ('%s', '%s', %d)",
 				ip, from->h_name, (int) time (0));
 			mem_free (newd->strClientHostname);
-			newd->strClientHostname = str_dup (from->h_name);
+			newd->strClientHostname = strdup (from->h_name);
 		}
 		else
 		{
@@ -104,7 +104,7 @@ new_descriptor (int s)
 	else
 	{
 		mem_free (newd->strClientHostname);
-		newd->strClientHostname = str_dup (resolved_hostname.c_str ());
+		newd->strClientHostname = strdup (resolved_hostname.c_str ());
 		newd->resolved = 1;
 	}
 
@@ -418,7 +418,7 @@ close_socket (DESCRIPTOR_DATA * d)
 }
 
 /* ******************************************************************
-general utility stuff (for local use)				
+general utility stuff (for local use)
 ****************************************************************** */
 
 int

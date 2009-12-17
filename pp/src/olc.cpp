@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  olc.c : OLC Module                                 www.middle-earth.us | 
+|  olc.c : OLC Module                                 www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -792,36 +792,36 @@ PRIMARY KEY(id)
 );
 
 create table bp_vobjects (
-vnum INT UNSIGNED NULL UNIQUE, 
-zone SMALLINT UNSIGNED NOT NULL DEFAULT 0, 
+vnum INT UNSIGNED NULL UNIQUE,
+zone SMALLINT UNSIGNED NOT NULL DEFAULT 0,
 type INT UNSIGNED NOT NULL DEFAULT 0,
-material INT NOT NULL DEFAULT 0, 
-size SMALLINT NOT NULL DEFAULT -1, 
-weight INT NOT NULL DEFAULT 0, 
-quality INT NOT NULL DEFAULT 0, 
-item_wear INT NOT NULL DEFAULT 0, 
-silver FLOAT NOT NULL DEFAULT 0.0, 
-farthings FLOAT NOT NULL DEFAULT 0.0, 
-activation INT NOT NULL DEFAULT 0, 
-count INT NOT NULL DEFAULT 1, 
-clock INT NOT NULL DEFAULT 0, 
-morphto INT NOT NULL DEFAULT 0, 
-oval0 INT NOT NULL DEFAULT 0, 
-oval1 INT NOT NULL DEFAULT 0, 
-oval2 INT NOT NULL DEFAULT 0, 
-oval3 INT NOT NULL DEFAULT 0, 
-oval4 INT NOT NULL DEFAULT 0, 
-oval5 INT NOT NULL DEFAULT 0, 
-extra_flags SET('destroyed', 'pitchable', 'invisible', 'magic', 'nodrop', 'bless', 'get_affect', 'drop_affect', 'multi_affect', 'wear_affect', 'wield_affect', 'hit_affect', 'ok', 'combinable', 'leader', 'member', 'omni', 'illegal', 'restricted', 'mask', 'mount', 'table', 'stack', 'vnpc_dwelling', 'loads', 'variable', 'timer', 'pc_sold', 'throwing', 'newskills', 'pitched', 'vnpc') NULL, 
+material INT NOT NULL DEFAULT 0,
+size SMALLINT NOT NULL DEFAULT -1,
+weight INT NOT NULL DEFAULT 0,
+quality INT NOT NULL DEFAULT 0,
+item_wear INT NOT NULL DEFAULT 0,
+silver FLOAT NOT NULL DEFAULT 0.0,
+farthings FLOAT NOT NULL DEFAULT 0.0,
+activation INT NOT NULL DEFAULT 0,
+count INT NOT NULL DEFAULT 1,
+clock INT NOT NULL DEFAULT 0,
+morphto INT NOT NULL DEFAULT 0,
+oval0 INT NOT NULL DEFAULT 0,
+oval1 INT NOT NULL DEFAULT 0,
+oval2 INT NOT NULL DEFAULT 0,
+oval3 INT NOT NULL DEFAULT 0,
+oval4 INT NOT NULL DEFAULT 0,
+oval5 INT NOT NULL DEFAULT 0,
+extra_flags SET('destroyed', 'pitchable', 'invisible', 'magic', 'nodrop', 'bless', 'get_affect', 'drop_affect', 'multi_affect', 'wear_affect', 'wield_affect', 'hit_affect', 'ok', 'combinable', 'leader', 'member', 'omni', 'illegal', 'restricted', 'mask', 'mount', 'table', 'stack', 'vnpc_dwelling', 'loads', 'variable', 'timer', 'pc_sold', 'throwing', 'newskills', 'pitched', 'vnpc') NULL,
 wear_flags SET('take', 'finger', 'neck', 'body', 'head', 'legs', 'feet', 'hands', 'arms', 'shield', 'about', 'waist', 'wrist', 'wield', 'hold', 'throw', 'unused', 'sheath', 'belt', 'back', 'blindfold', 'throat', 'ear', 'shoulder', 'ankle', 'hair', 'face', 'armband') NULL,
-econ_flags SET('tirith','osgiliath','gondor','morgul','magical','rare','valuable','foreign','junk','illegal','wild','poor','fine','haradaic','orkish','practice','used','numenorean','dunlending','elvish','dwarvish','hobbit','admin','fellowship','cooked','meat','pelargir','generic') NULL, 
-name VARCHAR(255) NULL, 
-sdesc VARCHAR(255) NULL, 
-ldesc VARCHAR(255) NULL, 
-fdesc TEXT NULL, 
-desc_keys VARCHAR(255) NULL, 
-ex_description TEXT NULL, 
-xaffected TEXT NULL, 
+econ_flags SET('tirith','osgiliath','gondor','morgul','magical','rare','valuable','foreign','junk','illegal','wild','poor','fine','haradaic','orkish','practice','used','numenorean','dunlending','elvish','dwarvish','hobbit','admin','fellowship','cooked','meat','pelargir','generic') NULL,
+name VARCHAR(255) NULL,
+sdesc VARCHAR(255) NULL,
+ldesc VARCHAR(255) NULL,
+fdesc TEXT NULL,
+desc_keys VARCHAR(255) NULL,
+ex_description TEXT NULL,
+xaffected TEXT NULL,
 PRIMARY KEY (vnum),
 FOREIGN KEY (type) REFERENCES shadows_world.item_type (type)
 );
@@ -949,7 +949,7 @@ fwrite_object (OBJ_DATA * tobj, FILE * fp)
 	}
 
 	if (tobj->super_vnum > 0) {
-		fprintf(fp, "S\n%d\n", tobj->super_vnum); // Super vnum storage - Case											  
+		fprintf(fp, "S\n%d\n", tobj->super_vnum); // Super vnum storage - Case
 	}											  // Would prefer something better than 'S', but when in Rome.
 
 	if (tobj->wdesc)
@@ -984,7 +984,7 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 	(((unsigned long)troom->room_flags)));
 
 
-	mysql_safe_query (query_format, 
+	mysql_safe_query (query_format,
 	troom->name,
 	troom->name);
 	*/
@@ -1816,7 +1816,7 @@ do_review (CHAR_DATA * ch, char *argument, int cmd)
 
 	ch->delay_type = DEL_APP_APPROVE;
 	ch->delay = 3 * 60;
-	ch->delay_who = str_dup (name);
+	ch->delay_who = strdup (name);
 
 	mysql_safe_query
 		("SELECT * FROM virtual_boards WHERE board_name = 'Applications' AND subject LIKE '%% %s'",
@@ -2044,7 +2044,7 @@ olist_show (OBJ_DATA * obj, int type, int header)
 			obj->nVirtual, (obj->full_description
 			&& *obj->full_description) ? " " : "*",
 			obj->farthings, obj->name, obj->short_description);
-		OBJ_DATA* filling = 0; 
+		OBJ_DATA* filling = 0;
 		if (obj->obj_flags.type_flag == ITEM_DRINKCON && obj->o.od.value[1]
 		&& obj->o.od.value[2] && (filling = vtoo (obj->o.od.value[2])))
 		{
@@ -2100,7 +2100,7 @@ mlist_show (std::string *output_string, CHAR_DATA *mob, bool header)
 
 	line.append(" #2|#0 ");
 
-	line.append(mob->name, MIN((int) strlen(mob->name), 29));	
+	line.append(mob->name, MIN((int) strlen(mob->name), 29));
 
 	for (int i = 0, j = (30 - MIN((int) strlen(mob->name), 29)); i < j; i++)
 
@@ -2112,7 +2112,7 @@ mlist_show (std::string *output_string, CHAR_DATA *mob, bool header)
 
 	line.append("#2|#0 ");
 
-	line.append(mob->short_descr, MIN((int) strlen(mob->short_descr), 29));     
+	line.append(mob->short_descr, MIN((int) strlen(mob->short_descr), 29));
 
 	for (int i = 0, j = (30 - MIN((int) strlen(mob->short_descr), 29)); i < j; i++)
 
@@ -2146,7 +2146,7 @@ mlist_show (std::string *output_string, CHAR_DATA *mob, bool header)
 	std::ostringstream conversion2;
 	conversion2 << loads;
 
-	line.append(conversion2.str());       
+	line.append(conversion2.str());
 
 	for (int i = 0, j = (7-conversion2.str().length()); i < j; i++)
 
@@ -2170,7 +2170,7 @@ mlist_show (std::string *output_string, CHAR_DATA *mob, bool header)
 
 }
 
-// To do 
+// To do
 
 void
 
@@ -2865,7 +2865,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 			*buf1 != 'r' &&
 			*buf1 != 'u' &&
 			*buf1 != 'x' &&
-			*buf1 != 'z')      
+			*buf1 != 'z')
 
 		{
 			s ("   a           per zone stats");
@@ -2881,7 +2881,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 
 	if  (GET_TRUST (ch) < 3)
 	{
-		if (*buf1 != 'a' && 
+		if (*buf1 != 'a' &&
 			*buf1 != 'k' &&
 			*buf1 != 'o' &&
 			*buf1 != 'm' &&
@@ -2889,7 +2889,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 			*buf1 != 'r' &&
 			*buf1 != 'u' &&
 			*buf1 != 'x' &&
-			*buf1 != 'z')      
+			*buf1 != 'z')
 
 		{
 			s ("   a           per zone stats");
@@ -2907,7 +2907,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 
 	if  (GET_TRUST (ch) < 5)
 	{
-		if (*buf1 != 'a' && 
+		if (*buf1 != 'a' &&
 			*buf1 != 'c' &&
 			*buf1 != 'k' &&
 			*buf1 != 'l' &&
@@ -2918,7 +2918,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 			*buf1 != 'r' &&
 			*buf1 != 'u' &&
 			*buf1 != 'x' &&
-			*buf1 != 'z')      
+			*buf1 != 'z')
 
 		{
 			s ("   a           per zone stats");
@@ -3061,8 +3061,8 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 					continue;
 
 				got_line++;
-				sprintf (buf, 
-					"  %-15s  %-15s  ", 
+				sprintf (buf,
+					"  %-15s  %-15s  ",
 					is_guide_rev ? "" : row[2],
 					row[0]);
 				current_time = strtol (row[1], NULL, 10);
@@ -3075,7 +3075,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 					current_time / 24, current_time % 24);
 				else
 					sprintf (buf + strlen (buf), "#2   %c %2dh#0",
-					(!current_time) ? '<' : ' ', 
+					(!current_time) ? '<' : ' ',
 					(int) MAX (1, (int)current_time));
 
 				if (!IS_NPC (ch))
@@ -3117,7 +3117,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 		zone_str = NULL;
 
 		if (!isdigit (*buf2))
-			mob_name = str_dup (buf2);
+			mob_name = strdup (buf2);
 		else
 			zone_str = buf2;
 
@@ -3168,7 +3168,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 
 	case 'o':			/* object */
 
-		obj_name = str_dup (buf3);
+		obj_name = strdup (buf3);
 		zone_str = NULL;
 
 		if (!isdigit (*buf2))
@@ -3310,11 +3310,11 @@ nVirtual : 0);
 			if (create_state < 0 || create_state > 4)
 				create_state = 0;
 
-			sprintf (buf2, "%4d. %-12s #%d%-10s", 
+			sprintf (buf2, "%4d. %-12s #%d%-10s",
 				i, row[0], color_state[create_state], row[1]);
 			if (search_type == SEARCH_CLAN)
 			{
-				sprintf (buf2 + strlen(buf2), " #0%-10s#%d", 
+				sprintf (buf2 + strlen(buf2), " #0%-10s#%d",
 					row[4], color_state[create_state]);
 			}
 			sprintf (buf2 + strlen(buf2), " %s#0\n", row[2]);
@@ -4126,18 +4126,18 @@ do_redesc (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!str_cmp (argument, "delete"))
 	{
-		if ((vtor (ch->in_room)->ex_description) 
+		if ((vtor (ch->in_room)->ex_description)
 			&& (!strn_cmp (vtor (ch->in_room)->ex_description->keyword, buf, strlen (buf))))
 		{
-			send_to_char("Description deleted\n", ch);							
-			vtor (ch->in_room)->ex_description = 
+			send_to_char("Description deleted\n", ch);
+			vtor (ch->in_room)->ex_description =
 				vtor (ch->in_room)->ex_description->next;
 			return;
 		}
 
 		for (tmp = vtor (ch->in_room)->ex_description; tmp; tmp = tmp->next)
 		{
-			if ((tmp->next) 
+			if ((tmp->next)
 				&& (!strn_cmp (tmp->next->keyword, buf, strlen (buf))))
 			{
 				send_to_char("Description deleted\n", ch);
@@ -4759,7 +4759,7 @@ do_minit (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->fight_mode = 2;
 	newmob->speed = SPEED_WALK;
 
-	newmob->clans = str_dup ("");	/* Null clan list */
+	newmob->clans = strdup ("");	/* Null clan list */
 
 	add_mob_to_hash (newmob);
 
@@ -4884,7 +4884,7 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 	newobj->in_obj = 0;
 	newobj->next_content = 0;
 	newobj->carried_by = 0;
-	newobj->full_description = str_dup ("");
+	newobj->full_description = strdup ("");
 	newobj->obj_flags.type_flag = index_lookup (item_types, arg2);
 
 	switch (type)
@@ -5471,7 +5471,7 @@ do_object (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 
-	if ((edit_object->nVirtual == VNUM_HEAD) 
+	if ((edit_object->nVirtual == VNUM_HEAD)
 		|| (edit_object->nVirtual == VNUM_CORPSE))
 	{
 		send_to_char ("You cannot make changes to this item.\n", ch);
@@ -6403,7 +6403,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 						return;
 					}
 
-					std::set<int> chainedInts;								
+					std::set<int> chainedInts;
 					chainedInts.insert(edit_obj->nVirtual);
 					chainedInts.insert(inheritedVNum);
 					OBJ_DATA * loopCheck = vtoo(inheritedVNum);
@@ -6432,7 +6432,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 			}
 		}
 
-		/*              
+		/*
 		else if ( !str_cmp (subcmd, "mdesc") ) {
 
 		argument = one_argument (argument, buf);
@@ -6447,11 +6447,11 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 		}
 
-		if ( edit_obj->obj_flags.type_flag == ITEM_ARMOR ) 
+		if ( edit_obj->obj_flags.type_flag == ITEM_ARMOR )
 		edit_obj->o.armor.helm_short = add_hash (buf);
 
 		if ( edit_obj->obj_flags.type_flag == ITEM_WORN )
-		edit_obj->o.cloak.cloak_short = add_hash (buf); 
+		edit_obj->o.cloak.cloak_short = add_hash (buf);
 		} */
 
 		else if (!str_cmp (subcmd, "mkeys"))
@@ -6664,15 +6664,15 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				sprintf(clan_rank, "member");
 
 			if (edit_obj->clan_data) //removes old clan
-				clan_rem_obj (edit_obj, edit_obj->clan_data);	
+				clan_rem_obj (edit_obj, edit_obj->clan_data);
 
 			if (!edit_obj->clan_data)
 			{
 				edit_obj->clan_data = new OBJ_CLAN_DATA;
-				edit_obj->clan_data->name = str_dup (clan_name);
-				edit_obj->clan_data->rank = str_dup (clan_rank);
+				edit_obj->clan_data->name = strdup (clan_name);
+				edit_obj->clan_data->rank = strdup (clan_rank);
 				edit_obj->clan_data->next = NULL;
-			}			
+			}
 			send_to_char("Clan/rank have been added.\n", ch);
 		}//if clannadd
 
@@ -6682,7 +6682,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 		**/
 		else if (!str_cmp (subcmd, "clanremove"))
 		{
-			clan_rem_obj (edit_obj, edit_obj->clan_data);		
+			clan_rem_obj (edit_obj, edit_obj->clan_data);
 		}
 
 		else
@@ -6902,7 +6902,7 @@ add_replace_mobprog (CHAR_DATA * ch, CHAR_DATA * mob, char *trigger_name)
 		else
 			mob->prog = prog;
 
-		prog->trigger_name = str_dup (trigger_name);
+		prog->trigger_name = strdup (trigger_name);
 		prog->next = NULL;
 
 	}
@@ -7159,7 +7159,7 @@ update_crafts_file (void)
 		if (craft->followers > 0)
 			fprintf (fp, "followers: %d\n", craft->followers);
 
-		/** is opening craft for some skill(s) **/	
+		/** is opening craft for some skill(s) **/
 		for (i = 0; i <= 24; i++)
 		{
 			if (craft->opening[i] > 0)
@@ -7928,7 +7928,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char (output, ch);
 			}
 
-			/** Phase move cost **/	
+			/** Phase move cost **/
 			else if (!str_cmp (subcmd, "movecost"))
 			{
 				argument = one_argument (argument, buf);
@@ -7942,7 +7942,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char ("The phase's movement cost has been modified.\n", ch);
 			}
 
-			/** Phase pain cost **/	
+			/** Phase pain cost **/
 			else if (!str_cmp (subcmd, "paincost"))
 			{
 				argument = one_argument (argument, buf);
@@ -7955,7 +7955,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 					phase->hit_cost = atoi (buf);
 				send_to_char ("The phase's pain cost has been modified.\n", ch);
 			}
-			/** Phase Failure objects **/				  
+			/** Phase Failure objects **/
 			else if (!strn_cmp (subcmd, "fobj", 4))
 			{
 				if (!isdigit (subcmd[4]))
@@ -8001,7 +8001,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 					{
 						if (i + 1 != fobjnum)
 						{
-							sprintf (output, 
+							sprintf (output,
 								"Please use the next available slot to add a new\n           failure object set; in this case, fobj%d.\n",
 								i + 1);
 							send_to_char (output, ch);
@@ -8109,7 +8109,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 				fitems->phase = phase;
 			}//else if (!strn_cmp (subcmd, "fobj", 4))
 
-			/** Phase Objects (normal)**/ 
+			/** Phase Objects (normal)**/
 			else if (!strn_cmp (subcmd, "object", 6))
 			{
 				if (!isdigit (subcmd[6]))
@@ -8289,7 +8289,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 void
 mset_account_flag (const CHAR_DATA* ch, const char *account_name, const char *subcmd)
 {
-	const char* message[14] = 
+	const char* message[14] =
 	{
 		"There was a problem accessing that player's account!\n",
 		"Error: Unknown account flag.\n",
@@ -8307,7 +8307,7 @@ mset_account_flag (const CHAR_DATA* ch, const char *account_name, const char *su
 		"The IP sharing restrictions have been lifted on that account.\n"
 	};
 
-	enum 
+	enum
 	{
 		no_player,
 		unknown_flag,
@@ -8384,13 +8384,13 @@ mset_account_flag (const CHAR_DATA* ch, const char *account_name, const char *su
 			}
 		}
 	}
-	send_to_char (message[response], ch);      
+	send_to_char (message[response], ch);
 }
 
 void
 mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *reflex)
 {
-	const char * cues [] = 
+	const char * cues [] =
 	{
 		"none", "notes", "flags", "memory", "on_reboot",
 		"on_hour", "on_time",
@@ -8415,27 +8415,27 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 		std::pair<N,N> range = mob->cues->equal_range (c);
 		std::string world_db = engine.get_config ("world_db");
 
-		if (strcmp (reflex, "delete") == 0 
+		if (strcmp (reflex, "delete") == 0
 			|| strcmp (reflex, "remove") == 0
 			|| strcmp (reflex, "clear") == 0)
-		{	  
+		{
 			for (N n = range.first; n != range.second; n++)
 			{
 				std::string cue_string = n->second;
 				if (!cue_string.empty ())
 				{
-					cue_string = std::string (cue) + std::string (" ") 
+					cue_string = std::string (cue) + std::string (" ")
 						+ cue_string + " #1deleted#0\n";
 					send_to_char (cue_string.c_str (), builder);
 				}
 			}
 			if (engine.in_build_mode ())
 			{
-				mysql_safe_query 
+				mysql_safe_query
 					( "DELETE"
 					" FROM %s.cues"
 					" WHERE mid = %d"
-					" AND cue = %d ", 
+					" AND cue = %d ",
 					world_db.c_str (), mob->nVirtual, index);
 			}
 			mob->cues->erase (c);
@@ -8446,15 +8446,15 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 
 			if (engine.in_build_mode ())
 			{
-				mysql_safe_query 
+				mysql_safe_query
 					( "INSERT"
 					" INTO %s.cues (mid, cue, reflex)"
-					" VALUES ('%d', '%d', '%s')", 
+					" VALUES ('%d', '%d', '%s')",
 					world_db.c_str (),
-					mob->nVirtual, index, reflex);	      
+					mob->nVirtual, index, reflex);
 			}
 			mob->cues->insert (std::make_pair (c, reflex_string));
-			reflex_string = std::string (cue) + std::string (" ") 
+			reflex_string = std::string (cue) + std::string (" ")
 				+ reflex_string + " #6installed#0\n";
 			send_to_char (reflex_string.c_str (), builder);
 		}// if (*reflex)
@@ -8465,7 +8465,7 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 				std::string cue_string = n->second;
 				if (!cue_string.empty ())
 				{
-					cue_string = std::string (cue) + std::string (" ") 
+					cue_string = std::string (cue) + std::string (" ")
 						+ cue_string + "\n";
 					send_to_char (cue_string.c_str (), builder);
 				}
@@ -8746,7 +8746,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			if (edit_mob->pc->account_name && *edit_mob->pc->account_name)
 				mem_free (edit_mob->pc->account_name);
 			buf[0] = toupper (buf[0]);
-			edit_mob->pc->account_name = str_dup (buf);
+			edit_mob->pc->account_name = strdup (buf);
 			send_to_char ("Account set.\n", ch);
 			save_char (edit_mob, false);
 			return;
@@ -8868,7 +8868,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			|| !strcasecmp (subcmd, "noretire")
 			|| !strcasecmp (subcmd, "ipsharingok"))
 		{
-			if (!IS_NPC (edit_mob) && edit_mob->pc && edit_mob->pc->account_name)	  
+			if (!IS_NPC (edit_mob) && edit_mob->pc && edit_mob->pc->account_name)
 			{
 
 				mset_account_flag (ch, edit_mob->pc->account_name, subcmd);
@@ -8877,7 +8877,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				send_to_char ("I couldn't access that character's account.\n", ch);
 			}
-			return; 
+			return;
 		}
 
 		else if (!str_cmp (subcmd, "noplayerport") && GET_TRUST (ch) >= 5)
@@ -11895,7 +11895,7 @@ reformat_desc (char *source, char **target)
 	{
 		sprintf (buf, "   %s", source);
 		mem_free (source);
-		source = str_dup (buf);
+		source = strdup (buf);
 	}
 
 	s = source;
@@ -11955,7 +11955,7 @@ reformat_desc (char *source, char **target)
 	if (result[strlen (result) - 1] != '\n')
 		strcat (result, "\n");
 
-	*target = str_dup (result);
+	*target = strdup (result);
 }
 
 // Case '08, for do_look. Extends length of the lines from 80 to 130.
@@ -12026,7 +12026,7 @@ void reformat_string (char *source, char **target)
 	if (result[strlen (result) - 1] != '\n')
 		strcat (result, "\r\n");
 
-	*target = str_dup (result);
+	*target = strdup (result);
 }
 
 int
@@ -12244,7 +12244,7 @@ do_rmove (CHAR_DATA * ch, char *argument, int cmd)
 
 	//	room->hnext = wld_tab[target_room_num % ZONE_SIZE];
 	//	wld_tab[target_room_num % ZONE_SIZE] = room;
-	//} 
+	//}
 
 	for (tch = room->people; tch; tch = tch->next_in_room)
 	{
@@ -12423,7 +12423,7 @@ do_zset (CHAR_DATA * ch, char *argument, int cmd)
 				return;
 			}
 
-			zone_table[zone].name = str_dup (buf);
+			zone_table[zone].name = strdup (buf);
 		}
 
 		else if (!str_cmp (subcmd, "lead"))
@@ -12944,13 +12944,13 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	newmob->act = source->act;
 
-	newmob->name = str_dup (source->name);
-	newmob->tname = str_dup (source->tname);
-	newmob->short_descr = str_dup (source->short_descr);
-	newmob->long_descr = str_dup (source->long_descr);
-	newmob->description = str_dup (source->description);
-	newmob->clans = str_dup (source->clans);
-	newmob->travel_str = str_dup (source->travel_str);
+	newmob->name = strdup (source->name);
+	newmob->tname = strdup (source->tname);
+	newmob->short_descr = strdup (source->short_descr);
+	newmob->long_descr = strdup (source->long_descr);
+	newmob->description = strdup (source->description);
+	newmob->clans = strdup (source->clans);
+	newmob->travel_str = strdup (source->travel_str);
 
 	newmob->str = source->str;
 	newmob->intel = source->intel;
@@ -13034,7 +13034,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->color = source->color;
 	newmob->writes = source->writes;
 
-	m->owner = str_dup (sm->owner);
+	m->owner = strdup (sm->owner);
 
 	m->skinned_vnum = sm->skinned_vnum;
 	m->carcass_vnum = sm->carcass_vnum;
@@ -13058,7 +13058,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	if (sm->resets)
 	{
 		m->resets->type = sm->resets->type;
-		m->resets->command = str_dup (sm->resets->command);
+		m->resets->command = strdup (sm->resets->command);
 		m->resets->planned = sm->resets->planned;
 	}
 
@@ -13068,7 +13068,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 		newmob->moves->flags = source->moves->flags;
 		newmob->moves->desired_time = source->moves->desired_time;
 		newmob->moves->next = NULL;
-		newmob->moves->travel_str = str_dup (source->moves->travel_str);
+		newmob->moves->travel_str = strdup (source->moves->travel_str);
 	}
 
 	if (source->shop)
@@ -13082,25 +13082,25 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 			newmob->shop->store_vnum = source->shop->store_vnum;
 
 		if (source->shop->no_such_item1)
-			newmob->shop->no_such_item1 = str_dup(source->shop->no_such_item1);
+			newmob->shop->no_such_item1 = strdup(source->shop->no_such_item1);
 		if (source->shop->no_such_item2)
-			newmob->shop->no_such_item2 = str_dup(source->shop->no_such_item2);
+			newmob->shop->no_such_item2 = strdup(source->shop->no_such_item2);
 		if (source->shop->missing_cash1)
-			newmob->shop->missing_cash1 = str_dup(source->shop->missing_cash1);
+			newmob->shop->missing_cash1 = strdup(source->shop->missing_cash1);
 		if (source->shop->missing_cash2)
-			newmob->shop->missing_cash2 = str_dup(source->shop->missing_cash2);
+			newmob->shop->missing_cash2 = strdup(source->shop->missing_cash2);
 		if (source->shop->do_not_buy)
-			newmob->shop->do_not_buy = str_dup(source->shop->do_not_buy);
+			newmob->shop->do_not_buy = strdup(source->shop->do_not_buy);
 		if (source->shop->message_buy)
-			newmob->shop->message_buy = str_dup(source->shop->message_buy);
+			newmob->shop->message_buy = strdup(source->shop->message_buy);
 		if (source->shop->message_sell)
-			newmob->shop->message_sell = str_dup(source->shop->message_sell);
+			newmob->shop->message_sell = strdup(source->shop->message_sell);
 
 
 		if (source->shop->delivery)
 		{
 			for (i = 0; i <= MAX_DELIVERIES; i++)
-			{	
+			{
 				newmob->shop->delivery[i] = source->shop->delivery[i];
 			}
 		}
@@ -13258,30 +13258,30 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	newObj->carried_by = NULL;
 	newObj->equiped_by = NULL;
 
-	newObj->name = str_dup (source->name);
-	newObj->description = str_dup (source->description);
-	newObj->short_description = str_dup (source->short_description);
-	newObj->full_description = str_dup (source->full_description);
-	newObj->omote_str = str_dup (source->omote_str);
-	newObj->ink_color = str_dup (source->ink_color);
-	newObj->desc_keys = str_dup (source->desc_keys);
-	newObj->var_color = str_dup (source->var_color);
-	newObj->book_title = str_dup (source->book_title);
-	newObj->indoor_desc = str_dup (source->indoor_desc);
+	newObj->name = strdup (source->name);
+	newObj->description = strdup (source->description);
+	newObj->short_description = strdup (source->short_description);
+	newObj->full_description = strdup (source->full_description);
+	newObj->omote_str = strdup (source->omote_str);
+	newObj->ink_color = strdup (source->ink_color);
+	newObj->desc_keys = strdup (source->desc_keys);
+	newObj->var_color = strdup (source->var_color);
+	newObj->book_title = strdup (source->book_title);
+	newObj->indoor_desc = strdup (source->indoor_desc);
 
-	if (source->ex_description) 
+	if (source->ex_description)
 	{
-		newObj->ex_description->keyword = str_dup (source->ex_description->keyword);
-		newObj->ex_description->description = str_dup (source->ex_description->description);
+		newObj->ex_description->keyword = strdup (source->ex_description->keyword);
+		newObj->ex_description->description = strdup (source->ex_description->description);
 	}
 
-	if (source->wdesc) 
+	if (source->wdesc)
 	{
 		newObj->wdesc->language = source->wdesc->language;
-		newObj->wdesc->description = str_dup (source->wdesc->description);
+		newObj->wdesc->description = strdup (source->wdesc->description);
 	}
 
-	if (source->wounds) 
+	if (source->wounds)
 	{
 		newObj->wounds->damage = source->wounds->damage;
 		newObj->wounds->bleeding = source->wounds->bleeding;
@@ -13292,35 +13292,35 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 		newObj->wounds->lasthealed = source->wounds->lasthealed;
 		newObj->wounds->lastbled = source->wounds->lastbled;
 		newObj->wounds->lastbound = source->wounds->lastbound;
-		newObj->wounds->location = str_dup (source->wounds->location);
-		newObj->wounds->type = str_dup (source->wounds->type);
-		newObj->wounds->name = str_dup (source->wounds->name);
-		newObj->wounds->severity = str_dup (source->wounds->severity);
+		newObj->wounds->location = strdup (source->wounds->location);
+		newObj->wounds->type = strdup (source->wounds->type);
+		newObj->wounds->name = strdup (source->wounds->name);
+		newObj->wounds->severity = strdup (source->wounds->severity);
 	}
 
-	if (source->writing) 
+	if (source->writing)
 	{
 		newObj->writing->language = source->writing->language;
 		newObj->writing->script = source->writing->script;
 		newObj->writing->skill = source->writing->skill;
 		newObj->writing->torn = source->writing->torn;
-		newObj->writing->message = str_dup (source->writing->message);
-		newObj->writing->author = str_dup (source->writing->author);
-		newObj->writing->date = str_dup (source->writing->date);
-		newObj->writing->ink = str_dup (source->writing->ink);
+		newObj->writing->message = strdup (source->writing->message);
+		newObj->writing->author = strdup (source->writing->author);
+		newObj->writing->date = strdup (source->writing->date);
+		newObj->writing->ink = strdup (source->writing->ink);
 	}
 
-	if (source->lodged) 
+	if (source->lodged)
 	{
 		newObj->lodged->vnum = source->lodged->vnum;
-		newObj->lodged->location = str_dup (source->lodged->location);
-	} 
+		newObj->lodged->location = strdup (source->lodged->location);
+	}
 
-	if (source->clan_data) 
+	if (source->clan_data)
 	{
-		newObj->clan_data->name = str_dup (source->clan_data->name);
-		newObj->clan_data->rank = str_dup (source->clan_data->rank);
-	} 
+		newObj->clan_data->name = strdup (source->clan_data->name);
+		newObj->clan_data->rank = strdup (source->clan_data->rank);
+	}
 
 	add_obj_to_hash (newObj);
 	ch->pc->edit_obj = newVNum;
@@ -13528,7 +13528,7 @@ do_resets (CHAR_DATA * ch, char *argument, int cmd)
 
 		reset->type = RESET_REPLY;
 
-		reset->command = str_dup (argument);
+		reset->command = strdup (argument);
 
 		reset->when.month = -1;
 		reset->when.day = -1;
@@ -13616,7 +13616,7 @@ do_resets (CHAR_DATA * ch, char *argument, int cmd)
 
 	reset = (RESET_DATA *) alloc (sizeof (RESET_DATA), 33);
 
-	reset->command = str_dup (argument);
+	reset->command = strdup (argument);
 
 	reset->type = RESET_TIMED;
 
@@ -13950,7 +13950,7 @@ rlist_show (ROOM_DATA * troom, int sector, int header)
 
 	strcat (b_buf, "\n");
 
-	return;  
+	return;
 }
 
 /******
@@ -14011,8 +14011,8 @@ do_rlist (CHAR_DATA * ch, char *argument, int cmd)
 		inc_flags = 1;
 		sector = index_lookup (sector_types, buf);
 
-		if (strlen (buf) > 1 
-			&& isalpha (*buf) 
+		if (strlen (buf) > 1
+			&& isalpha (*buf)
 			&& (sector != -1))
 		{
 			argument = one_argument (argument, buf);
@@ -14086,7 +14086,7 @@ do_rlist (CHAR_DATA * ch, char *argument, int cmd)
 		case '/':
 			inc_flags = 0;
 
-		case '$':	
+		case '$':
 			//argument = one_argument (argument, buf);
 
 			if (!buf[1])
@@ -14293,7 +14293,7 @@ do_name (CHAR_DATA *ch, char *argument, int cmd)
 		}
 		keywords += " " + ThisArg;
 		mem_free(tch->name);
-		tch->name = str_dup ((char *) keywords.c_str());
+		tch->name = strdup ((char *) keywords.c_str());
 		if (!IS_NPC(tch))
 			save_char(tch, true);
 		else
@@ -14345,7 +14345,7 @@ do_name (CHAR_DATA *ch, char *argument, int cmd)
 			}
 		}
 		mem_free(tch->name);
-		tch->name = str_dup((char *) NewKeywords.c_str());
+		tch->name = strdup((char *) NewKeywords.c_str());
 		if (!IS_NPC(tch))
 			save_char(tch, true);
 		else

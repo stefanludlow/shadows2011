@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  objects.c : Object Module                          www.middle-earth.us | 
+|  objects.c : Object Module                          www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -30,7 +30,7 @@ void obj_data::partial_deep_copy (OBJ_DATA *proto)
 		{
 			mem_free(this->name);
 		}
-		this->name = str_dup(proto->name);
+		this->name = strdup(proto->name);
 	}
 	if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
 	{
@@ -38,7 +38,7 @@ void obj_data::partial_deep_copy (OBJ_DATA *proto)
 		{
 			mem_free(this->short_description);
 		}
-		this->short_description = str_dup(proto->short_description);
+		this->short_description = strdup(proto->short_description);
 	}
 	if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
 	{
@@ -46,7 +46,7 @@ void obj_data::partial_deep_copy (OBJ_DATA *proto)
 		{
 			mem_free(this->description);
 		}
-		this->description = str_dup(proto->description);
+		this->description = strdup(proto->description);
 	}
 	if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
 	{
@@ -54,7 +54,7 @@ void obj_data::partial_deep_copy (OBJ_DATA *proto)
 		{
 			mem_free(this->full_description);
 		}
-		this->full_description = str_dup(proto->full_description);
+		this->full_description = strdup(proto->full_description);
 	}
 
 	if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
@@ -102,52 +102,52 @@ void obj_data::deep_copy (OBJ_DATA *copy_from)
 
 	if (copy_from->short_description)
 	{
-		this->short_description = str_dup(copy_from->short_description);
+		this->short_description = strdup(copy_from->short_description);
 	}
 
 	if (copy_from->name)
 	{
-		this->name = str_dup(copy_from->name);
+		this->name = strdup(copy_from->name);
 	}
 
 	if (copy_from->description)
 	{
-		this->description = str_dup(copy_from->description);
+		this->description = strdup(copy_from->description);
 	}
 
 	if (copy_from->full_description)
 	{
-		this->full_description = str_dup(copy_from->full_description);
+		this->full_description = strdup(copy_from->full_description);
 	}
 
 	if (copy_from->omote_str)
 	{
-		this->omote_str = str_dup(copy_from->omote_str);
+		this->omote_str = strdup(copy_from->omote_str);
 	}
 
 	if (copy_from->ink_color)
 	{
-		this->ink_color = str_dup(copy_from->ink_color);
+		this->ink_color = strdup(copy_from->ink_color);
 	}
 
 	if (copy_from->desc_keys)
 	{
-		this->desc_keys = str_dup(copy_from->desc_keys);
+		this->desc_keys = strdup(copy_from->desc_keys);
 	}
 
 	if (copy_from->var_color)
 	{
-		this->var_color = str_dup(copy_from->var_color);
+		this->var_color = strdup(copy_from->var_color);
 	}
 
 	if (copy_from->book_title)
 	{
-		this->book_title = str_dup(copy_from->book_title);
+		this->book_title = strdup(copy_from->book_title);
 	}
 
 	if (copy_from->indoor_desc)
 	{
-		this->indoor_desc = str_dup(copy_from->indoor_desc);
+		this->indoor_desc = strdup(copy_from->indoor_desc);
 	}
 }
 
@@ -985,7 +985,7 @@ can_obj_to_inv (OBJ_DATA * obj, CHAR_DATA * ch, int *error, int count)
 		return 0;
 	}
 
-	if ((!CAN_WEAR (obj, ITEM_TAKE) && IS_MORTAL(ch)) 
+	if ((!CAN_WEAR (obj, ITEM_TAKE) && IS_MORTAL(ch))
 		|| IS_SET (obj->obj_flags.extra_flags, ITEM_PITCHED))
 	{
 		*error = NO_CANT_TAKE;
@@ -1202,7 +1202,7 @@ do_get (CHAR_DATA * ch, char *argument, int cmd)
 	*arg1 = '\0';
 	*arg2 = '\0';
 
-	if (IS_MORTAL (ch) && IS_SET (ch->room->room_flags, OOC) 
+	if (IS_MORTAL (ch) && IS_SET (ch->room->room_flags, OOC)
 		&& str_cmp (ch->room->name, PREGAME_ROOM_NAME))
 	{
 		send_to_char ("This command has been disabled in OOC zones.\n", ch);
@@ -1371,12 +1371,12 @@ do_get (CHAR_DATA * ch, char *argument, int cmd)
 		}
 		/*
 		if ( GET_ITEM_TYPE (container) != ITEM_QUIVER
-		&& ( bow = get_equip (ch, WEAR_PRIM) ) 
+		&& ( bow = get_equip (ch, WEAR_PRIM) )
 		&& ( bow->o.weapon.use_skill == SKILL_SHORTBOW
 		|| bow->o.weapon.use_skill == SKILL_LONGBOW
 		|| bow->o.weapon.use_skill == SKILL_CROSSBOW ) ) {
 		send_to_char ("You'll have to stop using the bow first.\n", ch);
-		return;                
+		return;
 		}
 		*/
 		if (IS_SET (container->o.container.flags, CONT_CLOSED))
@@ -1494,7 +1494,7 @@ do_get (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!obj && !(obj = get_obj_in_dark (ch, arg1, container->contains)))
 	{
-		act ("You don't see that in $p.", true, ch, container, 0, 
+		act ("You don't see that in $p.", true, ch, container, 0,
 			TO_CHAR);
 		return;
 	}
@@ -2743,7 +2743,7 @@ do_drink (CHAR_DATA * ch, char *argument, int cmd)
 
 			sips = atoi(buf);
 		}
-		else 
+		else
 		{
 			send_to_char ("The correct syntax is #3drink <container> [<amount>] [(emote)]#0.\n", ch);
 			return;
@@ -2866,7 +2866,7 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	if (obj->obj_flags.type_flag != ITEM_FOOD && IS_MORTAL (ch))
-	{	
+	{
 		send_to_char ("That isn't food.  You can't eat it.\n", ch);
 		return;
 	}
@@ -2905,7 +2905,7 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			bites = MAX (1, obj->o.food.bites);
 		}
-		else 
+		else
 		{
 			send_to_char ("The correct syntax is #3eat <food> [<amount>] [(emote)]#0.\n", ch);
 			return;
@@ -2950,11 +2950,11 @@ do_eat (CHAR_DATA * ch, char *argument, int cmd)
 	if (evaluate_emote_string (ch, &first_person, third_person, argument))
 	{
 		if (obj->equiped_by)
-			unequip_char (ch, obj->location);	
+			unequip_char (ch, obj->location);
 
 		for (int i = 0; i < bites; i++)
 		{
-			if (ch->hunger < 20)  
+			if (ch->hunger < 20)
 				ch->hunger += get_bite_value (obj);
 			if (ch->hunger > 20)
 				act ("You are full.", false, ch, 0, 0, TO_CHAR);
@@ -3580,7 +3580,7 @@ wear (CHAR_DATA * ch, OBJ_DATA * obj_object, int keyword)
 
 	if (ch->race == lookup_race_id ("Olog-Hai"))
 	{
-		if ((GET_ITEM_TYPE (obj_object) == ITEM_ARMOR && keyword != 4) 
+		if ((GET_ITEM_TYPE (obj_object) == ITEM_ARMOR && keyword != 4)
 			|| (GET_ITEM_TYPE (obj_object) == ITEM_SHIELD && keyword != 20))
 		{
 			send_to_char ("You cannot wear armor on that part of your body.\n", ch);
@@ -3953,8 +3953,8 @@ wear (CHAR_DATA * ch, OBJ_DATA * obj_object, int keyword)
 			}
 			else if (hands == 1)
 			{
-				/* to wield it must already be in hand 
-				* thus we know there is room for it, just a matter of tracking it as 
+				/* to wield it must already be in hand
+				* thus we know there is room for it, just a matter of tracking it as
 				* primary or secondary weapon*/
 				perform_wear (ch, obj_object, keyword);
 				if (get_equip(ch,WEAR_PRIM))
@@ -3973,7 +3973,7 @@ wear (CHAR_DATA * ch, OBJ_DATA * obj_object, int keyword)
 				}
 				perform_wear (ch, obj_object, keyword);
 				equip_char (ch, obj_object, WEAR_BOTH);
-			}		 
+			}
 		} // if can wear as wield
 		else
 		{
@@ -4605,7 +4605,7 @@ do_remove (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			target_found++;
 			target_obj++;
-		}			
+		}
 		if (!tch && !obj)
 		{
 			send_to_char ("Remove what?\n", ch);
@@ -4925,7 +4925,7 @@ do_sheathe (CHAR_DATA * ch, char *argument, int cmd)
 	int i = 0, sheathed = 0, count = 0;
 	std::string first_person, third_person;
 
-	if (*argument != '(') 
+	if (*argument != '(')
 	{
 		argument = one_argument (argument, arg1);
 		if (*argument != '(')
@@ -5226,7 +5226,7 @@ do_draw (CHAR_DATA * ch, char *argument, int cmd)
 		third_person.append(obj_short_desc(sheath));
 	}
 	first_person.append("#0");
-	third_person.append("#0"); 
+	third_person.append("#0");
 
 	if (!(evaluate_emote_string (ch, &first_person, third_person, argument)) )
 	{
@@ -5366,7 +5366,7 @@ delayed_skin_new1 (CHAR_DATA * ch)
 		ch->delay = 0;
 		ch->delay_type = 0;
 		send_to_char ("The corpse you were skinning is no longer here.\n", ch);
-		return; 
+		return;
 	}
 
 	if (!obj_corpse)
@@ -5377,7 +5377,7 @@ delayed_skin_new1 (CHAR_DATA * ch)
 		ch->delay = 0;
 		ch->delay_type = 0;
 		send_to_char ("The corpse you were skinning is no longer here.\n", ch);
-		return;   
+		return;
 	}
 
 	if (CAN_SEE_OBJ (ch, obj_corpse))
@@ -5418,7 +5418,7 @@ delayed_skin_new2 (CHAR_DATA * ch)
 		ch->delay = 0;
 		ch->delay_type = 0;
 		send_to_char ("The corpse you were skinning is no longer here.\n", ch);
-		return; 
+		return;
 	}
 
 	if (!obj_corpse)
@@ -5429,7 +5429,7 @@ delayed_skin_new2 (CHAR_DATA * ch)
 		ch->delay = 0;
 		ch->delay_type = 0;
 		send_to_char ("The corpse you were skinning is no longer here.\n", ch);
-		return;    
+		return;
 	}
 
 	if (CAN_SEE_OBJ (ch, obj_corpse))
@@ -5442,14 +5442,14 @@ delayed_skin_new2 (CHAR_DATA * ch)
 		ch->delay = 10;
 	}
 	else
-	{ 
+	{
 		// The corpse being skinned is gone, abort.
 		ch->delay_info1 = 0;
-		ch->delay_info2 = 0; 
+		ch->delay_info2 = 0;
 		ch->delay = 0;
 		ch->delay_type = 0;
 		send_to_char ("You can't see any corpse to skin.\n", ch);
-		return;    
+		return;
 	}
 }
 
@@ -5473,7 +5473,7 @@ delayed_skin_new3 (CHAR_DATA * ch)
 		ch->delay = 0;
 		ch->delay_type = 0;
 		send_to_char ("The corpse you were skinning is no longer here.\n", ch);
-		return; 
+		return;
 	}
 
 	if (!corpse)
@@ -5484,7 +5484,7 @@ delayed_skin_new3 (CHAR_DATA * ch)
 		ch->delay = 0;
 		ch->delay_type = 0;
 		send_to_char ("The corpse you were skinning is no longer here.\n", ch);
-		return;			
+		return;
 	}
 
 	if (!CAN_SEE_OBJ (ch, corpse))
@@ -5837,7 +5837,7 @@ do_gather (CHAR_DATA * ch, char *argument, int cmd)
 	act ("$n begins to harvest $p.", true, ch, plant, 0, TO_ROOM);
 
 	ch->delay_type = DEL_GATHER;
-	ch->delay_who = str_dup (buf);
+	ch->delay_who = strdup (buf);
 	ch->delay = 20 - (ch->skills[SKILL_HERBALISM] / 10);
 }
 
@@ -5934,7 +5934,7 @@ do_identify (CHAR_DATA * ch, char *argument, int cmd)
 	act ("$n begins examining $p.", true, ch, plant, 0, TO_ROOM);
 
 	ch->delay_type = DEL_IDENTIFY;
-	ch->delay_who = str_dup (buf);
+	ch->delay_who = strdup (buf);
 	ch->delay = 15 - (ch->skills[SKILL_HERBALISM] / 10);
 }
 
@@ -6235,17 +6235,17 @@ do_behead (CHAR_DATA * ch, char *argument, int cmd)
 
 	head = load_object (VNUM_HEAD);
 
-	head->name = str_dup ("head");
+	head->name = strdup ("head");
 	if (!strncmp (corpse->short_description, "the corpse of ", 14))
 		strcpy (buf2, corpse->short_description + 14);
 	else
 		strcpy (buf2, "some unfortunate creature");
 
 	sprintf (buf, "The head of %s rests here.", buf2);
-	head->description = str_dup (buf);
+	head->description = strdup (buf);
 
 	sprintf (buf, "the head of %s", buf2);
-	head->short_description = str_dup (buf);
+	head->short_description = strdup (buf);
 
 	sprintf (buf, "You %s the head from $p.",
 		weapon_theme[tool->o.weapon.hit_type]);
@@ -6259,17 +6259,17 @@ do_behead (CHAR_DATA * ch, char *argument, int cmd)
 	mem_free (corpse->short_description);
 
 	sprintf (buf, "The headless corpse of %s is lying here.", buf2);
-	corpse->description = str_dup (buf);
+	corpse->description = strdup (buf);
 
 	sprintf (buf, "the headless corpse of %s", buf2);
-	corpse->short_description = str_dup (buf);
+	corpse->short_description = strdup (buf);
 
 	strcpy (buf2, corpse->name);
 
 	mem_free (corpse->name);
 
 	sprintf (buf, "headless %s", buf2);
-	corpse->name = str_dup (buf);
+	corpse->name = strdup (buf);
 
 	head->obj_flags.weight = corpse->obj_flags.weight / 10;
 	corpse->obj_flags.weight -= head->obj_flags.weight;

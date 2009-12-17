@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  handler.c : Handler Module                         www.middle-earth.us | 
+|  handler.c : Handler Module                         www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -616,7 +616,7 @@ remove_affect_type (CHAR_DATA * ch, int type)
 }
 
 /* Remove an affected_type structure from a char (called when duration
-reaches zero).  Pointer *af must never be NIL!  Frees mem and calls 
+reaches zero).  Pointer *af must never be NIL!  Frees mem and calls
 affect_location_apply.
 */
 
@@ -1585,7 +1585,7 @@ obj_to_room (OBJ_DATA * object, int room)	/* STACKing */
 
 	exit = r->dir_option[DOWN];
 
-	if (exit 
+	if (exit
 		&& !IS_SET (exit->exit_info, EX_ISDOOR)
 		&& !IS_SET (exit->exit_info, EX_ISGATE))
 	{
@@ -2090,7 +2090,7 @@ extract_char (CHAR_DATA * ch)
 	{
 		if (IS_SET (ch->act, ACT_STAYPUT))
 		{
-			mysql_safe_query 
+			mysql_safe_query
 				("DELETE FROM stayput_mobiles"
 				" WHERE coldload_id = %d",
 				ch->coldload_id);
@@ -2161,7 +2161,7 @@ extract_char (CHAR_DATA * ch)
 		k = *tch_iterator;
 		if (k->deleted)
 			continue;
-		if ((af = get_affect (k, MAGIC_GUARD)) && af->a.spell.modifier == 1 && 
+		if ((af = get_affect (k, MAGIC_GUARD)) && af->a.spell.modifier == 1 &&
 			(CHAR_DATA *) af->a.spell.t == ch)
 			affect_remove (k, af);
 	}
@@ -2342,7 +2342,7 @@ get_char_room_vis (CHAR_DATA * ch, const char *name)
 			tchtemp = tch->name;
 		else if (IS_MORTAL (ch))
 			tchtemp = char_names (tch);
-		else 
+		else
 			tchtemp = tch->name;
 
 
@@ -2712,86 +2712,86 @@ name_money (OBJ_DATA * obj)
 	if (obj->nVirtual == VNUM_FARTHING)
 	{
 
-		obj->description = str_dup ("");
+		obj->description = strdup ("");
 
 		if (obj->count == 1)
-			obj->name = str_dup (farthing_one);
+			obj->name = strdup (farthing_one);
 		else
-			obj->name = str_dup (farthing_some);
+			obj->name = strdup (farthing_some);
 
 		if (obj->count == 1)
-			obj->short_description = str_dup (farthing_short_1);
+			obj->short_description = strdup (farthing_short_1);
 
 		else if (obj->count == 2)
-			obj->short_description = str_dup (farthing_short_2);
+			obj->short_description = strdup (farthing_short_2);
 
 		else if (obj->count == 3)
-			obj->short_description = str_dup (farthing_short_3);
+			obj->short_description = strdup (farthing_short_3);
 
 		else if (obj->count == 4)
-			obj->short_description = str_dup (farthing_short_4);
+			obj->short_description = strdup (farthing_short_4);
 
 		else if (obj->count > 2501)	/* more than 2500 coins */
-			obj->short_description = str_dup (farthing_short_enormous);
+			obj->short_description = strdup (farthing_short_enormous);
 
 		else if (obj->count > 1001)	/* 1001 - 2500 coins */
-			obj->short_description = str_dup (farthing_short_huge);
+			obj->short_description = strdup (farthing_short_huge);
 
 		else if (obj->count > 101)	/* 101 - 1000 coins */
-			obj->short_description = str_dup (farthing_short_big);
+			obj->short_description = strdup (farthing_short_big);
 
 		else if (obj->count > 51)	/* 51 - 100 coins */
-			obj->short_description = str_dup (farthing_short_pile);
+			obj->short_description = strdup (farthing_short_pile);
 
 		else if (obj->count > 21)	/* 21 - 50 coins */
-			obj->short_description = str_dup (farthing_short_small);
+			obj->short_description = strdup (farthing_short_small);
 
 		else			/* 5 - 20 coins */
-			obj->short_description = str_dup (farthing_short_handful);
+			obj->short_description = strdup (farthing_short_handful);
 
 		return;
 	}
 
 	if (obj->o.od.value[0] == 1)
 	{
-		obj->name = str_dup (name_one_penny);
-		obj->short_description = str_dup (short_one_penny);
-		obj->description = str_dup (long_one_penny);
+		obj->name = strdup (name_one_penny);
+		obj->short_description = strdup (short_one_penny);
+		obj->description = strdup (long_one_penny);
 	}
 
 	else if (obj->o.od.value[0] >= 100000)
 	{
-		obj->name = str_dup (name_some_pennies);
-		obj->short_description = str_dup (short_mountain);
-		obj->description = str_dup (long_mountain);
+		obj->name = strdup (name_some_pennies);
+		obj->short_description = strdup (short_mountain);
+		obj->description = strdup (long_mountain);
 	}
 
 	else if (obj->o.od.value[0] >= 10000)
 	{
-		obj->name = str_dup (name_some_pennies);
-		obj->short_description = str_dup (short_huge);
-		obj->description = str_dup (long_huge);
+		obj->name = strdup (name_some_pennies);
+		obj->short_description = strdup (short_huge);
+		obj->description = strdup (long_huge);
 	}
 
 	else if (obj->o.od.value[0] >= 1000)
 	{
-		obj->name = str_dup (name_some_pennies);
-		obj->short_description = str_dup (short_big);
-		obj->description = str_dup (long_big);
+		obj->name = strdup (name_some_pennies);
+		obj->short_description = strdup (short_big);
+		obj->description = strdup (long_big);
 	}
 
 	else if (obj->o.od.value[0] >= 100)
 	{
-		obj->name = str_dup (name_some_pennies);
-		obj->short_description = str_dup (short_pile);
-		obj->description = str_dup (long_pile);
+		obj->name = strdup (name_some_pennies);
+		obj->short_description = strdup (short_pile);
+		obj->description = strdup (long_pile);
 	}
 
 	else
 	{
-		obj->name = str_dup (name_some_pennies);
-		obj->short_description = str_dup (short_several);
-		obj->description = str_dup (long_several);
+		obj->name = strdup (name_some_pennies);
+		obj->short_description = strdup (short_several);
+		obj->description = strdup (long_several);
 	}
 }
 
@@ -3464,7 +3464,7 @@ break_delay (CHAR_DATA * ch)
 	case DEL_COVER:
 		ch->delay = 0;
 		send_to_char ("You stop trying to take cover.\n", ch);
-		break;  
+		break;
 	}
 
 	ch->delay_type = 0;
@@ -3534,7 +3534,7 @@ add_registry (int reg_index, int value, const char *string)
 
 	new_reg = new REGISTRY_DATA;
 
-	new_reg->string = str_dup (string);
+	new_reg->string = strdup (string);
 	new_reg->value = value;
 	new_reg->next = registry[reg_index];
 	registry[reg_index] = new_reg;
@@ -3677,7 +3677,7 @@ reg_read_magic (FILE * fp_reg, char *buf)
 		if (!*buf2)
 			continue;
 
-		spell_table[sn].msg_off = str_dup (buf2);
+		spell_table[sn].msg_off = strdup (buf2);
 	}
 }
 
@@ -3911,11 +3911,11 @@ add_combat_message (char *line)
 		argument++;
 
 	if (party == 0)
-		cm->def_msg = str_dup (argument);
+		cm->def_msg = strdup (argument);
 	else if (party == 1)
-		cm->off_msg = str_dup (argument);
+		cm->off_msg = strdup (argument);
 	else
-		cm->other_msg = str_dup (argument);
+		cm->other_msg = strdup (argument);
 
 	if (party == 0)
 		insert_combat_msg (cm);
@@ -4253,7 +4253,7 @@ setup_registry (void)
 	add_registry (REG_SKILLS, SKILL_PARRY, "Parry");
 	add_registry (REG_SKILLS, SKILL_PERFUMERY, "Perfumery");
 	add_registry (REG_SKILLS, SKILL_POISONING, "Poisoning");
-	add_registry (REG_SKILLS, SKILL_POLEARM, "Polearm"); 
+	add_registry (REG_SKILLS, SKILL_POLEARM, "Polearm");
 	add_registry (REG_SKILLS, SKILL_POTTERY, "Pottery");
 	add_registry (REG_SKILLS, SKILL_PRESCIENCE, "Prescience");
 	add_registry (REG_SKILLS, SKILL_SPEAK_PUKAEL, "Pukael");
@@ -4356,10 +4356,10 @@ load_dynamic_registry (void)
 				alloc (sizeof (struct name_switch_data), 38);
 
 			argument = one_argument (argument, token);
-			name_switch->old_name = str_dup (token);
+			name_switch->old_name = strdup (token);
 
 			argument = one_argument (argument, token);
-			name_switch->new_name = str_dup (token);
+			name_switch->new_name = strdup (token);
 
 			if (!last_name)
 				clan_name_switch_list = name_switch;
@@ -4398,7 +4398,7 @@ morph_mob (CHAR_DATA * ch)
 	if (ch->deleted)
 		return;
 
-	if (GET_POS (ch) == POSITION_FIGHTING 
+	if (GET_POS (ch) == POSITION_FIGHTING
 		|| IS_SUBDUER (ch)
 		|| IS_SUBDUEE (ch)
 		|| IS_HITCHER (ch)
@@ -4414,7 +4414,7 @@ morph_mob (CHAR_DATA * ch)
 	troom = ch->in_room;
 	flag = ch->morph_type;
 
-	if (temp_vnum <= 0) 
+	if (temp_vnum <= 0)
 	{
 		sprintf (nbuf, "Mob %d has a morph clock, but no morph Mobvnum\n",
 			ch->mob->nVirtual);
@@ -4454,7 +4454,7 @@ morph_mob (CHAR_DATA * ch)
 	morphtype = 2 will keep the same description, just change the skills
 
 	*********************/
-	if (flag == 1) 
+	if (flag == 1)
 		// physical morph includes new skills from new prototype
 	{
 		newMob->was_in_room = ch->was_in_room;
@@ -4487,7 +4487,7 @@ morph_mob (CHAR_DATA * ch)
 		newMob->wil = ch->wil;
 
 		newMob->tmp_agi = ch->tmp_agi;
-		newMob->tmp_agi  = ch->tmp_agi; 
+		newMob->tmp_agi  = ch->tmp_agi;
 		newMob->tmp_con = ch->tmp_con;
 		newMob->tmp_dex = ch->tmp_dex;
 		newMob->tmp_intel = ch->tmp_intel;
@@ -4525,68 +4525,68 @@ morph_mob (CHAR_DATA * ch)
 		if (ch->clans)
 		{
 			sprintf (nbuf, "%s", ch->clans);
-			newMob->name = str_dup (nbuf);
-		}		
+			newMob->name = strdup (nbuf);
+		}
 
 		if (ch->name)
 		{
 			sprintf (nbuf, "%s", ch->name);
-			newMob->name = str_dup (nbuf);
+			newMob->name = strdup (nbuf);
 		}
 
 		if (ch->tname)
 		{
 			sprintf (nbuf, "%s", ch->tname);
-			newMob->tname = str_dup (nbuf);
+			newMob->tname = strdup (nbuf);
 		}
 
 		if (ch->short_descr)
-		{	
+		{
 			sprintf (nbuf, "%s", ch->short_descr);
-			newMob->short_descr = str_dup (nbuf);
+			newMob->short_descr = strdup (nbuf);
 		}
 
 		if (ch->long_descr)
-		{	
+		{
 			sprintf (nbuf, "%s", ch->long_descr);
-			newMob->long_descr = str_dup (nbuf);
+			newMob->long_descr = strdup (nbuf);
 		}
 
 		if (ch->pmote_str)
-		{	
+		{
 			sprintf (nbuf, "%s", ch->pmote_str);
-			newMob->pmote_str = str_dup (nbuf);
+			newMob->pmote_str = strdup (nbuf);
 		}
 
 		if (ch->voice_str)
-		{	
+		{
 			sprintf (nbuf, "%s", ch->voice_str);
-			newMob->voice_str = str_dup (nbuf);
-		} 
+			newMob->voice_str = strdup (nbuf);
+		}
 
 		if (ch->description)
-		{	
+		{
 			sprintf (nbuf, "%s", ch->description);
-			newMob->description = str_dup (nbuf);
+			newMob->description = strdup (nbuf);
 		}
 
 		if (ch->travel_str)
-		{	
+		{
 			sprintf (nbuf, "%s", ch->travel_str);
-			newMob->travel_str = str_dup (nbuf);
+			newMob->travel_str = strdup (nbuf);
 		}
 
 		if (ch->dmote_str)
-		{	
+		{
 			sprintf (nbuf, "%s", ch->dmote_str);
-			newMob->dmote_str = str_dup (nbuf);
-		}  	
+			newMob->dmote_str = strdup (nbuf);
+		}
 
 		newMob->hour_affects = ch->hour_affects;
 
 		/*
 		The new mob will take the best skill level between his old skill and the new skill level.
-		*/	 
+		*/
 
 		for (index = 0; index <= MAX_SKILLS; index ++)
 		{
@@ -4595,7 +4595,7 @@ morph_mob (CHAR_DATA * ch)
 				newMob->skills[index] = ch->skills[index];
 			}
 		}
-	} //flag ==2		
+	} //flag ==2
 
 	/******** objects and equip for all ***/
 	for (jdex = 1; jdex < MAX_WEAR; jdex++)
@@ -4613,7 +4613,7 @@ morph_mob (CHAR_DATA * ch)
 		nobj = ch->right_hand;
 		ch->right_hand = NULL;
 		nobj->equiped_by = newMob;
-		nobj->carried_by = newMob; 
+		nobj->carried_by = newMob;
 		newMob->right_hand = nobj;
 	}
 

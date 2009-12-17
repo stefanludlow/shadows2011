@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  comm.c : Central Game Loop                         www.middle-earth.us | 
+|  comm.c : Central Game Loop                         www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -108,7 +108,7 @@ main (int argc, char *argv[])
 
 	if (chdir (DFLT_DIR) < 0)
 	{
-		std::string error_message = 
+		std::string error_message =
 			"The system call 'chdir' failed to switch to the directory '";
 		error_message += DFLT_DIR;
 		error_message += "' for the following reason";
@@ -574,7 +574,7 @@ game_loop (int s)
 
 						if (get_affect (point->character, AFFECT_HOLDING_BREATH))
 						{
-							prompt += " / "; 
+							prompt += " / ";
 							prompt += breath_bar (point->character);
 						}
 
@@ -748,8 +748,8 @@ game_loop (int s)
 
 		if (!(pulse % (SECOND_PULSE * 60 * 15))) //every IG hour
 		{
-			if (!morgul_arena_fight 
-				&& engine.in_play_mode () 
+			if (!morgul_arena_fight
+				&& engine.in_play_mode ()
 				&& is_arena_clear())
 			{
 				morgul_arena_first ();
@@ -765,22 +765,22 @@ game_loop (int s)
 		//      time_t t = time(NULL);
 		//      struct tm* tp = localtime(&t);
 		//      int daymonth;
-		//      
+		//
 		//      daymonth = tp->tm_mday;
-		// 
+		//
 		//      if (daymonth == 1 || daymonth == 15)
 		//	{
 		//	  if (!(pulse % (SECOND_PULSE * 60 * 30))) //every 30 RL miuntes
 		//	    {
-		//	      if (!te_pit_fight 
-		//		  && engine.in_play_mode () 
+		//	      if (!te_pit_fight
+		//		  && engine.in_play_mode ()
 		//		  && is_te_pit_clear ())
 		//	    	{
 		//	    	  te_pit_first ();
 		//	    	  te_pit_time = (int) time (0);
 		//	    	}
 		//	    }
-		//	}  
+		//	}
 		///* end te minute update pit **/
 
 
@@ -1200,7 +1200,7 @@ update_website (void)
 	}
 }
 
-void 
+void
 send_to_not_char (const char *message, const CHAR_DATA *ch)
 
 {
@@ -1214,7 +1214,7 @@ send_to_not_char (const char *message, const CHAR_DATA *ch)
 	if ( !ch )
 		return;
 
-	for (tch = ch->room->people; tch; tch = tch->next_in_room) 
+	for (tch = ch->room->people; tch; tch = tch->next_in_room)
 	{
 
 		d = tch->desc;
@@ -1429,7 +1429,7 @@ send_outside_zone (char *message, int zone)
 	if (!message || !*message)
 		return;
 
-	if (zone == 1) 
+	if (zone == 1)
 	{
 		send_outside_zone (message, 3);
 		send_outside_zone (message, 8);
@@ -1526,9 +1526,9 @@ send_to_room_unf (char *message, int room_num)
 //////////////////////////////////////////////////////////////////////////////
 //
 /// \brief  Show an action relative to the actors and watchers.
-/// 
+///
 /// \param[in]  action_message  A specially formatted action string.
-/// \param[in]  hide_invisible  When set do not show the action to those who 
+/// \param[in]  hide_invisible  When set do not show the action to those who
 ///                             cannot see the actor.
 /// \param[in]  ch              The primary actor.
 /// \param[in]  obj             A target object or character.
@@ -1554,7 +1554,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 	/// \li \e  chsex  - A temporary backup of a PC's sex if they are hooded.
 	/// \li \e  color  - A reference to the ANSI color to use for output part.
 	/// \li \e  do_cap  - Determines proper capitalization (start of line, e.g).
-	/// \li \e  dietyCap  - Capitalize the actor's god name (wtf?). 
+	/// \li \e  dietyCap  - Capitalize the actor's god name (wtf?).
 	/// \li \e  totemCap  - Capitalize the actor's totem name (again: w.t.f.?).
 	/// \li \e  to  - A pointer to the recipient of the action message.
 	/// \li \e  tch  - A pointer to an included secondary actor.
@@ -1580,7 +1580,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 	/// <ul>
 
 	/// <li>
-	///       First we test the parameter integrity as a precaution. If we have 
+	///       First we test the parameter integrity as a precaution. If we have
 	///       bad parameters we return immediately.
 	/// </li>
 
@@ -1596,7 +1596,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 	/// <li>
-	///       We return immediately if the N/PC is in Combat "Compete" Mode. 
+	///       We return immediately if the N/PC is in Combat "Compete" Mode.
 	///       \see do_compete()
 	/// </li>
 
@@ -1646,7 +1646,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 
-		/// <li>  
+		/// <li>
 		///       We do not translate and send the message:
 		/// <ul>
 		/// <li>    \e IF the recipient is not the actor </li>
@@ -1666,16 +1666,16 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 		/// <li>
 		///       We translate and send the message:
 		/// <ul>
-		/// <li>    \e IF the recipient is connected (i.e. a link-live PC or an 
+		/// <li>    \e IF the recipient is connected (i.e. a link-live PC or an
 		///            animated NPC) </li>
-		/// <li>    \e AND the recipient is not the actor (\e OR this message 
+		/// <li>    \e AND the recipient is not the actor (\e OR this message
 		///            type is to the actor) </li>
-		/// <li>    \e AND the recipient is in the actor's group (\e OR this 
+		/// <li>    \e AND the recipient is in the actor's group (\e OR this
 		///            message type is not group-only) </li>
-		/// <li>    \e AND the recipient can see the actor (\e OR we do not want 
+		/// <li>    \e AND the recipient can see the actor (\e OR we do not want
 		///            to hide invisible actors </li>
 		/// <li>    \e AND the recipient is awake </li>
-		/// <li>    \e AND the type is not immortal-only (\e OR the recipient is 
+		/// <li>    \e AND the type is not immortal-only (\e OR the recipient is
 		///            on staff and the actor is not (?)) </li>
 		/// <li>    \e AND \e NOT a non-victim message \e IF the recipient is
 		///            the same as the victim. </li>
@@ -1692,18 +1692,18 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 		{
 
 
-			/// <li>  Iterate through the action_message and output buffer 
+			/// <li>  Iterate through the action_message and output buffer
 			///       character-at-a-time.
-			/// <ul>  
+			/// <ul>
 
 			for (strp = action_message, point = buf;;)
 			{
 
 				/// <li>
 				///       We parse the next character as a format identifier
-				///       \e IF this character is \c $. \e ELSE we copy this 
+				///       \e IF this character is \c $. \e ELSE we copy this
 				///       character from the message to the buffer (stopping
-				///       when we reach the end of the string. 
+				///       when we reach the end of the string.
 				/// </li>
 
 				/// <li>  Format translations:
@@ -1716,9 +1716,9 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 					{
 
 						/// <li>
-						///       \c $n - insert the short description of actor 
-						///               (showing "someone" if the recipient 
-						///               cannot see, and storing the actor's 
+						///       \c $n - insert the short description of actor
+						///               (showing "someone" if the recipient
+						///               cannot see, and storing the actor's
 						///               name for immortals.
 						/// </li>
 
@@ -1735,9 +1735,9 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $N - insert the short description of the 
-						///               victim (showing "someone" if the 
-						///               recipient cannot see, and storing the 
+						///       \c $N - insert the short description of the
+						///               victim (showing "someone" if the
+						///               recipient cannot see, and storing the
 						///               victim's name for immortals to see.
 						/// </li>
 
@@ -1755,7 +1755,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $3 - insert the short description of third 
+						///       \c $3 - insert the short description of third
 						///               PC (?).
 						/// </li>
 
@@ -1765,8 +1765,8 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $m - actor as "him", "her", or "it" (the 
-						///               latter in the case of neuter or hooded 
+						///       \c $m - actor as "him", "her", or "it" (the
+						///               latter in the case of neuter or hooded
 						///               actors).
 						/// </li>
 
@@ -1785,8 +1785,8 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $M - victim as "him", "her", or "it" (the 
-						///               latter in the case of neuter or hooded 
+						///       \c $M - victim as "him", "her", or "it" (the
+						///               latter in the case of neuter or hooded
 						///               victims).
 						/// </li>
 
@@ -1806,8 +1806,8 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $s - actor as "his", "her", or "its" (the 
-						///               latter in the case of neuter or hooded 
+						///       \c $s - actor as "his", "her", or "its" (the
+						///               latter in the case of neuter or hooded
 						///               actors).
 						/// </li>
 
@@ -1826,8 +1826,8 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $S - victim as "his", "her", or "its" (the 
-						///               latter in the case of neuter or hooded 
+						///       \c $S - victim as "his", "her", or "its" (the
+						///               latter in the case of neuter or hooded
 						///               victims).
 						/// </li>
 
@@ -1847,8 +1847,8 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $e - actor as "he", "she", or "it" (the 
-						///               latter in the case of neuter or hooded 
+						///       \c $e - actor as "he", "she", or "it" (the
+						///               latter in the case of neuter or hooded
 						///               actors).
 						/// </li>
 
@@ -1866,9 +1866,9 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 						break;
 
 
-						/// <li> 
-						///       \c $E - victim as "he", "she", or "it" (the 
-						///               latter in the case of neuter or hooded 
+						/// <li>
+						///       \c $E - victim as "he", "she", or "it" (the
+						///               latter in the case of neuter or hooded
 						///               victims).
 						/// </li>
 
@@ -1888,7 +1888,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $o - object name or "something" if hidden 
+						///       \c $o - object name or "something" if hidden
 						///               from the recipient
 						/// </li>
 
@@ -1899,7 +1899,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $O - victim object name or "something" if 
+						///       \c $O - victim object name or "something" if
 						///         hidden from the recipient
 						/// </li>
 
@@ -1921,7 +1921,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $P - victim object short description or 
+						///       \c $P - victim object short description or
 						///              "something" if hidden from the recipient
 						/// </li>
 
@@ -1941,7 +1941,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $A - "a" or "an" victim object (based on 
+						///       \c $A - "a" or "an" victim object (based on
 						///               name)
 						/// </li>
 
@@ -1951,7 +1951,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $T - Cast parameter \c vict_obj as a string 
+						///       \c $T - Cast parameter \c vict_obj as a string
 						///               and set to local \c i (?).
 						/// </li>
 
@@ -1961,8 +1961,8 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $F - Cast parameter \c vict_obj as a string 
-						///               of names and set to local \c i to the 
+						///       \c $F - Cast parameter \c vict_obj as a string
+						///               of names and set to local \c i to the
 						///               first of them (?).
 						/// </li>
 
@@ -1984,8 +1984,8 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $G  - insert the name of the victim's god 
-						///                (?). 
+						///       \c $G  - insert the name of the victim's god
+						///                (?).
 						/// </li>
 
 					case 'G':
@@ -1995,7 +1995,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 
 
 						/// <li>
-						///       \c $$  - Insert a dollar-sign 
+						///       \c $$  - Insert a dollar-sign
 						/// </li>
 
 					case '$':
@@ -2009,8 +2009,8 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 					}
 
 
-					/// <li>  Do not copy local \c i to \c buf \e IF there is 
-					///       nothing to insert (\e OR we are at the end of the 
+					/// <li>  Do not copy local \c i to \c buf \e IF there is
+					///       nothing to insert (\e OR we are at the end of the
 					///       buffer), \e ELSE Capitalize, color, and copy.</li>
 
 					if (!i || !point)
@@ -2064,7 +2064,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 			}
 
 
-			/// </li> 
+			/// </li>
 			/// <li>  Cap the end of the output buffer with a newline & null.
 			/// </li>
 
@@ -2128,7 +2128,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 		}
 
 
-		/// <li>  \e IF the action \c type is to a single recipient, we can 
+		/// <li>  \e IF the action \c type is to a single recipient, we can
 		///       stop iterating. \e ELSE process the next recipient.
 
 		if (IS_SET (type, TO_VICT) || IS_SET (type, TO_CHAR))
@@ -2145,8 +2145,8 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 	/// \todo  Consider swapping out \c MAX_STRING_LENGTH for something more
 	///        reasonable.
 	/// \todo  Ensure \c immbuf1 and \c immbuf2 are redundant and merge them.
-	/// \todo  Consider using an #ifndef block and a command-line option to decide 
-	///        if we want strong argument checking compiled into the server, and 
+	/// \todo  Consider using an #ifndef block and a command-line option to decide
+	///        if we want strong argument checking compiled into the server, and
 	///        available as a command-line option.
 	/// \todo  Evaluate critcalness of bad parameters and handle with a warning
 	///        or error as appropriate.
@@ -2156,7 +2156,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 	/// \todo  Detect multi-sentence actions and utilize \c do_cap appropriately.
 	/// \todo  Consider giving immortals the option to see names only (no sdesc).
 	/// \todo  Remove \c dietyCap and \c totemCap as they really don't belong.
-	///        The local \c totemCap is never set. 
+	///        The local \c totemCap is never set.
 }
 
 extern int bytes_allocated;
@@ -2166,7 +2166,7 @@ extern int mud_memory;
 void
 do_gstat (CHAR_DATA * ch, char *argument, int cmd)
 {
-	if (argument && *argument) 
+	if (argument && *argument)
 	{
 		if (strcmp (argument, "config") == STR_MATCH)
 		{
@@ -2259,7 +2259,7 @@ do_gstat (CHAR_DATA * ch, char *argument, int cmd)
 	send_to_char (buf, ch);
 
 	// Display the database set we are using
-	sprintf (buf, 
+	sprintf (buf,
 		"#2MySQL Database Set: engine      #0%s\n"
 		"                    #2world       #0%s\n"
 		"                    #2world_log   #0%s\n"
@@ -2332,7 +2332,7 @@ colorize (const char *source, char *target, struct descriptor_data *d)
 	};
 
 	char *retval = target;
-	bool is_color_link = (d && ((d->character && d->character->color) 
+	bool is_color_link = (d && ((d->character && d->character->color)
 		|| (d->color)));
 
 	*target = '\0';
@@ -2350,13 +2350,13 @@ colorize (const char *source, char *target, struct descriptor_data *d)
 				{
 					escaped -= '0';
 				}
-				else 
+				else
 				{
 					if (escaped <= 'F')
 					{
 						escaped -= 'A';
 					}
-					else 
+					else
 					{
 						escaped -= 'a';
 					}
@@ -2491,7 +2491,7 @@ save_world_state (void)
 		{
 			if (!room->dir_option[i])
 				continue;
-			if (!IS_SET (room->dir_option[i]->exit_info, EX_ISDOOR) 
+			if (!IS_SET (room->dir_option[i]->exit_info, EX_ISDOOR)
 				&& !IS_SET (room->dir_option[i]->exit_info, EX_ISGATE))
 				continue;
 
@@ -2504,9 +2504,9 @@ save_world_state (void)
 			5 - gate_locked_and_closed
 			**/
 
-			if (IS_SET (room->dir_option[i]->exit_info, EX_CLOSED) 
+			if (IS_SET (room->dir_option[i]->exit_info, EX_CLOSED)
 				&& IS_SET (room->dir_option[i]->exit_info, EX_LOCKED)
-				&& IS_SET (room->dir_option[i]->exit_info, EX_ISGATE))	
+				&& IS_SET (room->dir_option[i]->exit_info, EX_ISGATE))
 				mysql_safe_query ("INSERT INTO copyover_doors VALUES (%d, %d, 5)",
 				room->nVirtual, i);
 
@@ -2519,7 +2519,7 @@ save_world_state (void)
 				mysql_safe_query ("INSERT INTO copyover_doors VALUES (%d, %d, 3)",
 				room->nVirtual, i);
 
-			else if (IS_SET (room->dir_option[i]->exit_info, EX_CLOSED) && IS_SET (room->dir_option[i]->exit_info, EX_LOCKED))	
+			else if (IS_SET (room->dir_option[i]->exit_info, EX_CLOSED) && IS_SET (room->dir_option[i]->exit_info, EX_LOCKED))
 				mysql_safe_query ("INSERT INTO copyover_doors VALUES (%d, %d, 2)",
 				room->nVirtual, i);
 			else if (IS_SET (room->dir_option[i]->exit_info, EX_CLOSED))
@@ -3050,9 +3050,9 @@ gdbdump (char *strGdbCommandFile, char *strFilterScript)
 	/* Get the pid of this server. */
 	nServerPid = getpid ();
 	sprintf (strServerPid, "%d", nServerPid);
-	sprintf (strOutfilePath, "%s/crashes/gdb.%d", 
+	sprintf (strOutfilePath, "%s/crashes/gdb.%d",
 		(engine.get_base_path ("test")).c_str (), nServerPid);
-	sprintf (strServerPath, "%s/bin/server", 
+	sprintf (strServerPath, "%s/bin/server",
 		(engine.get_base_path ()).c_str ());
 
 	/* backup fds and redirect i/o for gdb */
@@ -3206,8 +3206,8 @@ sigsegv (int signo)
 
 	// gdbdump(PATH_TO_TP "/src/gdbdump.ini", PERL_GDB_FILTER);
 	sprintf (buf, "/bin/cp %s/bin/server %s/crashes/server-%d.%d",
-		(engine.get_base_path ()).c_str (), 
-		(engine.get_base_path ("test")).c_str (), 
+		(engine.get_base_path ()).c_str (),
+		(engine.get_base_path ("test")).c_str (),
 		port, nServerPid);
 
 	system (buf);
@@ -3350,7 +3350,7 @@ page_string (DESCRIPTOR_DATA * d, const char *str)
 	if (d->showstr_head && *d->showstr_head)
 		mem_free (d->showstr_head);
 
-	d->showstr_head = str_dup (str);
+	d->showstr_head = strdup (str);
 	d->showstr_point = d->showstr_head;
 
 	show_string (d, "");
