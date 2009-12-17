@@ -520,7 +520,7 @@ leave_tracks (CHAR_DATA * ch, int to_dir, int from_dir)
 	}
 
 
-	CREATE (track, TRACK_DATA, 1);
+	track = new TRACK_DATA;
 
 	track->race = ch->race;
 	track->to_dir = to_dir;
@@ -1617,7 +1617,7 @@ exit_room (CHAR_DATA * ch, int dir, int flags, int leave_time,
 
 	ch->flags |= FLAG_LEAVING;
 
-	CREATE (qe, QE_DATA, 1);
+	qe = new QE_DATA;
 
 	qe->ch = ch;
 	qe->dir = dir;
@@ -2458,7 +2458,7 @@ move (CHAR_DATA * ch, char *argument, int dir, int speed)
 		argument = one_argument (argument, buf);
 	}
 
-	CREATE (move, MOVE_DATA, 1);
+	move = new MOVE_DATA;
 
 	move->dir = dir;
 	move->desired_time = speed;

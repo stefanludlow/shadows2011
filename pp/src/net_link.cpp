@@ -714,7 +714,7 @@ write_to_q (const char *txt, struct txt_q *queue)
 	if (!queue)
 		return;
 
-	CREATE (newPtr, struct txt_block, 1);
+	newPtr = new txt_block;
 
 	p = txt;
 

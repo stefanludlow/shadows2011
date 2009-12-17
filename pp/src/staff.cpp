@@ -415,13 +415,13 @@ post_log (DESCRIPTOR_DATA * d)
 void
 do_clog (CHAR_DATA * ch, char *argument, int cmd)
 {
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a coding report to be included in the next newsletter:\n", ch);
 
 	make_quiet (ch);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
@@ -434,14 +434,14 @@ do_clog (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_alog (CHAR_DATA * ch, char *argument, int cmd)
 {
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a general staff announcement to be included in the next newsletter:\n",
 		ch);
 
 	make_quiet (ch);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
@@ -455,13 +455,13 @@ void
 do_blog (CHAR_DATA * ch, char *argument, int cmd)
 {
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a building report to be included in the next newsletter:\n", ch);
 
 	make_quiet (ch);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
@@ -475,13 +475,13 @@ void
 do_wlog (CHAR_DATA * ch, char *argument, int cmd)
 {
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a website report to be included in the next newsletter:\n", ch);
 
 	make_quiet (ch);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
@@ -495,13 +495,13 @@ void
 do_plog (CHAR_DATA * ch, char *argument, int cmd)
 {
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a plot report to be included in the next newsletter:\n", ch);
 
 	make_quiet (ch);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
@@ -587,7 +587,7 @@ do_wclone (CHAR_DATA * ch, char *argument, int cmd)
 		if (fwriting == fbook->writing)
 		{
 			if (!tbook->writing)
-				CREATE (tbook->writing, WRITING_DATA, 1);
+				tbook->writing = new WRITING_DATA;
 			twriting = tbook->writing;
 			twriting->message = add_hash (fwriting->message);
 			twriting->author = add_hash (fwriting->author);
@@ -605,7 +605,7 @@ do_wclone (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				if (!twriting->next_page)
 				{
-					CREATE (twriting->next_page, WRITING_DATA, 1);
+					twriting->next_page = new WRITING_DATA;
 					twriting->next_page->message = add_hash (fwriting->message);
 					twriting->next_page->author = add_hash (fwriting->author);
 					twriting->next_page->date = add_hash (fwriting->date);
@@ -1277,7 +1277,7 @@ do_email (CHAR_DATA * ch, char *argument, int cmd)
 	send_to_char ("\n#2Enter the message you'd like to email this player:#0\n",
 		ch);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 	ch->desc->proc = post_email;
@@ -1376,7 +1376,7 @@ ban_host (char *host, char *banned_by, int length)
 	SITE_INFO *site, *tmp_site;
 	char buf[MAX_STRING_LENGTH];
 
-	CREATE (site, SITE_INFO, 1);
+	site = new SITE_INFO;
 	site->name = add_hash (host);
 	site->banned_by = add_hash (banned_by);
 	site->banned_on = time (0);
@@ -5936,7 +5936,7 @@ _do_load (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
-		CREATE (mob->pc, PC_DATA, 1);
+		mob->pc = new PC_DATA;
 		mob = load_char_mysql (buf);
 		if (mob)
 		{
@@ -11389,7 +11389,7 @@ void do_wmotd(CHAR_DATA * ch, char *argument, int cmd)
 
 	act ("$n begins editing the MOTD.", false, ch, 0, 0, TO_ROOM);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 	ch->delay_info1 = ch->room->nVirtual;

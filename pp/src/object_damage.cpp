@@ -250,7 +250,7 @@ object_damage__new ()
 	if (!engine.in_test_mode ())
 		return NULL;
 
-	CREATE (thisPtr, OBJECT_DAMAGE, 1);
+	thisPtr = new OBJECT_DAMAGE;
 
 	thisPtr->source = (DAMAGE_TYPE) 0;
 	thisPtr->material = (MATERIAL_TYPE) 0;

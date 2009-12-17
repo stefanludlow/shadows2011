@@ -821,7 +821,7 @@ load_object_full (int vnum, bool newWritingID)
 			/* if there is no writing and it has more than 0 pages assigned to it */
 			if (!new_obj->writing && new_obj->o.od.value[0] > 0)
 			{
-				CREATE (new_obj->writing, WRITING_DATA, 1);
+				new_obj->writing = new WRITING_DATA;
 				for (i = 1, writing = new_obj->writing; i <= new_obj->o.od.value[0]; i++)
 				{
 					writing->message = add_hash ("blank");
@@ -834,7 +834,7 @@ load_object_full (int vnum, bool newWritingID)
 					writing->torn = false;
 					if (i != new_obj->o.od.value[0])
 					{
-						CREATE (writing->next_page, WRITING_DATA, 1);
+						writing->next_page = new WRITING_DATA;
 						writing = writing->next_page;
 					}
 					new_obj->o.od.value[1] = unused_writing_id ();
@@ -936,7 +936,7 @@ load_colored_object (int vnum, char *color)
 	{
 		if (!new_obj->writing && new_obj->o.od.value[0] > 0)
 		{
-			CREATE (new_obj->writing, WRITING_DATA, 1);
+			new_obj->writing = new WRITING_DATA;
 			for (i = 1, writing = new_obj->writing; i <= new_obj->o.od.value[0];
 				i++)
 			{
@@ -950,7 +950,7 @@ load_colored_object (int vnum, char *color)
 				writing->torn = false;
 				if (i != new_obj->o.od.value[0])
 				{
-					CREATE (writing->next_page, WRITING_DATA, 1);
+					writing->next_page = new WRITING_DATA;
 					writing = writing->next_page;
 				}
 			}
@@ -1194,7 +1194,7 @@ fread_object (int vnum, int nZone, FILE * fp)
 
 		fscanf (fp, "%s \n", chk);
 
-		CREATE (newclan, OBJ_CLAN_DATA, 1);
+		newclan = new OBJ_CLAN_DATA;
 		newclan->name = fread_string (fp);
 		newclan->rank = fread_string (fp);
 		newclan->next = NULL;

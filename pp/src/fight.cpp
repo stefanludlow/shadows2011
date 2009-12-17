@@ -829,7 +829,7 @@ make_statue (CHAR_DATA * ch)
 	{
 		if (!statue->wounds)
 		{
-			CREATE (statue->wounds, WOUND_DATA, 1);
+			statue->wounds = new WOUND_DATA;
 			statue->wounds->location = add_hash (wound->location);
 			statue->wounds->type = add_hash (wound->type);
 			statue->wounds->name = add_hash (wound->name);
@@ -847,7 +847,7 @@ make_statue (CHAR_DATA * ch)
 			{
 				if (cwound->next)
 					continue;
-				CREATE (cwound->next, WOUND_DATA, 1);
+				cwound->next = new WOUND_DATA;
 				cwound->next->location = add_hash (wound->location);
 				cwound->next->type = add_hash (wound->type);
 				cwound->next->name = add_hash (wound->name);
@@ -867,7 +867,7 @@ make_statue (CHAR_DATA * ch)
 	{
 		if (!statue->lodged)
 		{
-			CREATE (statue->lodged, LODGED_OBJECT_INFO, 1);
+			statue->lodged = new LODGED_OBJECT_INFO;
 			statue->lodged->vnum = lodged->vnum;
 			statue->lodged->location = add_hash (lodged->location);
 			statue->lodged->next = NULL;
@@ -877,7 +877,7 @@ make_statue (CHAR_DATA * ch)
 			{
 				if (!clodged->next)
 				{
-					CREATE (clodged->next, LODGED_OBJECT_INFO, 1);
+					clodged->next = new LODGED_OBJECT_INFO;
 					clodged->next->vnum = lodged->vnum;
 					clodged->next->location = add_hash (lodged->location);
 					clodged->next->next = NULL;
@@ -953,7 +953,7 @@ make_corpse (CHAR_DATA * ch)
 	{
 		if (!corpse->wounds)
 		{
-			CREATE (corpse->wounds, WOUND_DATA, 1);
+			corpse->wounds = new WOUND_DATA;
 			corpse->wounds->location = add_hash (wound->location);
 			corpse->wounds->type = add_hash (wound->type);
 			corpse->wounds->name = add_hash (wound->name);
@@ -971,7 +971,7 @@ make_corpse (CHAR_DATA * ch)
 			{
 				if (cwound->next)
 					continue;
-				CREATE (cwound->next, WOUND_DATA, 1);
+				cwound->next = new WOUND_DATA;
 				cwound->next->location = add_hash (wound->location);
 				cwound->next->type = add_hash (wound->type);
 				cwound->next->name = add_hash (wound->name);
@@ -991,7 +991,7 @@ make_corpse (CHAR_DATA * ch)
 	{
 		if (!corpse->lodged)
 		{
-			CREATE (corpse->lodged, LODGED_OBJECT_INFO, 1);
+			corpse->lodged = new LODGED_OBJECT_INFO;
 			corpse->lodged->vnum = lodged->vnum;
 			corpse->lodged->location = add_hash (lodged->location);
 			corpse->lodged->next = NULL;
@@ -1001,7 +1001,7 @@ make_corpse (CHAR_DATA * ch)
 			{
 				if (!clodged->next)
 				{
-					CREATE (clodged->next, LODGED_OBJECT_INFO, 1);
+					clodged->next = new LODGED_OBJECT_INFO;
 					clodged->next->vnum = lodged->vnum;
 					clodged->next->location = add_hash (lodged->location);
 					clodged->next->next = NULL;

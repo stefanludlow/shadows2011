@@ -960,7 +960,7 @@ lodge_missile (CHAR_DATA * target, OBJ_DATA * ammo, char *strike_location)
 
 	if (!target->lodged)
 	{
-		CREATE (target->lodged, LODGED_OBJECT_INFO, 1);
+		target->lodged = new LODGED_OBJECT_INFO;
 		target->lodged->vnum = ammo->nVirtual;
 		target->lodged->location = add_hash (strike_location);
 	}
@@ -969,7 +969,7 @@ lodge_missile (CHAR_DATA * target, OBJ_DATA * ammo, char *strike_location)
 		{
 			if (!lodged->next)
 			{
-				CREATE (lodged->next, LODGED_OBJECT_INFO, 1);
+				lodged->next = new LODGED_OBJECT_INFO;
 				lodged->next->vnum = ammo->nVirtual;
 				lodged->next->location = add_hash (strike_location);
 				break;

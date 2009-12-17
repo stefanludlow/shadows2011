@@ -5384,7 +5384,7 @@ do_stable (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!paid_for)
 	{
-		CREATE (af, AFFECTED_TYPE, 1);
+		af = new AFFECTED_TYPE;
 		af->type = i;
 		af->a.spell.sn = animal->coldload_id;
 		af->a.spell.duration = 168;

@@ -833,7 +833,7 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			if (!craft->next)
 			{
-				CREATE (craft->next, SUBCRAFT_HEAD_DATA, 1);
+				craft->next = new SUBCRAFT_HEAD_DATA;
 				craft = craft->next;
 				break;
 			}
@@ -902,11 +902,11 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 		else
 			sprintf (command, "%s", buf);
 
-		CREATE (tcraft, SUBCRAFT_HEAD_DATA, 1);
+		tcraft = new SUBCRAFT_HEAD_DATA;
 		memset (tcraft, 0, sizeof (SUBCRAFT_HEAD_DATA));
 		memcpy (tcraft, ch->pc->edit_craft, sizeof (SUBCRAFT_HEAD_DATA));
 
-		CREATE (tcraft->phases, PHASE_DATA, 1);
+		tcraft->phases = new PHASE_DATA;
 		memset (tcraft->phases, 0, sizeof (PHASE_DATA));
 		memcpy (tcraft->phases, ch->pc->edit_craft->phases, sizeof (PHASE_DATA));
 
@@ -914,7 +914,7 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			for (i = 0; ch->pc->edit_craft->obj_items[i]; i++)
 			{
-				CREATE (tcraft->obj_items[i], DEFAULT_ITEM_DATA, 1);
+				tcraft->obj_items[i] = new DEFAULT_ITEM_DATA;
 				memset (tcraft->obj_items[i], 0,
 					sizeof (DEFAULT_ITEM_DATA));
 			}
@@ -933,7 +933,7 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			if (!craft->next)
 			{
-				CREATE (craft->next, SUBCRAFT_HEAD_DATA, 1);
+				craft->next = new SUBCRAFT_HEAD_DATA;
 				craft->next = tcraft;
 				ch->pc->edit_craft = tcraft;
 				send_to_char ("Craft cloned; new craft opened for editing.\n", ch);

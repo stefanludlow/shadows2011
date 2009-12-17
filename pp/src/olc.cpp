@@ -3695,14 +3695,14 @@ do_rlink (CHAR_DATA * ch, char *argument, int cmd)
 		vtor (vtor (ch->in_room)->dir_option[dir]->to_room)->
 		dir_option[rev_dir[dir]] = 0;
 
-	CREATE (vtor (cha_rnum)->dir_option[dir], struct room_direction_data, 1);
+	vtor (cha_rnum)->dir_option[dir] = new room_direction_data;
 	vtor (cha_rnum)->dir_option[dir]->general_description = 0;
 	vtor (cha_rnum)->dir_option[dir]->keyword = 0;
 	vtor (cha_rnum)->dir_option[dir]->exit_info = 0;
 	vtor (cha_rnum)->dir_option[dir]->key = -1;
 	vtor (cha_rnum)->dir_option[dir]->to_room = troom->nVirtual;
 
-	CREATE (troom->dir_option[rev_dir[dir]], struct room_direction_data, 1);
+	troom->dir_option[rev_dir[dir]] = new room_direction_data;
 	troom->dir_option[rev_dir[dir]]->general_description = 0;
 	troom->dir_option[rev_dir[dir]]->keyword = 0;
 	troom->dir_option[rev_dir[dir]]->exit_info = 0;
@@ -3778,7 +3778,7 @@ do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	else
 	{
-		CREATE (r_secret, struct secret, 1);
+		r_secret = new secret;
 	}
 	r_secret->diff = dif;
 	vtor (ch->in_room)->secrets[dir] = r_secret;
@@ -3855,7 +3855,7 @@ do_rexit (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	if (!vtor (ch->in_room)->dir_option[dir])
-		CREATE (vtor (cha_rnum)->dir_option[dir], struct room_direction_data, 1);
+		vtor (cha_rnum)->dir_option[dir] = new room_direction_data;
 
 	vtor (cha_rnum)->dir_option[dir]->general_description = 0;
 	vtor (cha_rnum)->dir_option[dir]->keyword = 0;
@@ -3979,14 +3979,14 @@ do_rxchange (CHAR_DATA * ch, char *argument, int cmd)
 	k = strlen (end);
 	if (!arg2[0])
 	{
-		CREATE (result, char, i + j + k);
+		result = new char[i + j + k];
 		strncpy (result, ch->room->description, (i - j));
 		strcat (result, arg2);
 		strcat (result, end + 1);
 	}
 	else
 	{
-		CREATE (result, char, i + j + k + 1);
+		result = new char[i + j + k + 1];
 		strncpy (result, ch->room->description, (i - j));
 		strcat (result, arg2);
 		strcat (result, end);
@@ -4048,7 +4048,7 @@ do_rdesc (CHAR_DATA * ch, char *argument, int cmd)
 
 	act ("$n begins editing a room description.", false, ch, 0, 0, TO_ROOM);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 	ch->delay_info1 = room->nVirtual;
@@ -4076,7 +4076,7 @@ do_rappend (CHAR_DATA * ch, char *argument, int cmd)
 {
 	char *new_string;
 
-	CREATE (new_string, char, strlen (vtor (ch->in_room)->description) + 1);
+	new_string = new char[strlen (vtor (ch->in_room)->description) + 1];
 	strcpy (new_string, vtor (ch->in_room)->description);
 	vtor (ch->in_room)->description = new_string;
 
@@ -4158,7 +4158,7 @@ do_redesc (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!tmp)
 	{
-		CREATE (newdesc, struct extra_descr_data, 1);
+		newdesc = new extra_descr_data;
 		newdesc->next = vtor (ch->in_room)->ex_description;
 		newdesc->keyword = add_hash (buf);
 		vtor (ch->in_room)->ex_description = newdesc;
@@ -5774,7 +5774,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 			if (atoi (buf))
 			{
 				send_to_char ("Object skill affect set.\n", ch);
-				CREATE (af, AFFECTED_TYPE, 1);
+				af = new AFFECTED_TYPE;
 
 				af->type = 0;
 				af->a.spell.duration = -1;
@@ -6573,7 +6573,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 			else
 			{
 
-				CREATE (af, AFFECTED_TYPE, 1);
+				af = new AFFECTED_TYPE;
 
 				af->type = 0;
 				af->a.spell.duration = -1;
@@ -6668,7 +6668,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 
 			if (!edit_obj->clan_data)
 			{
-				CREATE (edit_obj->clan_data, OBJ_CLAN_DATA, 1);
+				edit_obj->clan_data = new OBJ_CLAN_DATA;
 				edit_obj->clan_data->name = str_dup (clan_name);
 				edit_obj->clan_data->rank = str_dup (clan_rank);
 				edit_obj->clan_data->next = NULL;
@@ -6703,7 +6703,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (full_description)
 	{
-		CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+		ch->desc->pending_message = new MESSAGE_DATA;
 		ch->desc->str = &ch->desc->pending_message->message;
 		ch->desc->proc = post_odesc;
 		ch->delay_info1 = edit_obj->nVirtual;
@@ -6895,7 +6895,7 @@ add_replace_mobprog (CHAR_DATA * ch, CHAR_DATA * mob, char *trigger_name)
 
 	if (!prog)
 	{
-		CREATE (prog, MOBPROG_DATA, 1);
+		prog = new MOBPROG_DATA;
 
 		if (last_prog)
 			last_prog->next = prog;
@@ -7587,7 +7587,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (!craft->phases)
 		{
-			CREATE (craft->phases, PHASE_DATA, 1);
+			craft->phases = new PHASE_DATA;
 			craft->phases = new_phase ();
 			phase = craft->phases;
 		}
@@ -7596,7 +7596,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				if (!phase->next && phasenum == i + 1)
 				{
-					CREATE (phase->next, PHASE_DATA, 1);
+					phase->next = new PHASE_DATA;
 					phase->next = new_phase ();
 				}
 				else if (i == phasenum)
@@ -7988,7 +7988,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 				}
 
 				if (!craft->fails[0])
-					CREATE (craft->fails[0], DEFAULT_ITEM_DATA, 1);
+					craft->fails[0] = new DEFAULT_ITEM_DATA;
 
 				for (i = 0; i <= MAX_DEFAULT_ITEMS; i++)
 				{
@@ -8009,7 +8009,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 						}
 
 						else
-							CREATE (craft->fails[i + 1], DEFAULT_ITEM_DATA, 1);
+							craft->fails[i + 1] = new DEFAULT_ITEM_DATA;
 					}
 				}//for (i = 0
 
@@ -8141,7 +8141,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 				}
 
 				if (!craft->obj_items[0])
-					CREATE (craft->obj_items[0], DEFAULT_ITEM_DATA, 1);
+					craft->obj_items[0] = new DEFAULT_ITEM_DATA;
 
 				for (i = 0; i <= MAX_DEFAULT_ITEMS; i++)
 				{
@@ -8159,7 +8159,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 							return;
 						}
 						else
-							CREATE (craft->obj_items[i + 1], DEFAULT_ITEM_DATA, 1);
+							craft->obj_items[i + 1] = new DEFAULT_ITEM_DATA;
 					}
 				}//for (i = 0;
 				memset (items->items, 0, MAX_DEFAULT_ITEMS);
@@ -8776,7 +8776,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			af = get_affect (edit_mob, MAGIC_FLAG_NOGAIN + ind);
 			if (!af)
 			{
-				CREATE (af, AFFECTED_TYPE, 1);
+				af = new AFFECTED_TYPE;
 				af->type = MAGIC_FLAG_NOGAIN + ind;
 				affect_to_char (edit_mob, af);
 				send_to_char
@@ -9090,7 +9090,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 				edit_mob->flags |= FLAG_KEEPER;
 
 				if (!edit_mob->shop)
-					CREATE (edit_mob->shop, SHOP_DATA, 1);
+					edit_mob->shop = new SHOP_DATA;
 
 				edit_mob->shop->discount = 1.0;
 				edit_mob->shop->markup = 1.0;
@@ -11304,7 +11304,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char
 			("1-------10--------20--------30--------40--------50--------60---65\n",
 			ch);
-		CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+		ch->desc->pending_message = new MESSAGE_DATA;
 		ch->desc->str = &ch->desc->pending_message->message;
 		ch->desc->proc = post_mdesc;
 		if (IS_NPC (edit_mob))
@@ -12621,7 +12621,7 @@ do_rset (CHAR_DATA * ch, char *argument, int cmd)
 		}
 
 		if (!ch->room->extra)
-			CREATE (ch->room->extra, ROOM_EXTRA_DATA, 1);
+			ch->room->extra = new ROOM_EXTRA_DATA;
 
 		if (ch->room->extra->alas[ind] &&
 			!IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
@@ -12684,7 +12684,7 @@ do_rset (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!ch->room->extra)
 	{
-		CREATE (ch->room->extra, ROOM_EXTRA_DATA, 1);
+		ch->room->extra = new ROOM_EXTRA_DATA;
 		printf ("Creating extra room data.\n");
 		fflush (stdout);
 	}

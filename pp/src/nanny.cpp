@@ -1410,7 +1410,7 @@ nanny_retire (DESCRIPTOR_DATA * d, char *argument)
 		d);
 
 
-	CREATE (d->pending_message, MESSAGE_DATA, 1);
+	d->pending_message = new MESSAGE_DATA;
 
 	d->str = &d->pending_message->message;
 	d->max_str = MAX_STRING_LENGTH;
@@ -1616,7 +1616,7 @@ nanny_composing_message (DESCRIPTOR_DATA * d, char *argument)
 	if (strlen (date) > 1)
 		date[strlen (date) - 1] = '\0';
 
-	CREATE (message, MUDMAIL_DATA, 1);
+	message = new MUDMAIL_DATA;
 	message->from = str_dup (d->pending_message->poster);
 	message->subject = str_dup (d->pending_message->subject);
 	message->message = str_dup (d->pending_message->message);
@@ -1843,7 +1843,7 @@ nanny_compose_mail_to (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	CREATE (d->pending_message, MESSAGE_DATA, 1);
+	d->pending_message = new MESSAGE_DATA;
 	d->pending_message->target = str_dup (argument);
 	d->stored = str_dup (acct->name.c_str ());
 	delete acct;
@@ -2042,7 +2042,7 @@ nanny_read_message (DESCRIPTOR_DATA * d, char *argument)
 		row = mysql_fetch_row (result);
 		d->stored = str_dup (row[0]);
 
-		CREATE (d->pending_message, MESSAGE_DATA, 1);
+		d->pending_message = new MESSAGE_DATA;
 		d->pending_message->target = str_dup (row[1]);
 		mysql_free_result (result);
 		result = NULL;
@@ -3768,7 +3768,7 @@ spitstat (CHAR_DATA * ch, DESCRIPTOR_DATA * recipient)
 	*buf = '\0';
 
 	if (!ch->pc)
-		CREATE (ch->pc, PC_DATA, 1);
+		ch->pc = new PC_DATA;
 
 	if (ch->pc->role)
 		sprintf (ADDBUF, "\nPurchased Starter: %s\n",
@@ -4390,7 +4390,7 @@ nanny_special_role_selection (DESCRIPTOR_DATA * d, char *arg)
 		return;
 	}
 
-	CREATE (d->character->pc->special_role, ROLE_DATA, 1);
+	d->character->pc->special_role = new ROLE_DATA;
 	d->character->pc->special_role->summary = str_dup (role->summary);
 	d->character->pc->special_role->body = str_dup (role->body);
 	d->character->pc->special_role->poster = str_dup (role->poster);

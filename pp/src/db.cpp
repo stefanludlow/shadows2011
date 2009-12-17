@@ -314,12 +314,11 @@ add_obj_to_hash (OBJ_DATA * add_obj)
 
 	if (globalObjectArray[add_obj->nVirtual] == NULL) {
 		globalObjectArray[add_obj->nVirtual] = add_obj;
+		
+		hash = add_obj->nVirtual % OBJECT_ZONE_SIZE;
+		add_obj->hnext = obj_tab[hash];
+		obj_tab[hash] = add_obj;
 	}
-
-	hash = add_obj->nVirtual % OBJECT_ZONE_SIZE;
-
-	add_obj->hnext = obj_tab[hash];
-	obj_tab[hash] = add_obj;
 }
 
 /*************************************************************************
@@ -547,7 +546,7 @@ reload_hints (void)
 		string = fread_string (fp);
 		if (!string || !*string)
 			break;
-		CREATE (hint, NEWBIE_HINT, 1);
+		hint = new NEWBIE_HINT;
 		hint->hint = string;
 		if (!hint_list)
 			hint_list = hint;
@@ -917,7 +916,7 @@ load_rooms (void)
 					else if (*chk == 'A')
 					{		/* Additional descriptions */
 
-						CREATE (room->extra, ROOM_EXTRA_DATA, 1);
+						room->extra = new ROOM_EXTRA_DATA;
 
 						for (i = 0; i < WR_DESCRIPTIONS; i++)
 						{
@@ -967,10 +966,10 @@ get_room (void)
 	static int prealloc_rooms_count = 0;
 
 	if (!prealloc_rooms)
-		CREATE (prealloc_rooms, ROOM_DATA, MAX_PREALLOC_ROOMS);
+		prealloc_rooms = new ROOM_DATA[MAX_PREALLOC_ROOMS];
 
 	if (prealloc_rooms_count >= MAX_PREALLOC_ROOMS)
-		CREATE (room, ROOM_DATA, 1);
+		room = new ROOM_DATA;
 	else
 	{
 		room = prealloc_rooms + prealloc_rooms_count;
@@ -1069,7 +1068,7 @@ boot_zones (void)
 	struct stat fstatus;
 	RESET_AFFECT *ra;
 
-	CREATE (zone_table, struct zone_data, MAX_ZONE);
+	zone_table = new zone_data[MAX_ZONE];
 
 	for (zon = 0; zon < MAX_ZONE; zon++)
 	{
@@ -1111,7 +1110,7 @@ boot_zones (void)
 			fgets (buf, 80, fl);
 		}
 
-		CREATE (zone_table[zon].cmd, struct reset_com, cmd_no);
+		zone_table[zon].cmd = new reset_com[cmd_no];
 
 		zone_table[zon].weather_type = 0;
 

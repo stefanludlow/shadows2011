@@ -316,7 +316,7 @@ load_race_table (void)
 	{
 		i++;
 
-		CREATE (entry, RACE_TABLE_ENTRY, 1);
+		entry = new RACE_TABLE_ENTRY;
 		entry->id = atoi (row[RACE_ID]);
 		entry->name = str_dup (row[RACE_NAME]);
 		entry->pc_race = atoi (row[RACE_PC]);
@@ -1133,7 +1133,7 @@ reload_sitebans ()
 
 	while ((row = mysql_fetch_row (result)))
 	{
-		CREATE (site, SITE_INFO, 1);
+		site = new SITE_INFO;
 		site->name = str_dup (row[0]);
 		site->banned_by = str_dup (row[1]);
 		site->banned_on = atoi (row[2]);
@@ -1274,7 +1274,7 @@ read_saved_obj (MYSQL_ROW row)
 			get_line (&p, buf);
 			if (!*buf || !str_cmp (buf, "(null)"))
 				break;
-			CREATE (wound, WOUND_DATA, 1);
+			wound = new WOUND_DATA;
 			sscanf (buf, "%s %s %s %s %d %d %d %d %d %d\n",
 				location, type, severity, name, &damage, &bleeding, &poison,
 				&healerskill, &lasthealed, &lastbled);
@@ -1311,7 +1311,7 @@ read_saved_obj (MYSQL_ROW row)
 			get_line (&p, buf);
 			if (!*buf || !str_cmp (buf, "(null)"))
 				break;
-			CREATE (lodged, LODGED_OBJECT_INFO, 1);
+			lodged = new LODGED_OBJECT_INFO;
 			sscanf (buf, "%s %d\n", location, &vnum);
 			lodged->location = str_dup (location);
 			lodged->vnum = vnum;
@@ -1333,7 +1333,7 @@ read_saved_obj (MYSQL_ROW row)
 			get_line (&p, buf);
 			if (!*buf || !str_cmp (buf, "(null)"))
 				break;
-			CREATE (af, AFFECTED_TYPE, 1);
+			af = new AFFECTED_TYPE;
 			sscanf (buf, "%d %d %d %d %d %d %d\n",
 				&af->a.spell.location, &af->a.spell.modifier,
 				&af->a.spell.duration, &af->a.spell.bitvector,
@@ -1904,7 +1904,7 @@ load_all_writing (void)
 				&& obj->o.od.value[0] == atoi (row[0]))
 			{
 				if (!obj->writing)
-					CREATE (obj->writing, WRITING_DATA, 1);
+					obj->writing = new WRITING_DATA;
 				obj->writing->author = add_hash (row[1]);
 				obj->writing->date = add_hash (row[3]);
 				obj->writing->ink = add_hash (row[4]);
@@ -1919,13 +1919,13 @@ load_all_writing (void)
 				&& obj->o.od.value[1] == atoi (row[0]))
 			{
 				if (!obj->writing)
-					CREATE (obj->writing, WRITING_DATA, 1);
+					obj->writing = new WRITING_DATA;
 				writing = obj->writing;
 				for (i = 1; i <= obj->o.od.value[0]; i++)
 				{
 					if (!writing->next_page && i + 1 <= obj->o.od.value[0])
 					{
-						CREATE (writing->next_page, WRITING_DATA, 1);
+						writing->next_page = new WRITING_DATA;
 					}
 					if (i == atoi (row[2]))
 					{
@@ -2008,7 +2008,7 @@ load_writing (OBJ_DATA * obj)
 		}
 		if (!obj->writing)
 		{
-			CREATE (obj->writing, WRITING_DATA, 1);
+			obj->writing = new WRITING_DATA;
 			writing = obj->writing;
 			writing->author = add_hash (row[1]);
 			writing->date = add_hash (row[3]);
@@ -2028,7 +2028,7 @@ load_writing (OBJ_DATA * obj)
 	{
 		if (!obj->writing)
 		{
-			CREATE (obj->writing, WRITING_DATA, 1);
+			obj->writing = new WRITING_DATA;
 		}
 		/* iterate among all known pages, listed in ascending order */
 		writing = obj->writing;
@@ -2040,7 +2040,7 @@ load_writing (OBJ_DATA * obj)
 			should be left null */
 			if (!writing->next_page && ((i + 1) <= obj->o.od.value[0]))
 			{
-				CREATE (writing->next_page, WRITING_DATA, 1);
+				writing->next_page = new WRITING_DATA;
 			}
 
 			/* if the data specify info on this page, add in information */
@@ -2233,7 +2233,7 @@ load_dreams (CHAR_DATA * ch)
 	{
 		while ((row = mysql_fetch_row (result)))
 		{
-			CREATE (dream, DREAM_DATA, 1);
+			dream = new DREAM_DATA;
 			dream->dream = str_dup (row[2]);
 			dream->next = NULL;
 
@@ -2750,7 +2750,7 @@ load_char_mysql (const char *name)
 	if (strn_cmp (row[13], "~", 1) && strn_cmp (row[13], " ", 1))
 	{
 		if (!ch->pc->special_role)
-			CREATE (ch->pc->special_role, ROLE_DATA, 1);
+			ch->pc->special_role = new ROLE_DATA;
 		ch->pc->special_role->summary = str_dup (row[11]);
 		ch->pc->special_role->body = str_dup (row[12]);
 		ch->pc->special_role->date = str_dup (row[13]);
@@ -2960,7 +2960,7 @@ load_char_mysql (const char *name)
 				&infection, &healerskill, &lasthealed, &lastbled,
 				&bindskill, &lastbound);
 
-			CREATE (wound, WOUND_DATA, 1);
+			wound = new WOUND_DATA;
 			wound->next = NULL;
 
 			wound->location = str_dup (location);
@@ -3004,7 +3004,7 @@ load_char_mysql (const char *name)
 			if (!*location)
 				continue;
 
-			CREATE (lodged, LODGED_OBJECT_INFO, 36);
+			lodged = new LODGED_OBJECT_INFO[36];
 			lodged->next = NULL;
 
 			lodged->location = str_dup (location);
@@ -3581,7 +3581,7 @@ load_tracks (void)
 	{
 		if (!(room = vtor (atoi (row[0]))))
 			continue;
-		CREATE (track, TRACK_DATA, 1);
+		track = new TRACK_DATA;
 		track->next = NULL;
 		if (!room->tracks)
 			room->tracks = track;
@@ -4040,8 +4040,7 @@ do_mysql (CHAR_DATA * ch, char *argument, int cmd)
 					continue;
 				if (!room->dir_option[OUTSIDE])
 				{
-					CREATE (room->dir_option[OUTSIDE],
-					struct room_direction_data, 1);
+					room->dir_option[OUTSIDE] = new room_direction_data;
 					room->dir_option[OUTSIDE]->general_description =
 						str_dup ("");
 					room->dir_option[OUTSIDE]->keyword = str_dup ("entryway");
@@ -4484,7 +4483,7 @@ erase_mysql_board_post (CHAR_DATA * ch, char *name, int board_type,
 		{
 			send_to_char
 				("Please enter what you did in response to this report:\n", ch);
-			CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+			ch->desc->pending_message = new MESSAGE_DATA;
 			ch->desc->pending_message->message = NULL;
 			ch->desc->pending_message->poster = add_hash (message->poster);
 			ch->desc->str = &ch->desc->pending_message->message;

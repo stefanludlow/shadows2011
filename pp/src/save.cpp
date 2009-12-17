@@ -663,13 +663,13 @@ fread_obj (FILE * fp)
 		{
 			if (!obj->wounds)
 			{
-				CREATE (obj->wounds, WOUND_DATA, 1);
+				obj->wounds = new WOUND_DATA;
 				wound = obj->wounds;
 				obj->wounds->next = NULL;
 			}
 			else
 			{
-				CREATE (wound->next, WOUND_DATA, 1);
+				wound->next = new WOUND_DATA;
 				wound = wound->next;
 				wound->next = NULL;
 			}
@@ -690,7 +690,7 @@ fread_obj (FILE * fp)
 
 		else if (!strcmp (p, "Clan"))
 		{
-			CREATE (tclan, OBJ_CLAN_DATA, 1);
+			tclan = new OBJ_CLAN_DATA;
 			obj->clan_data->next = NULL;
 			obj->clan_data->name = add_hash (fread_string (fp));
 			obj->clan_data->rank = add_hash (fread_string (fp));
@@ -713,13 +713,13 @@ fread_obj (FILE * fp)
 		{
 			if (!obj->lodged)
 			{
-				CREATE (obj->lodged, LODGED_OBJECT_INFO, 1);
+				obj->lodged = new LODGED_OBJECT_INFO;
 				lodged = obj->lodged;
 				obj->lodged->next = NULL;
 			}
 			else
 			{
-				CREATE (lodged->next, LODGED_OBJECT_INFO, 1);
+				lodged->next = new LODGED_OBJECT_INFO;
 				lodged = lodged->next;
 				lodged->next = NULL;
 			}
@@ -764,7 +764,7 @@ fread_obj (FILE * fp)
 			return (NULL);	/* Forfiet remainder of objects */
 		}
 
-		CREATE (af, AFFECTED_TYPE, 1);
+		af = new AFFECTED_TYPE;
 
 		af->next = NULL;
 
@@ -1104,7 +1104,7 @@ load_leantos ()
 		sprintf (buf,
 			"vstr You enter the lean-to.\nostr %%n enters the lean-to.\natecho %d %%n enters the lean-to.\ntrans %d\natlook %d\n",
 			toroom, toroom, toroom);
-		CREATE (t, struct room_prog, 1);
+		t = new room_prog;
 		t->next = NULL;
 		t->command = add_hash ("enter");
 		t->keys = add_hash ("lean-to leanto");
@@ -1216,7 +1216,7 @@ load_mobiles ()
 
 			else if (!str_cmp (key, "Wound"))
 			{
-				CREATE (wound, WOUND_DATA, 1);
+				wound = new WOUND_DATA;
 				wound->next = NULL;
 				sscanf (line,
 					"Wound              %s %s %s %s %d %d %d %d %d %d %d\n",
@@ -1689,7 +1689,7 @@ load_a_saved_mobile (int nVirtual, FILE * fp, bool stable)
 
 		else if (key_table[i].key_type == TYPE_WOUND)
 		{
-			CREATE (wound, WOUND_DATA, 1);
+			wound = new WOUND_DATA;
 			wound->next = NULL;
 
 			wound->location = add_hash (fread_word (fp));
