@@ -1712,4 +1712,14 @@ bool inline isDwarf(char_data *ch) {
 bool inline isOrkin(char_data *ch) {
 	return (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29);
 }
+
+
+/* -temporary- mem redirects. Replace all calls to mem_free eventually */
+int mem_free (malloc_t ptr) {
+  delete [] ptr;
+  return 1;
+}
+
+char* add_hash (char*);
+
 #endif // _rpie_protos_h_
