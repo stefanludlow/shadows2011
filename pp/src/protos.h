@@ -30,10 +30,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#ifndef MACOSX
-#include <malloc.h>
-#endif
-
 #include <sys/time.h>
 #include <mysql/mysql.h>
 #include <list>
@@ -111,7 +107,6 @@ extern const char *frames[];
 extern const char* const speeds[];
 extern const char* const mount_speeds[];
 extern const char* const mount_speeds_ing[];
-extern bool memory_check;
 extern const char *skills[];
 extern const char *rs_name[];	// fight.c
 extern const char *attack_names[];	// fight.c
@@ -999,7 +994,6 @@ int m_prog (CHAR_DATA *ch, char *argument);
 int m_prog (CHAR_DATA *ch, char *argument, room_prog prog);
 int o_prog (CHAR_DATA *ch, char *argument, room_prog prog);
 void do_mpstat (CHAR_DATA *ch, char *argument, int cmd);
-void add_memory (CHAR_DATA * add, CHAR_DATA * mob);
 bool get_obj_in_equip_num (CHAR_DATA * ch, long vnum);
 void spitstat (CHAR_DATA * ch, struct descriptor_data *recipient);
 void save_char_objs (CHAR_DATA * ch, char *name);
@@ -1035,7 +1029,6 @@ MYSQL_RES *mysql_player_search (int search_type, char *string, int timeframe);
 CHAR_DATA *load_char_mysql (const char *name);
 int save_char (CHAR_DATA * ch, int save_objs);
 void save_char_mysql (CHAR_DATA * ch);
-int mem_free (malloc_t ptr);
 AFFECTED_TYPE *is_room_affected (AFFECTED_TYPE * af, int type);
 void room_update (void);
 void apply_race_affects (CHAR_DATA * tch);
@@ -1097,11 +1090,6 @@ void ban_host (char *host, char *banned_by, int length);
 void list_validate (char *name);
 int unused_writing_id (void);
 void act_black_curse (CHAR_DATA * ch);
-void print_mem_stats (CHAR_DATA * ch);
-void init_memory ();
-char *get_mem (int size);
-char *add_hash (const char *string);
-char *str_dup (const char *string);
 void process_reviews (void);
 PHASE_DATA *new_phase (void);
 CHAR_DATA *new_char (int pc_type);
@@ -1410,7 +1398,6 @@ void rl_minute_affect_update (void);
 void clear_watch (CHAR_DATA * ch);
 void show_unread_messages (CHAR_DATA * ch);
 char *file_to_string (char *name);
-void check_memory ();
 OBJ_DATA *get_bow (CHAR_DATA * ch);
 int is_incantation (char *argument);
 void magic_incantation (CHAR_DATA * ch, char *argument);
