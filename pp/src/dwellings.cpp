@@ -36,7 +36,7 @@ clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits)
 		{
 			if (!source_room->dir_option[i])
 				continue;
-			CREATE (targ_room->dir_option[i], struct room_direction_data, 1);
+			targ_room->dir_option[i] = new room_direction_data;
 			targ_room->dir_option[i]->general_description =
 				str_dup (source_room->dir_option[i]->general_description);
 			targ_room->dir_option[i]->keyword =
@@ -54,7 +54,7 @@ clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits)
 	{
 		for (exptr = source_room->ex_description; exptr; exptr = exptr->next)
 		{
-			CREATE (extra, EXTRA_DESCR_DATA, 1);
+			extra = new EXTRA_DESCR_DATA;
 			extra->keyword = str_dup (exptr->keyword);
 			extra->description = str_dup (exptr->description);
 			extra->next = targ_room->ex_description;
@@ -64,7 +64,7 @@ clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits)
 
 	if (source_room->extra)
 	{
-		CREATE (targ_room->extra, ROOM_EXTRA_DATA, 1);
+		targ_room->extra = new ROOM_EXTRA_DATA;
 		for (i = 0; i < WR_DESCRIPTIONS; i++)
 		{
 			if (source_room->extra->weather_desc[i])
@@ -192,7 +192,7 @@ generate_dwelling_room (OBJ_DATA * dwelling)
 	if (!room)
 		return NULL;
 
-	CREATE (room->dir_option[OUTSIDE], struct room_direction_data, 1);
+	room->dir_option[OUTSIDE] = new room_direction_data;
 
 	room->dir_option[OUTSIDE]->general_description = str_dup ("");
 	room->dir_option[OUTSIDE]->keyword = str_dup ("entryway");
@@ -722,7 +722,7 @@ load_dwelling_rooms ()
 				else if (*chk == 'A')
 				{		/* Additional descriptions */
 
-					CREATE (room->extra, ROOM_EXTRA_DATA, 1);
+					room->extra = new ROOM_EXTRA_DATA;
 
 					for (i = 0; i < WR_DESCRIPTIONS; i++)
 					{

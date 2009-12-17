@@ -1586,37 +1586,39 @@ alloc (int bytes, int dtype)
 malloc_t
 alloc (int bytes, int dtype)
 {
-	static int allocs = 0;
-	char *p;
-	extern char *emergency_data;
-	extern int mem_allocated;
+	char *p = new char[bytes];
+	return p;
+	//static int allocs = 0;
+	//char *p;
+	//extern char *emergency_data;
+	//extern int mem_allocated;
 
-	allocs++;
+	//allocs++;
 
-	bytes += 4;
+	//bytes += 4;
 
-	p = (char *) calloc (1, bytes);
+	//p = (char *) calloc (1, bytes);
 
-	mem_allocated += bytes;
+	//mem_allocated += bytes;
 
-	if (!p)
-	{
-		mem_free (emergency_data);
-		system_log ("calloc failed.  Out of memory - forced to shutdown.",
-			true);
-		shutd = 1;
-		p = (char *) calloc (1, bytes);
-		mm ("calloc failed");
-	}
+	//if (!p)
+	//{
+	//	mem_free (emergency_data);
+	//	system_log ("calloc failed.  Out of memory - forced to shutdown.",
+	//		true);
+	//	shutd = 1;
+	//	p = (char *) calloc (1, bytes);
+	//	mm ("calloc failed");
+	//}
 
-	strncpy (p, "ZZZZ", 4);
+	//strncpy (p, "ZZZZ", 4);
 
 
-	//if (x1) // Unused testing mode, cast throws error - Case
-	//	printf ("+ @ %Xd  bytes = %d\n", (unsigned int) p, bytes);
-	bytes_allocated += bytes;
+	////if (x1) // Unused testing mode, cast throws error - Case
+	////	printf ("+ @ %Xd  bytes = %d\n", (unsigned int) p, bytes);
+	//bytes_allocated += bytes;
 
-	return p + 4;
+	//return p + 4;
 }
 
 

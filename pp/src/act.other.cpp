@@ -1989,7 +1989,7 @@ do_typo (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a typo report to be submitted to the admins. Terminate\n"
 		"the editor with an '@' symbol. Please note that your post\n"
@@ -1999,7 +1999,7 @@ do_typo (CHAR_DATA * ch, char *argument, int cmd)
 
 	make_quiet (ch);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	std::stringstream ss;
 	ss << "typos-" << arg;
@@ -3709,7 +3709,7 @@ add_memory (CHAR_DATA * add, CHAR_DATA * mob)
 		if (!strcmp (memory->name, name))
 			return;
 
-	CREATE (memory, struct memory_data, 1);
+	memory = new memory_data;
 
 	memory->name = add_hash (name);
 	memory->next = mob->remembers;

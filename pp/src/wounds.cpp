@@ -292,7 +292,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 		{
 			if (!ch->wounds)
 			{
-				CREATE (ch->wounds, WOUND_DATA, 1);
+				ch->wounds = new WOUND_DATA;
 				wound = ch->wounds;
 				wound->next = NULL;
 			}
@@ -303,7 +303,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 				{
 					if (!wound->next)
 					{
-						CREATE (wound->next, WOUND_DATA, 1);
+						wound->next = new WOUND_DATA;
 						wound = wound->next;
 						wound->next = NULL;
 						break;

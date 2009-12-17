@@ -3182,7 +3182,7 @@ do_rpadd (CHAR_DATA * ch, char *argument, int cmd)
 {
 	struct room_prog *t, *old, *tmp;
 
-	CREATE (t, struct room_prog, 1);
+	t = new room_prog;
 
 	t->next = NULL;
 	t->command = NULL;
@@ -3486,15 +3486,14 @@ r_link (CHAR_DATA * ch, char *argument)
 		vtor (source_room->dir_option[dir]->to_room)->dir_option[rev_dir[dir]] =
 		0;
 
-	CREATE (source_room->dir_option[dir], struct room_direction_data, 1);
+	source_room->dir_option[dir] = new room_direction_data;
 	source_room->dir_option[dir]->general_description = 0;
 	source_room->dir_option[dir]->keyword = 0;
 	source_room->dir_option[dir]->exit_info = 0;
 	source_room->dir_option[dir]->key = -1;
 	source_room->dir_option[dir]->to_room = target_room->nVirtual;
 
-	CREATE (target_room->dir_option[rev_dir[dir]], struct room_direction_data,
-		1);
+	target_room->dir_option[rev_dir[dir]] = new room_direction_data;
 	target_room->dir_option[rev_dir[dir]]->general_description = 0;
 	target_room->dir_option[rev_dir[dir]]->keyword = 0;
 	target_room->dir_option[rev_dir[dir]]->exit_info = 0;
@@ -3573,7 +3572,7 @@ r_exit (CHAR_DATA * ch, char *argument)
 	}
 
 	if (!source_room->dir_option[dir])
-		CREATE (source_room->dir_option[dir], struct room_direction_data, 1);
+		source_room->dir_option[dir] = new room_direction_data;
 
 	source_room->dir_option[dir]->general_description = 0;
 	source_room->dir_option[dir]->keyword = 0;

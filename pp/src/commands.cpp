@@ -1175,7 +1175,7 @@ boot_social_messages (void)
 
 #define MAX_SOCIALS		200
 
-	CREATE (social_messages, SOCIAL_DATA, MAX_SOCIALS);
+	social_messages = new SOCIAL_DATA[MAX_SOCIALS];
 
 	for (list_top = 0;; list_top++)
 	{

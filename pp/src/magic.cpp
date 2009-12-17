@@ -1386,7 +1386,7 @@ process_spell_effect (CHAR_DATA * ch, CHAR_DATA * tch, int id, int saved,
 	if (!x || !y)
 		return;
 
-	CREATE (af, AFFECTED_TYPE, 1);
+	af = new AFFECTED_TYPE;
 
 	af->type = affect_type;
 	af->a.spell.duration = dice (x, y);
@@ -1884,7 +1884,7 @@ do_invoke (CHAR_DATA * ch, char *argument, int cmd)
 	return;
 	}
 
-	CREATE (ch->preparing, SPELL_TABLE_DATA, 1);
+	ch->preparing = new SPELL_TABLE_DATA;
 
 	ch->preparing->name = spell_entry->name;
 	ch->preparing->discipline = spell_entry->discipline;
@@ -1972,7 +1972,7 @@ apply_enchantment (CHAR_DATA * caster, CHAR_DATA * victim, char *name,
 {
 	ENCHANTMENT_DATA *tmp, *enchantment;
 
-	CREATE (enchantment, ENCHANTMENT_DATA, 1);
+	enchantment = new ENCHANTMENT_DATA;
 
 	enchantment->name = add_hash (name);
 	enchantment->original_hours = duration;
@@ -1982,7 +1982,7 @@ apply_enchantment (CHAR_DATA * caster, CHAR_DATA * victim, char *name,
 
 	if (!victim->enchantments)
 	{
-		CREATE (victim->enchantments, ENCHANTMENT_DATA, 1);
+		victim->enchantments = new ENCHANTMENT_DATA;
 		victim->enchantments = enchantment;
 	}
 	else
@@ -1995,7 +1995,7 @@ apply_enchantment (CHAR_DATA * caster, CHAR_DATA * victim, char *name,
 			}
 			if (!tmp->next)
 			{
-				CREATE (tmp->next, ENCHANTMENT_DATA, 1);
+				tmp->next = new ENCHANTMENT_DATA;
 				tmp->next = enchantment;
 				break;
 			}
@@ -2984,7 +2984,7 @@ post_dream (DESCRIPTOR_DATA * d)
 		return;
 	}
 
-	CREATE (dream, DREAM_DATA, 1);
+	dream = new DREAM_DATA;
 
 	dream->dream = d->character->delay_who;
 	dream->next = ch->pc->dreams;
@@ -3233,7 +3233,7 @@ apply_affect (CHAR_DATA * ch, int type, int duration, int power)
 		return 1;
 	}
 
-	CREATE (af, AFFECTED_TYPE, 1);
+	af = new AFFECTED_TYPE;
 
 	af->type = type;
 	af->a.spell.duration = duration;
@@ -3273,7 +3273,7 @@ magic_add_affect (CHAR_DATA * ch, int type, int duration, int modifier,
 		return 0;
 	}
 
-	CREATE (af, AFFECTED_TYPE, 1);
+	af = new AFFECTED_TYPE;
 
 	af->type = type;
 	af->a.spell.duration = duration;
@@ -3323,7 +3323,7 @@ magic_add_obj_affect (OBJ_DATA * obj, int type, int duration, int modifier,
 		return 0;
 	}
 
-	CREATE (af, AFFECTED_TYPE, 1);
+	af = new AFFECTED_TYPE;
 
 	af->type = type;
 	af->a.spell.duration = duration;

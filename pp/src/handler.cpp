@@ -3532,7 +3532,7 @@ add_registry (int reg_index, int value, const char *string)
 		abort ();
 	}
 
-	CREATE (new_reg, REGISTRY_DATA, 1);
+	new_reg = new REGISTRY_DATA;
 
 	new_reg->string = str_dup (string);
 	new_reg->value = value;
@@ -3884,7 +3884,7 @@ add_combat_message (char *line)
 
 		argument = one_argument (argument, buf);
 
-		CREATE (cm, COMBAT_MSG_DATA, 1);
+		cm = new COMBAT_MSG_DATA;
 
 		*buf = toupper (*buf);
 

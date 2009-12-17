@@ -641,7 +641,7 @@ outfit_role (CHAR_DATA * ch, char *argument)
 	if ( !str_cmp (cmd, "brief") )
 	{
 		send_to_char ("\n#2Enter a briefing for this role that you'd like to appear to starting characters:#0\n",ch);
-		CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+		ch->desc->pending_message = new MESSAGE_DATA;
 		ch->desc->str = &ch->desc->pending_message->message;
 		ch->desc->max_str = MAX_STRING_LENGTH;
 		ch->desc->proc = post_brief;
@@ -1221,7 +1221,7 @@ post_role (DESCRIPTOR_DATA * d)
 
 	if (!role_list)
 	{
-		CREATE (role_list, ROLE_DATA, 1);
+		role_list = new ROLE_DATA;
 		index_id = 0;
 		role = role_list;
 	}
@@ -1230,7 +1230,7 @@ post_role (DESCRIPTOR_DATA * d)
 		{
 			if (!role->next)
 			{
-				CREATE (role->next, ROLE_DATA, 1);
+				role->next = new ROLE_DATA;
 				index_id = role->id; //get the id before we move the pointer
 				role = role->next;
 				break;
@@ -1520,12 +1520,12 @@ reload_roles (void)
 	{
 		if (!role_list)
 		{
-			CREATE (role_list, ROLE_DATA, 1);
+			role_list = new ROLE_DATA;
 			role = role_list;
 		}
 		else
 		{
-			CREATE (role->next, ROLE_DATA, 1);
+			role->next = new ROLE_DATA;
 			role = role->next;
 		}
 		role->summary = str_dup (row[0]);

@@ -794,7 +794,7 @@ mob_weather_reaction (CHAR_DATA * ch)
 	{
 		if (!af)
 		{
-			CREATE (af, AFFECTED_TYPE, 1);
+			af = new AFFECTED_TYPE;
 			af->type = MAGIC_RAISED_HOOD;
 			affect_to_char (ch, af);
 		}
@@ -835,13 +835,13 @@ add_attacker (CHAR_DATA * victim, CHAR_DATA * threat)
 
 	if (!victim->attackers)
 	{
-		CREATE (victim->attackers, ATTACKER_DATA, 1);
+		victim->attackers = new ATTACKER_DATA;
 		victim->attackers->attacker = threat;
 		victim->attackers->next = NULL;
 	}
 	else
 	{
-		CREATE (tmp_att, ATTACKER_DATA, 1);
+		tmp_att = new ATTACKER_DATA;
 		tmp_att->next = victim->attackers;
 		victim->attackers = tmp_att;
 	}
@@ -865,14 +865,14 @@ add_threat (CHAR_DATA * victim, CHAR_DATA * threat, int amount)
 
 	if (!victim->threats)
 	{
-		CREATE (victim->threats, THREAT_DATA, 1);
+		victim->threats = new THREAT_DATA;
 		victim->threats->source = threat;
 		victim->threats->level = amount;
 		victim->threats->next = NULL;
 	}
 	else
 	{
-		CREATE (tmp, THREAT_DATA, 1);
+		tmp = new THREAT_DATA;
 		tmp->next = victim->threats;
 		victim->threats = tmp;
 	}

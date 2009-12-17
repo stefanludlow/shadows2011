@@ -4,15 +4,15 @@
 CC=g++
 
 #SVN_VERS = -D'SVN_REV="$(shell svnversion -n . && touch comm.cpp)"'
-CFLAGS = -DLINUX -ggdb -w -m32
+CFLAGS = -DLINUX -ggdb -w
 CXXFLAGS = $(CFLAGS)
-LFLAGS = -lm -lmysqlclient -lcrypt -lnsl -m32
+LFLAGS = -lm -lmysqlclient -lcrypt -lnsl
 
 INSTALL_DIR = ..
 
 INCLUDE = -I/usr/local/mysql/include/ -I/usr/include/mysql/ -I/usr/include/openssl/ -I/usr/local/mysql/ -I/usr/local/include/mysql/ -I/usr/lib/mysql
 
-LIBDIRS = -L/usr/lib32/ -L/usr/lib32/gcc/i486-linux-gnu/4.3
+LIBDIRS = -L/usr/lib64/mysql -L/usr/lib/mysql -L/usr/local/mysql/lib
 
 OBJS = \
 account.o act.comm.o act.informative.o act.movement.o act.offensive.o \

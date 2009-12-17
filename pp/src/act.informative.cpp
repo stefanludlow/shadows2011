@@ -197,7 +197,7 @@ target_sighted (CHAR_DATA * ch, CHAR_DATA * target)
 
 	if (!ch->sighted)
 	{
-		CREATE (ch->sighted, SIGHTED_DATA, 1);
+		ch->sighted = new SIGHTED_DATA;
 		ch->sighted->target = target;
 		return;
 	}
@@ -207,7 +207,7 @@ target_sighted (CHAR_DATA * ch, CHAR_DATA * target)
 			return;
 		if (!sighted->next)
 		{
-			CREATE (sighted->next, SIGHTED_DATA, 1);
+			sighted->next = new SIGHTED_DATA;
 			sighted->next->target = target;
 			return;
 		}
@@ -6759,7 +6759,7 @@ do_hedit (CHAR_DATA * ch, char *argument, int cmd)
 
 	make_quiet (ch);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
@@ -9937,7 +9937,7 @@ do_write (CHAR_DATA * ch, char *argument, int cmd)
 
 	strcpy (title, argument);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	/* We need to borrow the poster slot to save the board name */
 
@@ -10119,7 +10119,7 @@ add_board (int level, char *name, char *title)
 	if (board_lookup (name))
 		return;
 
-	CREATE (board_entry, BOARD_DATA, 1);
+	board_entry = new BOARD_DATA;
 
 	board_entry->level = level;
 	board_entry->name = add_hash (name);
@@ -11031,7 +11031,7 @@ post_writing (DESCRIPTOR_DATA * d)
 
 	if (GET_ITEM_TYPE (obj) == ITEM_PARCHMENT)
 	{
-		CREATE (obj->writing, WRITING_DATA, 1);
+		obj->writing = new WRITING_DATA;
 		obj->writing->ink = add_hash (ch->delay_who);
 		obj->writing->author = add_hash (ch->tname);
 		obj->writing->date = add_hash (date);
@@ -11253,7 +11253,7 @@ do_tear (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (*page->message && strcasecmp (page->message, "blank") != STR_MATCH)
 		{
-			CREATE (parchment->writing, WRITING_DATA, 1);
+			parchment->writing = new WRITING_DATA;
 			parchment->writing->ink = add_hash (page->ink);
 			parchment->writing->author = add_hash (page->author);
 			parchment->writing->date = add_hash (page->date);
@@ -11497,7 +11497,7 @@ do_scribe (CHAR_DATA * ch, char *argument, int cmd)
 	buffer[3] = toupper (buffer[3]);
 	act (buffer, true, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	ch->desc->pending_message->message = NULL;
 

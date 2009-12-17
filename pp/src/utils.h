@@ -30,9 +30,9 @@
 #define IF_STR(st) ((st) ? (st) : "\0")
 #define CAP(st)  (*(st) = toupper(*(st)), st)
 #define LOW(st)  (*(st) = tolower(*(st)), st)
-#define CREATE(result, type, number)  do {\
-	if (!((result) = (type *) alloc ((number) * sizeof(type), 16)))\
-		{ perror("CREATE: alloc failure"); abort(); } } while(0)
+//#define CREATE(result, type, number)  do {\
+//	if (!((result) = (type *) alloc ((number) * sizeof(type), 16)))\
+//		{ perror("CREATE: alloc failure"); abort(); } } while(0)
 #define IS_SET(flag,bit)  ((flag) & (bit))
 #define IS_AFFECTED(ch,skill) ( IS_SET((ch)->affected_by, (skill)) )
 

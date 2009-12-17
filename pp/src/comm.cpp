@@ -3252,7 +3252,7 @@ string_add (DESCRIPTOR_DATA * d, char *str)
 			*(str + d->max_str - 1) = '\0';
 			terminator = 1;
 		}
-		CREATE (*d->str, char, strlen (str) + 3);
+		*d->str = new char[strlen (str) + 3)];
 		strcpy (*d->str, str);
 	}
 

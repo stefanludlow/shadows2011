@@ -586,7 +586,7 @@ reload_hints (void)
 		string = fread_string (fp);
 		if (!string || !*string)
 			break;
-		CREATE (hint, NEWBIE_HINT, 1);
+		hint = new NEWBIE_HINT;
 		hint->hint = string;
 		if (!hint_list)
 			hint_list = hint;
@@ -956,7 +956,7 @@ load_rooms (void)
 					else if (*chk == 'A')
 					{		/* Additional descriptions */
 
-						CREATE (room->extra, ROOM_EXTRA_DATA, 1);
+						room->extra = new ROOM_EXTRA_DATA;
 
 						for (i = 0; i < WR_DESCRIPTIONS; i++)
 						{
@@ -1006,10 +1006,10 @@ get_room (void)
 	static int prealloc_rooms_count = 0;
 
 	if (!prealloc_rooms)
-		CREATE (prealloc_rooms, ROOM_DATA, MAX_PREALLOC_ROOMS);
+		prealloc_rooms = new ROOM_DATA[MAX_PREALLOC_ROOMS];
 
 	if (prealloc_rooms_count >= MAX_PREALLOC_ROOMS)
-		CREATE (room, ROOM_DATA, 1);
+		room = new ROOM_DATA;
 	else
 	{
 		room = prealloc_rooms + prealloc_rooms_count;
@@ -1108,7 +1108,7 @@ boot_zones (void)
 	struct stat fstatus;
 	RESET_AFFECT *ra;
 
-	CREATE (zone_table, struct zone_data, MAX_ZONE);
+	zone_table = new zone_data[MAX_ZONE];
 
 	for (zon = 0; zon < MAX_ZONE; zon++)
 	{
@@ -1150,7 +1150,7 @@ boot_zones (void)
 			fgets (buf, 80, fl);
 		}
 
-		CREATE (zone_table[zon].cmd, struct reset_com, cmd_no);
+		zone_table[zon].cmd = new reset_com[cmd_no];
 
 		zone_table[zon].weather_type = 0;
 
@@ -2829,44 +2829,46 @@ check_memory ()
 int
 mem_free (malloc_t string)
 {
-	char *p = NULL;
-	extern char *null_string;
-
-	if (string >= (malloc_t) memory_base && string <= (malloc_t) memory_top)
-	{
-		return 0;
-	}
-
-	if (string >= (malloc_t) perm_memory &&
-		string <= (malloc_t) perm_memory_top)
-	{
-		return 0;
-	}
-
-	if (booting &&
-		string >= (malloc_t) overhead_base && string <= (malloc_t) overhead_top)
-	{
-		return 0;
-	}
-
-	if (string == null_string || string == NULL)
-	{
-		return 0;
-	}
-
-	p = (char *) string;
-	p -= 4;
-
-	if (strncmp (p, "ZZZZ", 4))
-	{
-		return 0;
-	}
-
-	strncpy (p, "----", 4);
-
-	free (p);
-
+	delete [] string;
 	return 1;
+	//char *p = NULL;
+	//extern char *null_string;
+
+	//if (string >= (malloc_t) memory_base && string <= (malloc_t) memory_top)
+	//{
+	//	return 0;
+	//}
+
+	//if (string >= (malloc_t) perm_memory &&
+	//	string <= (malloc_t) perm_memory_top)
+	//{
+	//	return 0;
+	//}
+
+	//if (booting &&
+	//	string >= (malloc_t) overhead_base && string <= (malloc_t) overhead_top)
+	//{
+	//	return 0;
+	//}
+
+	//if (string == null_string || string == NULL)
+	//{
+	//	return 0;
+	//}
+
+	//p = (char *) string;
+	//p -= 4;
+
+	//if (strncmp (p, "ZZZZ", 4))
+	//{
+	//	return 0;
+	//}
+
+	//strncpy (p, "----", 4);
+
+	//free (p);
+
+	//return 1;
 }
 
 #endif /* NOVELL */
