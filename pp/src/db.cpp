@@ -2472,3 +2472,6 @@ struct hash_data
 	struct hash_data *next;
 };
 
+char* add_hash(const char *string) {
+	return strdup(string);
+}
