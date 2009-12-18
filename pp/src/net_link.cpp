@@ -77,8 +77,8 @@ new_descriptor (int s)
 	*ip = '\0';
 	strcpy (ip, inet_ntoa (sock.sin_addr));
 
-	newd->strClientIpAddr = strdup (ip);
-	newd->strClientHostname = strdup (ip);
+	newd->strClientIpAddr = duplicateString (ip);
+	newd->strClientHostname = duplicateString (ip);
 
 	std::string resolved_hostname = resolved_host (newd->strClientHostname);
 	if (resolved_hostname.empty ())
@@ -91,8 +91,8 @@ new_descriptor (int s)
 			mysql_safe_query ("INSERT INTO resolved_hosts "
 				"VALUES ('%s', '%s', %d)",
 				ip, from->h_name, (int) time (0));
-			mem_free (newd->strClientHostname);
-			newd->strClientHostname = strdup (from->h_name);
+			free_mem (newd->strClientHostname);
+			newd->strClientHostname = duplicateString (from->h_name);
 		}
 		else
 		{
@@ -103,8 +103,8 @@ new_descriptor (int s)
 	}
 	else
 	{
-		mem_free (newd->strClientHostname);
-		newd->strClientHostname = strdup (resolved_hostname.c_str ());
+		free_mem (newd->strClientHostname);
+		newd->strClientHostname = duplicateString (resolved_hostname.c_str ());
 		newd->resolved = 1;
 	}
 
@@ -206,27 +206,27 @@ free_descriptor (DESCRIPTOR_DATA * d)
 {
 	if (d->strClientHostname && *d->strClientHostname)
 	{
-		mem_free (d->strClientHostname);
+		free_mem (d->strClientHostname);
 	}
 
 	if (d->strClientIpAddr && *d->strClientIpAddr)
 	{
-		mem_free (d->strClientIpAddr);
+		free_mem (d->strClientIpAddr);
 	}
 
 	if (d->showstr_head && *d->showstr_head)
 	{
-		mem_free (d->showstr_head);
+		free_mem (d->showstr_head);
 	}
 
 	if (d->header && *d->header)
 	{
-		mem_free (d->header);
+		free_mem (d->header);
 	}
 
 	if (d->edit_string && *d->edit_string)
 	{
-		mem_free (d->edit_string);
+		free_mem (d->edit_string);
 	}
 
 	delete d;
@@ -437,8 +437,8 @@ get_from_q (struct txt_q *queue, char *dest)
 	if (queue->head == NULL)
 		queue->tail = NULL;
 
-	mem_free (tmp->text); // struct txt_block
-	mem_free (tmp); // struct txt_block
+	free_mem (tmp->text); // struct txt_block
+	free_mem (tmp); // struct txt_block
 
 	return (1);
 }
@@ -459,8 +459,8 @@ get_from_q (struct txt_q *queue, std::string& dest)
 	if (queue->head == NULL)
 		queue->tail = NULL;
 
-	mem_free (tmp->text); // struct txt_block
-	mem_free (tmp); // struct txt_block
+	free_mem (tmp->text); // struct txt_block
+	free_mem (tmp); // struct txt_block
 
 	return (true);
 }
@@ -715,6 +715,7 @@ write_to_q (const char *txt, struct txt_q *queue)
 		return;
 
 	newPtr = new txt_block;
+	newPtr->next = NULL;
 
 	p = txt;
 
@@ -742,7 +743,7 @@ write_to_q (const char *txt, struct txt_q *queue)
 		p++;
 	}
 
-	newPtr->text = (char *) alloc (char_count + 1, 2);
+	newPtr->text = (char *) alloc (char_count + 1);
 
 	p = txt;
 	m = newPtr->text;

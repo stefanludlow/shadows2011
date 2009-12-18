@@ -88,7 +88,7 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 
 	randomize_mobile (ch);
 
-	ch->pc->account_name = strdup (d->acct->name.c_str ());
+	ch->pc->account_name = duplicateString (d->acct->name.c_str ());
 
 	if (is_guide (d->acct->name.c_str ()))
 		ch->pc->is_guide = true;
@@ -106,7 +106,7 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 		sprintf (buf2, "%s %s", ch->name, ch->tname);
 
 	if (ch->name)
-		mem_free (ch->name);
+		free_mem (ch->name);
 	ch->name = add_hash (buf2);
 
 	ch->hit = 100;
@@ -137,15 +137,15 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 	guest_conns++;
 
 	if (ch->description)
-		mem_free (ch->description);
+		free_mem (ch->description);
 
 	if (ch->pc->is_guide)
 		ch->description =
-		strdup
+		duplicateString
 		("One of our friendly player #BGuides#0 is here, awaiting questions.\n");
 	else
 		ch->description =
-		strdup
+		duplicateString
 		("Another Guest is here, passing through. Be sure to welcome them!\n");
 
 	ch->plr_flags |= NEWBIE_HINTS;

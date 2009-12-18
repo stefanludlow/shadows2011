@@ -985,7 +985,7 @@ delayed_hide_obj (CHAR_DATA * ch)
 
 	remove_obj_affect (obj, MAGIC_HIDDEN);	/* Probably doesn't exist */
 
-	af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+	af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 
 	af->type = MAGIC_HIDDEN;
 	af->a.hidden.duration = -1;
@@ -1828,8 +1828,8 @@ post_idea (DESCRIPTOR_DATA * d)
 	if (!*d->pending_message->message)
 	{
 		send_to_char ("No suggestion report entered.\n", ch);
-		mem_free (date);
-		mem_free (date2);
+		free_mem (date);
+		free_mem (date2);
 		return;
 	}
 
@@ -1846,8 +1846,8 @@ post_idea (DESCRIPTOR_DATA * d)
 
 	unload_message (d->pending_message);
 
-	mem_free (date);
-	mem_free (date2);
+	free_mem (date);
+	free_mem (date2);
 }
 
 void
@@ -1923,8 +1923,8 @@ post_typo (DESCRIPTOR_DATA * d)
 	if (!*d->pending_message->message)
 	{
 		send_to_char ("No typo report posted.\n", ch);
-		mem_free (date);
-		mem_free (date2);
+		free_mem (date);
+		free_mem (date2);
 		return;
 	}
 
@@ -1948,8 +1948,8 @@ post_typo (DESCRIPTOR_DATA * d)
 
 	unload_message (d->pending_message);
 
-	mem_free (date);
-	mem_free (date2);
+	free_mem (date);
+	free_mem (date2);
 }
 
 void
@@ -2035,8 +2035,8 @@ post_bug (DESCRIPTOR_DATA * d)
 	if (!*d->pending_message->message)
 	{
 		send_to_char ("No bug report posted.\n", ch);
-		mem_free (date);
-		mem_free (date2);
+		free_mem (date);
+		free_mem (date2);
 		return;
 	}
 
@@ -2054,8 +2054,8 @@ post_bug (DESCRIPTOR_DATA * d)
 
 	unload_message (d->pending_message);
 
-	mem_free (date);
-	mem_free (date2);
+	free_mem (date);
+	free_mem (date2);
 }
 
 void
@@ -2228,7 +2228,7 @@ add_second_affect (int type, int seconds, CHAR_DATA * ch, OBJ_DATA * obj,
 	sa.info2 = info2;
 
 	if (info)
-		sa.info = strdup (info);
+		sa.info = duplicateString (info);
 	else
 		sa.info = NULL;
 
@@ -2269,7 +2269,7 @@ remove_second_affect (SECOND_AFFECT * sa)
 	{
 		if (*it == *sa)
 		{
-			mem_free(it->info);
+			free_mem(it->info);
 			it = second_affect_list.erase(it);
 			break;
 		}
@@ -2342,7 +2342,7 @@ second_affect_update (void)
 		}
 
 		second_affect_active = 0;
-		mem_free(it->info);
+		free_mem(it->info);
 		it = second_affect_list.erase(it);
 	}
 }
@@ -3462,9 +3462,14 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
 					break;
 			magic_add_affect (victim, i, -1, 0, 0, 0, 0);
 			af = get_affect (victim, i);
-			af->a.craft =
-				(struct affect_craft_type *)
-				alloc (sizeof (struct affect_craft_type), 23);
+			af->a.craft = (struct affect_craft_type *)alloc (sizeof (struct affect_craft_type));
+			af->a.craft->phase = NULL;
+			af->a.craft->subcraft = NULL;
+			af->a.craft->target_ch = NULL;
+			af->a.craft->target_obj = NULL;
+			af->a.craft->skill_check = 0;
+			af->a.craft->timer = 0;
+
 			af->a.craft->subcraft = craft;
 			sprintf (buf, "You teach $N '%s %s'.", craft->command,
 				craft->subcraft_name);
@@ -3710,10 +3715,8 @@ add_memory (CHAR_DATA * add, CHAR_DATA * mob)
 			return;
 
 	memory = new memory_data;
-
 	memory->name = add_hash (name);
 	memory->next = mob->remembers;
-
 	mob->remembers = memory;
 }
 
@@ -3730,7 +3733,7 @@ forget (CHAR_DATA * ch, CHAR_DATA * foe)
 	{
 		mem = ch->remembers;
 		ch->remembers = ch->remembers->next;
-		mem_free (mem);
+		free_mem (mem);
 		return;
 	}
 
@@ -3740,7 +3743,7 @@ forget (CHAR_DATA * ch, CHAR_DATA * foe)
 		{
 			tmem = mem->next;
 			mem->next = tmem->next;
-			mem_free (tmem);
+			free_mem (tmem);
 			return;
 		}
 	}
@@ -4582,11 +4585,11 @@ do_tables (CHAR_DATA * ch, char *argument, int cmd)
 			af_table = get_affect (tmp, MAGIC_SIT_TABLE);
 			if (af_table && is_at_table (tmp, obj) && tmp != ch)
 			{
-				char* charShort = strdup(char_short(tmp));
+				char* charShort = duplicateString(char_short(tmp));
 
 				sprintf (buf2, "    #5%s#0 is seated here.\n",
 					CAP (charShort));
-				mem_free (charShort);
+				free_mem (charShort);
 				strcat (buf, buf2);
 			}
 		}
@@ -4690,22 +4693,22 @@ do_cover (CHAR_DATA *ch, char *argument, int cmd)
 	switch (dir)
 	{
 	case 0:
-		dir_word = strdup("north");
+		dir_word = duplicateString("north");
 		break;
 	case 1:
-		dir_word = strdup("east");
+		dir_word = duplicateString("east");
 		break;
 	case 2:
-		dir_word = strdup( "south");
+		dir_word = duplicateString( "south");
 		break;
 	case 3:
-		dir_word = strdup("west");
+		dir_word = duplicateString("west");
 		break;
 	case 4:
-		dir_word = strdup("up");
+		dir_word = duplicateString("up");
 		break;
 	case 5:
-		dir_word = strdup( "down");
+		dir_word = duplicateString( "down");
 		break;
 	}
 	/** taking cover behind an object **/
@@ -4781,27 +4784,27 @@ delayed_cover (CHAR_DATA * ch)
 	switch (ch->delay_info1)
 	{
 	case 0:
-		direct = strdup("north");
+		direct = duplicateString("north");
 		aff_type = AFFECT_COVER_NORTH;
 		break;
 	case 1:
-		direct = strdup("east");
+		direct = duplicateString("east");
 		aff_type = AFFECT_COVER_EAST;
 		break;
 	case 2:
-		direct = strdup( "south");
+		direct = duplicateString( "south");
 		aff_type = AFFECT_COVER_SOUTH;
 		break;
 	case 3:
-		direct = strdup("west");
+		direct = duplicateString("west");
 		aff_type = AFFECT_COVER_WEST;
 		break;
 	case 4:
-		direct = strdup("up");
+		direct = duplicateString("up");
 		aff_type = AFFECT_COVER_UP;
 		break;
 	case 5:
-		direct = strdup( "down");
+		direct = duplicateString( "down");
 		aff_type = AFFECT_COVER_DOWN;
 		break;
 	}
@@ -5053,7 +5056,7 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 	{
 
 		ThisArgument[0] = toupper(ThisArgument[0]);
-		owned_mob->mob->owner = strdup (ThisArgument.c_str());
+		owned_mob->mob->owner = duplicateString (ThisArgument.c_str());
 		send_to_char ("Setting ownership of #5", ch);
 		send_to_char (char_short(owned_mob), ch);
 		send_to_char ("#0 to \"#2", ch);
@@ -5083,7 +5086,7 @@ void do_ownership (CHAR_DATA *ch, char *argument, int command)
 
 		Output.assign(target->tname);
 		Output[0] = toupper(Output[0]);
-		owned_mob->mob->owner = strdup (Output.c_str());
+		owned_mob->mob->owner = duplicateString (Output.c_str());
 		send_to_char ("You transfer ownership of #5", ch);
 		send_to_char (char_short(owned_mob), ch);
 		send_to_char ("#0 to #5", ch);

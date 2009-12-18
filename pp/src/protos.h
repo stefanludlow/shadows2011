@@ -68,7 +68,6 @@ extern int world_version_out;
 extern const int restricted_skills[];
 
 extern int pulse_violence;
-extern int x1;
 extern int sun_light;
 extern int global_moon_light;
 extern int moon_light[];
@@ -1097,7 +1096,7 @@ OBJ_DATA *new_object ();
 int attempt_disarm (CHAR_DATA * ch, CHAR_DATA * victim);
 void forget (CHAR_DATA * ch, CHAR_DATA * foe);
 void sort_int_array (int *array, int entries);
-malloc_t alloc (int bytes, int dtype);
+void* alloc (int bytes);
 int redefine_mobiles (CHAR_DATA * proto);
 AFFECTED_TYPE *get_obj_affect (OBJ_DATA * obj, int type);
 AFFECTED_TYPE *get_obj_affect_location (OBJ_DATA * obj, int location);
@@ -1316,7 +1315,6 @@ void refresh_zone (void);
 int is_leader (CHAR_DATA * src, CHAR_DATA * tar);
 void invite_accept (CHAR_DATA * ch, char *argument);
 void tashal_prisoner_release (CHAR_DATA * ch);
-malloc_t get_perm (int size);
 int flee_attempt (CHAR_DATA * ch);
 SECOND_AFFECT *get_second_affect (CHAR_DATA * ch, int type, OBJ_DATA * obj);
 void clear_player_from_second_affects (CHAR_DATA *ch);
@@ -1343,7 +1341,7 @@ inline int get_trust (CHAR_DATA * ch) {
 	return ch->pc->level;
 }
 
-
+void add_memory (CHAR_DATA * add, CHAR_DATA * mob);
 int real_trust (CHAR_DATA * ch);
 int is_obj_here (CHAR_DATA * ch, OBJ_DATA * obj, int check);
 void jailer_func (CHAR_DATA * ch);
@@ -1714,12 +1712,11 @@ bool inline isOrkin(char_data *ch) {
 }
 
 
-/* -temporary- mem redirects. Replace all calls to mem_free eventually */
-int mem_free (malloc_t ptr) {
-  delete [] ptr;
-  return 1;
-}
+/* -temporary- mem redirects. Replace all calls to free_mem eventually */
+char* add_hash (const char *);
+char* duplicateString(const char *input);
 
-char* add_hash (char*);
-
+int free_mem_array (void *ptr);	
+int free_mem (char *ptr);
+int free_mem (void *ptr);
 #endif // _rpie_protos_h_

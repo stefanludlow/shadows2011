@@ -317,12 +317,13 @@ load_race_table (void)
 		i++;
 
 		entry = new RACE_TABLE_ENTRY;
+		entry->next = NULL;
 		entry->id = atoi (row[RACE_ID]);
-		entry->name = strdup (row[RACE_NAME]);
+		entry->name = duplicateString (row[RACE_NAME]);
 		entry->pc_race = atoi (row[RACE_PC]);
 		entry->starting_locs = atoi (row[RACE_START_LOC]);
 		entry->rpp_cost = atoi (row[RACE_RPP_COST]);
-		entry->created_by = strdup (row[RACE_CREATED_BY]);
+		entry->created_by = duplicateString (row[RACE_CREATED_BY]);
 		entry->last_modified = atoi (row[RACE_LAST_MODIFIED]);
 		entry->race_size = atoi (row[RACE_SIZE]);
 		entry->body_proto = atoi (row[RACE_BODY_PROTO]);
@@ -1134,8 +1135,8 @@ reload_sitebans ()
 	while ((row = mysql_fetch_row (result)))
 	{
 		site = new SITE_INFO;
-		site->name = strdup (row[0]);
-		site->banned_by = strdup (row[1]);
+		site->name = duplicateString (row[0]);
+		site->banned_by = duplicateString (row[1]);
 		site->banned_on = atoi (row[2]);
 		site->banned_until = atoi (row[3]);
 		site->next = NULL; //bug killer right here!
@@ -1205,33 +1206,33 @@ read_saved_obj (MYSQL_ROW row)
 
 	if (row[5] && strlen (row[5]) > 3 && str_cmp (row[5], "(null)"))
 	{
-		mem_free (obj->name);
-		obj->name = strdup (row[5]);
+		free_mem (obj->name);
+		obj->name = duplicateString (row[5]);
 	}
 	if (row[6] && strlen (row[6]) > 3 && str_cmp (row[6], "(null)"))
 	{
-		mem_free (obj->short_description);
-		obj->short_description = strdup (row[6]);
+		free_mem (obj->short_description);
+		obj->short_description = duplicateString (row[6]);
 	}
 	if (row[7] && strlen (row[7]) > 3 && str_cmp (row[7], "(null)"))
 	{
-		mem_free (obj->description);
-		obj->description = strdup (row[7]);
+		free_mem (obj->description);
+		obj->description = duplicateString (row[7]);
 	}
 	if (row[8] && strlen (row[8]) > 3 && str_cmp (row[8], "(null)"))
 	{
-		mem_free (obj->full_description);
-		obj->full_description = strdup (row[8]);
+		free_mem (obj->full_description);
+		obj->full_description = duplicateString (row[8]);
 	}
 	if (row[9] && strlen (row[9]) > 3 && str_cmp (row[9], "(null)"))
 	{
-		mem_free (obj->desc_keys);
-		obj->desc_keys = strdup (row[9]);
+		free_mem (obj->desc_keys);
+		obj->desc_keys = duplicateString (row[9]);
 	}
 	if (row[10] && strlen (row[10]) > 3 && str_cmp (row[10], "(null)"))
 	{
-		mem_free (obj->book_title);
-		obj->book_title = strdup (row[10]);
+		free_mem (obj->book_title);
+		obj->book_title = duplicateString (row[10]);
 	}
 
 	obj->title_skill = atoi (row[11]);
@@ -1255,18 +1256,18 @@ read_saved_obj (MYSQL_ROW row)
 
 	if (row[29] && strlen (row[29]) > 3 && str_cmp (row[29], "(null)"))
 	{
-		mem_free (obj->var_color);
-		obj->var_color = strdup (row[29]);
+		free_mem (obj->var_color);
+		obj->var_color = duplicateString (row[29]);
 	}
 	if (row[30] && strlen (row[30]) > 3 && str_cmp (row[30], "(null)"))
 	{
-		mem_free (obj->omote_str);
-		obj->omote_str = strdup (row[30]);
+		free_mem (obj->omote_str);
+		obj->omote_str = duplicateString (row[30]);
 	}
 
 	if (row[31] && strlen (row[31]) > 3 && str_cmp (row[31], "(null)"))
 	{
-		p = strdup (row[31]);
+		p = duplicateString (row[31]);
 		while (1)
 		{
 			if (!*p)
@@ -1275,13 +1276,14 @@ read_saved_obj (MYSQL_ROW row)
 			if (!*buf || !str_cmp (buf, "(null)"))
 				break;
 			wound = new WOUND_DATA;
+			wound->next = NULL;
 			sscanf (buf, "%s %s %s %s %d %d %d %d %d %d\n",
 				location, type, severity, name, &damage, &bleeding, &poison,
 				&healerskill, &lasthealed, &lastbled);
-			wound->location = strdup (location);
-			wound->type = strdup (type);
-			wound->severity = strdup (severity);
-			wound->name = strdup (name);
+			wound->location = duplicateString (location);
+			wound->type = duplicateString (type);
+			wound->severity = duplicateString (severity);
+			wound->name = duplicateString (name);
 			wound->damage = damage;
 			wound->bleeding = bleeding;
 			wound->poison = poison;
@@ -1296,14 +1298,14 @@ read_saved_obj (MYSQL_ROW row)
 		}
 		if (p)
 		{
-			mem_free (p);
+			free_mem (p);
 			p = NULL;
 		}
 	}
 
 	if (row[32] && strlen (row[32]) > 3 && str_cmp (row[32], "(null)"))
 	{
-		p = strdup (row[32]);
+		p = duplicateString (row[32]);
 		while (1)
 		{
 			if (!*p)
@@ -1313,7 +1315,7 @@ read_saved_obj (MYSQL_ROW row)
 				break;
 			lodged = new LODGED_OBJECT_INFO;
 			sscanf (buf, "%s %d\n", location, &vnum);
-			lodged->location = strdup (location);
+			lodged->location = duplicateString (location);
 			lodged->vnum = vnum;
 			if (obj->lodged)
 				lodged->next = obj->lodged;
@@ -1325,7 +1327,7 @@ read_saved_obj (MYSQL_ROW row)
 
 	if (row[33] && strlen (row[33]) > 3 && str_cmp (row[33], "(null)"))
 	{
-		p = strdup (row[33]);
+		p = duplicateString (row[33]);
 		while (1)
 		{
 			if (!*p)
@@ -1575,7 +1577,7 @@ do_history (CHAR_DATA * ch, char *argument, int cmd)
 	*name = '\0';
 
 	strcpy (name, ch->delay_who);
-	mem_free (ch->delay_who);
+	free_mem (ch->delay_who);
 	ch->delay_who = NULL;
 	ch->delay = 0;
 
@@ -1903,8 +1905,10 @@ load_all_writing (void)
 			if (GET_ITEM_TYPE (obj) == ITEM_PARCHMENT
 				&& obj->o.od.value[0] == atoi (row[0]))
 			{
-				if (!obj->writing)
+				if (!obj->writing) {
 					obj->writing = new WRITING_DATA;
+					obj->writing->next_page = NULL;
+				}
 				obj->writing->author = add_hash (row[1]);
 				obj->writing->date = add_hash (row[3]);
 				obj->writing->ink = add_hash (row[4]);
@@ -1918,14 +1922,17 @@ load_all_writing (void)
 			else if (GET_ITEM_TYPE (obj) == ITEM_BOOK
 				&& obj->o.od.value[1] == atoi (row[0]))
 			{
-				if (!obj->writing)
+				if (!obj->writing) {
 					obj->writing = new WRITING_DATA;
+					obj->writing->next_page = NULL;
+				}
 				writing = obj->writing;
 				for (i = 1; i <= obj->o.od.value[0]; i++)
 				{
 					if (!writing->next_page && i + 1 <= obj->o.od.value[0])
 					{
 						writing->next_page = new WRITING_DATA;
+						writing->next_page->next_page = NULL;
 					}
 					if (i == atoi (row[2]))
 					{
@@ -2010,6 +2017,7 @@ load_writing (OBJ_DATA * obj)
 		{
 			obj->writing = new WRITING_DATA;
 			writing = obj->writing;
+			writing->next_page = NULL;
 			writing->author = add_hash (row[1]);
 			writing->date = add_hash (row[3]);
 			writing->ink = add_hash (row[4]);
@@ -2029,6 +2037,7 @@ load_writing (OBJ_DATA * obj)
 		if (!obj->writing)
 		{
 			obj->writing = new WRITING_DATA;
+			obj->writing->next_page = NULL;
 		}
 		/* iterate among all known pages, listed in ascending order */
 		writing = obj->writing;
@@ -2041,6 +2050,7 @@ load_writing (OBJ_DATA * obj)
 			if (!writing->next_page && ((i + 1) <= obj->o.od.value[0]))
 			{
 				writing->next_page = new WRITING_DATA;
+				writing->next_page->next_page = NULL;
 			}
 
 			/* if the data specify info on this page, add in information */
@@ -2234,7 +2244,7 @@ load_dreams (CHAR_DATA * ch)
 		while ((row = mysql_fetch_row (result)))
 		{
 			dream = new DREAM_DATA;
-			dream->dream = strdup (row[2]);
+			dream->dream = duplicateString (row[2]);
 			dream->next = NULL;
 
 			if (atoi (row[1]) > 0)
@@ -2525,37 +2535,37 @@ process_queued_review (MYSQL_ROW row)
 
 	if (tch->name && *tch->name && str_cmp (row[2], tch->name))
 	{
-		mem_free (tch->name);
-		tch->name = strdup (row[2]);
+		free_mem (tch->name);
+		tch->name = duplicateString (row[2]);
 	}
 
 	if (tch->short_descr && *tch->short_descr
 		&& str_cmp (row[3], tch->short_descr))
 	{
-		mem_free (tch->short_descr);
-		tch->short_descr = strdup (row[3]);
+		free_mem (tch->short_descr);
+		tch->short_descr = duplicateString (row[3]);
 	}
 
 	if (tch->long_descr && *tch->long_descr
 		&& str_cmp (row[4], tch->long_descr))
 	{
-		mem_free (tch->long_descr);
-		tch->long_descr = strdup (row[4]);
+		free_mem (tch->long_descr);
+		tch->long_descr = duplicateString (row[4]);
 	}
 
 	if (tch->description && *tch->description
 		&& str_cmp (row[5], tch->description))
 	{
-		mem_free (tch->description);
-		tch->description = strdup (row[5]);
+		free_mem (tch->description);
+		tch->description = duplicateString (row[5]);
 		reformat_string (tch->description, &tch->description);
 	}
 
 	if (tch->pc && tch->pc->creation_comment && *tch->pc->creation_comment
 		&& str_cmp (row[6], tch->pc->creation_comment))
 	{
-		mem_free (tch->pc->creation_comment);
-		tch->pc->creation_comment = strdup (row[6]);
+		free_mem (tch->pc->creation_comment);
+		tch->pc->creation_comment = duplicateString (row[6]);
 	}
 	delete acct;
 	unload_pc (tch);
@@ -2731,30 +2741,32 @@ load_char_mysql (const char *name)
 	ch = new_char (1);
 	//clear_char (ch);
 
-	ch->tname = strdup (row[0]);
-	ch->name = strdup (row[1]);
-	ch->pc->account_name = strdup (row[2]);
-	ch->short_descr = strdup (row[3]);
+	ch->tname = duplicateString (row[0]);
+	ch->name = duplicateString (row[1]);
+	ch->pc->account_name = duplicateString (row[2]);
+	ch->short_descr = duplicateString (row[3]);
 	//correction for capital short_descr's;
 	if (isupper(ch->short_descr[0]))
 		ch->short_descr[0] = tolower(ch->short_descr[0]);
 
-	ch->long_descr = strdup (row[4]);
-	ch->description = strdup (row[5]);
-	ch->pc->msg = strdup (row[6]);
-	ch->pc->creation_comment = strdup (row[7]);
+	ch->long_descr = duplicateString (row[4]);
+	ch->description = duplicateString (row[5]);
+	ch->pc->msg = duplicateString (row[6]);
+	ch->pc->creation_comment = duplicateString (row[7]);
 	ch->pc->create_state = atoi (row[8]);
 	ch->pc->nanny_state = atoi (row[9]);
 	ch->pc->role = atoi (row[10]);
 
 	if (strn_cmp (row[13], "~", 1) && strn_cmp (row[13], " ", 1))
 	{
-		if (!ch->pc->special_role)
+		if (!ch->pc->special_role) {
 			ch->pc->special_role = new ROLE_DATA;
-		ch->pc->special_role->summary = strdup (row[11]);
-		ch->pc->special_role->body = strdup (row[12]);
-		ch->pc->special_role->date = strdup (row[13]);
-		ch->pc->special_role->poster = strdup (row[14]);
+			ch->pc->special_role->next = NULL;
+		}
+		ch->pc->special_role->summary = duplicateString (row[11]);
+		ch->pc->special_role->body = duplicateString (row[12]);
+		ch->pc->special_role->date = duplicateString (row[13]);
+		ch->pc->special_role->poster = duplicateString (row[14]);
 		ch->pc->special_role->cost = atoi (row[15]);
 		ch->pc->special_role->id = atoi(row[96]);
 	}
@@ -2847,14 +2859,17 @@ load_char_mysql (const char *name)
 					continue;
 				magic_add_affect (ch, i, -1, 0, 0, 0, 0);
 				af = get_affect (ch, i);
-				af->a.craft =
-					(struct affect_craft_type *)
-					alloc (sizeof (struct affect_craft_type), 23);
+				af->a.craft =(struct affect_craft_type *)alloc (sizeof (struct affect_craft_type));
 				af->a.craft->subcraft = craft;
+				af->a.craft->phase = NULL;
+				af->a.craft->target_ch = NULL;
+				af->a.craft->target_obj = NULL;
+				af->a.craft->skill_check = 0;
+				af->a.craft->timer = 0;
 			}
 			else if (!str_cmp (buf2, "Affect"))
 			{
-				af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+				af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 
 				sscanf (buf, "Affect %d %d %d %d %d %d %d\n",
 					&af->type,
@@ -2865,7 +2880,7 @@ load_char_mysql (const char *name)
 					&af->a.spell.sn, &af->a.spell.t);
 				if (af->type == 3416)
 				{
-					mem_free (af);
+					free_mem (af);
 				}
 				else
 				{
@@ -2906,13 +2921,13 @@ load_char_mysql (const char *name)
 		ch->affected_by |= AFF_HOODED;
 
 	if (row[77] != NULL && strlen (row[77]) > 1)
-		ch->pc->imm_enter = strdup (row[77]);
+		ch->pc->imm_enter = duplicateString (row[77]);
 	if (row[78] != NULL && strlen (row[78]) > 1)
-		ch->pc->imm_leave = strdup (row[78]);
+		ch->pc->imm_leave = duplicateString (row[78]);
 	if (row[79] != NULL && strlen (row[79]) > 1)
-		ch->pc->site_lie = strdup (row[79]);
+		ch->pc->site_lie = duplicateString (row[79]);
 	if (row[80] != NULL && strlen (row[80]) > 1 && str_cmp (row[80], "(null)"))
-		ch->voice_str = strdup (row[80]);
+		ch->voice_str = duplicateString (row[80]);
 
 	if (row[81] != NULL && str_cmp (row[81], "~") && str_cmp (row[81], " "))
 	{
@@ -2963,10 +2978,10 @@ load_char_mysql (const char *name)
 			wound = new WOUND_DATA;
 			wound->next = NULL;
 
-			wound->location = strdup (location);
-			wound->type = strdup (type);
-			wound->severity = strdup (severity);
-			wound->name = strdup (wound_name);
+			wound->location = duplicateString (location);
+			wound->type = duplicateString (type);
+			wound->severity = duplicateString (severity);
+			wound->name = duplicateString (wound_name);
 			wound->damage = damage;
 			wound->bleeding = bleeding;
 			wound->poison = poison;
@@ -3007,7 +3022,7 @@ load_char_mysql (const char *name)
 			lodged = new LODGED_OBJECT_INFO[36];
 			lodged->next = NULL;
 
-			lodged->location = strdup (location);
+			lodged->location = duplicateString (location);
 			lodged->vnum = i;
 
 			if (!ch->lodged)
@@ -3029,7 +3044,7 @@ load_char_mysql (const char *name)
 	ch->was_in_room = atoi (row[87]);
 
 	if (row[88] && strlen (row[88]) > 1 && str_cmp (row[88], "(null)"))
-		ch->travel_str = strdup (row[88]);
+		ch->travel_str = duplicateString (row[88]);
 
 	ch->bmi = atoi (row[90]);
 
@@ -3063,7 +3078,7 @@ load_char_mysql (const char *name)
 
 	// Persistant dmotes, wooo!
 	if (row[98] && strlen (row[98]) > 1 && str_cmp (row[98], "(null)"))
-		ch->dmote_str = strdup (row[98]);
+		ch->dmote_str = duplicateString (row[98]);
 
 	// Load our UID
 	ch->pc->char_num = atoi( row[101] );
@@ -3890,7 +3905,7 @@ post_to_mysql_board (DESCRIPTOR_DATA * d)
 
 	unload_message (d->pending_message);
 	d->pending_message = NULL;
-	mem_free (date);
+	free_mem (date);
 }
 
 /* This is mainly a "test" command - not really functional for any one speciifc purpose! */
@@ -4042,8 +4057,8 @@ do_mysql (CHAR_DATA * ch, char *argument, int cmd)
 				{
 					room->dir_option[OUTSIDE] = new room_direction_data;
 					room->dir_option[OUTSIDE]->general_description =
-						strdup ("");
-					room->dir_option[OUTSIDE]->keyword = strdup ("entryway");
+						duplicateString ("");
+					room->dir_option[OUTSIDE]->keyword = duplicateString ("entryway");
 					room->dir_option[OUTSIDE]->exit_info |= (1 << 0);
 					room->dir_option[OUTSIDE]->key = obj->o.od.value[3];
 					room->dir_option[OUTSIDE]->to_room = obj->in_room;
@@ -4358,7 +4373,7 @@ load_mysql_message (char *msg_name, int board_type, int msg_number)
 		}
 		if ((row = mysql_fetch_row (result)))
 		{
-			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 			message->nVirtual = atoi (row[1]);
 			message->poster = add_hash (row[3]);
 			message->date = add_hash (row[4]);
@@ -4383,7 +4398,7 @@ load_mysql_message (char *msg_name, int board_type, int msg_number)
 		}
 		if ((row = mysql_fetch_row (result)))
 		{
-			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 			message->nVirtual = msg_number;
 			message->poster = add_hash (row[3]);
 			message->date = add_hash (row[4]);
@@ -4408,7 +4423,7 @@ load_mysql_message (char *msg_name, int board_type, int msg_number)
 		}
 		if ((row = mysql_fetch_row (result)))
 		{
-			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 			message->nVirtual = msg_number;
 			message->poster = add_hash (row[3]);
 			message->date = add_hash (row[4]);
@@ -4433,7 +4448,7 @@ load_mysql_message (char *msg_name, int board_type, int msg_number)
 		}
 		if ((row = mysql_fetch_row (result)))
 		{
-			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 			message->nVirtual = msg_number;
 			message->poster = add_hash (row[3]);
 			message->date = add_hash (row[4]);
@@ -4689,7 +4704,7 @@ post_to_mysql_virtual_board (DESCRIPTOR_DATA * d)
 
 	unload_message (d->pending_message);
 	d->pending_message = NULL;
-	mem_free (date);
+	free_mem (date);
 }
 
 void
@@ -4744,7 +4759,7 @@ post_to_mysql_journal (DESCRIPTOR_DATA * d)
 
 	unload_message (d->pending_message);
 	d->pending_message = NULL;
-	mem_free (date);
+	free_mem (date);
 }
 
 void
@@ -4799,7 +4814,7 @@ post_to_mysql_player_board (DESCRIPTOR_DATA * d)
 
 	unload_message (d->pending_message);
 	d->pending_message = NULL;
-	mem_free (date);
+	free_mem (date);
 }
 
 void

@@ -574,11 +574,11 @@ jailer_func (CHAR_DATA * ch)
 	{
 		sprintf (buf, "A prison bag, labeled '%s %s' sits here.",
 			JAILBAG_DESC_PREPEND, victim->short_descr);
-		bag->description = strdup (buf);
+		bag->description = duplicateString (buf);
 
 		sprintf (buf, "a bag labeled '%s %s'", JAILBAG_DESC_PREPEND,
 			victim->short_descr);
-		bag->short_description = strdup (buf);
+		bag->short_description = duplicateString (buf);
 
 		if (IS_NPC (victim))
 			bag->obj_timer = 24 * 4;	/* one rl day */
@@ -795,6 +795,7 @@ mob_weather_reaction (CHAR_DATA * ch)
 		if (!af)
 		{
 			af = new AFFECTED_TYPE;
+			af->next = NULL;
 			af->type = MAGIC_RAISED_HOOD;
 			affect_to_char (ch, af);
 		}
@@ -1081,7 +1082,7 @@ threat_from_char (CHAR_DATA * ch, THREAT_DATA * att)
 				tempatt->next = tempatt->next->next;
 	}
 
-	mem_free (att);
+	free_mem (att);
 }
 
 void
@@ -1107,7 +1108,7 @@ remove_threat (CHAR_DATA * victim, CHAR_DATA * threat)
 	}
 
 	if (targ_threat)
-		mem_free (targ_threat);
+		free_mem (targ_threat);
 }
 
 void
@@ -1128,7 +1129,7 @@ attacker_from_char (CHAR_DATA * ch, ATTACKER_DATA * att)
 				tempatt->next = tempatt->next->next;
 	}
 
-	mem_free (att);
+	free_mem (att);
 }
 
 
@@ -1156,7 +1157,7 @@ remove_attacker (CHAR_DATA * victim, CHAR_DATA * threat)
 	}
 
 	if (targ_att)
-		mem_free (targ_att);
+		free_mem (targ_att);
 }
 
 

@@ -432,16 +432,16 @@ add_clandef (char *argument)
 	CLAN_DATA *clan;
 	char buf[MAX_STRING_LENGTH];
 
-	clan = (CLAN_DATA *) alloc (sizeof (CLAN_DATA), 39);
+	clan = (CLAN_DATA *) alloc (sizeof (CLAN_DATA));
 
 	argument = one_argument (argument, buf);
-	clan->name = strdup (buf);
+	clan->name = duplicateString (buf);
 
 	argument = one_argument (argument, buf);
 	clan->zone = atoi (buf);
 
 	argument = one_argument (argument, buf);
-	clan->literal = strdup (buf);
+	clan->literal = duplicateString (buf);
 
 	argument = one_argument (argument, buf);
 	clan->member_vnum = atoi (buf);
@@ -535,9 +535,9 @@ add_clan_id_string (char *string, char *clan_name, char *clan_flags)
 	else
 		sprintf (buf, "'%s' %s", clan_flags, clan_name);
 
-	mem_free (string);
+	free_mem (string);
 
-	string = strdup (buf);
+	string = duplicateString (buf);
 }
 
 void
@@ -575,9 +575,9 @@ add_clan_id (CHAR_DATA * ch, char *clan_name, const char *clan_flags)
 	else
 		sprintf (buf, "'%s' %s", clan_flags, clan_name);
 
-	mem_free (ch->clans);
+	free_mem (ch->clans);
 
-	ch->clans = strdup (buf);
+	ch->clans = duplicateString (buf);
 }
 
 int
@@ -808,7 +808,7 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 						break;
 
 				if (i >= num_clans)
-					the_clans[num_clans++] = strdup (clan_name);
+					the_clans[num_clans++] = duplicateString (clan_name);
 			}
 
 		}
@@ -963,8 +963,8 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (!str_cmp (clan_name, "all"))
 		{
-			mem_free (ch->clans);
-			ch->clans = strdup ("");
+			free_mem (ch->clans);
+			ch->clans = duplicateString ("");
 		}
 
 		else if (!get_clan (edit_mob, clan_name, &clan_flags))
@@ -1017,9 +1017,9 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 		}
 		clan__do_remove (delete_clan);
 
-		mem_free (delete_clan->name);
-		mem_free (delete_clan->literal);
-		mem_free (delete_clan);
+		free_mem (delete_clan->name);
+		free_mem (delete_clan->literal);
+		free_mem (delete_clan);
 	}
 
 	else if (!str_cmp (buf, "rename"))
@@ -1034,11 +1034,9 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
-		name_switch =
-			(struct name_switch_data *) alloc (sizeof (struct name_switch_data),
-			38);
-		name_switch->old_name = strdup (oldname);
-		name_switch->new_name = strdup (newname);
+		name_switch = (struct name_switch_data *) alloc (sizeof (struct name_switch_data));
+		name_switch->old_name = duplicateString (oldname);
+		name_switch->new_name = duplicateString (newname);
 
 		if (!clan_name_switch_list)
 			clan_name_switch_list = name_switch;
@@ -1065,11 +1063,11 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 		if (!str_cmp (clan_name_switch_list->old_name, oldname) &&
 			!str_cmp (clan_name_switch_list->new_name, newname))
 		{
-			mem_free (clan_name_switch_list->old_name);
-			mem_free (clan_name_switch_list->new_name);
+			free_mem (clan_name_switch_list->old_name);
+			free_mem (clan_name_switch_list->new_name);
 			nsp = clan_name_switch_list;
 			clan_name_switch_list = nsp->next;
-			mem_free (nsp);
+			free_mem (nsp);
 			send_to_char ("Rename entry deleted.\n", ch);
 			write_dynamic_registry (ch);
 			return;
@@ -1089,9 +1087,9 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 		name_switch = nsp->next;
 		nsp->next = name_switch->next;
 
-		mem_free (name_switch->old_name);
-		mem_free (name_switch->new_name);
-		mem_free (name_switch);
+		free_mem (name_switch->old_name);
+		free_mem (name_switch->new_name);
+		free_mem (name_switch);
 
 		send_to_char ("Rename entry deleted.\n", ch);
 	}
@@ -1166,11 +1164,11 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 				"exist.\n", ch);
 		}
 
-		clan = (CLAN_DATA *) alloc (sizeof (CLAN_DATA), 39);
+		clan = (CLAN_DATA *) alloc (sizeof (CLAN_DATA));
 
-		clan->name = strdup (name);
+		clan->name = duplicateString (name);
 		clan->zone = zone;
-		clan->literal = strdup (literal);
+		clan->literal = duplicateString (literal);
 		clan->member_vnum = member_obj_vnum;
 		clan->leader_vnum = leader_obj_vnum;
 		clan->omni_vnum = 0;
@@ -1556,7 +1554,7 @@ remove_clan_from_string (char *string, char *old_clan_name)
 			sprintf (buf + strlen (buf), "'%s' %s ", clan_flags, clan_name);
 	}
 
-	mem_free (string);
+	free_mem (string);
 	string = NULL;
 
 	if (*buf && buf[strlen (buf) - 1] == ' ')
@@ -1606,7 +1604,7 @@ add_clan_to_string (char *string, char *new_clan_name, int clan_flags)
 
 	if (string && *string)
 	{
-		mem_free (string);
+		free_mem (string);
 		string = NULL;
 	}
 
@@ -1644,7 +1642,7 @@ remove_clan (CHAR_DATA * ch, char *old_clan_name)
 		buf[strlen (buf) - 1] = '\0';
 
 	if (ch->clans && *ch->clans != '\0')
-		mem_free (ch->clans);
+		free_mem (ch->clans);
 
 	ch->clans = add_hash (buf);
 	clan_forum_remove (ch, old_clan_name);
@@ -1687,7 +1685,7 @@ add_clan (CHAR_DATA * ch, char *new_clan_name, int clan_flags)
 		buf[strlen (buf) - 1] = '\0';
 
 	if (ch->clans && *ch->clans != '\0')
-		mem_free (ch->clans);
+		free_mem (ch->clans);
 
 	ch->clans = add_hash (buf);
 }
@@ -3049,7 +3047,7 @@ do_invite (CHAR_DATA * ch, char *argument, int cmd)
 	tch->delay = IS_NPC (tch) && !tch->desc ? 3 : 120;
 	tch->delay_type = DEL_INVITE;
 	tch->delay_ch = ch;
-	tch->delay_who = strdup (buf);
+	tch->delay_who = duplicateString (buf);
 
 	sprintf (buf, "You invite $N to join %s.",
 		clan ? clan->literal : clan_name);
@@ -3079,7 +3077,7 @@ invite_accept (CHAR_DATA * ch, char *argument)
 	ch->delay = 0;
 
 	strcpy (clan_name, ch->delay_who);
-	mem_free (ch->delay_who);
+	free_mem (ch->delay_who);
 	ch->delay_who = NULL;
 
 	if (!is_he_here (ch, ch->delay_ch, 1))
@@ -3565,11 +3563,11 @@ clan__do_load ()
 	while ((row = mysql_fetch_row (result)))
 	{
 
-		if ((clan = (CLAN_DATA *) alloc (sizeof (CLAN_DATA), 39)) != NULL)
+		if ((clan = (CLAN_DATA *) alloc (sizeof (CLAN_DATA))) != NULL)
 		{
-			clan->name = strdup (row[0]);
+			clan->name = duplicateString (row[0]);
 			clan->zone = strtol (row[2], NULL, 0);
-			clan->literal = strdup (row[1]);
+			clan->literal = duplicateString (row[1]);
 			clan->member_vnum = strtol (row[3], NULL, 0);
 			clan->leader_vnum = strtol (row[4], NULL, 0);
 			clan->omni_vnum = strtol (row[5], NULL, 0);
@@ -3684,9 +3682,9 @@ void
 clan_rem_obj (OBJ_DATA *obj, OBJ_CLAN_DATA * targ)
 {
 	obj->clan_data = NULL;
-	mem_free (targ->name);
-	mem_free (targ->rank);
-	mem_free (targ);
+	free_mem (targ->name);
+	free_mem (targ->rank);
+	free_mem (targ);
 
 	return;
 }

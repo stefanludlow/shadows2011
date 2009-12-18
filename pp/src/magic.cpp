@@ -1387,7 +1387,7 @@ process_spell_effect (CHAR_DATA * ch, CHAR_DATA * tch, int id, int saved,
 		return;
 
 	af = new AFFECTED_TYPE;
-
+	af->next = NULL;
 	af->type = affect_type;
 	af->a.spell.duration = dice (x, y);
 	af->a.spell.modifier = 0;
@@ -1973,16 +1973,16 @@ apply_enchantment (CHAR_DATA * caster, CHAR_DATA * victim, char *name,
 	ENCHANTMENT_DATA *tmp, *enchantment;
 
 	enchantment = new ENCHANTMENT_DATA;
-
+	enchantment->next = NULL;
 	enchantment->name = add_hash (name);
 	enchantment->original_hours = duration;
 	enchantment->current_hours = enchantment->original_hours;
 	enchantment->power_source = source;
-	enchantment->next = NULL;
 
 	if (!victim->enchantments)
 	{
 		victim->enchantments = new ENCHANTMENT_DATA;
+		victim->enchantments->next = NULL;
 		victim->enchantments = enchantment;
 	}
 	else
@@ -1996,7 +1996,7 @@ apply_enchantment (CHAR_DATA * caster, CHAR_DATA * victim, char *name,
 			if (!tmp->next)
 			{
 				tmp->next = new ENCHANTMENT_DATA;
-				tmp->next = enchantment;
+				tmp->next->next = enchantment; // I added in ->next here - Case
 				break;
 			}
 		}
@@ -2128,7 +2128,7 @@ email_acceptance (DESCRIPTOR_DATA * d)
 	if (!*d->character->pc->msg)
 	{
 		send_to_char ("No email sent!\n", d->character);
-		mem_free (date);
+		free_mem (date);
 		delete acct;
 		if (tch)
 			unload_pc (tch);
@@ -2139,7 +2139,7 @@ email_acceptance (DESCRIPTOR_DATA * d)
 		send_to_char
 			("\nEmail response aborted; there was a problem loading this PC.\n",
 			d->character);
-		mem_free (date);
+		free_mem (date);
 		delete acct;
 		if (tch)
 			unload_pc (tch);
@@ -2183,7 +2183,7 @@ email_acceptance (DESCRIPTOR_DATA * d)
 				buf);
 		}
 
-		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 		d->pending_message->nVirtual = 0;
 		d->pending_message->info = add_hash ("");
 		sprintf (buf, "#2Accepted:#0 %s: %s", tch->pc->account_name, tch->tname);
@@ -2209,7 +2209,7 @@ email_acceptance (DESCRIPTOR_DATA * d)
 		unload_message (d->pending_message);
 		if (d->character->pc->msg)
 		{
-			mem_free (d->character->pc->msg);
+			free_mem (d->character->pc->msg);
 			d->character->pc->msg = NULL;
 		}
 		d->pending_message = NULL;
@@ -2250,12 +2250,12 @@ email_acceptance (DESCRIPTOR_DATA * d)
 	d->character->delay_who = add_hash (tch->tname);
 	if (d->character->delay_who2)
 	{
-		mem_free (d->character->delay_who2);
+		free_mem (d->character->delay_who2);
 		d->character->delay_who2 = NULL;
 	}
 	d->character->delay_ch = NULL;
 
-	mem_free (date);
+	free_mem (date);
 
 	unload_pc (tch);
 }
@@ -2291,7 +2291,7 @@ email_rejection (DESCRIPTOR_DATA * d)
 	{
 		delete acct;
 		send_to_char ("No email sent!\n", d->character);
-		mem_free (date);
+		free_mem (date);
 		if (tch)
 			unload_pc (tch);
 		return;
@@ -2302,7 +2302,7 @@ email_rejection (DESCRIPTOR_DATA * d)
 		send_to_char
 			("\nEmail response aborted; there was a problem loading this PC.\n",
 			d->character);
-		mem_free (date);
+		free_mem (date);
 		if (tch)
 			unload_pc (tch);
 		return;
@@ -2356,7 +2356,7 @@ email_rejection (DESCRIPTOR_DATA * d)
 				buf);
 		}
 
-		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 		d->pending_message->poster = add_hash ("player_applications");
 		d->pending_message->nVirtual = 0;
 		d->pending_message->info = add_hash ("");
@@ -2391,12 +2391,12 @@ email_rejection (DESCRIPTOR_DATA * d)
 	d->character->delay_who = add_hash (tch->tname);
 	if (d->character->delay_who2)
 	{
-		mem_free (d->character->delay_who2);
+		free_mem (d->character->delay_who2);
 		d->character->delay_who2 = NULL;
 	}
 	d->character->delay_ch = NULL;
 
-	mem_free (date);
+	free_mem (date);
 
 	save_char (tch, false);
 	unload_pc (tch);
@@ -2521,7 +2521,7 @@ check_psionic_talents (CHAR_DATA * ch)
 	add_message (1, ch->tname, -2, "Server", date, "Psionic Talents.", "", buf,
 		0);
 
-	mem_free (date);
+	free_mem (date);
 }
 
 /* Changed from age based boost to power (aura) based boost, with random factor  -- Huan*/
@@ -2665,13 +2665,13 @@ answer_application (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (ch->pc->msg)
 	{
-		mem_free (ch->pc->msg);
+		free_mem (ch->pc->msg);
 		ch->pc->msg = NULL;
 	}
 
 	sprintf (name, "%s", ch->delay_who);
 
-	mem_free (ch->delay_who);
+	free_mem (ch->delay_who);
 	ch->delay_who = NULL;
 	ch->delay = 0;
 
@@ -2872,7 +2872,7 @@ do_decline (struct char_data *ch, char *argument, int cmd)
 
 	if (ch->delay_who)
 	{
-		mem_free (ch->delay_who);
+		free_mem (ch->delay_who);
 		ch->delay_who = NULL;
 	}
 
@@ -2985,7 +2985,6 @@ post_dream (DESCRIPTOR_DATA * d)
 	}
 
 	dream = new DREAM_DATA;
-
 	dream->dream = d->character->delay_who;
 	dream->next = ch->pc->dreams;
 
@@ -3013,7 +3012,7 @@ post_dream (DESCRIPTOR_DATA * d)
 
 	unload_pc (ch);
 
-	mem_free (date);
+	free_mem (date);
 }
 
 void
@@ -3234,7 +3233,7 @@ apply_affect (CHAR_DATA * ch, int type, int duration, int power)
 	}
 
 	af = new AFFECTED_TYPE;
-
+	af->next = NULL;
 	af->type = type;
 	af->a.spell.duration = duration;
 	af->a.spell.modifier = power;
@@ -3274,7 +3273,7 @@ magic_add_affect (CHAR_DATA * ch, int type, int duration, int modifier,
 	}
 
 	af = new AFFECTED_TYPE;
-
+	af->next = NULL;
 	af->type = type;
 	af->a.spell.duration = duration;
 	af->a.spell.modifier = modifier;
@@ -3297,7 +3296,7 @@ job_add_affect (CHAR_DATA * ch, int type, int days, int pay_date, int cash,
 	if ((af = get_affect (ch, type)))
 		affect_remove (ch, af);
 
-	af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+	af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 
 	af->type = type;
 	af->a.job.days = days;
@@ -3324,7 +3323,7 @@ magic_add_obj_affect (OBJ_DATA * obj, int type, int duration, int modifier,
 	}
 
 	af = new AFFECTED_TYPE;
-
+	af->next = NULL;
 	af->type = type;
 	af->a.spell.duration = duration;
 	af->a.spell.modifier = modifier;
@@ -4178,7 +4177,7 @@ post_prescience (DESCRIPTOR_DATA * d)
 	add_message (1, "Prescience", -5, GET_NAME (ch), date, buf, "",
 		ch->delay_who, MF_DREAM);
 
-	mem_free (date);
+	free_mem (date);
 
 	ch->delay_who = NULL;
 }

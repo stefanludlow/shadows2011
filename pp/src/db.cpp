@@ -467,7 +467,7 @@ boot_db (void)
 
 	mm ("post load object progs");
 
-	mem_free (overhead_base);
+	//free_mem (overhead_base);
 
 	mm ("freed overhead_base");
 
@@ -501,7 +501,7 @@ boot_db (void)
 	initialize_materials();
 	initialize_location_map();
 
-	print_mem_stats (NULL);
+	//print_mem_stats (NULL);
 
 	booting = 0;
 
@@ -548,13 +548,15 @@ reload_hints (void)
 			break;
 		hint = new NEWBIE_HINT;
 		hint->hint = string;
-		if (!hint_list)
+		hint->next = NULL;
+		if (hint_list == NULL)
 			hint_list = hint;
 		else
 		{
 			thint = hint_list;
-			while (thint->next)
+			while (thint->next) {
 				thint = thint->next;
+			}
 			thint->next = hint;
 		}
 	}
@@ -706,13 +708,13 @@ create_room_zero (void)
 
 	room = allocate_room (0);
 	room->zone = 0;
-	room->name = strdup ("Heaven");
-	room->description = strdup ("You are in heaven.\n");
+	room->name = duplicateString ("Heaven");
+	room->description = duplicateString ("You are in heaven.\n");
 
 	if (str_cmp (zone_table[0].name, "Empty Zone"))
 		return;
 
-	zone_table[0].name = strdup ("Heaven");
+	zone_table[0].name = duplicateString ("Heaven");
 	zone_table[0].top = 0;
 	zone_table[0].lifespan = 0;
 	zone_table[0].reset_mode = 0;
@@ -836,8 +838,7 @@ load_rooms (void)
 
 					else if (*chk == 'Q')
 					{		/* Secret search desc */
-						r_secret =
-							(struct secret *) get_perm (sizeof (struct secret));
+						r_secret = new secret;
 						sdir = atoi (chk + 1);
 						fscanf (fl, "%d\n", &tmp);
 						r_secret->diff = tmp;
@@ -852,13 +853,11 @@ load_rooms (void)
 					{
 						struct extra_descr_data *tmp_extra;
 
-						new_descr =
-							(struct extra_descr_data *)
-							get_perm (sizeof (struct extra_descr_data));
+						new_descr = new extra_descr_data;
+						new_descr->next = NULL;
 						new_descr->keyword = fread_string (fl);
 						new_descr->description = fread_string (fl);
-						new_descr->next = NULL;
-
+						
 						if (!room->ex_description)
 							room->ex_description = new_descr;
 						else
@@ -874,9 +873,7 @@ load_rooms (void)
 
 					else if (*chk == 'W')
 					{
-						w_desc =
-							(struct written_descr_data *)
-							get_perm (sizeof (struct written_descr_data));
+						w_desc = new written_descr_data;
 						fscanf (fl, "%d\n", &tmp);
 						w_desc->language = tmp;
 						w_desc->description = fread_string (fl);
@@ -886,14 +883,12 @@ load_rooms (void)
 					else if (*chk == 'P')
 					{
 						struct room_prog *tmp_prg;
-						r_prog =
-							(struct room_prog *)
-							get_perm (sizeof (struct room_prog));
+						r_prog = new room_prog;
+						r_prog->next = NULL;
 						r_prog->command = fread_string (fl);
 						r_prog->keys = fread_string (fl);
 						r_prog->prog = fread_string (fl);
-						r_prog->next = NULL;
-
+						
 						/* Make sure that the room program is stored at
 						end of the list.  This way when the room is
 						saved, the rprogs get saved in the same order
@@ -965,14 +960,35 @@ get_room (void)
 	static ROOM_DATA *prealloc_rooms = NULL;
 	static int prealloc_rooms_count = 0;
 
-	if (!prealloc_rooms)
+	if (!prealloc_rooms) {
 		prealloc_rooms = new ROOM_DATA[MAX_PREALLOC_ROOMS];
+	}
 
-	if (prealloc_rooms_count >= MAX_PREALLOC_ROOMS)
+
+	if (prealloc_rooms_count >= MAX_PREALLOC_ROOMS) {
 		room = new ROOM_DATA;
+		room->lnext = NULL;
+		room->hnext = NULL;
+		room->affects = NULL;
+		room->tracks = NULL;
+		room->contents = NULL;
+		room->description = NULL;
+		room->people = NULL;
+		room->prg = NULL;
+		room->extra = NULL;
+	}
 	else
 	{
 		room = prealloc_rooms + prealloc_rooms_count;
+		room->lnext = NULL;
+		room->hnext = NULL;
+		room->affects = NULL;
+		room->tracks = NULL;
+		room->contents = NULL;
+		room->description = NULL;
+		room->people = NULL;
+		room->prg = NULL;
+		room->extra = NULL;
 		prealloc_rooms_count++;
 	}
 
@@ -1013,10 +1029,7 @@ setup_dir (FILE * fl, ROOM_DATA * room, int dir, int type)
 {
 	int tmp2;
 
-	room->dir_option[dir] =
-		(struct room_direction_data *)
-		get_perm (sizeof (struct room_direction_data));
-
+	room->dir_option[dir] = new room_direction_data;
 	room->dir_option[dir]->general_description = fread_string (fl);
 	room->dir_option[dir]->keyword = fread_string (fl);
 
@@ -1156,7 +1169,7 @@ boot_zones (void)
 				while (*buf && isspace (buf[strlen (buf) - 1]))
 					buf[strlen (buf) - 1] = '\0';
 
-				zone_table[zon].cmd[cmd_no].arg1 = (long int) strdup (buf);
+				zone_table[zon].cmd[cmd_no].arg1 = (long int) duplicateString (buf);
 
 				cmd_no++;
 
@@ -1191,7 +1204,7 @@ boot_zones (void)
 					while (isspace (*p))
 						p++;
 
-					zone_table[zon].cmd[cmd_no].arg2 = (long int) strdup (p);
+					zone_table[zon].cmd[cmd_no].arg2 = (long int) duplicateString (p);
 				}
 
 				else
@@ -1209,7 +1222,7 @@ boot_zones (void)
 				zone_table[zon].cmd[cmd_no].command == 'r')
 			{
 
-				ra = (RESET_AFFECT *) alloc (sizeof (RESET_AFFECT), 34);
+				ra = (RESET_AFFECT *) alloc (sizeof (RESET_AFFECT));
 
 				fscanf (fl, "%d %d %d %d %d %d %d",
 					&ra->type,
@@ -1360,7 +1373,7 @@ fread_string (FILE * fp)
 	}
 
 	if ((*plast++ = c) == '~')
-		return null_string;
+		return "";
 
 	for (;;)
 	{
@@ -1379,7 +1392,7 @@ fread_string (FILE * fp)
 
 		case '~':
 			*plast = '\0';
-			return strdup (string_space);
+			return duplicateString (string_space);
 		}
 	}
 }
@@ -1397,7 +1410,7 @@ read_string (char *string)
 	}
 
 	if (*string == '~')
-		return null_string;
+		return "";
 
 	for (;;)
 	{
@@ -1413,52 +1426,12 @@ read_string (char *string)
 	}
 }
 
-/*
-CHAR_DATA *
-new_char (int pc_type)
-{
-CHAR_DATA *ch;
-
-// NOTE:  get_perm gets memory from perm_memory during bootup,
-//   thereafter gets it from calloc.
-
-
-if (booting)
-ch = (CHAR_DATA *) get_perm (sizeof (CHAR_DATA));
-else
-ch = (CHAR_DATA *) alloc (sizeof (CHAR_DATA), 19);
-
-if (ch->pc)
-mem_free (ch->pc);
-
-if (ch->mob)
-mem_free (ch->mob);
-
-ch->hour_affects = NULL;
-
-ch->pc = NULL;
-ch->mob = NULL;
-
-if (pc_type)
-{
-ch->pc = (PC_DATA *) get_perm (sizeof (PC_DATA));
-ch->pc->doc_index = -1;
-}
-else
-ch->mob = (MOB_DATA *) get_perm (sizeof (MOB_DATA));
-
-return ch;
-} */
-
 OBJ_DATA *
 new_object ()
 {
-	OBJ_DATA *obj = NULL;
-
-	if (booting)
-		obj = (OBJ_DATA *) get_perm (sizeof (OBJ_DATA));
-	else
-		obj = (OBJ_DATA *) alloc (sizeof (OBJ_DATA), 18);
+	OBJ_DATA *obj = new OBJ_DATA;
+	obj->hnext = NULL;
+	obj->lnext = NULL;
 
 	return obj;
 }
@@ -1504,11 +1477,11 @@ ch->pc->dreams = ch->pc->dreams->next;
 
 if (dream->dream && *dream->dream)
 {
-mem_free (dream->dream);
+free_mem (dream->dream);
 dream->dream = NULL;
 }
 
-mem_free (dream);
+free_mem (dream);
 dream = NULL;
 }
 
@@ -1518,10 +1491,10 @@ dream = ch->pc->dreamed;
 ch->pc->dreamed = ch->pc->dreamed->next;
 if (dream->dream && *dream->dream)
 {
-mem_free (dream->dream);
+free_mem (dream->dream);
 dream->dream = NULL;
 }
-mem_free (dream);
+free_mem (dream);
 dream = NULL;
 }
 
@@ -1529,7 +1502,7 @@ while (ch->remembers)
 {
 mem = ch->remembers;
 ch->remembers = mem->next;
-mem_free (mem);
+free_mem (mem);
 mem = NULL;
 }
 
@@ -1541,11 +1514,11 @@ ch->vartab = var->next;
 
 if (var->name && *var->name)
 {
-mem_free (var->name);
+free_mem (var->name);
 var->name = NULL;
 }
 
-mem_free (var);
+free_mem (var);
 var = NULL;
 }
 
@@ -1555,50 +1528,50 @@ if (ch->pc)
 if ((role = ch->pc->special_role) != NULL)
 {
 if (role->summary && *role->summary)
-mem_free (role->summary);
+free_mem (role->summary);
 if (role->body && *role->body)
-mem_free (role->body);
+free_mem (role->body);
 if (role->date && *role->date)
-mem_free (role->date);
+free_mem (role->date);
 if (role->poster && *role->poster)
-mem_free (role->poster);
-mem_free (role);
+free_mem (role->poster);
+free_mem (role);
 ch->pc->special_role = NULL;
 }
 
 if (ch->pc->account_name && *ch->pc->account_name)
 {
-mem_free (ch->pc->account_name);
+free_mem (ch->pc->account_name);
 ch->pc->account_name = NULL;
 }
 
 if (ch->pc->site_lie && *ch->pc->site_lie)
 {
-mem_free (ch->pc->site_lie);
+free_mem (ch->pc->site_lie);
 ch->pc->site_lie = NULL;
 }
 
 if (ch->pc->imm_leave && *ch->pc->imm_leave)
 {
-mem_free (ch->pc->imm_leave);
+free_mem (ch->pc->imm_leave);
 ch->pc->imm_leave = NULL;
 }
 
 if (ch->pc->imm_enter && *ch->pc->imm_enter)
 {
-mem_free (ch->pc->imm_enter);
+free_mem (ch->pc->imm_enter);
 ch->pc->imm_enter = NULL;
 }
 
 if (ch->pc->creation_comment && *ch->pc->creation_comment)
 {
-mem_free (ch->pc->creation_comment);
+free_mem (ch->pc->creation_comment);
 ch->pc->creation_comment = NULL;
 }
 
 if (ch->pc->msg && *ch->pc->msg)
 {
-mem_free (ch->pc->msg);
+free_mem (ch->pc->msg);
 ch->pc->msg = NULL;
 }
 
@@ -1607,19 +1580,19 @@ ch->pc->owner = NULL;
 
 if (ch->voice_str && *ch->voice_str)
 {
-mem_free (ch->voice_str);
+free_mem (ch->voice_str);
 ch->voice_str = NULL;
 }
 
 if (ch->travel_str && *ch->travel_str)
 {
-mem_free (ch->travel_str);
+free_mem (ch->travel_str);
 ch->travel_str = NULL;
 }
 
 if (ch->pmote_str && *ch->pmote_str)
 {
-mem_free (ch->pmote_str);
+free_mem (ch->pmote_str);
 ch->pmote_str = NULL;
 }
 
@@ -1643,31 +1616,31 @@ if (!IS_NPC(ch))
 {
 if (ch->tname && *ch->tname)
 {
-mem_free (ch->tname);
+free_mem (ch->tname);
 ch->tname = NULL;
 }
 
 if (ch->name && *ch->name)
 {
-mem_free (ch->name);
+free_mem (ch->name);
 ch->name = NULL;
 }
 
 if (ch->short_descr && *ch->short_descr)
 {
-mem_free (ch->short_descr);
+free_mem (ch->short_descr);
 ch->short_descr = NULL;
 }
 
 if (ch->long_descr && *ch->long_descr)
 {
-mem_free (ch->long_descr);
+free_mem (ch->long_descr);
 ch->long_descr = NULL;
 }
 
 if (ch->description && *ch->description)
 {
-mem_free (ch->description);
+free_mem (ch->description);
 ch->description = NULL;
 }
 }
@@ -1679,35 +1652,35 @@ if (proto)
 if (ch->tname && *ch->tname
 && ch->tname != proto->tname)
 {
-mem_free (ch->tname);
+free_mem (ch->tname);
 ch->tname = NULL;
 }
 
 if (ch->name && *ch->name
 && ch->name != proto->name)
 {
-mem_free (ch->name);
+free_mem (ch->name);
 ch->name = NULL;
 }
 
 if (ch->short_descr && *ch->short_descr
 && ch->short_descr != proto->short_descr )
 {
-mem_free (ch->short_descr);
+free_mem (ch->short_descr);
 ch->short_descr = NULL;
 }
 
 if (ch->long_descr && *ch->long_descr
 && ch->long_descr != proto->long_descr)
 {
-mem_free (ch->long_descr);
+free_mem (ch->long_descr);
 ch->long_descr = NULL;
 }
 
 if (ch->description && *ch->description
 && ch->description != proto->description)
 {
-mem_free (ch->description);
+free_mem (ch->description);
 ch->description = NULL;
 }
 }
@@ -1719,31 +1692,31 @@ fprintf (stderr, "Proto not defined for NPC %d?\n", ch->mob->nVirtual);
 
 if (ch->clans && *ch->clans)
 {
-mem_free (ch->clans);
+free_mem (ch->clans);
 ch->clans = NULL;
 }
 
 if (ch->combat_log && *ch->combat_log)
 {
-mem_free (ch->combat_log);
+free_mem (ch->combat_log);
 ch->combat_log = NULL;
 }
 
 if (ch->enemy_direction && *ch->enemy_direction)
 {
-mem_free (ch->enemy_direction);
+free_mem (ch->enemy_direction);
 ch->enemy_direction = NULL;
 }
 
 if (ch->delay_who && !isdigit (*ch->delay_who) && *ch->delay_who)
 {
-mem_free (ch->delay_who);
+free_mem (ch->delay_who);
 ch->delay_who = NULL;
 }
 
 if (ch->delay_who2 && !isdigit (*ch->delay_who2) && *ch->delay_who2)
 {
-mem_free (ch->delay_who2);
+free_mem (ch->delay_who2);
 ch->delay_who2 = NULL;
 }
 
@@ -1760,12 +1733,12 @@ while (ch->threats)
 threat_from_char (ch, ch->threats);
 
 if (ch->pc)
-mem_free (ch->pc);
+free_mem (ch->pc);
 
 if (ch->mob)
-mem_free (ch->mob);
+free_mem (ch->mob);
 
-mem_free (ch);
+free_mem (ch);
 
 ch = NULL;
 
@@ -1784,22 +1757,22 @@ free_obj (OBJ_DATA * obj)
 	/* Make sure these arn't duplicate fields of the prototype */
 
 	if (!tobj || tobj->name != obj->name)
-		mem_free (obj->name);
+		free_mem (obj->name);
 
 	if (!tobj || tobj->short_description != obj->short_description)
-		mem_free (obj->short_description);
+		free_mem (obj->short_description);
 
 	if (!tobj || tobj->description != obj->description)
-		mem_free (obj->description);
+		free_mem (obj->description);
 
 	if (!tobj || tobj->full_description != obj->full_description)
-		mem_free (obj->full_description);
+		free_mem (obj->full_description);
 
 	if (!tobj || tobj->var_color != obj->var_color)
-		mem_free (obj->var_color);
+		free_mem (obj->var_color);
 
 	if (!tobj || tobj->desc_keys != obj->desc_keys)
-		mem_free (obj->desc_keys);
+		free_mem (obj->desc_keys);
 
 	clear_omote (obj);
 
@@ -1813,7 +1786,7 @@ free_obj (OBJ_DATA * obj)
 	while ((af = obj->xaffected))
 	{
 		obj->xaffected = af->next;
-		mem_free (af);
+		free_mem (af);
 	}
 
 	while (obj->wounds)
@@ -1827,19 +1800,19 @@ free_obj (OBJ_DATA * obj)
 		writing = obj->writing;
 		obj->writing = writing->next_page;
 		if (writing->message)
-			mem_free (writing->message);
+			free_mem (writing->message);
 		if (writing->author)
-			mem_free (writing->author);
+			free_mem (writing->author);
 		if (writing->date)
-			mem_free (writing->date);
+			free_mem (writing->date);
 		if (writing->ink)
-			mem_free (writing->ink);
-		mem_free (writing);
+			free_mem (writing->ink);
+		free_mem (writing);
 	}
 
 	memset (obj, 0, sizeof (OBJ_DATA));
 
-	mem_free (obj);
+	free_mem (obj);
 
 }
 
@@ -1857,14 +1830,14 @@ file_to_string (char *name)
 	{
 		sprintf (tmp, "file_to_string(%s)", name);
 		perror (tmp);
-		string = (char *) alloc (1, 4);
+		string = (char *) alloc (1);
 		*string = '\0';
 		return (string);
 	}
 
 	num_chars = fread (tmp, 1, MAX_STRING_LENGTH - 1, fl);
 	tmp[num_chars] = '\0';
-	string = (char *) alloc (num_chars + 2, 4);
+	string = (char *) alloc (num_chars + 2);
 	strcpy (string, tmp);
 	strcat (string, "\r\0");
 
@@ -2198,9 +2171,9 @@ create_penny_proto ()
 
 	obj->name = add_hash ("pennies penny coins money cash silver");
 
-	obj->short_description = null_string;
-	obj->description = null_string;
-	obj->full_description = null_string;
+	obj->short_description = "";
+	obj->description = "";
+	obj->full_description = "";
 
 	obj->obj_flags.type_flag = ITEM_MONEY;
 	obj->obj_flags.wear_flags = ITEM_TAKE;
@@ -2232,9 +2205,9 @@ create_farthing_proto ()
 
 	obj->name = add_hash ("farthings coins money cash brass");
 
-	obj->short_description = null_string;
-	obj->description = null_string;
-	obj->full_description = null_string;
+	obj->short_description = "";
+	obj->description = "";
+	obj->full_description = "";
 
 	obj->obj_flags.type_flag = ITEM_MONEY;
 	obj->obj_flags.wear_flags = ITEM_TAKE;
@@ -2296,7 +2269,7 @@ create_ticket_proto ()
 	obj->short_description = add_hash ("a small ostler's ticket");
 	obj->description = add_hash ("A small paper ticket with a number "
 		"is here.");
-	obj->full_description = null_string;
+	obj->full_description = "";
 
 	obj->obj_flags.weight = 1;
 	obj->obj_flags.type_flag = ITEM_TICKET;
@@ -2325,7 +2298,7 @@ create_order_ticket_proto ()
 	obj->short_description = add_hash ("a small merchandise ticket");
 	obj->description =
 		add_hash ("A small merchandise ticket has been carelessly left here.");
-	obj->full_description = null_string;
+	obj->full_description = "";
 
 	obj->obj_flags.weight = 1;
 	obj->obj_flags.type_flag = ITEM_MERCH_TICKET;
@@ -2353,7 +2326,7 @@ create_head_proto ()
 	obj->name = add_hash ("head");
 	obj->short_description = add_hash ("a head");
 	obj->description = add_hash ("A head is here.");
-	obj->full_description = null_string;
+	obj->full_description = "";
 
 	obj->obj_flags.weight = 10;
 	obj->obj_flags.type_flag = ITEM_HEAD;
@@ -2381,7 +2354,7 @@ create_corpse_proto ()
 	obj->name = add_hash ("corpse");
 	obj->short_description = add_hash ("a corpse");
 	obj->description = add_hash ("A corpse is here.");
-	obj->full_description = null_string;
+	obj->full_description = "";
 
 	obj->obj_flags.weight = 1000;
 	obj->o.container.capacity = 0;	/* No keeping things on a corpse */
@@ -2410,7 +2383,7 @@ create_statue_proto ()
 	obj->name = add_hash ("statue");
 	obj->short_description = add_hash ("a remarkably lifelike statue");
 	obj->description = add_hash ("A remarkably lifelike statue looms here.");
-	obj->full_description = null_string;
+	obj->full_description = "";
 
 	obj->obj_flags.weight = 1000;
 	obj->o.container.capacity = 0;	/* No keeping things on a corpse */
@@ -2473,5 +2446,5 @@ struct hash_data
 };
 
 char* add_hash(const char *string) {
-	return strdup(string);
+	return duplicateString(string);
 }

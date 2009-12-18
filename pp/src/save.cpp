@@ -70,14 +70,14 @@ unspace (char *s)
 
 	orig = s;
 
-	result = (char *) alloc (strlen (s) + 1, 14);
+	result = (char *) alloc (strlen (s) + 1);
 
 	while (s && *s == ' ')
 		s++;
 
 	strcpy (result, s);
 
-	mem_free (orig);
+	free_mem (orig);
 
 	return result;
 }
@@ -443,7 +443,7 @@ fread_obj (FILE * fp)
 	while ((af = obj->xaffected))
 	{
 		obj->xaffected = af->next;
-		mem_free (af);
+		free_mem (af);
 	}
 
 	fscanf (fp, "%d", &modifiers);
@@ -1080,7 +1080,7 @@ load_online_stats ()
 	fscanf (fp, "%d\n", &count_max_online);
 	char *tmpdate = fread_string (fp);
 	strcpy (max_online_date, tmpdate);
-	mem_free (tmpdate); // char*
+	free_mem (tmpdate); // char*
 	fclose (fp);
 }
 
@@ -1664,7 +1664,7 @@ load_a_saved_mobile (int nVirtual, FILE * fp, bool stable)
 		else if (key_table[i].key_type == TYPE_AFFECT)
 		{
 
-			af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+			af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 
 			fscanf (fp, "%d %d %d %d %d %d %d\n",
 				&af->type,
@@ -1718,7 +1718,7 @@ load_a_saved_mobile (int nVirtual, FILE * fp, bool stable)
 		else if (key_table[i].key_type == TYPE_LODGED)
 		{
 			lodged =
-				(LODGED_OBJECT_INFO *) alloc (sizeof (LODGED_OBJECT_INFO), 36);
+				(LODGED_OBJECT_INFO *) alloc (sizeof (LODGED_OBJECT_INFO));
 			lodged->next = NULL;
 
 			lodged->location = add_hash (fread_word (fp));
@@ -1755,7 +1755,7 @@ load_a_saved_mobile (int nVirtual, FILE * fp, bool stable)
 		{
 			p = mob->clans;
 			p2 = p;
-			mob->clans = strdup ("");
+			mob->clans = duplicateString ("");
 
 			while (1)
 			{
@@ -1769,7 +1769,7 @@ load_a_saved_mobile (int nVirtual, FILE * fp, bool stable)
 				add_clan_id (mob, buf2, buf);
 			}
 
-			mem_free (p2);
+			free_mem (p2);
 
 			return mob;
 		}

@@ -426,7 +426,7 @@ do_clog (CHAR_DATA * ch, char *argument, int cmd)
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
-	ch->delay_who = strdup ("clog");
+	ch->delay_who = duplicateString ("clog");
 
 	ch->desc->proc = post_log;
 }
@@ -446,7 +446,7 @@ do_alog (CHAR_DATA * ch, char *argument, int cmd)
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
-	ch->delay_who = strdup ("alog");
+	ch->delay_who = duplicateString ("alog");
 
 	ch->desc->proc = post_log;
 }
@@ -466,7 +466,7 @@ do_blog (CHAR_DATA * ch, char *argument, int cmd)
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
-	ch->delay_who = strdup ("blog");
+	ch->delay_who = duplicateString ("blog");
 
 	ch->desc->proc = post_log;
 }
@@ -486,7 +486,7 @@ do_wlog (CHAR_DATA * ch, char *argument, int cmd)
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
-	ch->delay_who = strdup ("wlog");
+	ch->delay_who = duplicateString ("wlog");
 
 	ch->desc->proc = post_log;
 }
@@ -506,7 +506,7 @@ do_plog (CHAR_DATA * ch, char *argument, int cmd)
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
-	ch->delay_who = strdup ("plog");
+	ch->delay_who = duplicateString ("plog");
 
 	ch->desc->proc = post_log;
 }
@@ -586,8 +586,9 @@ do_wclone (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (fwriting == fbook->writing)
 		{
-			if (!tbook->writing)
+			if (!tbook->writing) {
 				tbook->writing = new WRITING_DATA;
+			}
 			twriting = tbook->writing;
 			twriting->message = add_hash (fwriting->message);
 			twriting->author = add_hash (fwriting->author);
@@ -1258,7 +1259,7 @@ do_email (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	ch->delay_who = strdup (acct->name.c_str ());
+	ch->delay_who = duplicateString (acct->name.c_str ());
 	unload_pc (tch);
 
 	if (!*argument)
@@ -1281,7 +1282,7 @@ do_email (CHAR_DATA * ch, char *argument, int cmd)
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 	ch->desc->proc = post_email;
-	ch->delay_who2 = strdup (argument);
+	ch->delay_who2 = duplicateString (argument);
 	ch->act |= PLR_QUIET;
 
 }
@@ -1436,7 +1437,7 @@ do_disconnect (CHAR_DATA * ch, char *argument, int cmd)
 * funtion: do_ban                      < e.g.> ban [ <host> <duration> ]   *
 *                                                                          *
 * 09/17/2004 [JWW] - was freeing the static char[] that asctime() returns! *
-*                    now switched to using alloc, asctime_r, and mem_free  *
+*                    now switched to using alloc, asctime_r, and free_mem  *
 *                                                                          */
 void
 do_ban (CHAR_DATA * ch, char *argument, int cmd)
@@ -1510,7 +1511,7 @@ do_ban (CHAR_DATA * ch, char *argument, int cmd)
 					"      #2Accounts:#0 None Found\n");
 
 				ban_time = site->banned_on;
-				start_date = (char *) alloc (256, 31);
+				start_date = (char *) alloc (256);
 				if (asctime_r (localtime (&ban_time), start_date) != NULL)
 				{
 					start_date[strlen (start_date) - 1] = '\0';
@@ -1528,7 +1529,7 @@ do_ban (CHAR_DATA * ch, char *argument, int cmd)
 						start_date);
 
 					end_ban_time = site->banned_until;
-					end_date = (char *) alloc (256, 31);
+					end_date = (char *) alloc (256);
 					if (asctime_r (localtime (&end_ban_time), end_date) != NULL)
 					{
 						end_date[strlen (end_date) - 1] = '\0';
@@ -1539,7 +1540,7 @@ do_ban (CHAR_DATA * ch, char *argument, int cmd)
 					}
 
 					sprintf (buf + strlen (buf), "%s\n", end_date);
-					mem_free (end_date);
+					free_mem (end_date);
 					end_date = NULL;
 				}
 				else
@@ -1549,7 +1550,7 @@ do_ban (CHAR_DATA * ch, char *argument, int cmd)
 					sprintf (buf + strlen (buf),
 						"      #2Permanently Banned On:#0 %s\n", start_date);
 				}
-				mem_free (start_date);
+				free_mem (start_date);
 				start_date = NULL;
 			}
 			page_string (ch->desc, buf);
@@ -2011,11 +2012,11 @@ do_goto (CHAR_DATA * ch, char *argument, int cmd)
 	if (ch->pc)
 	{
 		if (!ch->pc->imm_leave || !strncmp (ch->pc->imm_leave, "(null)", 6))
-			ch->pc->imm_leave = strdup ("");
+			ch->pc->imm_leave = duplicateString ("");
 
 		if (!ch->pc->imm_enter || !strncmp (ch->pc->imm_enter, "(null)", 6))
 		{
-			ch->pc->imm_enter = strdup ("");
+			ch->pc->imm_enter = duplicateString ("");
 		}
 
 		if (*ch->pc->imm_leave)
@@ -3487,7 +3488,7 @@ roomstat (CHAR_DATA * ch, char *name)
 *                                                                          *
 * 09/17/2004 [JWW] - Ensured that (result != NULL) in a few spots          *
 *                  - was freeing the static char[] that asctime() returns! *
-*                    now switched to using alloc, asctime_r, and mem_free  *
+*                    now switched to using alloc, asctime_r, and free_mem  *
 *                  - ordered the statement execution to match output flow  *
 *                                                                          */
 void
@@ -3556,7 +3557,7 @@ acctstat (CHAR_DATA * ch, char *name)
 	}
 
 	/* Retreive the timestamp for Last Activity ( default = "" ) */
-	date = (char *) alloc (256, 31);
+	date = (char *) alloc (256);
 	date[0] = '\0';
 	std::string player_db = engine.get_config ("player_db");
 	mysql_safe_query
@@ -3568,7 +3569,7 @@ acctstat (CHAR_DATA * ch, char *name)
 	if ((result = mysql_store_result (database)) != NULL)
 	{
 		row = mysql_fetch_row (result);
-		if (row && *row[0])
+		if (row[0] != NULL && *row[0])
 		{
 			account_time = (time_t) atoi (row[0]);
 			if (asctime_r (localtime (&account_time), date) != NULL)
@@ -3587,16 +3588,16 @@ acctstat (CHAR_DATA * ch, char *name)
 	}
 	sprintf (buf + strlen (buf), "   #2Last PC Activity On:#0      %s\n",
 		(date[0]) ? date : "None Recorded");
-	mem_free (date);
+	free_mem (date);
 
 	/* Account Registration Date ( default = "None Recorded" ) */
-	date = (char *) alloc (256, 31);
+	date = (char *) alloc (256);
 	date[0] = '\0';
 	account_time = acct->created_on;
 	asctime_r (localtime (&account_time), date);
 	sprintf (buf + strlen (buf), "   #2Account Registered On:#0    %s",
 		(date[0]) ? date : "None Recorded");
-	mem_free (date);
+	free_mem (date);
 
 	sprintf (buf + strlen (buf), "   #2Accrued Roleplay Points:#0  %d\n",
 		acct->get_rpp ());
@@ -3797,7 +3798,7 @@ objstat (CHAR_DATA * ch, char *name)
 	sprintf (buf, "#2Omote:#0 %s\n\n", (j->omote_str) ? j->omote_str : "None");
 	reformat_string (buf, &sp);
 	sprintf (buf, "%s", sp);
-	mem_free (sp);
+	free_mem (sp);
 	sp = NULL;
 	send_to_char (buf, ch);
 
@@ -6848,14 +6849,6 @@ do_debug (CHAR_DATA * ch, char *argument, int cmd)
 			ch->debug_mode |= DEBUG_SUBDUE;
 	}
 
-	else if (!str_cmp (buf, "x1"))
-	{
-		if (x1)
-			x1 = 0;
-		else
-			x1 = 1;
-	}
-
 	else if (!strcmp (buf, "crash"))
 	{
 		printf ("Debug crash core dump:\n");
@@ -6883,9 +6876,6 @@ do_debug (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (IS_SET (ch->debug_mode, DEBUG_SUBDUE))
 		send_to_char ("SUBDUE ", ch);
-
-	if (x1)
-		send_to_char ("X1 ", ch);
 
 	send_to_char ("\n", ch);
 }
@@ -7537,19 +7527,19 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
 			argument++;
 
 		if (ch->pc->imm_enter)
-			mem_free (ch->pc->imm_enter);
+			free_mem (ch->pc->imm_enter);
 
 		if (!*argument)
 		{
 			send_to_char ("You will use the standard immenter message.\n", ch);
-			ch->pc->imm_enter = strdup ("");
+			ch->pc->imm_enter = duplicateString ("");
 			return;
 		}
 
 		if (*argument == '"' || *argument == '\'')
 			send_to_char ("Note:  You probably didn't mean to use quotes.\n", ch);
 
-		ch->pc->imm_enter = strdup (argument);
+		ch->pc->imm_enter = duplicateString (argument);
 	}
 
 	else if (ch->pc && ch->pc->level && !str_cmp (subcmd, "immleave"))
@@ -7559,19 +7549,19 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
 			argument++;
 
 		if (ch->pc->imm_leave)
-			mem_free (ch->pc->imm_leave);
+			free_mem (ch->pc->imm_leave);
 
 		if (!*argument)
 		{
 			send_to_char ("You will use the standard immleave message.\n", ch);
-			ch->pc->imm_leave = strdup ("");
+			ch->pc->imm_leave = duplicateString ("");
 			return;
 		}
 
 		if (*argument == '"' || *argument == '\'')
 			send_to_char ("Note:  You probably didn't mean to use quotes.\n", ch);
 
-		ch->pc->imm_leave = strdup (argument);
+		ch->pc->imm_leave = duplicateString (argument);
 	}
 
 	else if (ch->pc &&
@@ -7700,7 +7690,7 @@ do_passwd (CHAR_DATA * ch, char *argument, int cmd)
 
 	char* epass = encrypt_buf(new_pass);
 	acct.update_password (epass);
-	mem_free (epass);
+	free_mem (epass);
 	send_to_char ("Password set.\n", ch);
 }
 
@@ -8019,9 +8009,9 @@ do_wanted (CHAR_DATA * ch, char *argument, int cmd)
 	else
 	{
 		if (!IS_MORTAL (ch))
-			ch->desc->header = strdup ("Room  Hours  Zone  Name\n");
+			ch->desc->header = duplicateString ("Room  Hours  Zone  Name\n");
 		else if (criminals)
-			ch->desc->header = strdup ("Hours   Description\n");
+			ch->desc->header = duplicateString ("Hours   Description\n");
 
 		page_string (ch->desc, s_buf);
 	}
@@ -8117,9 +8107,6 @@ report_mobiles (CHAR_DATA * ch)
 	}
 
 	sprintf (buf, "  Total: %d; recount: %d\n", total_mobs, recount);
-	send_to_char (buf, ch);
-	sprintf (buf, "  Hash dups: %d; Dup'ed len: %d\n",
-		hash_dup_strings, hash_dup_length);
 	send_to_char (buf, ch);
 }
 
@@ -8917,7 +8904,7 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 
 	/* Add a new affect */
 
-	af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+	af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 
 	af->type = affect_no;
 
@@ -9215,12 +9202,12 @@ alias_free (ALIAS_DATA * alias)
 		tmp_alias = alias->next_line;
 
 		if (alias->command)
-			mem_free (alias->command);
+			free_mem (alias->command);
 
 		if (alias->line)
-			mem_free (alias->line);
+			free_mem (alias->line);
 
-		mem_free (alias);
+		free_mem (alias);
 
 		alias = tmp_alias;
 	}
@@ -9264,20 +9251,20 @@ alias_create (CHAR_DATA * ch, char *alias_cmd, char *value)
 	if (!get_line (&value, line))
 		return;
 
-	alias = (ALIAS_DATA *) alloc (sizeof (ALIAS_DATA), 28);
+	alias = (ALIAS_DATA *) alloc (sizeof (ALIAS_DATA));
 
-	alias->command = strdup (alias_cmd);
-	alias->line = strdup (line);
+	alias->command = duplicateString (alias_cmd);
+	alias->line = duplicateString (line);
 
 	alias->next_alias = ch->pc->aliases;
 	ch->pc->aliases = alias;
 
 	while (get_line (&value, line))
 	{
-		alias->next_line = (ALIAS_DATA *) alloc (sizeof (ALIAS_DATA), 28);
+		alias->next_line = (ALIAS_DATA *) alloc (sizeof (ALIAS_DATA));
 		alias = alias->next_line;
 
-		alias->line = strdup (line);
+		alias->line = duplicateString (line);
 	}
 }
 
@@ -9290,8 +9277,8 @@ post_alias (DESCRIPTOR_DATA * d)
 
 	alias_create (ch, (char *) ch->delay_info1, ch->delay_who);
 
-	mem_free ((char *) ch->delay_info1);
-	mem_free ((char *) ch->delay_who);
+	free_mem ((char *) ch->delay_info1);
+	free_mem ((char *) ch->delay_who);
 }
 
 ALIAS_DATA *
@@ -9369,7 +9356,7 @@ do_alias (CHAR_DATA * ch, char *argument, int cmd)
 		ch->delay_who = NULL;
 
 		ch->delay_ch = ch;
-		ch->delay_info1 = (long int) strdup (alias_cmd);
+		ch->delay_info1 = (long int) duplicateString (alias_cmd);
 
 		ch->desc->str = &ch->delay_who;
 		ch->desc->max_str = STR_MULTI_LINE;
@@ -9751,7 +9738,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (*search_args)
 	{
-		args = strdup (search_args);
+		args = duplicateString (search_args);
 		alloc = true;
 	}
 
@@ -9765,7 +9752,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				send_to_char ("Expected a port number to search on. "
 					"E.g. 4500, or 4501.\n", ch);
-				mem_free (search_args);
+				free_mem (search_args);
 				return;
 			}
 		}
@@ -9775,7 +9762,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 			if (!*buf)
 			{
 				send_to_char ("Expected a player name to search for.\n", ch);
-				mem_free (search_args);
+				free_mem (search_args);
 				return;
 			}
 			else
@@ -9787,7 +9774,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 			if (!*buf)
 			{
 				send_to_char ("Expected an account name to search for.\n", ch);
-				mem_free (search_args);
+				free_mem (search_args);
 				return;
 			}
 			else
@@ -9799,7 +9786,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 			if (!*buf)
 			{
 				send_to_char ("Expected a command to search for.\n", ch);
-				mem_free (search_args);
+				free_mem (search_args);
 				return;
 			}
 			else
@@ -9811,7 +9798,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 			if (!*buf)
 			{
 				send_to_char ("Expected an NPC name to search for.\n", ch);
-				mem_free (search_args);
+				free_mem (search_args);
 				return;
 			}
 			else
@@ -9823,7 +9810,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 			if (!isdigit (*buf))
 			{
 				send_to_char ("Expected a room number to search for.\n", ch);
-				mem_free (search_args);
+				free_mem (search_args);
 				return;
 			}
 			else
@@ -9836,7 +9823,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				send_to_char
 					("Expected a number of minutes to search within.\n", ch);
-				mem_free (search_args);
+				free_mem (search_args);
 				return;
 			}
 			else
@@ -9849,7 +9836,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				send_to_char ("Expected a number of hours to search within.\n",
 					ch);
-				mem_free (search_args);
+				free_mem (search_args);
 				return;
 			}
 			else
@@ -9862,7 +9849,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				send_to_char ("Expected a number of days to search within.\n",
 					ch);
-				mem_free (search_args);
+				free_mem (search_args);
 				return;
 			}
 			else
@@ -9877,7 +9864,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char
 					("Only level 5 staff members may search the immortal logs.\n",
 					ch);
-				mem_free (search_args);
+				free_mem (search_args);
 				return;
 			}
 			else
@@ -9895,7 +9882,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 				"You've specified an unknown log search parameter: '%s'.\n",
 				buf);
 			send_to_char (buf2, ch);
-			mem_free (search_args);
+			free_mem (search_args);
 			return;
 		}
 		if (!*args)
@@ -9903,7 +9890,7 @@ do_log (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	if (alloc && search_args)
-		mem_free (search_args);
+		free_mem (search_args);
 
 	if (!*search_args && !*argument)
 	{
@@ -10217,14 +10204,14 @@ set_document (int type, int index, char *new_string)
 	if (type == EDIT_TYPE_DOCUMENT || type == EDIT_TYPE_TEXT)
 	{
 		text = (TEXT_DATA *) index;
-		mem_free (text->text);
+		free_mem (text->text);
 		text->text = new_string;
 	}
 
 	else if (type == EDIT_TYPE_HELP || type == EDIT_TYPE_BHELP)
 	{
 		element = (HELP_DATA *) index;
-		mem_free (element->help_info);
+		free_mem (element->help_info);
 		element->help_info = new_string;
 	}
 
@@ -10247,13 +10234,13 @@ edit_string (DESCRIPTOR_DATA * d, std::string argument)
 	if (argument[0] != '@')
 	{
 		p =
-			(char *) alloc (strlen (d->edit_string) + argument.length () + 2, 35);
+			(char *) alloc (strlen (d->edit_string) + argument.length () + 2);
 
 		strcpy (p, d->edit_string);
 		strcat (p, argument.c_str ());
 		strcat (p, "\n");
 
-		mem_free (d->edit_string);
+		free_mem (d->edit_string);
 
 		d->edit_string = p;
 
@@ -10270,7 +10257,7 @@ edit_string (DESCRIPTOR_DATA * d, std::string argument)
 	new_doc_length = strlen (document) -
 		d->edit_length + strlen (d->edit_string) + 1;
 
-	new_doc = (char *) alloc (new_doc_length, 35);
+	new_doc = (char *) alloc (new_doc_length);
 
 	*new_doc = '\0';
 
@@ -10293,7 +10280,7 @@ edit_string (DESCRIPTOR_DATA * d, std::string argument)
 
 	strcpy (new_doc + strlen (new_doc), document + length + d->edit_length);
 
-	mem_free (d->edit_string);
+	free_mem (d->edit_string);
 
 	set_document (d->edit_type, d->edit_index, new_doc);
 
@@ -10580,7 +10567,7 @@ do_edit (CHAR_DATA * ch, char *argument, int cmd)
 		&line_start, &doc_type)))
 		return;
 
-	ch->desc->edit_string = strdup ("");
+	ch->desc->edit_string = duplicateString ("");
 
 	ch->desc->edit_type = doc_type;
 	ch->desc->edit_index = doc_num;
@@ -10793,9 +10780,9 @@ add_help_topics (CHAR_DATA * ch, HELP_DATA ** list, char *argument)
 			last_element->next; last_element = last_element->next)
 			;
 
-	master_element = (HELP_DATA *) alloc (sizeof (HELP_DATA), 36);
-	master_element->keywords = strdup (argument);
-	master_element->help_info = strdup ("");
+	master_element = (HELP_DATA *) alloc (sizeof (HELP_DATA));
+	master_element->keywords = duplicateString (argument);
+	master_element->help_info = duplicateString ("");
 
 	if (last_element)
 		last_element->next = master_element;
@@ -10807,11 +10794,11 @@ add_help_topics (CHAR_DATA * ch, HELP_DATA ** list, char *argument)
 	for (p = one_argument (argument, buf); *buf; p = one_argument (p, buf))
 	{
 
-		element = (HELP_DATA *) alloc (sizeof (HELP_DATA), 36);
+		element = (HELP_DATA *) alloc (sizeof (HELP_DATA));
 
 		element->master_element = master_element;
 		element->help_info = NULL;
-		element->keyword = strdup (buf);
+		element->keyword = duplicateString (buf);
 
 		last_element->next = element;
 		last_element = element;
@@ -10909,10 +10896,10 @@ delete_document (CHAR_DATA * ch, TEXT_DATA ** list, char *argument)
 
 	unlink (element->filename);
 
-	mem_free (element->text);
-	mem_free (element->filename);
-	mem_free (element->name);
-	mem_free (element);
+	free_mem (element->text);
+	free_mem (element->filename);
+	free_mem (element->name);
+	free_mem (element);
 }
 
 void

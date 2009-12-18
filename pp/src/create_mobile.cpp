@@ -2569,8 +2569,9 @@ create_description (CHAR_DATA * mob)
 
 	mob->delay_info1 = 0;
 
-	if (mob->short_descr)
-		mem_free (mob->short_descr);
+	if (mob->short_descr) {
+		free_mem(mob->short_descr);
+	}
 	mob->short_descr = add_hash (sdesc);
 	*buf = '\0';
 	if (IS_SET (mob->act, ACT_ENFORCER) && IS_SET (mob->act, ACT_SENTINEL))
@@ -2842,11 +2843,11 @@ create_description (CHAR_DATA * mob)
 			*buf = toupper (*buf);
 
 			if (mob->long_descr)
-				mem_free (mob->long_descr);
+				free_mem (mob->long_descr);
 			mob->long_descr = add_hash (buf);
 
 			if (mob->name)
-				mem_free (mob->name);
+				free_mem (mob->name);
 			mob->name = add_hash (buf2);
 }
 

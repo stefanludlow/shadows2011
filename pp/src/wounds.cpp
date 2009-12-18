@@ -311,34 +311,34 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 				}
 			}
 
-			wound->location = strdup (location);
+			wound->location = duplicateString (location);
 			wound->damage = impact;
 
 			if (type == 2 || type == 4)
-				wound->type = strdup ("slash");
+				wound->type = duplicateString ("slash");
 			else if (type == 0 || type == 1)
-				wound->type = strdup ("pierce");
+				wound->type = duplicateString ("pierce");
 			else if (type == 3)
-				wound->type = strdup ("blunt");
+				wound->type = duplicateString ("blunt");
 			else if (type == 5)
-				wound->type = strdup ("frost");
+				wound->type = duplicateString ("frost");
 			else if (type == 6)
-				wound->type = strdup ("fire");
+				wound->type = duplicateString ("fire");
 			else if (type == 7)
-				wound->type = strdup ("bite");
+				wound->type = duplicateString ("bite");
 			else if (type == 8)
-				wound->type = strdup ("claw");
+				wound->type = duplicateString ("claw");
 			else if (type == 9)
-				wound->type = strdup ("fist");
+				wound->type = duplicateString ("fist");
 			else if (type == 10)
-				wound->type = strdup("stun");
+				wound->type = duplicateString("stun");
 			else if (!str_cmp(location, "bloodloss"))
-				wound->type = strdup("bloodloss");
+				wound->type = duplicateString("bloodloss");
 			else
-				wound->type = strdup("bloodloss");
+				wound->type = duplicateString("bloodloss");
 
-			wound->name = strdup (name);
-			wound->severity = strdup (severity);
+			wound->name = duplicateString (name);
+			wound->severity = duplicateString (severity);
 
 			if (!str_cmp (severity, "severe") && !bleeding && str_cmp(wound->type, "stun"))
 				wound->bleeding = number (2, 3);
@@ -369,7 +369,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 				reformat_string (buf, &p);
 				send_to_char ("\n", ch);
 				send_to_char (p, ch);
-				mem_free (p);
+				free_mem (p);
 			}
 		} // if bloodloss
 		else
@@ -463,9 +463,9 @@ free_lodged (LODGED_OBJECT_INFO * lodged)
 		return;
 
 	if (lodged->location && strlen (lodged->location) > 1)
-		mem_free (lodged->location);
+		free_mem (lodged->location);
 
-	mem_free (lodged);
+	free_mem (lodged);
 }
 
 void
@@ -475,18 +475,18 @@ free_wound (WOUND_DATA * wound)
 		return;
 
 	if (wound->location && *wound->location)
-		mem_free (wound->location);
+		free_mem (wound->location);
 
 	if (wound->type && *wound->type)
-		mem_free (wound->type);
+		free_mem (wound->type);
 
 	if (wound->name && *wound->name)
-		mem_free (wound->name);
+		free_mem (wound->name);
 
 	if (wound->severity && *wound->severity)
-		mem_free (wound->severity);
+		free_mem (wound->severity);
 
-	mem_free (wound);
+	free_mem (wound);
 }
 
 void
@@ -813,9 +813,9 @@ adjust_wound (CHAR_DATA * ch, WOUND_DATA * wound, int amount)
 	}
 
 	sprintf (buf, "%s", downsized_wound (ch, wound));
-	mem_free (wound->severity);
+	free_mem (wound->severity);
 	wound->severity = NULL;
-	wound->severity = strdup (buf);
+	wound->severity = duplicateString (buf);
 
 	if (amount < 0)
 		return 0;
@@ -2310,14 +2310,14 @@ do_diagnose (CHAR_DATA * ch, char *argument, int cmd)
 				sprintf(buf, strip_small_minor(buf, ch));
 				reformat_string (buf, &p);
 				send_to_char (p, ch);
-				mem_free (p);
+				free_mem (p);
 				p = NULL;
 			}
 			else
 			{
 				reformat_string (buf, &p);
 				send_to_char (p, ch);
-				mem_free (p);
+				free_mem (p);
 				p = NULL;
 			}
 			/*********** end Japheth strip of minor and small ***************/
@@ -3033,9 +3033,9 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
 		if (wound->damage > 0)
 		{
 			sprintf (buf, "%s", downsized_wound (ch, wound));
-			mem_free (wound->severity);
+			free_mem (wound->severity);
 			wound->severity = NULL;
-			wound->severity = strdup (buf);
+			wound->severity = duplicateString (buf);
 		}
 	}
 	else if (roll > needed && WOUND_INFECTIONS)

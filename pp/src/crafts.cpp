@@ -213,10 +213,13 @@ is_craft_command (CHAR_DATA * ch, char *argument)
 		}
 		magic_add_affect (ch, i, -1, 0, 0, 0, 0);
 		af = get_affect (ch, i);
-		af->a.craft =
-			(struct affect_craft_type *) alloc (sizeof (struct affect_craft_type),
-			23);
+		af->a.craft = (struct affect_craft_type *) alloc (sizeof (struct affect_craft_type));
 		af->a.craft->subcraft = craft;
+		af->a.craft->phase = NULL;
+		af->a.craft->target_ch = NULL;
+		af->a.craft->target_obj = NULL;
+		af->a.craft->skill_check = 0;
+		af->a.craft->timer = 0;
 	}
 	else
 		for (i = CRAFT_FIRST; i <= CRAFT_LAST; i++)
@@ -903,10 +906,11 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 			sprintf (command, "%s", buf);
 
 		tcraft = new SUBCRAFT_HEAD_DATA;
+		tcraft->next = NULL;
 		memset (tcraft, 0, sizeof (SUBCRAFT_HEAD_DATA));
 		memcpy (tcraft, ch->pc->edit_craft, sizeof (SUBCRAFT_HEAD_DATA));
 
-		tcraft->phases = new PHASE_DATA;
+		tcraft->phases = new_phase();
 		memset (tcraft->phases, 0, sizeof (PHASE_DATA));
 		memcpy (tcraft->phases, ch->pc->edit_craft->phases, sizeof (PHASE_DATA));
 
@@ -915,6 +919,7 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 			for (i = 0; ch->pc->edit_craft->obj_items[i]; i++)
 			{
 				tcraft->obj_items[i] = new DEFAULT_ITEM_DATA;
+				tcraft->obj_items[i]->phase = NULL;
 				memset (tcraft->obj_items[i], 0,
 					sizeof (DEFAULT_ITEM_DATA));
 			}
@@ -934,6 +939,7 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 			if (!craft->next)
 			{
 				craft->next = new SUBCRAFT_HEAD_DATA;
+				craft->next->next = NULL;
 				craft->next = tcraft;
 				ch->pc->edit_craft = tcraft;
 				send_to_char ("Craft cloned; new craft opened for editing.\n", ch);
@@ -1194,10 +1200,13 @@ do_addcraft (CHAR_DATA * ch, char *argument, int cmd)
 						break;
 				magic_add_affect (edit_mob, i, -1, 0, 0, 0, 0);
 				af = get_affect (edit_mob, i);
-				af->a.craft =
-					(struct affect_craft_type *)
-					alloc (sizeof (struct affect_craft_type), 23);
+				af->a.craft = (struct affect_craft_type *)alloc (sizeof (struct affect_craft_type));
 				af->a.craft->subcraft = craft;
+				af->a.craft->phase = NULL;
+				af->a.craft->target_ch = NULL;
+				af->a.craft->target_obj = NULL;
+				af->a.craft->skill_check = 0;
+				af->a.craft->timer = 0;
 			}
 		}
 	}
@@ -1205,10 +1214,11 @@ do_addcraft (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		magic_add_affect (edit_mob, i, -1, 0, 0, 0, 0);
 		af = get_affect (edit_mob, i);
-		af->a.craft =
-			(struct affect_craft_type *) alloc (sizeof (struct affect_craft_type),
-			23);
+		af->a.craft = (struct affect_craft_type *) alloc (sizeof (struct affect_craft_type));
 		af->a.craft->subcraft = craft;
+		af->a.craft->phase = NULL;
+		af->a.craft->target_ch = NULL;
+		af->a.craft->target_obj = NULL;
 	}
 
 	send_to_char ("Craft(s) added.\n", ch);
@@ -1237,10 +1247,13 @@ update_crafts (CHAR_DATA * ch)
 					break;
 			magic_add_affect (ch, i, -1, 0, 0, 0, 0);
 			af = get_affect (ch, i);
-			af->a.craft =
-				(struct affect_craft_type *)
-				alloc (sizeof (struct affect_craft_type), 23);
+			af->a.craft = (struct affect_craft_type *)alloc (sizeof (struct affect_craft_type));
 			af->a.craft->subcraft = craft;
+			af->a.craft->phase = NULL;
+			af->a.craft->target_ch = NULL;
+			af->a.craft->target_obj = NULL;
+			af->a.craft->skill_check = 0;
+			af->a.craft->timer = 0;
 		}
 		if (is_opening_craft (ch, craft)
 			&& has_required_crafting_skills (ch, craft)
@@ -1251,10 +1264,13 @@ update_crafts (CHAR_DATA * ch)
 					break;
 			magic_add_affect (ch, i, -1, 0, 0, 0, 0);
 			af = get_affect (ch, i);
-			af->a.craft =
-				(struct affect_craft_type *)
-				alloc (sizeof (struct affect_craft_type), 23);
+			af->a.craft = (struct affect_craft_type *) alloc (sizeof (struct affect_craft_type));
 			af->a.craft->subcraft = craft;
+			af->a.craft->phase = NULL;
+			af->a.craft->target_ch = NULL;
+			af->a.craft->target_obj = NULL;
+			af->a.craft->skill_check = 0;
+			af->a.craft->timer = 0;
 		}
 	}
 }
@@ -1561,7 +1577,7 @@ read_item_list (DEFAULT_ITEM_DATA ** items, char *list, PHASE_DATA * phase)
 	char *argument;
 	DEFAULT_ITEM_DATA *deflt;
 
-	*items = (DEFAULT_ITEM_DATA *) alloc (sizeof (DEFAULT_ITEM_DATA), 27);
+	*items = (DEFAULT_ITEM_DATA *) alloc (sizeof (DEFAULT_ITEM_DATA));
 
 	deflt = *items;
 
@@ -1593,8 +1609,27 @@ new_phase ()
 {
 	PHASE_DATA *phase;
 
-	phase = (PHASE_DATA *) alloc (sizeof (PHASE_DATA), 26);
+	phase = new PHASE_DATA;
+	phase->load_mob = -1;
+	phase->move_cost = -1;
+	phase->phase_seconds = -1;
+	phase->power = 0;
+	phase->req_skill = -1;
+	phase->req_skill_value = -1;
+	phase->self = "";
+	phase->sides = -1;
 	phase->attribute = -1;
+	phase->next = NULL;
+	phase->tool = NULL;
+	phase->attribute = -1;
+	phase->attr = -1;
+	phase->dice = -1;
+	phase->duration = -1;
+	phase->flags = 0;
+	phase->hit_cost = -1;
+	phase->targets = -1;
+	phase->skill = -1;
+	phase->spell_type = -1;
 
 	return phase;
 }
@@ -1655,7 +1690,7 @@ read_extended_text (FILE * fp, char *first_line)
 		fgets (buf, MAX_STRING_LENGTH - 1, fp);
 	}
 
-	return strdup (line);
+	return duplicateString (line);
 }
 
 void
@@ -1677,8 +1712,9 @@ subcraft_line (FILE * fp_reg, char *line)
 	{
 		if (!crafts)
 		{
-			crafts = subcraft =
-				(SUBCRAFT_HEAD_DATA *) alloc (sizeof (SUBCRAFT_HEAD_DATA), 25);
+			crafts = subcraft = (SUBCRAFT_HEAD_DATA *) alloc (sizeof (SUBCRAFT_HEAD_DATA));
+			crafts->next = NULL;
+			crafts->phases = NULL;
 			memset (crafts, 0, sizeof (SUBCRAFT_HEAD_DATA));
 		}
 		else
@@ -1686,9 +1722,9 @@ subcraft_line (FILE * fp_reg, char *line)
 			for (subcraft = crafts; subcraft->next; subcraft = subcraft->next)
 				;
 
-			subcraft->next =
-				(SUBCRAFT_HEAD_DATA *) alloc (sizeof (SUBCRAFT_HEAD_DATA), 25);
+			subcraft->next = (SUBCRAFT_HEAD_DATA *) alloc (sizeof (SUBCRAFT_HEAD_DATA));
 			subcraft = subcraft->next;
+			subcraft->phases = NULL;
 			memset (subcraft, 0, sizeof (SUBCRAFT_HEAD_DATA));
 		}
 
@@ -1697,7 +1733,7 @@ subcraft_line (FILE * fp_reg, char *line)
 		subcraft->clans = add_hash ("");
 
 		argument = one_argument (argument, buf);
-		subcraft->craft_name = strdup (buf);
+		subcraft->craft_name = duplicateString (buf);
 
 		argument = one_argument (argument, buf);
 
@@ -1710,7 +1746,7 @@ subcraft_line (FILE * fp_reg, char *line)
 		}
 
 		argument = one_argument (argument, buf);
-		subcraft->subcraft_name = strdup (buf);
+		subcraft->subcraft_name = duplicateString (buf);
 
 		argument = one_argument (argument, buf);
 
@@ -1723,7 +1759,7 @@ subcraft_line (FILE * fp_reg, char *line)
 		}
 
 		argument = one_argument (argument, buf);
-		subcraft->command = strdup (buf);
+		subcraft->command = duplicateString (buf);
 
 		return;
 	}
@@ -1967,14 +2003,15 @@ subcraft_line (FILE * fp_reg, char *line)
 
 	if (!str_cmp (buf, "phase") || !str_cmp (buf, "phase:"))
 	{
-		if (!subcraft->phases)
-			subcraft->phases = new_phase ();
+		if (!subcraft->phases) {
+			subcraft->phases = new_phase();
+		}
 		else
 		{
 			for (phase = subcraft->phases; phase->next; phase = phase->next)
 				;
 
-			phase->next = new_phase ();
+			phase->next = new_phase();
 		}
 
 		return;
@@ -2838,7 +2875,7 @@ missing_item_msg (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, char *header)
 	reformat_string (buf, &p);
 	send_to_char (p, ch);
 
-	mem_free (p);
+	free_mem (p);
 }
 
 int
@@ -3097,10 +3134,13 @@ branch_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft)
 
 	magic_add_affect (ch, i, -1, 0, 0, 0, 0);
 	af = get_affect (ch, i);
-	af->a.craft =
-		(struct affect_craft_type *) alloc (sizeof (struct affect_craft_type),
-		23);
+	af->a.craft = (struct affect_craft_type *) alloc (sizeof (struct affect_craft_type));
 	af->a.craft->subcraft = tcraft;
+	af->a.craft->phase = NULL;
+	af->a.craft->target_ch = NULL;
+	af->a.craft->target_obj = NULL;
+	af->a.craft->skill_check = 0;
+	af->a.craft->timer = 0;
 
 	magic_add_affect (ch, MAGIC_CRAFT_BRANCH_STOP, number (30, 90), 0, 0, 0, 0);
 }
@@ -3270,7 +3310,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 	int delay_time = 0;
 	bool missing_said = false;
 	int phase_failed = 0;
-	int skill_value;
+	int skill_value = 0;
 	int index = 0;
 	int dice_val;
 	int ch_level;
@@ -3455,10 +3495,12 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 
 	if (phase->req_skill)
 	{
-		if (IS_SET (phase->flags, PHASE_REQUIRE_ON_SELF))
+		if (IS_SET (phase->flags, PHASE_REQUIRE_ON_SELF)) {
 			skill_value = ch->skills[phase->req_skill];
-		else
+		}
+		else if (target_ch != NULL) {
 			skill_value = target_ch->skills[phase->req_skill];
+		}
 
 		if (IS_SET (phase->flags, PHASE_REQUIRE_GREATER) &&
 			skill_value <= phase->req_skill_value)
@@ -3532,7 +3574,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 		if (obj_list[i] && obj_list[i]->var_color
 			&& str_cmp (obj_list[i]->var_color, "none"))
 		{
-			item->color = strdup (obj_list[i]->var_color);
+			item->color = duplicateString (obj_list[i]->var_color);
 		}
 
 		/* Purge Consumed Craft Items */
@@ -3627,7 +3669,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 			if (item && item->color && *item->color)
 			{
 				sprintf (color, "%s", item->color);
-				mem_free (item->color);
+				free_mem (item->color);
 				break;
 			}
 		}
@@ -3694,7 +3736,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 
 			if (IS_SET (phase->nMobFlags, CRAFT_MOB_SETOWNER))
 			{
-				mob->mob->owner = strdup (ch->tname);
+				mob->mob->owner = duplicateString (ch->tname);
 			}
 		}
 	}
@@ -3721,7 +3763,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 					if (item && item->color && *item->color)
 					{
 						sprintf (color, "%s", item->color);
-						mem_free (item->color);
+						free_mem (item->color);
 						break;
 					}
 				}
@@ -4507,7 +4549,7 @@ craft_clan (CHAR_DATA * ch, char *argument, char *subcmd)
 		if (!*buf2)
 		{
 			craft->clans =
-				strdup (remove_clan_from_string (craft->clans, buf));
+				duplicateString (remove_clan_from_string (craft->clans, buf));
 			send_to_char
 				("The specified clan requirement has been removed.\n",
 				ch);
@@ -4525,9 +4567,9 @@ craft_clan (CHAR_DATA * ch, char *argument, char *subcmd)
 		else
 		{
 			craft->clans =
-				strdup (remove_clan_from_string (craft->clans, buf));
+				duplicateString (remove_clan_from_string (craft->clans, buf));
 			craft->clans =
-				strdup (add_clan_to_string (craft->clans, buf, flags));
+				duplicateString (add_clan_to_string (craft->clans, buf, flags));
 			send_to_char
 				("The rank requirement for the specified clan has been updated.\n",
 				ch);
@@ -4551,12 +4593,12 @@ craft_clan (CHAR_DATA * ch, char *argument, char *subcmd)
 		if (flags)
 		{
 			craft->clans =
-				strdup (add_clan_to_string (craft->clans, buf, flags));
+				duplicateString (add_clan_to_string (craft->clans, buf, flags));
 		}
 		else
 		{
 			craft->clans =
-				strdup (add_clan_to_string (craft->clans, buf, CLAN_MEMBER));
+				duplicateString (add_clan_to_string (craft->clans, buf, CLAN_MEMBER));
 		}
 
 		send_to_char

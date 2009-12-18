@@ -105,7 +105,7 @@ reformat_say_string (char *source, char **target, CHAR_DATA * to)
 		result[strlen (result) - 1] != '?')
 		result[strlen (result)] = '.';
 
-	*target = strdup (result);
+	*target = duplicateString (result);
 }
 
 #include <memory>
@@ -143,14 +143,14 @@ do_ooc (CHAR_DATA * ch, char *argument, int cmd)
 		std::string formatted = argument;
 		formatted[0] = toupper (formatted[0]);
 		char *p = 0;
-		char *s = strdup (formatted.c_str ());
+		char *s = duplicateString (formatted.c_str ());
 		reformat_say_string (s, &p, 0);
 		sprintf (buf, "$n says, out of character,\n   \"%s\"", p + i);
 		act (buf, false, ch, 0, 0, TO_ROOM);
 		sprintf (buf, "You say, out of character,\n   \"%s\"\n", p + i);
 		send_to_char (buf, ch);
-		mem_free (s);
-		mem_free (p);
+		free_mem (s);
+		free_mem (p);
 	}
 }
 
@@ -240,7 +240,7 @@ clear_dmote (CHAR_DATA * ch)
 {
 	if (ch->dmote_str)
 	{
-		mem_free (ch->dmote_str); // char*
+		free_mem (ch->dmote_str); // char*
 		ch->dmote_str = NULL;
 	}
 }
@@ -348,7 +348,7 @@ void do_think (CHAR_DATA * ch, char *argument, int cmd) {
 	sprintf (buf1, "%s thinks, \"%s\"", GET_NAME (ch), argument);
 	reformat_say_string (argument, &p, 0);
 	sprintf (buf2, "#6You hear #5%s#6 think,\n   \"%s\"#0\n", char_short (ch), p);
-	mem_free (p); // char*
+	free_mem (p); // char*
 
 	act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 
@@ -862,7 +862,7 @@ do_mute (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (!get_affect (ch, MUTE_EAVESDROP))
 		{
-			af = (AFFECTED_TYPE *) new AFFECTED_TYPE), 13);
+			af = (AFFECTED_TYPE *) alloc(sizeof(AFFECTED_TYPE));
 
 			af->type = MUTE_EAVESDROP;
 			af->a.listening.duration = -1;
@@ -1065,7 +1065,7 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (buf[i] == ')') {
 			send_to_char ("What did you wish to say?\n", ch);
-			mem_free (argument);
+			free_mem (argument);
 			return;
 		}
 
@@ -1073,7 +1073,7 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 			if (buf[i] == '\0')
 			{
 				send_to_char ("What did you wish to say?\n", ch);
-				mem_free (argument);
+				free_mem (argument);
 				return;
 			}
 			if (buf[i] == '*')
@@ -1091,7 +1091,7 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 				{
 					sprintf (buf, "I don't see %s here.\n", key);
 					send_to_char (buf, ch);
-					mem_free (argument);
+					free_mem (argument);
 					return;
 				}
 
@@ -1118,7 +1118,7 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 				{
 					sprintf (buf, "I don't see %s here.\n", key);
 					send_to_char (buf, ch);
-					mem_free (argument);
+					free_mem (argument);
 					return;
 				}
 
@@ -1135,19 +1135,19 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 			argument++;
 			if (*argument == '\0') {
 				send_to_char ("What did you wish to say?\n", ch);
-				mem_free (argument);
+				free_mem (argument);
 				return;
 			}
 		}
 
 		if (*(++argument) == '\0') {
 			send_to_char ("What did you wish to say?\n", ch);
-			mem_free (argument);
+			free_mem (argument);
 			return;
 		}
 		else if (*(++argument) == '\0') {
 			send_to_char ("What did you wish to say?\n", ch);
-			mem_free (argument);
+			free_mem (argument);
 			return;
 		}
 
@@ -1162,7 +1162,7 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 		if (!*argument)
 		{
 			send_to_char ("What did you wish to say?\n", ch);
-			mem_free (argument);
+			free_mem (argument);
 			return;
 		}
 	}
@@ -1175,7 +1175,7 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	if (!*argument)
 	{
 		send_to_char ("What did you wish to say?\n", ch);
-		mem_free (argument);
+		free_mem (argument);
 		return;
 	}
 
@@ -1189,21 +1189,21 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 		if (!*argument)
 		{
 			send_to_char ("What did you wish to tell?\n", ch);
-			mem_free (argument);
+			free_mem (argument);
 			return;
 		}
 
 		if (!(target = get_char_room_vis (ch, buf)))
 		{
 			send_to_char ("Tell who?\n", ch);
-			mem_free (argument);
+			free_mem (argument);
 			return;
 		}
 
 		if (target == ch)
 		{
 			send_to_char ("You want to tell yourself?\n", ch);
-			mem_free (argument);
+			free_mem (argument);
 			return;
 		}
 
@@ -1222,7 +1222,7 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 		else
 			send_to_char ("What would you like to say?\n", ch);
 
-		mem_free (argument);
+		free_mem (argument);
 		return;
 	}
 
@@ -1240,7 +1240,7 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char
 			("You can't even make a guess at the language you want to speak.\n",
 			ch);
-		mem_free (argument);
+		free_mem (argument);
 		return;
 	}
 
@@ -1252,12 +1252,12 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (buf4[strlen (buf4) - 1] == '?')
 		{
-			utters[cmd] = strdup ("ask");
+			utters[cmd] = duplicateString ("ask");
 			allocd = true;
 		}
 		else if (buf4[strlen (buf4) - 1] == '!')
 		{
-			utters[cmd] = strdup ("exclaim");
+			utters[cmd] = duplicateString ("exclaim");
 			allocd = true;
 		}
 	}
@@ -1265,12 +1265,12 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (buf4[strlen (buf4) - 1] == '?')
 		{
-			utters[cmd] = strdup ("ask");
+			utters[cmd] = duplicateString ("ask");
 			allocd = true;
 		}
 		else if (buf4[strlen (buf4) - 1] == '!')
 		{
-			utters[cmd] = strdup ("emphatically tell");
+			utters[cmd] = duplicateString ("emphatically tell");
 			allocd = true;
 		}
 	}
@@ -1674,10 +1674,10 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	if (cmd == 0)
 	{
 		if (allocd)
-			mem_free (utters[cmd]); // char[]
+			free_mem (utters[cmd]); // char[]
 	}
 
-	mem_free (argument); // char * ??? <- why freeing this here???
+	free_mem (argument); // char * ??? <- why freeing this here???
 }
 
 void
@@ -1779,7 +1779,7 @@ do_ichat (CHAR_DATA * ch, char *argument, int cmd)
 				}
 			}
 		}
-		mem_free (p); // char*
+		free_mem (p); // char*
 	}
 }
 
@@ -1840,7 +1840,7 @@ do_fivenet (CHAR_DATA * ch, char *argument, int cmd)
 					}
 				}
 			}
-			mem_free (p); // char*
+			free_mem (p); // char*
 	}
 
 }
@@ -1908,12 +1908,12 @@ do_immtell (CHAR_DATA * ch, char *argument, int cmd)
 			CAP (message));
 		reformat_string (buf, &p);
 		send_to_char (p, vict);
-		mem_free (p); // char*
+		free_mem (p); // char*
 
 		sprintf (buf, "#5[To %s]#0 %s\n", GET_NAME (vict), CAP (message));
 		reformat_string (buf, &p);
 		send_to_char (p, ch);
-		mem_free (p); // char*
+		free_mem (p); // char*
 	}
 }
 
@@ -2371,7 +2371,7 @@ do_whisper (CHAR_DATA * ch, char *argument, int cmd)
 		sprintf (p, buf3);
 	}
 
-	mem_free (p); // char*
+	free_mem (p); // char*
 
 	trigger (ch, argument, TRIG_WHISPER);
 }
@@ -2605,12 +2605,12 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 		} /* end of 'it wasn't sent' block */
 
 		/* clean up and sent echo back to user */
-		mem_free (p); // char*
+		free_mem (p); // char*
 
 		sprintf (buf, "You petitioned: %s\n", CAP (argument));
 		reformat_string (buf, &p);
 		send_to_char (p, ch);
-		mem_free (p); // char*
+		free_mem (p); // char*
 
 		if (!sent)
 		{
@@ -2686,11 +2686,11 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 
 	reformat_string (buf, &p);
 	send_to_char (p, admin);
-	mem_free (p); // char*
+	free_mem (p); // char*
 	sprintf (buf, "You petitioned %s: %s\n", GET_NAME (admin), CAP (argument));
 	reformat_string (buf, &p);
 	send_to_char (p, ch);
-	mem_free (p); // char*
+	free_mem (p); // char*
 
 	/* successfully sent to that named staff member */
 	unload_pc (admin);
@@ -2751,9 +2751,9 @@ do_shout (CHAR_DATA *ch, char * arg, int cmd)
 
 	argument[0] = toupper(argument[0]);
 	char *buf;
-	char *orig = strdup((char *) argument.c_str());
+	char *orig = duplicateString((char *) argument.c_str());
 	reformat_say_string (orig, &buf, 0);
-	mem_free(orig);
+	free_mem(orig);
 	argument = buf;
 
 	std::string toplayer = argument;
@@ -3489,7 +3489,7 @@ clear_voice (CHAR_DATA * ch)
 {
 	if (ch->voice_str)
 	{
-		mem_free (ch->voice_str); // char*
+		free_mem (ch->voice_str); // char*
 		ch->voice_str = NULL;
 	}
 }
@@ -3509,7 +3509,7 @@ clear_travel (CHAR_DATA * ch)
 {
 	if (ch->travel_str)
 	{
-		mem_free (ch->travel_str); // char*
+		free_mem (ch->travel_str); // char*
 		ch->travel_str = NULL;
 		send_to_char ("Your travel string has been cleared.\n", ch);
 	}
@@ -3802,7 +3802,7 @@ do_plan (CHAR_DATA * ch, char *argument, int cmd)
 					char *p;
 					reformat_string (buf, &p);
 					send_to_char (p, ch);
-					mem_free (p);
+					free_mem (p);
 				}
 
 				// bad message size

@@ -251,7 +251,7 @@ object_damage__new ()
 		return NULL;
 
 	thisPtr = new OBJECT_DAMAGE;
-
+	thisPtr->next = NULL;
 	thisPtr->source = (DAMAGE_TYPE) 0;
 	thisPtr->material = (MATERIAL_TYPE) 0;
 	thisPtr->severity = (DAMAGE_SEVERITY) 0;
@@ -322,7 +322,7 @@ object_damage__delete (OBJECT_DAMAGE * thisPtr)
 	if (thisPtr)
 	{
 		next = thisPtr->next;
-		mem_free (thisPtr);
+		free_mem (thisPtr);
 	}
 
 	return next;
@@ -352,7 +352,7 @@ object_damage__get_sdesc (OBJECT_DAMAGE * thisPtr)
 		+
 		strlen (damage_name[thisPtr->source]
 	[(thisPtr->material < MATERIAL_IRON) ? 0 : 1][thisPtr->name]) + 5;
-	str_sdesc = (char *) alloc (sizeof (char) * n_sdesc_length, 0);
+	str_sdesc = (char *) alloc (sizeof (char) * n_sdesc_length);
 	sprintf (str_sdesc, "%s %s %s",
 		(isvowel (damage_severity[thisPtr->severity][0])) ? "an" : "a",
 		damage_severity[thisPtr->severity],

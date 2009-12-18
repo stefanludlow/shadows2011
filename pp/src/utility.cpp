@@ -1358,19 +1358,19 @@ calc_lookup (CHAR_DATA * ch, int reg_index, int reg_entry)
 	return calced_value;
 }
 
-void
-print_mem_stats (CHAR_DATA * ch)
-{
-	extern int bytes_allocated;
-	extern char *memory_next;
-	extern char *memory_top;
-	char buf[MAX_STRING_LENGTH];
-
-	sprintf (buf, "Bytes allocated:  %d  Internal free: %d", bytes_allocated,
-		memory_top - memory_next);
-
-	system_log (buf, false);
-}
+//void
+//print_mem_stats (CHAR_DATA * ch)
+//{
+//	extern int bytes_allocated;
+//	extern char *memory_next;
+//	extern char *memory_top;
+//	char buf[MAX_STRING_LENGTH];
+//
+//	sprintf (buf, "Bytes allocated:  %d  Internal free: %d", bytes_allocated,
+//		memory_top - memory_next);
+//
+//	system_log (buf, false);
+//}
 
 void
 sort_int_array (int *array, int entries)
@@ -1489,7 +1489,7 @@ alloc (int bytes, int dtype)
 			printf ("unspace");
 			break;
 		case 15:
-			printf ("strdup: ");
+			printf ("duplicateString: ");
 			break;
 		case 16:
 			printf ("CREATE");
@@ -1582,9 +1582,34 @@ alloc (int bytes, int dtype)
 
 #else /* NOVELL */
 
+char* duplicateString(const char *source) {
+	std::string tempString = source;
+	char *output = new char[tempString.length() + 1];
 
-malloc_t
-alloc (int bytes, int dtype)
+	strncpy(output, tempString.c_str(), tempString.length() + 1);
+	return output;
+}
+
+int free_mem_array (void *ptr) {
+	delete [] ptr;
+	return 1;
+}
+	
+int free_mem (char *ptr) {
+	if (ptr != NULL && strcmp(ptr, "") == STR_MATCH) {
+		return free_mem_array(ptr);
+	}
+	else {
+		return 0;
+	}
+}
+
+int free_mem (void *ptr) {
+	delete [] ptr;
+	return 1;
+}
+
+void* alloc (int bytes)
 {
 	char *p = new char[bytes];
 	return p;
@@ -1603,7 +1628,7 @@ alloc (int bytes, int dtype)
 
 	//if (!p)
 	//{
-	//	mem_free (emergency_data);
+	//	free_mem (emergency_data);
 	//	system_log ("calloc failed.  Out of memory - forced to shutdown.",
 	//		true);
 	//	shutd = 1;
@@ -3182,7 +3207,7 @@ add_text (TEXT_DATA ** list, char *filename, char *document_name)
 
 	doc = file_to_string (filename);
 
-	text = (TEXT_DATA *) alloc (sizeof (TEXT_DATA), 37);
+	text = (TEXT_DATA *) alloc (sizeof (TEXT_DATA));
 
 	if (list == NULL)
 		text->next = NULL;
@@ -3191,8 +3216,8 @@ add_text (TEXT_DATA ** list, char *filename, char *document_name)
 
 	*list = text;
 
-	text->filename = strdup (filename);
-	text->name = strdup (document_name);
+	text->filename = duplicateString (filename);
+	text->name = duplicateString (document_name);
 	text->text = doc;
 
 	return text;
@@ -3245,15 +3270,15 @@ deallocate_help (HELP_DATA ** list)
 		l = l->next;
 
 		if (element->keyword)
-			mem_free (element->keyword);
+			free_mem (element->keyword);
 
 		if (element->keywords)
-			mem_free (element->keywords);
+			free_mem (element->keywords);
 
 		if (element->help_info)
-			mem_free (element->help_info);
+			free_mem (element->help_info);
 
-		mem_free (element);
+		free_mem (element);
 	}
 }
 
@@ -3287,8 +3312,8 @@ load_help_file (FILE * fp)
 			if (!master_element)
 			{
 
-				master_element = (HELP_DATA *) alloc (sizeof (HELP_DATA), 36);
-				master_element->keywords = strdup (buf);
+				master_element = (HELP_DATA *) alloc (sizeof (HELP_DATA));
+				master_element->keywords = duplicateString (buf);
 
 				if (!list)
 					list = master_element;
@@ -3298,11 +3323,11 @@ load_help_file (FILE * fp)
 				last_element = master_element;
 			}
 
-			element = (HELP_DATA *) alloc (sizeof (HELP_DATA), 36);
+			element = (HELP_DATA *) alloc (sizeof (HELP_DATA));
 
 			element->master_element = master_element;
 			element->help_info = NULL;
-			element->keyword = strdup (topic);
+			element->keyword = duplicateString (topic);
 
 			last_element->next = element;
 			last_element = element;
@@ -3321,7 +3346,7 @@ load_help_file (FILE * fp)
 			strcat (b_buf, buf);
 		}
 
-		master_element->help_info = strdup (b_buf);
+		master_element->help_info = duplicateString (b_buf);
 
 		if (buf[1] == '~')
 			break;
@@ -3533,7 +3558,7 @@ add_combat_log (CHAR_DATA * ch, char *msg)
 		return;
 
 	if (!ch->combat_log)
-		ch->combat_log = strdup ("\n");
+		ch->combat_log = duplicateString ("\n");
 
 	p = ch->combat_log;
 
@@ -3561,9 +3586,9 @@ add_combat_log (CHAR_DATA * ch, char *msg)
 	sprintf (buf + strlen (buf), "%s DIED: %s\n", ch->tname, msg);
 
 	if (ch->combat_log)
-		mem_free (ch->combat_log);
+		free_mem (ch->combat_log);
 
-	ch->combat_log = strdup (buf);
+	ch->combat_log = duplicateString (buf);
 }
 
 int

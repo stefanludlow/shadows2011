@@ -502,7 +502,7 @@ remove_obj_affect_location (OBJ_DATA * obj, int location)
 	{
 		af = obj->xaffected;
 		obj->xaffected = obj->xaffected->next;
-		mem_free (af);
+		free_mem (af);
 		return;
 	}
 
@@ -511,7 +511,7 @@ remove_obj_affect_location (OBJ_DATA * obj, int location)
 		{
 			taf = af->next;
 			af->next = taf->next;
-			mem_free (taf);
+			free_mem (taf);
 			return;
 		}
 }
@@ -546,7 +546,7 @@ remove_obj_affect (OBJ_DATA * obj, int type)
 	{
 		af = obj->xaffected;
 		obj->xaffected = af->next;
-		mem_free (af);
+		free_mem (af);
 		return;
 	}
 
@@ -556,7 +556,7 @@ remove_obj_affect (OBJ_DATA * obj, int type)
 		{
 			free_af = af->next;
 			af->next = free_af->next;
-			mem_free (free_af);
+			free_mem (free_af);
 			return;
 		}
 	}
@@ -647,9 +647,9 @@ affect_remove (CHAR_DATA * ch, AFFECTED_TYPE * af)
 	}
 
 	if (af->type >= CRAFT_FIRST && af->type <= CRAFT_LAST)
-		mem_free (af->a.craft);
+		free_mem (af->a.craft);
 
-	mem_free (af);
+	free_mem (af);
 }
 
 void
@@ -1871,7 +1871,7 @@ remove_object_affect (OBJ_DATA * obj, AFFECTED_TYPE * af)
 	if (af == obj->xaffected)
 	{
 		obj->xaffected = af->next;
-		mem_free (af);
+		free_mem (af);
 		return;
 	}
 
@@ -1880,7 +1880,7 @@ remove_object_affect (OBJ_DATA * obj, AFFECTED_TYPE * af)
 		if (af == taf->next)
 		{
 			taf->next = af->next;
-			mem_free (af);
+			free_mem (af);
 			return;
 		}
 	}
@@ -2712,86 +2712,86 @@ name_money (OBJ_DATA * obj)
 	if (obj->nVirtual == VNUM_FARTHING)
 	{
 
-		obj->description = strdup ("");
+		obj->description = duplicateString ("");
 
 		if (obj->count == 1)
-			obj->name = strdup (farthing_one);
+			obj->name = duplicateString (farthing_one);
 		else
-			obj->name = strdup (farthing_some);
+			obj->name = duplicateString (farthing_some);
 
 		if (obj->count == 1)
-			obj->short_description = strdup (farthing_short_1);
+			obj->short_description = duplicateString (farthing_short_1);
 
 		else if (obj->count == 2)
-			obj->short_description = strdup (farthing_short_2);
+			obj->short_description = duplicateString (farthing_short_2);
 
 		else if (obj->count == 3)
-			obj->short_description = strdup (farthing_short_3);
+			obj->short_description = duplicateString (farthing_short_3);
 
 		else if (obj->count == 4)
-			obj->short_description = strdup (farthing_short_4);
+			obj->short_description = duplicateString (farthing_short_4);
 
 		else if (obj->count > 2501)	/* more than 2500 coins */
-			obj->short_description = strdup (farthing_short_enormous);
+			obj->short_description = duplicateString (farthing_short_enormous);
 
 		else if (obj->count > 1001)	/* 1001 - 2500 coins */
-			obj->short_description = strdup (farthing_short_huge);
+			obj->short_description = duplicateString (farthing_short_huge);
 
 		else if (obj->count > 101)	/* 101 - 1000 coins */
-			obj->short_description = strdup (farthing_short_big);
+			obj->short_description = duplicateString (farthing_short_big);
 
 		else if (obj->count > 51)	/* 51 - 100 coins */
-			obj->short_description = strdup (farthing_short_pile);
+			obj->short_description = duplicateString (farthing_short_pile);
 
 		else if (obj->count > 21)	/* 21 - 50 coins */
-			obj->short_description = strdup (farthing_short_small);
+			obj->short_description = duplicateString (farthing_short_small);
 
 		else			/* 5 - 20 coins */
-			obj->short_description = strdup (farthing_short_handful);
+			obj->short_description = duplicateString (farthing_short_handful);
 
 		return;
 	}
 
 	if (obj->o.od.value[0] == 1)
 	{
-		obj->name = strdup (name_one_penny);
-		obj->short_description = strdup (short_one_penny);
-		obj->description = strdup (long_one_penny);
+		obj->name = duplicateString (name_one_penny);
+		obj->short_description = duplicateString (short_one_penny);
+		obj->description = duplicateString (long_one_penny);
 	}
 
 	else if (obj->o.od.value[0] >= 100000)
 	{
-		obj->name = strdup (name_some_pennies);
-		obj->short_description = strdup (short_mountain);
-		obj->description = strdup (long_mountain);
+		obj->name = duplicateString (name_some_pennies);
+		obj->short_description = duplicateString (short_mountain);
+		obj->description = duplicateString (long_mountain);
 	}
 
 	else if (obj->o.od.value[0] >= 10000)
 	{
-		obj->name = strdup (name_some_pennies);
-		obj->short_description = strdup (short_huge);
-		obj->description = strdup (long_huge);
+		obj->name = duplicateString (name_some_pennies);
+		obj->short_description = duplicateString (short_huge);
+		obj->description = duplicateString (long_huge);
 	}
 
 	else if (obj->o.od.value[0] >= 1000)
 	{
-		obj->name = strdup (name_some_pennies);
-		obj->short_description = strdup (short_big);
-		obj->description = strdup (long_big);
+		obj->name = duplicateString (name_some_pennies);
+		obj->short_description = duplicateString (short_big);
+		obj->description = duplicateString (long_big);
 	}
 
 	else if (obj->o.od.value[0] >= 100)
 	{
-		obj->name = strdup (name_some_pennies);
-		obj->short_description = strdup (short_pile);
-		obj->description = strdup (long_pile);
+		obj->name = duplicateString (name_some_pennies);
+		obj->short_description = duplicateString (short_pile);
+		obj->description = duplicateString (long_pile);
 	}
 
 	else
 	{
-		obj->name = strdup (name_some_pennies);
-		obj->short_description = strdup (short_several);
-		obj->description = strdup (long_several);
+		obj->name = duplicateString (name_some_pennies);
+		obj->short_description = duplicateString (short_several);
+		obj->description = duplicateString (long_several);
 	}
 }
 
@@ -3328,7 +3328,7 @@ break_delay (CHAR_DATA * ch)
 		if (ch->pc->msg)
 		{
 			send_to_char ("Your prepared message was deleted.\n\r", ch);
-			mem_free (ch->pc->msg);
+			free_mem (ch->pc->msg);
 			ch->pc->msg = NULL;
 		}
 		break;
@@ -3353,7 +3353,7 @@ break_delay (CHAR_DATA * ch)
 		ch->delay = 0;
 		if (ch->delay_who)
 		{
-			mem_free (ch->delay_who);
+			free_mem (ch->delay_who);
 			ch->delay_who = NULL;
 		}
 		act ("You stop trying to identify the flora.", true, ch, 0, 0, TO_CHAR);
@@ -3363,7 +3363,7 @@ break_delay (CHAR_DATA * ch)
 		ch->delay = 0;
 		if (ch->delay_who)
 		{
-			mem_free (ch->delay_who);
+			free_mem (ch->delay_who);
 			ch->delay_who = NULL;
 		}
 		act ("You stop gathering.", true, ch, 0, 0, TO_CHAR);
@@ -3495,7 +3495,7 @@ add_room_affect (AFFECTED_TYPE ** af, int type, int duration)
 		return;
 	}
 
-	raffect = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+	raffect = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 
 	raffect->type = type;
 	raffect->a.room.duration = duration;
@@ -3533,8 +3533,7 @@ add_registry (int reg_index, int value, const char *string)
 	}
 
 	new_reg = new REGISTRY_DATA;
-
-	new_reg->string = strdup (string);
+	new_reg->string = duplicateString (string);
 	new_reg->value = value;
 	new_reg->next = registry[reg_index];
 	registry[reg_index] = new_reg;
@@ -3552,13 +3551,13 @@ free_registry (void)
 	i--;
 	while (i)
 	{
-		mem_free (registry[i]->string);
-		mem_free (registry[i]);
+		free_mem (registry[i]->string);
+		free_mem (registry[i]);
 		i--;
 	}
 
-	mem_free (registry[0]->string);
-	mem_free (registry[0]);
+	free_mem (registry[0]->string);
+	free_mem (registry[0]);
 }
 
 int
@@ -3677,7 +3676,7 @@ reg_read_magic (FILE * fp_reg, char *buf)
 		if (!*buf2)
 			continue;
 
-		spell_table[sn].msg_off = strdup (buf2);
+		spell_table[sn].msg_off = duplicateString (buf2);
 	}
 }
 
@@ -3885,6 +3884,7 @@ add_combat_message (char *line)
 		argument = one_argument (argument, buf);
 
 		cm = new COMBAT_MSG_DATA;
+		cm->next = NULL;
 
 		*buf = toupper (*buf);
 
@@ -3911,11 +3911,11 @@ add_combat_message (char *line)
 		argument++;
 
 	if (party == 0)
-		cm->def_msg = strdup (argument);
+		cm->def_msg = duplicateString (argument);
 	else if (party == 1)
-		cm->off_msg = strdup (argument);
+		cm->off_msg = duplicateString (argument);
 	else
-		cm->other_msg = strdup (argument);
+		cm->other_msg = duplicateString (argument);
 
 	if (party == 0)
 		insert_combat_msg (cm);
@@ -4353,13 +4353,13 @@ load_dynamic_registry (void)
 
 			name_switch =
 				(struct name_switch_data *)
-				alloc (sizeof (struct name_switch_data), 38);
+				alloc (sizeof (struct name_switch_data));
 
 			argument = one_argument (argument, token);
-			name_switch->old_name = strdup (token);
+			name_switch->old_name = duplicateString (token);
 
 			argument = one_argument (argument, token);
-			name_switch->new_name = strdup (token);
+			name_switch->new_name = duplicateString (token);
 
 			if (!last_name)
 				clan_name_switch_list = name_switch;
@@ -4525,61 +4525,61 @@ morph_mob (CHAR_DATA * ch)
 		if (ch->clans)
 		{
 			sprintf (nbuf, "%s", ch->clans);
-			newMob->name = strdup (nbuf);
+			newMob->name = duplicateString (nbuf);
 		}
 
 		if (ch->name)
 		{
 			sprintf (nbuf, "%s", ch->name);
-			newMob->name = strdup (nbuf);
+			newMob->name = duplicateString (nbuf);
 		}
 
 		if (ch->tname)
 		{
 			sprintf (nbuf, "%s", ch->tname);
-			newMob->tname = strdup (nbuf);
+			newMob->tname = duplicateString (nbuf);
 		}
 
 		if (ch->short_descr)
 		{
 			sprintf (nbuf, "%s", ch->short_descr);
-			newMob->short_descr = strdup (nbuf);
+			newMob->short_descr = duplicateString (nbuf);
 		}
 
 		if (ch->long_descr)
 		{
 			sprintf (nbuf, "%s", ch->long_descr);
-			newMob->long_descr = strdup (nbuf);
+			newMob->long_descr = duplicateString (nbuf);
 		}
 
 		if (ch->pmote_str)
 		{
 			sprintf (nbuf, "%s", ch->pmote_str);
-			newMob->pmote_str = strdup (nbuf);
+			newMob->pmote_str = duplicateString (nbuf);
 		}
 
 		if (ch->voice_str)
 		{
 			sprintf (nbuf, "%s", ch->voice_str);
-			newMob->voice_str = strdup (nbuf);
+			newMob->voice_str = duplicateString (nbuf);
 		}
 
 		if (ch->description)
 		{
 			sprintf (nbuf, "%s", ch->description);
-			newMob->description = strdup (nbuf);
+			newMob->description = duplicateString (nbuf);
 		}
 
 		if (ch->travel_str)
 		{
 			sprintf (nbuf, "%s", ch->travel_str);
-			newMob->travel_str = strdup (nbuf);
+			newMob->travel_str = duplicateString (nbuf);
 		}
 
 		if (ch->dmote_str)
 		{
 			sprintf (nbuf, "%s", ch->dmote_str);
-			newMob->dmote_str = strdup (nbuf);
+			newMob->dmote_str = duplicateString (nbuf);
 		}
 
 		newMob->hour_affects = ch->hour_affects;

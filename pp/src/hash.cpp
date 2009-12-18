@@ -226,8 +226,8 @@ fread_mobile (int vnum, const int *nZone, FILE * fp)
 	if (IS_SET (mob->flags, FLAG_KEEPER))
 	{
 
-		mob->shop = (SHOP_DATA *) get_perm (sizeof (SHOP_DATA));
-
+		mob->shop = new SHOP_DATA;
+		mob->shop->negotiations = NULL;
 		mob->shop->materials = materials;
 		mob->shop->buy_flags = buy_flags;
 
@@ -360,7 +360,7 @@ fread_mobile (int vnum, const int *nZone, FILE * fp)
 
 	p = mob->clans;
 	p2 = p;
-	mob->clans = strdup ("");
+	mob->clans = duplicateString ("");
 
 	while (*p2)
 	{
@@ -375,7 +375,7 @@ fread_mobile (int vnum, const int *nZone, FILE * fp)
 	}
 
 	if (p2 && *p2)
-		mem_free (p2);
+		free_mem (p2);
 
 	if (clan1 == 1)
 	{
@@ -487,7 +487,7 @@ load_mobile (int vnum)
 		new_mobile->flags &= ~FLAG_VARIABLE;
 	}
 
-	new_mobile->clans = strdup (proto->clans);
+	new_mobile->clans = duplicateString (proto->clans);
 
 	new_mobile->move = new_mobile->max_move;
 
@@ -604,7 +604,7 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
 			sprintf (buf2 + strlen (buf2), "%c", original[i]);
 		}
 
-		mem_free (new_obj->short_description);
+		free_mem (new_obj->short_description);
 		new_obj->short_description = add_hash (buf2);
 	}
 
@@ -636,7 +636,7 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
 			sprintf (buf2 + strlen (buf2), "%c", original[i]);
 		}
 
-		mem_free (new_obj->description);
+		free_mem (new_obj->description);
 		new_obj->description = add_hash (buf2);
 	}
 
@@ -668,8 +668,8 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
 			sprintf (buf2 + strlen (buf2), "%c", original[i]);
 		}
 
-		mem_free (new_obj->full_description);
-		new_obj->full_description = strdup (buf2);
+		free_mem (new_obj->full_description);
+		new_obj->full_description = duplicateString (buf2);
 	}
 
 	*buf2 = '\0';
@@ -700,8 +700,8 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
 			sprintf (buf2 + strlen (buf2), "%c", original[i]);
 		}
 
-		mem_free (new_obj->name);
-		new_obj->name = strdup (buf2);
+		free_mem (new_obj->name);
+		new_obj->name = duplicateString (buf2);
 	}
 
 	if ((IS_SET (new_obj->obj_flags.extra_flags, ITEM_MASK)
@@ -736,13 +736,13 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
 				}
 				sprintf (buf2 + strlen (buf2), "%c", original[i]);
 			}
-			mem_free (new_obj->desc_keys);
+			free_mem (new_obj->desc_keys);
 			new_obj->desc_keys = add_hash (buf2);
 		}
 	}
 
 	if (new_obj->var_color)
-		mem_free (new_obj->var_color);
+		free_mem (new_obj->var_color);
 
 	if (!modified)
 		new_obj->var_color = add_hash ("none");
@@ -790,7 +790,7 @@ load_object_full (int vnum, bool newWritingID)
 	for (af = proto->xaffected; af; af = af->next)
 	{
 
-		new_af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+		new_af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 
 		memcpy (new_af, af, sizeof (AFFECTED_TYPE));
 
@@ -822,6 +822,8 @@ load_object_full (int vnum, bool newWritingID)
 			if (!new_obj->writing && new_obj->o.od.value[0] > 0)
 			{
 				new_obj->writing = new WRITING_DATA;
+				new_obj->writing->next_page = NULL;
+
 				for (i = 1, writing = new_obj->writing; i <= new_obj->o.od.value[0]; i++)
 				{
 					writing->message = add_hash ("blank");
@@ -835,6 +837,7 @@ load_object_full (int vnum, bool newWritingID)
 					if (i != new_obj->o.od.value[0])
 					{
 						writing->next_page = new WRITING_DATA;
+						writing->next_page->next_page = NULL;
 						writing = writing->next_page;
 					}
 					new_obj->o.od.value[1] = unused_writing_id ();
@@ -910,7 +913,7 @@ load_colored_object (int vnum, char *color)
 	for (af = proto->xaffected; af; af = af->next)
 	{
 
-		new_af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+		new_af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 
 		memcpy (new_af, af, sizeof (AFFECTED_TYPE));
 
@@ -937,6 +940,8 @@ load_colored_object (int vnum, char *color)
 		if (!new_obj->writing && new_obj->o.od.value[0] > 0)
 		{
 			new_obj->writing = new WRITING_DATA;
+			new_obj->writing->next_page = NULL;
+
 			for (i = 1, writing = new_obj->writing; i <= new_obj->o.od.value[0];
 				i++)
 			{
@@ -951,6 +956,7 @@ load_colored_object (int vnum, char *color)
 				if (i != new_obj->o.od.value[0])
 				{
 					writing->next_page = new WRITING_DATA;
+					writing->next_page->next_page = NULL;
 					writing = writing->next_page;
 				}
 			}
@@ -984,7 +990,6 @@ fread_object (int vnum, int nZone, FILE * fp)
 	AFFECTED_TYPE *taf;
 	OBJ_CLAN_DATA *newclan = NULL;
 	char peak_char;
-	extern char *null_string;
 
 	obj = new_object ();
 
@@ -1013,7 +1018,7 @@ fread_object (int vnum, int nZone, FILE * fp)
 		sprintf (buf, "NOTE:  Object %d with '(null)' full description fixed.",
 			obj->nVirtual);
 		system_log (buf, true);
-		obj->full_description = null_string;
+		obj->full_description = "";
 	}
 
 	/* *** numeric data *** */
@@ -1113,10 +1118,7 @@ fread_object (int vnum, int nZone, FILE * fp)
 
 		fscanf (fp, " %s \n", chk);
 
-		new_descr =
-			(struct extra_descr_data *)
-			get_perm (sizeof (struct extra_descr_data));
-
+		new_descr = new extra_descr_data;
 		new_descr->keyword = fread_string (fp);
 		new_descr->description = fread_string (fp);
 
@@ -1152,14 +1154,13 @@ fread_object (int vnum, int nZone, FILE * fp)
 
 		fscanf (fp, " %s \n", chk);
 
-		af = (AFFECTED_TYPE *) get_perm (sizeof (AFFECTED_TYPE));
-
+		af = new AFFECTED_TYPE;
+		af->next = NULL;
 		af->type = 0;
 		af->a.spell.duration = -1;
 		af->a.spell.bitvector = 0;
 		af->a.spell.sn = 0;
-		af->next = NULL;
-
+		
 		fscanf (fp, " %d %d\n", &af->a.spell.location, &af->a.spell.modifier);
 
 		if (af->a.spell.location || af->a.spell.modifier)
@@ -1195,10 +1196,10 @@ fread_object (int vnum, int nZone, FILE * fp)
 		fscanf (fp, "%s \n", chk);
 
 		newclan = new OBJ_CLAN_DATA;
+		newclan->next = NULL;
 		newclan->name = fread_string (fp);
 		newclan->rank = fread_string (fp);
-		newclan->next = NULL;
-
+		
 		tmp++;
 
 		if (!obj->clan_data)
@@ -1217,7 +1218,7 @@ fread_object (int vnum, int nZone, FILE * fp)
 		if (peak_char != 'S')
 			break;
 
-		fscanf (fp, "%s\n", chk);
+		fscanf (fp, "%s\n", chk); // I dunno if this is very good though - Case
 		obj->super_vnum = fread_number(fp);
 	}
 	while (1);
@@ -1426,7 +1427,7 @@ reset_zone (int zone)
 			if (get_affect (mob, ra->type))
 				continue;
 
-			af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+			af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 
 			af->type = ra->type;
 			af->a.spell.duration = ra->duration;
@@ -1456,11 +1457,11 @@ reset_zone (int zone)
 
 			if (ZCMD.arg1 == RESET_REPLY)
 			{
-				reset = (RESET_DATA *) alloc (sizeof (RESET_DATA), 33);
+				reset = (RESET_DATA *) alloc (sizeof (RESET_DATA));
 
 				reset->type = RESET_REPLY;
 
-				reset->command = strdup ((char *) ZCMD.arg2);
+				reset->command = duplicateString ((char *) ZCMD.arg2);
 
 				reset->when.month = -1;
 				reset->when.day = -1;
@@ -1504,11 +1505,13 @@ reset_zone (int zone)
 
 			af = get_affect (mob, i);
 
-			af->a.craft =
-				(struct affect_craft_type *)
-				alloc (sizeof (struct affect_craft_type), 23);
-
+			af->a.craft =(struct affect_craft_type *)alloc (sizeof (struct affect_craft_type));
+			af->a.craft->phase = NULL;
+			af->a.craft->target_ch = NULL;
+			af->a.craft->target_obj = NULL;
 			af->a.craft->subcraft = craft;
+			af->a.craft->skill_check = 0;
+			af->a.craft->timer = 0;
 		}
 
 		else if (ZCMD.command == 'O')

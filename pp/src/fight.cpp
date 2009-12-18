@@ -630,7 +630,7 @@ fighting_sounds (CHAR_DATA * ch, ROOM_DATA * room)
 			if (!next_room->affects)
 			{
 				next_room->affects =
-					(AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+					(AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 				next_room->affects->type = MAGIC_ROOM_FIGHT_NOISE;
 				next_room->affects->a.room.duration = from_dir;
 				next_room->affects->next = NULL;
@@ -641,7 +641,7 @@ fighting_sounds (CHAR_DATA * ch, ROOM_DATA * room)
 					if (!af->next)
 					{
 						af->next =
-							(AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+							(AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 						af->next->type = MAGIC_ROOM_FIGHT_NOISE;
 						af->next->a.room.duration = from_dir;
 						af->next->next = NULL;
@@ -816,14 +816,14 @@ make_statue (CHAR_DATA * ch)
 		sprintf (buf, "statue npc_%s", buf2);
 	}
 
-	statue->name = strdup (buf);
+	statue->name = duplicateString (buf);
 
 	sprintf (buf, "An eerily lifelike statue of %s looms here.",
 		ch->short_descr);
-	statue->description = strdup (buf);
+	statue->description = duplicateString (buf);
 
 	sprintf (buf, "an eerily lifelike statue of %s", ch->short_descr);
-	statue->short_description = strdup (buf);
+	statue->short_description = duplicateString (buf);
 
 	for (wound = ch->wounds; wound; wound = wound->next)
 	{
@@ -941,13 +941,13 @@ make_corpse (CHAR_DATA * ch)
 		sprintf (buf, "corpse npc %s", GET_NAMES (ch));
 	}
 
-	corpse->name = strdup (buf);
+	corpse->name = duplicateString (buf);
 
 	sprintf (buf, "The corpse of %s is lying here.", ch->short_descr);
-	corpse->description = strdup (buf);
+	corpse->description = duplicateString (buf);
 
 	sprintf (buf, "the corpse of %s", ch->short_descr);
-	corpse->short_description = strdup (buf);
+	corpse->short_description = duplicateString (buf);
 
 	for (wound = ch->wounds; wound; wound = wound->next)
 	{
@@ -1455,7 +1455,7 @@ die (CHAR_DATA * ch)
 			add_message (1, "Deaths", -5, "Server", date, ch->tname, "", msg,
 				0);
 
-			mem_free (date);
+			free_mem (date);
 		}
 
 		if (!IS_SET (ch->flags, FLAG_GUEST))
@@ -4677,7 +4677,7 @@ compete (CHAR_DATA * ch, CHAR_DATA * src, CHAR_DATA * tar, int iterations)
 	src->flags &= ~FLAG_COMPETE;
 	tar->flags &= ~FLAG_COMPETE;
 
-	mem_free(name);
+	free_mem(name);
 
 	/*
 	for (obj = src->room->contents; obj; obj = next_obj)

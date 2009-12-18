@@ -1046,19 +1046,19 @@ arena__do_enter (CHAR_DATA * ch, char *argument, int cmd)
 		ch->race = 0;
 		send_to_char ("#6\nYou have been placed on the Human team!#0\n", ch);
 		humans++;
-		ch->description = strdup (vtom (5999)->description);
+		ch->description = duplicateString (vtom (5999)->description);
 	}
 	else if (roll == 2)
 	{
 		if (!number (0, 9))
 		{
 			ch->race = 119;
-			ch->description = strdup (vtom (5997)->description);
+			ch->description = duplicateString (vtom (5997)->description);
 		}
 		else
 		{
 			ch->race = 120;
-			ch->description = strdup (vtom (5998)->description);
+			ch->description = duplicateString (vtom (5998)->description);
 		}
 		send_to_char ("#1\nYou have been placed on the Orcish team!#0\n", ch);
 		orcs++;
@@ -1089,8 +1089,8 @@ arena__do_enter (CHAR_DATA * ch, char *argument, int cmd)
 	char_from_room (ch);
 	char_to_room (ch, 5142);
 	sprintf (buf, "%s %s", ch->name, ch->tname);
-	mem_free (ch->name);
-	ch->name = strdup (buf);
+	free_mem (ch->name);
+	ch->name = duplicateString (buf);
 	return;
 }
 
@@ -2291,11 +2291,11 @@ te_pit_do_enter (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		sprintf (buf, "A gladiator's bag, labeled '%s %s' sits here.",
 			PITBAG_DESC_PREPEND, ch->short_descr);
-		bag->description = strdup (buf);
+		bag->description = duplicateString (buf);
 
 		sprintf (buf, "a bag labeled '%s %s'", PITBAG_DESC_PREPEND,
 			ch->short_descr);
-		bag->short_description = strdup (buf);
+		bag->short_description = duplicateString (buf);
 
 
 		if (ch->right_hand)
@@ -2333,7 +2333,7 @@ te_pit_do_enter (CHAR_DATA * ch, char *argument, int cmd)
 	char_from_room (ch);
 	char_to_room (ch, 66953);
 	sprintf (buf, "%s %s", ch->name, ch->tname);
-	mem_free (ch->name);
-	ch->name = strdup (buf);
+	free_mem (ch->name);
+	ch->name = duplicateString (buf);
 	return;
 }

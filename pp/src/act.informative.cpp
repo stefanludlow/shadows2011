@@ -198,6 +198,7 @@ target_sighted (CHAR_DATA * ch, CHAR_DATA * target)
 	if (!ch->sighted)
 	{
 		ch->sighted = new SIGHTED_DATA;
+		ch->sighted->next = NULL;
 		ch->sighted->target = target;
 		return;
 	}
@@ -208,6 +209,7 @@ target_sighted (CHAR_DATA * ch, CHAR_DATA * target)
 		if (!sighted->next)
 		{
 			sighted->next = new SIGHTED_DATA;
+			sighted->next->next = NULL;
 			sighted->next->target = target;
 			return;
 		}
@@ -663,7 +665,7 @@ tilde_eliminator (char *string)
 	while ((p = strchr (string, '~')))
 		*p = '-';
 
-	return strdup (string);
+	return duplicateString (string);
 }
 
 char *
@@ -1574,7 +1576,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 		strcat (buffer, "#0");
 		reformat_string (buffer, &p);
 		sprintf (buffer, "%s", p);
-		mem_free (p); // char*
+		free_mem (p); // char*
 		buffer[strlen (buffer) - 1] = '\0';
 	}
 
@@ -1595,7 +1597,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 
 		reformat_string (buffer, &p);
 		sprintf (buffer, "%s", p);
-		mem_free (p); //char*
+		free_mem (p); //char*
 		buffer[strlen (buffer) - 1] = '\0';
 	}
 
@@ -1675,7 +1677,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 					reformat_string (buf, &p);
 					strcat (buffer, "\n");
 					strcat (buffer, p);
-					mem_free (p); //char*
+					free_mem (p); //char*
 				}
 				page_string (ch->desc, buffer);
 				return;
@@ -1939,7 +1941,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 					reformat_string (buf, &p);
 					strcat (buffer, "\n");
 					strcat (buffer, p);
-					mem_free (p); //char*
+					free_mem (p); //char*
 					p = 0;
 				}
 			}
@@ -1986,7 +1988,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 					crafts_found != 1 ? "s" : "", buf);
 				reformat_string (output, &p);
 				sprintf (buffer + strlen (buffer), "\n%s", p);
-				mem_free (p); // char*;
+				free_mem (p); // char*;
 				p = 0;
 			}
 
@@ -2010,7 +2012,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 				reformat_string (buf, &p);
 				strcat (buffer, "\n");
 				strcat (buffer, p);
-				mem_free (p); //char*
+				free_mem (p); //char*
 				p = 0;
 			}
 
@@ -2041,7 +2043,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 				if (obj->wounds)
 					strcat (buffer, "\n");
 				strcat (buffer, p);
-				mem_free (p); //char*
+				free_mem (p); //char*
 				p = NULL;
 			}
 
@@ -2453,7 +2455,7 @@ enter_exit_msg (CHAR_DATA * ch, char *buffer)
 		return 0;
 
 
-	char* charShort = strdup(char_short(ch));
+	char* charShort = duplicateString(char_short(ch));
 
 	sprintf (addon, "#3%s is %s %s%s%s.#0",
 		CAP (charShort),
@@ -2464,7 +2466,7 @@ enter_exit_msg (CHAR_DATA * ch, char *buffer)
 travel_str : (ch->travel_str ? ch->travel_str : ""))));
 	addon[2] = toupper (addon[2]);
 
-	mem_free(charShort);
+	free_mem(charShort);
 
 	return 1;
 }
@@ -3070,7 +3072,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 			strcat (buffer, "#0\n");
 			reformat_string (buffer, &p);
 			send_to_char (p, ch);
-			mem_free (p); // char*
+			free_mem (p); // char*
 		}
 
 		else
@@ -3184,7 +3186,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 					strcat (buffer, "#0\n");
 					reformat_string (buffer, &p);
 					send_to_char (p, ch);
-					mem_free (p); // char*
+					free_mem (p); // char*
 				}
 				else if ((af = get_affect (i, AFFECT_SHADOW)) &&
 					af->a.shadow.edge != -1)
@@ -3256,7 +3258,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 					strcat (buffer, "#0\n");
 					reformat_string (buffer, &p);
 					send_to_char (p, ch);
-					mem_free (p); //char*
+					free_mem (p); //char*
 				}
 			}
 		}
@@ -3367,7 +3369,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 			*buf2 = toupper (*buf2);
 			reformat_string (buf2, &p);
 			send_to_char (p, ch);
-			mem_free (p); //char*
+			free_mem (p); //char*
 			p = NULL;
 		}
 
@@ -3378,7 +3380,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 		buffer[0] = toupper(buffer[0]);
 		reformat_string (buffer, &p);
 		send_to_char (p, ch);
-		mem_free (p); // char*
+		free_mem (p); // char*
 		p = NULL;
 		}
 		*/
@@ -3435,7 +3437,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 			*buffer = toupper (*buffer);
 			reformat_string (buffer, &p);
 			send_to_char (p, ch);
-			mem_free (p); // char*
+			free_mem (p); // char*
 			p = NULL;
 		}
 
@@ -3461,7 +3463,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 			*buf2 = toupper (*buf2);
 			reformat_string (buf2, &p);
 			send_to_char (p, ch);
-			mem_free (p); //char*
+			free_mem (p); //char*
 			p = NULL;
 		}
 
@@ -6024,7 +6026,7 @@ do_time (CHAR_DATA * ch, char *argument, int cmd)
 	send_to_char ("\n", ch);
 	send_to_char (p, ch);
 
-	mem_free (p); //char*
+	free_mem (p); //char*
 	p = NULL;
 
 	if (GET_TRUST (ch))
@@ -6751,8 +6753,8 @@ do_hedit (CHAR_DATA * ch, char *argument, int cmd)
 
 	lvl = atoi (level);
 
-	ch->delay_who = strdup (topic);
-	ch->delay_who2 = strdup (subject);
+	ch->delay_who = duplicateString (topic);
+	ch->delay_who2 = duplicateString (subject);
 	ch->delay_info1 = lvl;
 
 	send_to_char ("Enter the text of this database entry:\n", ch);
@@ -6760,10 +6762,8 @@ do_hedit (CHAR_DATA * ch, char *argument, int cmd)
 	make_quiet (ch);
 
 	ch->desc->pending_message = new MESSAGE_DATA;
-
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
-
 	ch->desc->proc = post_help;
 }
 
@@ -7584,10 +7584,10 @@ do_find (CHAR_DATA * ch, char *argument, int cmd)
 	{
 
 		if (*buf == '+')
-			must_list[musts++] = strdup (buf + 1);
+			must_list[musts++] = duplicateString (buf + 1);
 
 		else if (*buf == '-')
-			not_list[nots++] = strdup (buf + 1);
+			not_list[nots++] = duplicateString (buf + 1);
 
 		else if (isdigit (*buf))
 		{
@@ -9698,7 +9698,7 @@ write_virtual_board (CHAR_DATA * ch, char *name, char *argument)
 		argument++;
 
 	ch->desc->pending_message =
-		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 
 	/* We need to borrow the poster slot to save the board name */
 
@@ -9784,7 +9784,7 @@ write_pc_board (CHAR_DATA * ch, char *name, char *argument)
 		argument++;
 
 	ch->desc->pending_message =
-		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 
 	/* We need to borrow the poster slot to save the board name */
 
@@ -9854,7 +9854,7 @@ write_journal (CHAR_DATA * ch, char *argument)
 		argument++;
 
 	ch->desc->pending_message =
-		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 
 	/* We need to borrow the poster slot to save the board name */
 
@@ -10120,13 +10120,11 @@ add_board (int level, char *name, char *title)
 		return;
 
 	board_entry = new BOARD_DATA;
-
+	board_entry->next = NULL;
 	board_entry->level = level;
 	board_entry->name = add_hash (name);
 	board_entry->title = add_hash (title);
 	board_entry->next_virtual = 1;
-
-	board_entry->next = NULL;
 
 	/* Add board_entry to end of full_board_list */
 
@@ -10314,7 +10312,7 @@ add_message (int new_message, const char *name, int nVirtual, const char *poster
 		return;
 	}
 
-	msg = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+	msg = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 
 	if (nVirtual == -1)
 	{
@@ -10476,7 +10474,7 @@ read_a_line (FILE * fp)
 	if (*buf)
 		buf[strlen (buf) - 1] = '\0';
 
-	return strdup (buf);
+	return duplicateString (buf);
 }
 
 MESSAGE_DATA *
@@ -10528,7 +10526,7 @@ load_message (char *msg_name, int pc_message, int msg_number)
 			return NULL;
 		}
 
-		message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+		message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 
 		message->nVirtual = msg_number;
 		message->poster = read_a_line (fp_message);
@@ -10611,27 +10609,27 @@ void
 unload_message (MESSAGE_DATA * message)
 {
 	if (message->poster)
-		mem_free (message->poster);
+		free_mem (message->poster);
 
 	if (message->date)
-		mem_free (message->date);
+		free_mem (message->date);
 
 	if (message->subject)
-		mem_free (message->subject);
+		free_mem (message->subject);
 
 	if (message->info)
-		mem_free (message->info);
+		free_mem (message->info);
 
 	if (message->message)
-		mem_free (message->message);
+		free_mem (message->message);
 
 	if (message->icdate)
-		mem_free (message->icdate);
+		free_mem (message->icdate);
 
 	if (message->target)
-		mem_free (message->target);
+		free_mem (message->target);
 
-	mem_free (message); // MESSAGE_DATA*
+	free_mem (message); // MESSAGE_DATA*
 }
 
 void
@@ -11032,6 +11030,7 @@ post_writing (DESCRIPTOR_DATA * d)
 	if (GET_ITEM_TYPE (obj) == ITEM_PARCHMENT)
 	{
 		obj->writing = new WRITING_DATA;
+		obj->writing->next_page = NULL;
 		obj->writing->ink = add_hash (ch->delay_who);
 		obj->writing->author = add_hash (ch->tname);
 		obj->writing->date = add_hash (date);
@@ -11254,6 +11253,7 @@ do_tear (CHAR_DATA * ch, char *argument, int cmd)
 		if (*page->message && strcasecmp (page->message, "blank") != STR_MATCH)
 		{
 			parchment->writing = new WRITING_DATA;
+			parchment->writing->next_page = NULL;
 			parchment->writing->ink = add_hash (page->ink);
 			parchment->writing->author = add_hash (page->author);
 			parchment->writing->date = add_hash (page->date);
@@ -12156,13 +12156,13 @@ void do_origins (CHAR_DATA *ch, char *argument, int cmd)
 	/* add the crafts list */
 	char* originlist = origins_list(ch,obj);
 	sprintf(output + strlen(output), originlist);
-	mem_free(originlist);
+	free_mem(originlist);
 	send_to_char(output,ch);
 }
 
 
 /* returns line formatted edition of crafts you can use something in */
-/* this must be mem_free'd to prevent leaks */
+/* this must be free_mem'd to prevent leaks */
 char * origins_list(CHAR_DATA * ch, OBJ_DATA * obj)
 {
 	char* p = 0;
@@ -12220,6 +12220,6 @@ char * origins_list(CHAR_DATA * ch, OBJ_DATA * obj)
 		reformat_string (output, &p);
 	}
 
-	/* return the strdup'd version */
+	/* return the duplicateString'd version */
 	return p;
 }

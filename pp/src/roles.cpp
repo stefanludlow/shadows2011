@@ -264,10 +264,13 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
 
 				magic_add_affect (ch, index, -1, 0, 0, 0, 0);
 				af = get_affect (ch, index);
-				af->a.craft =
-					(struct affect_craft_type *) alloc (sizeof (struct affect_craft_type),
-					23);
+				af->a.craft = (struct affect_craft_type *) alloc (sizeof (struct affect_craft_type));
 				af->a.craft->subcraft = craft;
+				af->a.craft->phase = NULL;
+				af->a.craft->target_ch = NULL;
+				af->a.craft->target_obj = NULL;
+				af->a.craft->skill_check = 0;
+				af->a.craft->timer = 0;
 				send_to_char ("Craft added.\n", ch);
 				continue;
 			}
@@ -315,7 +318,7 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
 		row = mysql_fetch_row(result);
 		sprintf (buf,	"#6The strange, glowing text was perhaps left by a helpful Istar, seeking\n"
 			"to help educate you in the intricacies of your new lot in life:#0\n\n%s", row[0]);
-		tobj->full_description = strdup (buf);
+		tobj->full_description = duplicateString (buf);
 		obj_to_room (tobj, ch->room->nVirtual);
 	}
 
@@ -565,7 +568,7 @@ post_body (DESCRIPTOR_DATA * d)
 			break;
 	}
 
-	role->body = strdup (ch->pc->msg);
+	role->body = duplicateString (ch->pc->msg);
 
 	save_roles ();
 }
@@ -1049,9 +1052,9 @@ delete_role (CHAR_DATA * ch, char *argument)
 			sprintf (buf, "DELETE FROM special_roles WHERE role_id = %d", atoi (argument));
 			mysql_safe_query (buf);
 
-			mem_free (role_list->summary);
-			mem_free (role_list->poster);
-			mem_free (role_list->body);
+			free_mem (role_list->summary);
+			free_mem (role_list->poster);
+			free_mem (role_list->body);
 			role_list = NULL;
 			send_to_char
 				("The specified special role has been removed as an option from chargen.\n", ch);
@@ -1068,9 +1071,9 @@ delete_role (CHAR_DATA * ch, char *argument)
 			sprintf (buf, "DELETE FROM special_roles WHERE role_id = %d", temp_role->id);
 			mysql_safe_query (buf);
 
-			mem_free (temp_role->summary);
-			mem_free (temp_role->poster);
-			mem_free (temp_role->body);
+			free_mem (temp_role->summary);
+			free_mem (temp_role->poster);
+			free_mem (temp_role->body);
 			temp_role = NULL;
 			send_to_char
 				("The specified special role has been removed as an option from chargen.\n", ch);
@@ -1112,9 +1115,9 @@ delete_role (CHAR_DATA * ch, char *argument)
 		sprintf (buf, "DELETE FROM special_roles WHERE role_id = %d", temp_role->id);
 		mysql_safe_query (buf);
 
-		mem_free (temp_role->summary);
-		mem_free (temp_role->poster);
-		mem_free (temp_role->body);
+		free_mem (temp_role->summary);
+		free_mem (temp_role->poster);
+		free_mem (temp_role->body);
 		temp_role = NULL;
 	}
 	send_to_char
@@ -1224,6 +1227,7 @@ post_role (DESCRIPTOR_DATA * d)
 		role_list = new ROLE_DATA;
 		index_id = 0;
 		role = role_list;
+		role->next = NULL;
 	}
 	else
 		for (role = role_list; role; role = role->next)
@@ -1233,12 +1237,13 @@ post_role (DESCRIPTOR_DATA * d)
 				role->next = new ROLE_DATA;
 				index_id = role->id; //get the id before we move the pointer
 				role = role->next;
+				role->next = NULL;
 				break;
 			}
 		}
 
 		/* Get a date string from current time ( default = "" ) */
-		date = (char *) alloc (256, 31);
+		date = (char *) alloc (256);
 		date[0] = '\0';
 		current_time = time (0);
 		if (asctime_r (localtime (&current_time), date) != NULL)
@@ -1247,10 +1252,10 @@ post_role (DESCRIPTOR_DATA * d)
 		}
 
 		role->cost = ch->delay_info1;
-		role->summary = strdup (ch->delay_who);
-		role->body = strdup (ch->pc->msg);
-		role->date = strdup (date);
-		role->poster = strdup (ch->pc->account_name);
+		role->summary = duplicateString (ch->delay_who);
+		role->body = duplicateString (ch->pc->msg);
+		role->date = duplicateString (date);
+		role->poster = duplicateString (ch->pc->account_name);
 		role->timestamp = (int) time (0);
 		role->id = index_id + 1;
 
@@ -1259,7 +1264,7 @@ post_role (DESCRIPTOR_DATA * d)
 
 		save_roles ();
 
-		mem_free (date);
+		free_mem (date);
 }
 
 void
@@ -1302,8 +1307,8 @@ new_role (CHAR_DATA * ch, char *argument)
 
 	make_quiet (ch);
 	ch->delay_info1 = cost;
-	ch->delay_who = strdup (argument);
-	ch->pc->msg = (char *) alloc (sizeof (char), 1);
+	ch->delay_who = duplicateString (argument);
+	ch->pc->msg = (char *) alloc (sizeof (char));
 	*ch->pc->msg = '\0';
 	ch->desc->str = &ch->pc->msg;
 	ch->desc->max_str = MAX_STRING_LENGTH;
@@ -1367,8 +1372,8 @@ update_role (CHAR_DATA * ch, char *argument)
 			return;
 		}
 		delete acct;
-		mem_free (role->poster);
-		role->poster = strdup (CAP (buf));
+		free_mem (role->poster);
+		role->poster = duplicateString (CAP (buf));
 		send_to_char ("The point of contact for that role has been updated.\n",
 			ch);
 		save_roles ();
@@ -1395,7 +1400,7 @@ update_role (CHAR_DATA * ch, char *argument)
 				("Please specify the summary for this role.\n", ch);
 			return;
 		}
-		role->summary = strdup (buf);
+		role->summary = duplicateString (buf);
 		save_roles ();
 	}
 
@@ -1412,7 +1417,7 @@ update_role (CHAR_DATA * ch, char *argument)
 
 		make_quiet (ch);
 		ch->delay_info1 = role->id;
-		ch->pc->msg = (char *) alloc (sizeof (char), 1);
+		ch->pc->msg = (char *) alloc (sizeof (char));
 		*ch->pc->msg = '\0';
 		ch->desc->str = &ch->pc->msg;
 		ch->desc->max_str = MAX_STRING_LENGTH;
@@ -1528,14 +1533,14 @@ reload_roles (void)
 			role->next = new ROLE_DATA;
 			role = role->next;
 		}
-		role->summary = strdup (row[0]);
-		role->poster = strdup (row[1]);
-		role->date = strdup (row[2]);
+		role->next = NULL;
+		role->summary = duplicateString (row[0]);
+		role->poster = duplicateString (row[1]);
+		role->date = duplicateString (row[2]);
 		role->cost = atoi (row[3]);
-		role->body = strdup (row[4]);
+		role->body = duplicateString (row[4]);
 		role->timestamp = atoi (row[5]);
 		role->id = atoi(row[6]);
-		role->next = NULL;
 	}
 
 	mysql_free_result (result);

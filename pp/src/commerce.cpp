@@ -741,8 +741,8 @@ do_classify (CHAR_DATA * ch, char *argument, int cmd)
 					updated++;
 					sprintf (buf3, "%s %s", obj->name, buf2);
 					if (obj->name && strlen (obj->name) > 1)
-						mem_free (obj->name);
-					obj->name = strdup (buf3);
+						free_mem (obj->name);
+					obj->name = duplicateString (buf3);
 					update = false;
 				}
 			}
@@ -794,9 +794,9 @@ do_classify (CHAR_DATA * ch, char *argument, int cmd)
 		sprintf (buf2, "%s %s", obj->name, buf);
 
 	if (obj->name && strlen (obj->name) > 1)
-		mem_free (obj->name);
+		free_mem (obj->name);
 
-	obj->name = strdup (buf2);
+	obj->name = duplicateString (buf2);
 
 	send_to_char ("Done.\n", ch);
 }
@@ -1650,7 +1650,7 @@ do_order (CHAR_DATA * ch, char *argument, int cmd)
 
 		reformat_string (buf, &p);
 		send_to_char (p, ch);
-		mem_free (p);
+		free_mem (p);
 
 		ch->delay_type = DEL_ORDER_ITEM;
 		ch->delay_obj = obj;
@@ -1658,7 +1658,7 @@ do_order (CHAR_DATA * ch, char *argument, int cmd)
 		ch->delay_info2 = (int) val_in_farthings;
 		ch->delay_ch = keeper;
 		if (*color)
-			ch->delay_who = strdup (color);
+			ch->delay_who = duplicateString (color);
 
 		return;
 	}
@@ -2428,7 +2428,7 @@ do_preview (CHAR_DATA * ch, char *argument, int cmd)
 	char* origins = origins_list(ch,obj);
 	send_to_char ("\n", ch);
 	send_to_char(origins,ch);
-	mem_free(origins);
+	free_mem(origins);
 
 	//append the output of the evaluate command
 	show_evaluate_information(ch, obj);
@@ -3238,7 +3238,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 		else
 		{
 			sprintf (buf2, "%s", ch->delay_who);
-			mem_free (ch->delay_who);
+			free_mem (ch->delay_who);
 		}
 		if (strlen (buf2) > 26)
 		{
@@ -3356,7 +3356,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 			discount = 0;		/* A CF by ch */
 
 		discount = -1 * discount; //changing to a lower price
-		neg = (NEGOTIATION_DATA *) alloc (sizeof (NEGOTIATION_DATA), 40);
+		neg = (NEGOTIATION_DATA *) alloc (sizeof (NEGOTIATION_DATA));
 		neg->ch_coldload_id = ch->coldload_id;
 		neg->obj_vnum = obj->nVirtual;
 		neg->time_when_forgotten = time (NULL) + 6 * 60 * 60;	/* 6 hours */
@@ -3540,7 +3540,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 		ch->delay_ch = keeper;
 		obj->count = orig_count;
 		if (GET_ITEM_TYPE (obj) == ITEM_NPC_OBJECT)
-			ch->delay_who = strdup (name);
+			ch->delay_who = duplicateString (name);
 		return;
 	}
 
@@ -3700,8 +3700,8 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 		char_to_room (horse, ch->in_room);
 		horse->act |= ACT_STAYPUT;
 		sprintf (buf, "%s %s", horse->name, name);
-		mem_free (horse->name);
-		horse->name = strdup (buf);
+		free_mem (horse->name);
+		horse->name = duplicateString (buf);
 		if (get_clan (ch, "mordor_char", &flags))
 		{
 			add_clan (horse, "mordor_char", CLAN_MEMBER);
@@ -3714,7 +3714,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 			hitch_char (ch, horse);
 		if (!IS_NPC (ch))
 		{
-			horse->mob->owner = strdup (ch->tname);
+			horse->mob->owner = duplicateString (ch->tname);
 			save_char (ch, true);
 		}
 		return;
@@ -4543,7 +4543,7 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
 		else
 			discount = 0;		/* A CF by ch */
 
-		neg = (NEGOTIATION_DATA *) alloc (sizeof (NEGOTIATION_DATA), 40);
+		neg = (NEGOTIATION_DATA *) alloc (sizeof (NEGOTIATION_DATA));
 		neg->ch_coldload_id = ch->coldload_id;
 		neg->obj_vnum = obj->nVirtual;
 		neg->time_when_forgotten = time (NULL) + 6 * 60 * 60;	/* 6 hours */
@@ -5385,6 +5385,7 @@ do_stable (CHAR_DATA * ch, char *argument, int cmd)
 	if (!paid_for)
 	{
 		af = new AFFECTED_TYPE;
+		af->next = NULL;
 		af->type = i;
 		af->a.spell.sn = animal->coldload_id;
 		af->a.spell.duration = 168;
@@ -5433,7 +5434,7 @@ do_stable (CHAR_DATA * ch, char *argument, int cmd)
 	sprintf (buf + strlen (buf),
 		"\n\n#6OOC: To retrieve your mount, GIVE this ticket to the ostler\n"
 		"     with whom you stabled it; be sure you don't lose this!#0");
-	ticket->full_description = strdup (buf);
+	ticket->full_description = duplicateString (buf);
 
 	act ("$N gives you $p.", false, ch, ticket, keeper, TO_CHAR | _ACT_FORMAT);
 	act ("You give $N $p.", false, keeper, ticket, ch, TO_CHAR | _ACT_FORMAT);

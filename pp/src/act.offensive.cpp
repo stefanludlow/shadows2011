@@ -532,8 +532,8 @@ do_throw (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char (out1, rch);
 		}
 
-		mem_free (out1);
-		mem_free (out2);
+		free_mem (out1);
+		free_mem (out2);
 
 		obj_from_char (&tobj, 0);
 
@@ -961,6 +961,7 @@ lodge_missile (CHAR_DATA * target, OBJ_DATA * ammo, char *strike_location)
 	if (!target->lodged)
 	{
 		target->lodged = new LODGED_OBJECT_INFO;
+		target->lodged->next = NULL;
 		target->lodged->vnum = ammo->nVirtual;
 		target->lodged->location = add_hash (strike_location);
 	}
@@ -970,6 +971,7 @@ lodge_missile (CHAR_DATA * target, OBJ_DATA * ammo, char *strike_location)
 			if (!lodged->next)
 			{
 				lodged->next = new LODGED_OBJECT_INFO;
+				lodged->next->next = NULL;
 				lodged->next->vnum = ammo->nVirtual;
 				lodged->next->location = add_hash (strike_location);
 				break;
@@ -1211,8 +1213,8 @@ fire_sling (CHAR_DATA * ch, OBJ_DATA * sling, char *argument)
 			send_to_char (out1, rch);
 	}
 
-	mem_free (out1);
-	mem_free (out2);
+	free_mem (out1);
+	free_mem (out2);
 
 	if (damage > 0)
 	{
@@ -1570,7 +1572,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 				}
 			}
 		}
-		mem_free (p);
+		free_mem (p);
 	}
 	else if (!ranged)
 	{
@@ -1583,19 +1585,19 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 	if (ranged && ch->delay_who)
 	{
 		if (!str_cmp (ch->delay_who, "north"))
-			from_direction = strdup ("the south");
+			from_direction = duplicateString ("the south");
 		else if (!str_cmp (ch->delay_who, "east"))
-			from_direction = strdup ("the west");
+			from_direction = duplicateString ("the west");
 		else if (!str_cmp (ch->delay_who, "south"))
-			from_direction = strdup ("the north");
+			from_direction = duplicateString ("the north");
 		else if (!str_cmp (ch->delay_who, "west"))
-			from_direction = strdup ("the east");
+			from_direction = duplicateString ("the east");
 		else if (!str_cmp (ch->delay_who, "up"))
-			from_direction = strdup ("below");
+			from_direction = duplicateString ("below");
 		else if (!str_cmp (ch->delay_who, "down"))
-			from_direction = strdup ("above");
+			from_direction = duplicateString ("above");
 		if (ch->delay_who && strlen (ch->delay_who) > 1)
-			mem_free (ch->delay_who);
+			free_mem (ch->delay_who);
 		ch->delay_who = NULL;
 	}
 	else
@@ -2081,9 +2083,9 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char (out1, rch);
 		}
 	}
-	mem_free (out1);
-	mem_free (out2);
-	mem_free (out3);
+	free_mem (out1);
+	free_mem (out2);
+	free_mem (out3);
 
 	if (bow->o.weapon.use_skill == SKILL_SHORTBOW ||
 		bow->o.weapon.use_skill == SKILL_LONGBOW ||
@@ -2099,10 +2101,10 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 	ch->enemy_direction = NULL;
 
 	if (from_direction)
-		mem_free (from_direction);
+		free_mem (from_direction);
 	if (ch->delay_who)
 	{
-		mem_free (ch->delay_who);
+		free_mem (ch->delay_who);
 		ch->delay_who = NULL;
 	}
 
@@ -2474,7 +2476,7 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
-		ch->delay_who = strdup (dirs[dir]);
+		ch->delay_who = duplicateString (dirs[dir]);
 
 		room = vtor (EXIT (ch, dir)->to_room);
 

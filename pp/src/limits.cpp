@@ -770,7 +770,7 @@ hourly_update (void)
 
 					if (neg->time_when_forgotten <= current_time)
 					{
-						mem_free (neg);
+						free_mem (neg);
 					}
 					else
 					{
@@ -949,7 +949,7 @@ remove_room_affect (ROOM_DATA * room, int type)
 	{
 		free_af = room->affects;
 		room->affects = free_af->next;
-		mem_free (free_af);
+		free_mem (free_af);
 		return 1;
 	}
 
@@ -958,7 +958,7 @@ remove_room_affect (ROOM_DATA * room, int type)
 		{
 			free_af = af->next;
 			af->next = free_af->next;
-			mem_free (free_af);
+			free_mem (free_af);
 			return 1;
 		}
 

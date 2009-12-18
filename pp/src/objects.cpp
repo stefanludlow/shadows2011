@@ -28,33 +28,33 @@ void obj_data::partial_deep_copy (OBJ_DATA *proto)
 	{
 		if (this->name)
 		{
-			mem_free(this->name);
+			free_mem(this->name);
 		}
-		this->name = strdup(proto->name);
+		this->name = duplicateString(proto->name);
 	}
 	if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
 	{
 		if (this->short_description)
 		{
-			mem_free(this->short_description);
+			free_mem(this->short_description);
 		}
-		this->short_description = strdup(proto->short_description);
+		this->short_description = duplicateString(proto->short_description);
 	}
 	if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
 	{
 		if (this->description)
 		{
-			mem_free(this->description);
+			free_mem(this->description);
 		}
-		this->description = strdup(proto->description);
+		this->description = duplicateString(proto->description);
 	}
 	if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
 	{
 		if (this->full_description)
 		{
-			mem_free(this->full_description);
+			free_mem(this->full_description);
 		}
-		this->full_description = strdup(proto->full_description);
+		this->full_description = duplicateString(proto->full_description);
 	}
 
 	if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
@@ -102,52 +102,52 @@ void obj_data::deep_copy (OBJ_DATA *copy_from)
 
 	if (copy_from->short_description)
 	{
-		this->short_description = strdup(copy_from->short_description);
+		this->short_description = duplicateString(copy_from->short_description);
 	}
 
 	if (copy_from->name)
 	{
-		this->name = strdup(copy_from->name);
+		this->name = duplicateString(copy_from->name);
 	}
 
 	if (copy_from->description)
 	{
-		this->description = strdup(copy_from->description);
+		this->description = duplicateString(copy_from->description);
 	}
 
 	if (copy_from->full_description)
 	{
-		this->full_description = strdup(copy_from->full_description);
+		this->full_description = duplicateString(copy_from->full_description);
 	}
 
 	if (copy_from->omote_str)
 	{
-		this->omote_str = strdup(copy_from->omote_str);
+		this->omote_str = duplicateString(copy_from->omote_str);
 	}
 
 	if (copy_from->ink_color)
 	{
-		this->ink_color = strdup(copy_from->ink_color);
+		this->ink_color = duplicateString(copy_from->ink_color);
 	}
 
 	if (copy_from->desc_keys)
 	{
-		this->desc_keys = strdup(copy_from->desc_keys);
+		this->desc_keys = duplicateString(copy_from->desc_keys);
 	}
 
 	if (copy_from->var_color)
 	{
-		this->var_color = strdup(copy_from->var_color);
+		this->var_color = duplicateString(copy_from->var_color);
 	}
 
 	if (copy_from->book_title)
 	{
-		this->book_title = strdup(copy_from->book_title);
+		this->book_title = duplicateString(copy_from->book_title);
 	}
 
 	if (copy_from->indoor_desc)
 	{
-		this->indoor_desc = strdup(copy_from->indoor_desc);
+		this->indoor_desc = duplicateString(copy_from->indoor_desc);
 	}
 }
 
@@ -487,7 +487,7 @@ do_rend (CHAR_DATA * ch, char *argument, int cmd)
 				(target_obj_ch != ch) ? "$N" : "$p", str_damage_sdesc,
 				(target_obj_ch != ch) ? "$p" : "#3it#0");
 			sprintf (buf[1], "You notice #1%s#0 on $p.", str_damage_sdesc);
-			mem_free (str_damage_sdesc);
+			free_mem (str_damage_sdesc);
 
 		}
 		else
@@ -599,7 +599,7 @@ object__examine_damage (OBJ_DATA * thisPtr)
 				&& damage != thisPtr->damage) ? "and" : ""),
 				str_damage_sdesc, ((!damage->next) ? ".#0\n" : ", "));
 
-			mem_free (str_damage_sdesc);
+			free_mem (str_damage_sdesc);
 		}
 
 	}
@@ -608,7 +608,7 @@ object__examine_damage (OBJ_DATA * thisPtr)
 	{
 		reformat_string (buf, &p);
 		sprintf (buf, "\n   %s", p);
-		mem_free (p);
+		free_mem (p);
 	}
 
 	return buf;
@@ -824,7 +824,7 @@ clear_omote (OBJ_DATA * obj)
 
 	if (obj->omote_str)
 	{
-		mem_free (obj->omote_str);
+		free_mem (obj->omote_str);
 		obj->omote_str = (char *) NULL;
 	}
 }
@@ -5774,7 +5774,7 @@ delayed_rummage (CHAR_DATA * ch)
 			act ("$n reveals some useful plant life.", true, ch, 0, 0, TO_ROOM);
 			if (!herbed)
 			{
-				herbed = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+				herbed = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 				herbed->type = HERBED_COUNT;
 				herbed->a.herbed.timesHerbed = 1;
 				herbed->a.herbed.duration = HERB_RESET_DURATION;
@@ -5837,7 +5837,7 @@ do_gather (CHAR_DATA * ch, char *argument, int cmd)
 	act ("$n begins to harvest $p.", true, ch, plant, 0, TO_ROOM);
 
 	ch->delay_type = DEL_GATHER;
-	ch->delay_who = strdup (buf);
+	ch->delay_who = duplicateString (buf);
 	ch->delay = 20 - (ch->skills[SKILL_HERBALISM] / 10);
 }
 
@@ -5853,7 +5853,7 @@ delayed_gather (CHAR_DATA * ch)
 
 	strcpy (buf, ch->delay_who);
 
-	mem_free (ch->delay_who);
+	free_mem (ch->delay_who);
 	ch->delay_who = NULL;
 
 	if (!(plant = get_obj_in_list_vis (ch, buf, room->contents)))
@@ -5934,7 +5934,7 @@ do_identify (CHAR_DATA * ch, char *argument, int cmd)
 	act ("$n begins examining $p.", true, ch, plant, 0, TO_ROOM);
 
 	ch->delay_type = DEL_IDENTIFY;
-	ch->delay_who = strdup (buf);
+	ch->delay_who = duplicateString (buf);
 	ch->delay = 15 - (ch->skills[SKILL_HERBALISM] / 10);
 }
 
@@ -5950,7 +5950,7 @@ delayed_identify (CHAR_DATA * ch)
 
 	strcpy (buf, ch->delay_who);
 
-	mem_free (ch->delay_who);
+	free_mem (ch->delay_who);
 	ch->delay_who = NULL;
 
 	if (!(plant = get_obj_in_list_vis (ch, buf, room->contents)))
@@ -6235,17 +6235,17 @@ do_behead (CHAR_DATA * ch, char *argument, int cmd)
 
 	head = load_object (VNUM_HEAD);
 
-	head->name = strdup ("head");
+	head->name = duplicateString ("head");
 	if (!strncmp (corpse->short_description, "the corpse of ", 14))
 		strcpy (buf2, corpse->short_description + 14);
 	else
 		strcpy (buf2, "some unfortunate creature");
 
 	sprintf (buf, "The head of %s rests here.", buf2);
-	head->description = strdup (buf);
+	head->description = duplicateString (buf);
 
 	sprintf (buf, "the head of %s", buf2);
-	head->short_description = strdup (buf);
+	head->short_description = duplicateString (buf);
 
 	sprintf (buf, "You %s the head from $p.",
 		weapon_theme[tool->o.weapon.hit_type]);
@@ -6255,21 +6255,21 @@ do_behead (CHAR_DATA * ch, char *argument, int cmd)
 		weapon_theme[tool->o.weapon.hit_type]);
 	act (buf, false, ch, corpse, 0, TO_ROOM | _ACT_FORMAT);
 
-	mem_free (corpse->description);
-	mem_free (corpse->short_description);
+	free_mem (corpse->description);
+	free_mem (corpse->short_description);
 
 	sprintf (buf, "The headless corpse of %s is lying here.", buf2);
-	corpse->description = strdup (buf);
+	corpse->description = duplicateString (buf);
 
 	sprintf (buf, "the headless corpse of %s", buf2);
-	corpse->short_description = strdup (buf);
+	corpse->short_description = duplicateString (buf);
 
 	strcpy (buf2, corpse->name);
 
-	mem_free (corpse->name);
+	free_mem (corpse->name);
 
 	sprintf (buf, "headless %s", buf2);
-	corpse->name = strdup (buf);
+	corpse->name = duplicateString (buf);
 
 	head->obj_flags.weight = corpse->obj_flags.weight / 10;
 	corpse->obj_flags.weight -= head->obj_flags.weight;

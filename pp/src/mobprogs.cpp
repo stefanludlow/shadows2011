@@ -145,8 +145,8 @@ deletevar (CHAR_DATA * mob, char *var_name)
 		tvar = mob->vartab;
 		mob->vartab = tvar->next;
 
-		mem_free (tvar->name);
-		mem_free (tvar);
+		free_mem (tvar->name);
+		free_mem (tvar);
 		return;
 	}
 
@@ -157,8 +157,8 @@ deletevar (CHAR_DATA * mob, char *var_name)
 			tvar2 = tvar->next;
 			tvar->next = tvar2->next;
 
-			mem_free (tvar2->name);
-			mem_free (tvar2);
+			free_mem (tvar2->name);
+			free_mem (tvar2);
 			return;
 		}
 	}
@@ -189,9 +189,9 @@ setvar (CHAR_DATA * mob, char *var_name, int value, int type)
 	if (!(var = getvar (mob, var_name)))
 	{
 
-		var = (VAR_DATA *) alloc (sizeof (VAR_DATA), 20);
+		var = (VAR_DATA *) alloc (sizeof (VAR_DATA));
 
-		var->name = strdup (var_name);
+		var->name = duplicateString (var_name);
 
 		if (*var_name == '_')
 		{
@@ -233,7 +233,7 @@ define_variable (CHAR_DATA * mob, MOBPROG_DATA * program, char *argument)
 	else
 	{
 		system_log ("Mob program with a variable problem.", true);
-		program->line = strdup (current_line);
+		program->line = duplicateString (current_line);
 		program->flags |= MPF_BROKEN;
 	}
 
@@ -242,7 +242,7 @@ define_variable (CHAR_DATA * mob, MOBPROG_DATA * program, char *argument)
 	if (!*var_name)
 	{
 		system_log ("Variable name problem; no var_name.", true);
-		program->line = strdup (current_line);
+		program->line = duplicateString (current_line);
 		program->flags |= MPF_BROKEN;
 	}
 
@@ -1351,7 +1351,7 @@ assignment (CHAR_DATA * mob, MOBPROG_DATA * program, char *target_name,
 		sprintf (buf, "trigger %s, mob %d", program->trigger_name,
 			mob->mob->nVirtual);
 		system_log (buf, true);
-		program->line = strdup (current_line);
+		program->line = duplicateString (current_line);
 		program->flags  |= MPF_BROKEN;
 		return;
 	}
@@ -1359,7 +1359,7 @@ assignment (CHAR_DATA * mob, MOBPROG_DATA * program, char *target_name,
 	if (!mob_get_token (p, buf, MT_EQUAL))
 	{
 		system_log ("Assignment needs equal.", true);
-		program->line = strdup (current_line);
+		program->line = duplicateString (current_line);
 		program->flags |= MPF_BROKEN;
 		return;
 	}
@@ -1383,9 +1383,9 @@ assignment (CHAR_DATA * mob, MOBPROG_DATA * program, char *target_name,
 		mob_string (mob, p, buf);
 
 		if (target->value)
-			mem_free ((char *) target->value);
+			free_mem ((char *) target->value);
 
-		target->value = (long int) strdup (buf);
+		target->value = (long int) duplicateString (buf);
 	}
 }
 
@@ -1701,21 +1701,21 @@ add_replace_mobprog_data (CHAR_DATA * ch, CHAR_DATA * mob,
 
 	if (!prog)
 	{
-		prog = (MOBPROG_DATA *) alloc (sizeof (MOBPROG_DATA), 21);
+		prog = (MOBPROG_DATA *) alloc (sizeof (MOBPROG_DATA));
 
 		if (last_prog)
 			last_prog->next = prog;
 		else
 			mob->prog = prog;
 
-		prog->trigger_name = strdup (trigger_name);
+		prog->trigger_name = duplicateString (trigger_name);
 		prog->next = NULL;
 
 	}
 	else
-		mem_free (prog->prog);
+		free_mem (prog->prog);
 
-	prog->prog = strdup (prog_data);
+	prog->prog = duplicateString (prog_data);
 	prog->busy = 0;
 }
 
@@ -2000,7 +2000,7 @@ boot_mobprogs ()
 				last_prog && last_prog->next; last_prog = last_prog->next)
 				;
 
-			prog = (MOBPROG_DATA *) alloc (sizeof (MOBPROG_DATA), 21);
+			prog = (MOBPROG_DATA *) alloc (sizeof (MOBPROG_DATA));
 
 			if (last_prog)
 				last_prog->next = prog;

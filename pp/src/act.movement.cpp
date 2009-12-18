@@ -411,7 +411,7 @@ track_from_room (ROOM_DATA * room, TRACK_DATA * track)
 		}
 	}
 
-	mem_free (track); // TRACK_DATA*
+	free_mem (track); // TRACK_DATA*
 }
 
 void
@@ -521,13 +521,12 @@ leave_tracks (CHAR_DATA * ch, int to_dir, int from_dir)
 
 
 	track = new TRACK_DATA;
-
+	track->next = NULL;
 	track->race = ch->race;
 	track->to_dir = to_dir;
 	track->from_dir = from_dir;
 	track->speed = ch->speed;
 	track->flags = 0;
-	track->next = NULL;
 
 	if (bleeding > 2)
 		track->flags |= BLOODY_TRACK;
@@ -557,7 +556,7 @@ clear_pmote (CHAR_DATA * ch)
 
 	if (ch->pmote_str)
 	{
-		mem_free (ch->pmote_str); // char*
+		free_mem (ch->pmote_str); // char*
 		ch->pmote_str = (char *) NULL;
 	}
 }
@@ -671,8 +670,8 @@ clear_current_move (CHAR_DATA * ch)
 
 	ch->flags &= ~FLAG_LEAVING;
 	if (qe->travel_str)
-		mem_free (qe->travel_str);
-	mem_free (qe); // QE_DATA*
+		free_mem (qe->travel_str);
+	free_mem (qe); // QE_DATA*
 
 	for (tch = ch->room->people; tch; tch = tch->next_in_room)
 	{
@@ -724,8 +723,8 @@ stop_mount_train (CHAR_DATA * stopper)
 			move = ch->moves;
 			ch->moves = move->next;
 			if (move->travel_str)
-				mem_free (move->travel_str);
-			mem_free (move); //MOVE_DATA*
+				free_mem (move->travel_str);
+			free_mem (move); //MOVE_DATA*
 		}
 
 		if ((af = get_affect (ch, MAGIC_DRAGGER)))
@@ -760,8 +759,8 @@ clear_moves (CHAR_DATA * ch)
 		move = ch->moves;
 		ch->moves = move->next;
 		if (move->travel_str)
-			mem_free (move->travel_str);
-		mem_free (move); // MOVE_DATA*
+			free_mem (move->travel_str);
+		free_mem (move); // MOVE_DATA*
 	}
 
 	if (move && (IS_HITCHER (ch) || IS_HITCHEE (ch)))
@@ -894,8 +893,8 @@ enter_room (QE_DATA * qe)
 	if (!ch)
 	{
 		if (qe->travel_str)
-			mem_free (qe->travel_str);
-		mem_free (qe); // QE_DATA*
+			free_mem (qe->travel_str);
+		free_mem (qe); // QE_DATA*
 		return;
 	}
 
@@ -905,8 +904,8 @@ enter_room (QE_DATA * qe)
 		if (is_he_somewhere (ch))
 			clear_moves (ch);
 		if (qe->travel_str)
-			mem_free (qe->travel_str);
-		mem_free (qe); // QE_DATA*
+			free_mem (qe->travel_str);
+		free_mem (qe); // QE_DATA*
 
 		return;
 	}
@@ -921,8 +920,8 @@ enter_room (QE_DATA * qe)
 			false, toll_collector (ch->room, qe->dir), 0, ch, TO_CHAR);
 		clear_moves (ch);
 		if (qe->travel_str)
-			mem_free (qe->travel_str);
-		mem_free (qe); // QE_DATA*
+			free_mem (qe->travel_str);
+		free_mem (qe); // QE_DATA*
 		return;
 	}
 
@@ -951,8 +950,8 @@ enter_room (QE_DATA * qe)
 				ch);
 			clear_moves (ch);
 			if (qe->travel_str)
-				mem_free (qe->travel_str);
-			mem_free (qe); // QE_DATA*
+				free_mem (qe->travel_str);
+			free_mem (qe); // QE_DATA*
 			return;
 		}
 	}
@@ -993,8 +992,8 @@ enter_room (QE_DATA * qe)
 			initiate_move (ch);
 
 		if (qe->travel_str)
-			mem_free (qe->travel_str);
-		mem_free (qe); // QE_DATA*
+			free_mem (qe->travel_str);
+		free_mem (qe); // QE_DATA*
 		qe = NULL;
 
 		return;
@@ -1032,8 +1031,8 @@ enter_room (QE_DATA * qe)
 		if (ch->moves)
 		{
 			if (qe->travel_str)
-				mem_free (qe->travel_str);
-			mem_free (qe); // QE_DATA*
+				free_mem (qe->travel_str);
+			free_mem (qe); // QE_DATA*
 			initiate_move (ch);
 		}
 		else
@@ -1041,8 +1040,8 @@ enter_room (QE_DATA * qe)
 			sprintf (buf, "$n stops just %s.", dir_names[qe->dir]);
 			act (buf, false, ch, 0, 0, TO_ROOM);
 			if (qe->travel_str)
-				mem_free (qe->travel_str);
-			mem_free (qe); // QE_DATA*
+				free_mem (qe->travel_str);
+			free_mem (qe); // QE_DATA*
 		}
 
 		return;
@@ -1060,8 +1059,8 @@ enter_room (QE_DATA * qe)
 		clear_moves (ch);
 		ch->flags &= ~FLAG_LEAVING;
 		if (qe->travel_str)
-			mem_free (qe->travel_str);
-		mem_free (qe); // QE_DATA*
+			free_mem (qe->travel_str);
+		free_mem (qe); // QE_DATA*
 
 		return;
 	}
@@ -1086,8 +1085,8 @@ enter_room (QE_DATA * qe)
 		clear_moves (ch);
 		ch->flags &= ~FLAG_LEAVING;
 		if (qe->travel_str)
-			mem_free (qe->travel_str);
-		mem_free (qe); // QE_DATA*
+			free_mem (qe->travel_str);
+		free_mem (qe); // QE_DATA*
 
 		return;
 	}
@@ -1131,8 +1130,8 @@ enter_room (QE_DATA * qe)
 
 			if (ch->targeted_by->delay_who
 				&& strlen (ch->targeted_by->delay_who) > 1)
-				mem_free (ch->targeted_by->delay_who);
-			ch->targeted_by->delay_who = strdup (dirs[qe->dir]);
+				free_mem (ch->targeted_by->delay_who);
+			ch->targeted_by->delay_who = duplicateString (dirs[qe->dir]);
 
 			sprintf (buf,
 				"You carefully hold your aim as your quarry moves away...\n");
@@ -1618,7 +1617,7 @@ exit_room (CHAR_DATA * ch, int dir, int flags, int leave_time,
 	ch->flags |= FLAG_LEAVING;
 
 	qe = new QE_DATA;
-
+	qe->next = NULL;
 	qe->ch = ch;
 	qe->dir = dir;
 	qe->speed_type = speed_name;
@@ -1627,7 +1626,6 @@ exit_room (CHAR_DATA * ch, int dir, int flags, int leave_time,
 	qe->event_time = leave_time;
 	qe->arrive_time = arrive_time;
 	qe->move_cost = needed_movement;
-	qe->next = NULL;
 	qe->travel_str = travel_str;
 
 	if (ch->speed == SPEED_IMMORTAL)
@@ -1992,10 +1990,10 @@ initiate_move (CHAR_DATA * ch)
 	if (move->travel_str)
 	{
 		sprintf (travel_str, ", %s", move->travel_str);
-		mem_free (move->travel_str);
+		free_mem (move->travel_str);
 	}
 
-	mem_free (move); // MOVE_DATA*
+	free_mem (move); // MOVE_DATA*
 
 	room_exit = EXIT (ch, dir);
 
@@ -2378,7 +2376,7 @@ initiate_move (CHAR_DATA * ch)
 
 	exit_room (ch, dir, flags, exit_speed, enter_speed, speed_name,
 		needed_movement,
-		strlen (travel_str) ? strdup (travel_str) : NULL);
+		strlen (travel_str) ? duplicateString (travel_str) : NULL);
 }
 
 int
@@ -2418,7 +2416,7 @@ move (CHAR_DATA * ch, char *argument, int dir, int speed)
 
 	if (*argument == '(')
 	{
-		tmp = (char *) alloc (strlen (argument), 31);
+		tmp = (char *) alloc (strlen (argument));
 		sprintf (buf, "%s", argument);
 		i = 1;
 		j = 0;
@@ -2459,10 +2457,9 @@ move (CHAR_DATA * ch, char *argument, int dir, int speed)
 	}
 
 	move = new MOVE_DATA;
-
+	move->next = NULL;
 	move->dir = dir;
 	move->desired_time = speed;
-	move->next = NULL;
 	move->travel_str = tmp;
 
 	if (get_affect (ch, MAGIC_SNEAK))
@@ -2683,8 +2680,8 @@ hitches_follow (CHAR_DATA * ch, int dir, int leave_time, int arrive_time)
 		m = ch->moves;
 		ch->moves = m->next;
 		if (m->travel_str)
-			mem_free (m->travel_str);
-		mem_free (m); // MOVE_DATA*
+			free_mem (m->travel_str);
+		free_mem (m); // MOVE_DATA*
 	}
 
 	clear_current_move (ch->hitchee);
@@ -5385,7 +5382,7 @@ delayed_track (CHAR_DATA * ch)
 	{
 		reformat_string (output, &p);
 		page_string (ch->desc, p);
-		mem_free (p); //char*
+		free_mem (p); //char*
 	}
 }
 
@@ -6225,7 +6222,7 @@ shadowers_shadow (CHAR_DATA * ch, int to_room, int move_dir)
 		if (!CAN_SEE (tch, ch))
 			continue;
 
-		move = (MOVE_DATA *) alloc (sizeof (MOVE_DATA), 24);
+		move = (MOVE_DATA *) alloc (sizeof (MOVE_DATA));
 
 		move->dir = move_dir;
 		move->flags = MF_TOEDGE;
@@ -6282,7 +6279,7 @@ shadowers_shadow (CHAR_DATA * ch, int to_room, int move_dir)
 
 			/* Make N/PC enter room of ch as ch leaves */
 
-			move = (MOVE_DATA *) alloc (sizeof (MOVE_DATA), 24);
+			move = (MOVE_DATA *) alloc (sizeof (MOVE_DATA));
 
 			move->dir = af->a.shadow.edge;
 			move->flags = MF_TONEXT_EDGE;
@@ -6294,7 +6291,7 @@ shadowers_shadow (CHAR_DATA * ch, int to_room, int move_dir)
 
 			/* Make N/PC move to edge joining room ch just entered */
 
-			move = (MOVE_DATA *) alloc (sizeof (MOVE_DATA), 24);
+			move = (MOVE_DATA *) alloc (sizeof (MOVE_DATA));
 
 			move->dir = move_dir;
 			move->flags = MF_TOEDGE;

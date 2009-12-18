@@ -3228,7 +3228,7 @@ do_rpdel (CHAR_DATA * ch, char *argument, int cmd)
 				vtor (ch->in_room)->prg = tmp->next;
 			else
 				p->next = tmp->next;
-			mem_free (tmp);
+			free_mem (tmp);
 			send_to_char ("Done.\n\r", ch);
 			return;
 		}
@@ -4692,7 +4692,7 @@ r_atwrite (CHAR_DATA * ch, char *argument)
 
 	if (strArgument.empty() || board.empty() || title.empty())
 	{
-		mem_free(date);
+		free_mem(date);
 		return;
 	}
 
@@ -4770,7 +4770,7 @@ r_atwrite (CHAR_DATA * ch, char *argument)
 			mysql_free_result (result);
 	}
 
-	mem_free(date);
+	free_mem(date);
 	return;
 }
 
@@ -4818,7 +4818,7 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 				send_to_char("", tch);
 			}
 		}
-		mem_free(formatted);
+		free_mem(formatted);
 	}
 	else if (!strncmp(buf, "room", 4))
 	{
@@ -4837,7 +4837,7 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 				send_to_char("", tch);
 			}
 		}
-		mem_free(formatted);
+		free_mem(formatted);
 	}
 	else if (!strncmp(buf, "zone", 4))
 	{
@@ -4868,7 +4868,7 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 			send_to_char (formatted, d->character);
 			send_to_char ("", d->character);
 		}
-		mem_free(formatted);
+		free_mem(formatted);
 	}
 	else if (!strncmp(buf, "all", 3))
 	{
@@ -4897,7 +4897,7 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 			send_to_char(formatted, d->character);
 
 		}
-		mem_free(formatted);
+		free_mem(formatted);
 	}
 	return;
 }
@@ -5081,10 +5081,10 @@ r_strip (CHAR_DATA *ch, char *argument)
 		if (bag && (ch->right_hand || ch->left_hand || ch->equip))
 		{
 			sprintf (buf, "A bag belonging to %s sits here.", ch->short_descr);
-			bag->description = strdup (buf);
+			bag->description = duplicateString (buf);
 
 			sprintf (buf, "a bag labeled '%s'", ch->short_descr);
-			bag->short_description = strdup (buf);
+			bag->short_description = duplicateString (buf);
 
 			if (ch->right_hand)
 			{
@@ -5912,30 +5912,30 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 			std::string buf2 = obj->name;
 			buf2.erase(buf2.find(argument), argument.length());
 			buf2 = argument + buf2;
-			mem_free(obj->name);
-			obj->name = strdup(buf2.c_str());
+			free_mem(obj->name);
+			obj->name = duplicateString(buf2.c_str());
 		}
 		else
 		{
 			std::string buf2 = obj->name;
-			mem_free(obj->name);
-			obj->name = strdup((argument + buf2).c_str());
+			free_mem(obj->name);
+			obj->name = duplicateString((argument + buf2).c_str());
 		}
 	}
 	else if (buf.find("sdesc") != std::string::npos)
 	{
-		mem_free(obj->short_description);
-		obj->short_description = strdup(argument.c_str());
+		free_mem(obj->short_description);
+		obj->short_description = duplicateString(argument.c_str());
 	}
 	else if (buf.find("ldesc") != std::string::npos)
 	{
-		mem_free(obj->description);
-		obj->description = strdup(argument.c_str());
+		free_mem(obj->description);
+		obj->description = duplicateString(argument.c_str());
 	}
 	else if (buf.find("desc") != std::string::npos)
 	{
-		mem_free(obj->full_description);
-		obj->full_description = strdup(argument.c_str());
+		free_mem(obj->full_description);
+		obj->full_description = duplicateString(argument.c_str());
 	}
 	else if (buf.find("material") != std::string::npos)
 	{
@@ -5967,7 +5967,7 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 	}
 	else if (buf.find("mkey") != std::string::npos)
 	{
-		mem_free(obj->desc_keys);
+		free_mem(obj->desc_keys);
 		obj->desc_keys = add_hash(argument.c_str());
 	}
 	else if (buf.find("timer") != std::string::npos)
@@ -6495,8 +6495,8 @@ r_setval (CHAR_DATA *ch, std::string argument)
 
 		if (buf.find("name") != std::string::npos)
 		{
-			mem_free(room->name);
-			room->name = strdup(argument.c_str());
+			free_mem(room->name);
+			room->name = duplicateString(argument.c_str());
 		}
 		else if (buf.find("desc") != std::string::npos)
 		{
@@ -6506,8 +6506,8 @@ r_setval (CHAR_DATA *ch, std::string argument)
 			}
 			else
 			{
-				mem_free(room->description);
-				room->description = strdup(argument.c_str());
+				free_mem(room->description);
+				room->description = duplicateString(argument.c_str());
 			}
 		}
 		else if (buf.find("sector") != std::string::npos)
@@ -6547,23 +6547,23 @@ r_setval (CHAR_DATA *ch, std::string argument)
 			//    We now know who we're targetting, work out what property we want
 			if (buf.find("name") != std::string::npos)
 			{
-				mem_free(tch->tname);
-				tch->tname = strdup (argument.c_str());
+				free_mem(tch->tname);
+				tch->tname = duplicateString (argument.c_str());
 			}
 			else if (buf.find("sdesc") != std::string::npos)
 			{
-				mem_free(tch->short_descr);
-				tch->short_descr = strdup (argument.c_str());
+				free_mem(tch->short_descr);
+				tch->short_descr = duplicateString (argument.c_str());
 			}
 			else if (buf.find("ldesc") != std::string::npos)
 			{
-				mem_free(tch->long_descr);
-				tch->long_descr = strdup (argument.c_str());
+				free_mem(tch->long_descr);
+				tch->long_descr = duplicateString (argument.c_str());
 			}
 			else if (buf.find("desc") != std::string::npos)
 			{
-				mem_free(tch->description);
-				tch->description = strdup (argument.c_str());
+				free_mem(tch->description);
+				tch->description = duplicateString (argument.c_str());
 			}
 			else if (buf.find("height") != std::string::npos)
 			{

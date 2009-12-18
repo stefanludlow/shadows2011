@@ -198,7 +198,7 @@ ve_deconstruct (DESCRIPTOR_DATA * c)
 		tmp_c = *text;
 		*text = '\0';
 
-		c->lines->line[line_no] = strdup (p);
+		c->lines->line[line_no] = duplicateString (p);
 
 		*text = tmp_c;
 
@@ -217,10 +217,10 @@ ve_setup_screen (DESCRIPTOR_DATA * c)
 	if (c->lines)
 	{
 		printf ("c->lines is non-NULL!\n");
-		mem_free (c->lines);
+		free_mem (c->lines);
 	}
 
-	c->lines = (LINE_DATA *) alloc (sizeof (LINE_DATA), 8);
+	c->lines = (LINE_DATA *) alloc (sizeof (LINE_DATA));
 
 	c->line = 1;
 	c->col = 1;
@@ -327,7 +327,7 @@ ve_delete_line (DESCRIPTOR_DATA * c, int lines_offset)
 		return;
 	}
 
-	mem_free (c->lines->line[lines_offset]);
+	free_mem (c->lines->line[lines_offset]);
 	c->lines->line[lines_offset] = NULL;
 
 	for (; c->lines->line[lines_offset + 1]; lines_offset++)
@@ -349,10 +349,10 @@ ve_insert_line (DESCRIPTOR_DATA * c, int lines_offset)
 
 	for (i = 1; i < lines_offset; i++)
 		if (!c->lines->line[i])
-			c->lines->line[i] = strdup ("");
+			c->lines->line[i] = duplicateString ("");
 
 	ptr = c->lines->line[lines_offset];
-	c->lines->line[lines_offset] = strdup ("");
+	c->lines->line[lines_offset] = duplicateString ("");
 
 	for (i = lines_offset + 1; ptr; i++)
 	{
@@ -546,7 +546,7 @@ ve_insert_char (DESCRIPTOR_DATA * c, char add_char)
 
 	if (!line_ptr)
 	{
-		line_ptr = (char *) alloc (insert_index + 2, 9);	/* +1 for new ch; +1 for zero */
+		line_ptr = (char *) alloc (insert_index + 2);	/* +1 for new ch; +1 for zero */
 
 		for (i = 0; i < insert_index; i++)
 			line_ptr[i] = ' ';
@@ -558,7 +558,7 @@ ve_insert_char (DESCRIPTOR_DATA * c, char add_char)
 
 	for (int i = 1; i < lines_offset; i++) /* This may be a little wasteful */
 		if (!c->lines->line[i])
-			c->lines->line[i] = strdup ("");
+			c->lines->line[i] = duplicateString ("");
 
 	if (strlen (line_ptr) >= 80)
 	{
@@ -585,9 +585,9 @@ ve_insert_char (DESCRIPTOR_DATA * c, char add_char)
 	if (strlen (line_ptr) > insert_index)
 		strcat (buf1, &line_ptr[insert_index]);
 
-	c->lines->line[lines_offset] = strdup (buf1);
+	c->lines->line[lines_offset] = duplicateString (buf1);
 
-	mem_free (line_ptr);
+	free_mem (line_ptr);
 
 	ve_goto (c, c->line, 1);
 
@@ -639,9 +639,9 @@ ve_delete_char (DESCRIPTOR_DATA * c, size_t backup)
 	for (i = c->col - 1; buf[i]; i++)
 		buf[i] = buf[i + 1];
 
-	mem_free (line_ptr);
+	free_mem (line_ptr);
 
-	c->lines->line[lines_offset] = strdup (buf);
+	c->lines->line[lines_offset] = duplicateString (buf);
 
 	ve_goto (c, c->line, 1);
 
@@ -672,7 +672,7 @@ ve_newline (DESCRIPTOR_DATA * c)
 
 		for (i = 1; i <= lines_offset + 1; i++)
 			if (!c->lines->line[i])
-				c->lines->line[i] = strdup ("");
+				c->lines->line[i] = duplicateString ("");
 
 		if (c->line > 22)
 		{
@@ -711,9 +711,9 @@ ve_newline (DESCRIPTOR_DATA * c)
 
 	ve_insert_line (c, lines_offset);
 
-	mem_free (c->lines->line[lines_offset]);
+	free_mem (c->lines->line[lines_offset]);
 
-	c->lines->line[lines_offset] = strdup (buf);
+	c->lines->line[lines_offset] = duplicateString (buf);
 
 	ve_refresh_screen (c);
 }
@@ -752,9 +752,9 @@ ve_deallocate (DESCRIPTOR_DATA * c)
 	int i;
 
 	for (i = 1; c->lines->line[i]; i++)
-		mem_free (c->lines->line[i]);
+		free_mem (c->lines->line[i]);
 
-	mem_free (c->lines);
+	free_mem (c->lines);
 
 	c->lines = NULL;
 }
@@ -769,9 +769,9 @@ ve_reconstruct (DESCRIPTOR_DATA * c)
 		str_len += strlen (c->lines->line[i]) + 1;	/* +newline */
 
 	if (*c->str)
-		mem_free (*c->str);
+		free_mem (*c->str);
 
-	*c->str = (char *) alloc (str_len, 10);
+	*c->str = (char *) alloc (str_len);
 
 	**c->str = '\0';
 

@@ -25,8 +25,8 @@ clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits)
 	targ_room->room_flags = source_room->room_flags;
 	targ_room->sector_type = source_room->sector_type;
 
-	targ_room->name = strdup (source_room->name);
-	targ_room->description = strdup (source_room->description);
+	targ_room->name = duplicateString (source_room->name);
+	targ_room->description = duplicateString (source_room->description);
 
 	targ_room->zone = targ_room->nVirtual / ZONE_SIZE;
 
@@ -38,9 +38,9 @@ clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits)
 				continue;
 			targ_room->dir_option[i] = new room_direction_data;
 			targ_room->dir_option[i]->general_description =
-				strdup (source_room->dir_option[i]->general_description);
+				duplicateString (source_room->dir_option[i]->general_description);
 			targ_room->dir_option[i]->keyword =
-				strdup (source_room->dir_option[i]->keyword);
+				duplicateString (source_room->dir_option[i]->keyword);
 			targ_room->dir_option[i]->exit_info =
 				source_room->dir_option[i]->exit_info;
 			targ_room->dir_option[i]->key = source_room->dir_option[i]->key;
@@ -55,9 +55,9 @@ clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits)
 		for (exptr = source_room->ex_description; exptr; exptr = exptr->next)
 		{
 			extra = new EXTRA_DESCR_DATA;
-			extra->keyword = strdup (exptr->keyword);
-			extra->description = strdup (exptr->description);
 			extra->next = targ_room->ex_description;
+			extra->keyword = duplicateString (exptr->keyword);
+			extra->description = duplicateString (exptr->description);
 			targ_room->ex_description = extra;
 		}
 	}
@@ -69,7 +69,7 @@ clone_room (ROOM_DATA * source_room, ROOM_DATA * targ_room, bool clone_exits)
 		{
 			if (source_room->extra->weather_desc[i])
 				targ_room->extra->weather_desc[i] =
-				strdup (source_room->extra->weather_desc[i]);
+				duplicateString (source_room->extra->weather_desc[i]);
 		}
 	}
 	else
@@ -194,8 +194,8 @@ generate_dwelling_room (OBJ_DATA * dwelling)
 
 	room->dir_option[OUTSIDE] = new room_direction_data;
 
-	room->dir_option[OUTSIDE]->general_description = strdup ("");
-	room->dir_option[OUTSIDE]->keyword = strdup ("entryway");
+	room->dir_option[OUTSIDE]->general_description = duplicateString ("");
+	room->dir_option[OUTSIDE]->keyword = duplicateString ("entryway");
 	room->dir_option[OUTSIDE]->exit_info |= (1 << 0);
 	room->dir_option[OUTSIDE]->key = dwelling->o.od.value[3];
 	room->dir_option[OUTSIDE]->to_room = dwelling->in_room;
@@ -646,8 +646,7 @@ load_dwelling_rooms ()
 
 				else if (*chk == 'Q')
 				{		/* Secret search desc */
-					r_secret =
-						(struct secret *) get_perm (sizeof (struct secret));
+					r_secret = new secret;
 					sdir = atoi (chk + 1);
 					fscanf (fl, "%d\n", &tmp);
 					r_secret->diff = tmp;
@@ -659,13 +658,11 @@ load_dwelling_rooms ()
 				{
 					struct extra_descr_data *tmp_extra;
 
-					new_descr =
-						(struct extra_descr_data *)
-						get_perm (sizeof (struct extra_descr_data));
+					new_descr = new extra_descr_data;
+					new_descr->next = NULL;
 					new_descr->keyword = fread_string (fl);
 					new_descr->description = fread_string (fl);
-					new_descr->next = NULL;
-
+					
 					if (!room->ex_description)
 						room->ex_description = new_descr;
 					else
@@ -681,9 +678,7 @@ load_dwelling_rooms ()
 
 				else if (*chk == 'W')
 				{
-					w_desc =
-						(struct written_descr_data *)
-						get_perm (sizeof (struct written_descr_data));
+					w_desc = new written_descr_data;
 					fscanf (fl, "%d\n", &tmp);
 					w_desc->language = tmp;
 					w_desc->description = fread_string (fl);
@@ -693,13 +688,12 @@ load_dwelling_rooms ()
 				else if (*chk == 'P')
 				{
 					struct room_prog *tmp_prg;
-					r_prog =
-						(struct room_prog *) get_perm (sizeof (struct room_prog));
+					r_prog = new room_prog;
+					r_prog->next = NULL;
 					r_prog->command = fread_string (fl);
 					r_prog->keys = fread_string (fl);
 					r_prog->prog = fread_string (fl);
-					r_prog->next = NULL;
-
+					
 					/* Make sure that the room program is stored at
 					end of the list.  This way when the room is
 					saved, the rprogs get saved in the same order

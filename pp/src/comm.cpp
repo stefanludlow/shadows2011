@@ -199,8 +199,13 @@ run_the_game (int port)
 		system_log ("Opening mother connection.", false);
 		nMainSocket = init_socket (port);
 	}
-
-	boot_db ();
+	
+	try {
+		boot_db ();
+	}
+	catch (std::bad_alloc& mallocErr) {
+		std::cerr << "bad_alloc caught: " << mallocErr.what() << std::endl;
+	}
 
 	system_log ("Entering game loop.", false);
 	starttime = time (0);
@@ -952,7 +957,7 @@ newbie_hints (void)
 			reformat_string (hint->hint, &p);
 			sprintf (buf, "\r\n#6%s#0", p);
 			send_to_char (buf, d->character);
-			mem_free (p);
+			free_mem (p);
 			break;
 		}
 	}
@@ -991,9 +996,9 @@ unban_site (SITE_INFO * site)
 			}
 		}
 
-		mem_free (site->name);
-		mem_free (site->banned_by);
-		mem_free (site);
+		free_mem (site->name);
+		free_mem (site->banned_by);
+		free_mem (site);
 		site = NULL;
 
 	}
@@ -1301,7 +1306,7 @@ send_to_all (char *messg)
 			if (!i->connected)
 				write_to_q (formatted, &i->output);
 
-	mem_free (formatted);
+	free_mem (formatted);
 }
 
 void
@@ -1322,7 +1327,7 @@ send_to_guides (char *message)
 		if (!d->connected &&
 			IS_GUIDE (d->character) && !IS_SET (d->character->act, PLR_QUIET))
 			write_to_q (formatted, &d->output);
-	mem_free (formatted);
+	free_mem (formatted);
 }
 
 void
@@ -1343,7 +1348,7 @@ send_to_gods (const char *message)
 		if (!d->connected &&
 			!IS_MORTAL (d->character) && !IS_SET (d->character->act, PLR_QUIET))
 			write_to_q (formatted, &d->output);
-	mem_free (formatted);
+	free_mem (formatted);
 }
 
 void
@@ -1364,7 +1369,7 @@ send_to_imms (char *message)
 		if (!d->connected &&
 			!IS_MORTAL (d->character) && !IS_SET (d->character->act, PLR_QUIET))
 			write_to_q (formatted, &d->output);
-	mem_free (formatted);
+	free_mem (formatted);
 }
 
 void
@@ -1393,7 +1398,7 @@ send_to_guardians (char *message, unsigned short int flag)
 		}
 
 	}
-	mem_free (formatted);
+	free_mem (formatted);
 }
 
 void
@@ -1417,7 +1422,7 @@ send_outside (char *message)
 			!IS_SET (d->character->act, PLR_QUIET) && AWAKE (d->character))
 			write_to_q (formatted, &d->output);
 	}
-	mem_free (formatted);
+	free_mem (formatted);
 }
 
 void
@@ -1477,7 +1482,7 @@ send_outside_zone (char *message, int zone)
 			write_to_q (formatted, &d->output);
 	}
 
-	mem_free (formatted);
+	free_mem (formatted);
 }
 
 void
@@ -1499,7 +1504,7 @@ send_to_room (char *message, int room_num)
 		if (tch->desc && !IS_SET (tch->act, PLR_QUIET))
 			write_to_q (formatted, &tch->desc->output);
 
-	mem_free (formatted);
+	free_mem (formatted);
 }
 
 void
@@ -2121,7 +2126,7 @@ act (char *action_message, int hide_invisible, CHAR_DATA * ch,
 					&& to == vict_obj)
 					send_to_char ("\r\n", to);
 				send_to_char (p, to);
-				mem_free (p);
+				free_mem (p);
 			}
 			else
 				send_to_char (buf, to);
@@ -2704,7 +2709,7 @@ copyover_recovery (void)
 			break;
 		}
 
-		d = new struct descriptor_data;
+		d = new descriptor_data;
 		init_descriptor (d, desc);
 
 		/*		descriptor_list = d; */
@@ -3252,7 +3257,7 @@ string_add (DESCRIPTOR_DATA * d, char *str)
 			*(str + d->max_str - 1) = '\0';
 			terminator = 1;
 		}
-		*d->str = new char[strlen (str) + 3)];
+		*d->str = new char[strlen (str) + 3];
 		strcpy (*d->str, str);
 	}
 
@@ -3266,11 +3271,11 @@ string_add (DESCRIPTOR_DATA * d, char *str)
 		}
 		else
 		{
-			p = (char *) alloc (strlen (*d->str) + strlen (str) + 3, 3);
+			p = (char *) alloc (strlen (*d->str) + strlen (str) + 3);
 			strcpy (p, *d->str);
 			strcat (p, str);
 
-			mem_free (*d->str);
+			free_mem (*d->str);
 			*d->str = p;
 		}
 	}
@@ -3348,9 +3353,9 @@ page_string (DESCRIPTOR_DATA * d, const char *str)
 		return;
 
 	if (d->showstr_head && *d->showstr_head)
-		mem_free (d->showstr_head);
+		free_mem (d->showstr_head);
 
-	d->showstr_head = strdup (str);
+	d->showstr_head = duplicateString (str);
 	d->showstr_point = d->showstr_head;
 
 	show_string (d, "");
@@ -3372,12 +3377,12 @@ show_string (DESCRIPTOR_DATA * d, char *input)
 
 		if (d->showstr_head)
 		{
-			mem_free (d->showstr_head);
+			free_mem (d->showstr_head);
 			d->showstr_head = NULL;
 		}
 
 		if (d->header)
-			mem_free (d->header);
+			free_mem (d->header);
 
 		d->header = NULL;
 		d->showstr_point = NULL;
@@ -3415,14 +3420,14 @@ show_string (DESCRIPTOR_DATA * d, char *input)
 
 				if (d->showstr_head)
 				{
-					mem_free (d->showstr_head);
+					free_mem (d->showstr_head);
 					d->showstr_head = NULL;
 				}
 
 				d->showstr_point = NULL;
 
 				if (d->header)
-					mem_free (d->header);
+					free_mem (d->header);
 
 				d->header = NULL;
 			}

@@ -32,15 +32,15 @@ new_char (int pc_type)
 {
 	CHAR_DATA *ch;
 
-	ch = new char_data;
+	ch = new char_data();
 
 	if (pc_type)
 	{
-		ch->pc = new pc_data;
+		ch->pc = new pc_data();
 	}
 	else
 	{
-		ch->mob = new mob_data;
+		ch->mob = new mob_data();
 	}
 	return ch;
 }
@@ -254,49 +254,49 @@ char_data::~char_data ()
 
 	if (this->clans && *this->clans)
 	{
-		mem_free (this->clans);
+		free_mem (this->clans);
 		this->clans = NULL;
 	}
 
 	if (this->combat_log && *this->combat_log)
 	{
-		mem_free (this->combat_log);
+		free_mem (this->combat_log);
 		this->combat_log = NULL;
 	}
 
 	if (this->enemy_direction && *this->enemy_direction)
 	{
-		mem_free (this->enemy_direction);
+		free_mem (this->enemy_direction);
 		this->enemy_direction = NULL;
 	}
 
 	if (this->delay_who && !isdigit (*this->delay_who) && *this->delay_who)
 	{
-		mem_free (this->delay_who);
+		free_mem (this->delay_who);
 		this->delay_who = NULL;
 	}
 
 	if (this->delay_who2 && !isdigit (*this->delay_who2) && *this->delay_who2)
 	{
-		mem_free (this->delay_who2);
+		free_mem (this->delay_who2);
 		this->delay_who2 = NULL;
 	}
 
 	if (this->voice_str && *this->voice_str)
 	{
-		mem_free (this->voice_str);
+		free_mem (this->voice_str);
 		this->voice_str = NULL;
 	}
 
 	if (this->travel_str && *this->travel_str)
 	{
-		mem_free (this->travel_str);
+		free_mem (this->travel_str);
 		this->travel_str = NULL;
 	}
 
 	if (this->pmote_str && *this->pmote_str)
 	{
-		mem_free (this->pmote_str);
+		free_mem (this->pmote_str);
 		this->pmote_str = NULL;
 	}
 
@@ -319,11 +319,11 @@ char_data::~char_data ()
 
 		if (var->name && *var->name)
 		{
-			mem_free (var->name);
+			free_mem (var->name);
 			var->name = NULL;
 		}
 
-		mem_free (var);
+		free_mem (var);
 		var = NULL;
 	}
 
@@ -331,7 +331,7 @@ char_data::~char_data ()
 	{
 		mem = this->remembers;
 		this->remembers = mem->next;
-		mem_free (mem);
+		free_mem (mem);
 		mem = NULL;
 	}
 
@@ -361,35 +361,35 @@ char_data::~char_data ()
 			if (this->tname && *this->tname
 				&& this->tname != proto->tname)
 			{
-				mem_free (this->tname);
+				free_mem (this->tname);
 				this->tname = NULL;
 			}
 
 			if (this->name && *this->name
 				&& this->name != proto->name)
 			{
-				mem_free (this->name);
+				free_mem (this->name);
 				this->name = NULL;
 			}
 
 			if (this->short_descr && *this->short_descr
 				&& this->short_descr != proto->short_descr )
 			{
-				mem_free (this->short_descr);
+				free_mem (this->short_descr);
 				this->short_descr = NULL;
 			}
 
 			if (this->long_descr && *this->long_descr
 				&& this->long_descr != proto->long_descr)
 			{
-				mem_free (this->long_descr);
+				free_mem (this->long_descr);
 				this->long_descr = NULL;
 			}
 
 			if (this->description && *this->description
 				&& this->description != proto->description)
 			{
-				mem_free (this->description);
+				free_mem (this->description);
 				this->description = NULL;
 			}
 		}
@@ -402,31 +402,31 @@ char_data::~char_data ()
 	{
 		if (this->tname && *this->tname )
 		{
-			mem_free (this->tname);
+			free_mem (this->tname);
 			this->tname = NULL;
 		}
 
 		if (this->name && *this->name )
 		{
-			mem_free (this->name);
+			free_mem (this->name);
 			this->name = NULL;
 		}
 
 		if (this->short_descr && *this->short_descr)
 		{
-			mem_free (this->short_descr);
+			free_mem (this->short_descr);
 			this->short_descr = NULL;
 		}
 
 		if (this->long_descr && *this->long_descr)
 		{
-			mem_free (this->long_descr);
+			free_mem (this->long_descr);
 			this->long_descr = NULL;
 		}
 
 		if (this->description && *this->description)
 		{
-			mem_free (this->description);
+			free_mem (this->description);
 			this->description = NULL;
 		}
 	}
@@ -511,11 +511,11 @@ pc_data::~pc_data()
 
 		if (dream->dream && *dream->dream)
 		{
-			mem_free (dream->dream);
+			free_mem (dream->dream);
 			dream->dream = NULL;
 		}
 
-		mem_free (dream);
+		free_mem (dream);
 		dream = NULL;
 	}
 	while (this->dreamed)
@@ -524,60 +524,60 @@ pc_data::~pc_data()
 		this->dreamed = this->dreamed->next;
 		if (dream->dream && *dream->dream)
 		{
-			mem_free (dream->dream);
+			free_mem (dream->dream);
 			dream->dream = NULL;
 		}
-		mem_free (dream);
+		free_mem (dream);
 		dream = NULL;
 	}
 
 	if ((trole = this->special_role) != NULL)
 	{
 		if (trole->summary && *trole->summary)
-			mem_free (trole->summary);
+			free_mem (trole->summary);
 		if (trole->body && *trole->body)
-			mem_free (trole->body);
+			free_mem (trole->body);
 		if (trole->date && *trole->date)
-			mem_free (trole->date);
+			free_mem (trole->date);
 		if (trole->poster && *trole->poster)
-			mem_free (trole->poster);
-		mem_free (trole);
+			free_mem (trole->poster);
+		free_mem (trole);
 		this->special_role = NULL;
 	}
 
 	if (this->account_name && *this->account_name)
 	{
-		mem_free (this->account_name);
+		free_mem (this->account_name);
 		this->account_name = NULL;
 	}
 
 	if (this->site_lie && *this->site_lie)
 	{
-		mem_free (this->site_lie);
+		free_mem (this->site_lie);
 		this->site_lie = NULL;
 	}
 
 	if (this->imm_leave && *this->imm_leave)
 	{
-		mem_free (this->imm_leave);
+		free_mem (this->imm_leave);
 		this->imm_leave = NULL;
 	}
 
 	if (this->imm_enter && *this->imm_enter)
 	{
-		mem_free (this->imm_enter);
+		free_mem (this->imm_enter);
 		this->imm_enter = NULL;
 	}
 
 	if (this->creation_comment && *this->creation_comment)
 	{
-		mem_free (this->creation_comment);
+		free_mem (this->creation_comment);
 		this->creation_comment = NULL;
 	}
 
 	if (this->msg && *this->msg)
 	{
-		mem_free (this->msg);
+		free_mem (this->msg);
 		this->msg = NULL;
 	}
 
@@ -617,7 +617,7 @@ mob_data::~mob_data()
 {
 	if (this->owner && *this->owner)
 	{
-		mem_free(this->owner);
+		free_mem(this->owner);
 	}
 }
 
@@ -626,33 +626,33 @@ void char_data::partial_deep_copy (CHAR_DATA *proto)
 {
 	if (this->name)
 	{
-		mem_free(this->name);
+		free_mem(this->name);
 	}
-	this->name = strdup(proto->name);
+	this->name = duplicateString(proto->name);
 
 	if (this->short_descr)
 	{
-		mem_free(this->short_descr);
+		free_mem(this->short_descr);
 	}
-	this->short_descr = strdup(proto->short_descr);
+	this->short_descr = duplicateString(proto->short_descr);
 
 	if (this->long_descr)
 	{
-		mem_free(this->long_descr);
+		free_mem(this->long_descr);
 	}
-	this->long_descr = strdup(proto->long_descr);
+	this->long_descr = duplicateString(proto->long_descr);
 
 	if (this->description)
 	{
-		mem_free(this->description);
+		free_mem(this->description);
 	}
-	this->description = strdup(proto->description);
+	this->description = duplicateString(proto->description);
 
 	if (this->clans)
 	{
-		mem_free(this->clans);
+		free_mem(this->clans);
 	}
-	this->clans = strdup(proto->clans);
+	this->clans = duplicateString(proto->clans);
 
 	this->act = proto->act;
 	this->mob->damnodice = proto->mob->damnodice;
@@ -727,77 +727,77 @@ void char_data::deep_copy (CHAR_DATA *copy_from)
 
 	if (copy_from->delay_who)
 	{
-		this->delay_who = strdup(copy_from->delay_who);
+		this->delay_who = duplicateString(copy_from->delay_who);
 	}
 
 	if (copy_from->delay_who2)
 	{
-		this->delay_who2 = strdup(copy_from->delay_who2);
+		this->delay_who2 = duplicateString(copy_from->delay_who2);
 	}
 
 	if (copy_from->casting_arg)
 	{
-		this->casting_arg = strdup(copy_from->casting_arg);
+		this->casting_arg = duplicateString(copy_from->casting_arg);
 	}
 
 	if (copy_from->name)
 	{
-		this->name = strdup(copy_from->name);
+		this->name = duplicateString(copy_from->name);
 	}
 
 	if (copy_from->tname)
 	{
-		this->tname = strdup(copy_from->tname);
+		this->tname = duplicateString(copy_from->tname);
 	}
 
 	if (copy_from->short_descr)
 	{
-		this->short_descr = strdup(copy_from->short_descr);
+		this->short_descr = duplicateString(copy_from->short_descr);
 	}
 
 	if (copy_from->long_descr)
 	{
-		this->long_descr = strdup(copy_from->long_descr);
+		this->long_descr = duplicateString(copy_from->long_descr);
 	}
 
 	if (copy_from->pmote_str)
 	{
-		this->pmote_str = strdup(copy_from->pmote_str);
+		this->pmote_str = duplicateString(copy_from->pmote_str);
 	}
 
 	if (copy_from->voice_str)
 	{
-		this->voice_str = strdup(copy_from->voice_str);
+		this->voice_str = duplicateString(copy_from->voice_str);
 	}
 
 	if (copy_from->description)
 	{
-		this->description = strdup(copy_from->description);
+		this->description = duplicateString(copy_from->description);
 	}
 
 	if (copy_from->clans)
 	{
-		this->clans = strdup(copy_from->clans);
+		this->clans = duplicateString(copy_from->clans);
 	}
 
 	if (copy_from->enemy_direction)
 	{
-		this->enemy_direction = strdup(copy_from->enemy_direction);
+		this->enemy_direction = duplicateString(copy_from->enemy_direction);
 	}
 
 	if (copy_from->combat_log)
 	{
-		this->combat_log = strdup(copy_from->combat_log);
+		this->combat_log = duplicateString(copy_from->combat_log);
 	}
 
 	if (copy_from->travel_str)
 	{
-		this->travel_str = strdup(copy_from->travel_str);
+		this->travel_str = duplicateString(copy_from->travel_str);
 	}
 
 	if (copy_from->dmote_str)
 	{
-		this->dmote_str = strdup(copy_from->dmote_str);
+		this->dmote_str = duplicateString(copy_from->dmote_str);
 	}
 
 	if (copy_from->plan)
@@ -827,32 +827,32 @@ void pc_data::deep_copy (pc_data *copy_from)
 
 	if (copy_from->creation_comment)
 	{
-		this->creation_comment = strdup(copy_from->creation_comment);
+		this->creation_comment = duplicateString(copy_from->creation_comment);
 	}
 
 	if (copy_from->imm_enter)
 	{
-		this->imm_enter = strdup(copy_from->imm_enter);
+		this->imm_enter = duplicateString(copy_from->imm_enter);
 	}
 
 	if (copy_from->imm_leave)
 	{
-		this->imm_leave = strdup(copy_from->imm_leave);
+		this->imm_leave = duplicateString(copy_from->imm_leave);
 	}
 
 	if (copy_from->site_lie)
 	{
-		this->site_lie = strdup(copy_from->site_lie);
+		this->site_lie = duplicateString(copy_from->site_lie);
 	}
 
 	if (copy_from->account_name)
 	{
-		this->account_name = strdup(copy_from->account_name);
+		this->account_name = duplicateString(copy_from->account_name);
 	}
 
 	if (copy_from->msg)
 	{
-		this->msg = strdup(copy_from->msg);
+		this->msg = duplicateString(copy_from->msg);
 	}
 }
 
@@ -862,7 +862,7 @@ void mob_data::deep_copy (mob_data *copy_from)
 
 	if (copy_from->owner)
 	{
-		this->owner = strdup(copy_from->owner);
+		this->owner = duplicateString(copy_from->owner);
 	}
 }
 

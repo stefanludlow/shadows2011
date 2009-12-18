@@ -243,7 +243,7 @@ encrypt_buf (const char *buf)
 {
 	//  extern char *crypt (const char *key, const char *salt);
 
-	return strdup (crypt (buf, "CR"));
+	return duplicateString (crypt (buf, "CR"));
 }
 
 int
@@ -256,7 +256,7 @@ check_password (const char *pass, const char *encrypted)
 
 	return_value = (strcmp (p, encrypted) == 0);
 
-	mem_free (p); // char* from crypt()
+	free_mem (p); // char* from crypt()
 
 	return return_value;
 }
@@ -751,7 +751,7 @@ nanny_new_account (DESCRIPTOR_DATA * d, char *argument)
 		sprintf (buf2, "\nApply for a login account named %s? [y/n]  ", buf);
 		SEND_TO_Q (buf2, d);
 		d->connected = CON_ACCT_POLICIES;
-		d->stored = strdup (buf);
+		d->stored = duplicateString (buf);
 	}
 	else
 	{
@@ -788,7 +788,7 @@ nanny_account_policies (DESCRIPTOR_DATA * d, char *argument)
 	{
 		d->acct = new account;
 		d->acct->set_name (d->stored);
-		d->stored = strdup ("");
+		d->stored = duplicateString ("");
 		d->acct->created_on = time (0);
 		SEND_TO_Q (get_text_buffer (NULL, text_list, "account_policies"), d);
 		SEND_TO_Q ("Do you agree? (y/n) ", d);
@@ -1018,7 +1018,7 @@ nanny_conf_change_password (DESCRIPTOR_DATA * d, char *argument)
 	ECHO_ON;
 
 	d->acct->update_password (d->stored);
-	mem_free (d->stored); // char*
+	free_mem (d->stored); // char*
 
 	SEND_TO_Q ("\n\n#2Account password successfully modified.#0\n\n", d);
 
@@ -1047,7 +1047,7 @@ setup_new_account (account  *acct)
 	char buf2[MAX_STRING_LENGTH];
 	char email[MAX_STRING_LENGTH];
 
-	password = strdup (generate_password (1, (char **) "8"));
+	password = duplicateString (generate_password (1, (char **) "8"));
 
 	sprintf (buf, "Greetings,\n"
 		"\n"
@@ -1072,7 +1072,7 @@ setup_new_account (account  *acct)
 
 	encrypted = encrypt_buf (password);
 	acct->set_password (encrypted);
-	mem_free (encrypted); // char* from crypt
+	free_mem (encrypted); // char* from crypt
 
 	acct->newsletter = true;
 
@@ -1144,7 +1144,7 @@ char *password;
 char buf[MAX_STRING_LENGTH];
 char email[MAX_STRING_LENGTH];
 
-password = strdup (generate_password (1, (char **) "8"));
+password = duplicateString (generate_password (1, (char **) "8"));
 
 sprintf (buf, "Greetings,\n"
 "\n"
@@ -1157,7 +1157,7 @@ sprintf (buf, "Greetings,\n"
 
 encrypted = encrypt_buf (password);
 acct->set_password (encrypted);
-mem_free (encrypted); // char* from crypt()
+free_mem (encrypted); // char* from crypt()
 
 sprintf (email, "%s <%s>", MUD_NAME, MUD_EMAIL);
 
@@ -1617,24 +1617,24 @@ nanny_composing_message (DESCRIPTOR_DATA * d, char *argument)
 		date[strlen (date) - 1] = '\0';
 
 	message = new MUDMAIL_DATA;
-	message->from = strdup (d->pending_message->poster);
-	message->subject = strdup (d->pending_message->subject);
-	message->message = strdup (d->pending_message->message);
-	message->from_account = strdup (d->acct->name.c_str ());
-	message->date = strdup (date);
+	message->from = duplicateString (d->pending_message->poster);
+	message->subject = duplicateString (d->pending_message->subject);
+	message->message = duplicateString (d->pending_message->message);
+	message->from_account = duplicateString (d->acct->name.c_str ());
+	message->date = duplicateString (date);
 	message->flags = 0;
-	message->target = strdup (d->pending_message->target);
+	message->target = duplicateString (d->pending_message->target);
 
 	acct = new account (d->stored);
 
 	save_hobbitmail_message (acct, message);
 
-	mem_free (message->from);
-	mem_free (message->subject);
-	mem_free (message->message);
-	mem_free (message->from_account);
-	mem_free (message->date);
-	mem_free (message); // MUDMAIL_DATA*
+	free_mem (message->from);
+	free_mem (message->subject);
+	free_mem (message->message);
+	free_mem (message->from_account);
+	free_mem (message->date);
+	free_mem (message); // MUDMAIL_DATA*
 
 	unload_message (d->pending_message);
 	d->pending_message = NULL;
@@ -1662,7 +1662,7 @@ nanny_composing_message (DESCRIPTOR_DATA * d, char *argument)
 
 	delete acct;
 
-	d->stored = strdup ("");
+	d->stored = duplicateString ("");
 
 	display_hobbitmail_inbox (d, d->acct);
 
@@ -1844,8 +1844,8 @@ nanny_compose_mail_to (DESCRIPTOR_DATA * d, char *argument)
 	}
 
 	d->pending_message = new MESSAGE_DATA;
-	d->pending_message->target = strdup (argument);
-	d->stored = strdup (acct->name.c_str ());
+	d->pending_message->target = duplicateString (argument);
+	d->stored = duplicateString (acct->name.c_str ());
 	delete acct;
 	unload_pc (tch);
 
@@ -2040,10 +2040,10 @@ nanny_read_message (DESCRIPTOR_DATA * d, char *argument)
 			return;
 		}
 		row = mysql_fetch_row (result);
-		d->stored = strdup (row[0]);
+		d->stored = duplicateString (row[0]);
 
 		d->pending_message = new MESSAGE_DATA;
-		d->pending_message->target = strdup (row[1]);
+		d->pending_message->target = duplicateString (row[1]);
 		mysql_free_result (result);
 		result = NULL;
 		d->connected = CON_COMPOSE_SUBJECT;
@@ -3400,10 +3400,10 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	if (d->character->pc->special_role)
 	{
 		outfit_new_char (d->character, d->character->pc->special_role);
-		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
-		d->pending_message->poster = strdup (GET_NAME (d->character));
+		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
+		d->pending_message->poster = duplicateString (GET_NAME (d->character));
 		d->pending_message->subject =
-			strdup ("Special Role Selected in Chargen.");
+			duplicateString ("Special Role Selected in Chargen.");
 		sprintf (buf,
 			"Role Name: %s\n" "Role Cost: %d points\n" "Posted By: %s\n"
 			"Posted On: %s\n" "\n" "%s\n",
@@ -3412,7 +3412,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 			d->character->pc->special_role->poster,
 			d->character->pc->special_role->date,
 			d->character->pc->special_role->body);
-		d->pending_message->message = strdup (buf);
+		d->pending_message->message = duplicateString (buf);
 		add_message_to_mysql_player_notes (d->character->tname,
 			d->character->tname,
 			d->pending_message);
@@ -3498,21 +3498,21 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		if (strlen (date) > 1)
 			date[strlen (date) - 1] = '\0';
 
-		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
-		d->pending_message->poster = strdup (GET_NAME (d->character));
-		d->pending_message->subject = strdup ("Background Information.");
+		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
+		d->pending_message->poster = duplicateString (GET_NAME (d->character));
+		d->pending_message->subject = duplicateString ("Background Information.");
 		d->pending_message->message =
-			strdup (d->character->pc->creation_comment);
-		d->pending_message->date = strdup (date);
+			duplicateString (d->character->pc->creation_comment);
+		d->pending_message->date = duplicateString (date);
 		add_message_to_mysql_player_notes (d->character->tname,
 			d->character->tname,
 			d->pending_message);
 
-		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
-		d->pending_message->poster = strdup (GET_NAME (d->character));
-		d->pending_message->subject = strdup ("My Background.");
+		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
+		d->pending_message->poster = duplicateString (GET_NAME (d->character));
+		d->pending_message->subject = duplicateString ("My Background.");
 		d->pending_message->message =
-			strdup (d->character->pc->creation_comment);
+			duplicateString (d->character->pc->creation_comment);
 		post_to_mysql_journal (d);
 
 		d->character->pc->creation_comment = NULL;
@@ -3629,7 +3629,7 @@ nanny_change_email (DESCRIPTOR_DATA * d, char *argument)
 		sprintf (buf, "\nIs the address %s correct? [y/n] ", argument);
 		SEND_TO_Q (buf, d);
 
-		d->stored = strdup (argument);
+		d->stored = duplicateString (argument);
 
 		d->connected = CON_CHG_EMAIL_CNF;
 		return;
@@ -3651,7 +3651,7 @@ nanny_change_email_confirm (DESCRIPTOR_DATA * d, char *argument)
 	{
 		SEND_TO_Q ("\nYour email address was successfully updated.\n", d);
 		d->acct->update_email (d->stored);
-		mem_free (d->stored); // char*
+		free_mem (d->stored); // char*
 		d->stored = NULL;
 		display_main_menu (d);
 		return;
@@ -3767,8 +3767,9 @@ spitstat (CHAR_DATA * ch, DESCRIPTOR_DATA * recipient)
 
 	*buf = '\0';
 
-	if (!ch->pc)
+	if (!ch->pc) {
 		ch->pc = new PC_DATA;
+	}
 
 	if (ch->pc->role)
 		sprintf (ADDBUF, "\nPurchased Starter: %s\n",
@@ -4391,10 +4392,11 @@ nanny_special_role_selection (DESCRIPTOR_DATA * d, char *arg)
 	}
 
 	d->character->pc->special_role = new ROLE_DATA;
-	d->character->pc->special_role->summary = strdup (role->summary);
-	d->character->pc->special_role->body = strdup (role->body);
-	d->character->pc->special_role->poster = strdup (role->poster);
-	d->character->pc->special_role->date = strdup (role->date);
+	d->character->pc->special_role->next = NULL;
+	d->character->pc->special_role->summary = duplicateString (role->summary);
+	d->character->pc->special_role->body = duplicateString (role->body);
+	d->character->pc->special_role->poster = duplicateString (role->poster);
+	d->character->pc->special_role->date = duplicateString (role->date);
 	d->character->pc->special_role->cost = role->cost;
 	d->character->pc->special_role->id = role->id;
 
@@ -4513,7 +4515,7 @@ race_selection (DESCRIPTOR_DATA * d, char *arg)
 	{
 		reformat_string (buf, &p);
 		sprintf (buf2, "\n#2%s:#0\n\n%s", row[RACE_NAME], p);
-		mem_free (p); //char*
+		free_mem (p); //char*
 	}
 	else
 	{
@@ -5241,7 +5243,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 	if (ch->name && !isname (ch->tname, ch->name))
 	{
 		sprintf (buf, "%s %s", ch->tname, ch->name);
-		ch->name = strdup (buf);
+		ch->name = duplicateString (buf);
 	}
 
 	else if (!str_cmp (key, "quit"))
