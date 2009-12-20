@@ -46,6 +46,9 @@ typedef struct message_data MESSAGE_DATA;
 
 typedef void CALL_PROC (DESCRIPTOR_DATA * d);
 
+extern int free_mem(char *&ptr);
+extern int free_mem(void *ptr);
+
 
 
 /* modes of connectedness */
@@ -168,8 +171,8 @@ struct message_list
 	struct message_type *msg;
 };
 
-struct message_data
-{
+class message_data {
+public:
 	int nVirtual;
 	long nTimestamp;
 	long flags;
@@ -180,6 +183,29 @@ struct message_data
 	char *message;
 	char *icdate;
 	char *target;
+
+	message_data() {
+		nVirtual = 0;
+		nTimestamp = 0;
+		flags = 0;
+		poster = NULL;
+		date = NULL;
+		subject = NULL;
+		info = NULL;
+		message = NULL;
+		icdate = NULL;
+		target = NULL;
+	}
+
+	~message_data() {
+		free_mem(poster);
+		free_mem(date);
+		free_mem(subject);
+		free_mem(info);
+		free_mem(message);
+		free_mem(icdate);
+		free_mem(target);
+	}
 };
 
 /*
@@ -200,7 +226,7 @@ struct descriptor_data
 	char *showstr_head;		/* for paging through texts     */
 	char *showstr_point;		/*       -                    */
 	char *header;
-	char **str;			/* for the modify-str system  */
+	char *descStr;			/* for the modify-str system  */
 	int edit_type;		/* Type of document being edited */
 	int edit_index;		/* Type relative index for edit */
 	char *edit_string;		/* String being edited by edit command */

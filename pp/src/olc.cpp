@@ -31,6 +31,8 @@
 
 extern rpie::server engine;
 extern const char *weather_states[];
+extern int free_mem(char *&ptr);
+extern int free_mem(void *ptr);
 
 const char *apply_types[] = {
 	"None",
@@ -3786,7 +3788,8 @@ do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 	make_quiet (ch);
 	send_to_char ("Enter a new secret description.  Terminate with an '@'\n",
 		ch);
-	ch->desc->str = &r_secret->stext;
+	free_mem(ch->desc->descStr);
+	ch->desc->descStr = r_secret->stext;
 	r_secret->stext = 0;
 	ch->desc->max_str = 2000;
 
@@ -4048,8 +4051,10 @@ do_rdesc (CHAR_DATA * ch, char *argument, int cmd)
 
 	act ("$n begins editing a room description.", false, ch, 0, 0, TO_ROOM);
 
+	free_mem(ch->desc->descStr);
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
-	ch->desc->str = &ch->desc->pending_message->message;
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 	ch->delay_info1 = room->nVirtual;
 
@@ -4091,7 +4096,8 @@ do_rappend (CHAR_DATA * ch, char *argument, int cmd)
 		("1-------10--------20--------30--------40--------50--------60---65\n",
 		ch);
 	make_quiet (ch);
-	ch->desc->str = &(vtor (ch->in_room)->description);
+	free_mem(ch->desc->descStr);
+	ch->desc->descStr = duplicateString(vtor (ch->in_room)->description);
 	ch->desc->max_str = 2000;
 }
 
@@ -4169,8 +4175,9 @@ do_redesc (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char (vtor (ch->in_room)->ex_description->description, ch);
 		newdesc = tmp;
 	}
-
-	ch->desc->str = &newdesc->description;
+	
+	free_mem(ch->desc->descStr);
+	ch->desc->descStr = duplicateString(newdesc->description);
 
 	if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
 		ve_setup_screen (ch->desc);
@@ -4530,7 +4537,8 @@ do_rddesc (CHAR_DATA * ch, char *argument, int cmd)
 		("1-------10--------20--------30--------40--------50--------60---65\n",
 		ch);
 	make_quiet (ch);
-	ch->desc->str = &(vtor (ch->in_room)->dir_option[dir]->general_description);
+	free_mem(ch->desc->descStr);
+	ch->desc->descStr = duplicateString(vtor (ch->in_room)->dir_option[dir]->general_description);
 	vtor (ch->in_room)->dir_option[dir]->general_description = 0;
 	ch->desc->max_str = 2000;
 }
@@ -6703,8 +6711,10 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (full_description)
 	{
+		free_mem(ch->desc->descStr);
+		free_mem(ch->desc->pending_message);
 		ch->desc->pending_message = new MESSAGE_DATA;
-		ch->desc->str = &ch->desc->pending_message->message;
+		ch->desc->descStr = ch->desc->pending_message->message;
 		ch->desc->proc = post_odesc;
 		ch->delay_info1 = edit_obj->nVirtual;
 		if (indoor_description)
@@ -6915,8 +6925,9 @@ add_replace_mobprog (CHAR_DATA * ch, CHAR_DATA * mob, char *trigger_name)
 	send_to_char ("Enter your mob program.  Terminate with @.\n", ch);
 
 	make_quiet (ch);
-
-	ch->desc->str = &prog->prog;
+	
+	free_mem(ch->desc->descStr);
+	ch->desc->descStr = duplicateString(prog->prog);
 	ch->desc->proc = post_mset;
 
 	if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
@@ -11313,8 +11324,10 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char
 			("1-------10--------20--------30--------40--------50--------60---65\n",
 			ch);
+		free_mem(ch->desc->descStr);
+		free_mem(ch->desc->pending_message);
 		ch->desc->pending_message = new MESSAGE_DATA;
-		ch->desc->str = &ch->desc->pending_message->message;
+		ch->desc->descStr = ch->desc->pending_message->message;
 		ch->desc->proc = post_mdesc;
 		if (IS_NPC (edit_mob))
 			ch->delay_info1 = edit_mob->mob->nVirtual;
@@ -12641,8 +12654,9 @@ do_rset (CHAR_DATA * ch, char *argument, int cmd)
 
 		act ("$n begins editing an alas description.", false, ch, 0, 0,
 			TO_ROOM);
-
-		ch->desc->str = &ch->room->extra->alas[ind];
+		
+		free_mem(ch->desc->descStr);
+		ch->desc->descStr = duplicateString(ch->room->extra->alas[ind]);
 
 		if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
 		{
@@ -12706,8 +12720,9 @@ do_rset (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	act ("$n begins editing a room description.", false, ch, 0, 0, TO_ROOM);
-
-	ch->desc->str = &ch->room->extra->weather_desc[ind];
+	
+	free_mem(ch->desc->descStr);
+	ch->desc->descStr = duplicateString(ch->room->extra->weather_desc[ind]);
 
 	if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
 	{

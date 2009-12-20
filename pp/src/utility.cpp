@@ -1594,7 +1594,7 @@ char* duplicateString(const char *source) {
 	return output;
 }
 	
-int free_mem (char *ptr) {
+int free_mem (char *&ptr) {
 	if (ptr != NULL && strcmp(ptr, "") != STR_MATCH) {
 		delete [] ptr;
 		ptr = (char *)NULL;

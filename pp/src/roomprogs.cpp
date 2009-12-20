@@ -2660,7 +2660,8 @@ do_mpprg (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			make_quiet (ch);
 			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
-			ch->desc->str = &it->second.prog;
+			free_mem(ch->desc->descStr);
+			ch->desc->descStr = duplicateString(it->second.prog);
 			it->second.prog = 0;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
@@ -2708,7 +2709,8 @@ do_mpapp (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			make_quiet (ch);
 			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
-			ch->desc->str = &it->second.prog;
+			free_mem(ch->desc->descStr);
+			ch->desc->descStr = duplicateString(it->second.prog);
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
 		}
@@ -3116,7 +3118,7 @@ do_opprg (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			make_quiet (ch);
 			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
-			ch->desc->str = &it->second.prog;
+			ch->desc->descStr = duplicateString(it->second.prog);
 			it->second.prog = 0;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
@@ -3164,7 +3166,8 @@ do_opapp (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			make_quiet (ch);
 			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
-			ch->desc->str = &it->second.prog;
+			free_mem(ch->desc->descStr);
+			ch->desc->descStr = duplicateString(it->second.prog);
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
 		}
@@ -3323,7 +3326,8 @@ do_rpprg (CHAR_DATA * ch, char *argument, int cmd)
 			make_quiet (ch);
 			send_to_char ("Enter program now, Terminate entry with an '@'\n\r",
 				ch);
-			ch->desc->str = &t->prog;
+			free_mem(ch->desc->descStr);
+			ch->desc->descStr = duplicateString(t->prog);
 			t->prog = 0;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
@@ -3355,7 +3359,8 @@ do_rpapp (CHAR_DATA * ch, char *argument, int cmd)
 			make_quiet (ch);
 			send_to_char
 				("Append to program now, Terminate entry with an '@'\n\r", ch);
-			ch->desc->str = &t->prog;
+			free_mem(ch->desc->descStr);
+			ch->desc->descStr = duplicateString(t->prog);
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
 		}

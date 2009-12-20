@@ -4575,7 +4575,7 @@ read_pc_message (CHAR_DATA * ch, char *name, char *argument)
 	if (ch == who && !message->flags)
 		mark_as_read (ch, atoi (buf));
 
-	unload_message (message);
+	free_mem(message);
 	unload_pc (who);
 
 	return 1;
@@ -4613,7 +4613,7 @@ read_virtual_message (CHAR_DATA * ch, char *name, char *argument)
 	send_to_char ("\n", ch);
 	page_string (ch->desc, b_buf);
 
-	unload_message (message);
+	free_mem(message);
 
 	return 1;
 }
@@ -6761,8 +6761,9 @@ do_hedit (CHAR_DATA * ch, char *argument, int cmd)
 
 	make_quiet (ch);
 
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
-	ch->desc->str = &ch->desc->pending_message->message;
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 	ch->desc->proc = post_help;
 }
@@ -9446,7 +9447,7 @@ post_track_response (DESCRIPTOR_DATA * d)
 	mysql_free_result (result);
 	result = NULL;
 
-	unload_message (message);
+	free_mem(message);
 }
 
 int
@@ -9665,7 +9666,7 @@ do_erase (CHAR_DATA * ch, char *argument, int cmd)
 		&& strcasecmp (GET_NAME (ch), message->poster) != STR_MATCH)
 	{
 		send_to_char ("You can only erase your own messages.\n", ch);
-		unload_message (message);
+		free_mem(message);
 		return;
 	}
 
@@ -9674,7 +9675,7 @@ do_erase (CHAR_DATA * ch, char *argument, int cmd)
 	else
 		send_to_char ("There was a problem erasing that message.\n", ch);
 
-	unload_message (message);
+	free_mem(message);
 }
 
 int
@@ -9696,9 +9697,9 @@ write_virtual_board (CHAR_DATA * ch, char *name, char *argument)
 
 	while (*argument == ' ')
 		argument++;
-
-	ch->desc->pending_message =
-		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
+	
+	free_mem (ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	/* We need to borrow the poster slot to save the board name */
 
@@ -9712,8 +9713,9 @@ write_virtual_board (CHAR_DATA * ch, char *name, char *argument)
 	make_quiet (ch);
 
 	send_to_char ("Enter your note, terminate with an '@'\n\n", ch);
-
-	ch->desc->str = &ch->desc->pending_message->message;
+	
+	
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->desc->proc = post_to_mysql_virtual_board;
@@ -9749,7 +9751,7 @@ post_player_message (DESCRIPTOR_DATA * d)
 		d->pending_message->message,	/* message */
 		d->pending_message->flags);
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 
 	d->pending_message = NULL;
 }
@@ -9782,9 +9784,9 @@ write_pc_board (CHAR_DATA * ch, char *name, char *argument)
 
 	while (*argument == ' ')
 		argument++;
-
-	ch->desc->pending_message =
-		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
+	
+	free_mem(ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	/* We need to borrow the poster slot to save the board name */
 
@@ -9799,7 +9801,7 @@ write_pc_board (CHAR_DATA * ch, char *name, char *argument)
 
 	send_to_char ("Enter your note, terminate with an '@'\n\n", ch);
 
-	ch->desc->str = &ch->desc->pending_message->message;
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->desc->proc = post_to_mysql_player_board;
@@ -9835,7 +9837,7 @@ post_journal (DESCRIPTOR_DATA * d)
 		d->pending_message->message,	/* message */
 		d->pending_message->flags);
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 
 	d->pending_message = NULL;
 }
@@ -9853,8 +9855,8 @@ write_journal (CHAR_DATA * ch, char *argument)
 	while (*argument == ' ')
 		argument++;
 
-	ch->desc->pending_message =
-		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
+	free_mem(ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	/* We need to borrow the poster slot to save the board name */
 
@@ -9868,7 +9870,7 @@ write_journal (CHAR_DATA * ch, char *argument)
 
 	send_to_char ("Type your journal entry; terminate with an '@'\n\n", ch);
 
-	ch->desc->str = &ch->desc->pending_message->message;
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->desc->proc = post_to_mysql_journal;
@@ -9936,7 +9938,8 @@ do_write (CHAR_DATA * ch, char *argument, int cmd)
 	one_argument (obj->name, buf);
 
 	strcpy (title, argument);
-
+	
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
 
 	/* We need to borrow the poster slot to save the board name */
@@ -9957,8 +9960,8 @@ do_write (CHAR_DATA * ch, char *argument, int cmd)
 		ch);
 
 	make_quiet (ch);
-
-	ch->desc->str = &ch->desc->pending_message->message;
+	
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->desc->proc = post_message;
@@ -10034,7 +10037,7 @@ read_journal_message (CHAR_DATA * ch, CHAR_DATA * reader, char *argument)
 		page_string (reader->desc, b_buf);
 	}
 
-	unload_message (message);
+	free_mem(message);
 
 	return 1;
 }
@@ -10454,13 +10457,13 @@ add_message (int new_message, const char *name, int nVirtual, const char *poster
 
 	if (!new_message)
 	{
-		unload_message (msg);
+		free_mem(msg);
 		return;
 	}
 
 	system_log ("Reached end of add_message()", true);
 
-	unload_message (msg);
+	free_mem(msg);
 }
 
 
@@ -10603,33 +10606,6 @@ load_message (char *msg_name, int pc_message, int msg_number)
 		fclose (fp_message);
 
 		return message;
-}
-
-void
-unload_message (MESSAGE_DATA * message)
-{
-	if (message->poster)
-		free_mem (message->poster);
-
-	if (message->date)
-		free_mem (message->date);
-
-	if (message->subject)
-		free_mem (message->subject);
-
-	if (message->info)
-		free_mem (message->info);
-
-	if (message->message)
-		free_mem (message->message);
-
-	if (message->icdate)
-		free_mem (message->icdate);
-
-	if (message->target)
-		free_mem (message->target);
-
-	free_mem (message); // MESSAGE_DATA*
 }
 
 void
@@ -11060,7 +11036,7 @@ post_writing (DESCRIPTOR_DATA * d)
 
 	ch->pc->writing_on = NULL;
 	ch->delay_who = NULL;
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 
 	skill_use (ch, ch->writes, 0);
 	if (!number (0, 1))
@@ -11496,10 +11472,9 @@ do_scribe (CHAR_DATA * ch, char *argument, int cmd)
 		obj->short_description);
 	buffer[3] = toupper (buffer[3]);
 	act (buffer, true, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
-
+	
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
-
-	ch->desc->pending_message->message = NULL;
 
 	send_to_char
 		("Scribe your message; terminate with an '@'. Please keep its length plausible\nfor the size of the writing object, since we have opted against coded limits.\n",
@@ -11510,7 +11485,7 @@ do_scribe (CHAR_DATA * ch, char *argument, int cmd)
 
 	make_quiet (ch);
 
-	ch->desc->str = &ch->desc->pending_message->message;
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->desc->proc = post_writing;

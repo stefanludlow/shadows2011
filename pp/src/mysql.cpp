@@ -3817,7 +3817,7 @@ post_to_mysql_board (DESCRIPTOR_DATA * d)
 	if (!*d->pending_message->message)
 	{
 		send_to_char ("No message posted.\n", d->character);
-		unload_message (d->pending_message);
+		free_mem(d->pending_message);
 		d->pending_message = NULL;
 		return;
 	}
@@ -3903,7 +3903,7 @@ post_to_mysql_board (DESCRIPTOR_DATA * d)
 	if (result)
 		mysql_free_result (result);
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 	d->pending_message = NULL;
 	free_mem (date);
 }
@@ -4483,7 +4483,7 @@ erase_mysql_board_post (CHAR_DATA * ch, char *name, int board_type,
 	{
 		if (!(message = load_message (name, 6, atoi (argument))))
 			return 0;
-		unload_message (message);
+		free_mem(message);
 		mysql_safe_query
 			("DELETE FROM boards WHERE post_number = %d AND board_name = '%s'",
 			atoi (argument), name);
@@ -4498,16 +4498,17 @@ erase_mysql_board_post (CHAR_DATA * ch, char *name, int board_type,
 		{
 			send_to_char
 				("Please enter what you did in response to this report:\n", ch);
+			free_mem(ch->desc->pending_message);
 			ch->desc->pending_message = new MESSAGE_DATA;
 			ch->desc->pending_message->message = NULL;
 			ch->desc->pending_message->poster = duplicateString (message->poster);
-			ch->desc->str = &ch->desc->pending_message->message;
+			ch->desc->descStr = ch->desc->pending_message->message;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			ch->desc->proc = post_track_response;
 			ch->delay_who = duplicateString (name);
 			ch->delay_info1 = atoi (argument);
 			make_quiet (ch);
-			unload_message (message);
+			free_mem(message);
 			return 1;
 		}
 		if (!str_cmp (name, "Prescience") && GET_TRUST (ch))
@@ -4522,22 +4523,22 @@ erase_mysql_board_post (CHAR_DATA * ch, char *name, int board_type,
 			send_to_char
 				("Enter the dream you'd like to give in response to this prescience request:\n",
 				ch);
-			ch->desc->str = &ch->delay_who;
+			ch->desc->descStr = duplicateString(ch->delay_who);
 			ch->desc->max_str = STR_MULTI_LINE;
 			ch->desc->proc = post_dream;
 			make_quiet (ch);
-			unload_message (message);
+			free_mem(message);
 		}
 		mysql_safe_query
 			("DELETE FROM virtual_boards WHERE post_number = %d AND board_name = '%s'",
 			atoi (argument), name);
-		unload_message (message);
+		free_mem(message);
 	}
 	if (board_type == 2)
 	{
 		if (!(message = load_message (name, 7, atoi (argument))))
 			return 0;
-		unload_message (message);
+		free_mem(message);
 		mysql_safe_query
 			("DELETE FROM player_notes WHERE post_number = %d AND name = '%s'",
 			atoi (argument), name);
@@ -4546,7 +4547,7 @@ erase_mysql_board_post (CHAR_DATA * ch, char *name, int board_type,
 	{
 		if (!(message = load_message (name, 8, atoi (argument))))
 			return 0;
-		unload_message (message);
+		free_mem(message);
 		mysql_safe_query
 			("DELETE FROM player_journals WHERE post_number = %d AND name = '%s'",
 			atoi (argument), name);
@@ -4664,7 +4665,7 @@ post_to_mysql_virtual_board (DESCRIPTOR_DATA * d)
 	if (!*d->pending_message->message)
 	{
 		send_to_char ("No message posted.\n", d->character);
-		unload_message (d->pending_message);
+		free_mem(d->pending_message);
 		d->pending_message = NULL;
 		return;
 	}
@@ -4702,7 +4703,7 @@ post_to_mysql_virtual_board (DESCRIPTOR_DATA * d)
 	if (result)
 		mysql_free_result (result);
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 	d->pending_message = NULL;
 	free_mem (date);
 }
@@ -4719,7 +4720,7 @@ post_to_mysql_journal (DESCRIPTOR_DATA * d)
 	if (!*d->pending_message->message)
 	{
 		send_to_char ("No message posted.\n", d->character);
-		unload_message (d->pending_message);
+		free_mem(d->pending_message);
 		d->pending_message = NULL;
 		return;
 	}
@@ -4757,7 +4758,7 @@ post_to_mysql_journal (DESCRIPTOR_DATA * d)
 	if (result)
 		mysql_free_result (result);
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 	d->pending_message = NULL;
 	free_mem (date);
 }
@@ -4774,7 +4775,7 @@ post_to_mysql_player_board (DESCRIPTOR_DATA * d)
 	if (!*d->pending_message->message)
 	{
 		send_to_char ("No message posted.\n", d->character);
-		unload_message (d->pending_message);
+		free_mem(d->pending_message);
 		d->pending_message = NULL;
 		return;
 	}
@@ -4812,9 +4813,8 @@ post_to_mysql_player_board (DESCRIPTOR_DATA * d)
 	if (result)
 		mysql_free_result (result);
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 	d->pending_message = NULL;
-	free_mem (date);
 }
 
 void

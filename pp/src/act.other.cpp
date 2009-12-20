@@ -1844,7 +1844,7 @@ post_idea (DESCRIPTOR_DATA * d)
 
 	send_to_char ("Thank you! Your suggestion has been recorded.\n\r", ch);
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 
 	free_mem (date);
 	free_mem (date2);
@@ -1946,7 +1946,7 @@ post_typo (DESCRIPTOR_DATA * d)
 		("Thank you! Your typo report has been entered into our tracking system.\n\r",
 		ch);
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 
 	free_mem (date);
 	free_mem (date2);
@@ -1988,8 +1988,10 @@ do_typo (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char ("Please select a brief title for your typo\n", ch);
 		return;
 	}
+	
+	/*free_mem(ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;*/
 
-	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a typo report to be submitted to the admins. Terminate\n"
 		"the editor with an '@' symbol. Please note that your post\n"
@@ -1998,7 +2000,8 @@ do_typo (CHAR_DATA * ch, char *argument, int cmd)
 		"doing your part to help improve our world!\n", ch);
 
 	make_quiet (ch);
-
+	
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
 
 	std::stringstream ss;
@@ -2007,7 +2010,7 @@ do_typo (CHAR_DATA * ch, char *argument, int cmd)
 	ch->desc->pending_message->info = duplicateString (ss.str().c_str()); /* category */
 	ch->desc->pending_message->subject = duplicateString (argument); /* title */
 
-	ch->desc->str = &ch->desc->pending_message->message;
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->desc->proc = post_typo;
@@ -2052,7 +2055,7 @@ post_bug (DESCRIPTOR_DATA * d)
 	send_to_char
 		("Thank you! Your bug report has been entered into our system.\n\r", ch);
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 
 	free_mem (date);
 	free_mem (date2);

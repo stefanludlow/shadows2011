@@ -1409,10 +1409,9 @@ nanny_retire (DESCRIPTOR_DATA * d, char *argument)
 		"below; when finished, terminate the editor with an '@' symbol.#0\n\n",
 		d);
 
-
+	free_mem(d->pending_message);
 	d->pending_message = new MESSAGE_DATA;
-
-	d->str = &d->pending_message->message;
+	d->descStr = d->pending_message->message;
 	d->max_str = MAX_STRING_LENGTH;
 
 	d->proc = post_retirement;
@@ -1636,7 +1635,7 @@ nanny_composing_message (DESCRIPTOR_DATA * d, char *argument)
 	free_mem (message->date);
 	free_mem (message); // MUDMAIL_DATA*
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 	d->pending_message = NULL;
 
 	if (!acct->is_registered ())
@@ -1699,7 +1698,7 @@ nanny_compose_message (DESCRIPTOR_DATA * d, char *argument)
 		d);
 
 	d->pending_message->message = NULL;
-	d->str = &d->pending_message->message;
+	d->descStr = d->pending_message->message;
 	d->max_str = MAX_STRING_LENGTH;
 	d->connected = CON_COMPOSING_MESSAGE;
 }
@@ -3224,7 +3223,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 
 	if (d->character->desc && d->character->desc != d)
 	{
-		SEND_TO_Q ("\n#6Your character was not gracefully removed from the world. Disconnecting.", d);
+		SEND_TO_Q ("\n#6Your character was not gracefully removed from the world. Disconnecting.\n", d);
 		if(GET_NAME (d->character))
 			sprintf (buf, "%s already online, disconnecting old connection.",GET_NAME (d->character));
 		else
@@ -5365,7 +5364,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 			ch->name = NULL;
 		}
 
-		d->str = &ch->name;
+		d->descStr = duplicateString(ch->name);
 		d->max_str = STR_ONE_LINE;
 		if (d->character->pc->nanny_state)
 			d->character->pc->nanny_state = STATE_LDESC;
@@ -5387,7 +5386,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 			ch->short_descr = NULL;
 		}
 
-		d->str = &ch->short_descr;
+		d->descStr = duplicateString(ch->short_descr);
 		d->max_str = STR_ONE_LINE;
 		if (d->character->pc->nanny_state)
 			d->character->pc->nanny_state = STATE_KEYWORDS;
@@ -5411,7 +5410,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 
 		if (d->character->pc->nanny_state)
 			d->character->pc->nanny_state = STATE_FDESC;
-		d->str = &ch->long_descr;
+		d->descStr = duplicateString(ch->long_descr);
 		d->max_str = STR_ONE_LINE;
 		return;
 	}
@@ -5434,7 +5433,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 		SEND_TO_Q
 			("> 1----*----10---*----20---*----30---*----40---*----50---*----60---*----70---END\n",
 			d);
-		d->str = &ch->description;
+		d->descStr = duplicateString(ch->description);
 		d->max_str = MAX_INPUT_LENGTH;
 		if (d->character->pc->nanny_state)
 			d->character->pc->nanny_state = STATE_PROFESSION;
@@ -5580,7 +5579,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 			ch->pc->creation_comment = NULL;
 		}
 
-		d->str = &ch->pc->creation_comment;
+		d->descStr = duplicateString(ch->pc->creation_comment);
 		d->max_str = MAX_INPUT_LENGTH;
 		/*
 		if ( d->character->pc->nanny_state && is_newbie (d->character) )

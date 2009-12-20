@@ -1394,7 +1394,7 @@ struct body_info
 #define FORM_FIRE               11
 #define FORM_WATER              12
 
-extern int free_mem(char *ptr);
+extern int free_mem(char *&ptr);
 extern int free_mem(void *ptr);
 
 class forage_data {

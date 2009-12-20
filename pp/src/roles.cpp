@@ -644,8 +644,10 @@ outfit_role (CHAR_DATA * ch, char *argument)
 	if ( !str_cmp (cmd, "brief") )
 	{
 		send_to_char ("\n#2Enter a briefing for this role that you'd like to appear to starting characters:#0\n",ch);
+		free_mem(ch->desc->descStr);
+		free_mem(ch->desc->pending_message);
 		ch->desc->pending_message = new MESSAGE_DATA;
-		ch->desc->str = &ch->desc->pending_message->message;
+		ch->desc->descStr = ch->desc->pending_message->message;
 		ch->desc->max_str = MAX_STRING_LENGTH;
 		ch->desc->proc = post_brief;
 		ch->delay_info1 = role->id;
@@ -1307,10 +1309,9 @@ new_role (CHAR_DATA * ch, char *argument)
 
 	make_quiet (ch);
 	ch->delay_info1 = cost;
-	ch->delay_who = duplicateString (argument);
-	ch->pc->msg = (char *) alloc (sizeof (char));
-	*ch->pc->msg = '\0';
-	ch->desc->str = &ch->pc->msg;
+	ch->delay_who = duplicateString(argument);
+	ch->pc->msg = NULL;
+	free_mem(ch->desc->descStr);
 	ch->desc->max_str = MAX_STRING_LENGTH;
 	ch->desc->proc = post_role;
 }
@@ -1417,9 +1418,8 @@ update_role (CHAR_DATA * ch, char *argument)
 
 		make_quiet (ch);
 		ch->delay_info1 = role->id;
-		ch->pc->msg = (char *) alloc (sizeof (char));
-		*ch->pc->msg = '\0';
-		ch->desc->str = &ch->pc->msg;
+		ch->pc->msg = NULL;
+		free_mem(ch->desc->descStr);
 		ch->desc->max_str = MAX_STRING_LENGTH;
 		ch->desc->proc = post_body;
 	}

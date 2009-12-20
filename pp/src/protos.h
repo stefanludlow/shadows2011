@@ -1362,7 +1362,6 @@ void skill_display (struct descriptor_data *d);
 char *read_a_line (FILE * fp);
 struct message_data *load_message (char *msg_name, int pc_message,
 	int msg_number);
-void unload_message (struct message_data *message);
 OBJ_DATA *get_item_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item,
 						PHASE_DATA * phase);
 void reformat_desc (char *s, char **t);
@@ -1715,7 +1714,7 @@ bool inline isOrkin(char_data *ch) {
 /* -temporary- mem redirects. Replace all calls to free_mem eventually */
 char* duplicateString(const char *source);
 	
-int free_mem (char *ptr);
+int free_mem (char *&ptr);
 int free_mem (void *ptr);
 int free_mem_array (void *ptr);
 #endif // _rpie_protos_h_

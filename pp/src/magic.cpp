@@ -2206,7 +2206,7 @@ email_acceptance (DESCRIPTOR_DATA * d)
 			d->pending_message->info,
 			d->pending_message->message, d->pending_message->flags);
 
-		unload_message (d->pending_message);
+		free_mem(d->pending_message);
 		if (d->character->pc->msg)
 		{
 			free_mem (d->character->pc->msg);
@@ -2372,7 +2372,7 @@ email_rejection (DESCRIPTOR_DATA * d)
 			d->pending_message->info,
 			d->pending_message->message, d->pending_message->flags);
 
-		unload_message (d->pending_message);
+		free_mem(d->pending_message);
 
 		sprintf (buf,
 			"\n#6Unfortunately, your application was declined on its most recent review.\n\n%s left the following comment(s) explaining why:#0\n"
@@ -2721,7 +2721,8 @@ answer_application (CHAR_DATA * ch, char *argument, int cmd)
 			("#2This will be sent via email to the player; terminate with an '@' when finished.#0\n",
 			ch);
 		make_quiet (ch);
-		ch->desc->str = &ch->pc->msg;
+
+		ch->desc->descStr = duplicateString(ch->pc->msg);
 		ch->desc->max_str = MAX_STRING_LENGTH;
 		ch->desc->proc = email_rejection;
 	}
@@ -2735,7 +2736,7 @@ answer_application (CHAR_DATA * ch, char *argument, int cmd)
 			("#2This will be sent via email to the player; terminate with an '@' when finished.#0\n",
 			ch);
 		make_quiet (ch);
-		ch->desc->str = &ch->pc->msg;
+		ch->desc->descStr = duplicateString(ch->pc->msg);
 		ch->desc->max_str = MAX_STRING_LENGTH;
 		ch->desc->proc = email_acceptance;
 	}
@@ -3041,7 +3042,7 @@ do_givedream (CHAR_DATA * ch, char *argument, int cmd)
 	ch->delay_who = NULL;
 
 	ch->delay_ch = who;
-	ch->desc->str = &ch->delay_who;
+	ch->desc->descStr = duplicateString(ch->delay_who);
 	ch->desc->max_str = MAX_INPUT_LENGTH;
 	ch->desc->proc = post_dream;
 }
@@ -4143,7 +4144,7 @@ do_prescience (CHAR_DATA * ch, char *argument, int cmd)
 		("#6You begin spiralling downward into meditative contemplation, preparing to part the Veil of the future, and the mysteries of the Valar. At long last your mind is focused and tranquil; you begin to ponder your question:#0",
 		false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 
-	ch->desc->str = &ch->delay_who;
+	ch->desc->descStr = duplicateString(ch->delay_who);
 	ch->desc->proc = post_prescience;
 
 	if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))

@@ -182,7 +182,7 @@ ve_deconstruct (DESCRIPTOR_DATA * c)
 	char tmp_c;
 	int line_no = 1;
 
-	text = *c->str;
+	text = c->descStr;
 
 	if (!text)
 		return;
@@ -522,7 +522,7 @@ ve_edit_move (DESCRIPTOR_DATA * c, int dir)
 
 	ve_reconstruct (c);
 
-	c->str = &room->description;
+	c->descStr = duplicateString(room->description);
 
 	ve_setup_screen (c);
 }
@@ -768,24 +768,24 @@ ve_reconstruct (DESCRIPTOR_DATA * c)
 	for (i = 1; c->lines->line[i]; i++)
 		str_len += strlen (c->lines->line[i]) + 1;	/* +newline */
 
-	if (*c->str)
-		free_mem (*c->str);
+	if (c->descStr)
+		free_mem (c->descStr);
 
-	*c->str = (char *) alloc (str_len);
+	c->descStr = (char *) alloc (str_len);
 
-	**c->str = '\0';
+	*c->descStr = '\0';
 
 	for (i = 1; c->lines->line[i]; i++)
 	{
-		strcat (*c->str, c->lines->line[i]);
+		strcat (c->descStr, c->lines->line[i]);
 		if (c->lines->line[i + 1] ||
 			c->lines->line[i][strlen (c->lines->line[i])] != '\n')
-			strcat (*c->str, "\n");
+			strcat (c->descStr, "\n");
 	}
 
 	ve_deallocate (c);
 
-	c->str = NULL;
+	c->descStr = NULL;
 }
 
 void

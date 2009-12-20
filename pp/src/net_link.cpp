@@ -70,7 +70,7 @@ new_descriptor (int s)
 	else if (desc > maxdesc)
 		maxdesc = desc;
 
-	newd = new struct descriptor_data;
+	newd = new descriptor_data;
 
 	init_descriptor (newd, desc);
 
@@ -157,7 +157,7 @@ init_descriptor (DESCRIPTOR_DATA* newd, int desc)
 	newd->showstr_head = 0;
 	newd->showstr_point = 0;
 	newd->header = 0;
-	newd->str = 0;
+	newd->descStr = NULL;
 
 	newd->edit_type = 0;
 	newd->edit_index = -1;
@@ -227,6 +227,10 @@ free_descriptor (DESCRIPTOR_DATA * d)
 	if (d->edit_string && *d->edit_string)
 	{
 		free_mem (d->edit_string);
+	}
+
+	if (d->descStr) {
+		free_mem(d->descStr);
 	}
 
 	delete d;

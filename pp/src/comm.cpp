@@ -476,7 +476,7 @@ game_loop (int s)
 
 				if (point->edit_index != -1)
 					edit_string (point, comm);
-				else if (point->str)
+				else if (point->proc != NULL)
 					string_add (point, comm);
 				else if (point->showstr_point)
 					show_string (point, comm);
@@ -530,7 +530,7 @@ game_loop (int s)
 				if (point->edit_index != -1)
 					;
 
-				else if (point->str)
+				else if (point->proc != NULL)
 					write_to_descriptor (point,
 					point->connected ==
 					CON_CREATION ? "> " : "] ");
@@ -3249,7 +3249,7 @@ string_add (DESCRIPTOR_DATA * d, char *str)
 	if (d->max_str == STR_ONE_LINE)
 		terminator = 1;
 
-	if (!*d->str)
+	if (!d->descStr)
 	{
 		if (strlen (str) >= d->max_str)
 		{
@@ -3257,13 +3257,13 @@ string_add (DESCRIPTOR_DATA * d, char *str)
 			*(str + d->max_str - 1) = '\0';
 			terminator = 1;
 		}
-		*d->str = new char[strlen (str) + 3];
-		strcpy (*d->str, str);
+		d->descStr = new char[strlen (str) + 3];
+		strcpy (d->descStr, str);
 	}
 
 	else
 	{
-		if (strlen (str) + strlen (*d->str) >= d->max_str)
+		if (strlen (str) + strlen (d->descStr) >= d->max_str)
 		{
 			send_to_char ("String too long. Last line skipped.\n\r",
 				d->character);
@@ -3271,18 +3271,21 @@ string_add (DESCRIPTOR_DATA * d, char *str)
 		}
 		else
 		{
-			p = (char *) alloc (strlen (*d->str) + strlen (str) + 3);
-			strcpy (p, *d->str);
+			p = (char *) alloc (strlen (d->descStr) + strlen (str) + 3);
+			strcpy (p, d->descStr);
 			strcat (p, str);
 
-			free_mem (*d->str);
-			*d->str = p;
+			free_mem(d->descStr);
+			d->descStr = p;
+		}
+		if (d->pending_message != NULL) {
+			d->pending_message->message = duplicateString(d->descStr);
 		}
 	}
 
 	if (terminator)
 	{
-		d->str = 0;
+		free_mem(d->descStr);
 
 		if (d->character)
 			d->character->act &= ~PLR_QUIET;
@@ -3299,7 +3302,7 @@ string_add (DESCRIPTOR_DATA * d, char *str)
 	}
 
 	else
-		strcat (*d->str, "\n");
+		strcat (d->descStr, "\n");
 }
 
 

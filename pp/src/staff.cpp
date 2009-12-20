@@ -409,21 +409,22 @@ post_log (DESCRIPTOR_DATA * d)
 		send_to_char ("There seems to be a problem with this command.\n", ch);
 
 	ch->delay_who = NULL;
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 }
 
 void
 do_clog (CHAR_DATA * ch, char *argument, int cmd)
 {
-	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a coding report to be included in the next newsletter:\n", ch);
 
 	make_quiet (ch);
 
+	free_mem(ch->desc->descStr);
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
-
-	ch->desc->str = &ch->desc->pending_message->message;
+	
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->delay_who = duplicateString ("clog");
@@ -434,16 +435,17 @@ do_clog (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_alog (CHAR_DATA * ch, char *argument, int cmd)
 {
-	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a general staff announcement to be included in the next newsletter:\n",
 		ch);
 
 	make_quiet (ch);
 
+	free_mem(ch->desc->descStr);
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
-
-	ch->desc->str = &ch->desc->pending_message->message;
+	
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->delay_who = duplicateString ("alog");
@@ -454,16 +456,16 @@ do_alog (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_blog (CHAR_DATA * ch, char *argument, int cmd)
 {
-
-	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a building report to be included in the next newsletter:\n", ch);
 
 	make_quiet (ch);
 
+	free_mem(ch->desc->descStr);
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
-
-	ch->desc->str = &ch->desc->pending_message->message;
+	
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->delay_who = duplicateString ("blog");
@@ -475,15 +477,16 @@ void
 do_wlog (CHAR_DATA * ch, char *argument, int cmd)
 {
 
-	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a website report to be included in the next newsletter:\n", ch);
 
 	make_quiet (ch);
 
+	free_mem(ch->desc->descStr);
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
-
-	ch->desc->str = &ch->desc->pending_message->message;
+	
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->delay_who = duplicateString ("wlog");
@@ -494,16 +497,16 @@ do_wlog (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_plog (CHAR_DATA * ch, char *argument, int cmd)
 {
-
-	ch->desc->pending_message = new MESSAGE_DATA;
 	send_to_char
 		("Enter a plot report to be included in the next newsletter:\n", ch);
 
 	make_quiet (ch);
 
+	free_mem(ch->desc->descStr);
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
-
-	ch->desc->str = &ch->desc->pending_message->message;
+	
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->delay_who = duplicateString ("plog");
@@ -1278,8 +1281,11 @@ do_email (CHAR_DATA * ch, char *argument, int cmd)
 	send_to_char ("\n#2Enter the message you'd like to email this player:#0\n",
 		ch);
 
+	free_mem(ch->desc->descStr);
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
-	ch->desc->str = &ch->desc->pending_message->message;
+	
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 	ch->desc->proc = post_email;
 	ch->delay_who2 = duplicateString (argument);
@@ -9357,8 +9363,9 @@ do_alias (CHAR_DATA * ch, char *argument, int cmd)
 
 		ch->delay_ch = ch;
 		ch->delay_info1 = (long int) duplicateString (alias_cmd);
-
-		ch->desc->str = &ch->delay_who;
+		
+		free_mem(ch->desc->descStr);
+		ch->desc->descStr = duplicateString(ch->delay_who);
 		ch->desc->max_str = STR_MULTI_LINE;
 		ch->desc->proc = post_alias;
 
@@ -10269,7 +10276,7 @@ edit_string (DESCRIPTOR_DATA * d, std::string argument)
 	for (i = 1; i < d->edit_line_first; i++)
 		length += get_edit_line_length (&p);
 
-	memcpy (new_doc, document, length);
+	strncpy(new_doc, document, length);
 	/* printf ("Doc %d:\n%s<-", length, new_doc); */
 	strcpy (new_doc + length, d->edit_string);
 	/* printf ("Plus:\n%s<-", new_doc);
@@ -11376,8 +11383,11 @@ void do_wmotd(CHAR_DATA * ch, char *argument, int cmd)
 
 	act ("$n begins editing the MOTD.", false, ch, 0, 0, TO_ROOM);
 
+	free_mem(ch->desc->descStr);
+	free_mem(ch->desc->pending_message);
 	ch->desc->pending_message = new MESSAGE_DATA;
-	ch->desc->str = &ch->desc->pending_message->message;
+	
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 	ch->delay_info1 = ch->room->nVirtual;
 
@@ -11405,7 +11415,7 @@ post_motd (DESCRIPTOR_DATA * d)
 	ch = d->character;
 	ch->delay_info1 = 0;
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No MOTD posted.\n", ch);
 		return;
