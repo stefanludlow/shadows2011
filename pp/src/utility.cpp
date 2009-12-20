@@ -1583,21 +1583,22 @@ alloc (int bytes, int dtype)
 #else /* NOVELL */
 
 char* duplicateString(const char *source) {
+	if (source != NULL && strcmp(source, "") == STR_MATCH) {
+		static char *emptyString = "";
+		return emptyString;
+	}
 	std::string tempString = source;
 	char *output = new char[tempString.length() + 1];
 
 	strncpy(output, tempString.c_str(), tempString.length() + 1);
 	return output;
 }
-
-int free_mem_array (void *ptr) {
-	delete [] ptr;
-	return 1;
-}
 	
 int free_mem (char *ptr) {
-	if (ptr != NULL && strcmp(ptr, "") == STR_MATCH) {
-		return free_mem_array(ptr);
+	if (ptr != NULL && strcmp(ptr, "") != STR_MATCH) {
+		delete [] ptr;
+		ptr = (char *)NULL;
+		return 1;
 	}
 	else {
 		return 0;
@@ -1605,7 +1606,14 @@ int free_mem (char *ptr) {
 }
 
 int free_mem (void *ptr) {
+	delete ptr;
+	ptr = NULL;
+	return 1;
+}
+
+int free_mem_array (void *ptr) {
 	delete [] ptr;
+	ptr = NULL;
 	return 1;
 }
 

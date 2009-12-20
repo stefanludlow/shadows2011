@@ -954,43 +954,18 @@ load_rooms (void)
 #define MAX_PREALLOC_ROOMS		14000
 
 ROOM_DATA *
-get_room (void)
-{
+get_room (void) {
 	ROOM_DATA *room;
-	static ROOM_DATA *prealloc_rooms = NULL;
-	static int prealloc_rooms_count = 0;
-
-	if (!prealloc_rooms) {
-		prealloc_rooms = new ROOM_DATA[MAX_PREALLOC_ROOMS];
-	}
-
-
-	if (prealloc_rooms_count >= MAX_PREALLOC_ROOMS) {
-		room = new ROOM_DATA;
-		room->lnext = NULL;
-		room->hnext = NULL;
-		room->affects = NULL;
-		room->tracks = NULL;
-		room->contents = NULL;
-		room->description = NULL;
-		room->people = NULL;
-		room->prg = NULL;
-		room->extra = NULL;
-	}
-	else
-	{
-		room = prealloc_rooms + prealloc_rooms_count;
-		room->lnext = NULL;
-		room->hnext = NULL;
-		room->affects = NULL;
-		room->tracks = NULL;
-		room->contents = NULL;
-		room->description = NULL;
-		room->people = NULL;
-		room->prg = NULL;
-		room->extra = NULL;
-		prealloc_rooms_count++;
-	}
+	room = new ROOM_DATA;
+	room->lnext = NULL;
+	room->hnext = NULL;
+	room->affects = NULL;
+	room->tracks = NULL;
+	room->contents = NULL;
+	room->description = NULL;
+	room->people = NULL;
+	room->prg = NULL;
+	room->extra = NULL;
 
 	return room;
 }
@@ -1421,7 +1396,7 @@ read_string (char *string)
 			sprintf (buf + strlen (buf), "%c", *string);
 			break;
 		case '~':
-			return add_hash (buf);
+			return duplicateString (buf);
 		}
 	}
 }
@@ -1430,6 +1405,63 @@ OBJ_DATA *
 new_object ()
 {
 	OBJ_DATA *obj = new OBJ_DATA;
+
+	obj->wdesc = NULL;
+	obj->wounds = NULL;
+	obj->writing = NULL;
+	obj->writing_loaded = false;
+	obj->xaffected = NULL;
+	obj->zone = -1;
+	obj->material = 0;
+	obj->morphTime = 0;
+	obj->morphto = 0;
+	obj->name = NULL;
+	obj->next = NULL;
+	obj->next_content = NULL;
+	obj->nVirtual = 0;
+	obj->obj_timer = 0;
+	obj->omote_str = NULL;
+	obj->open = 0;
+	obj->order_time = 0;
+	obj->quality = 0;
+	obj->short_description = NULL;
+	obj->silver = 0;
+	obj->size = 0;
+	obj->sold_at = 0;
+	obj->sold_by = 0;
+	obj->super_vnum = 0;
+	obj->title_language = 0;
+	obj->title_script = 0;
+	obj->title_skill = -1;
+	obj->tmp_flags = 0;
+	obj->var_color = NULL;
+	obj->deleted = 0;
+	obj->desc_keys = NULL;
+	obj->description = NULL;
+	obj->econ_flags = 0;
+	obj->equiped_by = NULL;
+	obj->ex_description = NULL;
+	obj->farthings = 0;
+	obj->full_description = NULL;
+	obj->in_obj = NULL;
+	obj->in_room = 0;
+	obj->indoor_desc = NULL;
+	obj->ink_color = NULL;
+	obj->instances = 0;
+	obj->item_wear = 100;
+	obj->loaded = NULL;
+	obj->location = 0;
+	obj->lodged = NULL;
+	obj->activation = 0;
+	obj->book_title = NULL;
+	obj->carried_by = NULL;
+	obj->clan_data = NULL;
+	obj->clock = 0;
+	obj->coldload_id = 0;
+	obj->contained_wt = 0;
+	obj->contains = NULL;
+	obj->count = 0;
+	obj->damage = NULL;
 	obj->hnext = NULL;
 	obj->lnext = NULL;
 
@@ -2169,7 +2201,7 @@ create_penny_proto ()
 
 	add_obj_to_hash (obj);
 
-	obj->name = add_hash ("pennies penny coins money cash silver");
+	obj->name = duplicateString ("pennies penny coins money cash silver");
 
 	obj->short_description = "";
 	obj->description = "";
@@ -2203,7 +2235,7 @@ create_farthing_proto ()
 
 	add_obj_to_hash (obj);
 
-	obj->name = add_hash ("farthings coins money cash brass");
+	obj->name = duplicateString ("farthings coins money cash brass");
 
 	obj->short_description = "";
 	obj->description = "";
@@ -2237,7 +2269,7 @@ create_money_proto ()
 
 	add_obj_to_hash (obj);
 
-	obj->name = add_hash ("coins coin silver money cash penny");
+	obj->name = duplicateString ("coins coin silver money cash penny");
 
 	obj->obj_flags.type_flag = ITEM_MONEY;
 	obj->obj_flags.wear_flags = ITEM_TAKE;
@@ -2265,9 +2297,9 @@ create_ticket_proto ()
 
 	add_obj_to_hash (obj);
 
-	obj->name = add_hash ("ticket small number paper");
-	obj->short_description = add_hash ("a small ostler's ticket");
-	obj->description = add_hash ("A small paper ticket with a number "
+	obj->name = duplicateString ("ticket small number paper");
+	obj->short_description = duplicateString ("a small ostler's ticket");
+	obj->description = duplicateString ("A small paper ticket with a number "
 		"is here.");
 	obj->full_description = "";
 
@@ -2294,10 +2326,10 @@ create_order_ticket_proto ()
 
 	add_obj_to_hash (obj);
 
-	obj->name = add_hash ("ticket small paper merchandise");
-	obj->short_description = add_hash ("a small merchandise ticket");
+	obj->name = duplicateString ("ticket small paper merchandise");
+	obj->short_description = duplicateString ("a small merchandise ticket");
 	obj->description =
-		add_hash ("A small merchandise ticket has been carelessly left here.");
+		duplicateString ("A small merchandise ticket has been carelessly left here.");
 	obj->full_description = "";
 
 	obj->obj_flags.weight = 1;
@@ -2323,9 +2355,9 @@ create_head_proto ()
 
 	add_obj_to_hash (obj);
 
-	obj->name = add_hash ("head");
-	obj->short_description = add_hash ("a head");
-	obj->description = add_hash ("A head is here.");
+	obj->name = duplicateString ("head");
+	obj->short_description = duplicateString ("a head");
+	obj->description = duplicateString ("A head is here.");
 	obj->full_description = "";
 
 	obj->obj_flags.weight = 10;
@@ -2351,9 +2383,9 @@ create_corpse_proto ()
 
 	add_obj_to_hash (obj);
 
-	obj->name = add_hash ("corpse");
-	obj->short_description = add_hash ("a corpse");
-	obj->description = add_hash ("A corpse is here.");
+	obj->name = duplicateString ("corpse");
+	obj->short_description = duplicateString ("a corpse");
+	obj->description = duplicateString ("A corpse is here.");
 	obj->full_description = "";
 
 	obj->obj_flags.weight = 1000;
@@ -2380,9 +2412,9 @@ create_statue_proto ()
 
 	add_obj_to_hash (obj);
 
-	obj->name = add_hash ("statue");
-	obj->short_description = add_hash ("a remarkably lifelike statue");
-	obj->description = add_hash ("A remarkably lifelike statue looms here.");
+	obj->name = duplicateString ("statue");
+	obj->short_description = duplicateString ("a remarkably lifelike statue");
+	obj->description = duplicateString ("A remarkably lifelike statue looms here.");
 	obj->full_description = "";
 
 	obj->obj_flags.weight = 1000;
@@ -2444,7 +2476,3 @@ struct hash_data
 	char *string;
 	struct hash_data *next;
 };
-
-char* add_hash(const char *string) {
-	return duplicateString(string);
-}

@@ -94,11 +94,11 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 		ch->pc->is_guide = true;
 
 	ch->fight_mode = 2;
-	ch->clans = add_hash ("");
+	ch->clans = duplicateString ("");
 
 	/* Address naming issues with our user's new account handle */
 
-	ch->tname = add_hash (tname_buf);
+	ch->tname = duplicateString (tname_buf);
 
 	if (ch->pc->is_guide)
 		sprintf (buf2, "%s Guide %s", ch->name, ch->tname);
@@ -107,7 +107,7 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 
 	if (ch->name)
 		free_mem (ch->name);
-	ch->name = add_hash (buf2);
+	ch->name = duplicateString (buf2);
 
 	ch->hit = 100;
 	ch->max_hit = 100;

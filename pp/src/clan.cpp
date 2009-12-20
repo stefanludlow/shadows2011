@@ -1644,7 +1644,7 @@ remove_clan (CHAR_DATA * ch, char *old_clan_name)
 	if (ch->clans && *ch->clans != '\0')
 		free_mem (ch->clans);
 
-	ch->clans = add_hash (buf);
+	ch->clans = duplicateString (buf);
 	clan_forum_remove (ch, old_clan_name);
 }
 
@@ -1687,7 +1687,7 @@ add_clan (CHAR_DATA * ch, char *new_clan_name, int clan_flags)
 	if (ch->clans && *ch->clans != '\0')
 		free_mem (ch->clans);
 
-	ch->clans = add_hash (buf);
+	ch->clans = duplicateString (buf);
 }
 
 int

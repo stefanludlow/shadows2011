@@ -1974,7 +1974,7 @@ apply_enchantment (CHAR_DATA * caster, CHAR_DATA * victim, char *name,
 
 	enchantment = new ENCHANTMENT_DATA;
 	enchantment->next = NULL;
-	enchantment->name = add_hash (name);
+	enchantment->name = duplicateString (name);
 	enchantment->original_hours = duration;
 	enchantment->current_hours = enchantment->original_hours;
 	enchantment->power_source = source;
@@ -2185,10 +2185,10 @@ email_acceptance (DESCRIPTOR_DATA * d)
 
 		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 		d->pending_message->nVirtual = 0;
-		d->pending_message->info = add_hash ("");
+		d->pending_message->info = duplicateString ("");
 		sprintf (buf, "#2Accepted:#0 %s: %s", tch->pc->account_name, tch->tname);
-		d->pending_message->subject = add_hash (buf);
-		d->pending_message->message = add_hash (d->character->pc->msg);
+		d->pending_message->subject = duplicateString (buf);
+		d->pending_message->message = duplicateString (d->character->pc->msg);
 
 		add_message (1, "Applications",
 			-5,
@@ -2247,7 +2247,7 @@ email_acceptance (DESCRIPTOR_DATA * d)
 	}
 
 	delete acct;
-	d->character->delay_who = add_hash (tch->tname);
+	d->character->delay_who = duplicateString (tch->tname);
 	if (d->character->delay_who2)
 	{
 		free_mem (d->character->delay_who2);
@@ -2357,12 +2357,12 @@ email_rejection (DESCRIPTOR_DATA * d)
 		}
 
 		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
-		d->pending_message->poster = add_hash ("player_applications");
+		d->pending_message->poster = duplicateString ("player_applications");
 		d->pending_message->nVirtual = 0;
-		d->pending_message->info = add_hash ("");
+		d->pending_message->info = duplicateString ("");
 		sprintf (buf, "#1Declined:#0 %s: %s", tch->pc->account_name, tch->tname);
-		d->pending_message->subject = add_hash (buf);
-		d->pending_message->message = add_hash (d->character->pc->msg);
+		d->pending_message->subject = duplicateString (buf);
+		d->pending_message->message = duplicateString (d->character->pc->msg);
 
 		add_message (1, "Applications",
 			-5,
@@ -2380,7 +2380,7 @@ email_rejection (DESCRIPTOR_DATA * d)
 		if (buf[strlen (buf) - 1] != '\n')
 			strcat (buf, "\n");
 
-		tch->pc->msg = add_hash (buf);
+		tch->pc->msg = duplicateString (buf);
 
 		mysql_safe_query
 			("UPDATE newsletter_stats SET declined_apps=declined_apps+1");
@@ -2388,7 +2388,7 @@ email_rejection (DESCRIPTOR_DATA * d)
 
 	delete acct;
 
-	d->character->delay_who = add_hash (tch->tname);
+	d->character->delay_who = duplicateString (tch->tname);
 	if (d->character->delay_who2)
 	{
 		free_mem (d->character->delay_who2);
@@ -2709,8 +2709,8 @@ answer_application (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	ch->delay_who = add_hash (tch->pc->account_name);
-	ch->delay_who2 = add_hash (tch->tname);
+	ch->delay_who = duplicateString (tch->pc->account_name);
+	ch->delay_who2 = duplicateString (tch->tname);
 
 	if (cmd != 345)
 	{

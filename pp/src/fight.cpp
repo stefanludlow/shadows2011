@@ -830,10 +830,10 @@ make_statue (CHAR_DATA * ch)
 		if (!statue->wounds)
 		{
 			statue->wounds = new WOUND_DATA;
-			statue->wounds->location = add_hash (wound->location);
-			statue->wounds->type = add_hash (wound->type);
-			statue->wounds->name = add_hash (wound->name);
-			statue->wounds->severity = add_hash (wound->severity);
+			statue->wounds->location = duplicateString (wound->location);
+			statue->wounds->type = duplicateString (wound->type);
+			statue->wounds->name = duplicateString (wound->name);
+			statue->wounds->severity = duplicateString (wound->severity);
 			statue->wounds->bleeding = 0;
 			statue->wounds->poison = wound->poison;
 			statue->wounds->infection = wound->infection;
@@ -848,10 +848,10 @@ make_statue (CHAR_DATA * ch)
 				if (cwound->next)
 					continue;
 				cwound->next = new WOUND_DATA;
-				cwound->next->location = add_hash (wound->location);
-				cwound->next->type = add_hash (wound->type);
-				cwound->next->name = add_hash (wound->name);
-				cwound->next->severity = add_hash (wound->severity);
+				cwound->next->location = duplicateString (wound->location);
+				cwound->next->type = duplicateString (wound->type);
+				cwound->next->name = duplicateString (wound->name);
+				cwound->next->severity = duplicateString (wound->severity);
 				cwound->next->bleeding = 0;
 				cwound->next->poison = wound->poison;
 				cwound->next->infection = wound->infection;
@@ -869,7 +869,7 @@ make_statue (CHAR_DATA * ch)
 		{
 			statue->lodged = new LODGED_OBJECT_INFO;
 			statue->lodged->vnum = lodged->vnum;
-			statue->lodged->location = add_hash (lodged->location);
+			statue->lodged->location = duplicateString (lodged->location);
 			statue->lodged->next = NULL;
 		}
 		else
@@ -879,7 +879,7 @@ make_statue (CHAR_DATA * ch)
 				{
 					clodged->next = new LODGED_OBJECT_INFO;
 					clodged->next->vnum = lodged->vnum;
-					clodged->next->location = add_hash (lodged->location);
+					clodged->next->location = duplicateString (lodged->location);
 					clodged->next->next = NULL;
 					break;
 				}
@@ -954,10 +954,10 @@ make_corpse (CHAR_DATA * ch)
 		if (!corpse->wounds)
 		{
 			corpse->wounds = new WOUND_DATA;
-			corpse->wounds->location = add_hash (wound->location);
-			corpse->wounds->type = add_hash (wound->type);
-			corpse->wounds->name = add_hash (wound->name);
-			corpse->wounds->severity = add_hash (wound->severity);
+			corpse->wounds->location = duplicateString (wound->location);
+			corpse->wounds->type = duplicateString (wound->type);
+			corpse->wounds->name = duplicateString (wound->name);
+			corpse->wounds->severity = duplicateString (wound->severity);
 			corpse->wounds->bleeding = 0;
 			corpse->wounds->poison = wound->poison;
 			corpse->wounds->infection = wound->infection;
@@ -972,10 +972,10 @@ make_corpse (CHAR_DATA * ch)
 				if (cwound->next)
 					continue;
 				cwound->next = new WOUND_DATA;
-				cwound->next->location = add_hash (wound->location);
-				cwound->next->type = add_hash (wound->type);
-				cwound->next->name = add_hash (wound->name);
-				cwound->next->severity = add_hash (wound->severity);
+				cwound->next->location = duplicateString (wound->location);
+				cwound->next->type = duplicateString (wound->type);
+				cwound->next->name = duplicateString (wound->name);
+				cwound->next->severity = duplicateString (wound->severity);
 				cwound->next->bleeding = 0;
 				cwound->next->poison = wound->poison;
 				cwound->next->infection = wound->infection;
@@ -993,7 +993,7 @@ make_corpse (CHAR_DATA * ch)
 		{
 			corpse->lodged = new LODGED_OBJECT_INFO;
 			corpse->lodged->vnum = lodged->vnum;
-			corpse->lodged->location = add_hash (lodged->location);
+			corpse->lodged->location = duplicateString (lodged->location);
 			corpse->lodged->next = NULL;
 		}
 		else
@@ -1003,7 +1003,7 @@ make_corpse (CHAR_DATA * ch)
 				{
 					clodged->next = new LODGED_OBJECT_INFO;
 					clodged->next->vnum = lodged->vnum;
-					clodged->next->location = add_hash (lodged->location);
+					clodged->next->location = duplicateString (lodged->location);
 					clodged->next->next = NULL;
 					break;
 				}

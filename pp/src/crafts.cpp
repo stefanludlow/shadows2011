@@ -842,9 +842,9 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 			}
 		}
 
-		craft->craft_name = add_hash (craft_name);
-		craft->subcraft_name = add_hash (subcraft);
-		craft->command = add_hash (command);
+		craft->craft_name = duplicateString (craft_name);
+		craft->subcraft_name = duplicateString (subcraft);
+		craft->command = duplicateString (command);
 		craft->key_first = -1;
 		craft->key_end = -1;
 		ch->pc->edit_craft = craft;
@@ -929,9 +929,9 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 		}
 
 		ch->pc->edit_craft = NULL;
-		tcraft->craft_name = add_hash (craft_name);
-		tcraft->subcraft_name = add_hash (subcraft);
-		tcraft->command = add_hash (command);
+		tcraft->craft_name = duplicateString (craft_name);
+		tcraft->subcraft_name = duplicateString (subcraft);
+		tcraft->command = duplicateString (command);
 		tcraft->next = NULL;
 
 		for (craft = crafts; craft; craft = craft->next)
@@ -1628,8 +1628,10 @@ new_phase ()
 	phase->flags = 0;
 	phase->hit_cost = -1;
 	phase->targets = -1;
-	phase->skill = -1;
+	phase->skill = 0;
 	phase->spell_type = -1;
+	phase->fail_group_mess = NULL;
+	phase->group_mess = NULL;
 
 	return phase;
 }
@@ -1730,7 +1732,7 @@ subcraft_line (FILE * fp_reg, char *line)
 
 		subcraft->crafts_start = ftell (fp_reg) - strlen (line) - 1;
 
-		subcraft->clans = add_hash ("");
+		subcraft->clans = duplicateString ("");
 
 		argument = one_argument (argument, buf);
 		subcraft->craft_name = duplicateString (buf);
@@ -1961,7 +1963,7 @@ subcraft_line (FILE * fp_reg, char *line)
 	else if (!str_cmp (buf, "clans:"))
 	{
 
-		subcraft->clans = add_hash (argument);
+		subcraft->clans = duplicateString (argument);
 
 		return;
 	}
@@ -4212,7 +4214,7 @@ craft_setup (CHAR_DATA * ch, char *argument, char *subcmd)
 			send_to_char ("Craft name contains illegal characters.\n", ch);
 			return;
 		}
-		craft->craft_name = add_hash (buf);
+		craft->craft_name = duplicateString (buf);
 		sprintf (output, "Craft name changed to '%s'.\n", buf);
 		send_to_char (output, ch);
 	}
@@ -4225,7 +4227,7 @@ craft_setup (CHAR_DATA * ch, char *argument, char *subcmd)
 			send_to_char ("Subcraft name contains illegal characters.\n", ch);
 			return;
 		}
-		craft->subcraft_name = add_hash (buf);
+		craft->subcraft_name = duplicateString (buf);
 		sprintf (output, "Subcraft name changed to '%s'.\n", buf);
 		send_to_char (output, ch);
 	}
@@ -4238,7 +4240,7 @@ craft_setup (CHAR_DATA * ch, char *argument, char *subcmd)
 			send_to_char ("Command name contains illegal characters.\n", ch);
 			return;
 		}
-		craft->command = add_hash (buf);
+		craft->command = duplicateString (buf);
 		sprintf (output, "Craft command changed to '%s'.\n", buf);
 		send_to_char (output, ch);
 	}
@@ -4679,7 +4681,7 @@ craft_failure (CHAR_DATA * ch, char *argument, char *subcmd)
 
 	else
 	{
-		craft->failure = add_hash (argument);
+		craft->failure = duplicateString (argument);
 		sprintf (output, "Header Failure string modified.\n");
 		send_to_char (output, ch);
 	}
@@ -4715,7 +4717,7 @@ craft_failobjs (CHAR_DATA * ch, char *argument, char *subcmd)
 	}
 	else
 	{
-		craft->failobjs = add_hash (argument);
+		craft->failobjs = duplicateString (argument);
 		send_to_char ("Failure object inserted.\n", ch);
 		return;
 	}
@@ -4756,7 +4758,7 @@ craft_failmobs (CHAR_DATA * ch, char *argument, char *subcmd)
 
 	else
 	{
-		craft->failmobs = add_hash (argument);
+		craft->failmobs = duplicateString (argument);
 		send_to_char ("Failure mobile list inserted.\n", ch);
 		return;
 	}

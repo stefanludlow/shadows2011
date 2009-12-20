@@ -311,7 +311,7 @@ delayed_pitch (CHAR_DATA * ch)
 	sprintf (buf, "%s has been erected here.", obj_short_desc (obj));
 	buf[0] = toupper (buf[0]);
 
-	obj->description = add_hash (buf);
+	obj->description = duplicateString (buf);
 
 	ch->delay_type = 0;
 	ch->delay = 0;
@@ -395,12 +395,12 @@ do_dismantle (CHAR_DATA * ch, char *argument, int cmd)
 	obj->obj_flags.extra_flags &= ~(ITEM_VNPC | ITEM_PITCHED);
 
 	if (vtoo (obj->nVirtual))
-		obj->description = add_hash (vtoo (obj->nVirtual)->description);
+		obj->description = duplicateString (vtoo (obj->nVirtual)->description);
 	else
 	{
 		sprintf (buf, "%s is here.", obj_short_desc (obj));
 		buf[0] = toupper (buf[0]);
-		obj->description = add_hash (buf);
+		obj->description = duplicateString (buf);
 	}
 }
 
@@ -412,7 +412,7 @@ fwrite_dwelling_room (ROOM_DATA * troom, FILE * fp)
 	int j;
 
 	if (!troom->description)
-		troom->description = add_hash ("No Description Set\n");
+		troom->description = duplicateString ("No Description Set\n");
 
 	fprintf (fp, "#%d\n%s~\n%s~\n",
 		troom->nVirtual, troom->name, troom->description);

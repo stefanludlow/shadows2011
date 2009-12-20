@@ -23,7 +23,7 @@ char last_command[MAX_STRING_LENGTH];
 extern std::multimap<int, room_prog> mob_prog_list;
 extern std::multimap<int, room_prog> obj_prog_list;
 
-const struct command_data commands[] = {
+const class command_data commands[] = {
 
 	/* Mortal commands */
 
@@ -1156,7 +1156,7 @@ fread_action (FILE * fl)
 
 	buf[strlen (buf) - 1] = '\0';
 
-	return add_hash (buf);
+	return duplicateString (buf);
 }
 
 void

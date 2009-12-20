@@ -2070,7 +2070,7 @@ do_drop (CHAR_DATA * ch, char *argument, int cmd)
 			if (obj->short_description[0] == '#')
 			ss << "#0";
 
-			obj->omote_str = add_hash(ss.str().c_str());
+			obj->omote_str = duplicateString(ss.str().c_str());
 			}
 			}*/
 			/* grommit add end */

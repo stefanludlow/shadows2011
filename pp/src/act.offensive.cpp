@@ -963,7 +963,7 @@ lodge_missile (CHAR_DATA * target, OBJ_DATA * ammo, char *strike_location)
 		target->lodged = new LODGED_OBJECT_INFO;
 		target->lodged->next = NULL;
 		target->lodged->vnum = ammo->nVirtual;
-		target->lodged->location = add_hash (strike_location);
+		target->lodged->location = duplicateString (strike_location);
 	}
 	else
 		for (lodged = target->lodged; lodged; lodged = lodged->next)
@@ -973,7 +973,7 @@ lodge_missile (CHAR_DATA * target, OBJ_DATA * ammo, char *strike_location)
 				lodged->next = new LODGED_OBJECT_INFO;
 				lodged->next->next = NULL;
 				lodged->next->vnum = ammo->nVirtual;
-				lodged->next->location = add_hash (strike_location);
+				lodged->next->location = duplicateString (strike_location);
 				break;
 			}
 			else
@@ -1601,7 +1601,7 @@ do_fire (CHAR_DATA * ch, char *argument, int cmd)
 		ch->delay_who = NULL;
 	}
 	else
-		from_direction = add_hash ("an indeterminate direction");
+		from_direction = duplicateString ("an indeterminate direction");
 
 	attack_mod -= bow->o.od.value[2];
 

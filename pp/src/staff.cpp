@@ -590,10 +590,10 @@ do_wclone (CHAR_DATA * ch, char *argument, int cmd)
 				tbook->writing = new WRITING_DATA;
 			}
 			twriting = tbook->writing;
-			twriting->message = add_hash (fwriting->message);
-			twriting->author = add_hash (fwriting->author);
-			twriting->date = add_hash (fwriting->date);
-			twriting->ink = add_hash (fwriting->ink);
+			twriting->message = duplicateString (fwriting->message);
+			twriting->author = duplicateString (fwriting->author);
+			twriting->date = duplicateString (fwriting->date);
+			twriting->ink = duplicateString (fwriting->ink);
 			twriting->script = fwriting->script;
 			twriting->skill = fwriting->skill;
 			twriting->torn = false;
@@ -607,10 +607,10 @@ do_wclone (CHAR_DATA * ch, char *argument, int cmd)
 				if (!twriting->next_page)
 				{
 					twriting->next_page = new WRITING_DATA;
-					twriting->next_page->message = add_hash (fwriting->message);
-					twriting->next_page->author = add_hash (fwriting->author);
-					twriting->next_page->date = add_hash (fwriting->date);
-					twriting->next_page->ink = add_hash (fwriting->ink);
+					twriting->next_page->message = duplicateString (fwriting->message);
+					twriting->next_page->author = duplicateString (fwriting->author);
+					twriting->next_page->date = duplicateString (fwriting->date);
+					twriting->next_page->ink = duplicateString (fwriting->ink);
 					twriting->next_page->script = fwriting->script;
 					twriting->next_page->skill = fwriting->skill;
 					twriting->next_page->torn = false;
@@ -625,7 +625,7 @@ do_wclone (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (fbook->book_title && *fbook->book_title)
 	{
-		tbook->book_title = add_hash (fbook->book_title);
+		tbook->book_title = duplicateString (fbook->book_title);
 		tbook->title_skill = fbook->title_skill;
 		tbook->title_script = fbook->title_script;
 		tbook->title_language = fbook->title_language;
@@ -1378,8 +1378,8 @@ ban_host (char *host, char *banned_by, int length)
 	char buf[MAX_STRING_LENGTH];
 
 	site = new SITE_INFO;
-	site->name = add_hash (host);
-	site->banned_by = add_hash (banned_by);
+	site->name = duplicateString (host);
+	site->banned_by = duplicateString (banned_by);
 	site->banned_on = time (0);
 	site->next = NULL;
 
@@ -5599,11 +5599,11 @@ do_load_object (CHAR_DATA * ch, char *argument, int cmd)
 
 	if ( *buf ) {
 	if ( (ind = index_lookup (standard_object_colors, buf)) != -1 )
-	ch->delay_who = add_hash(standard_object_colors[ind]);
+	ch->delay_who = duplicateString(standard_object_colors[ind]);
 	else if ( (ind = index_lookup (fine_object_colors, buf)) != -1 )
-	ch->delay_who = add_hash(fine_object_colors[ind]);
+	ch->delay_who = duplicateString(fine_object_colors[ind]);
 	else if ( (ind = index_lookup (drab_object_colors, buf)) != -1 )
-	ch->delay_who = add_hash(drab_object_colors[ind]);
+	ch->delay_who = duplicateString(drab_object_colors[ind]);
 	if ( ind != -1 ) {
 	if ( !(obj = load_colored_object (number, ch->delay_who)) ) {
 	send_to_char ("There is no object with that number.\n", ch);
@@ -5978,15 +5978,15 @@ _do_load (CHAR_DATA * ch, char *argument, int cmd)
 		if (*buf)
 		{
 			if ((ind = index_lookup (standard_object_colors, buf)) != -1)
-				ch->delay_who = add_hash (standard_object_colors[ind]);
+				ch->delay_who = duplicateString (standard_object_colors[ind]);
 			else if ((ind = index_lookup (fine_object_colors, buf)) != -1)
-				ch->delay_who = add_hash (fine_object_colors[ind]);
+				ch->delay_who = duplicateString (fine_object_colors[ind]);
 			else if ((ind = index_lookup (drab_object_colors, buf)) != -1)
-				ch->delay_who = add_hash (drab_object_colors[ind]);
+				ch->delay_who = duplicateString (drab_object_colors[ind]);
 			else if ((ind = index_lookup (fine_gem_colors, buf)) != -1)
-				ch->delay_who = add_hash (fine_gem_colors[ind]);
+				ch->delay_who = duplicateString (fine_gem_colors[ind]);
 			else if ((ind = index_lookup (gem_colors, buf)) != -1)
-				ch->delay_who = add_hash (gem_colors[ind]);
+				ch->delay_who = duplicateString (gem_colors[ind]);
 			if (ind != -1)
 			{
 				if (!(obj = load_colored_object (number, ch->delay_who)))

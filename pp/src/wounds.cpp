@@ -759,7 +759,7 @@ begin_treatment (CHAR_DATA * ch, CHAR_DATA * tch, char *location, int mode)
 					wound->severity, wound->name,
 					expand_wound_loc (wound->location));
 				act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-				ch->delay_who = add_hash (location);
+				ch->delay_who = duplicateString (location);
 				ch->delay_ch = tch;
 				ch->delay_type = DEL_TREAT_WOUND;
 				ch->delay = wound->damage - ch->skills[SKILL_HEALING] / 10;
@@ -777,7 +777,7 @@ begin_treatment (CHAR_DATA * ch, CHAR_DATA * tch, char *location, int mode)
 					expand_wound_loc (wound->location));
 				act (buf, false, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
 				act (buf2, false, ch, 0, tch, TO_VICT | _ACT_FORMAT);
-				ch->delay_who = add_hash (location);
+				ch->delay_who = duplicateString (location);
 				ch->delay_ch = tch;
 				ch->delay_type = DEL_TREAT_WOUND;
 				ch->delay = wound->damage - ch->skills[SKILL_HEALING] / 10;

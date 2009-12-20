@@ -103,7 +103,7 @@ fread_mobile (int vnum, const int *nZone, FILE * fp)
 
 	one_argument (mob->name, buf);
 
-	mob->tname = add_hash (CAP (buf));
+	mob->tname = duplicateString (CAP (buf));
 
 	while ((i = strlen (mob->name)) > 0 &&
 		(mob->name[i - 1] == '\r' || mob->name[i - 1] == '\n'))
@@ -442,11 +442,12 @@ load_mobile (int vnum)
 
 	mob_info = new_mobile->mob;
 
-	memcpy (new_mobile, proto, sizeof (CHAR_DATA));
+	//memcpy (new_mobile, proto, sizeof (CHAR_DATA));
+	new_mobile->deep_copy(proto);
 
 	new_mobile->mob = mob_info;
 
-	memcpy (new_mobile->mob, proto->mob, sizeof (MOB_DATA));
+	//memcpy (new_mobile->mob, proto->mob, sizeof (MOB_DATA));
 
 	/* A mostly unique number.  Can be used to ensure
 	the same mobile is being used between game plays.  */
@@ -605,7 +606,7 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
 		}
 
 		free_mem (new_obj->short_description);
-		new_obj->short_description = add_hash (buf2);
+		new_obj->short_description = duplicateString (buf2);
 	}
 
 	*buf2 = '\0';
@@ -637,7 +638,7 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
 		}
 
 		free_mem (new_obj->description);
-		new_obj->description = add_hash (buf2);
+		new_obj->description = duplicateString (buf2);
 	}
 
 	*buf2 = '\0';
@@ -737,7 +738,7 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
 				sprintf (buf2 + strlen (buf2), "%c", original[i]);
 			}
 			free_mem (new_obj->desc_keys);
-			new_obj->desc_keys = add_hash (buf2);
+			new_obj->desc_keys = duplicateString (buf2);
 		}
 	}
 
@@ -745,9 +746,9 @@ insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto, char *string)
 		free_mem (new_obj->var_color);
 
 	if (!modified)
-		new_obj->var_color = add_hash ("none");
+		new_obj->var_color = duplicateString ("none");
 	else
-		new_obj->var_color = add_hash (color);
+		new_obj->var_color = duplicateString (color);
 }
 
 OBJ_DATA * load_object (int vnum)
@@ -776,8 +777,10 @@ load_object_full (int vnum, bool newWritingID)
 		return NULL;
 
 	new_obj = new_object ();
+	
+	new_obj->deep_copy(proto);
 
-	memcpy (new_obj, proto, sizeof (OBJ_DATA));
+	//memcpy (new_obj, proto, sizeof (OBJ_DATA));
 
 	new_obj->deleted = 0;
 
@@ -826,10 +829,10 @@ load_object_full (int vnum, bool newWritingID)
 
 				for (i = 1, writing = new_obj->writing; i <= new_obj->o.od.value[0]; i++)
 				{
-					writing->message = add_hash ("blank");
-					writing->author = add_hash ("blank");
-					writing->date = add_hash ("blank");
-					writing->ink = add_hash ("blank");
+					writing->message = duplicateString ("blank");
+					writing->author = duplicateString ("blank");
+					writing->date = duplicateString ("blank");
+					writing->ink = duplicateString ("blank");
 					writing->language = 0;
 					writing->script = 0;
 					writing->skill = 0;
@@ -902,7 +905,9 @@ load_colored_object (int vnum, char *color)
 
 	new_obj = new_object ();
 
-	memcpy (new_obj, proto, sizeof (OBJ_DATA));
+	new_obj->deep_copy(proto);
+
+	//memcpy (new_obj, proto, sizeof (OBJ_DATA));
 
 	new_obj->deleted = 0;
 
@@ -945,10 +950,10 @@ load_colored_object (int vnum, char *color)
 			for (i = 1, writing = new_obj->writing; i <= new_obj->o.od.value[0];
 				i++)
 			{
-				writing->message = add_hash ("blank");
-				writing->author = add_hash ("blank");
-				writing->date = add_hash ("blank");
-				writing->ink = add_hash ("blank");
+				writing->message = duplicateString ("blank");
+				writing->author = duplicateString ("blank");
+				writing->date = duplicateString ("blank");
+				writing->ink = duplicateString ("blank");
 				writing->language = 0;
 				writing->script = 0;
 				writing->skill = 0;

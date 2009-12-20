@@ -454,7 +454,7 @@ do_title (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	obj->book_title = add_hash (buf);
+	obj->book_title = duplicateString (buf);
 	obj->title_skill = (int) skill;
 	obj->title_script = ch->writes;
 	obj->title_language = ch->speaks;
@@ -9702,11 +9702,11 @@ write_virtual_board (CHAR_DATA * ch, char *name, char *argument)
 
 	/* We need to borrow the poster slot to save the board name */
 
-	ch->desc->pending_message->poster = add_hash (name);
+	ch->desc->pending_message->poster = duplicateString (name);
 	ch->desc->pending_message->message = NULL;
 	ch->desc->pending_message->nVirtual = -2;
-	ch->desc->pending_message->info = add_hash ("");
-	ch->desc->pending_message->subject = add_hash (argument);
+	ch->desc->pending_message->info = duplicateString ("");
+	ch->desc->pending_message->subject = duplicateString (argument);
 	ch->desc->pending_message->flags = MF_READ;
 
 	make_quiet (ch);
@@ -9788,11 +9788,11 @@ write_pc_board (CHAR_DATA * ch, char *name, char *argument)
 
 	/* We need to borrow the poster slot to save the board name */
 
-	ch->desc->pending_message->poster = add_hash (name);
+	ch->desc->pending_message->poster = duplicateString (name);
 	ch->desc->pending_message->message = NULL;
 	ch->desc->pending_message->nVirtual = -1;
-	ch->desc->pending_message->info = add_hash ("");
-	ch->desc->pending_message->subject = add_hash (argument);
+	ch->desc->pending_message->info = duplicateString ("");
+	ch->desc->pending_message->subject = duplicateString (argument);
 	ch->desc->pending_message->flags = 0;
 
 	make_quiet (ch);
@@ -9858,11 +9858,11 @@ write_journal (CHAR_DATA * ch, char *argument)
 
 	/* We need to borrow the poster slot to save the board name */
 
-	ch->desc->pending_message->poster = add_hash (ch->tname);
+	ch->desc->pending_message->poster = duplicateString (ch->tname);
 	ch->desc->pending_message->message = NULL;
 	ch->desc->pending_message->nVirtual = -1;
-	ch->desc->pending_message->info = add_hash ("");
-	ch->desc->pending_message->subject = add_hash (argument);
+	ch->desc->pending_message->info = duplicateString ("");
+	ch->desc->pending_message->subject = duplicateString (argument);
 
 	make_quiet (ch);
 
@@ -9941,11 +9941,11 @@ do_write (CHAR_DATA * ch, char *argument, int cmd)
 
 	/* We need to borrow the poster slot to save the board name */
 
-	ch->desc->pending_message->poster = add_hash (buf);
+	ch->desc->pending_message->poster = duplicateString (buf);
 	ch->desc->pending_message->message = NULL;
 	ch->desc->pending_message->nVirtual = 0;
-	ch->desc->pending_message->info = add_hash ("");
-	ch->desc->pending_message->subject = add_hash (title);
+	ch->desc->pending_message->info = duplicateString ("");
+	ch->desc->pending_message->subject = duplicateString (title);
 
 	ch->desc->pending_message->flags = 0;
 
@@ -10122,8 +10122,8 @@ add_board (int level, char *name, char *title)
 	board_entry = new BOARD_DATA;
 	board_entry->next = NULL;
 	board_entry->level = level;
-	board_entry->name = add_hash (name);
-	board_entry->title = add_hash (title);
+	board_entry->name = duplicateString (name);
+	board_entry->title = duplicateString (title);
 	board_entry->next_virtual = 1;
 
 	/* Add board_entry to end of full_board_list */
@@ -10421,12 +10421,12 @@ add_message (int new_message, const char *name, int nVirtual, const char *poster
 	else
 		msg->nVirtual = i;
 	msg->flags = flags;
-	msg->poster = add_hash (poster);
-	msg->date = add_hash (date);
+	msg->poster = duplicateString (poster);
+	msg->date = duplicateString (date);
 	msg->subject = tilde_eliminator (subject);
-	msg->info = add_hash (info);
+	msg->info = duplicateString (info);
 	msg->message = tilde_eliminator (message);
-	msg->icdate = add_hash (date_buf);
+	msg->icdate = duplicateString (date_buf);
 
 	if (named || new_message == 2)
 		sprintf (msg_file_name, PLAYER_BOARD_DIR "/%s.%06d", name, nVirtual);
@@ -10598,7 +10598,7 @@ load_message (char *msg_name, int pc_message, int msg_number)
 				tilde = false;
 		}
 
-		message->icdate = add_hash (date_buf);
+		message->icdate = duplicateString (date_buf);
 
 		fclose (fp_message);
 
@@ -11031,9 +11031,9 @@ post_writing (DESCRIPTOR_DATA * d)
 	{
 		obj->writing = new WRITING_DATA;
 		obj->writing->next_page = NULL;
-		obj->writing->ink = add_hash (ch->delay_who);
-		obj->writing->author = add_hash (ch->tname);
-		obj->writing->date = add_hash (date);
+		obj->writing->ink = duplicateString (ch->delay_who);
+		obj->writing->author = duplicateString (ch->tname);
+		obj->writing->date = duplicateString (date);
 		obj->writing->language = ch->speaks;
 		obj->writing->script = ch->writes;
 		obj->writing->message = tilde_eliminator (message);
@@ -11049,9 +11049,9 @@ post_writing (DESCRIPTOR_DATA * d)
 				writing = writing->next_page;
 			}
 		}
-		writing->ink = add_hash (ch->delay_who);
-		writing->author = add_hash (ch->tname);
-		writing->date = add_hash (date);
+		writing->ink = duplicateString (ch->delay_who);
+		writing->author = duplicateString (ch->tname);
+		writing->date = duplicateString (date);
 		writing->language = ch->speaks;
 		writing->script = ch->writes;
 		writing->message = tilde_eliminator (message);
@@ -11254,12 +11254,12 @@ do_tear (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			parchment->writing = new WRITING_DATA;
 			parchment->writing->next_page = NULL;
-			parchment->writing->ink = add_hash (page->ink);
-			parchment->writing->author = add_hash (page->author);
-			parchment->writing->date = add_hash (page->date);
+			parchment->writing->ink = duplicateString (page->ink);
+			parchment->writing->author = duplicateString (page->author);
+			parchment->writing->date = duplicateString (page->date);
 			parchment->writing->language = page->language;
 			parchment->writing->script = page->script;
-			parchment->writing->message = add_hash (page->message);
+			parchment->writing->message = duplicateString (page->message);
 			parchment->writing->skill = page->skill;;
 		}
 

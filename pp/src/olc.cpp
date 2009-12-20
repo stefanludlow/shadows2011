@@ -968,7 +968,7 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 	int j;
 
 	if (!troom->description)
-		troom->description = add_hash ("No Description Set\n");
+		troom->description = duplicateString ("No Description Set\n");
 
 	/*
 	char query_format[MAX_STRING_LENGTH] = "";
@@ -1668,7 +1668,7 @@ do_rdoor (CHAR_DATA * ch, char *argument, int cmd)
 	if (!*buf2)
 		strcpy (buf2, "door");
 
-	room->dir_option[dir]->keyword = add_hash (buf2);
+	room->dir_option[dir]->keyword = duplicateString (buf2);
 
 	send_to_char ("Done.\n", ch);
 }
@@ -1732,7 +1732,7 @@ do_rgate (CHAR_DATA * ch, char *argument, int cmd)
 	if (!*buf2)
 		strcpy (buf2, "gate");
 
-	room->dir_option[dir]->keyword = add_hash (buf2);
+	room->dir_option[dir]->keyword = duplicateString (buf2);
 
 	send_to_char ("Done.\n", ch);
 }
@@ -3872,7 +3872,7 @@ do_rname (CHAR_DATA * ch, char *argument, int cmd)
 
 	for (; isspace (*argument); argument++);	/* Get rid of whitespaces */
 
-	vtor (ch->in_room)->name = add_hash (argument);
+	vtor (ch->in_room)->name = duplicateString (argument);
 
 	send_to_char ("Done.\n", ch);
 }
@@ -3939,8 +3939,8 @@ do_rinit (CHAR_DATA * ch, char *argument, int cmd)
 	troom->people = NULL;
 	troom->light = 0;		/* Zero light sources */
 	troom->zone = virt_nr / ZONE_SIZE;
-	troom->name = add_hash ("New Room");
-	troom->description = add_hash ("No Description Set.\n");
+	troom->name = duplicateString ("New Room");
+	troom->description = duplicateString ("No Description Set.\n");
 	troom->ex_description = NULL;
 	troom->wdesc = NULL;
 	troom->extra = NULL;
@@ -3994,7 +3994,7 @@ do_rxchange (CHAR_DATA * ch, char *argument, int cmd)
 
 	free_mem (ch->room->description);
 	ch->room->description = NULL;
-	ch->room->description = add_hash (result);
+	ch->room->description = duplicateString (result);
 }
 
 void
@@ -4013,7 +4013,7 @@ post_rdesc (DESCRIPTOR_DATA * d)
 		return;
 	}
 
-	room->description = add_hash (d->pending_message->message);
+	room->description = duplicateString (d->pending_message->message);
 	d->pending_message = NULL;
 }
 
@@ -4160,7 +4160,7 @@ do_redesc (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		newdesc = new extra_descr_data;
 		newdesc->next = vtor (ch->in_room)->ex_description;
-		newdesc->keyword = add_hash (buf);
+		newdesc->keyword = duplicateString (buf);
 		vtor (ch->in_room)->ex_description = newdesc;
 	}
 	else
@@ -4714,8 +4714,8 @@ do_minit (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->act = 0;
 	newmob->act |= ACT_ISNPC;
 
-	newmob->name = add_hash ("mob new");
-	newmob->short_descr = add_hash ("a new mobile");
+	newmob->name = duplicateString ("mob new");
+	newmob->short_descr = duplicateString ("a new mobile");
 
 	newmob->speaks = SKILL_SPEAK_WESTRON;
 	newmob->skills[SKILL_SPEAK_WESTRON] = 100;
@@ -4890,42 +4890,42 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 	switch (type)
 	{
 	case ITEM_FLUID:
-		newobj->name = add_hash ("water");
-		newobj->short_description = add_hash ("filled with water");
-		newobj->description = add_hash ("");
+		newobj->name = duplicateString ("water");
+		newobj->short_description = duplicateString ("filled with water");
+		newobj->description = duplicateString ("");
 		newobj->obj_flags.weight = 100;
 		break;
 
 	case ITEM_LIQUID_FUEL:
-		newobj->name = add_hash ("oil");
-		newobj->short_description = add_hash ("filled with oil");
-		newobj->description = add_hash ("");
+		newobj->name = duplicateString ("oil");
+		newobj->short_description = duplicateString ("filled with oil");
+		newobj->description = duplicateString ("");
 		newobj->obj_flags.weight = 100;
 		break;
 
 	case ITEM_DWELLING:
-		newobj->name = add_hash ("shelter");
-		newobj->short_description = add_hash ("a hastily-constructed shelter");
+		newobj->name = duplicateString ("shelter");
+		newobj->short_description = duplicateString ("a hastily-constructed shelter");
 		newobj->description =
-			add_hash ("a very crudely and hastily constructed shelter");
+			duplicateString ("a very crudely and hastily constructed shelter");
 		newobj->o.od.value[2] = 1;
 		newobj->o.od.value[3] = -1;
 		newobj->obj_flags.weight = 1500;
 		break;
 
 	case ITEM_LIGHT:
-		newobj->name = add_hash ("lantern");
-		newobj->short_description = add_hash ("a brass lantern");
-		newobj->description = add_hash ("an old dented lantern");
+		newobj->name = duplicateString ("lantern");
+		newobj->short_description = duplicateString ("a brass lantern");
+		newobj->description = duplicateString ("an old dented lantern");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[2] = 20;
 		newobj->obj_flags.weight = 500;
 		break;
 
 	case ITEM_WEAPON:
-		newobj->name = add_hash ("sword");
-		newobj->short_description = add_hash ("a long sword");
-		newobj->description = add_hash ("a gleaming long sword");
+		newobj->name = duplicateString ("sword");
+		newobj->short_description = duplicateString ("a long sword");
+		newobj->description = duplicateString ("a gleaming long sword");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.wear_flags |= ITEM_WIELD;
 		newobj->o.od.value[1] = 2;
@@ -4935,9 +4935,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_ARMOR:
-		newobj->name = add_hash ("jacket");
-		newobj->short_description = add_hash ("a leather jacket");
-		newobj->description = add_hash ("a heavy leather jacket");
+		newobj->name = duplicateString ("jacket");
+		newobj->short_description = duplicateString ("a leather jacket");
+		newobj->description = duplicateString ("a heavy leather jacket");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.wear_flags |= ITEM_WEAR_BODY;
 		newobj->o.od.value[0] = 2;
@@ -4945,18 +4945,18 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_KEY:
-		newobj->name = add_hash ("key");
-		newobj->short_description = add_hash ("a key");
-		newobj->description = add_hash ("a small silver key");
+		newobj->name = duplicateString ("key");
+		newobj->short_description = duplicateString ("a key");
+		newobj->description = duplicateString ("a small silver key");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 10;
 		break;
 
 	case ITEM_DRINKCON:
-		newobj->name = add_hash ("skin");
-		newobj->short_description = add_hash ("a water skin");
-		newobj->description = add_hash ("a leaky skin lies here.");
+		newobj->name = duplicateString ("skin");
+		newobj->short_description = duplicateString ("a water skin");
+		newobj->description = duplicateString ("a leaky skin lies here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 10;
 		newobj->o.od.value[1] = 0;
@@ -4966,9 +4966,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_FOOD:
-		newobj->name = add_hash ("bread");
-		newobj->short_description = add_hash ("a loaf of bread");
-		newobj->description = add_hash ("a loaf of bread");
+		newobj->name = duplicateString ("bread");
+		newobj->short_description = duplicateString ("a loaf of bread");
+		newobj->description = duplicateString ("a loaf of bread");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 6;
 		newobj->o.od.value[3] = 0;
@@ -4976,9 +4976,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_CONTAINER:
-		newobj->name = add_hash ("bag");
-		newobj->short_description = add_hash ("a rather large bag");
-		newobj->description = add_hash ("a large brown bag lies here");
+		newobj->name = duplicateString ("bag");
+		newobj->short_description = duplicateString ("a rather large bag");
+		newobj->description = duplicateString ("a large brown bag lies here");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 100;
 		newobj->o.od.value[1] = 0;
@@ -4987,17 +4987,17 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_BOARD:
-		newobj->name = add_hash ("board");
-		newobj->short_description = add_hash ("a board");
-		newobj->description = add_hash ("a bulletin board is standing here.");
+		newobj->name = duplicateString ("board");
+		newobj->short_description = duplicateString ("a board");
+		newobj->description = duplicateString ("a bulletin board is standing here.");
 		newobj->o.od.value[2] = 1;
 		newobj->obj_flags.weight = 100;
 		break;
 
 	case ITEM_USURY_NOTE:
-		newobj->name = add_hash ("note usury");
-		newobj->short_description = add_hash ("a usury note");
-		newobj->description = add_hash ("A usury note lies on the floor.");
+		newobj->name = duplicateString ("note usury");
+		newobj->short_description = duplicateString ("a usury note");
+		newobj->description = duplicateString ("A usury note lies on the floor.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 1;
 		newobj->o.od.value[1] = 1;
@@ -5007,10 +5007,10 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_BULLET:
-		newobj->name = add_hash ("bullet sphere small crude iron");
-		newobj->short_description = add_hash ("a crude iron sling bullet");
+		newobj->name = duplicateString ("bullet sphere small crude iron");
+		newobj->short_description = duplicateString ("a crude iron sling bullet");
 		newobj->description =
-			add_hash
+			duplicateString
 			("A small sphere of crudely-wrought iron has been left here.");
 		newobj->obj_flags.extra_flags |= ITEM_STACK;
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
@@ -5021,10 +5021,10 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_MISSILE:
-		newobj->name = add_hash ("arrow iron-tipped ash-shafted flight");
+		newobj->name = duplicateString ("arrow iron-tipped ash-shafted flight");
 		newobj->short_description =
-			add_hash ("an iron-tipped, ash-shafted flight arrow");
-		newobj->description = add_hash ("An arrow has been left here.");
+			duplicateString ("an iron-tipped, ash-shafted flight arrow");
+		newobj->description = duplicateString ("An arrow has been left here.");
 		newobj->obj_flags.extra_flags |= ITEM_STACK;
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.weight = 10;
@@ -5034,10 +5034,10 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_SHEATH:
-		newobj->name = add_hash ("sheath brown leather");
-		newobj->short_description = add_hash ("a brown leather sheath");
+		newobj->name = duplicateString ("sheath brown leather");
+		newobj->short_description = duplicateString ("a brown leather sheath");
 		newobj->description =
-			add_hash ("A brown leather sheath has been left here.");
+			duplicateString ("A brown leather sheath has been left here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.wear_flags |= ITEM_WEAR_BELT;
 		newobj->o.od.value[0] = 800;
@@ -5046,10 +5046,10 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_KEYRING:
-		newobj->name = add_hash ("keyring sturdy iron");
-		newobj->short_description = add_hash ("a sturdy iron keyring");
+		newobj->name = duplicateString ("keyring sturdy iron");
+		newobj->short_description = duplicateString ("a sturdy iron keyring");
 		newobj->description =
-			add_hash ("A sturdy iron keyring lies here, forgotten.");
+			duplicateString ("A sturdy iron keyring lies here, forgotten.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.wear_flags |= ITEM_WEAR_BELT;
 		newobj->o.od.value[0] = 10;
@@ -5058,9 +5058,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_QUIVER:
-		newobj->name = add_hash ("quiver brown leather");
-		newobj->short_description = add_hash ("a brown leather quiver");
-		newobj->description = add_hash ("A brown leather quiver lies here.");
+		newobj->name = duplicateString ("quiver brown leather");
+		newobj->short_description = duplicateString ("a brown leather quiver");
+		newobj->description = duplicateString ("A brown leather quiver lies here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.wear_flags |= ITEM_WEAR_SHOULDER;
 		newobj->o.od.value[0] = 25;
@@ -5069,12 +5069,12 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_INK:
-		newobj->name = add_hash ("ink black pot ceramic small");
+		newobj->name = duplicateString ("ink black pot ceramic small");
 		newobj->short_description =
-			add_hash ("a small ceramic pot of black ink");
+			duplicateString ("a small ceramic pot of black ink");
 		newobj->description =
-			add_hash ("A small ceramic pot has been left here.");
-		newobj->ink_color = add_hash ("black ink");
+			duplicateString ("A small ceramic pot has been left here.");
+		newobj->ink_color = duplicateString ("black ink");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 10;
 		newobj->o.od.value[1] = 10;
@@ -5082,47 +5082,47 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_BOOK:
-		newobj->name = add_hash ("tome leather-bound small");
-		newobj->short_description = add_hash ("a small, leather-bound tome");
-		newobj->description = add_hash ("A small tome has been left here.");
+		newobj->name = duplicateString ("tome leather-bound small");
+		newobj->short_description = duplicateString ("a small, leather-bound tome");
+		newobj->description = duplicateString ("A small tome has been left here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 25;
 		newobj->obj_flags.weight = 500;
 		break;
 
 	case ITEM_PARCHMENT:
-		newobj->name = add_hash ("paper parchment sheet");
-		newobj->short_description = add_hash ("a sheet of parchment");
+		newobj->name = duplicateString ("paper parchment sheet");
+		newobj->short_description = duplicateString ("a sheet of parchment");
 		newobj->description =
-			add_hash ("A sheet of parchment has been discarded here.");
+			duplicateString ("A sheet of parchment has been discarded here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 10;
 		break;
 
 	case ITEM_WRITING_INST:
-		newobj->name = add_hash ("quill writing");
-		newobj->short_description = add_hash ("a writing quill");
+		newobj->name = duplicateString ("quill writing");
+		newobj->short_description = duplicateString ("a writing quill");
 		newobj->description =
-			add_hash ("A writing quill has been discarded here.");
+			duplicateString ("A writing quill has been discarded here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 25;
 		break;
 
 	case ITEM_HEALER_KIT:
-		newobj->name = add_hash ("kit healer");
-		newobj->short_description = add_hash ("a healer's kit");
-		newobj->description = add_hash ("A healer's kit lies on the floor.");
+		newobj->name = duplicateString ("kit healer");
+		newobj->short_description = duplicateString ("a healer's kit");
+		newobj->description = duplicateString ("A healer's kit lies on the floor.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 500;
 		break;
 
 	case ITEM_REPAIR_KIT:
-		newobj->name = add_hash ("kit repair mending");
-		newobj->short_description = add_hash ("a repair kit");
-		newobj->description = add_hash ("A repair kit lies on the floor.");
+		newobj->name = duplicateString ("kit repair mending");
+		newobj->short_description = duplicateString ("a repair kit");
+		newobj->description = duplicateString ("A repair kit lies on the floor.");
 		newobj->obj_flags.wear_flags |= (ITEM_TAKE | ITEM_WEAR_BELT);
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 500;
@@ -5130,10 +5130,10 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 
 	default:
 		act ("Generic object created.", false, ch, 0, 0, TO_CHAR);
-		newobj->name = add_hash ("object generic");
-		newobj->short_description = add_hash ("a generic object");
+		newobj->name = duplicateString ("object generic");
+		newobj->short_description = duplicateString ("a generic object");
 		newobj->description =
-			add_hash ("Some careless admin has left a generic object here.");
+			duplicateString ("Some careless admin has left a generic object here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 100;
@@ -5589,9 +5589,9 @@ post_odesc (DESCRIPTOR_DATA * d)
 	}
 
 	if (ch->delay_info2)
-		obj->indoor_desc = add_hash (d->pending_message->message);
+		obj->indoor_desc = duplicateString (d->pending_message->message);
 	else
-		obj->full_description = add_hash (d->pending_message->message);
+		obj->full_description = duplicateString (d->pending_message->message);
 
 	ch->delay_info2 = 0;
 
@@ -6097,7 +6097,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				return;
 			}
 			else
-				edit_obj->ink_color = add_hash (buf);
+				edit_obj->ink_color = duplicateString (buf);
 			if ((i = redefine_objects (edit_obj)) > 0)
 			{
 				sprintf (buf, "%d objects in world redefined.\n", i);
@@ -6200,7 +6200,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				return;
 			}
 
-			edit_obj->name = add_hash (buf);
+			edit_obj->name = duplicateString (buf);
 		}
 
 		else if (!str_cmp (subcmd, "desc") ||
@@ -6229,7 +6229,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				break;
 			}
 
-			edit_obj->short_description = add_hash (buf);
+			edit_obj->short_description = duplicateString (buf);
 		}
 
 		else if (!str_cmp (subcmd, "ldesc"))
@@ -6243,7 +6243,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				break;
 			}
 
-			edit_obj->description = add_hash (buf);
+			edit_obj->description = duplicateString (buf);
 		}
 
 		else if (!str_cmp (subcmd, "type"))
@@ -6448,10 +6448,10 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 		}
 
 		if ( edit_obj->obj_flags.type_flag == ITEM_ARMOR )
-		edit_obj->o.armor.helm_short = add_hash (buf);
+		edit_obj->o.armor.helm_short = duplicateString (buf);
 
 		if ( edit_obj->obj_flags.type_flag == ITEM_WORN )
-		edit_obj->o.cloak.cloak_short = add_hash (buf);
+		edit_obj->o.cloak.cloak_short = duplicateString (buf);
 		} */
 
 		else if (!str_cmp (subcmd, "mkeys"))
@@ -6481,7 +6481,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char
 					("Remember, the first keyword will be used in the wearer's short description.\n",
 					ch);
-				edit_obj->desc_keys = add_hash (buf);
+				edit_obj->desc_keys = duplicateString (buf);
 			}
 
 		}
@@ -7014,7 +7014,7 @@ post_mdesc (DESCRIPTOR_DATA * d)
 		return;
 	}
 
-	mob->description = add_hash (d->pending_message->message);
+	mob->description = duplicateString (d->pending_message->message);
 	d->pending_message = NULL;
 	if (!IS_NPC(mob))
 		unload_pc(mob);
@@ -7619,7 +7619,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			if (!str_cmp (subcmd, "1st"))
 			{
 				argument = one_argument (argument, buf);
-				phase->first = add_hash (buf);
+				phase->first = duplicateString (buf);
 				sprintf (output,
 					"The first person echo for phase %d has been modified.\n",
 					phasenum);
@@ -7628,7 +7628,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "2nd"))
 			{
 				argument = one_argument (argument, buf);
-				phase->second = add_hash (buf);
+				phase->second = duplicateString (buf);
 				sprintf (output,
 					"The second person echo for phase %d has been modified.\n",
 					phasenum);
@@ -7637,7 +7637,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "3rd"))
 			{
 				argument = one_argument (argument, buf);
-				phase->third = add_hash (buf);
+				phase->third = duplicateString (buf);
 				sprintf (output,
 					"The third person echo for phase %d has been modified.\n",
 					phasenum);
@@ -7646,7 +7646,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "failure-1st"))
 			{
 				argument = one_argument (argument, buf);
-				phase->failure = add_hash (buf);
+				phase->failure = duplicateString (buf);
 				sprintf (output,
 					"The first-person failure echo for phase %d has been modified.\n",
 					phasenum);
@@ -7655,7 +7655,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "failure-2nd"))
 			{
 				argument = one_argument (argument, buf);
-				phase->second_failure = add_hash (buf);
+				phase->second_failure = duplicateString (buf);
 				sprintf (output,
 					"The second-person failure echo for phase %d has been modified.\n",
 					phasenum);
@@ -7664,7 +7664,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "failure-3rd"))
 			{
 				argument = one_argument (argument, buf);
-				phase->third_failure = add_hash (buf);
+				phase->third_failure = duplicateString (buf);
 				sprintf (output,
 					"The third-person failure echo for phase %d has been modified.\n",
 					phasenum);
@@ -7674,7 +7674,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "group"))
 			{
 				argument = one_argument (argument, buf);
-				phase->group_mess = add_hash (buf);
+				phase->group_mess = duplicateString (buf);
 				sprintf (output,
 					"The group echo for phase %d has been modified.\n",
 					phasenum);
@@ -7684,7 +7684,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "failure-group"))
 			{
 				argument = one_argument (argument, buf);
-				phase->fail_group_mess = add_hash (buf);
+				phase->fail_group_mess = duplicateString (buf);
 				sprintf (output,
 					"The group echo for phase %d has been modified.\n",
 					phasenum);
@@ -10811,7 +10811,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 
 			if ((damage <= 100 && damage > 0) && (typenum > 0 && typenum <= 9))
 			{
-				wound_to_char (edit_mob, add_hash (subcmd), damage, typenum, 0,
+				wound_to_char (edit_mob, duplicateString (subcmd), damage, typenum, 0,
 					0, 0);
 				break;
 			}
@@ -11174,7 +11174,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 				break;
 			}
 
-			edit_mob->name = add_hash (buf);
+			edit_mob->name = duplicateString (buf);
 		}
 
 		else if (!str_cmp (subcmd, "sdesc"))
@@ -11188,7 +11188,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 				break;
 			}
 
-			edit_mob->short_descr = add_hash (buf);
+			edit_mob->short_descr = duplicateString (buf);
 		}
 
 		else if (!str_cmp (subcmd, "ldesc"))
@@ -11202,7 +11202,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 				break;
 			}
 
-			edit_mob->long_descr = add_hash (buf);
+			edit_mob->long_descr = duplicateString (buf);
 		}
 
 		else if (!str_cmp (subcmd, "prog"))
@@ -11319,7 +11319,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 		if (IS_NPC (edit_mob))
 			ch->delay_info1 = edit_mob->mob->nVirtual;
 		else
-			ch->delay_who = add_hash (edit_mob->tname);
+			ch->delay_who = duplicateString (edit_mob->tname);
 		if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
 			ve_setup_screen (ch->desc);
 		else
@@ -12444,7 +12444,7 @@ do_zset (CHAR_DATA * ch, char *argument, int cmd)
 			}
 			else
 			{
-				zone_table[zone].lead = add_hash (CAP (buf));
+				zone_table[zone].lead = duplicateString (CAP (buf));
 				send_to_char ("Project lead changed.\n", ch);
 				return;
 			}

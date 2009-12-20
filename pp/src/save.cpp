@@ -674,10 +674,10 @@ fread_obj (FILE * fp)
 				wound->next = NULL;
 			}
 
-			wound->location = add_hash (fread_word (fp));
-			wound->type = add_hash (fread_word (fp));
-			wound->severity = add_hash (fread_word (fp));
-			wound->name = add_hash (fread_word (fp));
+			wound->location = duplicateString (fread_word (fp));
+			wound->type = duplicateString (fread_word (fp));
+			wound->severity = duplicateString (fread_word (fp));
+			wound->name = duplicateString (fread_word (fp));
 			wound->damage = fread_number (fp);
 			wound->bleeding = fread_number (fp);
 			wound->poison = fread_number (fp);
@@ -692,8 +692,8 @@ fread_obj (FILE * fp)
 		{
 			tclan = new OBJ_CLAN_DATA;
 			obj->clan_data->next = NULL;
-			obj->clan_data->name = add_hash (fread_string (fp));
-			obj->clan_data->rank = add_hash (fread_string (fp));
+			obj->clan_data->name = duplicateString (fread_string (fp));
+			obj->clan_data->rank = duplicateString (fread_string (fp));
 			continue;
 		}
 
@@ -723,7 +723,7 @@ fread_obj (FILE * fp)
 				lodged = lodged->next;
 				lodged->next = NULL;
 			}
-			lodged->location = add_hash (fread_word (fp));
+			lodged->location = duplicateString (fread_word (fp));
 			lodged->vnum = fread_number (fp);
 			continue;
 		}
@@ -1106,9 +1106,9 @@ load_leantos ()
 			toroom, toroom, toroom);
 		t = new room_prog;
 		t->next = NULL;
-		t->command = add_hash ("enter");
-		t->keys = add_hash ("lean-to leanto");
-		t->prog = add_hash (buf);
+		t->command = duplicateString ("enter");
+		t->keys = duplicateString ("lean-to leanto");
+		t->prog = duplicateString (buf);
 		if (!vtor (inroom)->prg)
 		{
 			vtor (inroom)->prg = t;
@@ -1224,10 +1224,10 @@ load_mobiles ()
 					&wound->bleeding, &wound->poison, &wound->infection,
 					&wound->healerskill, &wound->lasthealed,
 					&wound->lastbled);
-				wound->location = add_hash (unspace (fread_word (fp)));
-				wound->type = add_hash (unspace (fread_word (fp)));
-				wound->severity = add_hash (unspace (fread_word (fp)));
-				wound->name = add_hash (unspace (fread_word (fp)));
+				wound->location = duplicateString (unspace (fread_word (fp)));
+				wound->type = duplicateString (unspace (fread_word (fp)));
+				wound->severity = duplicateString (unspace (fread_word (fp)));
+				wound->name = duplicateString (unspace (fread_word (fp)));
 				wound->damage = fread_number (fp);
 				wound->bleeding = fread_number (fp);
 				wound->poison = fread_number (fp);
@@ -1692,10 +1692,10 @@ load_a_saved_mobile (int nVirtual, FILE * fp, bool stable)
 			wound = new WOUND_DATA;
 			wound->next = NULL;
 
-			wound->location = add_hash (fread_word (fp));
-			wound->type = add_hash (fread_word (fp));
-			wound->severity = add_hash (fread_word (fp));
-			wound->name = add_hash (fread_word (fp));
+			wound->location = duplicateString (fread_word (fp));
+			wound->type = duplicateString (fread_word (fp));
+			wound->severity = duplicateString (fread_word (fp));
+			wound->name = duplicateString (fread_word (fp));
 			wound->damage = fread_number (fp);
 			wound->bleeding = fread_number (fp);
 			wound->poison = fread_number (fp);
@@ -1721,7 +1721,7 @@ load_a_saved_mobile (int nVirtual, FILE * fp, bool stable)
 				(LODGED_OBJECT_INFO *) alloc (sizeof (LODGED_OBJECT_INFO));
 			lodged->next = NULL;
 
-			lodged->location = add_hash (fread_word (fp));
+			lodged->location = duplicateString (fread_word (fp));
 			lodged->vnum = fread_number (fp);
 
 			if (!mob->lodged)

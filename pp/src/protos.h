@@ -1713,10 +1713,9 @@ bool inline isOrkin(char_data *ch) {
 
 
 /* -temporary- mem redirects. Replace all calls to free_mem eventually */
-char* add_hash (const char *);
-char* duplicateString(const char *input);
-
-int free_mem_array (void *ptr);	
+char* duplicateString(const char *source);
+	
 int free_mem (char *ptr);
 int free_mem (void *ptr);
+int free_mem_array (void *ptr);
 #endif // _rpie_protos_h_

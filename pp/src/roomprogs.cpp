@@ -2492,7 +2492,7 @@ do_mpcmd (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (count == iprognum)
 		{
-			it->second.command = add_hash((char *) strArgument.c_str());
+			it->second.command = duplicateString((char *) strArgument.c_str());
 			std::string output;
 			output = "Installed command(s) [#6" + strArgument + "#0] for mob prog number #6" + prognum + "#0 for mobile vnum [#2" + vnum + "#0].\n";
 			send_to_char(output.c_str(), ch);
@@ -2545,7 +2545,7 @@ do_mpkey (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (count == iprognum)
 		{
-			it->second.keys = add_hash((char *) strArgument.c_str());
+			it->second.keys = duplicateString((char *) strArgument.c_str());
 			std::string output;
 			output = "Installed keyword(s) [#6" + strArgument + "#0] for mob prog number #6" + prognum + "#0 for mobile vnum [#2" + vnum + "#0].\n";
 			send_to_char(output.c_str(), ch);
@@ -2926,7 +2926,7 @@ do_opcmd (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (count == iprognum)
 		{
-			it->second.command = add_hash((char *) strArgument.c_str());
+			it->second.command = duplicateString((char *) strArgument.c_str());
 			std::string output;
 			output = "Installed command(s) [#6" + strArgument + "#0] for object prog number #6" + prognum + "#0 for Object vnum [#2" + vnum + "#0].\n";
 			send_to_char(output.c_str(), ch);
@@ -2979,7 +2979,7 @@ do_opkey (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (count == iprognum)
 		{
-			it->second.keys = add_hash((char *) strArgument.c_str());
+			it->second.keys = duplicateString((char *) strArgument.c_str());
 			std::string output;
 			if (strArgument.empty())
 			{
@@ -3264,7 +3264,7 @@ do_rpcmd (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (i == j)
 		{
-			t->command = add_hash (arg2);
+			t->command = duplicateString (arg2);
 			send_to_char ("Command installed.\n\r", ch);
 			return;
 		}
@@ -3292,7 +3292,7 @@ do_rpkey (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (i == j)
 		{
-			t->keys = add_hash (arg2);
+			t->keys = duplicateString (arg2);
 			send_to_char ("Keywords installed.\n\r", ch);
 			return;
 		}
@@ -5968,7 +5968,7 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 	else if (buf.find("mkey") != std::string::npos)
 	{
 		free_mem(obj->desc_keys);
-		obj->desc_keys = add_hash(argument.c_str());
+		obj->desc_keys = duplicateString(argument.c_str());
 	}
 	else if (buf.find("timer") != std::string::npos)
 	{

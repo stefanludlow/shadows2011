@@ -236,16 +236,16 @@ void load_obj_progs (void)
 	while (row = mysql_fetch_row(result))
 	{
 		room_prog prog;
-		prog.command = row[1];
+		prog.command = duplicateString(row[1]);
 		if (!strcmp(row[2], " ")) // God knows why this is the case?
 		{
 			prog.keys = "";
 		}
 		else
 		{
-			prog.keys = row[2];
+			prog.keys = duplicateString(row[2]);
 		}
-		prog.prog = row[3];
+		prog.prog = duplicateString(row[3]);
 		prog.type = atoi(row[4]);
 		obj_prog_list.insert (std::pair<int, room_prog>(atoi(row[0]), prog));
 	}
@@ -276,9 +276,9 @@ void load_mob_progs (void)
 	while (row = mysql_fetch_row(result))
 	{
 		room_prog prog;
-		prog.command = row[1];
-		prog.keys = row[2];
-		prog.prog = row[3];
+		prog.command = duplicateString(row[1]);
+		prog.keys = duplicateString(row[2]);
+		prog.prog = duplicateString(row[3]);
 		prog.type = atoi(row[4]);
 		mob_prog_list.insert (std::pair<int, room_prog>(atoi(row[0]), prog));
 	}
@@ -1909,13 +1909,13 @@ load_all_writing (void)
 					obj->writing = new WRITING_DATA;
 					obj->writing->next_page = NULL;
 				}
-				obj->writing->author = add_hash (row[1]);
-				obj->writing->date = add_hash (row[3]);
-				obj->writing->ink = add_hash (row[4]);
+				obj->writing->author = duplicateString (row[1]);
+				obj->writing->date = duplicateString (row[3]);
+				obj->writing->ink = duplicateString (row[4]);
 				obj->writing->language = atoi (row[5]);
 				obj->writing->script = atoi (row[6]);
 				obj->writing->skill = atoi (row[7]);
-				obj->writing->message = add_hash (row[8]);
+				obj->writing->message = duplicateString (row[8]);
 				obj->writing_loaded = true;
 				break;
 			}
@@ -1936,13 +1936,13 @@ load_all_writing (void)
 					}
 					if (i == atoi (row[2]))
 					{
-						writing->author = add_hash (row[1]);
-						writing->date = add_hash (row[3]);
-						writing->ink = add_hash (row[4]);
+						writing->author = duplicateString (row[1]);
+						writing->date = duplicateString (row[3]);
+						writing->ink = duplicateString (row[4]);
 						writing->language = atoi (row[5]);
 						writing->script = atoi (row[6]);
 						writing->skill = atoi (row[7]);
-						writing->message = add_hash (row[8]);
+						writing->message = duplicateString (row[8]);
 						loaded = true;
 						break;
 					}
@@ -2018,13 +2018,13 @@ load_writing (OBJ_DATA * obj)
 			obj->writing = new WRITING_DATA;
 			writing = obj->writing;
 			writing->next_page = NULL;
-			writing->author = add_hash (row[1]);
-			writing->date = add_hash (row[3]);
-			writing->ink = add_hash (row[4]);
+			writing->author = duplicateString (row[1]);
+			writing->date = duplicateString (row[3]);
+			writing->ink = duplicateString (row[4]);
 			writing->language = atoi (row[5]);
 			writing->script = atoi (row[6]);
 			writing->skill = atoi (row[7]);
-			writing->message = add_hash (row[8]);
+			writing->message = duplicateString (row[8]);
 		}
 		if (result)
 		{
@@ -2060,13 +2060,13 @@ load_writing (OBJ_DATA * obj)
 				//oss << "Loading written page on book " << id << " for page " << i << "\n";
 				//  send_to_gods (oss.str().c_str());
 
-				writing->author = add_hash (row[1]);
-				writing->date = add_hash (row[3]);
-				writing->ink = add_hash (row[4]);
+				writing->author = duplicateString (row[1]);
+				writing->date = duplicateString (row[3]);
+				writing->ink = duplicateString (row[4]);
 				writing->language = atoi (row[5]);
 				writing->script = atoi (row[6]);
 				writing->skill = atoi (row[7]);
-				writing->message = add_hash (row[8]);
+				writing->message = duplicateString (row[8]);
 				// load the next row to be considered on next loop
 				row = mysql_fetch_row(result);
 			}
@@ -2077,10 +2077,10 @@ load_writing (OBJ_DATA * obj)
 				//  oss << "Adding blank page on book " << id << " for page " << i << "\n";
 				//  send_to_gods (oss.str().c_str());
 
-				writing->message = add_hash ("blank");
-				writing->author = add_hash ("blank");
-				writing->date = add_hash ("blank");
-				writing->ink = add_hash ("blank");
+				writing->message = duplicateString ("blank");
+				writing->author = duplicateString ("blank");
+				writing->date = duplicateString ("blank");
+				writing->ink = duplicateString ("blank");
 				writing->language = 0;
 				writing->script = 0;
 				writing->skill = 0;
@@ -2468,7 +2468,7 @@ process_queued_review (MYSQL_ROW row)
 			"\n%s", row[1], row[8]);
 		if (buf[strlen (buf) - 1] != '\n')
 			strcat (buf, "\n");
-		tch->pc->msg = add_hash (buf);
+		tch->pc->msg = duplicateString (buf);
 
 		sprintf (buf, "Greetings,\n"
 			"\n"
@@ -3019,7 +3019,7 @@ load_char_mysql (const char *name)
 			if (!*location)
 				continue;
 
-			lodged = new LODGED_OBJECT_INFO[36];
+			lodged = new LODGED_OBJECT_INFO;//[36];
 			lodged->next = NULL;
 
 			lodged->location = duplicateString (location);
@@ -4375,11 +4375,11 @@ load_mysql_message (char *msg_name, int board_type, int msg_number)
 		{
 			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 			message->nVirtual = atoi (row[1]);
-			message->poster = add_hash (row[3]);
-			message->date = add_hash (row[4]);
-			message->icdate = add_hash (row[5]);
-			message->subject = add_hash (row[2]);
-			message->message = add_hash (row[6]);
+			message->poster = duplicateString (row[3]);
+			message->date = duplicateString (row[4]);
+			message->icdate = duplicateString (row[5]);
+			message->subject = duplicateString (row[2]);
+			message->message = duplicateString (row[6]);
 			mysql_free_result (result);
 			return message;
 		}
@@ -4400,10 +4400,10 @@ load_mysql_message (char *msg_name, int board_type, int msg_number)
 		{
 			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 			message->nVirtual = msg_number;
-			message->poster = add_hash (row[3]);
-			message->date = add_hash (row[4]);
-			message->subject = add_hash (row[2]);
-			message->message = add_hash (row[5]);
+			message->poster = duplicateString (row[3]);
+			message->date = duplicateString (row[4]);
+			message->subject = duplicateString (row[2]);
+			message->message = duplicateString (row[5]);
 			message->nTimestamp = strtol (row[6], NULL, 10);
 			mysql_free_result (result);
 			return message;
@@ -4425,10 +4425,10 @@ load_mysql_message (char *msg_name, int board_type, int msg_number)
 		{
 			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 			message->nVirtual = msg_number;
-			message->poster = add_hash (row[3]);
-			message->date = add_hash (row[4]);
-			message->subject = add_hash (row[2]);
-			message->message = add_hash (row[5]);
+			message->poster = duplicateString (row[3]);
+			message->date = duplicateString (row[4]);
+			message->subject = duplicateString (row[2]);
+			message->message = duplicateString (row[5]);
 			message->flags = atoi (row[6]);
 			mysql_free_result (result);
 			return message;
@@ -4450,10 +4450,10 @@ load_mysql_message (char *msg_name, int board_type, int msg_number)
 		{
 			message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
 			message->nVirtual = msg_number;
-			message->poster = add_hash (row[3]);
-			message->date = add_hash (row[4]);
-			message->subject = add_hash (row[2]);
-			message->message = add_hash (row[5]);
+			message->poster = duplicateString (row[3]);
+			message->date = duplicateString (row[4]);
+			message->subject = duplicateString (row[2]);
+			message->message = duplicateString (row[5]);
 			mysql_free_result (result);
 			return message;
 		}
@@ -4500,11 +4500,11 @@ erase_mysql_board_post (CHAR_DATA * ch, char *name, int board_type,
 				("Please enter what you did in response to this report:\n", ch);
 			ch->desc->pending_message = new MESSAGE_DATA;
 			ch->desc->pending_message->message = NULL;
-			ch->desc->pending_message->poster = add_hash (message->poster);
+			ch->desc->pending_message->poster = duplicateString (message->poster);
 			ch->desc->str = &ch->desc->pending_message->message;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			ch->desc->proc = post_track_response;
-			ch->delay_who = add_hash (name);
+			ch->delay_who = duplicateString (name);
 			ch->delay_info1 = atoi (argument);
 			make_quiet (ch);
 			unload_message (message);

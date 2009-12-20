@@ -2572,7 +2572,7 @@ create_description (CHAR_DATA * mob)
 	if (mob->short_descr) {
 		free_mem(mob->short_descr);
 	}
-	mob->short_descr = add_hash (sdesc);
+	mob->short_descr = duplicateString (sdesc);
 	*buf = '\0';
 	if (IS_SET (mob->act, ACT_ENFORCER) && IS_SET (mob->act, ACT_SENTINEL))
 	{
@@ -2584,7 +2584,7 @@ create_description (CHAR_DATA * mob)
 			sdesc);
 		else if (roll == 3)
 			sprintf (buf, "%s patrols here, looking hawkishly about.", sdesc);
-		mob->travel_str = add_hash ("looking hawkishly about");
+		mob->travel_str = duplicateString ("looking hawkishly about");
 	}
 	else if (IS_SET (mob->act, ACT_ENFORCER)
 		&& !IS_SET (mob->act, ACT_SENTINEL))
@@ -2594,17 +2594,17 @@ create_description (CHAR_DATA * mob)
 		{
 			sprintf (buf, "%s patrols here, looking for signs of trouble.",
 				sdesc);
-			mob->travel_str = add_hash ("looking about purposefully");
+			mob->travel_str = duplicateString ("looking about purposefully");
 		}
 		else if (roll == 2)
 		{
 			sprintf (buf, "%s moves by, watching the area attentively.", sdesc);
-			mob->travel_str = add_hash ("looking about the area attentively");
+			mob->travel_str = duplicateString ("looking about the area attentively");
 		}
 		else if (roll == 3)
 		{
 			sprintf (buf, "%s strides through, watching intently.", sdesc);
-			mob->travel_str = add_hash ("looking hawkishly about");
+			mob->travel_str = duplicateString ("looking hawkishly about");
 		}
 	}
 	else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Warg"))
@@ -2617,7 +2617,7 @@ create_description (CHAR_DATA * mob)
 		else if (roll == 3)
 		{
 			sprintf (buf, "%s is here, sniffing the air.", sdesc);
-			mob->travel_str = add_hash ("sniffing the ground");
+			mob->travel_str = duplicateString ("sniffing the ground");
 		}
 		else if (roll == 4)
 			sprintf (buf, "%s is here, growling at passersby.", sdesc);
@@ -2638,12 +2638,12 @@ create_description (CHAR_DATA * mob)
 		else if (roll == 5)
 		{
 			sprintf (buf, "%s pauses here, sniffing the air.", sdesc);
-			mob->travel_str = add_hash ("sniffing the ground");
+			mob->travel_str = duplicateString ("sniffing the ground");
 		}
 		else if (roll == 6)
 		{
 			sprintf (buf, "%s pads around, sniffing the ground.", sdesc);
-			mob->travel_str = add_hash ("sniffing the ground");
+			mob->travel_str = duplicateString ("sniffing the ground");
 		}
 		else if (roll == 7)
 			sprintf (buf, "%s watches its surroundings alertly.", sdesc);
@@ -2707,7 +2707,7 @@ create_description (CHAR_DATA * mob)
 			if (roll == 1)
 			{
 				sprintf (buf, "%s skitters around the area.", sdesc);
-				mob->travel_str = add_hash ("skittering about nervously");
+				mob->travel_str = duplicateString ("skittering about nervously");
 			}
 			else if (roll == 2)
 				sprintf (buf, "%s is here, skulking about.", sdesc);
@@ -2722,7 +2722,7 @@ create_description (CHAR_DATA * mob)
 			else if (roll == 7)
 			{
 				sprintf (buf, "%s sneaks about quietly.", sdesc);
-				mob->travel_str = add_hash ("padding along quietly in the shadows");
+				mob->travel_str = duplicateString ("padding along quietly in the shadows");
 			}
 		}
 		else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Arachnid"))
@@ -2780,24 +2780,24 @@ create_description (CHAR_DATA * mob)
 				if (roll == 1)
 				{
 					sprintf (buf, "%s is here, gazing about.", sdesc);
-					mob->travel_str = add_hash ("gazing about absently");
+					mob->travel_str = duplicateString ("gazing about absently");
 				}
 				else if (roll == 2)
 					sprintf (buf, "%s wanders through the area.", sdesc);
 				else if (roll == 3)
 				{
 					sprintf (buf, "%s passes through, looking about.", sdesc);
-					mob->travel_str = add_hash ("looking about absently");
+					mob->travel_str = duplicateString ("looking about absently");
 				}
 				else if (roll == 4)
 				{
 					sprintf (buf, "%s moves by, lost in thought.", sdesc);
-					mob->travel_str = add_hash ("lost in thought");
+					mob->travel_str = duplicateString ("lost in thought");
 				}
 				else if (roll == 5)
 				{
 					sprintf (buf, "%s strides purposefully through the area.", sdesc);
-					mob->travel_str = add_hash ("looking ahead purposefully");
+					mob->travel_str = duplicateString ("looking ahead purposefully");
 				}
 				else if (roll == 6)
 					sprintf (buf, "%s is here.", sdesc);
@@ -2818,7 +2818,7 @@ create_description (CHAR_DATA * mob)
 				else if (roll == 3)
 				{
 					sprintf (buf, "%s is here, glancing skittishly about.", sdesc);
-					mob->travel_str = add_hash ("padding along apprehensively");
+					mob->travel_str = duplicateString ("padding along apprehensively");
 				}
 				else if (roll == 4)
 					sprintf (buf, "%s stands here.", sdesc);
@@ -2831,7 +2831,7 @@ create_description (CHAR_DATA * mob)
 				else if (roll == 8)
 				{
 					sprintf (buf, "%s storms angrily by.", sdesc);
-					mob->travel_str = add_hash ("angrily glaring about");
+					mob->travel_str = duplicateString ("angrily glaring about");
 				}
 				else if (roll == 9)
 					sprintf (buf, "%s skitters by.", sdesc);
@@ -2844,11 +2844,11 @@ create_description (CHAR_DATA * mob)
 
 			if (mob->long_descr)
 				free_mem (mob->long_descr);
-			mob->long_descr = add_hash (buf);
+			mob->long_descr = duplicateString (buf);
 
 			if (mob->name)
 				free_mem (mob->name);
-			mob->name = add_hash (buf2);
+			mob->name = duplicateString (buf2);
 }
 
 /**

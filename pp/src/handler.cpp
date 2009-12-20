@@ -3254,10 +3254,10 @@ break_delay (CHAR_DATA * ch)
 		send_to_char ("You cease your ministrations.\n", ch);
 		break;
 
-	case DEL_BACKSTAB:
-		ch->delay = 0;
-		send_to_char ("You abort your backstab attempt.\n\r", ch);
-		break;
+	//case DEL_BACKSTAB:
+	//	ch->delay = 0;
+	//	send_to_char ("You abort your backstab attempt.\n\r", ch);
+	//	break;
 
 	case DEL_PURCHASE_ITEM:
 	case DEL_ORDER_ITEM:

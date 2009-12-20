@@ -1689,7 +1689,7 @@ nanny_compose_message (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	d->pending_message->subject = add_hash (argument);
+	d->pending_message->subject = duplicateString (argument);
 
 	SEND_TO_Q
 		("\n#2Enter message; terminate with an '@' when completed. Once finished,\n",
@@ -1724,7 +1724,7 @@ nanny_compose_subject (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	d->pending_message->poster = add_hash (argument);
+	d->pending_message->poster = duplicateString (argument);
 	d->connected = CON_COMPOSE_MESSAGE;
 	SEND_TO_Q ("\nRegarding? ", d);
 	return;
@@ -4309,16 +4309,16 @@ nanny_char_name_confirm (DESCRIPTOR_DATA * d, char *arg)
 	arg[0] = toupper (arg[0]);
 	d->character = new_char (1);
 	//clear_char (d->character);
-	d->character->tname = add_hash (arg);
+	d->character->tname = duplicateString (arg);
 	d->character->pc->create_state = STATE_APPLYING;
 	d->character->race = -1;
-	d->character->pc->account_name = add_hash (d->acct->name.c_str ());
+	d->character->pc->account_name = duplicateString (d->acct->name.c_str ());
 
 	d->character->desc = d;
 
-	d->character->short_descr = 0;
-	d->character->long_descr = 0;
-	d->character->description = 0;
+	d->character->short_descr = NULL;
+	d->character->long_descr = NULL;
+	d->character->description = NULL;
 
 	d->character->time.birth = time (0);
 	d->character->time.played = 0;

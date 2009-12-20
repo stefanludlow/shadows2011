@@ -2004,8 +2004,8 @@ do_typo (CHAR_DATA * ch, char *argument, int cmd)
 	std::stringstream ss;
 	ss << "typos-" << arg;
 
-	ch->desc->pending_message->info = add_hash (ss.str().c_str()); /* category */
-	ch->desc->pending_message->subject = add_hash (argument); /* title */
+	ch->desc->pending_message->info = duplicateString (ss.str().c_str()); /* category */
+	ch->desc->pending_message->subject = duplicateString (argument); /* title */
 
 	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
@@ -3715,7 +3715,7 @@ add_memory (CHAR_DATA * add, CHAR_DATA * mob)
 			return;
 
 	memory = new memory_data;
-	memory->name = add_hash (name);
+	memory->name = duplicateString (name);
 	memory->next = mob->remembers;
 	mob->remembers = memory;
 }
@@ -4712,7 +4712,7 @@ do_cover (CHAR_DATA *ch, char *argument, int cmd)
 		break;
 	}
 	/** taking cover behind an object **/
-	arg2 = add_hash(argument);
+	arg2 = duplicateString(argument);
 
 	if (*arg2)
 	{
@@ -4816,7 +4816,7 @@ delayed_cover (CHAR_DATA * ch)
 
 		sprintf (buf, "has taken cover from the %s.", direct);
 		GET_POS (ch) = SIT;
-		ch->pmote_str = add_hash(buf);
+		ch->pmote_str = duplicateString(buf);
 	}
 	else
 	{
@@ -4827,7 +4827,7 @@ delayed_cover (CHAR_DATA * ch)
 
 		sprintf (buf, "has taken cover from the %s by hiding behind %s.",
 			direct, obj_short_desc (tobj));
-		ch->pmote_str = add_hash(buf);
+		ch->pmote_str = duplicateString(buf);
 		GET_POS (ch) = SIT;
 	}
 

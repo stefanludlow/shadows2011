@@ -2056,12 +2056,6 @@ initiate_move (CHAR_DATA * ch)
 	//}
 	// Case
 
-	if (ch->room == NULL) {
-		send_to_gods("Room Capacity ERROR or before");
-		throw std::runtime_error::runtime_error("CRASH AT 2072");
-	}
-	// /Case
-
 	if (IS_SET (ch->act, ACT_MOUNT) &&
 		IS_SET (target_room->room_flags, NO_MOUNT))
 	{
@@ -2257,7 +2251,7 @@ initiate_move (CHAR_DATA * ch)
 
 	if (IS_SET (ch->act, ACT_VEHICLE))
 	{
-		move_names[ch->speed] = add_hash ("travelling");
+		move_names[ch->speed] = duplicateString ("travelling");
 		travel_str[0] = '\0';	/* override travel strings in vehicles */
 	}
 	else if ((strlen (travel_str) == 0) && (ch->travel_str != NULL))
@@ -2591,7 +2585,7 @@ do_move (CHAR_DATA * ch, char *argument, int dir)
 			{
 				do_shout (shoutchar, "Halt now or you will not leave this place alive!", 0);
 			}
-			else if (shoutchar->race == lookup_race_id("Mountain Orc") || shoutchar->race == lookup_race_id("Mirkwood Orc") || shoutchar->race == lookup_race_id("Mordorian Orc") || shoutchar->race == lookup_race_id("Troll") || shoutchar->race == lookup_race_id("Olog-hai"))
+			else if (isOrkin(shoutchar))
 			{
 				do_shout (shoutchar, "Oi! Youse not gunna get far! After da little bitch!", 0);
 			}

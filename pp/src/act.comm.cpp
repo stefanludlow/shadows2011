@@ -179,7 +179,7 @@ do_pmote (CHAR_DATA * ch, char *argument, int cmd)
 
 	else if (IS_NPC(ch) && argument)
 	{
-		ch->pmote_str = add_hash (argument);
+		ch->pmote_str = duplicateString (argument);
 	}
 
 	else
@@ -194,7 +194,7 @@ do_pmote (CHAR_DATA * ch, char *argument, int cmd)
 
 		sprintf (buf, "You pmote: %s", result);
 
-		ch->pmote_str = add_hash (result);
+		ch->pmote_str = duplicateString (result);
 
 		act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	}
@@ -229,7 +229,7 @@ do_dmote (CHAR_DATA * ch, char *argument, int cmd)
 
 		sprintf (buf, "You dmote: %s", argument);
 
-		ch->dmote_str = add_hash (argument);
+		ch->dmote_str = duplicateString (argument);
 
 		act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	}
@@ -311,7 +311,7 @@ do_omote (CHAR_DATA * ch, char *argument, int cmd)
 	/* free old string */
 	clear_omote(obj);
 	/* add new one */
-	obj->omote_str = add_hash (buf);
+	obj->omote_str = duplicateString (buf);
 	sprintf (buf, "You omote: %s %s", obj->short_description, obj->omote_str);
 
 	if (obj->short_description[0] == '#')
@@ -932,7 +932,7 @@ do_voice (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			sprintf (buf, "Your voice string has been set to: (#2%s#0)",
 				argument);
-			ch->voice_str = add_hash (argument);
+			ch->voice_str = duplicateString (argument);
 		}
 
 		act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
@@ -3570,7 +3570,7 @@ do_travel (CHAR_DATA * ch, char *argument, int cmd)
 
 			sprintf (buf, "Your travel string has been set to: (%s)",
 				result);
-			ch->travel_str = add_hash (result);
+			ch->travel_str = duplicateString (result);
 		}
 		act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	}

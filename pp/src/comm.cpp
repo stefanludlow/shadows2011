@@ -2730,7 +2730,7 @@ copyover_recovery (void)
 			if (d->hSocketFD > maxdesc)
 				maxdesc = d->hSocketFD;
 
-			d->strClientHostname = add_hash (host);
+			d->strClientHostname = duplicateString (host);
 
 			d->acct = new account (account_name);
 
