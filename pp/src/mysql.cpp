@@ -2312,6 +2312,7 @@ perform_pfile_update (CHAR_DATA * ch)
 
 	
 	// Stat fix code - Case, should be removed after a few weeks
+	/* - Commented out 1/1/10 - Grommit
 	int attributeTotal = (ch->str + ch->dex + ch->agi + ch->con + ch->wil + ch->intel);
 	int race = ch->race;
 	int raceTotal = 0;
@@ -2362,13 +2363,14 @@ perform_pfile_update (CHAR_DATA * ch)
 	ch->wil = statArray[4];
 	ch->intel = statArray[5];
 	// End stat fix code
-
+	*/
 	ch->tmp_str = ch->str;
 	ch->tmp_dex = ch->dex;
 	ch->tmp_agi = ch->agi;
 	ch->tmp_con = ch->con;
 	ch->tmp_aur = ch->aur;
 	ch->tmp_intel = ch->intel;
+
 }
 
 void
