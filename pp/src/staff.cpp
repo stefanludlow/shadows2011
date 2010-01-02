@@ -2149,11 +2149,14 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	    }
 
 	}
-      if (k == NULL && !bPCsOnly)
+        if (GET_TRUST(ch) >= 3)
+	{
+	if (k == NULL && !bPCsOnly)
 	{
 	  charstat (ch, name, true);
 	}
     }
+}
 
   if (k == NULL)
     {
