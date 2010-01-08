@@ -1003,6 +1003,7 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	char *utters[] = { "say", "sing", "tell", "murmur", "wouldbewhisper" };
 	bool bIsWithGroup = false;
 
+	Stringstack newString;
 
 	if (ch->room->sector_type == SECT_UNDERWATER)
 	{
@@ -1244,6 +1245,13 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+
+	//to allow tabs and newlines for poetry or songs
+	newString = argument;
+	newString.findAndReplace("\\t", "\t");
+	newString.findAndReplace("\\n", "\n");
+	sprintf(argument, newString.getRemainingArgument().c_str());	
+	
 	sprintf (buf4, argument);	/* The intended message, sent to the player. */
 	sprintf (buf5, argument);
 	sprintf (buf2, argument);
