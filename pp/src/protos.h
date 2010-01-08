@@ -607,7 +607,7 @@ void do_subscribe (CHAR_DATA * ch, char *argument, int cmd);
 void do_unsubscribe (CHAR_DATA * ch, char *argument, int cmd);
 int multipleRoomCount (int amount, ...);
 std::string gatheringPlace(int room_num, std::string name);
-
+std::string gatheringPlaceCore(int room_num, std::string name, bool colorise);
 
 //nanny.cpp
 //============VERMONKEY=================

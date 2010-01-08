@@ -7927,6 +7927,11 @@ void roomCount(ROOM_DATA *rd)
 
 std::string gatheringPlace(int room_num, std::string name)
 {
+  return gatheringPlaceCore(room_num, name, true);
+}
+
+std::string gatheringPlaceCore(int room_num, std::string name, bool colorise)
+{
 	std::stringstream placestream;
 	
 	ROOM_DATA* rd = vtor(room_num);
@@ -7936,7 +7941,19 @@ std::string gatheringPlace(int room_num, std::string name)
 	
 	if (num_occu > 0)
 	{
-		placestream << "In " << name << ", there " << (num_occu == 1 ? "is#2 " : "are#2 ") << num_occu << (num_occu == 1 ? " #0player. " : " #0players. ") << std::endl;
+	  placestream << "In " << name << ", there " << (num_occu == 1 ? "is " : "are ");
+
+	  /* color codes are ignored entirely when colorise is false, for web export */
+	  if (colorise)
+	    placestream << "#2";
+
+	  placestream << num_occu;
+
+	  /* color codes are ignored entirely when colorise is false, for web export */
+	  if (colorise)
+	    placestream << "#0";
+
+	  placestream <<  (num_occu == 1 ? " player." : " players.") << std::endl;
 	}
 	
 	return placestream.str();

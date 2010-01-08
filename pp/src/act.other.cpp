@@ -2517,18 +2517,47 @@ prisoner_release (CHAR_DATA * ch, int zone)
 
 }
 
+
+typedef struct
+{
+  int vnum;
+  char* title;
+} who_loc_info;
+
+
 void export_who_locations()
 {
   FILE* fp;
+  std::string str;
+  who_loc_info who_loc[] = { {1108,"the Battered Shield"},
+			     {1111,"the Gilded Lily"}, 
+			     {3271,"the Wardog Commons"},
+			     {3831,"the Copper Tankard Tavern"},
+			     {8299,"the Hawk and Dove Barn"},
+			     {8505,"the Pelennor Bastion Commons"},
+			     {21170,"the Commons of the Rancid Snakebite Tavern"},
+			     {42002,"Halburg's Rest Mead Hall"},
+			     {54430,"the Mess Hall of Amdir"},
+			     {54454,"the White Hart Tavern"},
+			     {80129,"the Drifting Lily Inn"},
+			     {80239,"the Drowning Corsair"}};
+  const int WHO_LOCS=13;
+
+
   if (!(fp = fopen("/home/webhobbit/public_html/who_locs.html","w+")))
     {
       fprintf(stderr, "Unable to open /home/webhobbit/public_html/who_locs.html for writing.");
       return;
     }
 
-    fprintf(fp,"<p>%s</p><br>\n",gatheringPlace(1108, "the Battered Shield"));
-    fprintf(fp,"<p>%s</p><br>\n",gatheringPlace(1111, "the Gilded Lily"));
-    fclose (fp);
+  for (int i=0; i<WHO_LOCS; i++)
+    {
+      str = gatheringPlaceCore(who_loc[i].vnum,who_loc[i].title,false);
+      if (str.length()>0)
+	fprintf(fp,"<p>%s</p><br>\n",str.c_str());
+    }
+
+  fclose (fp);
 }
 
 void
