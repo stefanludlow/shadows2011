@@ -7925,11 +7925,11 @@ void roomCount(ROOM_DATA *rd)
 	}
 }
 
-std::string gatheringPlace(int room_num, std::string name, ROOM_DATA *rd)
+std::string gatheringPlace(int room_num, std::string name)
 {
 	std::stringstream placestream;
 	
-	rd = vtor(room_num);
+	ROOM_DATA* rd = vtor(room_num);
 	roomCount(rd);
 	
 	int num_occu = rd->occupants;
@@ -7946,7 +7946,6 @@ std::string gatheringPlace(int room_num, std::string name, ROOM_DATA *rd)
 void do_who (CHAR_DATA * ch, char *argument, int cmd)
 {
 	DESCRIPTOR_DATA *d = NULL;
-	ROOM_DATA *rd = NULL;
 
 	int mortals = 0, immortals = 0, guests = 0, clanCount = 0, clansphere = 0;
 
@@ -8043,52 +8042,52 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	if (sphere == 1)
 	{	
 
-		whoStream << gatheringPlace(3271, "the Wardog Commons", rd);
-		whoStream << gatheringPlace(1108, "the Battered Shield", rd);
-		whoStream << gatheringPlace(1111, "the Gilded Lily", rd);
-		whoStream << gatheringPlace(3831, "the Copper Tankard Tavern", rd);	
-		whoStream << gatheringPlace(54454, "the White Hart Tavern", rd);
+	  whoStream << gatheringPlace(3271, "the Wardog Commons");
+		whoStream << gatheringPlace(1108, "the Battered Shield");
+		whoStream << gatheringPlace(1111, "the Gilded Lily");
+		whoStream << gatheringPlace(3831, "the Copper Tankard Tavern");	
+		whoStream << gatheringPlace(54454, "the White Hart Tavern");
 			
 		//Show battalion information to only those who can access it - Vader
 		if (is_clan_member(ch, "ithilien_battalion"))
 		{
-			whoStream << gatheringPlace(51162, "the Keep's Courtyard", rd);
-			whoStream << gatheringPlace(51169, "the Keep's Dining Hall", rd);
-			whoStream << gatheringPlace(51170, "the Keep's Kitchen", rd);
-			whoStream << gatheringPlace(54430, "the Mess Hall", rd);
+			whoStream << gatheringPlace(51162, "the Keep's Courtyard");
+			whoStream << gatheringPlace(51169, "the Keep's Dining Hall");
+			whoStream << gatheringPlace(51170, "the Keep's Kitchen");
+			whoStream << gatheringPlace(54430, "the Mess Hall");
 		}
 		if (is_clan_member(ch, "hawk_and_dove"))
 		{
-			whoStream << gatheringPlace(8299, "the Hawk and Dove Barn", rd);
+			whoStream << gatheringPlace(8299, "the Hawk and Dove Barn");
 		}
 		if (is_clan_member(ch, "mt_lower_class"))
 		{
-			whoStream << gatheringPlace(21170, "the Commons of the Rancid Snakebite Tavern", rd);
+			whoStream << gatheringPlace(21170, "the Commons of the Rancid Snakebite Tavern");
 		}
 		if (is_clan_member(ch, "z3_astirian_wardens"))
 		{
-			whoStream << gatheringPlace(8805, "the Pelennor Bastion Commons", rd);
+			whoStream << gatheringPlace(8805, "the Pelennor Bastion Commons");
 		}
 	}
 
 	else if (sphere == 2)
 	{	
-		whoStream << gatheringPlace(42002, "Halburg's Rest Mead Hall", rd);
+		whoStream << gatheringPlace(42002, "Halburg's Rest Mead Hall");
 	}
 	else if (sphere == 3)
 	{
-		whoStream << gatheringPlace(80129, "the Drifting Lily Inn", rd);
-		whoStream << gatheringPlace(80239, "the Drowning Corsair", rd);
+		whoStream << gatheringPlace(80129, "the Drifting Lily Inn");
+		whoStream << gatheringPlace(80239, "the Drowning Corsair");
 	}
 
 	else if (sphere == 4)
 	{
-		whoStream << gatheringPlace(41425, "Da Bleedin' Fist Waterhole", rd);
-		whoStream << gatheringPlace(41470, "Grutz's Guttahs' cave", rd);
+		whoStream << gatheringPlace(41425, "Da Bleedin' Fist Waterhole");
+		whoStream << gatheringPlace(41470, "Grutz's Guttahs' cave");
 
 		if (is_clan_member(ch, "blackrend"))
 		{
-			whoStream << gatheringPlace(41207, "Blackrend's Cave", rd);
+			whoStream << gatheringPlace(41207, "Blackrend's Cave");
 		}
 	}
 
