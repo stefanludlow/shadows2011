@@ -606,7 +606,7 @@ void read_motd(DESCRIPTOR_DATA * d);
 void do_subscribe (CHAR_DATA * ch, char *argument, int cmd);
 void do_unsubscribe (CHAR_DATA * ch, char *argument, int cmd);
 int multipleRoomCount (int amount, ...);
-std::string gatheringPlace(int room_num, std::string name, ROOM_DATA *rd);
+std::string gatheringPlace(int room_num, std::string name);
 
 
 //nanny.cpp
@@ -1406,6 +1406,7 @@ int get_weight (CHAR_DATA * ch);
 struct descriptor_data *is_pc_attached (char *buf);
 int is_mounted (CHAR_DATA * ch);
 void rl_minute_affect_update (void);
+void export_who_list(void);
 void clear_watch (CHAR_DATA * ch);
 void show_unread_messages (CHAR_DATA * ch);
 char *file_to_string (char *name);

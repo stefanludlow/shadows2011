@@ -2517,6 +2517,20 @@ prisoner_release (CHAR_DATA * ch, int zone)
 
 }
 
+void export_who_locations()
+{
+  FILE* fp;
+  if (!(fp = fopen("/home/webhobbit/public_html/who_locs.html","w+")))
+    {
+      fprintf(stderr, "Unable to open /home/webhobbit/public_html/who_locs.html for writing.");
+      return;
+    }
+
+    fprintf(fp,"<p>%s</p><br>\n",gatheringPlace(1108, "the Battered Shield"));
+    fprintf(fp,"<p>%s</p><br>\n",gatheringPlace(1111, "the Gilded Lily"));
+    fclose (fp);
+}
+
 void
 rl_minute_affect_update (void)
 {
@@ -2527,6 +2541,9 @@ rl_minute_affect_update (void)
   char buf2[MAX_STRING_LENGTH];
 
   next_minute_update += 60;	/* This is a RL minute */
+
+  /* Write list of who counts every minute */
+  export_who_locations();
 
   //for (ch = character_list; ch; ch = ch->next)
   for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
