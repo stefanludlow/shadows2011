@@ -2572,7 +2572,8 @@ rl_minute_affect_update (void)
   next_minute_update += 60;	/* This is a RL minute */
 
   /* Write list of who counts every minute */
-  export_who_locations();
+  if (engine.in_play_mode())
+    export_who_locations();
 
   //for (ch = character_list; ch; ch = ch->next)
   for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
