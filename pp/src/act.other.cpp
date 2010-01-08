@@ -2541,7 +2541,7 @@ void export_who_locations()
 			     {54454,"the White Hart Tavern"},
 			     {80129,"the Drifting Lily Inn"},
 			     {80239,"the Drowning Corsair"}};
-  const int WHO_LOCS=13;
+  const int WHO_LOCS=12;
 
 
   if (!(fp = fopen("/home/webhobbit/public_html/who_locs.html","w+")))
