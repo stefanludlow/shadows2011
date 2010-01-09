@@ -2809,6 +2809,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH],
 		buf3[MAX_STRING_LENGTH], buf4[MAX_STRING_LENGTH], tmp[MAX_STRING_LENGTH];
 	char output[MAX_STRING_LENGTH];
+	std::ostringstream stream;
 	char *date;
 	int mtop = 0, count, count2, otop = 0, n, i;
 	int count_total_rooms, docs = 0;
@@ -3326,25 +3327,20 @@ nVirtual : 0);
 
 	case 'u':			/* Undescribed room only */
 
-		*tmp = 0;
-
 		if (isdigit (*buf2))
 			nSearchZone = atoi (buf2);
 
 		if (nSearchZone < 0 || nSearchZone > MAX_ZONE)
 		{
 			nSearchZone = -1;
-			sprintf (tmp,
-				"\n#6Searching All Zones for Undescribed Rooms and Objects#0\n");
+			stream << "\n#6Searching All Zones for Undescribed Rooms and Objects#0\n";
 		}
 		else
 		{
-			sprintf (tmp,
-				"\n#6Searching Zone ##%d, %s, for Undescribed Rooms and Objects#0\n",
-				nSearchZone, zone_table[nSearchZone].name);
+		  stream << "\n#6Searching Zone ##" << nSearchZone << ", " << zone_table[nSearchZone].name << ", for Undescribed Rooms and Objects#0\n";
 		}
 
-		strcat (tmp, "\n#6Rnum     Room Name#0\n\n");
+		stream <<  "\n#6Rnum     Room Name#0\n\n";
 		for (troom = full_room_list; troom; troom = troom->lnext)
 		{
 
@@ -3357,12 +3353,10 @@ nVirtual : 0);
 			if (IS_SET (troom->room_flags, STORAGE))
 				continue;
 
-			sprintf (tmp + strlen (tmp), "[%.5d]  %s", troom->nVirtual,
-				troom->name);
-			sprintf (tmp + strlen (tmp), "\n");
+			stream <<  "[" << troom->nVirtual << "]  " << troom->name << "\n";
 		}
 
-		strcat (tmp, "\n\n#6Vnum     Object Name(s)   Short desc#0\n\n");
+		stream <<  "\n\n#6Vnum     Object Name(s)   Short desc#0\n\n";
 		for (k = full_object_list; k; k = k->lnext)
 		{
 
@@ -3374,15 +3368,11 @@ nVirtual : 0);
 				continue;
 			}
 
-			sprintf (tmp + strlen (tmp), "[%.5d]  %-16.16s  %-28.28s",
-				k->nVirtual, (k->name) ? k->name : "#1Unnamed Object!#0",
-				(k->short_description) ? k->
-short_description : "#1No Short Desc!#0");
-			sprintf (tmp + strlen (tmp), "\n");
+			stream << "[" << k->nVirtual << "] " <<  ((k->name) ? k->name : "#1Unnamed Object!#0") << ((k->short_description) ? k->short_description : "#1No Short Desc!#0" ) << "\n";
 
 		}
 
-		page_string (ch->desc, tmp);
+		page_string (ch->desc, stream.str().c_str());
 		return;
 	case 'r':			/* Room */
 
