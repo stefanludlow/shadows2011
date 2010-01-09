@@ -3571,7 +3571,7 @@ acctstat (CHAR_DATA * ch, char *name)
   if ((result = mysql_store_result (database)) != NULL)
     {
       row = mysql_fetch_row (result);
-      if (row && *row[0])
+      if (row && row[0] && *row[0])
 	{
 	  account_time = (time_t) atoi (row[0]);
 	  if (asctime_r (localtime (&account_time), date) != NULL)
