@@ -2287,7 +2287,7 @@ perform_pfile_update (CHAR_DATA * ch)
 		starting_skill_boost (ch, SKILL_SWIMMING);
 	}
 
-	if (ch->skills[SKILL_SUBDUE]<>0)
+	if (ch->skills[SKILL_SUBDUE]!=0)
 		ch->skills[SKILL_SUBDUE] = 0;
 
 	if (!ch->pc->level)
