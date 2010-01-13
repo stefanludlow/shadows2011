@@ -5179,7 +5179,12 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 	       "You have been playing for #2%d#0 days and #2%d#0 hours.\n",
 	       playing_time.day, playing_time.hour);
       send_to_char (buf, ch);
+      sprintf (buf,
+	       "You will fight with #2%d#0 percent of your effort.\n",
+	       ch->fight_percentage);
+      send_to_char (buf, ch);
     }
+
 
   switch (GET_POS (ch))
     {

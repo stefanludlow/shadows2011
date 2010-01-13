@@ -2812,7 +2812,7 @@ payday (CHAR_DATA * ch, CHAR_DATA * employer, AFFECTED_TYPE * af)
 	  		{
 	  		sprintf (buf, "$N whispers to you that they do not have the funds available. Try again later.");
 	  		act (buf, true, ch, 0, employer, TO_CHAR | _ACT_FORMAT);
-	  		act ("$N whispers somemthing to $n.", false, ch, 0, employer,  TO_NOTVICT | _ACT_FORMAT);
+	  		act ("$N whispers something to $n.", false, ch, 0, employer,  TO_NOTVICT | _ACT_FORMAT);
 	  		} //employer Does NOT have the coin
 		}//there is an employer
 	else
