@@ -5179,11 +5179,43 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 	       "You have been playing for #2%d#0 days and #2%d#0 hours.\n",
 	       playing_time.day, playing_time.hour);
       send_to_char (buf, ch);
-      sprintf (buf,
-	       "You will fight with #2%d#0 percent of your effort.\n",
-	       ch->fight_percentage);
-      send_to_char (buf, ch);
     }
+
+if (!IS_SET (ch->flags, FLAG_GUEST))
+{
+	if (ch->fight_percentage <= 20)
+	{
+	sprintf (buf, "You will fight with #1%d#0 percent of your effort.\n", ch->fight_percentage);
+	send_to_char (buf, ch);
+	}
+	else if (ch->fight_percentage <= 40)
+	{
+	sprintf (buf, "You will fight with #3%d#0 percent of your effort.\n", ch->fight_percentage);
+	send_to_char (buf, ch);
+	}
+	else if (ch->fight_percentage <= 60)
+	{
+	sprintf (buf, "You will fight with #4%d#0 percent of your effort.\n", ch->fight_percentage);
+	send_to_char (buf, ch);
+	}
+	else if (ch->fight_percentage <= 80)
+	{
+	sprintf (buf, "You will fight with #6%d#0 percent of your effort.\n", ch->fight_percentage);
+	send_to_char (buf, ch);
+	}
+	else if (ch->fight_percentage <= 99)
+	{
+	sprintf (buf, "You will fight with #5%d#0 percent of your effort.\n", ch->fight_percentage);
+	send_to_char (buf, ch);
+	}
+	else if (ch->fight_percentage == 100)
+	{
+	sprintf (buf, "You will fight with #F%d#0 percent of your effort.\n", ch->fight_percentage);
+	send_to_char (buf, ch);
+	}
+}
+
+
 
 
   switch (GET_POS (ch))
