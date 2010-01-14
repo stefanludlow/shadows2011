@@ -7396,6 +7396,12 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char ("This is a PC-only command.\n", ch);
 		return;
 	}
+	
+	if (!IS_SET(ch->plr_flags, IS_CRAFTER))
+	  {
+	    send_to_char ("You must be an authorised crafter to use this command.\n",ch);
+	    return;
+	  }
 
 	if (!ch->pc->edit_craft)
 	{
@@ -8522,6 +8528,27 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 		}
 		else if (!str_cmp (subcmd, "plot")) {
 			edit_mob->togglePlotFlag();
+		}
+		
+		else if (!strncmp(subcmd,"crafter",7)) {
+		  if (GET_TRUST(ch) < 5)
+		    {
+		      send_to_char ("You must be level 5 to toggle the IsCrafter flag.\n", ch);
+		      return;
+		    }
+
+		  if (!IS_SET (edit_mob->plr_flags, IS_CRAFTER))
+			{
+				edit_mob->plr_flags |= IS_CRAFTER;
+				send_to_char
+					("This admin is now authorised to use cset.\n", ch);
+				return;
+			}
+
+			edit_mob->plr_flags &= ~IS_CRAFTER;
+			send_to_char
+				("This admin is no longer authorised to use cset.\n",ch);
+			return;
 		}
 
 		else if (!str_cmp (subcmd, "spell")) {

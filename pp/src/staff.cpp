@@ -2497,6 +2497,9 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
   if (IS_SET (k->plr_flags, NO_PLAYERPORT))
     strcat (buf, " NoPlayerPort");
 
+  if (IS_SET(k->plr_flags, IS_CRAFTER))
+    strcat (buf, " IsCrafter");
+
   if (k->color)
     strcat (buf, " ANSI");
 

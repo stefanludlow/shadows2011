@@ -813,6 +813,12 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 // Immortal options - new
   else if (!str_cmp (buf, "new"))
     {
+      if (!IS_SET(ch->plr_flags,IS_CRAFTER))
+	{
+	  send_to_char("You must be an authorised crafter to use this command.\n",ch);
+	  return;
+	}
+
       argument = one_argument (argument, buf);
       sprintf (craft_name, "%s", buf);
       argument = one_argument (argument, buf);
@@ -857,6 +863,12 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 // Immortal options - clone
 	else if (!str_cmp (buf, "clone"))
     {
+      if (!IS_SET(ch->plr_flags,IS_CRAFTER))
+	{
+	  send_to_char("You must be an authorised crafter to use this command.\n",ch);
+	  return;
+	}
+
       if (!ch->pc->edit_craft)
 	{
 	  send_to_char
@@ -995,6 +1007,12 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("No such subcraft.\n", ch);
       return;
     }
+  if (!IS_SET(ch->plr_flags,IS_CRAFTER))
+    {
+      send_to_char("You must be an authorised crafter to use this command.\n",ch);
+      return;
+    }
+
 
   if (!ch->pc->edit_craft || ch->pc->edit_craft != craft)
     {
@@ -1048,6 +1066,7 @@ do_remcraft (CHAR_DATA * ch, char *argument, int cmd)
       send_to_char ("This command cannot be used while switched.\n", ch);
       return;
     }
+
 
   if (!(edit_mob = ch->pc->edit_player))
     {

@@ -357,9 +357,9 @@ const struct command_data commands[] = {
 	
 	/*Advanced Builder Level 2:  (mobs and crafts) */
 	{"classify", do_classify, DEAD, C_LV2},
-	{"clog", do_clog, DEAD, C_LV2},	/* Crafts Log */
-	{"craftspc", do_craftspc, DEAD, C_LV2},
-	{"cset", do_cset, DEAD, C_LV5},//was level 1, movd to five for a craft audit
+  {"clog", do_clog, DEAD, C_LV1},	/* Crafts Log  - lvl1 to allow crafter-only admins *//
+  {"craftspc", do_craftspc, DEAD, C_LV2},
+  {"cset", do_cset, DEAD, C_LV1}, // lvl1 to allow crafter-only admins 
 	{"find", do_find, DEAD, C_LV2},
 	//{"freeze", do_freeze, DEAD, C_LV2},
 	{"locate", do_locate, DEAD, C_LV2},
