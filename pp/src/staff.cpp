@@ -7001,11 +7001,17 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
           sprintf(buf, "You will now fight at ");
           if (atoi(argument) == 100)
             sprintf(buf+strlen(buf), "#F");
-          else if (atoi(argument) > 75)
-            sprintf(buf+strlen(buf),"#2");
-          else if (atoi(argument) > 30)
-            sprintf(buf+strlen(buf),"#B");
-          else
+          else if (atoi(argument) <= 99)
+            sprintf(buf+strlen(buf),"#5");
+          else if (atoi(argument) <= 80)
+            sprintf(buf+strlen(buf),"#6");
+          else if (atoi(argument) <= 60)
+	    sprintf(buf+strlen(buf),"#4");
+	  else if (atoi(argument) <= 40)
+	    sprintf(buf+strlen(buf),"#3");
+	  else if (atoi(argument) <= 20)
+	    sprintf(buf+strlen(buf),"#1");
+	  else
             sprintf(buf+strlen(buf),"#1");
           
 		  sprintf(buf+strlen(buf), "%d%%#0 of your combat ability.\n", ch->fight_percentage);
