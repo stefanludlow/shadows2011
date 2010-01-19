@@ -550,7 +550,7 @@ do_timeconvert (CHAR_DATA * ch, char *argument, int cmd)
       act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 
     }
-  else if (year < 2010 && year > 2002)
+  else if (year < 2100 && year > 2002)
     {
 
       real_date.tm_hour = hour;
