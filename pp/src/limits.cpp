@@ -813,6 +813,13 @@ else if (!IS_NPC(ch) && ch->pc->level == 0 && IS_SET (ch->flags, FLAG_ISADMIN))
       if (obj->deleted)
 	continue;
 
+      /* Check for morphto first, or object can be extracted accidently before call */
+      if ((obj->morphTime) && obj->morphTime < current_time)
+	{
+	  morph_obj (obj);
+	  continue;
+	}
+
       /* Mob jailbags need to disappear after a time */
 
       if (obj->nVirtual == VNUM_JAILBAG &&
@@ -858,7 +865,7 @@ else if (!IS_NPC(ch) && ch->pc->level == 0 && IS_SET (ch->flags, FLAG_ISADMIN))
 	      else if (obj->in_room != NOWHERE)
 		obj_to_room (objj, obj->in_room);
 	      else
-		extract_obj (obj);
+		extract_obj (objj);
 	    }
 
 	  extract_obj (obj);
@@ -930,9 +937,6 @@ else if (!IS_NPC(ch) && ch->pc->level == 0 && IS_SET (ch->flags, FLAG_ISADMIN))
 	  if (is_name_in_list ("candle", obj->name))
 	    extract_obj (obj);
 	}
-
-      if ((obj->morphTime) && obj->morphTime < current_time)
-	morph_obj (obj);
     }
 }
 
