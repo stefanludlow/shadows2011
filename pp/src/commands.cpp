@@ -199,7 +199,7 @@ const struct command_data commands[] = {
   {"qscan", do_qscan, SIT, C_HID | C_WLK},
   {"read", do_read, REST, C_WLK | C_DEL | C_HID | C_SUB | C_DOA},
   {"reach", do_reach, REST, C_HID | C_DEL | C_WLK | C_BLD | C_PAR | C_SUB},
-  {"recruit", do_recruit, SIT, C_BLD},
+  {"recruit", do_recruit, STAND, C_BLD},
   {"receipts", do_receipts, SIT, C_BLD},
   {"release", do_release, STAND, C_BLD},
   {"remove", do_remove, REST, C_BLD},
