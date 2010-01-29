@@ -8127,6 +8127,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	else if (sphere == 2)
 	{	
 		whoStream << gatheringPlace(42002, "Halburg's Rest Mead Hall");
+		whoStream << gatheringPlace(43054, "The Dalewatch Mess Hall");
 	}
 	else if (sphere == 3)
 	{
