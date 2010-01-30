@@ -5052,6 +5052,9 @@ craftstat (CHAR_DATA * ch, char *argument)
   sprintf (b_buf, "#6Craft:#0 %s #6Subcraft:#0 %s #6Command:#0 %s\n",
 	   craft->craft_name, craft->subcraft_name, craft->command);
 
+  if (IS_SET (craft->subcraft_flags, SCF_OBSCURE))
+    sprintf (b_buf + strlen (buf), "#1Hidden#0\n");
+
   for (i = 0; i <= 24; i++)
     {
     if (craft->race[i] > 0)
