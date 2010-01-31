@@ -175,7 +175,9 @@
 	fname((obj)->name) : "something")
 
 #define IS_OUTSIDE(ch) (!IS_SET((ch)->room->room_flags,INDOORS) && \
-			ch->room->sector_type != SECT_INSIDE && ch->room->sector_type != SECT_UNDERWATER)
+			ch->room->sector_type != SECT_INSIDE && \ 
+			ch->room->sector_type != SECT_CAVE && \
+			ch->room->sector_type != SECT_UNDERWATER)
 
 #define EXIT(ch, door)  ((ch->room) ? (ch)->room->dir_option[door] : NULL)
 
