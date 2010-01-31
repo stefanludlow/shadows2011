@@ -2687,10 +2687,11 @@ refresh_race_configuration (CHAR_DATA * tch)
 		tch->aur += atoi (lookup_race_variable (tch->race, RACE_AUR_MOD));
 	*/
 
+	if (IS_NPC(tch))
+	{
 	if ((tch->height = calculate_race_height (tch)) == -1)
 		tch->height = calculate_size_height (tch);
-
-	//      if ( lookup
+	}
 }
 
 CHAR_DATA *
