@@ -314,8 +314,13 @@ nanny_login_choice (DESCRIPTOR_DATA * d, char *argument)
 			return;
 		}
 		SEND_TO_Q (get_text_buffer (NULL, text_list, "account_application"), d);
-		SEND_TO_Q ("What would you like to name your login account? ", d);
-		d->connected = CON_NEW_ACCT_NAME;
+		
+		//These two lines are not needed with web based account creation
+		//SEND_TO_Q ("What would you like to name your login account? ", d);
+		//d->connected = CON_NEW_ACCT_NAME;
+		//they get the info blurb when they try to register and then put back to the login screen so they can log in.
+		//This also keeps the check for IP bans
+		d->connected = CON_LOGIN;
 		return;
 	}
 
