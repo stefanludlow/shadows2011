@@ -5880,6 +5880,8 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	case CON_LOGIN:
 		nanny_login_choice (d, argument);
 		break;
+
+/********the following are not used with web based account egistration
 	case CON_NEW_ACCT_NAME:
 		nanny_new_account (d, argument);
 		break;
@@ -5898,6 +5900,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	case CON_ACCOUNT_SETUP:
 		nanny_account_setup (d, argument);
 		break;
+**************/	
 	case CON_ENTER_ACCT_NME:
 		nanny_ask_password (d, argument);
 		break;
@@ -5919,12 +5922,15 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	case CON_PWDNCNF:
 		nanny_conf_change_password (d, argument);
 		break;
+/***email changes are through the user control panel in the forum now
 	case CON_CHG_EMAIL:
 		nanny_change_email (d, argument);
 		break;
 	case CON_CHG_EMAIL_CNF:
 		nanny_change_email_confirm (d, argument);
 		break;
+****************/
+
 //CHARGEN CHANGES BELOW
 	//case CON_DELETE_PC:
 	//	nanny_delete_pc (d, argument);
