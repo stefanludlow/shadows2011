@@ -2151,7 +2151,8 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		display_main_menu (d);
 		return;
 	}
-
+/********
+**removed because this is now handled in the forums
 //newsletter toggle
 	else if (c == 'n' || argn == 8)
 	{
@@ -2192,7 +2193,8 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		d->connected = CON_CHG_EMAIL;
 		return;
 	}
-
+** end of this section being removed in favor of forum changes
+******************/
 //guest access
 	else if (c == 'g' || argn == 2)
 	{
@@ -2293,7 +2295,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		{
 			SEND_TO_Q ("\nWhich character would you like to log in?\n\n", d);
 			i = 1;
-			
+
 //see character application status
 			while ((row = mysql_fetch_row (result)))
 			{
