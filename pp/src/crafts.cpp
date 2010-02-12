@@ -669,13 +669,13 @@ do_materials (CHAR_DATA * ch, char *argument, int cmd)
   
   if (craft->delay > 0)
     {
-      sprintf (buf, "#6OOC Delay Timer:#0 %d RL Hours\n", craft->delay);
+      sprintf (buf, "#6OOC Delay Timer:#0 %d RL Minutes\n", craft->delay);
       send_to_char (buf, ch);
     }
     
   if (craft->faildelay > 0)
     {
-      sprintf (buf, "#6OOC Failure Timer:#0 %d RL Hours\n", craft->faildelay);
+      sprintf (buf, "#6OOC Failure Timer:#0 %d RL Minutes\n", craft->faildelay);
       send_to_char (buf, ch);
     }
     
@@ -3184,7 +3184,7 @@ figure_craft_delay (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft)
   PHASE_DATA *phase;
   int seconds = 0, skill = 0, numskills = 0;
 
-  seconds = craft->delay * 60 * 60;
+  seconds = craft->delay * 60;
 
   for (phase = craft->phases; phase; phase = phase->next)
     {
@@ -3221,7 +3221,7 @@ figure_craft_faildelay (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft)
   PHASE_DATA *phase;
   int seconds = 0, skill = 0, numskills = 0;
 
-  seconds = craft->faildelay * 60 * 60;
+  seconds = craft->faildelay * 60;
 
   for (phase = craft->phases; phase; phase = phase->next)
     {
@@ -4731,7 +4731,7 @@ craft_delay (CHAR_DATA * ch, char *argument, char *subcmd)
   if (!*buf)
     {
     send_to_char
-      ("How many OOC hours did you want to set the delay timer to?\nUse <cset delay X fail> for failure delay.\n",
+      ("How many OOC minutes did you want to set the delay timer to?\nUse <cset delay X fail> for failure delay.\n",
       ch);
     return;
     }
@@ -4739,7 +4739,7 @@ craft_delay (CHAR_DATA * ch, char *argument, char *subcmd)
   if (!isdigit (*buf))
     {
     send_to_char
-      ("You must specify a number of RL hours to set the timer to.\n",
+      ("You must specify a number of RL minutes to set the timer to.\n",
       ch);
     return;
     }
@@ -5141,11 +5141,11 @@ craftstat (CHAR_DATA * ch, char *argument)
   
 /** delay **/
   if (craft->delay)
-    sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Hours\n",
+    sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Minutes\n",
 	     craft->delay);
 
   if (craft->faildelay)
-    sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Hours\n",
+    sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Minutes\n",
        craft->faildelay);
 
   if (craft->failure)
@@ -5271,10 +5271,10 @@ display_spec_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA *craft)
 
 /** delay **/
 	if (craft->delay)
-		sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Hours\n", craft->delay);
+		sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Minutes\n", craft->delay);
 
 	if (craft->faildelay)
-		sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Hours\n", craft->faildelay);
+		sprintf (b_buf + strlen (b_buf), "  #6OOC Delay Timer:#0 %d RL Minutes\n", craft->faildelay);
 
 
 /** evaluates objects for each phase **/
