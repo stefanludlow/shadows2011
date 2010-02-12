@@ -7927,6 +7927,8 @@ int kingdom_from_zone (CHAR_DATA *ch)
 	int zone = ch->in_room / 1000;
 	if (IS_SET(ch->flags, FLAG_GUEST))
 		return 0;
+	else if (zone == 23 || zone == 5 || zone == 6)
+		return 5;
 	else if (zone == 41 || zone == 40)
 		return 4;
 	else if (zone == 73 || zone == 80 || zone == 81 || zone == 82)
@@ -8144,6 +8146,11 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			whoStream << gatheringPlace(41207, "Blackrend's Cave");
 		}
+	}
+
+	else if (sphere == 5)
+	{
+		whoStream << gatheringPlace(23046, "The Spear's Thrust");
 	}
 
 	if (guests != 1) {
