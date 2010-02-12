@@ -199,7 +199,7 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Angost.]#0", char_short(ch));
 		   break;
 		 case 4:
-		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in the Mordor.]#0", char_short(ch));
+		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Mordor.]#0", char_short(ch));
 		   break;
 	   }
 
