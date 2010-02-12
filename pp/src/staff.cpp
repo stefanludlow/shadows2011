@@ -53,7 +53,7 @@ const int SPHERE_COUNT = 7;
 	{"MT",true},           
 	{"PelAnor",true},      
 	{"Northlands",true},
-	{"Mines",true},
+	{"Mordor",true},
 	{"Harad",true},
 	{"Battalions",true},
 	{"Guldur",false},
