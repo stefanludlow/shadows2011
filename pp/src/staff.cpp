@@ -62,7 +62,7 @@ const int SPHERE_COUNT = 7;
 
 SPHERE_INFO spheres[] = {  //ONLY ADD TO THE END OF THIS OR YOU WILL SCREW UP CURRENT FLAGS 
 	{"Gondor",true},
-	{"Moria",true},
+	{"Mordor",true},
 	{"Harad",true},
 	{"Battalions",false},
 	{"Guldur",false},
