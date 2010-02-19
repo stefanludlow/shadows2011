@@ -4959,7 +4959,7 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 {
   int i = 0;
   int weight = 0;
-  int time_diff = 0, days_remaining = 0, hours_remaining = 0;
+  int time_diff = 0, days_remaining = 0, hours_remaining = 0, mins_remain = 0;
   struct time_info_data playing_time;
   AFFECTED_TYPE *af = NULL;
   AFFECTED_TYPE *af_table = NULL;
@@ -5344,10 +5344,19 @@ if (!IS_SET (ch->flags, FLAG_GUEST))
       days_remaining = time_diff / (60 * 60 * 24);
       time_diff %= 60 * 60 * 24;
       hours_remaining = time_diff / (60 * 60);
-      if (!days_remaining && !hours_remaining)
+	mins_remain = time_diff/ (60*60);     
+ 
+	if (!days_remaining && !hours_remaining)
 	{
-	  sprintf (buf,
-		   "Your craft timer has #2less than 1#0 RL hour remaining.\n");
+		if ((mins_remain < 60) && (mins_remain > 30))
+			sprintf (buf,
+			   "Your craft timer has #2less than 1#0 RL hour remaining.\n");
+		else if ((mins_remain <= 30) && (mins_remain > 15))
+			sprintf (buf,
+			   "Your craft timer has #2less than a half#0 RL hour remaining.\n");
+		else if (mins_remain <= 15)
+			sprintf (buf,
+			   "Your craft timer has #2less than fifeteen#0 RL minutes remaining.\n");
 	}
       else
 	{
