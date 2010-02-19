@@ -708,141 +708,146 @@ do_hood (CHAR_DATA * ch, char *argument, int cmd)
   return;
 }
 
-void
-do_hide (CHAR_DATA * ch, char *argument, int cmd)
+void do_hide (CHAR_DATA * ch, char *argument, int cmd)
 {
-  OBJ_DATA *obj;
-  char buf[MAX_STRING_LENGTH];
-  AFFECTED_TYPE *af;
-  CHAR_DATA *tch;
+	OBJ_DATA *obj;
+	char buf[MAX_STRING_LENGTH];
+  	AFFECTED_TYPE *af;
+  	CHAR_DATA *tch;
 
-  if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch))
-    {
-      send_to_char ("You cannot do this in an OOC area.\n", ch);
-      return;
-    }
+  	if (IS_SET (ch->room->room_flags, OOC) && IS_MORTAL (ch))
+    	{
+    		send_to_char ("You cannot do this in an OOC area.\n", ch);
+    		return;
+    	}
 
-  if (!real_skill (ch, SKILL_HIDE))
-    {
-      send_to_char ("You lack the skill to hide.\n", ch);
-      return;
-    }
+  	if (!real_skill (ch, SKILL_HIDE))
+    	{
+		send_to_char ("You lack the skill to hide.\n", ch);
+		return;
+    	}
 
-  if (IS_SET (ch->room->room_flags, NOHIDE))
-    {
-      send_to_char ("This room offers no hiding spots.\n", ch);
-      return;
-    }
+	if (IS_SET (ch->room->room_flags, NOHIDE))
+    	{
+		send_to_char ("This room offers no hiding spots.\n", ch);
+		return;
+    	}
+
+	if (ch->delay_type == DEL_HIDE)
+	{
+		send_to_char ("You are already trying to hide.\n", ch);
+		return;
+	}
+
+	argument = one_argument (argument, buf);
+
+	if (!*buf)
+	{
+		if (IS_ENCUMBERED (ch))
+		{
+			send_to_char ("You are too encumbered to hide.\n", ch);
+			return;
+		}
+
+		if (get_affect(ch, MAGIC_HIDDEN))
+		{
+			send_to_char ("You are already hidden.\n", ch);
+			return;
+		}
 	
-  if (get_affect(ch,MAGIC_HIDDEN))
-  {
-	 send_to_char ("You are already hidden.\n", ch);
-	 return;
-  }
-
-  if (ch->delay_type == DEL_HIDE)
-  {
-	 send_to_char ("You are already trying to hide.\n", ch);
-	 return;
-  }
-
-  if (ch->aiming_at)
-    {
-      send_to_char ("You lose your aim as you move to conceal yourself.\n", ch);
-      ch->aiming_at->targeted_by = NULL;
-      ch->aiming_at = NULL;
-      ch->aim = 0;
-      return;
-    }
-	
-	//remove any guarding the player is doing if they hide
-	if ((af = get_affect (ch, MAGIC_GUARD))
-		  && (tch = (CHAR_DATA *) af->a.spell.t) != NULL)
-	  {
-		  if (af->a.spell.modifier == 0)
-		  {
-			  act ("You cease to guard $N.", true, ch, 0, tch,
-				  TO_CHAR | _ACT_FORMAT);
-			  act ("$n ceases to guard you.", false, ch, 0, tch,
-				  TO_VICT | _ACT_FORMAT);
-			  act ("$n ceases to guard $N.", false, ch, 0, tch,
-				  TO_NOTVICT | _ACT_FORMAT);
-		  }
-		  else
-		  {
-			  act ("You cease to guard $p.", true, ch, (OBJ_DATA *) af->a.spell.t, 0, TO_CHAR | _ACT_FORMAT);
-			  act ("$n ceases to guard $p.", true, ch, (OBJ_DATA *) af->a.spell.t, 0, TO_ROOM | _ACT_FORMAT);
-		  }
-		  remove_affect_type (ch, MAGIC_GUARD);
-	  }
+		//remove any guarding the player is doing if they hide
+		if ((af = get_affect (ch, MAGIC_GUARD)) && (tch = (CHAR_DATA *) af->a.spell.t) != NULL)
+		{
+			if (af->a.spell.modifier == 0)
+			{
+				act ("You cease to guard $N.", true, ch, 0, tch, TO_CHAR | _ACT_FORMAT);
+				act ("$n ceases to guard you.", false, ch, 0, tch, TO_VICT | _ACT_FORMAT);
+				act ("$n ceases to guard $N.", false, ch, 0, tch, TO_NOTVICT | _ACT_FORMAT);
+			}
+			else
+			{
+				act ("You cease to guard $p.", true, ch, (OBJ_DATA *) af->a.spell.t, 0, TO_CHAR | _ACT_FORMAT);
+				act ("$n ceases to guard $p.", true, ch, (OBJ_DATA *) af->a.spell.t, 0, TO_ROOM | _ACT_FORMAT);
+			}
+			remove_affect_type (ch, MAGIC_GUARD);
+		}
 	  
-	  //also remove anyone from guarding the player that is hiding
-	  for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
-	  {
+		//also remove anyone from guarding the player that is hiding
+		for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+		{
 			af = get_affect (tch, MAGIC_GUARD);
 			if (!af || af->a.spell.modifier == 1)
 				continue;
 
-		if ((CHAR_DATA *) af->a.spell.t == ch)
-      	{
-			if (af->a.spell.modifier == 0)
-		  {
-			  act ("You cease to guard $N.", true, tch, 0, ch,
-				  TO_CHAR | _ACT_FORMAT);
-			  act ("$n ceases to guard you.", false, tch, 0, ch,
-				  TO_VICT | _ACT_FORMAT);
-			  act ("$n ceases to guard $N.", false, tch, 0, ch,
-				  TO_NOTVICT | _ACT_FORMAT);
-		  }
-		  else
-		  {
-			  act ("You cease to guard $p.", true, tch, (OBJ_DATA *) af->a.spell.t, 0, TO_CHAR | _ACT_FORMAT);
-			  act ("$n ceases to guard $p.", true, tch, (OBJ_DATA *) af->a.spell.t, 0, TO_ROOM | _ACT_FORMAT);
-		  }
-		  remove_affect_type (tch, MAGIC_GUARD);
-      	}
-	  }
-    
-  argument = one_argument (argument, buf);
+			if ((CHAR_DATA *) af->a.spell.t == ch)
+			{
+      				if (af->a.spell.modifier == 0)
+				{
+					act ("You cease to guard $N.", true, tch, 0, ch, TO_CHAR | _ACT_FORMAT);
+					act ("$n ceases to guard you.", false, tch, 0, ch, TO_VICT | _ACT_FORMAT);
+					act ("$n ceases to guard $N.", false, tch, 0, ch, TO_NOTVICT | _ACT_FORMAT);
+				}
+				else
+				{
+					act ("You cease to guard $p.", true, tch, (OBJ_DATA *) af->a.spell.t, 0, TO_CHAR | _ACT_FORMAT);
+					act ("$n ceases to guard $p.", true, tch, (OBJ_DATA *) af->a.spell.t, 0, TO_ROOM | _ACT_FORMAT);
+				}
+				remove_affect_type (tch, MAGIC_GUARD);
+      			}
+		}
 
-  if (*buf)
-    {
-
-      if (!(obj = get_obj_in_dark (ch, buf, ch->right_hand)) &&
-	  !(obj = get_obj_in_dark (ch, buf, ch->left_hand)))
-	{
-	  send_to_char ("You don't have that.\n", ch);
-	  return;
+		if (ch->aiming_at)
+		{
+			send_to_char ("You lose your aim as you move to conceal yourself.\n", ch);
+			ch->aiming_at->targeted_by = NULL;
+			ch->aiming_at = NULL;
+			ch->aim = 0;
+		}
+		else
+			send_to_char ("You start trying to conceal yourself.\n", ch);
+		act ("$n starts looking for a place to hide.", false, ch, 0, 0, TO_ROOM);
+		ch->delay_type = DEL_HIDE;
+		ch->delay = 5;
 	}
 
-      if (!get_obj_in_list_vis (ch, buf, ch->right_hand) &&
-	  !get_obj_in_list_vis (ch, buf, ch->left_hand))
+	if (*buf)
 	{
-	  act ("It is too dark to hide it.", false, ch, 0, 0, TO_CHAR);
-	  return;
+		if (!(obj = get_obj_in_dark (ch, buf, ch->right_hand)) && !(obj = get_obj_in_dark (ch, buf, ch->left_hand)))
+		{
+			send_to_char ("You don't have that.\n", ch);
+			return;
+		}
+
+		if (!get_obj_in_list_vis (ch, buf, ch->right_hand) && !get_obj_in_list_vis (ch, buf, ch->left_hand))
+		{
+			act ("It is too dark to hide it.", false, ch, 0, 0, TO_CHAR);
+			return;
+		}
+
+		if (obj->loaded && (obj->o.weapon.use_skill == SKILL_LONGBOW || obj->o.weapon.use_skill == SKILL_SHORTBOW))
+		{
+			send_to_char("Don't you think you should unload it first?\n", ch);
+			return;
+		}
+
+		if (ch->aiming_at)
+		{
+			act ("You lose your aim as you move to hide $p.", false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
+			ch->aiming_at->targeted_by = NULL;
+			ch->aiming_at = NULL;
+			ch->aim = 0;
+		}
+		else
+			act ("You begin looking for a hiding spot for $p.", false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
+
+		if (!get_affect(ch, MAGIC_HIDDEN))
+			act ("$n begins looking for a place to hide $p.", false, ch, obj, 0, TO_ROOM | _ACT_FORMAT);
+
+		ch->delay_type = DEL_HIDE_OBJ;
+		ch->delay_info1 = (long int) obj;
+		ch->delay = 5;
+		return;
 	}
-
-      act ("You begin looking for a hiding spot for $p.",
-	   false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
-
-      ch->delay_type = DEL_HIDE_OBJ;
-      ch->delay_info1 = (long int) obj;
-      ch->delay = 5;
-
-      return;
-    }
-
-  if (IS_ENCUMBERED (ch))
-    {
-      send_to_char ("You are too encumbered to hide.\n", ch);
-      return;
-    }
-
-  send_to_char ("You start trying to conceal yourself.\n", ch);
-  act ("$n starts looking for a place to hide.", false, ch, 0, 0, TO_ROOM);
-
-  ch->delay_type = DEL_HIDE;
-  ch->delay = 5;
 }
 
 void
