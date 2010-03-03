@@ -146,12 +146,12 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	}
       commenced_in = 3;
     }
-  else if (IS_SET (ch->plr_flags, START_MORIA))
+  else if (IS_SET (ch->plr_flags, START_MORDOR))
   {
 	  char_from_room(ch);
 	  char_to_room(ch, MORDOR_START_LOC);
 	  ch->was_in_room = 0;
-//	  add_clan (ch,"moria_dwellers",CLAN_MEMBER); NEED A NEW CLAN FOR MORDOR.
+	  add_clan (ch,"mordor_char",CLAN_MEMBER);
 
 
 	  // no region-wide language is set 

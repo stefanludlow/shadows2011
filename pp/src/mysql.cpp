@@ -2602,7 +2602,7 @@ num_starting_locs (int race)
 			start_loc++;
 		if (IS_SET (flags, RACE_HOME_HARAD))
 			start_loc++;
-		if (IS_SET (flags, RACE_HOME_MORIA))
+		if (IS_SET (flags, RACE_HOME_MORDOR))
 			start_loc++;
 		return start_loc;
 	}
