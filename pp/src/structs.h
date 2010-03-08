@@ -2495,6 +2495,7 @@ struct encumberance_info
 #define START_HARAD             ( 1 << 18 ) /* FJ */
 #define START_MORDOR				( 1 << 19 ) /* Start in moria orcs */
 #define IS_CRAFTER              ( 1 << 20)  /* required to use cset */
+#define REBOOT_ACCESS		( 1 << 21) /* Allows non L5's to use reboot */
 
 
 /* char_data.guardian_flags - controls notification of PC initiated attacks */

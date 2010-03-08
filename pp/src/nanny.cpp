@@ -2708,7 +2708,7 @@ equip_newbie (CHAR_DATA * ch)
 
 		}//end Harad
 
-//Start in Moria
+//Start in Mordor
 	/* set tobj at end of func for pack for money loading */
 	else if (IS_SET (ch->plr_flags, START_MORDOR))
 		{
@@ -3484,12 +3484,12 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		d->character->armor = 3;
 	}
 	
-	if (d->character->race == 86)//Olag-hai
+	if (d->character->race == 86) //Olog-hai
 	{
         d->character->max_hit =
-            50 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 18) * 4);
+            50 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 25) * 4);
         d->character->hit = d->character->max_hit;
-	d->character->armor = 7;	
+	d->character->armor = 3;	
 }
 
 	if (d->character->pc->level)

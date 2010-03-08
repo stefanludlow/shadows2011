@@ -3087,12 +3087,12 @@ load_char_mysql (const char *name)
 
 	if (ch->race == 28)
 	{
-		ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),18) * 4);
+		ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
 		ch->armor = 3;
 	}
 	else
 	{
-		ch->max_hit = 50 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),18) * 4);
+		ch->max_hit = 50 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
 		ch->armor = 0;
 	}
 
