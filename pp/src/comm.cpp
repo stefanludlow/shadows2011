@@ -2753,7 +2753,7 @@ copyover_recovery (void)
 	
 		if (d->character->race == 86)
 		{
-			d->character->armor = 7;
+			d->character->armor = 3;
 		}
 
       d->character->flags &= ~(FLAG_ENTERING | FLAG_LEAVING);

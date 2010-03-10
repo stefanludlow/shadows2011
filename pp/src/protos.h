@@ -1723,6 +1723,6 @@ bool inline isDwarf(char_data *ch) {
 }
 
 bool inline isOrkin(char_data *ch) {
-	return (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29);
+	return (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29 || ch->race == 86 || ch->race == 121);
 }
 #endif // _rpie_protos_h_

@@ -2350,7 +2350,7 @@ struct race_data
 #define RACE_HOME_MORDOR    ( 1 << 1 )     /* 2 */
 #define RACE_HOME_HARAD     ( 1 << 2 )     /* 4 */
 #define RACE_HOME_ANGOST	( 1 << 3 )     /* 8 */
-#define RACE_HOME_MORIA		( 1 << 4)     /* 16 - orcs */
+#define RACE_HOME_MORDOR		( 1 << 4)     /* 16 - orcs */
 
 /* These should match the order of the rows in the races */
 /* database, since they're read in ascending order. */
@@ -2493,8 +2493,9 @@ struct encumberance_info
 #define NO_BUILDERPORT          ( 1 << 16 )     /* Admins w/o access to 4501 */
 #define START_ANGOST             ( 1 << 17 ) /* Players starting on human/elf/dwarf side of Angost */
 #define START_HARAD             ( 1 << 18 ) /* FJ */
-#define START_MORIA				( 1 << 19 ) /* Start in moria orcs */
+#define START_MORDOR				( 1 << 19 ) /* Start in moria orcs */
 #define IS_CRAFTER              ( 1 << 20)  /* required to use cset */
+#define REBOOT_ACCESS		( 1 << 21) /* Allows non L5's to use reboot */
 
 
 /* char_data.guardian_flags - controls notification of PC initiated attacks */

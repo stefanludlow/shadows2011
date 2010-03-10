@@ -2708,9 +2708,9 @@ equip_newbie (CHAR_DATA * ch)
 
 		}//end Harad
 
-//Start in Moria
+//Start in Mordor
 	/* set tobj at end of func for pack for money loading */
-	else if (IS_SET (ch->plr_flags, START_MORIA))
+	else if (IS_SET (ch->plr_flags, START_MORDOR))
 		{
 		if ((obj = load_object (5011))) //pants
 			equip_char (ch,obj, WEAR_LEGS);
@@ -2771,7 +2771,7 @@ equip_newbie (CHAR_DATA * ch)
 			tobj = obj; 
 			}
 			
-		/* moria money */
+		/* mordor money */
 /* 100 to 300 spread, thus 2 to 6 pieces of 50 */
 		if (tobj && (obj = load_object (5032))) //yrch token
 			{
@@ -2779,7 +2779,7 @@ equip_newbie (CHAR_DATA * ch)
 			obj_to_obj (obj, tobj);
 			}
 			
-		}//end Moria 
+		}//end Mordor 
 
 //start in Angost
 	else if (IS_SET (ch->plr_flags, START_ANGOST))
@@ -3484,12 +3484,12 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		d->character->armor = 3;
 	}
 	
-	if (d->character->race == 86)//Olag-hai
+	if (d->character->race == 86) //Olog-hai
 	{
         d->character->max_hit =
-            50 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 18) * 4);
+            50 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 25) * 4);
         d->character->hit = d->character->max_hit;
-	d->character->armor = 7;	
+	d->character->armor = 3;	
 }
 
 	if (d->character->pc->level)
@@ -4487,7 +4487,7 @@ race_selection (DESCRIPTOR_DATA * d, char *arg)
 
 	*race_name = '\0';
 
-	d->character->plr_flags &= ~(START_GONDOR | START_MORDOR | START_HARAD | START_ANGOST | START_MORIA);
+	d->character->plr_flags &= ~(START_GONDOR | START_MORDOR | START_HARAD | START_ANGOST | START_MORDOR);
 
 	while ((row = mysql_fetch_row (result)))
 	{
@@ -4698,10 +4698,10 @@ location_selection (DESCRIPTOR_DATA * d, char *argument)
 		if (i++ == atoi(buf))
 			d->character->plr_flags |= START_HARAD;
 	}
-	if (IS_SET (flags, RACE_HOME_MORIA))
+	if (IS_SET (flags, RACE_HOME_MORDOR))
 	{
 		if (i++ == atoi(buf))
-			d->character->plr_flags |= START_MORIA;
+			d->character->plr_flags |= START_MORDOR;
 	}
 
 	if (d->character->pc->nanny_state)
@@ -4992,7 +4992,7 @@ get_native_tongue(CHAR_DATA* ch)
 			return SKILL_SPEAK_HARADAIC;
 		if (IS_SET (ch->plr_flags, START_ANGOST))
 			return SKILL_SPEAK_ATLIDUK;
-		/* START_MORIA - no humans start here */
+		/* START_MORDOR - no humans start here */
 
 		/* Error - human is not starting anywhere. Set to Westron */
 		fprintf(stderr,"Error - Common Human %s not starting anywhere\n",ch->tname);
@@ -5536,7 +5536,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Haradaic City of Fahad'Jafari South of the River Poros\n");
 			strcat (b_buf, location_string.c_str());
 		}
-		if (IS_SET (flags, RACE_HOME_MORIA))
+		if (IS_SET (flags, RACE_HOME_MORDOR))
 		{
 			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Orc-Infested Mines of Moria\n");
 			strcat (b_buf, location_string.c_str());
@@ -5774,8 +5774,8 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 				ch->plr_flags |= START_GONDOR;
 			else if (IS_SET (flags, RACE_HOME_HARAD))
 				ch->plr_flags |= START_HARAD;
-			else if (IS_SET (flags, RACE_HOME_MORIA))
-				ch->plr_flags |= START_MORIA;
+			else if (IS_SET (flags, RACE_HOME_MORDOR))
+				ch->plr_flags |= START_MORDOR;
 		}
 
 		ch->in_room = NOWHERE;

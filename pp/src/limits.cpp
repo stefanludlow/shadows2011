@@ -1064,7 +1064,7 @@ skill_level (CHAR_DATA * ch, int skill, int diff_mod)
   if ((af = get_affect (ch, MAGIC_AFFECT_CURSE)))
     skill_lev -= af->a.spell.modifier;
 
-  if ((ch->race == 119 || ch->race == 120 || ch->race == 121 || ch->race == 25 || ch->race == 29  ) && sun_light
+  if ((ch->race == 119 || ch->race == 120 || ch->race == 121 || ch->race == 25 || ch->race == 24 ) && sun_light
       && ch->room->sector_type != SECT_INSIDE && !IS_SET (ch->room->room_flags, INDOORS))
     {
       if (weather_info[ch->room->zone].clouds == CLEAR_SKY)

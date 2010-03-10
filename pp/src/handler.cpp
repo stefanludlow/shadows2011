@@ -351,7 +351,7 @@ affect_modify (CHAR_DATA * ch, int type, int loc, int mod, int bitv,
       case APPLY_CON:
 	GET_CON (ch) += mod;
 	if (!IS_NPC (ch))
-	  ch->max_hit = 50 + CONSTITUTION_MULTIPLIER * GET_CON (ch) + (MIN(GET_AUR(ch),18) * 4); // Arbitrary power HP boost - Case
+	  ch->max_hit = 50 + CONSTITUTION_MULTIPLIER * GET_CON (ch) + (MIN(GET_AUR(ch),25) * 4); // Arbitrary power HP boost - Case
 	else
 	  {
 	    ch->max_hit += mod * 6;

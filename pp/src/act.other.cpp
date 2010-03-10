@@ -146,12 +146,12 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	}
       commenced_in = 3;
     }
-  else if (IS_SET (ch->plr_flags, START_MORIA))
+  else if (IS_SET (ch->plr_flags, START_MORDOR))
   {
 	  char_from_room(ch);
 	  char_to_room(ch, MORDOR_START_LOC);
 	  ch->was_in_room = 0;
-//	  add_clan (ch,"moria_dwellers",CLAN_MEMBER); NEED A NEW CLAN FOR MORDOR.
+	  add_clan (ch,"mordor_char",CLAN_MEMBER);
 
 
 	  // no region-wide language is set 
@@ -199,7 +199,7 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Angost.]#0", char_short(ch));
 		   break;
 		 case 4:
-		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in the Mordor.]#0", char_short(ch));
+		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Mordor.]#0", char_short(ch));
 		   break;
 	   }
 
