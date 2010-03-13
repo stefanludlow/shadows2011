@@ -1022,35 +1022,22 @@ do_deduct (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	argument = one_argument (argument, buf);
-
-	if (!isdigit (*buf))
-	{
+	if (args.pop() == "") {
 		delete acct;
-		send_to_char
-			("You must specify a number of roleplay points to deduct.\n", ch);
-		if (loaded)
+		send_to_char("You must specify a number of roleplay points to deduct.\n", ch);
+		if (loaded){
 			unload_pc(tch);
+		}
 		return;
 	}
-
-	int deduction = strtol(buf, 0, 10);
-	if (deduction < 1 || deduction > acct->get_rpp ())
-	{
-		delete acct;
-		act
-			("The specified number must be greater than 0 and less than or equal to the named character's RP point total.",
-			false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
-		if (loaded)
-			unload_pc(tch);
-		return;
-	}
-
-	acct->deduct_rpp (deduction);
+	
+	int deduction = MIN(acct->get_rpp(), ((args.toInt() < 0) ? 1 : args.toInt()));
+	acct->deduct_rpp(deduction);
 	delete acct;
 
-	if (loaded)
+	if (loaded) {
 		unload_pc (tch);
+	}
 
 	send_to_char
 		("#1The specified number of points have been removed from their account.\n",
