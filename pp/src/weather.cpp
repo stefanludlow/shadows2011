@@ -72,7 +72,6 @@ bool Weather::weather_unification (int zone)
 {
   bool zone_updated = false;
 
-
   // Begin Japheth's "Weather zone unification" changes
   if ( zone == 3 || zone == 11 || zone == 8 || zone == 38)
     {
