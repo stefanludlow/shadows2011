@@ -76,7 +76,7 @@ bool Weather::weather_unification (int zone)
   // Begin Laecla's Changed To Weather Unification Code
   if ( zone >= 1 && zone <= 99)
     {
-      zone_table[2];
+      weather_info[zone] = weather_info[40];
       zone_updated = true;
     }
 //     End Laecla's Change To Weather Unification 
