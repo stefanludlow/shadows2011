@@ -72,17 +72,8 @@ bool Weather::weather_unification (int zone)
 {
   bool zone_updated = false;
 
-
-  // Begin Laecla's Changed To Weather Unification Code
-  if ( zone >= 1 && zone <= 99)
-    {
-      weather_info[zone] = weather_info[4];
-      zone_updated = true;
-    }
-//     End Laecla's Change To Weather Unification 
-
   // Begin Japheth's "Weather zone unification" changes
-/*  if ( zone == 3 || zone == 11 || zone == 8 || zone == 38)
+  if ( zone == 3 || zone == 11 || zone == 8 || zone == 38)
     {
       weather_info[zone] = weather_info[1];
       zone_updated = true;
@@ -123,7 +114,7 @@ bool Weather::weather_unification (int zone)
       zone_updated = true;
     } 
   // End Japheth's changes 
-*/
+
   return zone_updated;
 }
 
