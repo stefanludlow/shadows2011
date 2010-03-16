@@ -41,39 +41,46 @@ void
 initialize_weather_zones (void)
 {
   // Minas Tirith is chillier due to the mountain range
-  zone_table[1].weather_type = WEATHER_COOL;
-  zone_table[3].weather_type = WEATHER_COOL;
+//  zone_table[1].weather_type = WEATHER_COOL;
+//  zone_table[3].weather_type = WEATHER_COOL;
 
   // Osgiliath and the Ithilien are generally warm
   zone_table[2].weather_type = WEATHER_TEMPERATE;
-  zone_table[4].weather_type = WEATHER_WARM;
+//  zone_table[4].weather_type = WEATHER_WARM;
 
   // Minas Morgul is warmer due to Mordor proximity
-  zone_table[5].weather_type = WEATHER_HOT;
-  zone_table[6].weather_type = WEATHER_HOT;
+//  zone_table[5].weather_type = WEATHER_HOT;
+//  zone_table[6].weather_type = WEATHER_HOT;
   
   // New Weather zones for Tur Edendor, at Zapata's request
-  zone_table[10].weather_type = WEATHER_TEMPERATE;
-  zone_table[66].weather_type = WEATHER_COOL;
-  zone_table[67].weather_type = WEATHER_WARM;
+//  zone_table[10].weather_type = WEATHER_TEMPERATE;
+//  zone_table[66].weather_type = WEATHER_COOL;
+//  zone_table[67].weather_type = WEATHER_WARM;
 
   // Pelargir, 100 miles south of Gondor, is hot
-  zone_table[13].weather_type = WEATHER_HOT;
+//  zone_table[13].weather_type = WEATHER_HOT;
   
   // Haradwaith and all that
-  zone_table[80].weather_type = WEATHER_DESERT;
-  zone_table[81].weather_type = WEATHER_DESERT;
-  zone_table[82].weather_type = WEATHER_DESERT;
+//  zone_table[80].weather_type = WEATHER_DESERT;
+//  zone_table[81].weather_type = WEATHER_DESERT;
+//  zone_table[82].weather_type = WEATHER_DESERT;
 
-  zone_table[42].weather_type = WEATHER_COLD;
+//  zone_table[42].weather_type = WEATHER_COLD;
 }
 
 bool Weather::weather_unification (int zone)
 {
   bool zone_updated = false;
 
+// Laecla's Weather Modifications
+  if (zone == 1 && zone >= 3 && zone <= 99)
+    {
+      weather_info[zone] = weather_info[2];
+      zone_updated = true;
+    }
+
   // Begin Japheth's "Weather zone unification" changes
-  if ( zone == 3 || zone == 11 || zone == 8 || zone == 38)
+/*  if ( zone == 3 || zone == 11 || zone == 8 || zone == 38)
     {
       weather_info[zone] = weather_info[1];
       zone_updated = true;
@@ -114,7 +121,7 @@ bool Weather::weather_unification (int zone)
       zone_updated = true;
     } 
   // End Japheth's changes 
-
+*/
   return zone_updated;
 }
 
