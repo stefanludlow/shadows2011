@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  olc.c : OLC Module                                 www.middle-earth.us |
+|  olc.c : OLC Module                                 www.middle-earth.us | 
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -25,14 +25,11 @@
 
 #define ROOM_MAX		100000
 #define ZONE_SIZE		1000
-#define OBJECT_ZONE_SIZE 1100
 
 #define s(a) send_to_char (a "\n", ch);
 
 extern rpie::server engine;
 extern const char *weather_states[];
-extern int free_mem(char *&ptr);
-extern int free_mem(void *ptr);
 
 const char *apply_types[] = {
 	"None",
@@ -794,36 +791,36 @@ PRIMARY KEY(id)
 );
 
 create table bp_vobjects (
-vnum INT UNSIGNED NULL UNIQUE,
-zone SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+vnum INT UNSIGNED NULL UNIQUE, 
+zone SMALLINT UNSIGNED NOT NULL DEFAULT 0, 
 type INT UNSIGNED NOT NULL DEFAULT 0,
-material INT NOT NULL DEFAULT 0,
-size SMALLINT NOT NULL DEFAULT -1,
-weight INT NOT NULL DEFAULT 0,
-quality INT NOT NULL DEFAULT 0,
-item_wear INT NOT NULL DEFAULT 0,
-silver FLOAT NOT NULL DEFAULT 0.0,
-farthings FLOAT NOT NULL DEFAULT 0.0,
-activation INT NOT NULL DEFAULT 0,
-count INT NOT NULL DEFAULT 1,
-clock INT NOT NULL DEFAULT 0,
-morphto INT NOT NULL DEFAULT 0,
-oval0 INT NOT NULL DEFAULT 0,
-oval1 INT NOT NULL DEFAULT 0,
-oval2 INT NOT NULL DEFAULT 0,
-oval3 INT NOT NULL DEFAULT 0,
-oval4 INT NOT NULL DEFAULT 0,
-oval5 INT NOT NULL DEFAULT 0,
-extra_flags SET('destroyed', 'pitchable', 'invisible', 'magic', 'nodrop', 'bless', 'get_affect', 'drop_affect', 'multi_affect', 'wear_affect', 'wield_affect', 'hit_affect', 'ok', 'combinable', 'leader', 'member', 'omni', 'illegal', 'restricted', 'mask', 'mount', 'table', 'stack', 'vnpc_dwelling', 'loads', 'variable', 'timer', 'pc_sold', 'throwing', 'newskills', 'pitched', 'vnpc') NULL,
+material INT NOT NULL DEFAULT 0, 
+size SMALLINT NOT NULL DEFAULT -1, 
+weight INT NOT NULL DEFAULT 0, 
+quality INT NOT NULL DEFAULT 0, 
+item_wear INT NOT NULL DEFAULT 0, 
+silver FLOAT NOT NULL DEFAULT 0.0, 
+farthings FLOAT NOT NULL DEFAULT 0.0, 
+activation INT NOT NULL DEFAULT 0, 
+count INT NOT NULL DEFAULT 1, 
+clock INT NOT NULL DEFAULT 0, 
+morphto INT NOT NULL DEFAULT 0, 
+oval0 INT NOT NULL DEFAULT 0, 
+oval1 INT NOT NULL DEFAULT 0, 
+oval2 INT NOT NULL DEFAULT 0, 
+oval3 INT NOT NULL DEFAULT 0, 
+oval4 INT NOT NULL DEFAULT 0, 
+oval5 INT NOT NULL DEFAULT 0, 
+extra_flags SET('destroyed', 'pitchable', 'invisible', 'magic', 'nodrop', 'bless', 'get_affect', 'drop_affect', 'multi_affect', 'wear_affect', 'wield_affect', 'hit_affect', 'ok', 'combinable', 'leader', 'member', 'omni', 'illegal', 'restricted', 'mask', 'mount', 'table', 'stack', 'vnpc_dwelling', 'loads', 'variable', 'timer', 'pc_sold', 'throwing', 'newskills', 'pitched', 'vnpc') NULL, 
 wear_flags SET('take', 'finger', 'neck', 'body', 'head', 'legs', 'feet', 'hands', 'arms', 'shield', 'about', 'waist', 'wrist', 'wield', 'hold', 'throw', 'unused', 'sheath', 'belt', 'back', 'blindfold', 'throat', 'ear', 'shoulder', 'ankle', 'hair', 'face', 'armband') NULL,
-econ_flags SET('tirith','osgiliath','gondor','morgul','magical','rare','valuable','foreign','junk','illegal','wild','poor','fine','haradaic','orkish','practice','used','numenorean','dunlending','elvish','dwarvish','hobbit','admin','fellowship','cooked','meat','pelargir','generic') NULL,
-name VARCHAR(255) NULL,
-sdesc VARCHAR(255) NULL,
-ldesc VARCHAR(255) NULL,
-fdesc TEXT NULL,
-desc_keys VARCHAR(255) NULL,
-ex_description TEXT NULL,
-xaffected TEXT NULL,
+econ_flags SET('tirith','osgiliath','gondor','morgul','magical','rare','valuable','foreign','junk','illegal','wild','poor','fine','haradaic','orkish','practice','used','numenorean','dunlending','elvish','dwarvish','hobbit','admin','fellowship','cooked','meat','pelargir','generic') NULL, 
+name VARCHAR(255) NULL, 
+sdesc VARCHAR(255) NULL, 
+ldesc VARCHAR(255) NULL, 
+fdesc TEXT NULL, 
+desc_keys VARCHAR(255) NULL, 
+ex_description TEXT NULL, 
+xaffected TEXT NULL, 
 PRIMARY KEY (vnum),
 FOREIGN KEY (type) REFERENCES shadows_world.item_type (type)
 );
@@ -950,9 +947,6 @@ fwrite_object (OBJ_DATA * tobj, FILE * fp)
 			tobj->clan_data->name, tobj->clan_data->rank);
 	}
 
-	if (tobj->super_vnum > 0) {
-		fprintf(fp, "S\n%d\n", tobj->super_vnum); // Super vnum storage - Case
-	}											  // Would prefer something better than 'S', but when in Rome.
 
 	if (tobj->wdesc)
 		fprintf (fp, "W\n%d\n%s~\n",
@@ -970,7 +964,7 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 	int j;
 
 	if (!troom->description)
-		troom->description = duplicateString ("No Description Set\n");
+		troom->description = add_hash ("No Description Set\n");
 
 	/*
 	char query_format[MAX_STRING_LENGTH] = "";
@@ -986,7 +980,7 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 	(((unsigned long)troom->room_flags)));
 
 
-	mysql_safe_query (query_format,
+	mysql_safe_query (query_format, 
 	troom->name,
 	troom->name);
 	*/
@@ -1030,7 +1024,7 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 			fprintf (fp, "T%d\n", j);
 		else
 			fprintf (fp, "D%d\n", j);
-
+			
 		if (troom->dir_option[j]->general_description)
 			fprintf (fp, "%s~\n", troom->dir_option[j]->general_description);
 		else
@@ -1071,7 +1065,7 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 			fprintf (fp, "%s~\n", troom->secrets[j]->stext);
 		}
 	}
-
+	
 	if (troom->noInvLimit)
 		fprintf (fp, "U\n");
 
@@ -1670,7 +1664,7 @@ do_rdoor (CHAR_DATA * ch, char *argument, int cmd)
 	if (!*buf2)
 		strcpy (buf2, "door");
 
-	room->dir_option[dir]->keyword = duplicateString (buf2);
+	room->dir_option[dir]->keyword = add_hash (buf2);
 
 	send_to_char ("Done.\n", ch);
 }
@@ -1734,7 +1728,7 @@ do_rgate (CHAR_DATA * ch, char *argument, int cmd)
 	if (!*buf2)
 		strcpy (buf2, "gate");
 
-	room->dir_option[dir]->keyword = duplicateString (buf2);
+	room->dir_option[dir]->keyword = add_hash (buf2);
 
 	send_to_char ("Done.\n", ch);
 }
@@ -1818,7 +1812,7 @@ do_review (CHAR_DATA * ch, char *argument, int cmd)
 
 	ch->delay_type = DEL_APP_APPROVE;
 	ch->delay = 3 * 60;
-	ch->delay_who = duplicateString (name);
+	ch->delay_who = str_dup (name);
 
 	mysql_safe_query
 		("SELECT * FROM virtual_boards WHERE board_name = 'Applications' AND subject LIKE '%% %s'",
@@ -2046,7 +2040,7 @@ olist_show (OBJ_DATA * obj, int type, int header)
 			obj->nVirtual, (obj->full_description
 			&& *obj->full_description) ? " " : "*",
 			obj->farthings, obj->name, obj->short_description);
-		OBJ_DATA* filling = 0;
+		OBJ_DATA* filling = 0; 
 		if (obj->obj_flags.type_flag == ITEM_DRINKCON && obj->o.od.value[1]
 		&& obj->o.od.value[2] && (filling = vtoo (obj->o.od.value[2])))
 		{
@@ -2102,7 +2096,7 @@ mlist_show (std::string *output_string, CHAR_DATA *mob, bool header)
 
 	line.append(" #2|#0 ");
 
-	line.append(mob->name, MIN((int) strlen(mob->name), 29));
+	line.append(mob->name, MIN((int) strlen(mob->name), 29));	
 
 	for (int i = 0, j = (30 - MIN((int) strlen(mob->name), 29)); i < j; i++)
 
@@ -2114,7 +2108,7 @@ mlist_show (std::string *output_string, CHAR_DATA *mob, bool header)
 
 	line.append("#2|#0 ");
 
-	line.append(mob->short_descr, MIN((int) strlen(mob->short_descr), 29));
+	line.append(mob->short_descr, MIN((int) strlen(mob->short_descr), 29));     
 
 	for (int i = 0, j = (30 - MIN((int) strlen(mob->short_descr), 29)); i < j; i++)
 
@@ -2148,7 +2142,7 @@ mlist_show (std::string *output_string, CHAR_DATA *mob, bool header)
 	std::ostringstream conversion2;
 	conversion2 << loads;
 
-	line.append(conversion2.str());
+	line.append(conversion2.str());       
 
 	for (int i = 0, j = (7-conversion2.str().length()); i < j; i++)
 
@@ -2172,7 +2166,7 @@ mlist_show (std::string *output_string, CHAR_DATA *mob, bool header)
 
 }
 
-// To do
+// To do 
 
 void
 
@@ -2683,9 +2677,9 @@ do_olist (CHAR_DATA * ch, char *argument, int cmd)
 		if (isdigit (*buf))
 		{
 
-			if ((zone = atoi (buf)) >= OBJECT_MAX_ZONE)
+			if ((zone = atoi (buf)) >= MAX_ZONE)
 			{
-				send_to_char ("Zone not in range 0..110\n", ch);
+				send_to_char ("Zone not in range 0..99\n", ch);
 				return;
 			}
 
@@ -2733,7 +2727,7 @@ do_olist (CHAR_DATA * ch, char *argument, int cmd)
 
 			argument = one_argument (argument, buf);
 
-			if (!isdigit (*buf) || atoi (buf) >= OBJECT_MAX_ZONE)
+			if (!isdigit (*buf) || atoi (buf) >= MAX_ZONE)
 			{
 				send_to_char ("Expected valid zone after 'z'.\n", ch);
 				return;
@@ -2815,6 +2809,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	char buf1[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH],
 		buf3[MAX_STRING_LENGTH], buf4[MAX_STRING_LENGTH], tmp[MAX_STRING_LENGTH];
 	char output[MAX_STRING_LENGTH];
+	std::ostringstream stream;
 	char *date;
 	int mtop = 0, count, count2, otop = 0, n, i;
 	int count_total_rooms, docs = 0;
@@ -2867,7 +2862,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 			*buf1 != 'r' &&
 			*buf1 != 'u' &&
 			*buf1 != 'x' &&
-			*buf1 != 'z')
+			*buf1 != 'z')      
 
 		{
 			s ("   a           per zone stats");
@@ -2883,7 +2878,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 
 	if  (GET_TRUST (ch) < 3)
 	{
-		if (*buf1 != 'a' &&
+		if (*buf1 != 'a' && 
 			*buf1 != 'k' &&
 			*buf1 != 'o' &&
 			*buf1 != 'm' &&
@@ -2891,7 +2886,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 			*buf1 != 'r' &&
 			*buf1 != 'u' &&
 			*buf1 != 'x' &&
-			*buf1 != 'z')
+			*buf1 != 'z')      
 
 		{
 			s ("   a           per zone stats");
@@ -2909,7 +2904,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 
 	if  (GET_TRUST (ch) < 5)
 	{
-		if (*buf1 != 'a' &&
+		if (*buf1 != 'a' && 
 			*buf1 != 'c' &&
 			*buf1 != 'k' &&
 			*buf1 != 'l' &&
@@ -2920,7 +2915,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 			*buf1 != 'r' &&
 			*buf1 != 'u' &&
 			*buf1 != 'x' &&
-			*buf1 != 'z')
+			*buf1 != 'z')      
 
 		{
 			s ("   a           per zone stats");
@@ -3022,14 +3017,14 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	case 'l':			/* Pending applications */
 
 		current_time = time (0);
-		date = (char *) alloc (256);
+		date = (char *) alloc (256, 31);
 		date[0] = '\0';
 		if (asctime_r (localtime (&current_time), date) != NULL)
 		{
 			date[strlen (date) - 1] = '\0';
 		}
 		sprintf (buf, "\nApplication Queue, as of #2%s#0:\n\n", date);
-		free_mem (date);
+		mem_free (date);
 		send_to_char (buf, ch);
 
 		mysql_safe_query
@@ -3063,8 +3058,8 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 					continue;
 
 				got_line++;
-				sprintf (buf,
-					"  %-15s  %-15s  ",
+				sprintf (buf, 
+					"  %-15s  %-15s  ", 
 					is_guide_rev ? "" : row[2],
 					row[0]);
 				current_time = strtol (row[1], NULL, 10);
@@ -3077,7 +3072,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 					current_time / 24, current_time % 24);
 				else
 					sprintf (buf + strlen (buf), "#2   %c %2dh#0",
-					(!current_time) ? '<' : ' ',
+					(!current_time) ? '<' : ' ', 
 					(int) MAX (1, (int)current_time));
 
 				if (!IS_NPC (ch))
@@ -3119,7 +3114,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 		zone_str = NULL;
 
 		if (!isdigit (*buf2))
-			mob_name = duplicateString (buf2);
+			mob_name = str_dup (buf2);
 		else
 			zone_str = buf2;
 
@@ -3170,7 +3165,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 
 	case 'o':			/* object */
 
-		obj_name = duplicateString (buf3);
+		obj_name = str_dup (buf3);
 		zone_str = NULL;
 
 		if (!isdigit (*buf2))
@@ -3312,11 +3307,11 @@ nVirtual : 0);
 			if (create_state < 0 || create_state > 4)
 				create_state = 0;
 
-			sprintf (buf2, "%4d. %-12s #%d%-10s",
+			sprintf (buf2, "%4d. %-12s #%d%-10s", 
 				i, row[0], color_state[create_state], row[1]);
 			if (search_type == SEARCH_CLAN)
 			{
-				sprintf (buf2 + strlen(buf2), " #0%-10s#%d",
+				sprintf (buf2 + strlen(buf2), " #0%-10s#%d", 
 					row[4], color_state[create_state]);
 			}
 			sprintf (buf2 + strlen(buf2), " %s#0\n", row[2]);
@@ -3332,25 +3327,20 @@ nVirtual : 0);
 
 	case 'u':			/* Undescribed room only */
 
-		*tmp = 0;
-
 		if (isdigit (*buf2))
 			nSearchZone = atoi (buf2);
 
 		if (nSearchZone < 0 || nSearchZone > MAX_ZONE)
 		{
 			nSearchZone = -1;
-			sprintf (tmp,
-				"\n#6Searching All Zones for Undescribed Rooms and Objects#0\n");
+			stream << "\n#6Searching All Zones for Undescribed Rooms and Objects#0\n";
 		}
 		else
 		{
-			sprintf (tmp,
-				"\n#6Searching Zone ##%d, %s, for Undescribed Rooms and Objects#0\n",
-				nSearchZone, zone_table[nSearchZone].name);
+		  stream << "\n#6Searching Zone ##" << nSearchZone << ", " << zone_table[nSearchZone].name << ", for Undescribed Rooms and Objects#0\n";
 		}
 
-		strcat (tmp, "\n#6Rnum     Room Name#0\n\n");
+		stream <<  "\n#6Rnum     Room Name#0\n\n";
 		for (troom = full_room_list; troom; troom = troom->lnext)
 		{
 
@@ -3363,12 +3353,10 @@ nVirtual : 0);
 			if (IS_SET (troom->room_flags, STORAGE))
 				continue;
 
-			sprintf (tmp + strlen (tmp), "[%.5d]  %s", troom->nVirtual,
-				troom->name);
-			sprintf (tmp + strlen (tmp), "\n");
+			stream <<  "[" << troom->nVirtual << "]  " << troom->name << "\n";
 		}
 
-		strcat (tmp, "\n\n#6Vnum     Object Name(s)   Short desc#0\n\n");
+		stream <<  "\n\n#6Vnum     Object Name(s)   Short desc#0\n\n";
 		for (k = full_object_list; k; k = k->lnext)
 		{
 
@@ -3380,15 +3368,11 @@ nVirtual : 0);
 				continue;
 			}
 
-			sprintf (tmp + strlen (tmp), "[%.5d]  %-16.16s  %-28.28s",
-				k->nVirtual, (k->name) ? k->name : "#1Unnamed Object!#0",
-				(k->short_description) ? k->
-short_description : "#1No Short Desc!#0");
-			sprintf (tmp + strlen (tmp), "\n");
+			stream << "[" << k->nVirtual << "] " <<  ((k->name) ? k->name : "#1Unnamed Object!#0") << ((k->short_description) ? k->short_description : "#1No Short Desc!#0" ) << "\n";
 
 		}
 
-		page_string (ch->desc, tmp);
+		page_string (ch->desc, stream.str().c_str());
 		return;
 	case 'r':			/* Room */
 
@@ -3697,14 +3681,14 @@ do_rlink (CHAR_DATA * ch, char *argument, int cmd)
 		vtor (vtor (ch->in_room)->dir_option[dir]->to_room)->
 		dir_option[rev_dir[dir]] = 0;
 
-	vtor (cha_rnum)->dir_option[dir] = new room_direction_data;
+	CREATE (vtor (cha_rnum)->dir_option[dir], struct room_direction_data, 1);
 	vtor (cha_rnum)->dir_option[dir]->general_description = 0;
 	vtor (cha_rnum)->dir_option[dir]->keyword = 0;
 	vtor (cha_rnum)->dir_option[dir]->exit_info = 0;
 	vtor (cha_rnum)->dir_option[dir]->key = -1;
 	vtor (cha_rnum)->dir_option[dir]->to_room = troom->nVirtual;
 
-	troom->dir_option[rev_dir[dir]] = new room_direction_data;
+	CREATE (troom->dir_option[rev_dir[dir]], struct room_direction_data, 1);
 	troom->dir_option[rev_dir[dir]]->general_description = 0;
 	troom->dir_option[rev_dir[dir]]->keyword = 0;
 	troom->dir_option[rev_dir[dir]]->exit_info = 0;
@@ -3780,7 +3764,7 @@ do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	else
 	{
-		r_secret = new secret;
+		CREATE (r_secret, struct secret, 1);
 	}
 	r_secret->diff = dif;
 	vtor (ch->in_room)->secrets[dir] = r_secret;
@@ -3788,8 +3772,7 @@ do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 	make_quiet (ch);
 	send_to_char ("Enter a new secret description.  Terminate with an '@'\n",
 		ch);
-	free_mem(ch->desc->descStr);
-	ch->desc->descStr = r_secret->stext;
+	ch->desc->str = &r_secret->stext;
 	r_secret->stext = 0;
 	ch->desc->max_str = 2000;
 
@@ -3858,7 +3841,7 @@ do_rexit (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	if (!vtor (ch->in_room)->dir_option[dir])
-		vtor (cha_rnum)->dir_option[dir] = new room_direction_data;
+		CREATE (vtor (cha_rnum)->dir_option[dir], struct room_direction_data, 1);
 
 	vtor (cha_rnum)->dir_option[dir]->general_description = 0;
 	vtor (cha_rnum)->dir_option[dir]->keyword = 0;
@@ -3875,7 +3858,7 @@ do_rname (CHAR_DATA * ch, char *argument, int cmd)
 
 	for (; isspace (*argument); argument++);	/* Get rid of whitespaces */
 
-	vtor (ch->in_room)->name = duplicateString (argument);
+	vtor (ch->in_room)->name = add_hash (argument);
 
 	send_to_char ("Done.\n", ch);
 }
@@ -3942,8 +3925,8 @@ do_rinit (CHAR_DATA * ch, char *argument, int cmd)
 	troom->people = NULL;
 	troom->light = 0;		/* Zero light sources */
 	troom->zone = virt_nr / ZONE_SIZE;
-	troom->name = duplicateString ("New Room");
-	troom->description = duplicateString ("No Description Set.\n");
+	troom->name = add_hash ("New Room");
+	troom->description = add_hash ("No Description Set.\n");
 	troom->ex_description = NULL;
 	troom->wdesc = NULL;
 	troom->extra = NULL;
@@ -3982,22 +3965,22 @@ do_rxchange (CHAR_DATA * ch, char *argument, int cmd)
 	k = strlen (end);
 	if (!arg2[0])
 	{
-		result = new char[i + j + k];
+		CREATE (result, char, i + j + k);
 		strncpy (result, ch->room->description, (i - j));
 		strcat (result, arg2);
 		strcat (result, end + 1);
 	}
 	else
 	{
-		result = new char[i + j + k + 1];
+		CREATE (result, char, i + j + k + 1);
 		strncpy (result, ch->room->description, (i - j));
 		strcat (result, arg2);
 		strcat (result, end);
 	}
 
-	free_mem (ch->room->description);
+	mem_free (ch->room->description);
 	ch->room->description = NULL;
-	ch->room->description = duplicateString (result);
+	ch->room->description = add_hash (result);
 }
 
 void
@@ -4016,7 +3999,7 @@ post_rdesc (DESCRIPTOR_DATA * d)
 		return;
 	}
 
-	room->description = duplicateString (d->pending_message->message);
+	room->description = add_hash (d->pending_message->message);
 	d->pending_message = NULL;
 }
 
@@ -4051,10 +4034,8 @@ do_rdesc (CHAR_DATA * ch, char *argument, int cmd)
 
 	act ("$n begins editing a room description.", false, ch, 0, 0, TO_ROOM);
 
-	free_mem(ch->desc->descStr);
-	free_mem(ch->desc->pending_message);
-	ch->desc->pending_message = new MESSAGE_DATA;
-	ch->desc->descStr = ch->desc->pending_message->message;
+	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	ch->desc->str = &ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 	ch->delay_info1 = room->nVirtual;
 
@@ -4081,7 +4062,7 @@ do_rappend (CHAR_DATA * ch, char *argument, int cmd)
 {
 	char *new_string;
 
-	new_string = new char[strlen (vtor (ch->in_room)->description) + 1];
+	CREATE (new_string, char, strlen (vtor (ch->in_room)->description) + 1);
 	strcpy (new_string, vtor (ch->in_room)->description);
 	vtor (ch->in_room)->description = new_string;
 
@@ -4096,8 +4077,7 @@ do_rappend (CHAR_DATA * ch, char *argument, int cmd)
 		("1-------10--------20--------30--------40--------50--------60---65\n",
 		ch);
 	make_quiet (ch);
-	free_mem(ch->desc->descStr);
-	ch->desc->descStr = duplicateString(vtor (ch->in_room)->description);
+	ch->desc->str = &(vtor (ch->in_room)->description);
 	ch->desc->max_str = 2000;
 }
 
@@ -4132,18 +4112,18 @@ do_redesc (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!str_cmp (argument, "delete"))
 	{
-		if ((vtor (ch->in_room)->ex_description)
+		if ((vtor (ch->in_room)->ex_description) 
 			&& (!strn_cmp (vtor (ch->in_room)->ex_description->keyword, buf, strlen (buf))))
 		{
-			send_to_char("Description deleted\n", ch);
-			vtor (ch->in_room)->ex_description =
+			send_to_char("Description deleted\n", ch);							
+			vtor (ch->in_room)->ex_description = 
 				vtor (ch->in_room)->ex_description->next;
 			return;
 		}
 
 		for (tmp = vtor (ch->in_room)->ex_description; tmp; tmp = tmp->next)
 		{
-			if ((tmp->next)
+			if ((tmp->next) 
 				&& (!strn_cmp (tmp->next->keyword, buf, strlen (buf))))
 			{
 				send_to_char("Description deleted\n", ch);
@@ -4164,9 +4144,9 @@ do_redesc (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!tmp)
 	{
-		newdesc = new extra_descr_data;
+		CREATE (newdesc, struct extra_descr_data, 1);
 		newdesc->next = vtor (ch->in_room)->ex_description;
-		newdesc->keyword = duplicateString (buf);
+		newdesc->keyword = add_hash (buf);
 		vtor (ch->in_room)->ex_description = newdesc;
 	}
 	else
@@ -4175,9 +4155,8 @@ do_redesc (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char (vtor (ch->in_room)->ex_description->description, ch);
 		newdesc = tmp;
 	}
-	
-	free_mem(ch->desc->descStr);
-	ch->desc->descStr = duplicateString(newdesc->description);
+
+	ch->desc->str = &newdesc->description;
 
 	if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
 		ve_setup_screen (ch->desc);
@@ -4199,6 +4178,8 @@ do_rlinkrm (CHAR_DATA * ch, char *argument, int cmd)
 	char buf[256];
 	int dir;
 	int cha_rnum, old_rnum;
+	ROOM_DATA* room=NULL;
+	ROOM_DATA* troom=NULL;
 
 	one_argument (argument, buf);
 
@@ -4240,9 +4221,10 @@ do_rlinkrm (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	cha_rnum = ch->in_room;
-	if (vtor (ch->in_room)->dir_option[dir])
+	room = vtor(ch->in_room);
+	if ((room) && room->dir_option[dir])
 	{
-		old_rnum = vtor (ch->in_room)->dir_option[dir]->to_room;
+		old_rnum = room->dir_option[dir]->to_room;
 	}
 	else
 	{
@@ -4250,8 +4232,13 @@ do_rlinkrm (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	vtor (cha_rnum)->dir_option[dir] = 0;
-	vtor (old_rnum)->dir_option[rev_dir[dir]] = 0;
+	if (room)
+	  room->dir_option[dir] = 0;
+
+	troom = vtor(old_rnum);
+	if (troom)
+	  troom->dir_option[rev_dir[dir]] = 0;
+
 	send_to_char ("Done.\n", ch);
 }
 
@@ -4379,8 +4366,8 @@ do_rflags (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char (buf3, ch);
 		return;
 	}
-
-	//Hibou -- Adding for unlimited buying
+	
+		//Hibou -- Adding for unlimited buying
 	if (!str_cmp (buf, "NoInvLimit"))
 	{
 		if (ch->room->noInvLimit)
@@ -4423,7 +4410,7 @@ do_rflags (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char ("Done.\n", ch);
 		return;
 	}
-
+	
 	if (buf[0] == '?')
 	{
 		sprintf (buf2, "The following room flags are available:\n\t\t\t");
@@ -4537,8 +4524,7 @@ do_rddesc (CHAR_DATA * ch, char *argument, int cmd)
 		("1-------10--------20--------30--------40--------50--------60---65\n",
 		ch);
 	make_quiet (ch);
-	free_mem(ch->desc->descStr);
-	ch->desc->descStr = duplicateString(vtor (ch->in_room)->dir_option[dir]->general_description);
+	ch->desc->str = &(vtor (ch->in_room)->dir_option[dir]->general_description);
 	vtor (ch->in_room)->dir_option[dir]->general_description = 0;
 	ch->desc->max_str = 2000;
 }
@@ -4722,8 +4708,8 @@ do_minit (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->act = 0;
 	newmob->act |= ACT_ISNPC;
 
-	newmob->name = duplicateString ("mob new");
-	newmob->short_descr = duplicateString ("a new mobile");
+	newmob->name = add_hash ("mob new");
+	newmob->short_descr = add_hash ("a new mobile");
 
 	newmob->speaks = SKILL_SPEAK_WESTRON;
 	newmob->skills[SKILL_SPEAK_WESTRON] = 100;
@@ -4767,7 +4753,7 @@ do_minit (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->fight_mode = 2;
 	newmob->speed = SPEED_WALK;
 
-	newmob->clans = duplicateString ("");	/* Null clan list */
+	newmob->clans = str_dup ("");	/* Null clan list */
 
 	add_mob_to_hash (newmob);
 
@@ -4826,9 +4812,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	else
 		vnum = atol (arg);
-	if ((vnum < 0) || (vnum > 110000))
+	if ((vnum < 0) || (vnum > 99999))
 	{
-		send_to_char ("Vnum must be between 0 and 110000.\n", ch);
+		send_to_char ("Vnum must be between 0 and 99999.\n", ch);
 		return;
 	}
 
@@ -4880,7 +4866,7 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 	clear_object (newobj);
 
 	newobj->nVirtual = vnum;
-	newobj->zone = vnum / OBJECT_ZONE_SIZE;
+	newobj->zone = vnum / ZONE_SIZE;
 
 	add_obj_to_hash (newobj);
 
@@ -4892,48 +4878,48 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 	newobj->in_obj = 0;
 	newobj->next_content = 0;
 	newobj->carried_by = 0;
-	newobj->full_description = duplicateString ("");
+	newobj->full_description = str_dup ("");
 	newobj->obj_flags.type_flag = index_lookup (item_types, arg2);
 
 	switch (type)
 	{
 	case ITEM_FLUID:
-		newobj->name = duplicateString ("water");
-		newobj->short_description = duplicateString ("filled with water");
-		newobj->description = duplicateString ("");
+		newobj->name = add_hash ("water");
+		newobj->short_description = add_hash ("filled with water");
+		newobj->description = add_hash ("");
 		newobj->obj_flags.weight = 100;
 		break;
 
 	case ITEM_LIQUID_FUEL:
-		newobj->name = duplicateString ("oil");
-		newobj->short_description = duplicateString ("filled with oil");
-		newobj->description = duplicateString ("");
+		newobj->name = add_hash ("oil");
+		newobj->short_description = add_hash ("filled with oil");
+		newobj->description = add_hash ("");
 		newobj->obj_flags.weight = 100;
 		break;
 
 	case ITEM_DWELLING:
-		newobj->name = duplicateString ("shelter");
-		newobj->short_description = duplicateString ("a hastily-constructed shelter");
+		newobj->name = add_hash ("shelter");
+		newobj->short_description = add_hash ("a hastily-constructed shelter");
 		newobj->description =
-			duplicateString ("a very crudely and hastily constructed shelter");
+			add_hash ("a very crudely and hastily constructed shelter");
 		newobj->o.od.value[2] = 1;
 		newobj->o.od.value[3] = -1;
 		newobj->obj_flags.weight = 1500;
 		break;
 
 	case ITEM_LIGHT:
-		newobj->name = duplicateString ("lantern");
-		newobj->short_description = duplicateString ("a brass lantern");
-		newobj->description = duplicateString ("an old dented lantern");
+		newobj->name = add_hash ("lantern");
+		newobj->short_description = add_hash ("a brass lantern");
+		newobj->description = add_hash ("an old dented lantern");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[2] = 20;
 		newobj->obj_flags.weight = 500;
 		break;
 
 	case ITEM_WEAPON:
-		newobj->name = duplicateString ("sword");
-		newobj->short_description = duplicateString ("a long sword");
-		newobj->description = duplicateString ("a gleaming long sword");
+		newobj->name = add_hash ("sword");
+		newobj->short_description = add_hash ("a long sword");
+		newobj->description = add_hash ("a gleaming long sword");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.wear_flags |= ITEM_WIELD;
 		newobj->o.od.value[1] = 2;
@@ -4943,9 +4929,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_ARMOR:
-		newobj->name = duplicateString ("jacket");
-		newobj->short_description = duplicateString ("a leather jacket");
-		newobj->description = duplicateString ("a heavy leather jacket");
+		newobj->name = add_hash ("jacket");
+		newobj->short_description = add_hash ("a leather jacket");
+		newobj->description = add_hash ("a heavy leather jacket");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.wear_flags |= ITEM_WEAR_BODY;
 		newobj->o.od.value[0] = 2;
@@ -4953,18 +4939,18 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_KEY:
-		newobj->name = duplicateString ("key");
-		newobj->short_description = duplicateString ("a key");
-		newobj->description = duplicateString ("a small silver key");
+		newobj->name = add_hash ("key");
+		newobj->short_description = add_hash ("a key");
+		newobj->description = add_hash ("a small silver key");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 10;
 		break;
 
 	case ITEM_DRINKCON:
-		newobj->name = duplicateString ("skin");
-		newobj->short_description = duplicateString ("a water skin");
-		newobj->description = duplicateString ("a leaky skin lies here.");
+		newobj->name = add_hash ("skin");
+		newobj->short_description = add_hash ("a water skin");
+		newobj->description = add_hash ("a leaky skin lies here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 10;
 		newobj->o.od.value[1] = 0;
@@ -4974,9 +4960,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_FOOD:
-		newobj->name = duplicateString ("bread");
-		newobj->short_description = duplicateString ("a loaf of bread");
-		newobj->description = duplicateString ("a loaf of bread");
+		newobj->name = add_hash ("bread");
+		newobj->short_description = add_hash ("a loaf of bread");
+		newobj->description = add_hash ("a loaf of bread");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 6;
 		newobj->o.od.value[3] = 0;
@@ -4984,9 +4970,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_CONTAINER:
-		newobj->name = duplicateString ("bag");
-		newobj->short_description = duplicateString ("a rather large bag");
-		newobj->description = duplicateString ("a large brown bag lies here");
+		newobj->name = add_hash ("bag");
+		newobj->short_description = add_hash ("a rather large bag");
+		newobj->description = add_hash ("a large brown bag lies here");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 100;
 		newobj->o.od.value[1] = 0;
@@ -4995,17 +4981,17 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_BOARD:
-		newobj->name = duplicateString ("board");
-		newobj->short_description = duplicateString ("a board");
-		newobj->description = duplicateString ("a bulletin board is standing here.");
+		newobj->name = add_hash ("board");
+		newobj->short_description = add_hash ("a board");
+		newobj->description = add_hash ("a bulletin board is standing here.");
 		newobj->o.od.value[2] = 1;
 		newobj->obj_flags.weight = 100;
 		break;
 
 	case ITEM_USURY_NOTE:
-		newobj->name = duplicateString ("note usury");
-		newobj->short_description = duplicateString ("a usury note");
-		newobj->description = duplicateString ("A usury note lies on the floor.");
+		newobj->name = add_hash ("note usury");
+		newobj->short_description = add_hash ("a usury note");
+		newobj->description = add_hash ("A usury note lies on the floor.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 1;
 		newobj->o.od.value[1] = 1;
@@ -5015,10 +5001,10 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_BULLET:
-		newobj->name = duplicateString ("bullet sphere small crude iron");
-		newobj->short_description = duplicateString ("a crude iron sling bullet");
+		newobj->name = add_hash ("bullet sphere small crude iron");
+		newobj->short_description = add_hash ("a crude iron sling bullet");
 		newobj->description =
-			duplicateString
+			add_hash
 			("A small sphere of crudely-wrought iron has been left here.");
 		newobj->obj_flags.extra_flags |= ITEM_STACK;
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
@@ -5029,10 +5015,10 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_MISSILE:
-		newobj->name = duplicateString ("arrow iron-tipped ash-shafted flight");
+		newobj->name = add_hash ("arrow iron-tipped ash-shafted flight");
 		newobj->short_description =
-			duplicateString ("an iron-tipped, ash-shafted flight arrow");
-		newobj->description = duplicateString ("An arrow has been left here.");
+			add_hash ("an iron-tipped, ash-shafted flight arrow");
+		newobj->description = add_hash ("An arrow has been left here.");
 		newobj->obj_flags.extra_flags |= ITEM_STACK;
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.weight = 10;
@@ -5042,10 +5028,10 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_SHEATH:
-		newobj->name = duplicateString ("sheath brown leather");
-		newobj->short_description = duplicateString ("a brown leather sheath");
+		newobj->name = add_hash ("sheath brown leather");
+		newobj->short_description = add_hash ("a brown leather sheath");
 		newobj->description =
-			duplicateString ("A brown leather sheath has been left here.");
+			add_hash ("A brown leather sheath has been left here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.wear_flags |= ITEM_WEAR_BELT;
 		newobj->o.od.value[0] = 800;
@@ -5054,10 +5040,10 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_KEYRING:
-		newobj->name = duplicateString ("keyring sturdy iron");
-		newobj->short_description = duplicateString ("a sturdy iron keyring");
+		newobj->name = add_hash ("keyring sturdy iron");
+		newobj->short_description = add_hash ("a sturdy iron keyring");
 		newobj->description =
-			duplicateString ("A sturdy iron keyring lies here, forgotten.");
+			add_hash ("A sturdy iron keyring lies here, forgotten.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.wear_flags |= ITEM_WEAR_BELT;
 		newobj->o.od.value[0] = 10;
@@ -5066,9 +5052,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_QUIVER:
-		newobj->name = duplicateString ("quiver brown leather");
-		newobj->short_description = duplicateString ("a brown leather quiver");
-		newobj->description = duplicateString ("A brown leather quiver lies here.");
+		newobj->name = add_hash ("quiver brown leather");
+		newobj->short_description = add_hash ("a brown leather quiver");
+		newobj->description = add_hash ("A brown leather quiver lies here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->obj_flags.wear_flags |= ITEM_WEAR_SHOULDER;
 		newobj->o.od.value[0] = 25;
@@ -5077,12 +5063,12 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_INK:
-		newobj->name = duplicateString ("ink black pot ceramic small");
+		newobj->name = add_hash ("ink black pot ceramic small");
 		newobj->short_description =
-			duplicateString ("a small ceramic pot of black ink");
+			add_hash ("a small ceramic pot of black ink");
 		newobj->description =
-			duplicateString ("A small ceramic pot has been left here.");
-		newobj->ink_color = duplicateString ("black ink");
+			add_hash ("A small ceramic pot has been left here.");
+		newobj->ink_color = add_hash ("black ink");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 10;
 		newobj->o.od.value[1] = 10;
@@ -5090,47 +5076,47 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 
 	case ITEM_BOOK:
-		newobj->name = duplicateString ("tome leather-bound small");
-		newobj->short_description = duplicateString ("a small, leather-bound tome");
-		newobj->description = duplicateString ("A small tome has been left here.");
+		newobj->name = add_hash ("tome leather-bound small");
+		newobj->short_description = add_hash ("a small, leather-bound tome");
+		newobj->description = add_hash ("A small tome has been left here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 25;
 		newobj->obj_flags.weight = 500;
 		break;
 
 	case ITEM_PARCHMENT:
-		newobj->name = duplicateString ("paper parchment sheet");
-		newobj->short_description = duplicateString ("a sheet of parchment");
+		newobj->name = add_hash ("paper parchment sheet");
+		newobj->short_description = add_hash ("a sheet of parchment");
 		newobj->description =
-			duplicateString ("A sheet of parchment has been discarded here.");
+			add_hash ("A sheet of parchment has been discarded here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 10;
 		break;
 
 	case ITEM_WRITING_INST:
-		newobj->name = duplicateString ("quill writing");
-		newobj->short_description = duplicateString ("a writing quill");
+		newobj->name = add_hash ("quill writing");
+		newobj->short_description = add_hash ("a writing quill");
 		newobj->description =
-			duplicateString ("A writing quill has been discarded here.");
+			add_hash ("A writing quill has been discarded here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 25;
 		break;
 
 	case ITEM_HEALER_KIT:
-		newobj->name = duplicateString ("kit healer");
-		newobj->short_description = duplicateString ("a healer's kit");
-		newobj->description = duplicateString ("A healer's kit lies on the floor.");
+		newobj->name = add_hash ("kit healer");
+		newobj->short_description = add_hash ("a healer's kit");
+		newobj->description = add_hash ("A healer's kit lies on the floor.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 500;
 		break;
 
 	case ITEM_REPAIR_KIT:
-		newobj->name = duplicateString ("kit repair mending");
-		newobj->short_description = duplicateString ("a repair kit");
-		newobj->description = duplicateString ("A repair kit lies on the floor.");
+		newobj->name = add_hash ("kit repair mending");
+		newobj->short_description = add_hash ("a repair kit");
+		newobj->description = add_hash ("A repair kit lies on the floor.");
 		newobj->obj_flags.wear_flags |= (ITEM_TAKE | ITEM_WEAR_BELT);
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 500;
@@ -5138,10 +5124,10 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 
 	default:
 		act ("Generic object created.", false, ch, 0, 0, TO_CHAR);
-		newobj->name = duplicateString ("object generic");
-		newobj->short_description = duplicateString ("a generic object");
+		newobj->name = add_hash ("object generic");
+		newobj->short_description = add_hash ("a generic object");
 		newobj->description =
-			duplicateString ("Some careless admin has left a generic object here.");
+			add_hash ("Some careless admin has left a generic object here.");
 		newobj->obj_flags.wear_flags |= ITEM_TAKE;
 		newobj->o.od.value[0] = 0;
 		newobj->obj_flags.weight = 100;
@@ -5299,7 +5285,7 @@ do_munused (CHAR_DATA * ch, char *argument, int cmd)
 void
 do_ounused (CHAR_DATA * ch, char *argument, int cmd)
 {
-	int unused[OBJECT_ZONE_SIZE];
+	int unused[ZONE_SIZE];
 	int zone;
 	int line_entry;
 	int i;
@@ -5311,7 +5297,7 @@ do_ounused (CHAR_DATA * ch, char *argument, int cmd)
 	if (!*buf)
 		zone = vtor (ch->in_room)->zone;
 
-	else if (!just_a_number (buf) || atoi (buf) < 0 || atoi (buf) >= OBJECT_MAX_ZONE)
+	else if (!just_a_number (buf) || atoi (buf) < 0 || atoi (buf) >= MAX_ZONE)
 	{
 		send_to_char ("Syntax:  runused [zone #]\n", ch);
 		return;
@@ -5320,15 +5306,15 @@ do_ounused (CHAR_DATA * ch, char *argument, int cmd)
 	else
 		zone = atoi (buf);
 
-	for (i = 0; i < OBJECT_ZONE_SIZE; i++)
+	for (i = 0; i < ZONE_SIZE; i++)
 		unused[i] = 0;
 
 	for (obj = full_object_list; obj; obj = obj->lnext)
 		if (obj->zone == zone)
-			unused[obj->nVirtual % OBJECT_ZONE_SIZE] = 1;
+			unused[obj->nVirtual % ZONE_SIZE] = 1;
 
 	sprintf (buf, "  ");
-	for (i = 0, line_entry = -2; i < OBJECT_ZONE_SIZE; i++)
+	for (i = 0, line_entry = -2; i < ZONE_SIZE; i++)
 	{
 
 		if (unused[i])
@@ -5339,7 +5325,7 @@ do_ounused (CHAR_DATA * ch, char *argument, int cmd)
 		if (line_entry == 11)
 			strcat (buf, "\n  ");
 
-		sprintf (buf + strlen (buf), "%-4d ", i + OBJECT_ZONE_SIZE * zone);
+		sprintf (buf + strlen (buf), "%-4d ", i + ZONE_SIZE * zone);
 	}
 
 	strcat (buf, "\n");
@@ -5479,7 +5465,7 @@ do_object (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 
-	if ((edit_object->nVirtual == VNUM_HEAD)
+	if ((edit_object->nVirtual == VNUM_HEAD) 
 		|| (edit_object->nVirtual == VNUM_CORPSE))
 	{
 		send_to_char ("You cannot make changes to this item.\n", ch);
@@ -5597,9 +5583,9 @@ post_odesc (DESCRIPTOR_DATA * d)
 	}
 
 	if (ch->delay_info2)
-		obj->indoor_desc = duplicateString (d->pending_message->message);
+		obj->indoor_desc = add_hash (d->pending_message->message);
 	else
-		obj->full_description = duplicateString (d->pending_message->message);
+		obj->full_description = add_hash (d->pending_message->message);
 
 	ch->delay_info2 = 0;
 
@@ -5782,7 +5768,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 			if (atoi (buf))
 			{
 				send_to_char ("Object skill affect set.\n", ch);
-				af = new AFFECTED_TYPE;
+				CREATE (af, AFFECTED_TYPE, 1);
 
 				af->type = 0;
 				af->a.spell.duration = -1;
@@ -6105,7 +6091,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				return;
 			}
 			else
-				edit_obj->ink_color = duplicateString (buf);
+				edit_obj->ink_color = add_hash (buf);
 			if ((i = redefine_objects (edit_obj)) > 0)
 			{
 				sprintf (buf, "%d objects in world redefined.\n", i);
@@ -6208,7 +6194,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				return;
 			}
 
-			edit_obj->name = duplicateString (buf);
+			edit_obj->name = add_hash (buf);
 		}
 
 		else if (!str_cmp (subcmd, "desc") ||
@@ -6237,7 +6223,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				break;
 			}
 
-			edit_obj->short_description = duplicateString (buf);
+			edit_obj->short_description = add_hash (buf);
 		}
 
 		else if (!str_cmp (subcmd, "ldesc"))
@@ -6251,7 +6237,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				break;
 			}
 
-			edit_obj->description = duplicateString (buf);
+			edit_obj->description = add_hash (buf);
 		}
 
 		else if (!str_cmp (subcmd, "type"))
@@ -6394,53 +6380,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 			}
 
 		}
-
-		// Implementation of object categories. Requires code to save builders from themselves - Case
-		else if (!str_cmp (subcmd, "inherits")) {
-			argument = one_argument (argument, buf);
-
-			if (*buf == '0' || atoi (buf)) {
-				OBJ_DATA* proto = vtoo(edit_obj->nVirtual);
-				int inheritedVNum = atoi(buf);
-
-				// Any object could be a category, but I'm keeping it simple
-				// and just using any vnum 100k and over to mark categories - Case
-				if (inheritedVNum > 99999 && vtoo(inheritedVNum) != NULL) {
-					if (inheritedVNum == edit_obj->nVirtual) {
-						send_to_char("This object cannot inherit from that category because it would form an infinite loop.\n", ch);
-						return;
-					}
-
-					std::set<int> chainedInts;
-					chainedInts.insert(edit_obj->nVirtual);
-					chainedInts.insert(inheritedVNum);
-					OBJ_DATA * loopCheck = vtoo(inheritedVNum);
-
-					while(loopCheck != NULL && loopCheck->super_vnum > 0) {
-						if (chainedInts.count(loopCheck->super_vnum) > 0) {
-							send_to_char("This object cannot inherit from that category because it would form an infinite loop.\n", ch);
-							return;
-						}
-						chainedInts.insert(loopCheck->super_vnum);
-						loopCheck = vtoo(loopCheck->super_vnum);
-					}
-					proto->super_vnum = atoi(buf);
-				}
-				else if (inheritedVNum == 0) {
-					proto->super_vnum = 0;
-				}
-				else {
-					send_to_char("That object does not exist or is not a category\n", ch);
-					return;
-				}
-			}
-			else {
-				send_to_char ("Expected the virtual number of a category object.\n", ch);
-				return;
-			}
-		}
-
-		/*
+		/*              
 		else if ( !str_cmp (subcmd, "mdesc") ) {
 
 		argument = one_argument (argument, buf);
@@ -6455,11 +6395,11 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 		break;
 		}
 
-		if ( edit_obj->obj_flags.type_flag == ITEM_ARMOR )
-		edit_obj->o.armor.helm_short = duplicateString (buf);
+		if ( edit_obj->obj_flags.type_flag == ITEM_ARMOR ) 
+		edit_obj->o.armor.helm_short = add_hash (buf);
 
 		if ( edit_obj->obj_flags.type_flag == ITEM_WORN )
-		edit_obj->o.cloak.cloak_short = duplicateString (buf);
+		edit_obj->o.cloak.cloak_short = add_hash (buf); 
 		} */
 
 		else if (!str_cmp (subcmd, "mkeys"))
@@ -6489,7 +6429,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char
 					("Remember, the first keyword will be used in the wearer's short description.\n",
 					ch);
-				edit_obj->desc_keys = duplicateString (buf);
+				edit_obj->desc_keys = add_hash (buf);
 			}
 
 		}
@@ -6581,7 +6521,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 			else
 			{
 
-				af = new AFFECTED_TYPE;
+				CREATE (af, AFFECTED_TYPE, 1);
 
 				af->type = 0;
 				af->a.spell.duration = -1;
@@ -6672,15 +6612,15 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				sprintf(clan_rank, "member");
 
 			if (edit_obj->clan_data) //removes old clan
-				clan_rem_obj (edit_obj, edit_obj->clan_data);
+				clan_rem_obj (edit_obj, edit_obj->clan_data);	
 
 			if (!edit_obj->clan_data)
 			{
-				edit_obj->clan_data = new OBJ_CLAN_DATA;
-				edit_obj->clan_data->name = duplicateString (clan_name);
-				edit_obj->clan_data->rank = duplicateString (clan_rank);
+				CREATE (edit_obj->clan_data, OBJ_CLAN_DATA, 1);
+				edit_obj->clan_data->name = str_dup (clan_name);
+				edit_obj->clan_data->rank = str_dup (clan_rank);
 				edit_obj->clan_data->next = NULL;
-			}
+			}			
 			send_to_char("Clan/rank have been added.\n", ch);
 		}//if clannadd
 
@@ -6690,7 +6630,7 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 		**/
 		else if (!str_cmp (subcmd, "clanremove"))
 		{
-			clan_rem_obj (edit_obj, edit_obj->clan_data);
+			clan_rem_obj (edit_obj, edit_obj->clan_data);		
 		}
 
 		else
@@ -6711,10 +6651,8 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (full_description)
 	{
-		free_mem(ch->desc->descStr);
-		free_mem(ch->desc->pending_message);
-		ch->desc->pending_message = new MESSAGE_DATA;
-		ch->desc->descStr = ch->desc->pending_message->message;
+		CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+		ch->desc->str = &ch->desc->pending_message->message;
 		ch->desc->proc = post_odesc;
 		ch->delay_info1 = edit_obj->nVirtual;
 		if (indoor_description)
@@ -6905,19 +6843,19 @@ add_replace_mobprog (CHAR_DATA * ch, CHAR_DATA * mob, char *trigger_name)
 
 	if (!prog)
 	{
-		prog = new MOBPROG_DATA;
+		CREATE (prog, MOBPROG_DATA, 1);
 
 		if (last_prog)
 			last_prog->next = prog;
 		else
 			mob->prog = prog;
 
-		prog->trigger_name = duplicateString (trigger_name);
+		prog->trigger_name = str_dup (trigger_name);
 		prog->next = NULL;
 
 	}
 	else
-		free_mem (prog->prog);
+		mem_free (prog->prog);
 
 	prog->prog = NULL;
 	prog->busy = 0;
@@ -6925,9 +6863,8 @@ add_replace_mobprog (CHAR_DATA * ch, CHAR_DATA * mob, char *trigger_name)
 	send_to_char ("Enter your mob program.  Terminate with @.\n", ch);
 
 	make_quiet (ch);
-	
-	free_mem(ch->desc->descStr);
-	ch->desc->descStr = duplicateString(prog->prog);
+
+	ch->desc->str = &prog->prog;
 	ch->desc->proc = post_mset;
 
 	if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
@@ -7009,7 +6946,7 @@ post_mdesc (DESCRIPTOR_DATA * d)
 		mob = load_pc (ch->delay_who);
 	ch->delay_info1 = 0;
 	if (ch->delay_who)
-		free_mem (ch->delay_who);
+		mem_free (ch->delay_who);
 
 	if (!mob)
 	{
@@ -7025,7 +6962,7 @@ post_mdesc (DESCRIPTOR_DATA * d)
 		return;
 	}
 
-	mob->description = duplicateString (d->pending_message->message);
+	mob->description = add_hash (d->pending_message->message);
 	d->pending_message = NULL;
 	if (!IS_NPC(mob))
 		unload_pc(mob);
@@ -7170,7 +7107,7 @@ update_crafts_file (void)
 		if (craft->followers > 0)
 			fprintf (fp, "followers: %d\n", craft->followers);
 
-		/** is opening craft for some skill(s) **/
+		/** is opening craft for some skill(s) **/	
 		for (i = 0; i <= 24; i++)
 		{
 			if (craft->opening[i] > 0)
@@ -7459,6 +7396,12 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char ("This is a PC-only command.\n", ch);
 		return;
 	}
+	
+	if (!IS_SET(ch->plr_flags, IS_CRAFTER))
+	  {
+	    send_to_char ("You must be an authorised crafter to use this command.\n",ch);
+	    return;
+	  }
 
 	if (!ch->pc->edit_craft)
 	{
@@ -7598,6 +7541,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (!craft->phases)
 		{
+			CREATE (craft->phases, PHASE_DATA, 1);
 			craft->phases = new_phase ();
 			phase = craft->phases;
 		}
@@ -7606,7 +7550,8 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				if (!phase->next && phasenum == i + 1)
 				{
-					phase->next = new_phase();
+					CREATE (phase->next, PHASE_DATA, 1);
+					phase->next = new_phase ();
 				}
 				else if (i == phasenum)
 					break;
@@ -7630,7 +7575,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			if (!str_cmp (subcmd, "1st"))
 			{
 				argument = one_argument (argument, buf);
-				phase->first = duplicateString (buf);
+				phase->first = add_hash (buf);
 				sprintf (output,
 					"The first person echo for phase %d has been modified.\n",
 					phasenum);
@@ -7639,7 +7584,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "2nd"))
 			{
 				argument = one_argument (argument, buf);
-				phase->second = duplicateString (buf);
+				phase->second = add_hash (buf);
 				sprintf (output,
 					"The second person echo for phase %d has been modified.\n",
 					phasenum);
@@ -7648,7 +7593,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "3rd"))
 			{
 				argument = one_argument (argument, buf);
-				phase->third = duplicateString (buf);
+				phase->third = add_hash (buf);
 				sprintf (output,
 					"The third person echo for phase %d has been modified.\n",
 					phasenum);
@@ -7657,7 +7602,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "failure-1st"))
 			{
 				argument = one_argument (argument, buf);
-				phase->failure = duplicateString (buf);
+				phase->failure = add_hash (buf);
 				sprintf (output,
 					"The first-person failure echo for phase %d has been modified.\n",
 					phasenum);
@@ -7666,7 +7611,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "failure-2nd"))
 			{
 				argument = one_argument (argument, buf);
-				phase->second_failure = duplicateString (buf);
+				phase->second_failure = add_hash (buf);
 				sprintf (output,
 					"The second-person failure echo for phase %d has been modified.\n",
 					phasenum);
@@ -7675,7 +7620,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "failure-3rd"))
 			{
 				argument = one_argument (argument, buf);
-				phase->third_failure = duplicateString (buf);
+				phase->third_failure = add_hash (buf);
 				sprintf (output,
 					"The third-person failure echo for phase %d has been modified.\n",
 					phasenum);
@@ -7685,7 +7630,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "group"))
 			{
 				argument = one_argument (argument, buf);
-				phase->group_mess = duplicateString (buf);
+				phase->group_mess = add_hash (buf);
 				sprintf (output,
 					"The group echo for phase %d has been modified.\n",
 					phasenum);
@@ -7695,7 +7640,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 			else if (!str_cmp (subcmd, "failure-group"))
 			{
 				argument = one_argument (argument, buf);
-				phase->fail_group_mess = duplicateString (buf);
+				phase->fail_group_mess = add_hash (buf);
 				sprintf (output,
 					"The group echo for phase %d has been modified.\n",
 					phasenum);
@@ -7937,7 +7882,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char (output, ch);
 			}
 
-			/** Phase move cost **/
+			/** Phase move cost **/	
 			else if (!str_cmp (subcmd, "movecost"))
 			{
 				argument = one_argument (argument, buf);
@@ -7951,7 +7896,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char ("The phase's movement cost has been modified.\n", ch);
 			}
 
-			/** Phase pain cost **/
+			/** Phase pain cost **/	
 			else if (!str_cmp (subcmd, "paincost"))
 			{
 				argument = one_argument (argument, buf);
@@ -7964,7 +7909,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 					phase->hit_cost = atoi (buf);
 				send_to_char ("The phase's pain cost has been modified.\n", ch);
 			}
-			/** Phase Failure objects **/
+			/** Phase Failure objects **/				  
 			else if (!strn_cmp (subcmd, "fobj", 4))
 			{
 				if (!isdigit (subcmd[4]))
@@ -7996,10 +7941,8 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 					return;
 				}
 
-				if (!craft->fails[0]) {
-					craft->fails[0] = new DEFAULT_ITEM_DATA;
-					craft->fails[0]->phase = NULL;
-				}
+				if (!craft->fails[0])
+					CREATE (craft->fails[0], DEFAULT_ITEM_DATA, 1);
 
 				for (i = 0; i <= MAX_DEFAULT_ITEMS; i++)
 				{
@@ -8012,17 +7955,15 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 					{
 						if (i + 1 != fobjnum)
 						{
-							sprintf (output,
+							sprintf (output, 
 								"Please use the next available slot to add a new\n           failure object set; in this case, fobj%d.\n",
 								i + 1);
 							send_to_char (output, ch);
 							return;
 						}
 
-						else {
-							craft->fails[i + 1] = new DEFAULT_ITEM_DATA;
-							craft->fails[i + 1]->phase = NULL;
-						}
+						else
+							CREATE (craft->fails[i + 1], DEFAULT_ITEM_DATA, 1);
 					}
 				}//for (i = 0
 
@@ -8122,7 +8063,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 				fitems->phase = phase;
 			}//else if (!strn_cmp (subcmd, "fobj", 4))
 
-			/** Phase Objects (normal)**/
+			/** Phase Objects (normal)**/ 
 			else if (!strn_cmp (subcmd, "object", 6))
 			{
 				if (!isdigit (subcmd[6]))
@@ -8153,10 +8094,8 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 					return;
 				}
 
-				if (!craft->obj_items[0]) {
-					craft->obj_items[0] = new DEFAULT_ITEM_DATA;
-					craft->obj_items[0]->phase = NULL;
-				}
+				if (!craft->obj_items[0])
+					CREATE (craft->obj_items[0], DEFAULT_ITEM_DATA, 1);
 
 				for (i = 0; i <= MAX_DEFAULT_ITEMS; i++)
 				{
@@ -8173,10 +8112,8 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 							send_to_char (output, ch);
 							return;
 						}
-						else {
-							craft->obj_items[i + 1] = new DEFAULT_ITEM_DATA;
-							craft->obj_items[i + 1]->phase = NULL;
-						}
+						else
+							CREATE (craft->obj_items[i + 1], DEFAULT_ITEM_DATA, 1);
 					}
 				}//for (i = 0;
 				memset (items->items, 0, MAX_DEFAULT_ITEMS);
@@ -8306,7 +8243,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 void
 mset_account_flag (const CHAR_DATA* ch, const char *account_name, const char *subcmd)
 {
-	const char* message[14] =
+	const char* message[14] = 
 	{
 		"There was a problem accessing that player's account!\n",
 		"Error: Unknown account flag.\n",
@@ -8324,7 +8261,7 @@ mset_account_flag (const CHAR_DATA* ch, const char *account_name, const char *su
 		"The IP sharing restrictions have been lifted on that account.\n"
 	};
 
-	enum
+	enum 
 	{
 		no_player,
 		unknown_flag,
@@ -8401,13 +8338,13 @@ mset_account_flag (const CHAR_DATA* ch, const char *account_name, const char *su
 			}
 		}
 	}
-	send_to_char (message[response], ch);
+	send_to_char (message[response], ch);      
 }
 
 void
 mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *reflex)
 {
-	const char * cues [] =
+	const char * cues [] = 
 	{
 		"none", "notes", "flags", "memory", "on_reboot",
 		"on_hour", "on_time",
@@ -8432,27 +8369,27 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 		std::pair<N,N> range = mob->cues->equal_range (c);
 		std::string world_db = engine.get_config ("world_db");
 
-		if (strcmp (reflex, "delete") == 0
+		if (strcmp (reflex, "delete") == 0 
 			|| strcmp (reflex, "remove") == 0
 			|| strcmp (reflex, "clear") == 0)
-		{
+		{	  
 			for (N n = range.first; n != range.second; n++)
 			{
 				std::string cue_string = n->second;
 				if (!cue_string.empty ())
 				{
-					cue_string = std::string (cue) + std::string (" ")
+					cue_string = std::string (cue) + std::string (" ") 
 						+ cue_string + " #1deleted#0\n";
 					send_to_char (cue_string.c_str (), builder);
 				}
 			}
 			if (engine.in_build_mode ())
 			{
-				mysql_safe_query
+				mysql_safe_query 
 					( "DELETE"
 					" FROM %s.cues"
 					" WHERE mid = %d"
-					" AND cue = %d ",
+					" AND cue = %d ", 
 					world_db.c_str (), mob->nVirtual, index);
 			}
 			mob->cues->erase (c);
@@ -8463,15 +8400,15 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 
 			if (engine.in_build_mode ())
 			{
-				mysql_safe_query
+				mysql_safe_query 
 					( "INSERT"
 					" INTO %s.cues (mid, cue, reflex)"
-					" VALUES ('%d', '%d', '%s')",
+					" VALUES ('%d', '%d', '%s')", 
 					world_db.c_str (),
-					mob->nVirtual, index, reflex);
+					mob->nVirtual, index, reflex);	      
 			}
 			mob->cues->insert (std::make_pair (c, reflex_string));
-			reflex_string = std::string (cue) + std::string (" ")
+			reflex_string = std::string (cue) + std::string (" ") 
 				+ reflex_string + " #6installed#0\n";
 			send_to_char (reflex_string.c_str (), builder);
 		}// if (*reflex)
@@ -8482,7 +8419,7 @@ mset_cue (CHAR_DATA * builder, MOB_DATA *mob, const char *cue, const char *refle
 				std::string cue_string = n->second;
 				if (!cue_string.empty ())
 				{
-					cue_string = std::string (cue) + std::string (" ")
+					cue_string = std::string (cue) + std::string (" ") 
 						+ cue_string + "\n";
 					send_to_char (cue_string.c_str (), builder);
 				}
@@ -8591,6 +8528,27 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 		}
 		else if (!str_cmp (subcmd, "plot")) {
 			edit_mob->togglePlotFlag();
+		}
+		
+		else if (!strncmp(subcmd,"crafter",7)) {
+		  if (GET_TRUST(ch) < 5)
+		    {
+		      send_to_char ("You must be level 5 to toggle the IsCrafter flag.\n", ch);
+		      return;
+		    }
+
+		  if (!IS_SET (edit_mob->plr_flags, IS_CRAFTER))
+			{
+				edit_mob->plr_flags |= IS_CRAFTER;
+				send_to_char
+					("This admin is now authorised to use cset.\n", ch);
+				return;
+			}
+
+			edit_mob->plr_flags &= ~IS_CRAFTER;
+			send_to_char
+				("This admin is no longer authorised to use cset.\n",ch);
+			return;
 		}
 
 		else if (!str_cmp (subcmd, "spell")) {
@@ -8761,9 +8719,9 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 				return;
 			}
 			if (edit_mob->pc->account_name && *edit_mob->pc->account_name)
-				free_mem (edit_mob->pc->account_name);
+				mem_free (edit_mob->pc->account_name);
 			buf[0] = toupper (buf[0]);
-			edit_mob->pc->account_name = duplicateString (buf);
+			edit_mob->pc->account_name = str_dup (buf);
 			send_to_char ("Account set.\n", ch);
 			save_char (edit_mob, false);
 			return;
@@ -8793,8 +8751,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			af = get_affect (edit_mob, MAGIC_FLAG_NOGAIN + ind);
 			if (!af)
 			{
-				af = new AFFECTED_TYPE;
-				af->next = NULL;
+				CREATE (af, AFFECTED_TYPE, 1);
 				af->type = MAGIC_FLAG_NOGAIN + ind;
 				affect_to_char (edit_mob, af);
 				send_to_char
@@ -8886,7 +8843,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			|| !strcasecmp (subcmd, "noretire")
 			|| !strcasecmp (subcmd, "ipsharingok"))
 		{
-			if (!IS_NPC (edit_mob) && edit_mob->pc && edit_mob->pc->account_name)
+			if (!IS_NPC (edit_mob) && edit_mob->pc && edit_mob->pc->account_name)	  
 			{
 
 				mset_account_flag (ch, edit_mob->pc->account_name, subcmd);
@@ -8895,7 +8852,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				send_to_char ("I couldn't access that character's account.\n", ch);
 			}
-			return;
+			return; 
 		}
 
 		else if (!str_cmp (subcmd, "noplayerport") && GET_TRUST (ch) >= 5)
@@ -9107,10 +9064,8 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				edit_mob->flags |= FLAG_KEEPER;
 
-				if (!edit_mob->shop) {
-					edit_mob->shop = new SHOP_DATA;
-					edit_mob->shop->negotiations = NULL;
-				}
+				if (!edit_mob->shop)
+					CREATE (edit_mob->shop, SHOP_DATA, 1);
 
 				edit_mob->shop->discount = 1.0;
 				edit_mob->shop->markup = 1.0;
@@ -10822,7 +10777,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 
 			if ((damage <= 100 && damage > 0) && (typenum > 0 && typenum <= 9))
 			{
-				wound_to_char (edit_mob, duplicateString (subcmd), damage, typenum, 0,
+				wound_to_char (edit_mob, add_hash (subcmd), damage, typenum, 0,
 					0, 0);
 				break;
 			}
@@ -11185,7 +11140,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 				break;
 			}
 
-			edit_mob->name = duplicateString (buf);
+			edit_mob->name = add_hash (buf);
 		}
 
 		else if (!str_cmp (subcmd, "sdesc"))
@@ -11199,7 +11154,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 				break;
 			}
 
-			edit_mob->short_descr = duplicateString (buf);
+			edit_mob->short_descr = add_hash (buf);
 		}
 
 		else if (!str_cmp (subcmd, "ldesc"))
@@ -11213,7 +11168,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 				break;
 			}
 
-			edit_mob->long_descr = duplicateString (buf);
+			edit_mob->long_descr = add_hash (buf);
 		}
 
 		else if (!str_cmp (subcmd, "prog"))
@@ -11324,15 +11279,13 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char
 			("1-------10--------20--------30--------40--------50--------60---65\n",
 			ch);
-		free_mem(ch->desc->descStr);
-		free_mem(ch->desc->pending_message);
-		ch->desc->pending_message = new MESSAGE_DATA;
-		ch->desc->descStr = ch->desc->pending_message->message;
+		CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+		ch->desc->str = &ch->desc->pending_message->message;
 		ch->desc->proc = post_mdesc;
 		if (IS_NPC (edit_mob))
 			ch->delay_info1 = edit_mob->mob->nVirtual;
 		else
-			ch->delay_who = duplicateString (edit_mob->tname);
+			ch->delay_who = add_hash (edit_mob->tname);
 		if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
 			ve_setup_screen (ch->desc);
 		else
@@ -11606,7 +11559,7 @@ replace_object (int src, int tar, CHAR_DATA * ch)
 	int zone;
 	int cmd_no;
 	int replace_count = 0;
-	int affected_zone[110];	/* Wanna use MAX_ZONE, but there
+	int affected_zone[100];	/* Wanna use MAX_ZONE, but there
 							a bug on the photobooks computer,
 							forcing me to use 100 */
 	char cmd;
@@ -11626,7 +11579,7 @@ replace_object (int src, int tar, CHAR_DATA * ch)
 		return;
 	}
 
-	for (zone = 0; zone < OBJECT_MAX_ZONE; zone++)
+	for (zone = 0; zone < MAX_ZONE; zone++)
 	{
 
 		affected_zone[zone] = 0;
@@ -11673,7 +11626,7 @@ replace_object (int src, int tar, CHAR_DATA * ch)
 		"(WARNING:  There could be more:)\n", ch);
 	*buf = '\0';
 
-	for (zone = 0; zone < OBJECT_MAX_ZONE; zone++)
+	for (zone = 0; zone < MAX_ZONE; zone++)
 	{
 		if (affected_zone[zone])
 			sprintf (buf + strlen (buf), "   %2d", zone);
@@ -11916,8 +11869,8 @@ reformat_desc (char *source, char **target)
 	if (strn_cmp (source, "   ", 3))
 	{
 		sprintf (buf, "   %s", source);
-		free_mem (source);
-		source = duplicateString (buf);
+		mem_free (source);
+		source = str_dup (buf);
 	}
 
 	s = source;
@@ -11977,7 +11930,7 @@ reformat_desc (char *source, char **target)
 	if (result[strlen (result) - 1] != '\n')
 		strcat (result, "\n");
 
-	*target = duplicateString (result);
+	*target = str_dup (result);
 }
 
 // Case '08, for do_look. Extends length of the lines from 80 to 130.
@@ -12048,7 +12001,7 @@ void reformat_string (char *source, char **target)
 	if (result[strlen (result) - 1] != '\n')
 		strcat (result, "\r\n");
 
-	*target = duplicateString (result);
+	*target = str_dup (result);
 }
 
 int
@@ -12058,12 +12011,12 @@ free_exit (struct room_direction_data *exit)
 		return -1;
 
 	if (exit->general_description && *exit->general_description)
-		free_mem (exit->general_description);
+		mem_free (exit->general_description);
 
 	if (exit->keyword && *exit->keyword)
-		free_mem (exit->keyword);
+		mem_free (exit->keyword);
 
-	free_mem (exit);
+	mem_free (exit);
 
 	return 1;
 }
@@ -12107,13 +12060,13 @@ free_room (ROOM_DATA * room)
 
 	if (room->name && *room->name)
 	{
-		free_mem (room->name);
+		mem_free (room->name);
 		room->name = NULL;
 	}
 
 	if (room->description && *room->description)
 	{
-		free_mem (room->description);
+		mem_free (room->description);
 		room->description = NULL;
 	}
 
@@ -12217,7 +12170,7 @@ do_rmove (CHAR_DATA * ch, char *argument, int cmd)
 	int dir;
 	int target_room_num;
 
-	//extern ROOM_DATA *wld_tab[];
+	extern ROOM_DATA *wld_tab[];
 
 	argument = one_argument (argument, buf);
 
@@ -12242,31 +12195,30 @@ do_rmove (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char ("Target room already exists.\n", ch);
 		return;
 	}
-	// Commented out by Case, trying to use vtor for all lookups
-	//if (vtor(room->nVirtual) == room) { // If wld_tab nVirtual == room then
-	//	//wld_tab[room->nVirtual % ZONE_SIZE] = room->hnext;
-	//}
-	//else
-	//{
-	//	printf ("%d %d\n", (long int) wld_tab[room->nVirtual % ZONE_SIZE],
-	//		room->nVirtual % ZONE_SIZE);
-	//	for (troom = wld_tab[room->nVirtual % ZONE_SIZE]; troom;
-	//		troom = troom->hnext)
-	//	{
 
-	//		printf ("%d v %d\n", troom->hnext->nVirtual, room->nVirtual);
+	if (wld_tab[room->nVirtual % ZONE_SIZE] == room)
+		wld_tab[room->nVirtual % ZONE_SIZE] = room->hnext;
+	else
+	{
+		printf ("%d %d\n", (long int) wld_tab[room->nVirtual % ZONE_SIZE],
+			room->nVirtual % ZONE_SIZE);
+		for (troom = wld_tab[room->nVirtual % ZONE_SIZE]; troom;
+			troom = troom->hnext)
+		{
 
-	//		fflush (stdout);
+			printf ("%d v %d\n", troom->hnext->nVirtual, room->nVirtual);
 
-	//		if (troom->hnext->nVirtual == room->nVirtual)
-	//			break;
-	//	}
+			fflush (stdout);
 
-	//	troom->hnext = room->hnext;
+			if (troom->hnext->nVirtual == room->nVirtual)
+				break;
+		}
 
-	//	room->hnext = wld_tab[target_room_num % ZONE_SIZE];
-	//	wld_tab[target_room_num % ZONE_SIZE] = room;
-	//}
+		troom->hnext = room->hnext;
+
+		room->hnext = wld_tab[target_room_num % ZONE_SIZE];
+		wld_tab[target_room_num % ZONE_SIZE] = room;
+	}
 
 	for (tch = room->people; tch; tch = tch->next_in_room)
 	{
@@ -12280,7 +12232,7 @@ do_rmove (CHAR_DATA * ch, char *argument, int cmd)
 	for (tobj = room->contents; tobj; tobj = tobj->next_content)
 	{
 		tobj->in_room = target_room_num;
-		tobj->zone = target_room_num / OBJECT_ZONE_SIZE;
+		tobj->zone = target_room_num / ZONE_SIZE;
 	}
 
 	/* Relink rooms */
@@ -12445,7 +12397,7 @@ do_zset (CHAR_DATA * ch, char *argument, int cmd)
 				return;
 			}
 
-			zone_table[zone].name = duplicateString (buf);
+			zone_table[zone].name = str_dup (buf);
 		}
 
 		else if (!str_cmp (subcmd, "lead"))
@@ -12457,7 +12409,7 @@ do_zset (CHAR_DATA * ch, char *argument, int cmd)
 			}
 			else
 			{
-				zone_table[zone].lead = duplicateString (CAP (buf));
+				zone_table[zone].lead = add_hash (CAP (buf));
 				send_to_char ("Project lead changed.\n", ch);
 				return;
 			}
@@ -12643,7 +12595,7 @@ do_rset (CHAR_DATA * ch, char *argument, int cmd)
 		}
 
 		if (!ch->room->extra)
-			ch->room->extra = new ROOM_EXTRA_DATA;
+			CREATE (ch->room->extra, ROOM_EXTRA_DATA, 1);
 
 		if (ch->room->extra->alas[ind] &&
 			!IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
@@ -12654,9 +12606,8 @@ do_rset (CHAR_DATA * ch, char *argument, int cmd)
 
 		act ("$n begins editing an alas description.", false, ch, 0, 0,
 			TO_ROOM);
-		
-		free_mem(ch->desc->descStr);
-		ch->desc->descStr = duplicateString(ch->room->extra->alas[ind]);
+
+		ch->desc->str = &ch->room->extra->alas[ind];
 
 		if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
 		{
@@ -12707,7 +12658,7 @@ do_rset (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!ch->room->extra)
 	{
-		ch->room->extra = new ROOM_EXTRA_DATA;
+		CREATE (ch->room->extra, ROOM_EXTRA_DATA, 1);
 		printf ("Creating extra room data.\n");
 		fflush (stdout);
 	}
@@ -12720,9 +12671,8 @@ do_rset (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	act ("$n begins editing a room description.", false, ch, 0, 0, TO_ROOM);
-	
-	free_mem(ch->desc->descStr);
-	ch->desc->descStr = duplicateString(ch->room->extra->weather_desc[ind]);
+
+	ch->desc->str = &ch->room->extra->weather_desc[ind];
 
 	if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
 	{
@@ -12915,67 +12865,67 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	MOB_DATA *sm;
 	char buf[8];
 	char buf2[8];
-
+	
 	if (!ch->pc)
 	{
 		send_to_char ("This is a PC-only command.\n", ch);
 		return;
 	}
-
+	
 	argument = one_argument (argument, buf);
 	argument = one_argument (argument, buf2);
-
+	
 	if (!*buf || !*buf2 || !atoi (buf) || !atoi (buf2))
 	{
 		send_to_char ("mclone <original vnum> <new vnum>   - copy a mobile prototype.\n", ch);
 		return;
 	}
-
+	
 	oldVNum = atoi (buf);
 	newVNum = atoi (buf2);
-
+	
 	if (!vtom (oldVNum))
 	{
 		send_to_char ("No such prototype exists.", ch);
 		return;
 	}
-
+	
 	if (vtom (newVNum))
 	{
 		send_to_char ("A mob prototype already exists with your target vnum.\n", ch);
 		return;
 	}
-
+	
 	if (newVNum < 1 || newVNum > 99999)
 	{
 		send_to_char ("VNums must be between 1 and 99999.\n", ch);
 		return;
 	}
-
+	
 	newmob = new_char (0); /* Creates mob. */
 	source = vtom (oldVNum);
 	m = newmob->mob;
 	sm = source->mob;
-
+	
 	m->nVirtual = newVNum;
 	m->zone = newVNum / ZONE_SIZE;
 	m->lnext = NULL;
 	m->hnext = NULL;
-
+	
 	for (i = 0; i <= 100; i++)
 	{
 		newmob->enforcement[i] = source->enforcement[i];
 	}
 	newmob->act = source->act;
-
-	newmob->name = duplicateString (source->name);
-	newmob->tname = duplicateString (source->tname);
-	newmob->short_descr = duplicateString (source->short_descr);
-	newmob->long_descr = duplicateString (source->long_descr);
-	newmob->description = duplicateString (source->description);
-	newmob->clans = duplicateString (source->clans);
-	newmob->travel_str = duplicateString (source->travel_str);
-
+	
+	newmob->name = str_dup (source->name);
+	newmob->tname = str_dup (source->tname);
+	newmob->short_descr = str_dup (source->short_descr);
+	newmob->long_descr = str_dup (source->long_descr);
+	newmob->description = str_dup (source->description);
+	newmob->clans = str_dup (source->clans);
+	newmob->travel_str = str_dup (source->travel_str);
+	
 	newmob->str = source->str;
 	newmob->intel = source->intel;
 	newmob->wil = source->wil;
@@ -12990,7 +12940,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->tmp_con = source->tmp_con;
 	newmob->tmp_aur = source->tmp_aur;
 	newmob->tmp_agi = source->tmp_agi;
-
+	
 	newmob->balance = source->balance;
 	newmob->bmi = source->bmi;
 	newmob->body_proto = source->body_proto;
@@ -12998,7 +12948,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->height = source->height;
 	newmob->frame = source->frame;
 	newmob->size = source->size;
-
+	
 	newmob->sex = source->sex;
 	newmob->age = source->age;
 	newmob->race = source->race;
@@ -13010,7 +12960,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->carry_weight = source->carry_weight;
 	newmob->carry_items = source->carry_items;
 	newmob->lastregen = source->lastregen;
-
+	
 	newmob->fight_percentage = source->fight_percentage;
 	newmob->primary_delay = source->primary_delay;
 	newmob->secondary_delay = source->secondary_delay;
@@ -13019,7 +12969,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->natural_delay = source->natural_delay;
 	newmob->speed = source->speed;
 	newmob->defensive = source->defensive;
-
+	
 	if (source->spells)
 	{
 		for (i = 0; i <= MAX_LEARNED_SPELLS; i++)
@@ -13030,16 +12980,16 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 			newmob->spells[i][3] = source->spells[i][3];
 		}
 	}
-
+	
 	newmob->mana = source->mana;
 	newmob->max_mana = source->max_mana;
 	newmob->harness = source->harness;
 	newmob->max_harness = source->max_harness;
 	newmob->curse = source->curse;
-
+	
 	newmob->hire_storeroom = source->hire_storeroom;
 	newmob->hire_storeobj = source->hire_storeobj;
-
+	
 	newmob->speaks = source->speaks;
 	newmob->psionic_talents = source->psionic_talents;
 	for (i = 0; i <= MAX_SKILLS; i++)
@@ -13047,7 +12997,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 		newmob->skills[i] = source->skills[i];
 	}
 	newmob->offense = source->offense;
-
+	
 	newmob->morph_type = source->morph_type;
 	newmob->morph_time = source->morph_time;
 	newmob->morphto = source->morphto;
@@ -13057,19 +13007,19 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	newmob->deity = source->deity;
 	newmob->color = source->color;
 	newmob->writes = source->writes;
-
-	m->owner = duplicateString (sm->owner);
-
+	
+	m->owner = str_dup (sm->owner);
+	
 	m->skinned_vnum = sm->skinned_vnum;
 	m->carcass_vnum = sm->carcass_vnum;
-
+	
 	m->damnodice = sm->damnodice;
 	m->damsizedice = sm->damsizedice;
 	m->damroll = sm->damroll;
 	m->min_height = sm->min_height;
 	m->max_height = sm->max_height;
 	m->size = sm->size;
-
+	
 	m->merch_seven = sm->merch_seven;
 	m->helm_room = sm->helm_room;
 	m->access_flags = sm->access_flags;
@@ -13078,58 +13028,57 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 	m->reset_cmd = sm->reset_cmd;
 	m->currency_type = sm->currency_type;
 	m->jail = sm->jail;
-
+	
 	if (sm->resets)
 	{
-		m->resets->type = sm->resets->type;
-		m->resets->command = duplicateString (sm->resets->command);
-		m->resets->planned = sm->resets->planned;
+			m->resets->type = sm->resets->type;
+			m->resets->command = str_dup (sm->resets->command);
+			m->resets->planned = sm->resets->planned;
 	}
-
+		
 	if (source->moves)
 	{
 		newmob->moves->dir = source->moves->dir;
 		newmob->moves->flags = source->moves->flags;
 		newmob->moves->desired_time = source->moves->desired_time;
 		newmob->moves->next = NULL;
-		newmob->moves->travel_str = duplicateString (source->moves->travel_str);
+		newmob->moves->travel_str = str_dup (source->moves->travel_str);
 	}
-
+	
 	if (source->shop)
 	{
 		newmob->shop = new SHOP_DATA;
-		newmob->shop->negotiations = NULL;
 		newmob->shop->markup = source->shop->markup;
 		newmob->shop->discount = source->shop->discount;
 		if (source->shop->shop_vnum)
 			newmob->shop->shop_vnum = source->shop->shop_vnum;
 		if (source->shop->store_vnum)
 			newmob->shop->store_vnum = source->shop->store_vnum;
-
+			
 		if (source->shop->no_such_item1)
-			newmob->shop->no_such_item1 = duplicateString(source->shop->no_such_item1);
+			newmob->shop->no_such_item1 = str_dup(source->shop->no_such_item1);
 		if (source->shop->no_such_item2)
-			newmob->shop->no_such_item2 = duplicateString(source->shop->no_such_item2);
+			newmob->shop->no_such_item2 = str_dup(source->shop->no_such_item2);
 		if (source->shop->missing_cash1)
-			newmob->shop->missing_cash1 = duplicateString(source->shop->missing_cash1);
+			newmob->shop->missing_cash1 = str_dup(source->shop->missing_cash1);
 		if (source->shop->missing_cash2)
-			newmob->shop->missing_cash2 = duplicateString(source->shop->missing_cash2);
+			newmob->shop->missing_cash2 = str_dup(source->shop->missing_cash2);
 		if (source->shop->do_not_buy)
-			newmob->shop->do_not_buy = duplicateString(source->shop->do_not_buy);
+			newmob->shop->do_not_buy = str_dup(source->shop->do_not_buy);
 		if (source->shop->message_buy)
-			newmob->shop->message_buy = duplicateString(source->shop->message_buy);
+			newmob->shop->message_buy = str_dup(source->shop->message_buy);
 		if (source->shop->message_sell)
-			newmob->shop->message_sell = duplicateString(source->shop->message_sell);
-
-
+			newmob->shop->message_sell = str_dup(source->shop->message_sell);
+		
+		
 		if (source->shop->delivery)
 		{
 			for (i = 0; i <= MAX_DELIVERIES; i++)
-			{
+			{	
 				newmob->shop->delivery[i] = source->shop->delivery[i];
 			}
 		}
-
+		
 		if (source->shop->trades_in)
 		{
 			for (i = 0; i <= MAX_TRADES_IN; i++)
@@ -13137,7 +13086,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 				newmob->shop->trades_in[i] = source->shop->trades_in[i];
 			}
 		}
-
+		
 		newmob->shop->econ_flags1 = source->shop->econ_flags1;
 		newmob->shop->econ_flags2 = source->shop->econ_flags2;
 		newmob->shop->econ_flags3 = source->shop->econ_flags3;
@@ -13165,7 +13114,7 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			newmob->shop->materials = source->shop->materials;
 		}
-
+		
 		if (newmob->shop->negotiations)
 		{
 			newmob->shop->negotiations->obj_vnum = source->shop->negotiations->obj_vnum;
@@ -13175,20 +13124,20 @@ do_mclone (CHAR_DATA * ch, char *argument, int cmd)
 			newmob->shop->negotiations->true_if_buying = source->shop->negotiations->true_if_buying;
 			newmob->shop->negotiations->next = NULL;
 		}
-
+		
 		newmob->shop->opening_hour = source->shop->opening_hour;
 		newmob->shop->closing_hour = source->shop->closing_hour;
 		newmob->shop->exit = source->shop->exit;
 	}
-
+	
 	newmob->hunger = -1;
 	newmob->thirst = -1;
-
+	
 	add_mob_to_hash (newmob);
-
+	
 	result << "Copied mobile #C" << sm->nVirtual << "#0 ('#2" << source->short_descr << "#0') to #C" << m->nVirtual << "#0." << std::endl;
 	send_to_char (result.str().c_str(), ch);
-
+	
 }
 
 void
@@ -13201,49 +13150,49 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	int oldVNum;
 	int newVNum;
 	std::stringstream result;
-
+	
 	if (!ch->pc)
 	{
 		send_to_char ("This is a PC only command.\n", ch);
 		return;
 	}
-
+	
 	argument = one_argument (argument, buf);
 	argument = one_argument (argument, buf2);
-
+	
 	if (!*buf || !*buf2 || !atoi (buf) || !atoi (buf2))
 	{
 		send_to_char ("oclone <original vnum> <new vnum>   - copy an object prototype.\n", ch);
 		return;
 	}
-
+	
 	oldVNum = atoi (buf);
 	newVNum = atoi (buf2);
-
+	
 	if (!vtoo (oldVNum))
 	{
 		send_to_char ("No such prototype exists.\n", ch);
 		return;
 	}
-
+	
 	if (vtoo (newVNum))
 	{
 		send_to_char ("A prototype already exists with your target vnum.\n", ch);
 		return;
 	}
-
-	if (newVNum < 0 || newVNum >= 110000)
+	
+	if (newVNum < 0 || newVNum > 100000)
 	{
-		send_to_char ("VNums must be between 1 and 110000.\n", ch);
+		send_to_char ("VNums must be between 1 and 99999.\n", ch);
 		return;
 	}
-
+	
 	clear_object (newObj);
 	source = vtoo (oldVNum);
-
+	
 	newObj->nVirtual = newVNum;
-	newObj->zone = newVNum / OBJECT_ZONE_SIZE;
-
+	newObj->zone = newVNum / ZONE_SIZE;
+	
 	newObj->clock = source->clock;
 	newObj->morphTime = source->morphTime;
 	newObj->morphto = source->morphto;
@@ -13265,7 +13214,7 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	newObj->coldload_id = source->coldload_id;
 	newObj->sold_at = source->sold_at;
 	newObj->sold_by = source->sold_by;
-
+	
 	newObj->obj_flags = source->obj_flags;
 	newObj->o.od.value[0] = source->o.od.value[0];
 	newObj->o.od.value[1] = source->o.od.value[1];
@@ -13274,7 +13223,7 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	newObj->o.od.value[4] = source->o.od.value[4];
 	newObj->o.od.value[5] = source->o.od.value[5];
 	newObj->o.od.value[6] = source->o.od.value[6];
-
+	
 	newObj->instances = 0;
 	newObj->next = NULL;
 	newObj->lnext = NULL;
@@ -13282,31 +13231,31 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 	newObj->contains = NULL;
 	newObj->carried_by = NULL;
 	newObj->equiped_by = NULL;
-
-	newObj->name = duplicateString (source->name);
-	newObj->description = duplicateString (source->description);
-	newObj->short_description = duplicateString (source->short_description);
-	newObj->full_description = duplicateString (source->full_description);
-	newObj->omote_str = duplicateString (source->omote_str);
-	newObj->ink_color = duplicateString (source->ink_color);
-	newObj->desc_keys = duplicateString (source->desc_keys);
-	newObj->var_color = duplicateString (source->var_color);
-	newObj->book_title = duplicateString (source->book_title);
-	newObj->indoor_desc = duplicateString (source->indoor_desc);
-
-	if (source->ex_description)
+	
+	newObj->name = str_dup (source->name);
+	newObj->description = str_dup (source->description);
+	newObj->short_description = str_dup (source->short_description);
+	newObj->full_description = str_dup (source->full_description);
+	newObj->omote_str = str_dup (source->omote_str);
+	newObj->ink_color = str_dup (source->ink_color);
+	newObj->desc_keys = str_dup (source->desc_keys);
+	newObj->var_color = str_dup (source->var_color);
+	newObj->book_title = str_dup (source->book_title);
+	newObj->indoor_desc = str_dup (source->indoor_desc);
+	
+	if (source->ex_description) 
 	{
-		newObj->ex_description->keyword = duplicateString (source->ex_description->keyword);
-		newObj->ex_description->description = duplicateString (source->ex_description->description);
+		newObj->ex_description->keyword = str_dup (source->ex_description->keyword);
+		newObj->ex_description->description = str_dup (source->ex_description->description);
 	}
-
-	if (source->wdesc)
+	
+	if (source->wdesc) 
 	{
 		newObj->wdesc->language = source->wdesc->language;
-		newObj->wdesc->description = duplicateString (source->wdesc->description);
+		newObj->wdesc->description = str_dup (source->wdesc->description);
 	}
-
-	if (source->wounds)
+	
+	if (source->wounds) 
 	{
 		newObj->wounds->damage = source->wounds->damage;
 		newObj->wounds->bleeding = source->wounds->bleeding;
@@ -13317,39 +13266,39 @@ do_oclone (CHAR_DATA * ch, char *argument, int cmd)
 		newObj->wounds->lasthealed = source->wounds->lasthealed;
 		newObj->wounds->lastbled = source->wounds->lastbled;
 		newObj->wounds->lastbound = source->wounds->lastbound;
-		newObj->wounds->location = duplicateString (source->wounds->location);
-		newObj->wounds->type = duplicateString (source->wounds->type);
-		newObj->wounds->name = duplicateString (source->wounds->name);
-		newObj->wounds->severity = duplicateString (source->wounds->severity);
+		newObj->wounds->location = str_dup (source->wounds->location);
+		newObj->wounds->type = str_dup (source->wounds->type);
+		newObj->wounds->name = str_dup (source->wounds->name);
+		newObj->wounds->severity = str_dup (source->wounds->severity);
 	}
-
-	if (source->writing)
+	
+	if (source->writing) 
 	{
 		newObj->writing->language = source->writing->language;
 		newObj->writing->script = source->writing->script;
 		newObj->writing->skill = source->writing->skill;
 		newObj->writing->torn = source->writing->torn;
-		newObj->writing->message = duplicateString (source->writing->message);
-		newObj->writing->author = duplicateString (source->writing->author);
-		newObj->writing->date = duplicateString (source->writing->date);
-		newObj->writing->ink = duplicateString (source->writing->ink);
+		newObj->writing->message = str_dup (source->writing->message);
+		newObj->writing->author = str_dup (source->writing->author);
+		newObj->writing->date = str_dup (source->writing->date);
+		newObj->writing->ink = str_dup (source->writing->ink);
 	}
-
-	if (source->lodged)
+	
+	if (source->lodged) 
 	{
 		newObj->lodged->vnum = source->lodged->vnum;
-		newObj->lodged->location = duplicateString (source->lodged->location);
-	}
-
-	if (source->clan_data)
+		newObj->lodged->location = str_dup (source->lodged->location);
+	} 
+	
+	if (source->clan_data) 
 	{
-		newObj->clan_data->name = duplicateString (source->clan_data->name);
-		newObj->clan_data->rank = duplicateString (source->clan_data->rank);
-	}
-
+		newObj->clan_data->name = str_dup (source->clan_data->name);
+		newObj->clan_data->rank = str_dup (source->clan_data->rank);
+	} 
+	
 	add_obj_to_hash (newObj);
 	ch->pc->edit_obj = newVNum;
-
+	
 	result << "Copied object #C" << source->nVirtual << "#0 ('#2" << source->short_description << "#0') to #C" << newObj->nVirtual << "#0." << std::endl;
 	send_to_char (result.str().c_str(), ch);
 
@@ -13468,7 +13417,7 @@ reset_delete (CHAR_DATA * mob, int reset_num)
 	{
 		free_reset = mob->mob->resets;
 		mob->mob->resets = free_reset->next;
-		free_mem (free_reset);
+		mem_free (free_reset);
 		return 1;
 	}
 
@@ -13481,7 +13430,7 @@ reset_delete (CHAR_DATA * mob, int reset_num)
 	free_reset = reset->next;
 	reset->next = free_reset->next;
 
-	free_mem (free_reset);
+	mem_free (free_reset);
 
 	return 1;
 }
@@ -13549,11 +13498,11 @@ do_resets (CHAR_DATA * ch, char *argument, int cmd)
 	if (!strcmp (buf, "reply"))
 	{
 
-		reset = (RESET_DATA *) alloc (sizeof (RESET_DATA));
+		reset = (RESET_DATA *) alloc (sizeof (RESET_DATA), 33);
 
 		reset->type = RESET_REPLY;
 
-		reset->command = duplicateString (argument);
+		reset->command = str_dup (argument);
 
 		reset->when.month = -1;
 		reset->when.day = -1;
@@ -13639,9 +13588,9 @@ do_resets (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	reset = (RESET_DATA *) alloc (sizeof (RESET_DATA));
+	reset = (RESET_DATA *) alloc (sizeof (RESET_DATA), 33);
 
-	reset->command = duplicateString (argument);
+	reset->command = str_dup (argument);
 
 	reset->type = RESET_TIMED;
 
@@ -13975,7 +13924,7 @@ rlist_show (ROOM_DATA * troom, int sector, int header)
 
 	strcat (b_buf, "\n");
 
-	return;
+	return;  
 }
 
 /******
@@ -14036,8 +13985,8 @@ do_rlist (CHAR_DATA * ch, char *argument, int cmd)
 		inc_flags = 1;
 		sector = index_lookup (sector_types, buf);
 
-		if (strlen (buf) > 1
-			&& isalpha (*buf)
+		if (strlen (buf) > 1 
+			&& isalpha (*buf) 
 			&& (sector != -1))
 		{
 			argument = one_argument (argument, buf);
@@ -14111,7 +14060,7 @@ do_rlist (CHAR_DATA * ch, char *argument, int cmd)
 		case '/':
 			inc_flags = 0;
 
-		case '$':
+		case '$':	
 			//argument = one_argument (argument, buf);
 
 			if (!buf[1])
@@ -14317,8 +14266,8 @@ do_name (CHAR_DATA *ch, char *argument, int cmd)
 			return;
 		}
 		keywords += " " + ThisArg;
-		free_mem(tch->name);
-		tch->name = duplicateString ((char *) keywords.c_str());
+		mem_free(tch->name);
+		tch->name = str_dup ((char *) keywords.c_str());
 		if (!IS_NPC(tch))
 			save_char(tch, true);
 		else
@@ -14369,8 +14318,8 @@ do_name (CHAR_DATA *ch, char *argument, int cmd)
 					NewKeywords += " " + sdesc;
 			}
 		}
-		free_mem(tch->name);
-		tch->name = duplicateString((char *) NewKeywords.c_str());
+		mem_free(tch->name);
+		tch->name = str_dup((char *) NewKeywords.c_str());
 		if (!IS_NPC(tch))
 			save_char(tch, true);
 		else

@@ -19,32 +19,32 @@
 void
 char__do_cards (CHAR_DATA * ch, char *argument, int cmd)
 {
-	char buf[AVG_STRING_LENGTH] = "";
-	OBJ_DATA *card = NULL;
+  char buf[AVG_STRING_LENGTH] = "";
+  OBJ_DATA *card = NULL;
 
-	if (ch->right_hand && GET_ITEM_TYPE (ch->right_hand) == ITEM_CARD)
+  if (ch->right_hand && GET_ITEM_TYPE (ch->right_hand) == ITEM_CARD)
+    {
+      send_to_char ("<carried in right hand>  ", ch);
+      show_obj_to_char (ch->right_hand, ch, 1);
+      for (card = ch->right_hand; card != NULL; card = card->next_content)
 	{
-		send_to_char ("<carried in right hand>  ", ch);
-		show_obj_to_char (ch->right_hand, ch, 1);
-		for (card = ch->right_hand; card != NULL; card = card->next_content)
-		{
-			strcpy (buf, "    #2");
-			strcat (buf, card->short_description);
-			strcat (buf, "#0\n");
-			send_to_char (buf, ch);
-		}
+	  strcpy (buf, "    #2");
+	  strcat (buf, card->short_description);
+	  strcat (buf, "#0\n");
+	  send_to_char (buf, ch);
 	}
-	if (ch->left_hand && GET_ITEM_TYPE (ch->left_hand) == ITEM_CARD)
+    }
+  if (ch->left_hand && GET_ITEM_TYPE (ch->left_hand) == ITEM_CARD)
+    {
+      send_to_char ("<carried in left hand>  ", ch);
+      show_obj_to_char (ch->left_hand, ch, 1);
+      for (card = ch->left_hand; card != NULL; card = card->next_content)
 	{
-		send_to_char ("<carried in left hand>  ", ch);
-		show_obj_to_char (ch->left_hand, ch, 1);
-		for (card = ch->left_hand; card != NULL; card = card->next_content)
-		{
-			strcpy (buf, "    #2");
-			strcat (buf, obj_short_desc (card));
-			strcat (buf, "#0\n");
-			send_to_char (buf, ch);
-		}
+	  strcpy (buf, "    #2");
+	  strcat (buf, obj_short_desc (card));
+	  strcat (buf, "#0\n");
+	  send_to_char (buf, ch);
 	}
+    }
 
 }

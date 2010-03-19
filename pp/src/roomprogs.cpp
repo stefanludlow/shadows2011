@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  roomprogs.c : Room Scripting Module                www.middle-earth.us |
+|  roomprogs.c : Room Scripting Module                www.middle-earth.us | 
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -29,7 +29,7 @@
 extern rpie::server engine;
 
 /* script program commands */
-#define MAKE_STRING(msg) (((std::ostringstream&) (std::ostringstream() << std::boolalpha << msg)).str())
+#define MAKE_STRING(msg) (((std::ostringstream&) (std::ostringstream() << std::boolalpha << msg)).str())  
 #define RP_ATECHO 	0
 #define RP_GIVE		1
 #define RP_TAKE		2
@@ -69,7 +69,7 @@ extern rpie::server engine;
 #define RP_SYSTEM	36	/* submit a system message */
 #define RP_CLAN	37	/* send a message to clan members */
 #define RP_TRANS_GROUP	38	/* send a message to clan members */
-#define RP_SET		39
+#define RP_SET		39	
 #define RP_CRIMINALIZE  40      /* criminalize a person or room */
 #define RP_STRIP        41      /* takes a person's equipment and puts it all neatly in a bag */
 #define RP_CLAN_ECHO         42      /* adds people to a clan at a certain rank */
@@ -241,7 +241,7 @@ is_variable_in_list (room_prog_var *& variable_list, std::string variable_name)
 		if (!tvar->name.compare(variable_name))
 			return true;
 	}
-	return false;
+	return false; 
 }
 
 std::string
@@ -298,7 +298,7 @@ add_variable_to_list (room_prog_var *& variable_list, std::string variable_name,
 	room_prog_var *tvar;
 
 	if (!variable_list)
-	{
+	{	
 		variable_list = new room_prog_var;
 		variable_list->name = variable_name;
 		variable_list->data = variable_data;
@@ -421,7 +421,7 @@ r_isname (char *str, char *namelist)
 	}
 }
 
-// called by command_interpreter if there is a
+// called by command_interpreter if there is a 
 // program in the user's room.
 int
 r_program (CHAR_DATA * ch, char *argument)
@@ -469,7 +469,7 @@ m_prog (CHAR_DATA * ch, char * argument)
 		return 0;
 
 	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range;
-	range = mob_prog_list.equal_range(ch->mob->nVirtual);
+	range = mob_prog_list.equal_range(ch->mob->nVirtual); 
 	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
 	{
 		if (!it->second.type)
@@ -555,7 +555,7 @@ o_prog (CHAR_DATA *ch, char *argument, room_prog prog)
 void
 rxp (CHAR_DATA *ch, char *prg, char *command, char *keyword, char *argument)
 {
-	// set null or empty argument to 'NOARG'
+    // set null or empty argument to 'NOARG'
 	if (!argument || !*argument)
 		argument="NOARG";
 
@@ -656,12 +656,12 @@ rxp (CHAR_DATA *ch, char *prg, char *command, char *keyword, char *argument)
 				line.erase(first_index, index-first_index+1);
 			}
 		}
-
+		
 		while (line.find("\\n") != std::string::npos)
 		{
 			line.replace(line.find("\\n"), 2, "\n");
 		}
-
+		
 		while (line.find("\\t") != std::string::npos)
 		{
 			line.replace(line.find("\\t"), 2, "\t");
@@ -750,7 +750,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 	while (*arg != '(' && *arg != '\0') {
 		arg++;
 	}
-
+	
 	if (*arg != '\0') {
 		arg++;
 	}
@@ -769,16 +769,16 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 	}
 
 	size_t sizeTemp = temp.length();
-
+	
 	if (sizeTemp > 79) {
 		ifin[nNest] = 1;
 		return;
 	}
 
 	strncpy (tmp2, temp.c_str(), 79);
-
+	
 	tempFind = temp.find_first_of(",");
-
+	
 	if (tempFind != std::string::npos) {
 		size_t dSize = temp.length() - tempFind;
 		//dbuf++;
@@ -956,7 +956,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 
 		return;
 	}
-
+	
 	else if (!strncmp(sarg, "admin", 5))
 	{
 		if (!GET_TRUST(ch))
@@ -970,7 +970,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 			ifin[nNest] = 1;
 		return;
 	}
-
+	
 	else if (!strncmp (sarg, "delayed", 7))
 	{
 		if (!get_second_affect (ch, SA_COMMAND, NULL))
@@ -1093,7 +1093,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 		}
 		else if (!strncmp (dbuf, "harad", 5))
 		{
-			currency = 3;
+		    currency = 3;
 		}
 		else if (!strncmp (dbuf, "northman", 8) || !strncmp(dbuf, "shillings", 9))
 		{
@@ -1203,7 +1203,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 				{
 					if (!IS_NPC(tch))
 						continue;
-
+				
 					if (tch->mob->nVirtual == atoi(dbuf))
 						break;
 				}
@@ -1235,7 +1235,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 		}
 		return;
 	}
-
+	
 	/* Check to see if a flag is set on a given room */
 	/* Usage: if flag(room-flag,roomvnum)            */
 
@@ -1265,10 +1265,10 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 		}
 		return;
 	}
-
+	
 	/* Check to see if person is in a group. */
 	/* Usage: if in_group()   					  */
-
+	
 	else if (!strncmp (sarg, "in_group", 8))
 	{
 		if (!is_with_group (ch))
@@ -1378,7 +1378,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 	/* will return true if wanted time is equal to or greater than "time". Current zone is -1. */
 
 	else if (!strncmp (sarg, "wanted", 6))
-	{
+	{ 
 		int zone = atol(rbuf);
 		int test = atol(dbuf);
 
@@ -1466,32 +1466,32 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 	}
 
 	else if (!strncmp (sarg, "statcheck", 9))
-	{
+  	{
 		nStat = number(1,strtol (dbuf, NULL, 10));
 		if (!str_cmp (rbuf, "str") && GET_STR (ch) >= nStat)
-		{
-			return;
-		}
-		else if (!str_cmp (rbuf, "dex") && GET_DEX (ch) >= nStat)
-		{
-			return;
-		}
-		else if (!str_cmp (rbuf, "con") && GET_CON (ch) >= nStat)
-		{
-			return;
-		}
-		else if (!str_cmp (rbuf, "int") && GET_INT (ch) >= nStat)
-		{
-			return;
-		}
-		else if (!str_cmp (rbuf, "wil") && GET_WIL (ch) >= nStat)
-		{
-			return;
-		}
-		else if (!str_cmp (rbuf, "aur") && GET_AUR (ch) >= nStat)
-		{
-			return;
-		}
+                {
+                        return;
+                }
+                else if (!str_cmp (rbuf, "dex") && GET_DEX (ch) >= nStat)
+                {
+                        return;
+                }
+                else if (!str_cmp (rbuf, "con") && GET_CON (ch) >= nStat)
+                {
+                        return;
+                }
+                else if (!str_cmp (rbuf, "int") && GET_INT (ch) >= nStat)
+                {
+                        return;
+                }
+                else if (!str_cmp (rbuf, "wil") && GET_WIL (ch) >= nStat)
+                {
+                        return;
+                }
+                else if (!str_cmp (rbuf, "aur") && GET_AUR (ch) >= nStat)
+                {
+                        return;
+                }
 		else if (!str_cmp (rbuf, "agi") && GET_AGI (ch) >= nStat)
 		{
 			return;
@@ -1602,7 +1602,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 				return;
 			}
 		}
-
+		
 		ifin[nNest] = 1;
 		if (tmp_ch->right_hand)
 		{
@@ -1997,27 +1997,27 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 	case RP_ATECHO:
 		if (!ifin[nNest])
 			r_atecho (ch, arg);
-
+		
 		return 1;
 	case RP_OBJVNUM:
 		if (!ifin[nNest])
 			r_objvnum(ch, arg, variable_list);
-
+			
 		return 1;
 	case RP_RANDOMOBJ:
 		if (!ifin[nNest])
 			r_randomobj(ch, arg, variable_list);
-
+		
 		return 1;
 	case RP_LOADOBJ:
 		if (!ifin[nNest])
 			r_load_obj (ch, arg);
-
+		
 		return 1;
 	case RP_TAKEMONEY:
 		if (!ifin[nNest])
 			r_takemoney(ch, arg);
-
+		
 		return 1;
 	case RP_COPPER_TO_SHILLINGS:
 		if (!ifin[nNest])
@@ -2026,24 +2026,24 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 	case RP_EXIT:
 		if (!ifin[nNest])
 			r_exit (ch, arg);
-
+		
 		return 1;
 	case RP_LINK:
 		if (!ifin[nNest])
 			r_link (ch, arg);
-
+		
 		return 1;
 	case RP_ATLOOK:
 		if (!ifin[nNest])
 			r_atlook (ch, arg);
-
+		
 		return 1;
 	case RP_TRANS:
 		if (!ifin[nNest])
 		{
 			if (!vtor (atoi (arg)))
 			{
-
+				
 				return 1;
 			}
 			if (ch->mount)
@@ -2054,14 +2054,14 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 			char_from_room (ch);
 			char_to_room (ch, vtor (atoi (arg))->nVirtual);
 		}
-
+		
 		return 1;
 	case RP_TRANSMOB:
 		if (!ifin[nNest])
 		{
 			r_transmob (ch, arg);
 		}
-
+		
 		return 1;
 	case RP_VSTR:
 		if (!ifin[nNest])
@@ -2069,12 +2069,12 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 			ref (arg, tmp);
 			act (tmp, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 		}
-
+		
 		return 1;
 	case RP_VBR:
 		if (!ifin[nNest])
 			send_to_char ("\n", ch);
-
+		
 		return 1;
 	case RP_OBR:
 		if (!ifin[nNest])
@@ -2087,96 +2087,96 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 			ref (arg, tmp);
 			act (tmp, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
 		}
-
+		
 		return 1;
 	case RP_TEACH:
 		if (!ifin[nNest])
 			r_teach (ch, arg);
-
+		
 		return 1;
 	case RP_UNLINK:
 		if (!ifin[nNest])
 			r_unlink (ch, arg);
-
+		
 		return 1;
 	case RP_UNEXIT:
 		if (!ifin[nNest])
 			r_unexit (ch, arg);
-
+		
 		return 1;
 	case RP_GIVE:
 		if (!ifin[nNest])
 			r_give (ch, arg);
-
+		
 		return 1;
 	case RP_TAKE:
 		if (!ifin[nNest])
 			r_take (ch, arg);
-
+		
 		return 1;
 	case RP_PUT:
 		if (!ifin[nNest])
 			r_put (ch, arg);
-
+		
 		return 1;
 	case RP_GET:
 		if (!ifin[nNest])
 			r_get (ch, arg);
-
+		
 		return 1;
 	case RP_GETCASH:
 	case RP_GIVECASH:
-
+		
 		return 1;
 	case RP_STAYPUT:
 		if (!ifin[nNest])
 			r_stayput (ch, arg);
-
+		
 		return 1;
 	case RP_ZONE_ECHO:
 		if (!ifin[nNest])
 			r_zone_echo (ch, arg);
-
+		
 		return 1;
 	case RP_ATWRITE:
 		if (!ifin[nNest])
 			r_atwrite (ch, arg);
-
+		
 		return 1;
 	case RP_SYSTEM:
 		if (!ifin[nNest])
 			r_system (ch, arg);
-
+		
 		return 1;
 	case RP_CLAN_ECHO:
 		if (!ifin[nNest])
 			r_clan_echo (ch, arg);
-
+		
 		return 1;
 	case RP_TRANS_GROUP:
 		if (!ifin[nNest])
 			r_trans_group (ch, arg);
-
+		
 		return 1;
 	case RP_SET:
 		if (!ifin[nNest])
 			r_set (ch, arg, variable_list);
-
+		
 		return 1;
 	case RP_LOADMOB:
 		if (!ifin[nNest])
 			r_loadmob (ch, arg);
-
+		
 		return 1;
 	case RP_LOAD_CLONE:
 		if (!ifin[nNest])
 			r_load_clone (ch, arg);
-
+		
 		return 1;
 	case RP_EXMOB:
 		if (!ifin[nNest])
 			r_exmob (ch, arg);
-
+		
 		return 1;
 
 	case RP_MCOPY:
@@ -2188,19 +2188,19 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 	case RP_FORCE:
 		if (!ifin[nNest])
 			r_force (ch, arg);
-
+		
 		return 1;
 	case RP_IF:
 		if (!ifin[nNest])
 			reval (ch, arg, variable_list);
 		ifin[nNest + 1] = ifin[nNest];
 		nNest++;
-
+		
 		return 1;
 	case RP_FI:
 		--nNest;
 		ifin[nNest] = ifin[nNest - 1];
-
+		
 		return 1;
 	case RP_ELSE:
 		nNest--;
@@ -2210,68 +2210,68 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 		}
 		ifin[nNest + 1] = ifin[nNest];
 		nNest++;
-
+		
 		return 1;
 	case RP_RFTOG:
 		if (!ifin[nNest])
 			r_rftog (ch, arg);
-
+		
 		return 1;
 	case RP_PAIN:
 		if (!ifin[nNest])
 			r_pain (ch, arg);
-
+		
 		return 1;
 	case RP_ATREAD:
 		if (!ifin[nNest])
 			r_atread (ch, arg);
-
+		
 		return 1;
 	case RP_PURGE:
 		if (!ifin[nNest])
 			r_purge (ch, arg);
-
+		
 		return 1;
 	case RP_CRIMINALIZE:
 		if (!ifin[nNest])
 			r_criminalize (ch, arg);
-
+		
 		return 1;
 	case RP_STRIP:
 		if (!ifin[nNest])
 			r_strip (ch, arg);
-
+		
 		return 1;
 	case RP_DOITANYWAY:
 		if (!ifin[nNest])
 			r_doitanyway(ch, arg, command, keyword, argument);
-
+		
 		return 1;
 	case RP_CLAN:
 		if (!ifin[nNest])
 			r_clan (ch, arg);
-
+		
 		return 1;
 	case RP_DELAY:
 		if (!ifin[nNest])
 			r_delay (ch, arg);
-
+		
 		return 1;
 	case RP_HALT:
 		if (!ifin[nNest])
 		{
-
+			
 			return 0;
 		}
 		else
 		{
-
+			
 			return 1;
 		}
 	case RP_DOOR:
 		if (!ifin[nNest])
 			r_door (ch, arg);
-
+		
 		return 1;
 	case RP_TALLY:
 		if (!ifin[nNest])
@@ -2284,7 +2284,7 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 		return 1;
 	default:
 		//system_log ("ERROR: unknown command in program", true);
-
+		
 		return -1;
 	}
 }
@@ -2492,7 +2492,7 @@ do_mpcmd (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (count == iprognum)
 		{
-			it->second.command = duplicateString((char *) strArgument.c_str());
+			it->second.command = add_hash((char *) strArgument.c_str());
 			std::string output;
 			output = "Installed command(s) [#6" + strArgument + "#0] for mob prog number #6" + prognum + "#0 for mobile vnum [#2" + vnum + "#0].\n";
 			send_to_char(output.c_str(), ch);
@@ -2545,7 +2545,7 @@ do_mpkey (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (count == iprognum)
 		{
-			it->second.keys = duplicateString((char *) strArgument.c_str());
+			it->second.keys = add_hash((char *) strArgument.c_str());
 			std::string output;
 			output = "Installed keyword(s) [#6" + strArgument + "#0] for mob prog number #6" + prognum + "#0 for mobile vnum [#2" + vnum + "#0].\n";
 			send_to_char(output.c_str(), ch);
@@ -2660,8 +2660,7 @@ do_mpprg (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			make_quiet (ch);
 			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
-			free_mem(ch->desc->descStr);
-			ch->desc->descStr = duplicateString(it->second.prog);
+			ch->desc->str = &it->second.prog;
 			it->second.prog = 0;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
@@ -2709,8 +2708,7 @@ do_mpapp (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			make_quiet (ch);
 			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
-			free_mem(ch->desc->descStr);
-			ch->desc->descStr = duplicateString(it->second.prog);
+			ch->desc->str = &it->second.prog;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
 		}
@@ -2826,7 +2824,7 @@ do_opadd (CHAR_DATA *ch, char *argument, int cmd)
 	prog.prog = "";
 	prog.keys = "";
 	prog.command = "";
-	prog.type = 5;
+	prog.type = 5;	
 
 	obj_prog_list.insert(std::pair<int, room_prog>(atoi(vnum.c_str()), prog));
 	int prog_num = 0;
@@ -2928,7 +2926,7 @@ do_opcmd (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (count == iprognum)
 		{
-			it->second.command = duplicateString((char *) strArgument.c_str());
+			it->second.command = add_hash((char *) strArgument.c_str());
 			std::string output;
 			output = "Installed command(s) [#6" + strArgument + "#0] for object prog number #6" + prognum + "#0 for Object vnum [#2" + vnum + "#0].\n";
 			send_to_char(output.c_str(), ch);
@@ -2971,8 +2969,8 @@ do_opkey (CHAR_DATA * ch, char *argument, int cmd)
 
 	/*if (strArgument.empty())
 	{
-	send_to_char("What keyword would you like to install?\n", ch);
-	return;
+		send_to_char("What keyword would you like to install?\n", ch);
+		return;
 	}*/
 
 	int count = 1;
@@ -2981,7 +2979,7 @@ do_opkey (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (count == iprognum)
 		{
-			it->second.keys = duplicateString((char *) strArgument.c_str());
+			it->second.keys = add_hash((char *) strArgument.c_str());
 			std::string output;
 			if (strArgument.empty())
 			{
@@ -3118,7 +3116,7 @@ do_opprg (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			make_quiet (ch);
 			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
-			ch->desc->descStr = duplicateString(it->second.prog);
+			ch->desc->str = &it->second.prog;
 			it->second.prog = 0;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
@@ -3166,8 +3164,7 @@ do_opapp (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			make_quiet (ch);
 			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
-			free_mem(ch->desc->descStr);
-			ch->desc->descStr = duplicateString(it->second.prog);
+			ch->desc->str = &it->second.prog;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
 		}
@@ -3185,7 +3182,7 @@ do_rpadd (CHAR_DATA * ch, char *argument, int cmd)
 {
 	struct room_prog *t, *old, *tmp;
 
-	t = new room_prog;
+	CREATE (t, struct room_prog, 1);
 
 	t->next = NULL;
 	t->command = NULL;
@@ -3231,7 +3228,7 @@ do_rpdel (CHAR_DATA * ch, char *argument, int cmd)
 				vtor (ch->in_room)->prg = tmp->next;
 			else
 				p->next = tmp->next;
-			free_mem (tmp);
+			mem_free (tmp);
 			send_to_char ("Done.\n\r", ch);
 			return;
 		}
@@ -3267,7 +3264,7 @@ do_rpcmd (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (i == j)
 		{
-			t->command = duplicateString (arg2);
+			t->command = add_hash (arg2);
 			send_to_char ("Command installed.\n\r", ch);
 			return;
 		}
@@ -3295,7 +3292,7 @@ do_rpkey (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (i == j)
 		{
-			t->keys = duplicateString (arg2);
+			t->keys = add_hash (arg2);
 			send_to_char ("Keywords installed.\n\r", ch);
 			return;
 		}
@@ -3326,8 +3323,7 @@ do_rpprg (CHAR_DATA * ch, char *argument, int cmd)
 			make_quiet (ch);
 			send_to_char ("Enter program now, Terminate entry with an '@'\n\r",
 				ch);
-			free_mem(ch->desc->descStr);
-			ch->desc->descStr = duplicateString(t->prog);
+			ch->desc->str = &t->prog;
 			t->prog = 0;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
@@ -3359,8 +3355,7 @@ do_rpapp (CHAR_DATA * ch, char *argument, int cmd)
 			make_quiet (ch);
 			send_to_char
 				("Append to program now, Terminate entry with an '@'\n\r", ch);
-			free_mem(ch->desc->descStr);
-			ch->desc->descStr = duplicateString(t->prog);
+			ch->desc->str = &t->prog;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
 		}
@@ -3491,14 +3486,15 @@ r_link (CHAR_DATA * ch, char *argument)
 		vtor (source_room->dir_option[dir]->to_room)->dir_option[rev_dir[dir]] =
 		0;
 
-	source_room->dir_option[dir] = new room_direction_data;
+	CREATE (source_room->dir_option[dir], struct room_direction_data, 1);
 	source_room->dir_option[dir]->general_description = 0;
 	source_room->dir_option[dir]->keyword = 0;
 	source_room->dir_option[dir]->exit_info = 0;
 	source_room->dir_option[dir]->key = -1;
 	source_room->dir_option[dir]->to_room = target_room->nVirtual;
 
-	target_room->dir_option[rev_dir[dir]] = new room_direction_data;
+	CREATE (target_room->dir_option[rev_dir[dir]], struct room_direction_data,
+		1);
 	target_room->dir_option[rev_dir[dir]]->general_description = 0;
 	target_room->dir_option[rev_dir[dir]]->keyword = 0;
 	target_room->dir_option[rev_dir[dir]]->exit_info = 0;
@@ -3577,7 +3573,7 @@ r_exit (CHAR_DATA * ch, char *argument)
 	}
 
 	if (!source_room->dir_option[dir])
-		source_room->dir_option[dir] = new room_direction_data;
+		CREATE (source_room->dir_option[dir], struct room_direction_data, 1);
 
 	source_room->dir_option[dir]->general_description = 0;
 	source_room->dir_option[dir]->keyword = 0;
@@ -3646,7 +3642,7 @@ r_set (CHAR_DATA * ch, char *argument, room_prog_var *& variable_list)
 			&& (*p == ' ' || *p == 'd'))
 		{
 			random_number[which_random] = dice (rolls, die);
-		}
+		}      
 	}
 	else if (!strncmp(var, "count", 5))
 	{
@@ -3677,7 +3673,7 @@ r_set (CHAR_DATA * ch, char *argument, room_prog_var *& variable_list)
 			room_vnum = atoi(var);
 		if (!room_vnum)
 			return;
-
+		
 		if (!vtor(room_vnum))
 			return;
 
@@ -3734,12 +3730,12 @@ r_tally (CHAR_DATA *ch, std::string argument, room_prog_var *&variable_list)
 	ROOM_DATA *room = NULL;
 	argument = one_argument(argument, buf);
 	if (buf.find("-1") != std::string::npos) // -1 means trigger puller
-	{
+	{	
 		tch = ch;
 		room = ch->room;
 		argument = one_argument(argument, buf); // Ignore next input
 	}
-	else
+	else 
 	{
 		std::string strroom;
 		argument = one_argument(argument, strroom);
@@ -3751,17 +3747,17 @@ r_tally (CHAR_DATA *ch, std::string argument, room_prog_var *&variable_list)
 		{
 			if (!vtor(atoi((char *) strroom.c_str())))
 				return;
-
+			
 			room = vtor(atoi((char *) strroom.c_str()));
 		}
-
+		
 		if (is_number((char *) buf.c_str()))
 		{
 			for (CHAR_DATA *xch = room->people; xch; xch = xch->next_in_room)
 			{
 				if (!IS_NPC(xch))
 					continue;
-
+				
 				if (xch->mob->nVirtual == atoi((char *) buf.c_str()))
 				{
 					tch = xch;
@@ -3769,14 +3765,14 @@ r_tally (CHAR_DATA *ch, std::string argument, room_prog_var *&variable_list)
 				}
 			}
 		}
-		else
+		else 
 		{
 			tch = get_char_room_vis2 (ch, room->nVirtual, (char *) buf.c_str());
 		}
 		if (!tch)
 			return;
 	}
-
+	
 	float total = 0.0;
 	OBJ_DATA *obj;
 	char buffer [MAX_STRING_LENGTH] = {'\0'};
@@ -3790,18 +3786,18 @@ r_tally (CHAR_DATA *ch, std::string argument, room_prog_var *&variable_list)
 			continue;
 		total += tally (obj, buffer, 1);
 	}
-
+	
 	std::string strTally = MAKE_STRING(total);
 	argument = one_argument (argument, buf);   // Get variable name
 	if (buf.empty())
 		return;
-
+		
 	if (is_variable_in_list(variable_list, buf))
 		set_variable_data(variable_list, buf, strTally);
 	else
 		add_variable_to_list(variable_list, buf, strTally);
-
-
+		
+	
 }
 
 // void
@@ -3828,79 +3824,79 @@ r_tally (CHAR_DATA *ch, std::string argument, room_prog_var *&variable_list)
 // }
 
 
-void
-r_atecho(CHAR_DATA *ch, char *argument)
-{
-	char   loc_str[MAX_INPUT_LENGTH] = {'\0'};
-	char   loc_str1[MAX_INPUT_LENGTH] = {'\0'};
-	char    *ploc_str;
-	char   *ploc_str1;
-	char   buf[MAX_INPUT_LENGTH] = {'\0'};
-	char   test_dat[2] = "-";
-	char   mt1[MAX_INPUT_LENGTH] = "              ";
-	int    room_span = 0;
-	int    first_room = 0;
-	int   last_room = 0;
+void 
+r_atecho(CHAR_DATA *ch, char *argument) 
+{ 
+	char   loc_str[MAX_INPUT_LENGTH] = {'\0'}; 
+	char   loc_str1[MAX_INPUT_LENGTH] = {'\0'}; 
+	char    *ploc_str; 
+	char   *ploc_str1; 
+	char   buf[MAX_INPUT_LENGTH] = {'\0'}; 
+	char   test_dat[2] = "-"; 
+	char   mt1[MAX_INPUT_LENGTH] = "              "; 
+	int    room_span = 0; 
+	int    first_room = 0; 
+	int   last_room = 0; 
 
-	half_chop(argument, loc_str, buf);
-	ploc_str = loc_str;
-	ploc_str1 = loc_str1;
-	strcat(buf,"\n\r");
-
+	half_chop(argument, loc_str, buf); 
+	ploc_str = loc_str; 
+	ploc_str1 = loc_str1; 
+	strcat(buf,"\n\r"); 
+	
 	std::string bufchange = buf;
 	while (bufchange.find("$n") != std::string::npos)
 	{
 		bufchange.replace(bufchange.find("$n"), 2, char_short(ch));
 	}
-
+	
 	sprintf (buf, "%s", bufchange.c_str());
 
-	// buf is ready to go.  it's the echo that gets sent out to the rooms.
+	// buf is ready to go.  it's the echo that gets sent out to the rooms. 
 
-	while(1)
-	{
-		if (!strncmp(ploc_str, test_dat, 1)) // if it's a '-' set the room_span flag
-			room_span = true;
-		for (; ispunct(*ploc_str); ploc_str++); // bypass any punctuation
-		for (; isdigit(*ploc_str1 = *ploc_str); ploc_str++, ploc_str1++); // read room # into loc_str1
+	while(1) 
+	{ 
+		if (!strncmp(ploc_str, test_dat, 1)) // if it's a '-' set the room_span flag 
+			room_span = true; 
+		for (; ispunct(*ploc_str); ploc_str++); // bypass any punctuation 
+		for (; isdigit(*ploc_str1 = *ploc_str); ploc_str++, ploc_str1++); // read room # into loc_str1 
 
-		if ( !isdigit(*loc_str1) ) {
-			return;
-		}
+		if ( !isdigit(*loc_str1) ) { 
+			return; 
+		} 
 
-		if ( !vtor (strtol(loc_str1, NULL, 10)) ) {
-			system_log("ERROR: Room not found in r_atecho", true);
-			//   return;
-		}
-		else {
-			strcat(buf,"\n\r");
-			send_to_room (buf, vtor (strtol(loc_str1, NULL, 10))->nVirtual);
-		}
+		if ( !vtor (strtol(loc_str1, NULL, 10)) ) { 
+			system_log("ERROR: Room not found in r_atecho", true); 
+			//   return; 
+		} 
+		else { 
+			strcat(buf,"\n\r"); 
+			send_to_room (buf, vtor (strtol(loc_str1, NULL, 10))->nVirtual); 
+		} 
 
 
-		if(room_span) { // if room_span is set, the last room echoed to was the end of the span
-			// go echo to the rooms in between now.
-			last_room = strtol(loc_str1, NULL, 10); // set the last room as an integer
+		if(room_span) { // if room_span is set, the last room echoed to was the end of the span 
+			// go echo to the rooms in between now. 
+			last_room = strtol(loc_str1, NULL, 10); // set the last room as an integer 
 
-			// iterate through the span of rooms
-			while(first_room + 1 < last_room) {
-				if ( !vtor (first_room + 1) ) { // does the room exist?
-					first_room++; // increment even if the room doesn't exist
-				}
-				else {
-					send_to_room(buf, vtor (first_room + 1)->nVirtual);
-					first_room++;
-				}
-			}
-			room_span = 0;    // reset the trigger
-		}
+			// iterate through the span of rooms 
+			while(first_room + 1 < last_room) { 
+				if ( !vtor (first_room + 1) ) { // does the room exist? 
+					first_room++; // increment even if the room doesn't exist 
+				} 
+				else { 
+					send_to_room(buf, vtor (first_room + 1)->nVirtual); 
+					first_room++; 
+				} 
+			} 
+			room_span = 0;    // reset the trigger 
+		} 
 
-		first_room = strtol(loc_str1, NULL, 10); // set first_room as the last room echoed to
-		strcpy(loc_str1, mt1); // overwrite loc_str1
-		ploc_str1 = loc_str1; // reset the pointer
-	}
-	return;
-}
+		first_room = strtol(loc_str1, NULL, 10); // set first_room as the last room echoed to 
+		strcpy(loc_str1, mt1); // overwrite loc_str1 
+		ploc_str1 = loc_str1; // reset the pointer 
+	} 
+	return; 
+} 
 
 
 void
@@ -4108,7 +4104,7 @@ r_load_clone (CHAR_DATA * ch, char *argument)
 
 	CHAR_DATA* i = ch->room->people;
 	for (; i; i = i->next_in_room)
-	{
+	{      
 		if (i->deleted)
 			continue;
 
@@ -4150,7 +4146,7 @@ r_load_clone (CHAR_DATA * ch, char *argument)
 			obj_to_room (clone, holder->room->nVirtual);
 		else if (recipient)
 			obj_to_char (clone, recipient);
-		else
+		else 
 			extract_obj (clone);
 	}
 
@@ -4279,7 +4275,7 @@ r_loadmob (CHAR_DATA * ch, char *argument)
 void
 r_mcopy (CHAR_DATA * ch, char *argument)
 {
-	do_mcopy(ch, argument, 0);
+  do_mcopy(ch, argument, 0);
 }
 
 
@@ -4378,7 +4374,7 @@ r_force (CHAR_DATA * ch, char *argument)
 	if (!strncmp(arg1, "all", 3))
 		mob = 0;
 	else if (!strncmp(arg1, "group", 5))
-		mob = -2;
+	    mob = -2;
 	else if (!strncmp(arg1, "-1", 2))
 		mob = -1;
 	else if (is_number(arg1))
@@ -4405,13 +4401,13 @@ r_force (CHAR_DATA * ch, char *argument)
 		system_log ("ERROR: unknown room in r_force.", true);
 		return;
 	}
-
+	
 	if (mob == -3)
 	{
 		tmp_ch = get_char_room_vis2(ch, room, arg1);
 		if (!tmp_ch)
 			return;
-
+		
 		command_interpreter (tmp_ch, arg3);
 	}
 	else
@@ -4508,9 +4504,9 @@ r_transmob (CHAR_DATA * ch, char *argument)
 * r_trans_group
 *
 * trans_group <mob> <from> <to>
-*
+* 
 * if <mob> is -1 assumes program user, and <from> is ignored
-*
+* 
 */
 void
 r_trans_group (CHAR_DATA * ch, char * argument)
@@ -4584,7 +4580,7 @@ r_trans_group (CHAR_DATA * ch, char * argument)
 	{
 		if (tmp_ch->following == leader || tmp_ch == leader)
 		{
-			if (tmp_ch->mount)
+			if (tmp_ch->mount) 
 			{
 				transfer_queue[queue++] = tmp_ch->mount;
 			}
@@ -4598,10 +4594,10 @@ r_trans_group (CHAR_DATA * ch, char * argument)
 			}
 			transfer_queue[queue++] = tmp_ch;
 		}
-	}
+	}  
 
 	// move them
-	do
+	do 
 	{
 		char_from_room (transfer_queue[--queue]);
 		char_to_room (transfer_queue[queue], destination_rnum);
@@ -4641,19 +4637,19 @@ r_zone_echo (CHAR_DATA * ch, char *argument)
 				case SECT_UNDERWATER:
 				case SECT_PIT:
 					break;
-				default:
+				default:		
 					send_to_room (argument, room->nVirtual);
 					break;
 				}
-			}
+			}            
 	}
-	else
+	else 
 	{
 		int sector_flag = parse_argument (sector_types, sector);
 		if (sector_flag >= 0)
 		{
 			for (ROOM_DATA *room = full_room_list; room; room = room->lnext)
-				if (room->people && room->zone == zone
+				if (room->people && room->zone == zone 
 					&& room->sector_type == sector_flag)
 					send_to_room (argument, room->nVirtual);
 		}
@@ -4661,7 +4657,7 @@ r_zone_echo (CHAR_DATA * ch, char *argument)
 }
 
 void
-r_atwrite (CHAR_DATA * ch, char *argument)
+r_atwrite (CHAR_DATA * ch, char *argument) 
 {
 	std::string strArgument = argument, board, title;
 	MYSQL_RES *result;
@@ -4670,11 +4666,11 @@ r_atwrite (CHAR_DATA * ch, char *argument)
 	char date_buf[MAX_STRING_LENGTH];
 	char * suf;
 	int day;
-
+	
 	time_t time_now = time(0);
 	date = (char *) asctime (localtime (&time_now));
 	date[strlen(date) - 1] = '\0';
-
+	
 	while (strArgument.find('@') != std::string::npos)
 	{
 		strArgument.replace(strArgument.find('@'), 1, ch->tname);
@@ -4691,18 +4687,18 @@ r_atwrite (CHAR_DATA * ch, char *argument)
 	{
 		strArgument.replace(strArgument.find("\\n"), 2, "\n");
 	}
-
+	
 	strArgument = one_argument (strArgument, board);
 	strArgument = one_argument (strArgument, title);
-
+	
 	if (strArgument.empty() || board.empty() || title.empty())
 	{
-		free_mem(date);
+		mem_free(date);
 		return;
 	}
-
+	
 	title[0] = toupper(title[0]);
-
+	
 	if (board[0] == '*') // PC Board
 	{
 		board.erase(0, 1);
@@ -4715,67 +4711,67 @@ r_atwrite (CHAR_DATA * ch, char *argument)
 		add_message (1, board.c_str(), -5, "Server", date, (char *) title.c_str(), "", (char *) strArgument.c_str(), 0);
 	}
 	else						// Non-virtual board (i.e. board object)
-	{
-		*date_buf = '\0';
-		day = time_info.day + 1;
-		if (day == 1)
-			suf = "st";
-		else if (day == 2)
-			suf = "nd";
-		else if (day == 3)
-			suf = "rd";
-		else if (day < 20)
-			suf = "th";
-		else if ((day % 10) == 1)
-			suf = "st";
-		else if ((day % 10) == 2)
-			suf = "nd";
-		else if ((day % 10) == 3)
-			suf = "rd";
-		else
-			suf = "th";
+		{
+			*date_buf = '\0';
+			day = time_info.day + 1;
+			if (day == 1)
+				suf = "st";
+			else if (day == 2)
+				suf = "nd";
+			else if (day == 3)
+				suf = "rd";
+			else if (day < 20)
+				suf = "th";
+			else if ((day % 10) == 1)
+				suf = "st";
+			else if ((day % 10) == 2)
+				suf = "nd";
+			else if ((day % 10) == 3)
+				suf = "rd";
+			else
+				suf = "th";
 
-		if (time_info.holiday == 0 &&
+			if (time_info.holiday == 0 &&
 			!(time_info.month == 1 && day == 12) &&
 			!(time_info.month == 4 && day == 10) &&
 			!(time_info.month == 7 && day == 11) &&
 			!(time_info.month == 10 && day == 12))
-			sprintf (date_buf, "%d%s %s, %d SR", day, suf, month_short_name[time_info.month], time_info.year);
-		else
-		{
-			if (time_info.holiday > 0)
+				sprintf (date_buf, "%d%s %s, %d SR", day, suf, month_short_name[time_info.month], time_info.year);
+			else
 			{
-				sprintf (date_buf, "%s, %d SR", holiday_short_names[time_info.holiday], time_info.year);
+				if (time_info.holiday > 0)
+				{
+					sprintf (date_buf, "%s, %d SR", holiday_short_names[time_info.holiday], time_info.year);
+				}
+				else if (time_info.month == 1 && day == 12)
+					sprintf (date_buf, "Erukyerme, %d SR", time_info.year);
+				else if (time_info.month == 4 && day == 10)
+					sprintf (date_buf, "Lairemerende, %d SR", time_info.year);
+				else if (time_info.month == 7 && day == 11)
+					sprintf (date_buf, "Eruhantale, %d SR", time_info.year);
+				else if (time_info.month == 10 && day == 12)
+					sprintf (date_buf, "Airilaitale, %d SR", time_info.year);
 			}
-			else if (time_info.month == 1 && day == 12)
-				sprintf (date_buf, "Erukyerme, %d SR", time_info.year);
-			else if (time_info.month == 4 && day == 10)
-				sprintf (date_buf, "Lairemerende, %d SR", time_info.year);
-			else if (time_info.month == 7 && day == 11)
-				sprintf (date_buf, "Eruhantale, %d SR", time_info.year);
-			else if (time_info.month == 10 && day == 12)
-				sprintf (date_buf, "Airilaitale, %d SR", time_info.year);
+
+			if (isalpha (*date_buf))
+				*date_buf = toupper (*date_buf);
+				
+			mysql_safe_query ("SELECT * FROM boards WHERE board_name = '%s' ORDER BY post_number DESC LIMIT 1", (char *) board.c_str());
+			result = mysql_store_result(database);
+			int free_slot = 1;
+			if ((row = mysql_fetch_row (result)))
+			{
+				free_slot = atoi(row[1]);
+				free_slot++;
+			}
+			
+			mysql_safe_query ("INSERT INTO boards VALUES ('%s', %d, '%s', '%s', '%s', '%s', '%s', %d)", (char *) board.c_str(), free_slot, (char *) title.c_str(), "System", date, date_buf, (char *) strArgument.c_str(), (int) time(0));
+			
+			if (result)
+				mysql_free_result (result);		
 		}
-
-		if (isalpha (*date_buf))
-			*date_buf = toupper (*date_buf);
-
-		mysql_safe_query ("SELECT * FROM boards WHERE board_name = '%s' ORDER BY post_number DESC LIMIT 1", (char *) board.c_str());
-		result = mysql_store_result(database);
-		int free_slot = 1;
-		if ((row = mysql_fetch_row (result)))
-		{
-			free_slot = atoi(row[1]);
-			free_slot++;
-		}
-
-		mysql_safe_query ("INSERT INTO boards VALUES ('%s', %d, '%s', '%s', '%s', '%s', '%s', %d)", (char *) board.c_str(), free_slot, (char *) title.c_str(), "System", date, date_buf, (char *) strArgument.c_str(), (int) time(0));
-
-		if (result)
-			mysql_free_result (result);
-	}
-
-	free_mem(date);
+	
+	mem_free(date);
 	return;
 }
 
@@ -4785,7 +4781,7 @@ r_system (CHAR_DATA * ch, char *argument)
 	char buf [AVG_STRING_LENGTH];
 	char *token = index (argument, '@');
 
-	if (token)
+	if (token) 
 	{
 		token[0] = 0;
 		sprintf (buf, "#6%s#5%s#0#6%s#0\n", argument, ch->tname, token+1);
@@ -4798,7 +4794,7 @@ r_system (CHAR_DATA * ch, char *argument)
 }
 
 void
-r_clan_echo (CHAR_DATA * ch, char *argument)
+r_clan_echo (CHAR_DATA * ch, char *argument) 
 {
 	CHAR_DATA *tch;
 	char buf [MAX_STRING_LENGTH];
@@ -4823,7 +4819,7 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 				send_to_char("", tch);
 			}
 		}
-		free_mem(formatted);
+		mem_free(formatted);
 	}
 	else if (!strncmp(buf, "room", 4))
 	{
@@ -4842,7 +4838,7 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 				send_to_char("", tch);
 			}
 		}
-		free_mem(formatted);
+		mem_free(formatted);
 	}
 	else if (!strncmp(buf, "zone", 4))
 	{
@@ -4873,7 +4869,7 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 			send_to_char (formatted, d->character);
 			send_to_char ("", d->character);
 		}
-		free_mem(formatted);
+		mem_free(formatted);
 	}
 	else if (!strncmp(buf, "all", 3))
 	{
@@ -4900,9 +4896,9 @@ r_clan_echo (CHAR_DATA * ch, char *argument)
 				continue;
 
 			send_to_char(formatted, d->character);
-
+			
 		}
-		free_mem(formatted);
+		mem_free(formatted);
 	}
 	return;
 }
@@ -5086,10 +5082,10 @@ r_strip (CHAR_DATA *ch, char *argument)
 		if (bag && (ch->right_hand || ch->left_hand || ch->equip))
 		{
 			sprintf (buf, "A bag belonging to %s sits here.", ch->short_descr);
-			bag->description = duplicateString (buf);
+			bag->description = str_dup (buf);
 
 			sprintf (buf, "a bag labeled '%s'", ch->short_descr);
-			bag->short_description = duplicateString (buf);
+			bag->short_description = str_dup (buf);
 
 			if (ch->right_hand)
 			{
@@ -5167,7 +5163,7 @@ r_clan (CHAR_DATA *ch, char *argument)
 			flags = CLAN_JOURNEYMAN;
 		else if (!strncmp (arg2, "master", 6))
 			flags = CLAN_MASTER;
-		else
+		else 
 			flags = CLAN_MEMBER;
 
 		add_clan(ch, arg1, flags);
@@ -5290,10 +5286,10 @@ r_load_obj (CHAR_DATA *ch, char *argument)
 	else
 	{
 		if (!exit && !(obj = load_object (ovnum)))
-		{
-			system_log("ERROR: Item does not exist in r_load_obj", true);
-			exit = true;
-		}
+	{
+		system_log("ERROR: Item does not exist in r_load_obj", true);
+		exit = true;
+	}
 	}
 
 	if ( !exit)
@@ -5385,7 +5381,7 @@ void r_takemoney ( CHAR_DATA *ch, char * argument)
 		else if (ThisArgument.find("orkish") != std::string::npos || ThisArgument.find("yrkish") != std::string::npos || ThisArgument.find("orcish") != std::string::npos)
 			Currency = 1;
 		else if (ThisArgument.find("harad") != std::string::npos)
-			Currency = 3;
+		    Currency = 3;
 		else if (ThisArgument.find("northman") != std::string::npos || ThisArgument.find("shillings") != std::string::npos)
 			Currency = 4;
 		else
@@ -5581,14 +5577,14 @@ r_transobj (CHAR_DATA *ch, char *argument)
 }
 
 // objvnum <room> <keyword or number> <variable>
-void
+void 
 r_objvnum (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 {
 	OBJ_DATA *obj;
 	ROOM_DATA *room;
 	std::string buf;
-
-	// Room first. -1 means actor's room.
+	
+	// Room first. -1 means actor's room. 
 	argument = one_argument(argument, buf);
 	if (buf.empty())
 		return;
@@ -5600,12 +5596,12 @@ r_objvnum (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 	{
 		if (!atoi(buf.c_str()))
 			return;
-
+		
 		room = vtor(atoi(buf.c_str()));
 		if (!room)
 			return;
 	}
-
+	
 	// Work out if it's a keyword or a number. Numbers mean nth object in room, keyword means first keyword named object.
 	argument = one_argument(argument, buf);
 	if (buf.empty())
@@ -5625,29 +5621,29 @@ r_objvnum (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 	}
 	if (!obj)
 		return;
-
+	
 	// Work out what variable to save to.
 	argument = one_argument(argument, buf);
 	if (buf.empty())
 		return;
-
+	
 	if (is_variable_in_list(variable_list, buf))
 		set_variable_data(variable_list, buf, MAKE_STRING(obj->nVirtual));
 	else
 		add_variable_to_list(variable_list, buf, MAKE_STRING(obj->nVirtual));
-
+	
 	return;
 }
 
 // randomobj <room> <variable>
-void
+void 
 r_randomobj (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 {
 	OBJ_DATA *obj;
 	ROOM_DATA *room;
 	std::string buf;
-
-	// Room first. -1 means actor's room.
+	
+	// Room first. -1 means actor's room. 
 	argument = one_argument(argument, buf);
 	if (buf.empty())
 		return;
@@ -5659,43 +5655,43 @@ r_randomobj (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list
 	{
 		if (!atoi(buf.c_str()))
 			return;
-
+		
 		room = vtor(atoi(buf.c_str()));
 		if (!room)
 			return;
 	}
-
+	
 	// Get a random object in the room
-
+	
 	int count = 0;
 	for (obj = room->contents; obj; obj = obj->next_content)
 	{
 		count++;
 	}
-
+	
 	// Grab a random number in the list to use
 	int rnumber = number(1, count);
-
+	
 	// Find the nth object
 	for (count = 1, obj = room->contents; obj; count++, obj = obj->next_content)
 	{
 		if (count == rnumber)
 			break;
 	}
-
+	
 	if (!obj)
 		return;
-
+	
 	// Work out what variable to save to.
 	argument = one_argument(argument, buf);
 	if (buf.empty())
 		return;
-
+	
 	if (is_variable_in_list(variable_list, buf))
 		set_variable_data(variable_list, buf, MAKE_STRING(obj->nVirtual));
 	else
 		add_variable_to_list(variable_list, buf, MAKE_STRING(obj->nVirtual));
-
+	
 	return;
 }
 
@@ -5715,7 +5711,7 @@ r_mftog (CHAR_DATA *ch, std::string argument)
 		{
 			if (!IS_NPC(tch))
 				continue;
-
+			
 			if (tch->mob->nVirtual == atoi(buf.c_str()))
 				break;
 		}
@@ -5726,36 +5722,36 @@ r_mftog (CHAR_DATA *ch, std::string argument)
 	}
 	if (!tch)
 		return;
-
+	
 	if (!IS_NPC(tch))
 		return;
-
+	
 	argument = one_argument(argument, buf);
 	int flag;
 	if ((flag = index_lookup(action_bits, (char *) buf.c_str())) == -1)
 	{
 		return;
 	}
-
+	
 	if (!IS_SET(tch->act, (1 << flag)))
 		tch->act |= (1 << flag);
 	else
 		tch->act &= ~(1 << flag);
-
+	
 	return;
 }
 
 char * room__get_description (ROOM_DATA * room);
 char *exits[] = {
-	"north",
-	"east",
-	"south",
-	"west",
-	"up",
-	"down",
-	"outside",
-	"inside"
-};
+    "north",
+    "east",
+    "south",
+    "west",
+    "up",
+    "down",
+    "outside",
+    "inside"
+  };
 
 bool
 prog_object_properties (OBJ_DATA *obj, std::string argument, std::string& output)
@@ -5764,7 +5760,7 @@ prog_object_properties (OBJ_DATA *obj, std::string argument, std::string& output
 	argument = one_argument(argument, buf);
 	if (buf.empty())
 		return false;
-
+	
 	if (buf.find("name") != std::string::npos)
 	{
 		std::string objname = obj->name;
@@ -5833,41 +5829,41 @@ prog_object_properties (OBJ_DATA *obj, std::string argument, std::string& output
 	}
 	else if (buf.find("mkey") != std::string::npos)
 	{
-		if (obj->desc_keys)
+		if (obj->desc_keys)	
 			output = obj->desc_keys;
 	}
 	else if (buf.find("months") != std::string::npos)
 	{
 		int morphtime = obj->morphTime - time(0);
 		morphtime /= 3600;
-		output = MAKE_STRING(morphtime / (24*30));
+		output = MAKE_STRING(morphtime / (24*30));			
 	}
 	else if (buf.find("days") != std::string::npos)
 	{
 		int delta, days;
 
-		delta = obj->morphTime - time (0);
-		days = delta / 86400;
+	    delta = obj->morphTime - time (0);
+	    days = delta / 86400;
 		days %= 30;
-		output = MAKE_STRING(days);
+        output = MAKE_STRING(days);
 	}
 	else if (buf.find("hours") != std::string::npos)
 	{
-		int delta, days, hours;
-		delta = obj->morphTime - time (0);
-		days = delta / 86400;
-		delta -= days * 86400;
-		hours = delta / 3600;
+	    int delta, days, hours;
+	    delta = obj->morphTime - time (0);
+	    days = delta / 86400;
+	    delta -= days * 86400;
+        hours = delta / 3600;
 		output = MAKE_STRING(hours);
 	}
 	else if (buf.find("minutes") != std::string::npos)
 	{
 		int delta, days, hours, minutes;
-		delta = obj->morphTime - time (0);
-		days = delta / 86400;
-		delta -= days * 86400;
-		hours = delta / 3600;
-		delta -= hours * 3600;
+	    delta = obj->morphTime - time (0);
+	    days = delta / 86400;
+	    delta -= days * 86400;
+        hours = delta / 3600;
+	    delta -= hours * 3600;
 		minutes = delta / 60;
 		output = MAKE_STRING(minutes);
 	}
@@ -5875,30 +5871,30 @@ prog_object_properties (OBJ_DATA *obj, std::string argument, std::string& output
 	{
 		switch (buf[4])
 		{
-		case '0':
-			output = MAKE_STRING(obj->o.od.value[0]);
-			break;
-		case '1':
-			output = MAKE_STRING(obj->o.od.value[1]);
-			break;
-		case '2':
-			output = MAKE_STRING(obj->o.od.value[2]);
-			break;
-		case '3':
-			output = MAKE_STRING(obj->o.od.value[3]);
-			break;
-		case '4':
-			output = MAKE_STRING(obj->o.od.value[4]);
-			break;
-		case '5':
-			output = MAKE_STRING(obj->o.od.value[5]);
-			break;
+			case '0':
+				output = MAKE_STRING(obj->o.od.value[0]);
+				break;
+			case '1':
+				output = MAKE_STRING(obj->o.od.value[1]);
+				break;
+			case '2':
+				output = MAKE_STRING(obj->o.od.value[2]);
+				break;
+			case '3':
+				output = MAKE_STRING(obj->o.od.value[3]);
+				break;
+			case '4':
+				output = MAKE_STRING(obj->o.od.value[4]);
+				break;
+			case '5':
+				output = MAKE_STRING(obj->o.od.value[5]);
+				break;
 		}
 	}
-
+	
 	if (output.empty())
 		return false;
-
+		
 	return true;
 }
 
@@ -5909,7 +5905,7 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 	argument = one_argument(argument, buf);
 	if (buf.empty())
 		return;
-
+	
 	if (buf.find("name") != std::string::npos)
 	{
 		if (MAKE_STRING(obj->name).find(argument) != std::string::npos)
@@ -5917,30 +5913,30 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 			std::string buf2 = obj->name;
 			buf2.erase(buf2.find(argument), argument.length());
 			buf2 = argument + buf2;
-			free_mem(obj->name);
-			obj->name = duplicateString(buf2.c_str());
+			mem_free(obj->name);
+			obj->name = str_dup(buf2.c_str());
 		}
 		else
 		{
 			std::string buf2 = obj->name;
-			free_mem(obj->name);
-			obj->name = duplicateString((argument + buf2).c_str());
+			mem_free(obj->name);
+			obj->name = str_dup((argument + buf2).c_str());
 		}
 	}
 	else if (buf.find("sdesc") != std::string::npos)
 	{
-		free_mem(obj->short_description);
-		obj->short_description = duplicateString(argument.c_str());
+		mem_free(obj->short_description);
+		obj->short_description = str_dup(argument.c_str());
 	}
 	else if (buf.find("ldesc") != std::string::npos)
 	{
-		free_mem(obj->description);
-		obj->description = duplicateString(argument.c_str());
+		mem_free(obj->description);
+		obj->description = str_dup(argument.c_str());
 	}
 	else if (buf.find("desc") != std::string::npos)
 	{
-		free_mem(obj->full_description);
-		obj->full_description = duplicateString(argument.c_str());
+		mem_free(obj->full_description);
+		obj->full_description = str_dup(argument.c_str());
 	}
 	else if (buf.find("material") != std::string::npos)
 	{
@@ -5951,7 +5947,7 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 			{
 				obj->material = it->first;
 				break;
-			}
+			}		
 		}
 	}
 	else if (buf.find("weight") != std::string::npos)
@@ -5972,8 +5968,8 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 	}
 	else if (buf.find("mkey") != std::string::npos)
 	{
-		free_mem(obj->desc_keys);
-		obj->desc_keys = duplicateString(argument.c_str());
+		mem_free(obj->desc_keys);
+		obj->desc_keys = add_hash(argument.c_str());
 	}
 	else if (buf.find("timer") != std::string::npos)
 	{
@@ -5995,24 +5991,24 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 	{
 		switch (buf[4])
 		{
-		case '0':
-			obj->o.od.value[0] = atoi(argument.c_str());
-			break;
-		case '1':
-			obj->o.od.value[1] = atoi(argument.c_str());
-			break;
-		case '2':
-			obj->o.od.value[2] = atoi(argument.c_str());
-			break;
-		case '3':
-			obj->o.od.value[3] = atoi(argument.c_str());
-			break;
-		case '4':
-			obj->o.od.value[4] = atoi(argument.c_str());
-			break;
-		case '5':
-			obj->o.od.value[5] = atoi(argument.c_str());
-			break;
+			case '0':
+				obj->o.od.value[0] = atoi(argument.c_str());
+				break;
+			case '1':
+				obj->o.od.value[1] = atoi(argument.c_str());
+				break;
+			case '2':
+				obj->o.od.value[2] = atoi(argument.c_str());
+				break;
+			case '3':
+				obj->o.od.value[3] = atoi(argument.c_str());
+				break;
+			case '4':
+				obj->o.od.value[4] = atoi(argument.c_str());
+				break;
+			case '5':
+				obj->o.od.value[5] = atoi(argument.c_str());
+				break;
 		}
 	}
 	else if (buf.find("morphto") != std::string::npos )
@@ -6025,7 +6021,7 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 
 		if (!isdigit (argument[0]))
 			return;
-
+		
 		month = atoi (argument.c_str());
 		argument = one_argument(argument, buf);
 
@@ -6043,7 +6039,7 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 
 		obj->clock = ((month * 30 * 24) + (day * 24) + hour);
 	}
-
+		
 	return;
 }
 
@@ -6054,12 +6050,12 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 	std::string buf, variable;
 	std::string value; // What we're setting the variable to be
 	argument = one_argument (argument, buf);
-
+	
 	if (buf.empty())
 		return;
 	else
 		variable = buf;
-
+		
 	argument = one_argument (argument, buf);
 	if (buf.find("obj") != std::string::npos)
 	{
@@ -6068,20 +6064,20 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 		argument = one_argument (argument, buf);
 		if (buf.empty())
 			return;
-
+		
 		if (atoi(buf.c_str()) < 1)
 			return;
-
+		
 		obj = vtoo(atoi(buf.c_str()));
-
+		
 		if (!obj)
 			return;
-
+		
 		// what property?
 		argument = one_argument (argument, buf);
 		if (buf.empty())
 			return;
-
+		
 		if (buf.find("vnum") != std::string::npos)
 		{
 			value = MAKE_STRING(obj->nVirtual);
@@ -6134,24 +6130,24 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 		{
 			switch (buf[4])
 			{
-			case '0':
-				value = MAKE_STRING(obj->o.od.value[0]);
-				break;
-			case '1':
-				value = MAKE_STRING(obj->o.od.value[1]);
-				break;
-			case '2':
-				value = MAKE_STRING(obj->o.od.value[2]);
-				break;
-			case '3':
-				value = MAKE_STRING(obj->o.od.value[3]);
-				break;
-			case '4':
-				value = MAKE_STRING(obj->o.od.value[4]);
-				break;
-			case '5':
-				value = MAKE_STRING(obj->o.od.value[5]);
-				break;
+				case '0':
+					value = MAKE_STRING(obj->o.od.value[0]);
+					break;
+				case '1':
+					value = MAKE_STRING(obj->o.od.value[1]);
+					break;
+				case '2':
+					value = MAKE_STRING(obj->o.od.value[2]);
+					break;
+				case '3':
+					value = MAKE_STRING(obj->o.od.value[3]);
+					break;
+				case '4':
+					value = MAKE_STRING(obj->o.od.value[4]);
+					break;
+				case '5':
+					value = MAKE_STRING(obj->o.od.value[5]);
+					break;
 			}
 		}
 	}
@@ -6161,10 +6157,10 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 		ROOM_DATA *room = NULL;
 		CHAR_DATA *tch = NULL;
 		argument = one_argument(argument, buf);
-
+		
 		if (buf.empty())
 			return;
-
+		
 		// Argument is a room vnum
 		if (buf.find("-1") != std::string::npos)
 		{
@@ -6176,15 +6172,15 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 		}
 		else
 			return;
-
+		
 		if (!room)
 			return;
-
+		
 		// What about the room do they want to know?
 		argument = one_argument (argument, buf);
 		if (buf.empty())
 			return;
-
+		
 		if (buf.find("vnum") != std::string::npos)
 		{
 			value = MAKE_STRING(room->nVirtual);
@@ -6206,13 +6202,13 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 			argument = one_argument(argument, buf);
 			if (buf.empty())
 				return;
-
+			
 			int exit_requested;
 			if ((exit_requested = index_lookup (exits, buf.c_str())) != -1)
 			{
 				if (!(room->dir_option[exit_requested]))
 					return;
-
+				
 				value = MAKE_STRING(room->dir_option[exit_requested]->to_room);
 			}
 			else
@@ -6225,7 +6221,7 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 			argument = one_argument (argument, buf);
 			if (buf.empty())
 				return;
-
+				
 			if (buf.find("-1") != std::string::npos)        // Actor
 			{
 				tch = ch;
@@ -6242,12 +6238,12 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 			{
 				tch = get_char_room ((char *) buf.c_str(), room->nVirtual);
 			}
-
+			
 			if (!tch)
 				return;
-
+				
 			argument = one_argument (argument, buf);
-
+			
 			//    We now know who we're targetting, work out what property we want
 			if (buf.find("vnum") != std::string::npos)
 			{
@@ -6337,16 +6333,16 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 			{
 				switch (tch->sex)
 				{
-				case 0:
-					value = "genderless";
-					break;
-				case 1:
-					value = "male";
-					break;
-				case 2:
-					value = "female";
-					break;
-				}
+					case 0:
+						value = "genderless";
+						break;
+					case 1:
+						value = "male";
+						break;
+					case 2:
+						value = "female";
+						break;
+				}		
 			}
 			else if (buf.find("inv") != std::string::npos || buf.find("worn") != std::string::npos)
 			{
@@ -6355,7 +6351,7 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 					argument = one_argument (argument, buf);
 					if (buf.empty())
 						return;
-
+					
 					if (is_number(buf.c_str()) && atoi(buf.c_str()) > 0)    // Obj vnum
 					{
 						if (tch->right_hand && tch->right_hand->nVirtual == atoi(buf.c_str()))
@@ -6380,10 +6376,10 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 						else if (tch->equip)
 							obj = get_obj_in_list ((char *) buf.c_str(), tch->equip);
 					}
-
+					
 					if (!obj)
 						return;
-
+					
 					if (!prog_object_properties (obj, argument, value))
 						return;
 				}
@@ -6393,14 +6389,14 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 					// are general - i.e. although there is a right shoulder and left shoulder, you can only target shoulder and it will
 					// choose for you. In this case that's inappropriate, and I don't want the builder to need to know any numbers.
 					// Hence the mapWearByName container was created to store this information.
-
+					
 					extern std::map<std::string, int> mapWearByName;
 					std::map<std::string, int>::iterator it;
 					argument = one_argument(argument, buf);
 					if (buf.empty())
 						return;
 					if (buf.find("rhand") != std::string::npos)
-					{
+					{	
 						obj = tch->right_hand;
 					}
 					else if (buf.find("lhand") != std::string::npos)
@@ -6415,7 +6411,7 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 					}
 					if (!obj)
 						return;
-
+						
 					if (!prog_object_properties (obj, argument, value))
 						return;
 				}
@@ -6426,7 +6422,7 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 			argument = one_argument(argument, buf);
 			if (buf.empty())
 				return;
-
+			
 			if (is_number(buf.c_str()) && atoi(buf.c_str()) > 0)
 			{
 				obj = get_obj_in_list_num(atoi(buf.c_str()), room->contents);
@@ -6435,10 +6431,10 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 			{
 				obj = get_obj_in_list((char *) buf.c_str(), room->contents);
 			}
-
+			
 			if (!obj)
 				return;
-
+				
 			if (!prog_object_properties (obj, argument, value))
 				return;
 		}
@@ -6447,15 +6443,15 @@ r_info (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 	{
 		value = MAKE_STRING (num_followers (ch) + 1);
 	}
-
+	
 	if (value.empty())
 		return;
-
+		
 	if (is_variable_in_list(variable_list, variable))
 		set_variable_data(variable_list, variable, value);
 	else
 		add_variable_to_list(variable_list, variable, value);
-
+	
 	return;
 }
 
@@ -6465,19 +6461,19 @@ r_setval (CHAR_DATA *ch, std::string argument)
 {
 	std::string buf;
 	std::string value; // What we're setting the variable to be
-
+		
 	argument = one_argument (argument, buf);
-
+	
 	if (buf.find("room") != std::string::npos)
 	{
 		OBJ_DATA *obj = NULL;
 		ROOM_DATA *room = NULL;
 		CHAR_DATA *tch = NULL;
 		argument = one_argument(argument, buf);
-
+		
 		if (buf.empty())
 			return;
-
+		
 		// Argument is a room vnum
 		if (buf.find("-1") != std::string::npos)
 		{
@@ -6489,19 +6485,19 @@ r_setval (CHAR_DATA *ch, std::string argument)
 		}
 		else
 			return;
-
+		
 		if (!room)
 			return;
-
+		
 		// What about the room do they want to know?
 		argument = one_argument (argument, buf);
 		if (buf.empty())
 			return;
-
+		
 		if (buf.find("name") != std::string::npos)
 		{
-			free_mem(room->name);
-			room->name = duplicateString(argument.c_str());
+			mem_free(room->name);
+			room->name = str_dup(argument.c_str());
 		}
 		else if (buf.find("desc") != std::string::npos)
 		{
@@ -6511,8 +6507,8 @@ r_setval (CHAR_DATA *ch, std::string argument)
 			}
 			else
 			{
-				free_mem(room->description);
-				room->description = duplicateString(argument.c_str());
+				mem_free(room->description);
+				room->description = str_dup(argument.c_str());
 			}
 		}
 		else if (buf.find("sector") != std::string::npos)
@@ -6526,7 +6522,7 @@ r_setval (CHAR_DATA *ch, std::string argument)
 			argument = one_argument (argument, buf);
 			if (buf.empty())
 				return;
-
+				
 			if (buf.find("-1") != std::string::npos)        // Actor
 			{
 				tch = ch;
@@ -6543,32 +6539,32 @@ r_setval (CHAR_DATA *ch, std::string argument)
 			{
 				tch = get_char_room ((char *) buf.c_str(), room->nVirtual);
 			}
-
+			
 			if (!tch)
 				return;
-
+				
 			argument = one_argument (argument, buf);
-
+			
 			//    We now know who we're targetting, work out what property we want
 			if (buf.find("name") != std::string::npos)
 			{
-				free_mem(tch->tname);
-				tch->tname = duplicateString (argument.c_str());
+				mem_free(tch->tname);
+				tch->tname = str_dup (argument.c_str());
 			}
 			else if (buf.find("sdesc") != std::string::npos)
 			{
-				free_mem(tch->short_descr);
-				tch->short_descr = duplicateString (argument.c_str());
+				mem_free(tch->short_descr);
+				tch->short_descr = str_dup (argument.c_str());
 			}
 			else if (buf.find("ldesc") != std::string::npos)
 			{
-				free_mem(tch->long_descr);
-				tch->long_descr = duplicateString (argument.c_str());
+				mem_free(tch->long_descr);
+				tch->long_descr = str_dup (argument.c_str());
 			}
 			else if (buf.find("desc") != std::string::npos)
 			{
-				free_mem(tch->description);
-				tch->description = duplicateString (argument.c_str());
+				mem_free(tch->description);
+				tch->description = str_dup (argument.c_str());
 			}
 			else if (buf.find("height") != std::string::npos)
 			{
@@ -6626,7 +6622,7 @@ r_setval (CHAR_DATA *ch, std::string argument)
 				else if (argument.find("male") != std::string::npos)
 					tch->sex = 1;
 				else if (argument.find("female") != std::string::npos)
-					tch->sex = 2;
+					tch->sex = 2;		
 			}
 			else if (buf.find("inv") != std::string::npos || buf.find("worn") != std::string::npos)
 			{
@@ -6635,7 +6631,7 @@ r_setval (CHAR_DATA *ch, std::string argument)
 					argument = one_argument (argument, buf);
 					if (buf.empty())
 						return;
-
+					
 					if (atoi(buf.c_str()) > 0)    // Obj vnum
 					{
 						if (tch->right_hand && tch->right_hand->nVirtual == atoi(buf.c_str()))
@@ -6660,10 +6656,10 @@ r_setval (CHAR_DATA *ch, std::string argument)
 						else if (tch->equip)
 							obj = get_obj_in_list ((char *) buf.c_str(), tch->equip);
 					}
-
+					
 					if (!obj)
 						return;
-
+					
 					prog_object_properties (obj, argument);
 				}
 				else 		// Target object by worn location (worn <location>)
@@ -6672,7 +6668,7 @@ r_setval (CHAR_DATA *ch, std::string argument)
 					// are general - i.e. although there is a right shoulder and left shoulder, you can only target shoulder and it will
 					// choose for you. In this case that's inappropriate, and I don't want the builder to need to know any numbers.
 					// Hence the mapWearByName container was created to store this information.
-
+					
 					extern std::map<std::string, int> mapWearByName;
 					std::map<std::string, int>::iterator it;
 					argument = one_argument(argument, buf);
@@ -6681,10 +6677,10 @@ r_setval (CHAR_DATA *ch, std::string argument)
 					it = mapWearByName.find(buf);
 					if (it != mapWearByName.end())
 						obj = get_equip(tch, it->second);
-
+					
 					if (!obj)
 						return;
-
+						
 					prog_object_properties (obj, argument);
 				}
 			}
@@ -6694,7 +6690,7 @@ r_setval (CHAR_DATA *ch, std::string argument)
 			argument = one_argument(argument, buf);
 			if (buf.empty())
 				return;
-
+			
 			if (atoi(buf.c_str()) > 0)
 			{
 				obj = get_obj_in_list_num(atoi(buf.c_str()), room->contents);
@@ -6703,10 +6699,10 @@ r_setval (CHAR_DATA *ch, std::string argument)
 			{
 				obj = get_obj_in_list((char *) buf.c_str(), room->contents);
 			}
-
+			
 			if (!obj)
 				return;
-
+				
 			prog_object_properties (obj, argument);
 		}
 	}
@@ -6735,10 +6731,10 @@ r_concat (CHAR_DATA *ch, std::string argument, room_prog_var *& variable_list)
 {
 	std::string variable;
 	argument = one_argument(argument, variable);
-
+	
 	if (variable.empty() || argument.empty())
 		return;
-
+	
 	if (is_variable_in_list(variable_list, variable))
 		set_variable_data(variable_list, variable, get_variable_data(variable_list, variable) + argument);
 	else

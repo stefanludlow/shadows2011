@@ -1,11 +1,12 @@
-#include "argument.h"
+#include "stringstack.h"
 
 /*********************************************************
 *          Stringstack Function Definitions              *
-*                (formerly Argument)                     *
 *                   Case                                 *
 *********************************************************/
 Stringstack::Stringstack() {
+	removeSpaces = false;
+	finished = false;
 }
 
 Stringstack::Stringstack(std::string input) {
@@ -71,6 +72,32 @@ Stringstack::Stringstack(std::istream &input, bool removeSpaces) {
 	}
 }
 
+Stringstack& Stringstack::operator= (const std::string &newString) {
+	argument = newString;
+	
+	argumentMemory.clear();
+
+	if (removeSpaces) {
+		Stringstack::trim(argument);
+	}
+	finished = false;
+
+	return *this;
+}
+
+Stringstack& Stringstack::operator= (const char *newString) {
+	argument = newString;
+	
+	argumentMemory.clear();
+
+	if (removeSpaces) {
+		Stringstack::trim(argument);
+	}
+	finished = false;
+
+	return *this;
+}
+
 bool Stringstack::operator== (const std::string compare) const {
 	if (!(this->argumentMemory.empty())) {
 		if ((strcasecmp(this->argumentMemory.back().c_str(), compare.c_str())) == 0) {
@@ -85,12 +112,24 @@ bool Stringstack::operator== (const std::string compare) const {
 	}
 }
 
+std::string& Stringstack::operator[] (const int index) {
+	if (index < 0) {
+		return argument;
+	}
+	else if (index < (int)argumentMemory.size()) {
+		return argumentMemory[index];
+	}
+	else {
+		throw std::runtime_error("Stringstack [] out of bounds");
+	}
+}
+
 std::string Stringstack::pop() {
 	if (removeSpaces) {
 		Stringstack::trim(argument);
 	}
-
-	if (finished) {
+	
+	if (finished && isFinished()) { // Keeping the short circuit just in case [] operator is used to set argument to ""
 		return "";
 	}
 
@@ -119,11 +158,11 @@ std::string Stringstack::pop() {
 	}
 }
 
-std::string Stringstack::popDelimited(std::string firstDelimit, std::string secondDelimit) {
-	return popDelimited(firstDelimit, secondDelimit, true, false);
+std::string Stringstack::pop(std::string firstDelimit, std::string secondDelimit) {
+	return pop(firstDelimit, secondDelimit, true, false);
 }
 
-std::string Stringstack::popDelimited(std::string firstDelimit, std::string secondDelimit, bool eraseDelimits, bool delimitsMatch) {
+std::string Stringstack::pop(std::string firstDelimit, std::string secondDelimit, bool eraseDelimits, bool delimitsMatch) {
 	pop();
 	std::string resultString = argumentMemory.back();
 	size_t size = resultString.size();
@@ -180,15 +219,96 @@ std::string Stringstack::popDelimited(std::string firstDelimit, std::string seco
 	return resultString;
 }
 
+std::string Stringstack::findPop(std::string firstDelimit, std::string secondDelimit) {
+	return findPop(firstDelimit, secondDelimit, true);
+}
+
+std::string Stringstack::findPop(std::string firstDelimit, std::string secondDelimit, bool eraseDelimits) {
+	size_t firstPos = argument.find(firstDelimit);
+	size_t secondPos = argument.find(secondDelimit, firstPos);
+
+	if ((firstPos != std::string::npos) && (secondPos != std::string::npos)) {
+		argumentMemory.push_back(argument.substr((firstPos + 1), (secondPos - firstPos - 1)));
+		if (eraseDelimits) {
+			argument.erase(firstPos, argumentMemory.back().size() + 2);
+		}
+		else {
+			argument.erase(firstPos + 1, argumentMemory.back().size() + 1);
+		}
+		return argumentMemory.back();
+	}
+	return "";
+}
+
 std::string Stringstack::popSpeech() {
-	return popDelimited("\"'", "\"'", true, true);
+	return pop("\"'", "\"'", true, true);
+}
+
+std::string Stringstack::popUntil(std::string delimit) {
+	return popUntil(delimit, true);
+}
+
+std::string Stringstack::popUntil(std::string delimit, bool eraseDelimit) {
+	if (removeSpaces) {
+		Stringstack::trim(argument);
+	}
+	size_t tempPos = argument.find(delimit);
+	size_t delimitWidth = delimit.size();
+	
+	if (delimitWidth == 0) {
+		return "";
+	}
+
+	if (tempPos != std::string::npos && tempPos > 0) {
+		if (eraseDelimit) {
+			argumentMemory.push_back(argument.substr(0, tempPos));
+
+			if (tempPos < argument.size() - delimitWidth) {
+				argument = argument.substr(tempPos + delimitWidth);
+			}
+			else {
+				argument = "";
+				finished = true;
+			}
+		}
+		else {
+			if (tempPos < argument.size()) {
+				argumentMemory.push_back(argument.substr(0, tempPos + delimitWidth));
+				argument = argument.substr(tempPos + delimitWidth);
+			}
+			else {
+				return pop();
+			}
+		}
+	}
+	else if (tempPos == 0) {
+		if (eraseDelimit) {
+			if (argument.size() > delimitWidth) {
+				argument = argument.substr(delimitWidth);
+				return "";
+			}
+			else {
+				argument = "";
+				finished = true;
+				return argument;
+			}
+		}
+		else {
+			argumentMemory.push_back(argument.substr(0, delimitWidth));
+			argument = argument.substr(delimitWidth);
+		}
+	}
+	else {
+		return "";
+	}
+	return argumentMemory.back();
 }
 
 bool Stringstack::find(std::string specifier) {
 	return (argument.find(specifier) != std::string::npos);
 }
 
-int Stringstack::findAndCount(std::string specifier) {
+int Stringstack::argCount(std::string specifier) {
 	int output = 0;
 	size_t position = argument.find(specifier);
 
@@ -199,7 +319,7 @@ int Stringstack::findAndCount(std::string specifier) {
 	return output;
 }
 
-std::vector<std::string> Stringstack::batchFind(const std::vector<std::string> &strings) {
+std::vector<std::string> Stringstack::argBatchFind(const std::vector<std::string> &strings) {
 	std::vector<std::string> output;
 
 	if (strings.size() > 0) {
@@ -214,7 +334,7 @@ std::vector<std::string> Stringstack::batchFind(const std::vector<std::string> &
 	return output;
 }
 
-std::vector<std::pair<std::string, int> > Stringstack::batchFindAndCount(const std::vector<std::string> &strings) {
+std::vector<std::pair<std::string, int> > Stringstack::argBatchCount(const std::vector<std::string> &strings) {
 	std::vector<std::pair<std::string, int> > output;
 
 	if (strings.size() > 0) {
@@ -222,43 +342,21 @@ std::vector<std::pair<std::string, int> > Stringstack::batchFindAndCount(const s
 		int tempCount = 0;
 
 		for (size_t i = 0; i < stringsSize; i++) {
-			tempCount = findAndCount(strings[i]);
-			if (tempCount > 0) {
-				output.push_back(std::pair<std::string, int>(strings[i], tempCount));
-			}
+			tempCount = argCount(strings[i]);
+			output.push_back(std::pair<std::string, int>(strings[i], tempCount));
 		}
 	}
 	return output;
 }
 
-std::string Stringstack::findAndPop(std::string firstDelimit, std::string secondDelimit) {
-	return findAndPop(firstDelimit, secondDelimit, true);
+void Stringstack::argReplace(std::string specifier, std::string replacement) {
+	argReplace(specifier, replacement, true, false);
 }
 
-std::string Stringstack::findAndPop(std::string firstDelimit, std::string secondDelimit, bool eraseDelimits) {
-	size_t firstPos = argument.find(firstDelimit);
-	size_t secondPos = argument.find(secondDelimit, firstPos);
-
-	if ((firstPos != std::string::npos) && (secondPos != std::string::npos)) { //&& (secondPos > firstPos)) {
-		argumentMemory.push_back(argument.substr((firstPos + 1), (secondPos - firstPos - 1)));
-		if (eraseDelimits) {
-			argument.erase(firstPos, argumentMemory.back().size() + 2);
-		}
-		else {
-			argument.erase(firstPos + 1, argumentMemory.back().size() + 1);
-		}
-		return argumentMemory.back();
-	}
-	return "";
-}
-
-void Stringstack::findAndReplace(std::string specifier, std::string replacement) {
-	findAndReplace(specifier, replacement, true, false);
-}
-
-void Stringstack::findAndReplace(std::string specifier, std::string replacement, bool replaceAll, bool replaceReverseOrder) {
+void Stringstack::argReplace(std::string specifier, std::string replacement, bool replaceAll, bool replaceReverseOrder) {
 	size_t specifierPos = 0;
 	size_t specifierSize = specifier.size();
+	size_t replacementSize = replacement.size();
 	bool finished = false;
 
 	if (replaceReverseOrder) {
@@ -279,23 +377,26 @@ void Stringstack::findAndReplace(std::string specifier, std::string replacement,
 
 		argument.replace(specifierPos, specifierSize, replacement);
 
-		if (!replaceReverseOrder) {
-			specifierPos += replacement.size();
+		if (replaceReverseOrder) {
+			specifierPos--;
+		}
+		else {
+			specifierPos += replacementSize;	
 		}
 	}while (replaceAll);
 }
 
-void Stringstack::findAndReplaceOnce(std::string specifier, std::string replacement) {
-	findAndReplace(specifier, replacement, false, false);
+void Stringstack::argReplaceOnce(std::string specifier, std::string replacement) {
+	argReplace(specifier, replacement, false, false);
 }
 
-void Stringstack::findAndReplaceOnce(std::string specifier, std::string replacement, bool replaceReverseOrder) {
-	findAndReplace(specifier, replacement, false, replaceReverseOrder);
+void Stringstack::argReplaceOnce(std::string specifier, std::string replacement, bool replaceReverseOrder) {
+	argReplace(specifier, replacement, false, replaceReverseOrder);
 }
 
-std::string Stringstack::recall(size_t indexArg) {
-	if (indexArg < argumentMemory.size()) {
-		return argumentMemory[indexArg];
+std::string Stringstack::recall(size_t indexString) {
+	if (indexString < argumentMemory.size()) {
+		return argumentMemory[indexString];
 	}
 	else {
 		return "";
@@ -320,8 +421,12 @@ int Stringstack::toInt() {
 	}
 }
 
-int Stringstack::toInt(size_t indexArg) {
-	return atoi((recall(indexArg)).c_str());
+int Stringstack::toInt(std::string integerString) {
+	return atoi(integerString.c_str());
+}
+
+int Stringstack::toInt(size_t indexString) {
+	return atoi((recall(indexString)).c_str());
 }
 
 double Stringstack::toDouble() {
@@ -333,11 +438,15 @@ double Stringstack::toDouble() {
 	}
 }
 
-double Stringstack::toDouble(size_t indexArg) {
-	return atof((recall(indexArg)).c_str());
+double Stringstack::toDouble(std::string doubleString) {
+	return atof(doubleString.c_str());
 }
 
-std::string Stringstack::printPartialArg(size_t begin) {
+double Stringstack::toDouble(size_t indexString) {
+	return atof((recall(indexString)).c_str());
+}
+
+std::string Stringstack::recallPartialString(size_t begin) {
 	size_t size = argumentMemory.size();
 	std::stringstream toReturn;
 
@@ -355,12 +464,12 @@ std::string Stringstack::printPartialArg(size_t begin) {
 	return toReturn.str();
 }
 
-std::string Stringstack::printPartialArg(size_t begin, size_t arguments) {
+std::string Stringstack::recallPartialString(size_t begin, size_t arguments) {
 	size_t size = argumentMemory.size();
 	std::stringstream toReturn;
 
 	if (begin >= size) {
-		return printPartialArg(0);
+		return recallPartialString(0);
 	}
 	else {
 		for (size_t i = begin; i < size && arguments; i++) {
@@ -374,8 +483,8 @@ std::string Stringstack::printPartialArg(size_t begin, size_t arguments) {
 	return toReturn.str();
 }
 
-std::string Stringstack::printArg() {
-	return printPartialArg(0);
+std::string Stringstack::recallString() {
+	return recallPartialString(0);
 }
 
 void Stringstack::popAll() {
@@ -391,120 +500,18 @@ void Stringstack::popAllSpeech() {
 }
 
 bool Stringstack::isFinished() {
+	finished = (argument == "");
 	return finished;
 }
 
-std::string Stringstack::getRemainingArgument() {
+std::string Stringstack::getArg() {
 	return argument;
 }
 
-/*********************************************************
-*          FourStringBin Function Definitions            *
-*                                                        *
-*                   Case                                 *
-*********************************************************/
-FourStringBin::FourStringBin() {
+const char* Stringstack::getCArg() {
+	return (argument.c_str());
 }
 
-FourStringBin::FourStringBin(std::string input) {
-	rawArgument = input;
-	Stringstack::trim(rawArgument.argument);
-}
-
-FourStringBin::FourStringBin(std::istream &input) {
-	std::string temp;
-
-	getline(input, temp);
-	rawArgument = temp;
-	Stringstack::trim(rawArgument.argument);
-}
-
-void FourStringBin::processCommand() {
-	if (getCommand().empty()) {
-		command = rawArgument.popDelimited("[(","])", true, true);
-	}
-	else {
-		premote = command;
-		command = rawArgument.pop();
-	}
-}
-
-void FourStringBin::processEmotes() {
-	if (premote.empty()) {
-		premote = rawArgument.findAndPop("[", "]");
-	}
-	emote = rawArgument.findAndPop("(", ")");
-}
-
-std::string FourStringBin::processRemains() {
-	remains = Stringstack::trim(rawArgument.argument);
-	return remains;
-}
-
-void FourStringBin::processFullBin() {
-	processCommand();
-	processEmotes();
-}
-
-std::string FourStringBin::pop() {
-	std::string toReturn = rawArgument.pop();
-	processRemains();
-	return toReturn;
-}
-
-std::string FourStringBin::getPremote() {
-	if (premote.empty()) {
-		return "";
-	}
-	else {
-		return premote;
-	}
-}
-
-std::string FourStringBin::getPremoteProper() {
-	if (premote.empty()) {
-		return "";
-	}
-	else {
-		char tempFirstChar = (char)toupper(premote[0]);
-		return (tempFirstChar + premote.substr(1));
-	}
-}
-
-std::string FourStringBin::getCommand() {
-	if (command.empty()) {
-		return "";
-	}
-	else {
-		return command;
-	}
-}
-
-std::string FourStringBin::getEmote() {
-	if (emote.empty()) {
-		return "";
-	}
-	else {
-		return emote;
-	}
-}
-
-std::string FourStringBin::getRemains() {
-	if (remains.empty()) {
-		return "";
-	}
-	return remains;
-}
-
-std::string FourStringBin::getRemainsProper() {
-	if (remains.empty()) {
-		return "";
-	}
-	char tempFirstChar = (char)toupper(remains[0]);
-
-	return (tempFirstChar + remains.substr(1));
-}
-
-Stringstack FourStringBin::getArgument() {
-	return rawArgument;
+const char* Stringstack::getCArg(const std::string input) {
+	return (input.c_str());
 }

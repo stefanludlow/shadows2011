@@ -22,108 +22,108 @@
 
 void
 perception_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-						 int target_type)
+			 int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }
 
 void
 perception_plant_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-						int target_type)
+			int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }
 
 void
 perception_image_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-						int target_type)
+			int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }
 
 void
 perception_light_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-						int target_type)
+			int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }
 
 void
 perception_darkness_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-						   void *target, int target_type)
+			   void *target, int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }
 
 void
 perception_power_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-						int target_type)
+			int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }
 
 void
 perception_mind_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-					   int target_type)
+		       int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }
 
 void
 perception_spirit_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-						 int target_type)
+			 int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }
 
 void
 perception_air_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-					  int target_type)
+		      int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }
 
 void
 perception_earth_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-						int target_type)
+			int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }
 
 void
 perception_fire_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-					   int target_type)
+		       int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }
 
 void
 perception_water_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-						int target_type)
+			int target_type)
 {
-	send_to_char
-		("Your incantation, though complete, does not seem to have any effect.\n",
-		ch);
+  send_to_char
+    ("Your incantation, though complete, does not seem to have any effect.\n",
+     ch);
 }

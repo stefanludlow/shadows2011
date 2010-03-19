@@ -37,93 +37,93 @@
 
 namespace rpie 
 {
-	enum server_modes
+  enum server_modes
+    {
+      mode_unknown,
+      mode_play,
+      mode_build,
+      mode_test,
+    };
+
+  class server
+    {
+    private:
+      int server_port;
+      server_modes server_mode;
+      std::map<std::string,std::string> config_variables;
+
+      // checkpoint alarms
+      static const int BOOT_DB_ABORT_THRESHOLD = 15; ///< Infinite loop test.
+      static const int RUNNING_ABORT_THRESHOLD = 5; ///< Infinite loop test.
+      bool abort_threshold_enabled;
+      int abort_threshold;
+      int last_checkpoint;
+
+      int get_user_seconds ()
 	{
-		mode_unknown,
-		mode_play,
-		mode_build,
-		mode_test,
-	};
+	  struct rusage rus;
+	  getrusage (RUSAGE_SELF, &rus);
+	  return rus.ru_utime.tv_sec;
+	}
 
-	class server
+    public:
+      static const size_t MAX_NAME_LENGTH = 15;	///< Username string length
+      static const int ALARM_FREQUENCY = 20; ///< ITimer frequency in seconds
+
+      server ();
+
+      // checkpoint alarms
+      void enable_timer_abort ()
 	{
-	private:
-		int server_port;
-		server_modes server_mode;
-		std::map<std::string,std::string> config_variables;
+	  abort_threshold_enabled = true;
+	}
+      void disable_timer_abort ()
+	{
+	  abort_threshold_enabled = false;
+	}
 
-		// checkpoint alarms
-		static const int BOOT_DB_ABORT_THRESHOLD = 15; ///< Infinite loop test.
-		static const int RUNNING_ABORT_THRESHOLD = 5; ///< Infinite loop test.
-		bool abort_threshold_enabled;
-		int abort_threshold;
-		int last_checkpoint;
+      void set_abort_threshold_pre_booting () 
+	{
+	  abort_threshold_enabled = true;
+	  abort_threshold = BOOT_DB_ABORT_THRESHOLD;
+	  last_checkpoint = get_user_seconds ();
+	}
 
-		int get_user_seconds ()
-		{
-			struct rusage rus;
-			getrusage (RUSAGE_SELF, &rus);
-			return rus.ru_utime.tv_sec;
-		}
+      void set_abort_threshold_post_booting ()
+	{
+	  last_checkpoint = get_user_seconds ();
 
-	public:
-		static const size_t MAX_NAME_LENGTH = 15;	///< Username string length
-		static const int ALARM_FREQUENCY = 20; ///< ITimer frequency in seconds
+	  if (abort_threshold == BOOT_DB_ABORT_THRESHOLD)
+	    {
+	      abort_threshold = RUNNING_ABORT_THRESHOLD;
+	    }
+	}
 
-		server ();
+      bool loop_detect ()
+	{
+	  int timeslice = get_user_seconds () - last_checkpoint;	  
+	  return (abort_threshold_enabled 
+		  && (timeslice > abort_threshold));
+	}
+      
+      void load_config_files ();
+      void load_config_file (std::ifstream &config_file);
 
-		// checkpoint alarms
-		void enable_timer_abort ()
-		{
-			abort_threshold_enabled = true;
-		}
-		void disable_timer_abort ()
-		{
-			abort_threshold_enabled = false;
-		}
-
-		void set_abort_threshold_pre_booting () 
-		{
-			abort_threshold_enabled = true;
-			abort_threshold = BOOT_DB_ABORT_THRESHOLD;
-			last_checkpoint = get_user_seconds ();
-		}
-
-		void set_abort_threshold_post_booting ()
-		{
-			last_checkpoint = get_user_seconds ();
-
-			if (abort_threshold == BOOT_DB_ABORT_THRESHOLD)
-			{
-				abort_threshold = RUNNING_ABORT_THRESHOLD;
-			}
-		}
-
-		bool loop_detect ()
-		{
-			int timeslice = get_user_seconds () - last_checkpoint;	  
-			return (abort_threshold_enabled 
-				&& (timeslice > abort_threshold));
-		}
-
-		void load_config_files ();
-		void load_config_file (std::ifstream &config_file);
-
-		void set_config (std::string var_name, std::string var_value);
-		std::string get_config ();
-		std::string get_config (std::string var_name)
-		{ 
-			return config_variables.find (var_name)->second; 
-		}
-
-		// Mode Inquiry
-		server_modes get_mode () { return server_mode; }
-		bool in_play_mode () { return (server_mode == mode_play); }
-		bool in_build_mode () { return (server_mode == mode_build); }
-		bool in_test_mode () { return (server_mode == mode_test); }
-		int get_port () { return server_port; }
-		std::string get_base_path (std::string req_mode = "current");
-	};
+      void set_config (std::string var_name, std::string var_value);
+      std::string get_config ();
+      std::string get_config (std::string var_name)
+	{ 
+	  return config_variables.find (var_name)->second; 
+	}
+      
+      // Mode Inquiry
+      server_modes get_mode () { return server_mode; }
+      bool in_play_mode () { return (server_mode == mode_play); }
+      bool in_build_mode () { return (server_mode == mode_build); }
+      bool in_test_mode () { return (server_mode == mode_test); }
+      int get_port () { return server_port; }
+      std::string get_base_path (std::string req_mode = "current");
+    };
 
 }
 

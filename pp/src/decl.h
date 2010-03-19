@@ -42,7 +42,7 @@ extern int select ();
 #if defined (_sys_socket_h)
 extern int socket (int domain, int type, int protocol);
 extern int setsockopt (int s, int level, int optname, char *optval,
-					   int optlen);
+		       int optlen);
 extern int bind (int s, struct sockaddr_in *name, int namelen);
 extern int accept (int s, struct sockaddr_in *addr, int *addrlen);
 extern int listen (int s, int backlog);

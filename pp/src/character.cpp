@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  character.cpp : Character Module                   www.middle-earth.us |
+|  character.cpp : Character Module                   www.middle-earth.us | 
 |  Copyright (C) 2008, Shadows of Isildur: Japheth and Case               |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -32,15 +32,15 @@ new_char (int pc_type)
 {
 	CHAR_DATA *ch;
 
-	ch = new char_data();
+	ch = new char_data;
 
 	if (pc_type)
 	{
-		ch->pc = new pc_data();
+		ch->pc = new pc_data;
 	}
 	else
 	{
-		ch->mob = new mob_data();
+		ch->mob = new mob_data;
 	}
 	return ch;
 }
@@ -254,53 +254,53 @@ char_data::~char_data ()
 
 	if (this->clans && *this->clans)
 	{
-		free_mem (this->clans);
+		mem_free (this->clans);
 		this->clans = NULL;
 	}
 
 	if (this->combat_log && *this->combat_log)
 	{
-		free_mem (this->combat_log);
+		mem_free (this->combat_log);
 		this->combat_log = NULL;
 	}
 
 	if (this->enemy_direction && *this->enemy_direction)
 	{
-		free_mem (this->enemy_direction);
+		mem_free (this->enemy_direction);
 		this->enemy_direction = NULL;
 	}
 
 	if (this->delay_who && !isdigit (*this->delay_who) && *this->delay_who)
 	{
-		free_mem (this->delay_who);
+		mem_free (this->delay_who);
 		this->delay_who = NULL;
 	}
 
 	if (this->delay_who2 && !isdigit (*this->delay_who2) && *this->delay_who2)
 	{
-		free_mem (this->delay_who2);
+		mem_free (this->delay_who2);
 		this->delay_who2 = NULL;
 	}
 
 	if (this->voice_str && *this->voice_str)
 	{
-		free_mem (this->voice_str);
+		mem_free (this->voice_str);
 		this->voice_str = NULL;
 	}
 
 	if (this->travel_str && *this->travel_str)
 	{
-		free_mem (this->travel_str);
+		mem_free (this->travel_str);
 		this->travel_str = NULL;
 	}
 
 	if (this->pmote_str && *this->pmote_str)
 	{
-		free_mem (this->pmote_str);
+		mem_free (this->pmote_str);
 		this->pmote_str = NULL;
 	}
 
-	if (this->plan)
+	if (this->plan) 
 	{
 		delete this->plan;
 		this->plan = 0;
@@ -319,11 +319,11 @@ char_data::~char_data ()
 
 		if (var->name && *var->name)
 		{
-			free_mem (var->name);
+			mem_free (var->name);
 			var->name = NULL;
 		}
 
-		free_mem (var);
+		mem_free (var);
 		var = NULL;
 	}
 
@@ -331,7 +331,7 @@ char_data::~char_data ()
 	{
 		mem = this->remembers;
 		this->remembers = mem->next;
-		free_mem (mem);
+		mem_free (mem);
 		mem = NULL;
 	}
 
@@ -358,42 +358,42 @@ char_data::~char_data ()
 		CHAR_DATA* proto = vtom(this->mob->nVirtual);
 		if (proto)
 		{
-			if (this->tname && *this->tname
+			if (this->tname && *this->tname 
 				&& this->tname != proto->tname)
 			{
-				free_mem (this->tname);
+				mem_free (this->tname);
 				this->tname = NULL;
 			}
 
-			if (this->name && *this->name
+			if (this->name && *this->name 
 				&& this->name != proto->name)
 			{
-				free_mem (this->name);
+				mem_free (this->name);
 				this->name = NULL;
 			}
 
-			if (this->short_descr && *this->short_descr
+			if (this->short_descr && *this->short_descr 
 				&& this->short_descr != proto->short_descr )
 			{
-				free_mem (this->short_descr);
+				mem_free (this->short_descr);
 				this->short_descr = NULL;
 			}
 
 			if (this->long_descr && *this->long_descr
 				&& this->long_descr != proto->long_descr)
 			{
-				free_mem (this->long_descr);
+				mem_free (this->long_descr);
 				this->long_descr = NULL;
 			}
 
 			if (this->description && *this->description
 				&& this->description != proto->description)
 			{
-				free_mem (this->description);
+				mem_free (this->description);
 				this->description = NULL;
 			}
 		}
-		else
+		else 
 		{
 			fprintf (stderr, "Proto not defined for NPC %d?\n", this->mob->nVirtual);
 		}
@@ -402,31 +402,31 @@ char_data::~char_data ()
 	{
 		if (this->tname && *this->tname )
 		{
-			free_mem (this->tname);
+			mem_free (this->tname);
 			this->tname = NULL;
 		}
 
 		if (this->name && *this->name )
 		{
-			free_mem (this->name);
+			mem_free (this->name);
 			this->name = NULL;
 		}
 
 		if (this->short_descr && *this->short_descr)
 		{
-			free_mem (this->short_descr);
+			mem_free (this->short_descr);
 			this->short_descr = NULL;
 		}
 
 		if (this->long_descr && *this->long_descr)
 		{
-			free_mem (this->long_descr);
+			mem_free (this->long_descr);
 			this->long_descr = NULL;
 		}
 
 		if (this->description && *this->description)
 		{
-			free_mem (this->description);
+			mem_free (this->description);
 			this->description = NULL;
 		}
 	}
@@ -511,11 +511,11 @@ pc_data::~pc_data()
 
 		if (dream->dream && *dream->dream)
 		{
-			free_mem (dream->dream);
+			mem_free (dream->dream);
 			dream->dream = NULL;
 		}
 
-		free_mem (dream);
+		mem_free (dream);
 		dream = NULL;
 	}
 	while (this->dreamed)
@@ -524,60 +524,60 @@ pc_data::~pc_data()
 		this->dreamed = this->dreamed->next;
 		if (dream->dream && *dream->dream)
 		{
-			free_mem (dream->dream);
+			mem_free (dream->dream);
 			dream->dream = NULL;
 		}
-		free_mem (dream);
+		mem_free (dream);
 		dream = NULL;
 	}
 
 	if ((trole = this->special_role) != NULL)
 	{
 		if (trole->summary && *trole->summary)
-			free_mem (trole->summary);
+			mem_free (trole->summary);
 		if (trole->body && *trole->body)
-			free_mem (trole->body);
+			mem_free (trole->body);
 		if (trole->date && *trole->date)
-			free_mem (trole->date);
+			mem_free (trole->date);
 		if (trole->poster && *trole->poster)
-			free_mem (trole->poster);
-		free_mem (trole);
+			mem_free (trole->poster);
+		mem_free (trole);
 		this->special_role = NULL;
 	}
 
 	if (this->account_name && *this->account_name)
 	{
-		free_mem (this->account_name);
+		mem_free (this->account_name);
 		this->account_name = NULL;
 	}
 
 	if (this->site_lie && *this->site_lie)
 	{
-		free_mem (this->site_lie);
+		mem_free (this->site_lie);
 		this->site_lie = NULL;
 	}
 
 	if (this->imm_leave && *this->imm_leave)
 	{
-		free_mem (this->imm_leave);
+		mem_free (this->imm_leave);
 		this->imm_leave = NULL;
 	}
 
 	if (this->imm_enter && *this->imm_enter)
 	{
-		free_mem (this->imm_enter);
+		mem_free (this->imm_enter);
 		this->imm_enter = NULL;
 	}
 
 	if (this->creation_comment && *this->creation_comment)
 	{
-		free_mem (this->creation_comment);
+		mem_free (this->creation_comment);
 		this->creation_comment = NULL;
 	}
 
 	if (this->msg && *this->msg)
 	{
-		free_mem (this->msg);
+		mem_free (this->msg);
 		this->msg = NULL;
 	}
 
@@ -617,103 +617,103 @@ mob_data::~mob_data()
 {
 	if (this->owner && *this->owner)
 	{
-		free_mem(this->owner);
+		mem_free(this->owner);
 	}
 }
 
 // This function is only intended to be called by redefine_mobiles()
 void char_data::partial_deep_copy (CHAR_DATA *proto)
 {
-	if (this->name)
-	{
-		free_mem(this->name);
-	}
-	this->name = duplicateString(proto->name);
+		if (this->name)
+		{
+			mem_free(this->name);
+		}
+		this->name = str_dup(proto->name);
+		
+		if (this->short_descr)
+		{
+			mem_free(this->short_descr);
+		}
+		this->short_descr = str_dup(proto->short_descr);
+		
+		if (this->long_descr)
+		{
+			mem_free(this->long_descr);
+		}
+		this->long_descr = str_dup(proto->long_descr);
+		
+		if (this->description)
+		{
+			mem_free(this->description);
+		}
+		this->description = str_dup(proto->description);
+		
+		if (this->clans)
+		{
+			mem_free(this->clans);
+		}
+		this->clans = str_dup(proto->clans);
 
-	if (this->short_descr)
-	{
-		free_mem(this->short_descr);
-	}
-	this->short_descr = duplicateString(proto->short_descr);
+		this->act = proto->act;
+		this->mob->damnodice = proto->mob->damnodice;
+		this->mob->damsizedice = proto->mob->damsizedice;
+		this->position = proto->position;
+		this->default_pos = proto->default_pos;
+		this->hmflags = proto->hmflags;
 
-	if (this->long_descr)
-	{
-		free_mem(this->long_descr);
-	}
-	this->long_descr = duplicateString(proto->long_descr);
+		this->str = proto->str;
+		this->dex = proto->dex;
+		this->intel = proto->intel;
+		this->aur = proto->aur;
+		this->con = proto->con;
+		this->wil = proto->wil;
+		this->agi = proto->agi;
 
-	if (this->description)
-	{
-		free_mem(this->description);
-	}
-	this->description = duplicateString(proto->description);
+		this->flags = proto->flags;
+		this->shop = proto->shop;
 
-	if (this->clans)
-	{
-		free_mem(this->clans);
-	}
-	this->clans = duplicateString(proto->clans);
+		this->hit = proto->hit;
+		this->max_hit = proto->max_hit;
+		this->move = proto->move;
+		this->max_move = proto->max_move;
+		this->armor = proto->armor;
+		this->offense = proto->offense;
+		this->mob->damroll = proto->mob->damroll;
+		this->ppoints = proto->ppoints;
+		this->nat_attack_type = proto->nat_attack_type;
 
-	this->act = proto->act;
-	this->mob->damnodice = proto->mob->damnodice;
-	this->mob->damsizedice = proto->mob->damsizedice;
-	this->position = proto->position;
-	this->default_pos = proto->default_pos;
-	this->hmflags = proto->hmflags;
+		this->sex = proto->sex;
+		this->deity = proto->deity;
 
-	this->str = proto->str;
-	this->dex = proto->dex;
-	this->intel = proto->intel;
-	this->aur = proto->aur;
-	this->con = proto->con;
-	this->wil = proto->wil;
-	this->agi = proto->agi;
+		this->circle = proto->circle;
+		this->mob->skinned_vnum = proto->mob->skinned_vnum;
+		this->mob->carcass_vnum = proto->mob->carcass_vnum;
+		this->mob->merch_seven = proto->mob->merch_seven;
+		this->mob->vehicle_type = proto->mob->vehicle_type;
+		this->mob->helm_room = proto->mob->helm_room;
+		this->natural_delay = proto->natural_delay;
+		this->fight_mode = proto->fight_mode;
+		this->race = proto->race;
+		this->mob->access_flags = proto->mob->access_flags;
+		this->speaks = proto->speaks;
 
-	this->flags = proto->flags;
-	this->shop = proto->shop;
+		/*
+		this->height				  = proto->height;
+		this->frame				  = proto->frame;
+		*/
+		this->age = proto->age;
 
-	this->hit = proto->hit;
-	this->max_hit = proto->max_hit;
-	this->move = proto->move;
-	this->max_move = proto->max_move;
-	this->armor = proto->armor;
-	this->offense = proto->offense;
-	this->mob->damroll = proto->mob->damroll;
-	this->ppoints = proto->ppoints;
-	this->nat_attack_type = proto->nat_attack_type;
+		for (int i = 0; i < MAX_SKILLS; i++)
+			this->skills[i] = proto->skills[i];
 
-	this->sex = proto->sex;
-	this->deity = proto->deity;
+		this->str = proto->str;
+		this->dex = proto->dex;
+		this->con = proto->con;
+		this->wil = proto->wil;
+		this->aur = proto->aur;
+		this->intel = proto->intel;
 
-	this->circle = proto->circle;
-	this->mob->skinned_vnum = proto->mob->skinned_vnum;
-	this->mob->carcass_vnum = proto->mob->carcass_vnum;
-	this->mob->merch_seven = proto->mob->merch_seven;
-	this->mob->vehicle_type = proto->mob->vehicle_type;
-	this->mob->helm_room = proto->mob->helm_room;
-	this->natural_delay = proto->natural_delay;
-	this->fight_mode = proto->fight_mode;
-	this->race = proto->race;
-	this->mob->access_flags = proto->mob->access_flags;
-	this->speaks = proto->speaks;
-
-	/*
-	this->height				  = proto->height;
-	this->frame				  = proto->frame;
-	*/
-	this->age = proto->age;
-
-	for (int i = 0; i < MAX_SKILLS; i++)
-		this->skills[i] = proto->skills[i];
-
-	this->str = proto->str;
-	this->dex = proto->dex;
-	this->con = proto->con;
-	this->wil = proto->wil;
-	this->aur = proto->aur;
-	this->intel = proto->intel;
-
-	this->mob->currency_type = proto->mob->currency_type;
+		this->mob->currency_type = proto->mob->currency_type;
 }
 
 void char_data::deep_copy (CHAR_DATA *copy_from)
@@ -727,77 +727,77 @@ void char_data::deep_copy (CHAR_DATA *copy_from)
 
 	if (copy_from->delay_who)
 	{
-		this->delay_who = duplicateString(copy_from->delay_who);
+		this->delay_who = str_dup(copy_from->delay_who);
 	}
 
 	if (copy_from->delay_who2)
 	{
-		this->delay_who2 = duplicateString(copy_from->delay_who2);
+		this->delay_who2 = str_dup(copy_from->delay_who2);
 	}
 
 	if (copy_from->casting_arg)
 	{
-		this->casting_arg = duplicateString(copy_from->casting_arg);
+		this->casting_arg = str_dup(copy_from->casting_arg);
 	}
 
 	if (copy_from->name)
 	{
-		this->name = duplicateString(copy_from->name);
+		this->name = str_dup(copy_from->name);
 	}
 
 	if (copy_from->tname)
 	{
-		this->tname = duplicateString(copy_from->tname);
+		this->tname = str_dup(copy_from->tname);
 	}
 
 	if (copy_from->short_descr)
 	{
-		this->short_descr = duplicateString(copy_from->short_descr);
+		this->short_descr = str_dup(copy_from->short_descr);
 	}
 
 	if (copy_from->long_descr)
 	{
-		this->long_descr = duplicateString(copy_from->long_descr);
+		this->long_descr = str_dup(copy_from->long_descr);
 	}
 
 	if (copy_from->pmote_str)
 	{
-		this->pmote_str = duplicateString(copy_from->pmote_str);
+		this->pmote_str = str_dup(copy_from->pmote_str);
 	}
 
 	if (copy_from->voice_str)
 	{
-		this->voice_str = duplicateString(copy_from->voice_str);
+		this->voice_str = str_dup(copy_from->voice_str);
 	}
 
 	if (copy_from->description)
 	{
-		this->description = duplicateString(copy_from->description);
+		this->description = str_dup(copy_from->description);
 	}
 
 	if (copy_from->clans)
 	{
-		this->clans = duplicateString(copy_from->clans);
+		this->clans = str_dup(copy_from->clans);
 	}
 
 	if (copy_from->enemy_direction)
 	{
-		this->enemy_direction = duplicateString(copy_from->enemy_direction);
+		this->enemy_direction = str_dup(copy_from->enemy_direction);
 	}
 
 	if (copy_from->combat_log)
 	{
-		this->combat_log = duplicateString(copy_from->combat_log);
+		this->combat_log = str_dup(copy_from->combat_log);
 	}
 
 	if (copy_from->travel_str)
 	{
-		this->travel_str = duplicateString(copy_from->travel_str);
+		this->travel_str = str_dup(copy_from->travel_str);
 	}
 
 	if (copy_from->dmote_str)
 	{
-		this->dmote_str = duplicateString(copy_from->dmote_str);
+		this->dmote_str = str_dup(copy_from->dmote_str);
 	}
 
 	if (copy_from->plan)
@@ -827,32 +827,32 @@ void pc_data::deep_copy (pc_data *copy_from)
 
 	if (copy_from->creation_comment)
 	{
-		this->creation_comment = duplicateString(copy_from->creation_comment);
+		this->creation_comment = str_dup(copy_from->creation_comment);
 	}
 
 	if (copy_from->imm_enter)
 	{
-		this->imm_enter = duplicateString(copy_from->imm_enter);
+		this->imm_enter = str_dup(copy_from->imm_enter);
 	}
 
 	if (copy_from->imm_leave)
 	{
-		this->imm_leave = duplicateString(copy_from->imm_leave);
+		this->imm_leave = str_dup(copy_from->imm_leave);
 	}
 
 	if (copy_from->site_lie)
 	{
-		this->site_lie = duplicateString(copy_from->site_lie);
+		this->site_lie = str_dup(copy_from->site_lie);
 	}
 
 	if (copy_from->account_name)
 	{
-		this->account_name = duplicateString(copy_from->account_name);
+		this->account_name = str_dup(copy_from->account_name);
 	}
 
 	if (copy_from->msg)
 	{
-		this->msg = duplicateString(copy_from->msg);
+		this->msg = str_dup(copy_from->msg);
 	}
 }
 
@@ -862,7 +862,7 @@ void mob_data::deep_copy (mob_data *copy_from)
 
 	if (copy_from->owner)
 	{
-		this->owner = duplicateString(copy_from->owner);
+		this->owner = str_dup(copy_from->owner);
 	}
 }
 
@@ -885,7 +885,7 @@ void char_data::toggleNaughtyFlag() {
 		naughtyFlag = true;
 	}
 }
-
+	
 void char_data::toggleRPFlag() {
 	if (RPFlag) {
 		RPFlag = false;
@@ -905,13 +905,13 @@ void char_data::togglePlotFlag() {
 }
 
 std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std::string whichClan) {
-
+	
 	bool underwater = (room->sector_type == SECT_RIVER
-		|| room->sector_type == SECT_LAKE
-		|| room->sector_type == SECT_OCEAN
-		|| room->sector_type == SECT_REEF
-		|| room->sector_type == SECT_UNDERWATER);
-
+						|| room->sector_type == SECT_LAKE
+						|| room->sector_type == SECT_OCEAN
+						|| room->sector_type == SECT_REEF
+						|| room->sector_type == SECT_UNDERWATER);
+	
 	int characterNameColour = 0;
 
 	if ((pc && pc->level > 0 && !fighting)) {
@@ -929,13 +929,13 @@ std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std:
 	else if (IS_SET (plr_flags, NEW_PLAYER_TAG)) {
 		characterNameColour = 2;
 	}
-	else if (IS_GUIDE (this)) { //If the person is a guide
+	else if (IS_GUIDE (this)) { //If the person is a guide 
 		characterNameColour = 3;
 	}
 	else {
 		characterNameColour = 0;
 	}
-
+	
 	char characterState = '_';
 
 	switch (GET_POS (this)) {
@@ -968,7 +968,7 @@ std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std:
 	std::stringstream reportStream;
 
 	reportStream << "#" << characterNameColour;
-
+	
 	int blankLineSize = 15 - strlen(tname); // 15 characters alloted to display the name, down from 17
 
 	if (blankLineSize < 1) {
@@ -981,7 +981,7 @@ std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std:
 			reportStream << " ";
 		}
 	}
-
+	
 	if (RPP < 0) {
 		if (aur < 10) {
 			reportStream << "#3[ " << aur << "]";
@@ -996,7 +996,7 @@ std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std:
 	else {
 		reportStream << "#3[" << RPP << "]";
 	}
-
+	
 	reportStream << " #0" << characterState;
 	reportStream << (getNaughtyFlag() ? "#1!" : "#0_");	// Flag to watch player for bad behaviour
 	reportStream << (getRPFlag() ? "#2R" : "#0_");	// Flag to watch player for possible award
@@ -1026,15 +1026,15 @@ bool *char_data::checkClansForWho()
 			clansArgument.pop(); // Pop Clan Flags
 			clansArgument.pop(); // Pop Clan Name
 			if( clansArgument == "mt_citizens" )
-				ret[1] = true;
+			ret[1] = true;
 			else if( clansArgument == "outpost_citizens" )
-				ret[2] = true;
+			ret[2] = true;
 			else if( clansArgument == "fahad_jafari" )
-				ret[3] = true;
+			ret[3] = true;
 			else if( clansArgument == "moria_orks" )
-				ret[4] = true;
+			ret[4] = true;
 			else if( clansArgument == "mordor_char" )
-				ret[5] = true;
+			ret[5] = true;
 		}
 	}
 	return ret;
@@ -1044,7 +1044,7 @@ bool *char_data::checkClansForWho()
 int char_data::majorSphere()
 {
 	if( IS_SET(flags,FLAG_GUEST) )
-		return 0;
+	return 0;
 	if( clans )
 	{
 		Stringstack clansArgument = clans;

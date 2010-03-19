@@ -52,13 +52,13 @@ typedef struct clan_data CLAN_DATA;
 
 struct clan_data
 {
-	char *name;
-	int zone;
-	char *literal;
-	int member_vnum;
-	int leader_vnum;
-	int omni_vnum;
-	CLAN_DATA *next;
+  char *name;
+  int zone;
+  char *literal;
+  int member_vnum;
+  int leader_vnum;
+  int omni_vnum;
+  CLAN_DATA *next;
 };
 
 /* player interface */
@@ -86,11 +86,11 @@ bool outranks(char *, char *, char *);
 
 inline int is_area_enforcer (CHAR_DATA * ch)
 {
-	// this func gets called lots but the result rarely changes
-	if (!ch->enforcement[0])
-		update_enforcement_array (ch);
+  // this func gets called lots but the result rarely changes
+  if (!ch->enforcement[0])
+    update_enforcement_array (ch);
 
-	return ch->enforcement[ch->room->zone];
+  return ch->enforcement[ch->room->zone];
 }
 
 int is_area_leader (CHAR_DATA * ch);

@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  nanny.c : Login Menu and Chargen Module            www.middle-earth.us |
+|  nanny.c : Login Menu and Chargen Module            www.middle-earth.us | 
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -40,17 +40,17 @@ char echo_on_str[] = { (char) IAC, (char) WONT, (char) TELOPT_ECHO,
 
 int new_accounts = 0;
 
-/* Check for duplicate passwords
-select aa.username, aa.user_password
-from forum_users aa, forum_users bb
-where aa.username != bb.username AND aa.user_password = bb.user_password
-group by aa.username, aa.user_password
+/* Check for duplicate passwords 
+select aa.username, aa.user_password 
+from forum_users aa, forum_users bb 
+where aa.username != bb.username AND aa.user_password = bb.user_password 
+group by aa.username, aa.user_password 
 order by user_password, username;
 
 Logins per day:
-select account,ip,firsttime,lasttime, count,has_pwd,count/datediff(lasttime,firsttime) as lpd
-from ip
-order by  lpd desc
+select account,ip,firsttime,lasttime, count,has_pwd,count/datediff(lasttime,firsttime) as lpd 
+from ip 
+order by  lpd desc 
 limit 60;
 */
 
@@ -208,15 +208,15 @@ if ( tyme_passed > 100 && tyme_passed < 21600 ) // more than 100 for people logg
 {
 sprintf (buf, "Less than a day has passed in Middle-Earth since your last departure.\n");
 SEND_TO_Q (buf, d);
-}
+}  
 else if (tyme_passed > 21599 && tyme_passed < 43200)
-{
+{        
 sprintf (buf, "A single day has passed in Middle-Earth since your last departure.\n" );
 SEND_TO_Q (buf, d);
 }
 else if (tyme_passed > 43199 && tyme_passed < 2160000)
-{
-tyme_passed = tyme_passed / 21600;
+{ 
+tyme_passed = tyme_passed / 21600;     
 sprintf (buf, "%d days have passed in Middle-Earth since your last departure.\n", tyme_passed);
 SEND_TO_Q (buf, d);
 }
@@ -243,7 +243,7 @@ encrypt_buf (const char *buf)
 {
 	//  extern char *crypt (const char *key, const char *salt);
 
-	return duplicateString (crypt (buf, "CR"));
+	return str_dup (crypt (buf, "CR"));
 }
 
 int
@@ -256,7 +256,7 @@ check_password (const char *pass, const char *encrypted)
 
 	return_value = (strcmp (p, encrypted) == 0);
 
-	free_mem (p); // char* from crypt()
+	mem_free (p); // char* from crypt()
 
 	return return_value;
 }
@@ -300,7 +300,7 @@ nanny_login_choice (DESCRIPTOR_DATA * d, char *argument)
 
 	else if (*buf == 'C')
 	{
-		if (!strstr (d->strClientHostname, "middle-earth.us")
+      if (!strstr (d->strClientHostname, "middle-earth.us")
 			&& reference_ip (NULL, d->strClientHostname))
 		{
 			SEND_TO_Q
@@ -314,8 +314,13 @@ nanny_login_choice (DESCRIPTOR_DATA * d, char *argument)
 			return;
 		}
 		SEND_TO_Q (get_text_buffer (NULL, text_list, "account_application"), d);
-		SEND_TO_Q ("What would you like to name your login account? ", d);
-		d->connected = CON_NEW_ACCT_NAME;
+		
+		//These two lines are not needed with web based account creation
+		//SEND_TO_Q ("What would you like to name your login account? ", d);
+		//d->connected = CON_NEW_ACCT_NAME;
+		//they get the info blurb when they try to register and then put back to the login screen so they can log in.
+		//This also keeps the check for IP bans
+		d->connected = CON_LOGIN;
 		return;
 	}
 
@@ -400,7 +405,7 @@ nanny_ask_password (DESCRIPTOR_DATA * d, char *argument)
 		}
 	}
 
-	if (str_cmp (CAP (argument), "Anonymous"))
+	if (str_cmp (CAP (argument), "Anonymous")) 
 	{
 		d->acct = new account (argument);
 	}
@@ -419,7 +424,7 @@ nanny_ask_password (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	/*
+	/* 
 	*  WE HAVE AN ACCOUNT CONNECTION
 	*     1st timer: count = 1, has_pwd = 0, logins = 0, fails = 0
 	*     otherwise: has_pwd = 0, count++
@@ -427,7 +432,7 @@ nanny_ask_password (DESCRIPTOR_DATA * d, char *argument)
 	int port = engine.get_port ();
 	if (d->acct && d->acct->is_registered () && d->acct->name.length ())
 	{
-		mysql_safe_query
+		mysql_safe_query 
 			("INSERT INTO %s.ip "
 			"  VALUES('%s','%s','%s',NOW(),NOW(),1,0,0,%d,0,0) "
 			"  ON DUPLICATE KEY "
@@ -497,12 +502,12 @@ nanny_check_password (DESCRIPTOR_DATA * d, char *argument)
 	if (!check_password (argument, d->acct->password.c_str ()))
 	{
 
-		/*
+		/* 
 		*  WE HAVE A LOGIN FAILURE
 		*     1st timer: count = 1, has_pwd = 0, logins = 0, fails = 1 (this should never happen)
 		*     otherwise: has_pwd = 0, fails++ (count already incremented)
 		*/
-		mysql_safe_query
+		mysql_safe_query 
 			("INSERT INTO %s.ip "
 			"  VALUES('%s','%s','%s',NOW(),NOW(),1,0,0,%d,0,1) "
 			"  ON DUPLICATE KEY "
@@ -636,26 +641,26 @@ nanny_check_password (DESCRIPTOR_DATA * d, char *argument)
 	send_to_gods (buf);
 	system_log (buf, false);
 
-	/*
-	*  WE HAVE A LOGIN
+	/* 
+	*  WE HAVE A LOGIN 
 	*     1st timer: count = 1, has_pwd = 1, logins = 1 (this should never happen)
 	*     otherwise: has_pwd = 1, logins++ (count already incremented)
 	*/
 	std::string pwd = argument;
-	std::string drupal_pass =
+	std::string drupal_pass = 
 		"UPDATE forum_users "
 		"SET pass = MD5('" + pwd + "') "
 		"WHERE username = '" + d->acct->name + "'" ;
 	mysql_safe_query ((char *)drupal_pass.c_str ());
 
-	mysql_safe_query
+	mysql_safe_query 
 		("INSERT INTO %s.ip "
 		"  VALUES('%s','%s','%s',NOW(),NOW(),1,0,1,%d,1,0) "
 		"  ON DUPLICATE KEY UPDATE lasttime = NOW(), "
 		"    logins = logins + 1, has_pwd = 1,host = '%s';",
 		(engine.get_config ("player_log_db")).c_str (),
-		d->acct->name.c_str (),
-		d->strClientHostname,
+		d->acct->name.c_str (), 
+		d->strClientHostname, 
 		d->strClientIpAddr, port,
 		d->strClientHostname);
 
@@ -751,7 +756,7 @@ nanny_new_account (DESCRIPTOR_DATA * d, char *argument)
 		sprintf (buf2, "\nApply for a login account named %s? [y/n]  ", buf);
 		SEND_TO_Q (buf2, d);
 		d->connected = CON_ACCT_POLICIES;
-		d->stored = duplicateString (buf);
+		d->stored = str_dup (buf);
 	}
 	else
 	{
@@ -788,7 +793,7 @@ nanny_account_policies (DESCRIPTOR_DATA * d, char *argument)
 	{
 		d->acct = new account;
 		d->acct->set_name (d->stored);
-		d->stored = duplicateString ("");
+		d->stored = str_dup ("");
 		d->acct->created_on = time (0);
 		SEND_TO_Q (get_text_buffer (NULL, text_list, "account_policies"), d);
 		SEND_TO_Q ("Do you agree? (y/n) ", d);
@@ -1018,7 +1023,7 @@ nanny_conf_change_password (DESCRIPTOR_DATA * d, char *argument)
 	ECHO_ON;
 
 	d->acct->update_password (d->stored);
-	free_mem (d->stored); // char*
+	mem_free (d->stored); // char*
 
 	SEND_TO_Q ("\n\n#2Account password successfully modified.#0\n\n", d);
 
@@ -1047,7 +1052,7 @@ setup_new_account (account  *acct)
 	char buf2[MAX_STRING_LENGTH];
 	char email[MAX_STRING_LENGTH];
 
-	password = duplicateString (generate_password (1, (char **) "8"));
+	password = str_dup (generate_password (1, (char **) "8"));
 
 	sprintf (buf, "Greetings,\n"
 		"\n"
@@ -1072,7 +1077,7 @@ setup_new_account (account  *acct)
 
 	encrypted = encrypt_buf (password);
 	acct->set_password (encrypted);
-	free_mem (encrypted); // char* from crypt
+	mem_free (encrypted); // char* from crypt
 
 	acct->newsletter = true;
 
@@ -1093,7 +1098,7 @@ setup_new_account (account  *acct)
 	acct->get_last_ip_sql_safe (escaped_last_ip);
 
 	mysql_set_server_option(database,MYSQL_OPTION_MULTI_STATEMENTS_ON);
-	std::string insert_query =
+	std::string insert_query = 
 		"SELECT (@next_id:=(MAX(user_id)+1)) AS next_id FROM forum_users; "
 
 		"INSERT INTO forum_users "
@@ -1144,7 +1149,7 @@ char *password;
 char buf[MAX_STRING_LENGTH];
 char email[MAX_STRING_LENGTH];
 
-password = duplicateString (generate_password (1, (char **) "8"));
+password = str_dup (generate_password (1, (char **) "8"));
 
 sprintf (buf, "Greetings,\n"
 "\n"
@@ -1157,7 +1162,7 @@ sprintf (buf, "Greetings,\n"
 
 encrypted = encrypt_buf (password);
 acct->set_password (encrypted);
-free_mem (encrypted); // char* from crypt()
+mem_free (encrypted); // char* from crypt()
 
 sprintf (email, "%s <%s>", MUD_NAME, MUD_EMAIL);
 
@@ -1191,18 +1196,18 @@ nanny_account_setup (DESCRIPTOR_DATA * d, char *argument)
 			d->strClientHostname);
 		system_log (buf, false);
 
-		/*
+		/* 
 		*  WE HAVE AN ACCOUNT CREATED
 		*     1st timer: count = 1, is_new = 1, has_pwd = 0, logins = 0, fails = 0
 		*     otherwise: not possible!
 		*/
 		int port = engine.get_port ();
-		mysql_safe_query
+		mysql_safe_query 
 			("INSERT INTO %s.ip "
 			"  VALUES('%s','%s','%s',NOW(),NOW(),1,1,0,%d,0,0);",
 			(engine.get_config ("player_log_db")).c_str (),
-			d->acct->name.c_str (),
-			d->strClientHostname,
+			d->acct->name.c_str (), 
+			d->strClientHostname, 
 			d->strClientIpAddr,
 			port);
 
@@ -1409,9 +1414,10 @@ nanny_retire (DESCRIPTOR_DATA * d, char *argument)
 		"below; when finished, terminate the editor with an '@' symbol.#0\n\n",
 		d);
 
-	free_mem(d->pending_message);
-	d->pending_message = new MESSAGE_DATA;
-	d->descStr = d->pending_message->message;
+
+	CREATE (d->pending_message, MESSAGE_DATA, 1);
+
+	d->str = &d->pending_message->message;
 	d->max_str = MAX_STRING_LENGTH;
 
 	d->proc = post_retirement;
@@ -1615,27 +1621,27 @@ nanny_composing_message (DESCRIPTOR_DATA * d, char *argument)
 	if (strlen (date) > 1)
 		date[strlen (date) - 1] = '\0';
 
-	message = new MUDMAIL_DATA;
-	message->from = duplicateString (d->pending_message->poster);
-	message->subject = duplicateString (d->pending_message->subject);
-	message->message = duplicateString (d->pending_message->message);
-	message->from_account = duplicateString (d->acct->name.c_str ());
-	message->date = duplicateString (date);
+	CREATE (message, MUDMAIL_DATA, 1);
+	message->from = str_dup (d->pending_message->poster);
+	message->subject = str_dup (d->pending_message->subject);
+	message->message = str_dup (d->pending_message->message);
+	message->from_account = str_dup (d->acct->name.c_str ());
+	message->date = str_dup (date);
 	message->flags = 0;
-	message->target = duplicateString (d->pending_message->target);
+	message->target = str_dup (d->pending_message->target);
 
 	acct = new account (d->stored);
 
 	save_hobbitmail_message (acct, message);
 
-	free_mem (message->from);
-	free_mem (message->subject);
-	free_mem (message->message);
-	free_mem (message->from_account);
-	free_mem (message->date);
-	free_mem (message); // MUDMAIL_DATA*
+	mem_free (message->from);
+	mem_free (message->subject);
+	mem_free (message->message);
+	mem_free (message->from_account);
+	mem_free (message->date);
+	mem_free (message); // MUDMAIL_DATA*
 
-	free_mem(d->pending_message);
+	unload_message (d->pending_message);
 	d->pending_message = NULL;
 
 	if (!acct->is_registered ())
@@ -1661,7 +1667,7 @@ nanny_composing_message (DESCRIPTOR_DATA * d, char *argument)
 
 	delete acct;
 
-	d->stored = duplicateString ("");
+	d->stored = str_dup ("");
 
 	display_hobbitmail_inbox (d, d->acct);
 
@@ -1688,7 +1694,7 @@ nanny_compose_message (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	d->pending_message->subject = duplicateString (argument);
+	d->pending_message->subject = add_hash (argument);
 
 	SEND_TO_Q
 		("\n#2Enter message; terminate with an '@' when completed. Once finished,\n",
@@ -1698,7 +1704,7 @@ nanny_compose_message (DESCRIPTOR_DATA * d, char *argument)
 		d);
 
 	d->pending_message->message = NULL;
-	d->descStr = d->pending_message->message;
+	d->str = &d->pending_message->message;
 	d->max_str = MAX_STRING_LENGTH;
 	d->connected = CON_COMPOSING_MESSAGE;
 }
@@ -1723,7 +1729,7 @@ nanny_compose_subject (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	d->pending_message->poster = duplicateString (argument);
+	d->pending_message->poster = add_hash (argument);
 	d->connected = CON_COMPOSE_MESSAGE;
 	SEND_TO_Q ("\nRegarding? ", d);
 	return;
@@ -1842,9 +1848,9 @@ nanny_compose_mail_to (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	d->pending_message = new MESSAGE_DATA;
-	d->pending_message->target = duplicateString (argument);
-	d->stored = duplicateString (acct->name.c_str ());
+	CREATE (d->pending_message, MESSAGE_DATA, 1);
+	d->pending_message->target = str_dup (argument);
+	d->stored = str_dup (acct->name.c_str ());
 	delete acct;
 	unload_pc (tch);
 
@@ -1898,18 +1904,18 @@ nanny_mail_menu (DESCRIPTOR_DATA * d, char *argument)
 
 		std::ostringstream message_query_stream;
 
-		message_query_stream <<
+		message_query_stream << 
 			"SELECT account,flags,from_line,from_account,"
 			"sent_date, subject,message, timestamp, id,"
 			"DATE_FORMAT(FROM_UNIXTIME(timestamp + "
 #ifndef MACOSX
-			<< (timezone + (int)(d->acct->timezone * 3600)) <<
+			<< (timezone + (int)(d->acct->timezone * 3600)) << 
 #else
 			<<
 #endif
 			"),\"%a %b %d %T %Y\") AS sent_date,to_line "
 			" FROM hobbitmail WHERE account = '"
-			<< escaped_name <<
+			<< escaped_name << 
 			"' ORDER BY timestamp DESC";
 
 		std::string message_query_string = message_query_stream.str ();
@@ -2039,10 +2045,10 @@ nanny_read_message (DESCRIPTOR_DATA * d, char *argument)
 			return;
 		}
 		row = mysql_fetch_row (result);
-		d->stored = duplicateString (row[0]);
+		d->stored = str_dup (row[0]);
 
-		d->pending_message = new MESSAGE_DATA;
-		d->pending_message->target = duplicateString (row[1]);
+		CREATE (d->pending_message, MESSAGE_DATA, 1);
+		d->pending_message->target = str_dup (row[1]);
 		mysql_free_result (result);
 		result = NULL;
 		d->connected = CON_COMPOSE_SUBJECT;
@@ -2106,7 +2112,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 
 	argn = strtol (argument,0,10);
 
-	//logging out
+//logging out
 	if (c == 'l' || argn == 10)
 	{
 		sprintf (buf, "%s [%s] has logged out.\n", d->acct->name.c_str (),
@@ -2118,8 +2124,8 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		close_socket (d);
 		return;
 	}
-
-	//ansi colors
+	
+//ansi colors
 	else if (c == 'a' || argn == 7)
 	{
 		if (strcasecmp ("Unknown", d->acct->name.c_str ()) == 0)
@@ -2145,8 +2151,9 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		display_main_menu (d);
 		return;
 	}
-
-	//newsletter toggle
+/********
+**removed because this is now handled in the forums
+//newsletter toggle
 	else if (c == 'n' || argn == 8)
 	{
 		if (strcasecmp ("Unknown", d->acct->name.c_str ()) == 0)
@@ -2169,7 +2176,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	//change email address
+//change email address
 	else if (c == 'c' || argn == 5)
 	{
 		if (strcasecmp ("Unknown", d->acct->name.c_str()) == 0)
@@ -2186,8 +2193,9 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		d->connected = CON_CHG_EMAIL;
 		return;
 	}
-
-	//guest access
+** end of this section being removed in favor of forum changes
+******************/
+//guest access
 	else if (c == 'g' || argn == 2)
 	{
 		if (IS_SET (d->acct->flags, ACCOUNT_NOGUEST))
@@ -2237,7 +2245,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	//enter the game with a live character
+//enter the game with a live character
 	else if (c == 'e' || argn == 1)
 	{
 		std::string player_db = engine.get_config ("player_db");
@@ -2246,7 +2254,7 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 			" WHERE account = '%s'"
 			" AND create_state = %d",
 			player_db.c_str (),
-			d->acct->name.c_str (),
+			d->acct->name.c_str (), 
 			STATE_SUSPENDED);
 
 		if ((result = mysql_store_result (database)))
@@ -2267,8 +2275,8 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 			}
 		}
 
-		mysql_safe_query (PFILE_QUERY,
-			player_db.c_str (),
+		mysql_safe_query (PFILE_QUERY, 
+			player_db.c_str (), 
 			d->acct->name.c_str ());
 		result = mysql_store_result (database);
 
@@ -2288,11 +2296,11 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 			SEND_TO_Q ("\nWhich character would you like to log in?\n\n", d);
 			i = 1;
 
-			//see character application status
+//see character application status
 			while ((row = mysql_fetch_row (result)))
 			{
-
-				//only active characters will be displayed, so this section is redundant
+			
+		//only active characters will be displayed, so this section is redundant	
 				if (atoi (row[1]) < 1)
 					sprintf (state, "#3(Pending)#0");
 				else if (atoi (row[1]) == 1)
@@ -2322,62 +2330,62 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		}
 	}
 
-	//CHARGEN delete pending applciations
-	//removed from menu - use web-based from now on.
-	/********
+//CHARGEN delete pending applciations
+//removed from menu - use web-based from now on.
+/********
 	else if (c == 'd' || argn == 4)
 	{
-	if (strcasecmp ("Unknown", d->acct->name.c_str ()) == 0)
-	{
-	SEND_TO_Q
-	("\n#1Sorry, but that isn't a valid option.#0\n\nYour Selection: ",
-	d);
-	return;
+		if (strcasecmp ("Unknown", d->acct->name.c_str ()) == 0)
+		{
+			SEND_TO_Q
+				("\n#1Sorry, but that isn't a valid option.#0\n\nYour Selection: ",
+				d);
+			return;
+		}
+		std::string player_db = engine.get_config ("player_db");
+		mysql_safe_query
+			("SELECT name,create_state"
+			" FROM %s.pfiles"
+			" WHERE account = '%s'"
+			" AND create_state <= 1",
+			player_db.c_str (),
+			d->acct->name.c_str ());
+		result = mysql_store_result (database);
+
+		if (!result || !mysql_num_rows (result))
+		{
+			SEND_TO_Q
+				("There are currently no pending PCs on this account to delete.\n",
+				d);
+			if (result)
+				mysql_free_result (result);
+			display_main_menu (d);
+			return;
+		}
+
+		SEND_TO_Q ("\nWhich pending character would you like to delete?\n\n",
+			d);
+
+		i = 1;
+
+		while ((row = mysql_fetch_row (result)))
+		{
+			sprintf (buf, "%d. %s\n", i, row[0]);
+			SEND_TO_Q (buf, d);
+			i++;
+		}
+
+		SEND_TO_Q ("\nYour Selection: ", d);
+		d->connected = CON_DELETE_PC;
+
+		if (result)
+			mysql_free_result (result);
+
+		return;
 	}
-	std::string player_db = engine.get_config ("player_db");
-	mysql_safe_query
-	("SELECT name,create_state"
-	" FROM %s.pfiles"
-	" WHERE account = '%s'"
-	" AND create_state <= 1",
-	player_db.c_str (),
-	d->acct->name.c_str ());
-	result = mysql_store_result (database);
+**************/
 
-	if (!result || !mysql_num_rows (result))
-	{
-	SEND_TO_Q
-	("There are currently no pending PCs on this account to delete.\n",
-	d);
-	if (result)
-	mysql_free_result (result);
-	display_main_menu (d);
-	return;
-	}
-
-	SEND_TO_Q ("\nWhich pending character would you like to delete?\n\n",
-	d);
-
-	i = 1;
-
-	while ((row = mysql_fetch_row (result)))
-	{
-	sprintf (buf, "%d. %s\n", i, row[0]);
-	SEND_TO_Q (buf, d);
-	i++;
-	}
-
-	SEND_TO_Q ("\nYour Selection: ", d);
-	d->connected = CON_DELETE_PC;
-
-	if (result)
-	mysql_free_result (result);
-
-	return;
-	}
-	**************/
-
-	//hobbit mail
+//hobbit mail
 	else if (c == 'h' || argn == 9)
 	{
 		if (strcasecmp ("Unknown", d->acct->name.c_str ()) == 0)
@@ -2394,55 +2402,55 @@ nanny_connect_select (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	//CHARGEN create new characters - removed in favor of the web-based application
-	/*************
+//CHARGEN create new characters - removed in favor of the web-based application
+/*************
 	else if (c == 'r' || argn == 3)
 	{
-	if (str_cmp ("Unknown", d->acct->name.c_str ()) == 0)
-	{
-	SEND_TO_Q
-	("\n#1Sorry, but that isn't a valid option.#0\n\nYour Selection: ",
-	d);
-	return;
+		if (str_cmp ("Unknown", d->acct->name.c_str ()) == 0)
+		{
+			SEND_TO_Q
+				("\n#1Sorry, but that isn't a valid option.#0\n\nYour Selection: ",
+				d);
+			return;
+		}
+		std::string player_db = engine.get_config ("player_db");
+		mysql_safe_query ("SELECT name,create_state "
+			"FROM %s.pfiles "
+			"WHERE account = '%s'"
+			" AND create_state = %d",
+			player_db.c_str (),
+			d->acct->name.c_str (), STATE_SUSPENDED);
+
+		if ((result = mysql_store_result (database)))
+		{
+
+			nCount = mysql_num_rows (result);
+			mysql_free_result (result);
+
+			if (nCount > 0)
+			{
+
+				SEND_TO_Q
+					("You may not create new characters while you are suspended.\n",
+					d);
+				display_main_menu (d);
+				return;
+
+			}
+		}
+
+		d->character = new_char (1);
+		//clear_char (d->character);
+		d->character->race = -1;
+		d->character->desc = d;
+		SEND_TO_Q (get_text_buffer (NULL, text_list, "help_name"), d);
+		SEND_TO_Q ("\nWhat would you like to name your new character? ", d);
+		d->connected = CON_NAME_CONFIRM;
+		return;
 	}
-	std::string player_db = engine.get_config ("player_db");
-	mysql_safe_query ("SELECT name,create_state "
-	"FROM %s.pfiles "
-	"WHERE account = '%s'"
-	" AND create_state = %d",
-	player_db.c_str (),
-	d->acct->name.c_str (), STATE_SUSPENDED);
+***************/
 
-	if ((result = mysql_store_result (database)))
-	{
-
-	nCount = mysql_num_rows (result);
-	mysql_free_result (result);
-
-	if (nCount > 0)
-	{
-
-	SEND_TO_Q
-	("You may not create new characters while you are suspended.\n",
-	d);
-	display_main_menu (d);
-	return;
-
-	}
-	}
-
-	d->character = new_char (1);
-	//clear_char (d->character);
-	d->character->race = -1;
-	d->character->desc = d;
-	SEND_TO_Q (get_text_buffer (NULL, text_list, "help_name"), d);
-	SEND_TO_Q ("\nWhat would you like to name your new character? ", d);
-	d->connected = CON_NAME_CONFIRM;
-	return;
-	}
-	***************/
-
-	//new password
+//new password
 	else if (c == 'm' || argn == 6)
 	{
 		if (str_cmp ("Unknown", d->acct->name.c_str ())==0)
@@ -2633,20 +2641,20 @@ equip_newbie (CHAR_DATA * ch)
 	int melee = 0, ranged = 0;
 
 	for (tobj = ch->equip; tobj; tobj = tobj->next_content)
-	{
+		{
 		if (tobj == ch->equip)
 			ch->equip = ch->equip->next_content;
 		else
 			ch->equip->next_content = tobj->next_content;
-	}
+		}
 
 	get_weapon_skills (ch, &melee, &ranged);
 
-	//Starting in Harad
+//Starting in Harad
 	if (IS_SET(ch->plr_flags, START_HARAD))
-	{
-		if (ch->sex == 1)
 		{
+		if (ch->sex == 1)
+			{
 			if ((obj = load_object (6276))) //pants
 				equip_char (ch, obj, WEAR_LEGS);
 			if ((obj = load_object (6213))) //shirt
@@ -2657,15 +2665,15 @@ equip_newbie (CHAR_DATA * ch)
 				equip_char (ch, obj, WEAR_WAIST);
 			if ((obj = load_object (1452)))//scarf
 				equip_char (ch, obj, WEAR_HEAD);
-
+			
 			if ((obj = load_object (1180)))//stachel
-			{
+				{
 				equip_char (ch, obj, WEAR_SHOULDER_R);
 				tobj = obj;
-			}
-		}//end male harad
+				}
+			}//end male harad
 		else
-		{
+			{
 			if ((obj = load_object (6168))) //skirt
 				equip_char (ch, obj, WEAR_LEGS);
 			if ((obj = load_object (6253))) //blouse
@@ -2680,210 +2688,210 @@ equip_newbie (CHAR_DATA * ch)
 				equip_char (ch, obj, WEAR_ABOUT);
 
 			if ((obj = load_object (1180))) //satchel
-			{
+				{
 				equip_char (ch, obj, WEAR_SHOULDER_R);
 				tobj = obj;
-			}
-		}//end female Harad
+				}
+			}//end female Harad
 
-		//general stachel contents
+		//general stachel contents	
 		if (tobj && (obj = load_object (80013))) //heavy silver coin
-		{
+			{
 			obj->count = 5;
 			obj_to_obj(obj, tobj);
-		}
+			}
 		if (tobj && (obj = load_object (80012))) //thin silver coin
-		{
+			{
 			obj->count = number (3, 5);
 			obj_to_obj(obj, tobj);
-		}
+			}
 
-	}//end Harad
+		}//end Harad
 
-	//Start in Moria
+//Start in Moria
 	/* set tobj at end of func for pack for money loading */
-	else if (IS_SET (ch->plr_flags, START_MORIA))
-	{
+	else if (IS_SET (ch->plr_flags, START_MORDOR_ORC))
+		{
 		if ((obj = load_object (5011))) //pants
 			equip_char (ch,obj, WEAR_LEGS);
 
-		if (number(0,1)) // cloak randomizer
-		{
+		if (number(0,1)) // cloak randomizer 
+			{
 			if ((obj = load_object (5112)))
 				equip_char (ch,obj, WEAR_ABOUT);
-		}
+			}
 		else
-		{
+			{
 			if ((obj = load_object (40140)))
 				equip_char (ch,obj, WEAR_ABOUT);
-		}
+			}
 
 		switch (number(1,4)) // belt randomizer
-		{
-		case 1:
-			if ((obj = load_object (40051)))
-				equip_char (ch,obj, WEAR_WAIST);
-			break;
-		case 2:
-			if ((obj = load_object (40135)))
-				equip_char (ch,obj, WEAR_WAIST);
-			break;
-		case 3:
-			if ((obj = load_object (40135)))
-				equip_char (ch,obj, WEAR_WAIST);
-			break;
-		default:
-			if ((obj = load_object (40136)))
-				equip_char (ch,obj, WEAR_WAIST);
-			break;
-		}
+			{
+			case 1:
+				if ((obj = load_object (40051)))
+					equip_char (ch,obj, WEAR_WAIST);
+				break;
+			case 2:
+				if ((obj = load_object (40135)))
+					equip_char (ch,obj, WEAR_WAIST);
+				break;
+			case 3:
+				if ((obj = load_object (40135)))
+					equip_char (ch,obj, WEAR_WAIST);
+				break;
+			default:
+				if ((obj = load_object (40136)))
+					equip_char (ch,obj, WEAR_WAIST);
+				break;
+			}
 
-		switch (number(1,3)) // boots randomizer
-		{
-		case 1:
-			if ((obj = load_object (40066)))
-				equip_char (ch,obj, WEAR_FEET);
-			break;
-		case 2:
-			if ((obj = load_object (40055)))
-				equip_char (ch,obj, WEAR_FEET);
-			break;
-		default:
-			if ((obj = load_object (40050)))
-				equip_char (ch,obj, WEAR_FEET);
-			break;
-		}
+		switch (number(1,3)) // boots randomizer 
+			{
+			case 1:
+				if ((obj = load_object (40066)))
+					equip_char (ch,obj, WEAR_FEET);
+				break;
+			case 2:
+				if ((obj = load_object (40055)))
+					equip_char (ch,obj, WEAR_FEET);
+				break;
+			default:
+				if ((obj = load_object (40050)))
+					equip_char (ch,obj, WEAR_FEET);
+				break;
+			}
 
-		if ((obj = load_object (1010))) // tunic
+		if ((obj = load_object (1010))) // tunic 
 			equip_char (ch,obj, WEAR_BODY);
 
 		if ((obj = load_object (5091))) // backpack
-		{
+			{
 			equip_char (ch,obj, WEAR_BACK );
-			tobj = obj;
-		}
-
+			tobj = obj; 
+			}
+			
 		/* moria money */
-		/* 100 to 300 spread, thus 2 to 6 pieces of 50 */
+/* 100 to 300 spread, thus 2 to 6 pieces of 50 */
 		if (tobj && (obj = load_object (5032))) //yrch token
-		{
+			{
 			obj->count = number (2, 6);
 			obj_to_obj (obj, tobj);
-		}
+			}
+			
+		}//end Moria 
 
-	}//end Moria
-
-	//start in Angost
-	else if (IS_SET (ch->plr_flags, START_ANGOST))
-	{
-		if (ch->sex == 1) //male Angost
+//start in Angost
+	else if (IS_SET (ch->plr_flags, START_CAOLAFON))
 		{
+		if (ch->sex == 1) //male Angost
+			{
 			if ((obj = load_colored_object(42121, "earthen brown")))
 				equip_char (ch, obj, WEAR_BODY); //tunic
 			if ((obj = load_colored_object(42122, "earthen brown")))
 				equip_char (ch, obj, WEAR_LEGS); //trousers
 			if ((obj = load_colored_object(42124, "dark grey")))
 				equip_char (ch, obj, WEAR_ABOUT); //cloak
-			if ((obj = load_colored_object(98026, "brown")))
+			if ((obj = load_colored_object(98026, "brown"))) 
 				equip_char (ch, obj, WEAR_HANDS); //gloves
-
+				
 			if ((obj = load_object (104))) //belt
 				equip_char (ch, obj, WEAR_WAIST);
 			if ((obj = load_object (42125))) //sandals
 				equip_char (ch, obj, WEAR_FEET);
-
+			
 			if ((obj = load_object (98))) //sheathe
-			{
+				{
 				equip_char (ch, obj, WEAR_BELT_2);
 				sobj = obj;
-			}
+				}
 
 			if ((obj = load_colored_object (97036, "brown")))
-			{
+				{
 				equip_char (ch, obj, WEAR_BELT_1); //pouch
 				tobj = obj;
+				}
 			}
-		}
 		else //female Angost
-		{
+			{
 			if ((obj = load_colored_object(42135, "earthen brown")))
 				equip_char (ch, obj, WEAR_BODY); //dress
 			if ((obj = load_colored_object(6175, "brown")))
 				equip_char (ch, obj, WEAR_ARMS); //sleeves
 			if ((obj = load_colored_object(98825, "brown")))
 				equip_char (ch, obj, WEAR_LEGS); //leggings
-
+				
 			if ((obj = load_object(97810))) //belt
-				equip_char (ch, obj, WEAR_WAIST);
+				equip_char (ch, obj, WEAR_WAIST); 
 			if ((obj = load_object (42125))) //sandals
 				equip_char (ch, obj, WEAR_FEET);
 			if ((obj = load_object (42123))) //cloak
 				equip_char (ch, obj, WEAR_ABOUT);
 
 			if ((obj = load_object (98))) //sheathe
-			{
+				{
 				equip_char (ch, obj, WEAR_BELT_2);
 				sobj = obj;
-			}
+				}
 
 			if ((obj = load_colored_object (97036, "brown")))
-			{
+				{
 				equip_char (ch, obj, WEAR_BELT_1); //pouch
 				tobj = obj;
-			}
-		}//end female Angost
-
+				}
+			}//end female Angost
+		
 		//everyone in Angost
 		if ((obj = load_object (1659))) //filled waterskin
-		{
+			{
 			obj->o.od.value[1] = 20;
 			obj->o.od.value[2] = 34;
 			equip_char (ch, obj, WEAR_SHOULDER_L);
-		}
-
+			}
+		
 		if (sobj && (obj = load_object (98508))) //longknife in sheathe
-		{
-			obj_to_obj (obj, sobj);
-		}
-
-		if (tobj) //pouch contents
-		{
-			if ((obj = load_object (42133))) //shillings
 			{
+			obj_to_obj (obj, sobj);
+			}
+		
+		if (tobj) //pouch contents
+			{
+			if ((obj = load_object (42133))) //shillings
+				{
 				obj->count = 40;
 				obj_to_obj(obj, tobj);
-			}
+				}
 			if ((obj = load_object (42132))) //penny
-			{
+				{
 				obj->count = 10;
 				obj_to_obj(obj, tobj);
-			}
+				}
 			if ((obj = load_object (42131))) //farthing
-			{
+				{
 				obj->count = 10;
 				obj_to_obj (obj, tobj);
-			}
+				}
 			if ((obj = load_object (42139))) //jerky
-			{
+				{
 				obj->count = 6;
 				obj_to_obj (obj, tobj);
-			}
-
+				}
+		
 			if ((obj = load_object (1070))) //torch
 				obj_to_obj (obj, tobj);
-
+		
 			if ((obj = load_object (1598))) //dice
-			{
+				{
 				obj->count = 2;
 				obj_to_obj (obj, tobj);
-			}
-		}//end pouch contents
-
-	} //end Angost
-
-	//starting in Gondor - also default case
-	else
-	{
+				}
+			}//end pouch contents
+			
+		} //end Angost
+		
+//starting in Gondor - also default case 
+	else 
+		{
 		if ((obj = load_object (1010))) //tunic
 			equip_char (ch, obj, WEAR_BODY);
 		if ((obj = load_object (1011))) //leggings
@@ -2896,16 +2904,16 @@ equip_newbie (CHAR_DATA * ch)
 
 		if ((obj = load_object (1014))) //belt
 			equip_char (ch, obj, WEAR_WAIST);
-
+			
 		if ((obj = load_object (1002))) //backpack
-		{
+			{
 			equip_char (ch, obj, WEAR_BACK);
 			tobj = obj;
-		}
-
+			}
+			
 		/* backpack gear...bread knife etc */
 		if (tobj)
-		{
+			{
 			if ((obj = load_object (804))) //bread
 				obj_to_obj (obj, tobj);
 			if ((obj = load_object (804))) //bread
@@ -2915,54 +2923,54 @@ equip_newbie (CHAR_DATA * ch)
 			if ((obj = load_object (804))) //bread
 				obj_to_obj (obj, tobj);
 			if ((obj = load_object (1560))) //gondorian waterskin
-			{
+				{
 				obj->o.od.value[1] = 7;
 				obj_to_obj (obj, tobj);
-			}
-
+				}
+		
 			if ((obj = load_object (1015))) //knife
 				obj_to_obj (obj, tobj);
 			if ((obj = load_object (1070))) //torch
 				obj_to_obj (obj, tobj);
-
+				
 			if ((obj = load_object (1544))) //silver tree coin
-			{
+				{
 				obj->count = 2;
 				obj_to_obj (obj, tobj);
-			}
-
+				}
+			
 			if ((obj = load_object (1540))) //silver royal
-			{
+				{
 				obj->count = number (3, 6);
 				obj_to_obj (obj, tobj);
-			}
-		} //end gondor pack stuff
-	} //end gondor-default case
+				}
+			} //end gondor pack stuff
+		} //end gondor-default case
 
-	//special case items
+//special case items
 	if (ch->skills[SKILL_HEALING] && (obj = load_object (HEALER_KIT_VNUM)))
 		obj_to_obj (obj, tobj);
 
 	if ((ch->skills[SKILL_SCRIPT_SARATI]) ||
-		(ch->skills[SKILL_SCRIPT_TENGWAR]) ||
-		(ch->skills[ SKILL_SCRIPT_BELERIAND_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_CERTHAS_DAERON]) ||
-		(ch->skills[SKILL_SCRIPT_ANGERTHAS_DAERON]) ||
-		(ch->skills[SKILL_SCRIPT_QUENYAN_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_ANGERTHAS_MORIA]) ||
-		(ch->skills[SKILL_SCRIPT_GONDORIAN_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_ARNORIAN_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_NUMENIAN_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_NORTHERN_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_ANGERTHAS_EREBOR]))
-	{
+	(ch->skills[SKILL_SCRIPT_TENGWAR]) ||
+	(ch->skills[ SKILL_SCRIPT_BELERIAND_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_CERTHAS_DAERON]) ||
+	(ch->skills[SKILL_SCRIPT_ANGERTHAS_DAERON]) ||
+	(ch->skills[SKILL_SCRIPT_QUENYAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_ANGERTHAS_MORIA]) ||
+	(ch->skills[SKILL_SCRIPT_GONDORIAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_ARNORIAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_NUMENIAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_NORTHERN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_ANGERTHAS_EREBOR]))
+		{
 		if ((obj = load_object (1170)))
 			obj_to_obj (obj, tobj);
 		if ((obj = load_object (63)))
 			obj_to_obj (obj, tobj);
 		if ((obj = load_object (79)))
 			obj_to_obj (obj, tobj);
-	}
+		}
 
 	ch->right_hand = NULL;
 	ch->left_hand = NULL;
@@ -3123,16 +3131,16 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	if (d->character->pc->create_state == STATE_REJECTED)
 		d->character->pc->create_state = STATE_APPLYING;
 
-	/***** CHARGEN they need to go to the web to work on thier application
+/***** CHARGEN they need to go to the web to work on thier application
 	if (d->character->pc->create_state == STATE_APPLYING)
 	{
-	d->character->desc = d;
-	create_menu_options (d);
-	d->character->pc->nanny_state = 0;
-	d->connected = CON_CREATION;
-	return;
+		d->character->desc = d;
+		create_menu_options (d);
+		d->character->pc->nanny_state = 0;
+		d->connected = CON_CREATION;
+		return;
 	}
-	******/
+******/
 
 	if (d->character->pc->create_state == STATE_SUBMITTED)
 	{
@@ -3223,7 +3231,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 
 	if (d->character->desc && d->character->desc != d)
 	{
-		SEND_TO_Q ("\n#6Your character was not gracefully removed from the world. Disconnecting.\n", d);
+		SEND_TO_Q ("\n#6Your character was not gracefully removed from the world. Disconnecting.", d);
 		if(GET_NAME (d->character))
 			sprintf (buf, "%s already online, disconnecting old connection.",GET_NAME (d->character));
 		else
@@ -3323,7 +3331,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		return;
 	}
 
-	//new character enters the game for the first time
+//new character enters the game for the first time
 	if ((!d->character->in_room || d->character->in_room == NOWHERE) &&
 		!d->character->right_hand && !d->character->left_hand
 		&& !d->character->equip)
@@ -3395,14 +3403,14 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 
 	send_to_char ("\n", d->character);
 
-	//special message for characters who took a role
+//special message for characters who took a role
 	if (d->character->pc->special_role)
 	{
 		outfit_new_char (d->character, d->character->pc->special_role);
-		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
-		d->pending_message->poster = duplicateString (GET_NAME (d->character));
+		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+		d->pending_message->poster = str_dup (GET_NAME (d->character));
 		d->pending_message->subject =
-			duplicateString ("Special Role Selected in Chargen.");
+			str_dup ("Special Role Selected in Chargen.");
 		sprintf (buf,
 			"Role Name: %s\n" "Role Cost: %d points\n" "Posted By: %s\n"
 			"Posted On: %s\n" "\n" "%s\n",
@@ -3411,7 +3419,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 			d->character->pc->special_role->poster,
 			d->character->pc->special_role->date,
 			d->character->pc->special_role->body);
-		d->pending_message->message = duplicateString (buf);
+		d->pending_message->message = str_dup (buf);
 		add_message_to_mysql_player_notes (d->character->tname,
 			d->character->tname,
 			d->pending_message);
@@ -3420,7 +3428,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 
 	do_look (d->character, "", 15);
 
-	//normal start without role
+//normal start without role
 	if (!str_cmp (d->character->room->name, PREGAME_ROOM_NAME))
 	{
 		send_to_char ("\n", d->character);
@@ -3475,14 +3483,14 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		d->character->hit = d->character->max_hit;
 		d->character->armor = 3;
 	}
-
-	if (d->character->race == 86)//Olag-hai
+	
+	if (d->character->race == 86) //Olog-hai
 	{
-		d->character->max_hit =
-			50 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 18) * 4);
-		d->character->hit = d->character->max_hit;
-		d->character->armor = 7;
-	}
+        d->character->max_hit =
+            50 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 25) * 4);
+        d->character->hit = d->character->max_hit;
+	d->character->armor = 3;	
+}
 
 	if (d->character->pc->level)
 		show_unread_messages (d->character);
@@ -3497,21 +3505,21 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		if (strlen (date) > 1)
 			date[strlen (date) - 1] = '\0';
 
-		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
-		d->pending_message->poster = duplicateString (GET_NAME (d->character));
-		d->pending_message->subject = duplicateString ("Background Information.");
+		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+		d->pending_message->poster = str_dup (GET_NAME (d->character));
+		d->pending_message->subject = str_dup ("Background Information.");
 		d->pending_message->message =
-			duplicateString (d->character->pc->creation_comment);
-		d->pending_message->date = duplicateString (date);
+			str_dup (d->character->pc->creation_comment);
+		d->pending_message->date = str_dup (date);
 		add_message_to_mysql_player_notes (d->character->tname,
 			d->character->tname,
 			d->pending_message);
 
-		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA));
-		d->pending_message->poster = duplicateString (GET_NAME (d->character));
-		d->pending_message->subject = duplicateString ("My Background.");
+		d->pending_message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+		d->pending_message->poster = str_dup (GET_NAME (d->character));
+		d->pending_message->subject = str_dup ("My Background.");
 		d->pending_message->message =
-			duplicateString (d->character->pc->creation_comment);
+			str_dup (d->character->pc->creation_comment);
 		post_to_mysql_journal (d);
 
 		d->character->pc->creation_comment = NULL;
@@ -3628,7 +3636,7 @@ nanny_change_email (DESCRIPTOR_DATA * d, char *argument)
 		sprintf (buf, "\nIs the address %s correct? [y/n] ", argument);
 		SEND_TO_Q (buf, d);
 
-		d->stored = duplicateString (argument);
+		d->stored = str_dup (argument);
 
 		d->connected = CON_CHG_EMAIL_CNF;
 		return;
@@ -3650,7 +3658,7 @@ nanny_change_email_confirm (DESCRIPTOR_DATA * d, char *argument)
 	{
 		SEND_TO_Q ("\nYour email address was successfully updated.\n", d);
 		d->acct->update_email (d->stored);
-		free_mem (d->stored); // char*
+		mem_free (d->stored); // char*
 		d->stored = NULL;
 		display_main_menu (d);
 		return;
@@ -3766,9 +3774,8 @@ spitstat (CHAR_DATA * ch, DESCRIPTOR_DATA * recipient)
 
 	*buf = '\0';
 
-	if (!ch->pc) {
-		ch->pc = new PC_DATA;
-	}
+	if (!ch->pc)
+		CREATE (ch->pc, PC_DATA, 1);
 
 	if (ch->pc->role)
 		sprintf (ADDBUF, "\nPurchased Starter: %s\n",
@@ -4198,7 +4205,7 @@ nanny_race_confirm (DESCRIPTOR_DATA * d, char *arg)
 	}
 }
 
-//not used with web-based chargen
+//not used with web-based chargen 
 //not used in a long time anyway
 void
 nanny_privacy_confirm (DESCRIPTOR_DATA * d, char *arg)
@@ -4308,16 +4315,16 @@ nanny_char_name_confirm (DESCRIPTOR_DATA * d, char *arg)
 	arg[0] = toupper (arg[0]);
 	d->character = new_char (1);
 	//clear_char (d->character);
-	d->character->tname = duplicateString (arg);
+	d->character->tname = add_hash (arg);
 	d->character->pc->create_state = STATE_APPLYING;
 	d->character->race = -1;
-	d->character->pc->account_name = duplicateString (d->acct->name.c_str ());
+	d->character->pc->account_name = add_hash (d->acct->name.c_str ());
 
 	d->character->desc = d;
 
-	d->character->short_descr = NULL;
-	d->character->long_descr = NULL;
-	d->character->description = NULL;
+	d->character->short_descr = 0;
+	d->character->long_descr = 0;
+	d->character->description = 0;
 
 	d->character->time.birth = time (0);
 	d->character->time.played = 0;
@@ -4390,12 +4397,11 @@ nanny_special_role_selection (DESCRIPTOR_DATA * d, char *arg)
 		return;
 	}
 
-	d->character->pc->special_role = new ROLE_DATA;
-	d->character->pc->special_role->next = NULL;
-	d->character->pc->special_role->summary = duplicateString (role->summary);
-	d->character->pc->special_role->body = duplicateString (role->body);
-	d->character->pc->special_role->poster = duplicateString (role->poster);
-	d->character->pc->special_role->date = duplicateString (role->date);
+	CREATE (d->character->pc->special_role, ROLE_DATA, 1);
+	d->character->pc->special_role->summary = str_dup (role->summary);
+	d->character->pc->special_role->body = str_dup (role->body);
+	d->character->pc->special_role->poster = str_dup (role->poster);
+	d->character->pc->special_role->date = str_dup (role->date);
 	d->character->pc->special_role->cost = role->cost;
 	d->character->pc->special_role->id = role->id;
 
@@ -4481,7 +4487,7 @@ race_selection (DESCRIPTOR_DATA * d, char *arg)
 
 	*race_name = '\0';
 
-	d->character->plr_flags &= ~(START_GONDOR | START_MORDOR | START_HARAD | START_ANGOST | START_MORIA);
+	d->character->plr_flags &= ~(START_GONDOR | START_MORDOR_ORC | START_HARAD | START_CAOLAFON | START_BALCHOTH);
 
 	while ((row = mysql_fetch_row (result)))
 	{
@@ -4514,7 +4520,7 @@ race_selection (DESCRIPTOR_DATA * d, char *arg)
 	{
 		reformat_string (buf, &p);
 		sprintf (buf2, "\n#2%s:#0\n\n%s", row[RACE_NAME], p);
-		free_mem (p); //char*
+		mem_free (p); //char*
 	}
 	else
 	{
@@ -4682,20 +4688,25 @@ location_selection (DESCRIPTOR_DATA * d, char *argument)
 		if (i++ == atoi(buf))
 			d->character->plr_flags |= START_GONDOR;
 	}
-	if (IS_SET (flags, RACE_HOME_ANGOST))
+	if (IS_SET (flags, RACE_HOME_CAOLAFON))
 	{
 		if (i++ == atoi(buf))
-			d->character->plr_flags |= START_ANGOST;
+			d->character->plr_flags |= START_CAOLAFON;
 	}
 	if (IS_SET (flags, RACE_HOME_HARAD))
 	{
 		if (i++ == atoi(buf))
 			d->character->plr_flags |= START_HARAD;
 	}
-	if (IS_SET (flags, RACE_HOME_MORIA))
+	if (IS_SET (flags, RACE_HOME_MORDOR_ORC))
 	{
 		if (i++ == atoi(buf))
-			d->character->plr_flags |= START_MORIA;
+			d->character->plr_flags |= START_MORDOR_ORC;
+	}
+	if (IS_SET (flags, RACE_HOME_BALCHOTH)) {
+		if (i++ == atoi(buf)) {
+			d->character->plr_flags |= START_BALCHOTH;
+		}
 	}
 
 	if (d->character->pc->nanny_state)
@@ -4971,7 +4982,7 @@ profession_selection (DESCRIPTOR_DATA * d, char *argument)
 }
 
 //not used with web-based chargen
-int
+int 
 get_native_tongue(CHAR_DATA* ch)
 {
 	/* retrieve the default racial tongue */
@@ -4984,9 +4995,9 @@ get_native_tongue(CHAR_DATA* ch)
 			return SKILL_SPEAK_WESTRON;
 		if (IS_SET (ch->plr_flags, START_HARAD))
 			return SKILL_SPEAK_HARADAIC;
-		if (IS_SET (ch->plr_flags, START_ANGOST))
+		if (IS_SET (ch->plr_flags, START_CAOLAFON))
 			return SKILL_SPEAK_ATLIDUK;
-		/* START_MORIA - no humans start here */
+		/* START_MORDOR_ORC_ORC - no humans start here */
 
 		/* Error - human is not starting anywhere. Set to Westron */
 		fprintf(stderr,"Error - Common Human %s not starting anywhere\n",ch->tname);
@@ -5001,7 +5012,7 @@ get_native_tongue(CHAR_DATA* ch)
 	}
 
 	/* otherwise return the racial native */
-	return atoi(native_tongue);
+	return atoi(native_tongue);	
 }
 
 //not used with web-based chargen
@@ -5123,7 +5134,7 @@ skill_selection (DESCRIPTOR_DATA * d, char *argument)
 		else
 		{
 			native_tongue = get_native_tongue(ch);
-
+	
 			if (skill == native_tongue)
 			{
 				SEND_TO_Q
@@ -5228,7 +5239,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 		create_menu_options (d);
 		return;
 	}
-
+	
 	arg = one_argument (arg, key);
 
 	if (!*key)
@@ -5242,7 +5253,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 	if (ch->name && !isname (ch->tname, ch->name))
 	{
 		sprintf (buf, "%s %s", ch->tname, ch->name);
-		ch->name = duplicateString (buf);
+		ch->name = str_dup (buf);
 	}
 
 	else if (!str_cmp (key, "quit"))
@@ -5364,7 +5375,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 			ch->name = NULL;
 		}
 
-		d->descStr = duplicateString(ch->name);
+		d->str = &ch->name;
 		d->max_str = STR_ONE_LINE;
 		if (d->character->pc->nanny_state)
 			d->character->pc->nanny_state = STATE_LDESC;
@@ -5386,7 +5397,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 			ch->short_descr = NULL;
 		}
 
-		d->descStr = duplicateString(ch->short_descr);
+		d->str = &ch->short_descr;
 		d->max_str = STR_ONE_LINE;
 		if (d->character->pc->nanny_state)
 			d->character->pc->nanny_state = STATE_KEYWORDS;
@@ -5410,7 +5421,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 
 		if (d->character->pc->nanny_state)
 			d->character->pc->nanny_state = STATE_FDESC;
-		d->descStr = duplicateString(ch->long_descr);
+		d->str = &ch->long_descr;
 		d->max_str = STR_ONE_LINE;
 		return;
 	}
@@ -5433,7 +5444,7 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 		SEND_TO_Q
 			("> 1----*----10---*----20---*----30---*----40---*----50---*----60---*----70---END\n",
 			d);
-		d->descStr = duplicateString(ch->description);
+		d->str = &ch->description;
 		d->max_str = MAX_INPUT_LENGTH;
 		if (d->character->pc->nanny_state)
 			d->character->pc->nanny_state = STATE_PROFESSION;
@@ -5520,19 +5531,19 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The City of Minas Tirith in Gondor\n");
 			strcat (b_buf, location_string.c_str());
 		}
-		if (IS_SET (flags, RACE_HOME_ANGOST))
+		if (IS_SET (flags, RACE_HOME_CAOLAFON))
 		{
-			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Northman Burg of Angost near Moria\n");
+			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Northman Village of Caolafan by the Swamps of Wetwang\n");
 			strcat (b_buf, location_string.c_str());
 		}
 		if (IS_SET (flags, RACE_HOME_HARAD))
 		{
-			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Haradaic City of Fahad'Jafari South of the River Poros\n");
+			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Haradaic Contingent Hosted by Mordor\n");
 			strcat (b_buf, location_string.c_str());
 		}
-		if (IS_SET (flags, RACE_HOME_MORIA))
+		if (IS_SET (flags, RACE_HOME_MORDOR_ORC))
 		{
-			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Orc-Infested Mines of Moria\n");
+			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Orkish Inhabitants of The Spire\n");
 			strcat (b_buf, location_string.c_str());
 		}
 		strcat (b_buf, "\n#2Choose starting location:#0 ");
@@ -5579,12 +5590,12 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 			ch->pc->creation_comment = NULL;
 		}
 
-		d->descStr = duplicateString(ch->pc->creation_comment);
+		d->str = &ch->pc->creation_comment;
 		d->max_str = MAX_INPUT_LENGTH;
 		/*
 		if ( d->character->pc->nanny_state && is_newbie (d->character) )
 		d->character->pc->nanny_state = STATE_PRIVACY;
-		else
+		else 
 		*/
 		d->character->pc->nanny_state = 0;
 
@@ -5752,24 +5763,27 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 
 		*ch->tname = toupper (*ch->tname);
 		ch->pc->create_state = STATE_SUBMITTED;
-
+ 
 		/* grommit changed to use helper func */
 		if (get_native_tongue(ch))
-			ch->speaks = get_native_tongue(ch);
+			ch->speaks = get_native_tongue(ch); 
 
 		/* grommit moved it here - set start flag if one was not picked (e.g. for races w/o a choice) */
-		if (num_starting_locs (ch->race) <= 1
+		 if (num_starting_locs (ch->race) <= 1
 			&& lookup_race_variable (ch->race, RACE_START_LOC))
 		{
 			int flags = strtol (lookup_race_variable (ch->race, RACE_START_LOC), NULL, 10);
-			if (IS_SET (flags, RACE_HOME_ANGOST))
-				ch->plr_flags |= START_ANGOST;
+			if (IS_SET (flags, RACE_HOME_CAOLAFON))
+				ch->plr_flags |= START_CAOLAFON;
 			else if (IS_SET (flags, RACE_HOME_GONDOR))
 				ch->plr_flags |= START_GONDOR;
 			else if (IS_SET (flags, RACE_HOME_HARAD))
 				ch->plr_flags |= START_HARAD;
-			else if (IS_SET (flags, RACE_HOME_MORIA))
-				ch->plr_flags |= START_MORIA;
+			else if (IS_SET (flags, RACE_HOME_MORDOR_ORC))
+				ch->plr_flags |= START_MORDOR_ORC;
+			else if (IS_SET (flags, RACE_HOME_BALCHOTH)) {
+				ch->plr_flags |= START_BALCHOTH;
+			}
 		}
 
 		ch->in_room = NOWHERE;
@@ -5876,6 +5890,8 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	case CON_LOGIN:
 		nanny_login_choice (d, argument);
 		break;
+
+/********the following are not used with web based account egistration
 	case CON_NEW_ACCT_NAME:
 		nanny_new_account (d, argument);
 		break;
@@ -5894,6 +5910,7 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	case CON_ACCOUNT_SETUP:
 		nanny_account_setup (d, argument);
 		break;
+**************/	
 	case CON_ENTER_ACCT_NME:
 		nanny_ask_password (d, argument);
 		break;
@@ -5915,16 +5932,19 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	case CON_PWDNCNF:
 		nanny_conf_change_password (d, argument);
 		break;
+/***email changes are through the user control panel in the forum now
 	case CON_CHG_EMAIL:
 		nanny_change_email (d, argument);
 		break;
 	case CON_CHG_EMAIL_CNF:
 		nanny_change_email_confirm (d, argument);
 		break;
-		//CHARGEN CHANGES BELOW
-		//case CON_DELETE_PC:
-		//	nanny_delete_pc (d, argument);
-		//	break;
+****************/
+
+//CHARGEN CHANGES BELOW
+	//case CON_DELETE_PC:
+	//	nanny_delete_pc (d, argument);
+	//	break;
 	case CON_CHOOSE_PC:
 		nanny_choose_pc (d, argument);
 		break;
@@ -5934,30 +5954,30 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 	case CON_READING_WAIT:
 		nanny_reading_wait (d, argument);
 		break;
-		//case CON_RACE_CONFIRM:
-		//	nanny_race_confirm (d, argument);
-		//	break;
-		//case CON_PRIV_CONFIRM:
-		//	nanny_privacy_confirm (d, argument);
-		//	break;
-		//case CON_NAME_CONFIRM:
-		//	nanny_char_name_confirm (d, argument);
-		//	break;
-		//case CON_TERMINATE_CONFIRM:
-		//	nanny_terminate (d, argument);
-		//	break;
+	//case CON_RACE_CONFIRM:
+	//	nanny_race_confirm (d, argument);
+	//	break;
+	//case CON_PRIV_CONFIRM:
+	//	nanny_privacy_confirm (d, argument);
+	//	break;
+	//case CON_NAME_CONFIRM:
+	//	nanny_char_name_confirm (d, argument);
+	//	break;
+	//case CON_TERMINATE_CONFIRM:
+	//	nanny_terminate (d, argument);
+	//	break;
 	case CON_RETIRE:
 		nanny_retire (d, argument);
 		break;
-		//case CON_RACE_SELECT:
-		//	race_selection (d, argument);
-		//	break;
-		//case CON_SPECIAL_ROLE_SELECT:
-		//	nanny_special_role_selection (d, argument);
-		//	break;
-		//case CON_SPECIAL_ROLE_CONFIRM:
-		//	nanny_special_role_confirm (d, argument);
-		//	break;
+	//case CON_RACE_SELECT:
+	//	race_selection (d, argument);
+	//	break;
+	//case CON_SPECIAL_ROLE_SELECT:
+	//	nanny_special_role_selection (d, argument);
+	//	break;
+	//case CON_SPECIAL_ROLE_CONFIRM:
+	//	nanny_special_role_confirm (d, argument);
+	//	break;
 	case CON_CREATE_GUEST:
 		nanny_create_guest (d, argument);
 		break;
@@ -5980,74 +6000,74 @@ nanny (DESCRIPTOR_DATA * d, char *argument)
 		nanny_read_message (d, argument);
 		break;
 
-		/************ following will not be used with web based chargen
-		case CON_PLAYER_NEW:
+/************ following will not be used with web based chargen 
+	case CON_PLAYER_NEW:
 		d->connected = CON_CREATION;
 		create_menu_options (d);
 		break;
 
-		case CON_RACE:
+	case CON_RACE:
 		d->connected = CON_CREATION;
 		create_menu_options (d);
 		break;
 
-		case CON_AGE:
+	case CON_AGE:
 		age_selection (d, argument);
 		if (age (d->character).year)
 		{
-		d->character->pc->nanny_state = STATE_ATTRIBUTES;
-		d->connected = CON_CREATION;
+			d->character->pc->nanny_state = STATE_ATTRIBUTES;
+			d->connected = CON_CREATION;
 		}
 		else
-		d->connected = CON_AGE;
+			d->connected = CON_AGE;
 		create_menu_options (d);
 		break;
 
-		case CON_HEIGHT_WEIGHT:
+	case CON_HEIGHT_WEIGHT:
 		height_frame_selection (d, argument);
 		create_menu_options (d);
 		break;
 
-		case CON_LOCATION:
+	case CON_LOCATION:
 		location_selection (d, argument);
 		create_menu_options (d);
 		break;
 
-		case CON_PROFESSION:
+	case CON_PROFESSION:
 		profession_selection (d, argument);
 		break;
 
-		case CON_SKILLS:
+	case CON_SKILLS:
 		skill_selection (d, argument);
 		break;
 
-		case CON_SEX:
+	case CON_SEX:
 		sex_selection (d, argument);
 		if (d->character->pc->nanny_state && d->character->sex)
 		{
-		if (!available_roles (d->acct->get_rpp ()))
-		d->character->pc->nanny_state = STATE_RACE;
-		else
-		d->character->pc->nanny_state = STATE_SPECIAL_ROLES;
-		d->connected = CON_CREATION;
+			if (!available_roles (d->acct->get_rpp ()))
+				d->character->pc->nanny_state = STATE_RACE;
+			else
+				d->character->pc->nanny_state = STATE_SPECIAL_ROLES;
+			d->connected = CON_CREATION;
 		}
 		create_menu_options (d);
 		break;
 
-		case CON_ATTRIBUTES:
+	case CON_ATTRIBUTES:
 		attribute_priorities (d, argument);
 		if (d->character->pc->nanny_state && d->character->str)
 		{
-		d->character->pc->nanny_state = STATE_FRAME;
+			d->character->pc->nanny_state = STATE_FRAME;
 		}
 		d->connected = CON_CREATION;
 		create_menu_options (d);
 		break;
 
-		case CON_CREATION:
+	case CON_CREATION:
 		create_menu_actions (d, argument);
 		break;
-		***************** end of cases used in web-based chargen *******/
+***************** end of cases used in web-based chargen *******/
 
 	case CON_WEB_CONNECTION:
 		/*                      web_process (d, argument); */
@@ -6088,5 +6108,5 @@ void read_motd(DESCRIPTOR_DATA * d)
 		//SEND_TO_Q (get_text_buffer (NULL, text_list, "lib/MOTD"), d);
 	}
 
-	return;
+	return;   
 }

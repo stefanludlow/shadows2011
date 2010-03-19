@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  utility.c : Utility Module                         www.middle-earth.us |
+|  utility.c : Utility Module                         www.middle-earth.us | 
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -157,7 +157,7 @@ const int restricted_skills[] = {
 	0,				/* Gambling */
 	-2,				/* Bonecarving */
 	0,				/* Gardening */
-	0,				/* Sleight */
+	0,				/* Sleight */ 
 	-2				/* Astonomy */
 };
 
@@ -403,21 +403,21 @@ bool is_overcast (ROOM_DATA * room)
 	int clouds = weather_info[room->zone].clouds;
 
 	if ((room->sector_type == SECT_INSIDE)
-		|| (room->sector_type == SECT_FOREST)
-		|| (room->sector_type == SECT_CAVE)
-		|| (room->sector_type == SECT_PIT)
-		|| (room->sector_type == SECT_UNDERWATER)
-		|| (flags & INDOORS) || (flags & STIFLING_FOG)
-		|| (flags & DARK) || (flags & TUNNEL)
-		|| (flags & CAVE) || (clouds == OVERCAST)
-		|| (clouds == HEAVY_CLOUDS))
+	   || (room->sector_type == SECT_FOREST)
+	   || (room->sector_type == SECT_CAVE)
+	   || (room->sector_type == SECT_PIT)
+	   || (room->sector_type == SECT_UNDERWATER)
+	   || (flags & INDOORS) || (flags & STIFLING_FOG)
+	   || (flags & DARK) || (flags & TUNNEL)
+	   || (flags & CAVE) || (clouds == OVERCAST)
+	   || (clouds == HEAVY_CLOUDS))
 	{
 		result = true;
 	}
 
 	return result;
 }
-// is_sunlight_restricted
+// is_sunlight_restricted 
 // returns true if the character is currently suffering due to the sun.
 // TODO: move to char.h
 bool
@@ -427,7 +427,7 @@ is_sunlight_restricted (CHAR_DATA * ch, ROOM_DATA * room)
 
 	if (sun_light && (ch->affected_by & AFF_SUNLIGHT_PEN))
 	{
-		if (!is_overcast (ch->room)
+		if (!is_overcast (ch->room) 
 			|| (room && !is_overcast (room)))
 		{
 			send_to_char ("The brilliant flame of Anor interferes "
@@ -480,7 +480,7 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 			return 1;
 	}
 
-	// no dual wield skill if you can't one hand the weapon
+	// no dual wield skill if you can't one hand the weapon 
 	if (skill == SKILL_DUAL)
 	{
 		/* bug: if we ever move something other than LIGHT_ / MEDIUM_ / HEAVY_ to one handed, dual not pickable */
@@ -619,7 +619,7 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 	}
 	else if (restricted_skills[skill] == -5)
 	{				// Scripts
-		if (!real_skill (ch, SKILL_LITERACY)) // NB - Literacy has been removed
+	  if (!real_skill (ch, SKILL_LITERACY)) // NB - Literacy has been removed
 			return 1;
 		if (skill == SKILL_SCRIPT_NUMENIAN_TENGWAR)
 			return 0;
@@ -893,7 +893,7 @@ dice (unsigned int number, unsigned int size)
 }
 
 /* returns: 0 if equal, 1 if arg1 > arg2, -1 if arg1 < arg2  */
-/* scan 'till found different or end of both
+/* scan 'till found different or end of both                 
 int str_cmp(char *arg1, char *arg2)
 {
 register int chk, i;
@@ -1358,19 +1358,19 @@ calc_lookup (CHAR_DATA * ch, int reg_index, int reg_entry)
 	return calced_value;
 }
 
-//void
-//print_mem_stats (CHAR_DATA * ch)
-//{
-//	extern int bytes_allocated;
-//	extern char *memory_next;
-//	extern char *memory_top;
-//	char buf[MAX_STRING_LENGTH];
-//
-//	sprintf (buf, "Bytes allocated:  %d  Internal free: %d", bytes_allocated,
-//		memory_top - memory_next);
-//
-//	system_log (buf, false);
-//}
+void
+print_mem_stats (CHAR_DATA * ch)
+{
+	extern int bytes_allocated;
+	extern char *memory_next;
+	extern char *memory_top;
+	char buf[MAX_STRING_LENGTH];
+
+	sprintf (buf, "Bytes allocated:  %d  Internal free: %d", bytes_allocated,
+		memory_top - memory_next);
+
+	system_log (buf, false);
+}
 
 void
 sort_int_array (int *array, int entries)
@@ -1489,7 +1489,7 @@ alloc (int bytes, int dtype)
 			printf ("unspace");
 			break;
 		case 15:
-			printf ("duplicateString: ");
+			printf ("str_dup: ");
 			break;
 		case 16:
 			printf ("CREATE");
@@ -1582,76 +1582,41 @@ alloc (int bytes, int dtype)
 
 #else /* NOVELL */
 
-char* duplicateString(const char *source) {
-	if (source != NULL && strcmp(source, "") == STR_MATCH) {
-		static char *emptyString = "";
-		return emptyString;
-	}
-	std::string tempString = source;
-	char *output = new char[tempString.length() + 1];
 
-	strncpy(output, tempString.c_str(), tempString.length() + 1);
-	return output;
-}
-	
-int free_mem (char *&ptr) {
-	if (ptr != NULL && strcmp(ptr, "") != STR_MATCH) {
-		delete [] ptr;
-		ptr = (char *)NULL;
-		return 1;
-	}
-	else {
-		return 0;
-	}
-}
-
-int free_mem (void *ptr) {
-	delete ptr;
-	ptr = NULL;
-	return 1;
-}
-
-int free_mem_array (void *ptr) {
-	delete [] ptr;
-	ptr = NULL;
-	return 1;
-}
-
-void* alloc (int bytes)
+malloc_t
+alloc (int bytes, int dtype)
 {
-	char *p = new char[bytes];
-	return p;
-	//static int allocs = 0;
-	//char *p;
-	//extern char *emergency_data;
-	//extern int mem_allocated;
+	static int allocs = 0;
+	char *p;
+	extern char *emergency_data;
+	extern int mem_allocated;
 
-	//allocs++;
+	allocs++;
 
-	//bytes += 4;
+	bytes += 4;
 
-	//p = (char *) calloc (1, bytes);
+	p = (char *) calloc (1, bytes);
 
-	//mem_allocated += bytes;
+	mem_allocated += bytes;
 
-	//if (!p)
-	//{
-	//	free_mem (emergency_data);
-	//	system_log ("calloc failed.  Out of memory - forced to shutdown.",
-	//		true);
-	//	shutd = 1;
-	//	p = (char *) calloc (1, bytes);
-	//	mm ("calloc failed");
-	//}
+	if (!p)
+	{
+		mem_free (emergency_data);
+		system_log ("calloc failed.  Out of memory - forced to shutdown.",
+			true);
+		shutd = 1;
+		p = (char *) calloc (1, bytes);
+		mm ("calloc failed");
+	}
 
-	//strncpy (p, "ZZZZ", 4);
+	strncpy (p, "ZZZZ", 4);
 
+	//if (x1)
+	//	printf ("+ @ %Xd  bytes = %d\n", (unsigned int) p, bytes);
 
-	////if (x1) // Unused testing mode, cast throws error - Case
-	////	printf ("+ @ %Xd  bytes = %d\n", (unsigned int) p, bytes);
-	//bytes_allocated += bytes;
+	bytes_allocated += bytes;
 
-	//return p + 4;
+	return p + 4;
 }
 
 
@@ -2246,33 +2211,33 @@ Proposed:
 
 Used:
 
-61: XXS XXS XXS XXS XXS XXS XXS XXS XXS XXS
-68:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS
-75:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS
-82:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS
-89:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS
-96:  XS  XS  XS  XS  XS  XS  XS  XS   S   S
-103:  XS  XS  XS  XS  XS  XS   S   S   S   S
-110:  XS  XS  XS  XS   S   S   S   S   S   S
-117:  XS  XS  XS   S   S   S   S   S   S   S
-124:  XS   S   S   S   S   S   S   S   S   S
-131:   S   S   S   S   S   S   S   S   M   M
-138:   S   S   S   S   S   S   M   M   M   M
-145:   S   S   S   S   M   M   M   M   M   M
-152:   S   S   S   M   M   M   M   M   M   M
-159:   S   M   M   M   M   M   M   M   M   M
-166:   M   M   M   M   M   M   M   M   M   L
-173:   M   M   M   M   M   M   M   M   L   L
-180:   M   M   M   M   M   M   L   L   L   L
-187:   M   M   M   M   L   L   L   L   L   L
-194:   M   M   L   L   L   L   L   L   L   L
-201:   M   L   L   L   L   L   L   L   L   L
-208:   L   L   L   L   L   L   L   L   L  XL
-215:   L   L   L   L   L   L   L  XL  XL  XL
-222:   L   L   L   L   L  XL  XL  XL  XL  XL
-229:   L   L   L   L  XL  XL  XL  XL  XL  XL
-236: XXL XXL XXL XXL XXL XXL XXL XXL XXL XXL
-40  44  48  52  56  60  64  68  72  76
+61: XXS XXS XXS XXS XXS XXS XXS XXS XXS XXS 
+68:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS 
+75:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS 
+82:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS 
+89:  XS  XS  XS  XS  XS  XS  XS  XS  XS  XS 
+96:  XS  XS  XS  XS  XS  XS  XS  XS   S   S 
+103:  XS  XS  XS  XS  XS  XS   S   S   S   S 
+110:  XS  XS  XS  XS   S   S   S   S   S   S 
+117:  XS  XS  XS   S   S   S   S   S   S   S 
+124:  XS   S   S   S   S   S   S   S   S   S 
+131:   S   S   S   S   S   S   S   S   M   M 
+138:   S   S   S   S   S   S   M   M   M   M 
+145:   S   S   S   S   M   M   M   M   M   M 
+152:   S   S   S   M   M   M   M   M   M   M 
+159:   S   M   M   M   M   M   M   M   M   M 
+166:   M   M   M   M   M   M   M   M   M   L 
+173:   M   M   M   M   M   M   M   M   L   L 
+180:   M   M   M   M   M   M   L   L   L   L 
+187:   M   M   M   M   L   L   L   L   L   L 
+194:   M   M   L   L   L   L   L   L   L   L 
+201:   M   L   L   L   L   L   L   L   L   L 
+208:   L   L   L   L   L   L   L   L   L  XL 
+215:   L   L   L   L   L   L   L  XL  XL  XL 
+222:   L   L   L   L   L  XL  XL  XL  XL  XL 
+229:   L   L   L   L  XL  XL  XL  XL  XL  XL 
+236: XXL XXL XXL XXL XXL XXL XXL XXL XXL XXL 
+40  44  48  52  56  60  64  68  72  76 
 
 */
 
@@ -3215,7 +3180,7 @@ add_text (TEXT_DATA ** list, char *filename, char *document_name)
 
 	doc = file_to_string (filename);
 
-	text = (TEXT_DATA *) alloc (sizeof (TEXT_DATA));
+	text = (TEXT_DATA *) alloc (sizeof (TEXT_DATA), 37);
 
 	if (list == NULL)
 		text->next = NULL;
@@ -3224,8 +3189,8 @@ add_text (TEXT_DATA ** list, char *filename, char *document_name)
 
 	*list = text;
 
-	text->filename = duplicateString (filename);
-	text->name = duplicateString (document_name);
+	text->filename = str_dup (filename);
+	text->name = str_dup (document_name);
 	text->text = doc;
 
 	return text;
@@ -3278,15 +3243,15 @@ deallocate_help (HELP_DATA ** list)
 		l = l->next;
 
 		if (element->keyword)
-			free_mem (element->keyword);
+			mem_free (element->keyword);
 
 		if (element->keywords)
-			free_mem (element->keywords);
+			mem_free (element->keywords);
 
 		if (element->help_info)
-			free_mem (element->help_info);
+			mem_free (element->help_info);
 
-		free_mem (element);
+		mem_free (element);
 	}
 }
 
@@ -3320,8 +3285,8 @@ load_help_file (FILE * fp)
 			if (!master_element)
 			{
 
-				master_element = (HELP_DATA *) alloc (sizeof (HELP_DATA));
-				master_element->keywords = duplicateString (buf);
+				master_element = (HELP_DATA *) alloc (sizeof (HELP_DATA), 36);
+				master_element->keywords = str_dup (buf);
 
 				if (!list)
 					list = master_element;
@@ -3331,11 +3296,11 @@ load_help_file (FILE * fp)
 				last_element = master_element;
 			}
 
-			element = (HELP_DATA *) alloc (sizeof (HELP_DATA));
+			element = (HELP_DATA *) alloc (sizeof (HELP_DATA), 36);
 
 			element->master_element = master_element;
 			element->help_info = NULL;
-			element->keyword = duplicateString (topic);
+			element->keyword = str_dup (topic);
 
 			last_element->next = element;
 			last_element = element;
@@ -3354,7 +3319,7 @@ load_help_file (FILE * fp)
 			strcat (b_buf, buf);
 		}
 
-		master_element->help_info = duplicateString (b_buf);
+		master_element->help_info = str_dup (b_buf);
 
 		if (buf[1] == '~')
 			break;
@@ -3566,7 +3531,7 @@ add_combat_log (CHAR_DATA * ch, char *msg)
 		return;
 
 	if (!ch->combat_log)
-		ch->combat_log = duplicateString ("\n");
+		ch->combat_log = str_dup ("\n");
 
 	p = ch->combat_log;
 
@@ -3594,9 +3559,9 @@ add_combat_log (CHAR_DATA * ch, char *msg)
 	sprintf (buf + strlen (buf), "%s DIED: %s\n", ch->tname, msg);
 
 	if (ch->combat_log)
-		free_mem (ch->combat_log);
+		mem_free (ch->combat_log);
 
-	ch->combat_log = duplicateString (buf);
+	ch->combat_log = str_dup (buf);
 }
 
 int
@@ -3862,7 +3827,7 @@ swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd)
 			tochar = true;
 		}
 		else
-			*(p++) = *(argument++);
+			*(p++) = *(argument++); 
 	}
 
 	*p = '\0';
@@ -3906,7 +3871,7 @@ swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd)
 				{
 					buf[0] = toupper (buf[0]);
 				}
-			}
+			}  
 		}
 	}
 	else
@@ -3918,7 +3883,7 @@ swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd)
 		&& buf[strlen (buf) - 1] != '?')
 		strcat (buf, ".");
 
-	//argument = temp;
+	//argument = temp; 
 	sprintf (argument, "%s", buf);
 
 	return (argument);
@@ -3950,12 +3915,12 @@ bool ciStringEqual (const std::string & s1, const std::string & s2)
 }  // end of ciStringEqual
 
 // Hibou -- Returns the date in an in-character context.
-std::string get_date( )
+std::string get_date( ) 
 {
 	std::string suf;
 	std::ostringstream date_buf;
 	int day;
-
+	
 	day = time_info.day + 1;
 	if (day == 1 || (day % 10) == 1)
 	{
@@ -3971,7 +3936,7 @@ std::string get_date( )
 	}
 	/* else if (day < 20)
 	{
-	suf = "th";
+		suf = "th";
 	} */
 	else
 	{
@@ -4002,7 +3967,7 @@ std::string get_date( )
 	{
 		date_buf << day << suf << " " << month_short_name[time_info.month] << ", " << time_info.year << " SR";
 	}
-
+	
 
 	return date_buf.str();
 }
