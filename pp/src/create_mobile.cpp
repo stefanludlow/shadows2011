@@ -23,7 +23,7 @@ const char *variable_races[] = {
   "Eotheod",
   "Free Man of the North",
   "Eriadorian Man",
-  "Haradun",
+  "Haradan",
   "Dwarf",
   "Mountain Orc",
   "Mirkwood Orc",
@@ -1015,7 +1015,7 @@ const char *avar_adj2[] = {
   "\n"
 };
 
-const char *haradun_adj1[] = {
+const char *haradan_adj1[] = {
   "dirty",
   "dust-covered",
   "greasy",
@@ -1083,7 +1083,7 @@ const char *haradun_adj1[] = {
   "\n"
 };
 
-const char *haradun_adj2[] = {
+const char *haradan_adj2[] = {
   "black-haired",
   "coal-haired",
   "ebony-haired",
@@ -1812,13 +1812,13 @@ return_adj2 (CHAR_DATA * mob)
       sprintf (adj, "%s", human_adj2[roll]);
       return adj;
     }
-  if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Haradun"))
+  if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Haradan"))
     {
-      for (limit = 0; *haradun_adj2[limit] != '\n'; limit++)
+      for (limit = 0; *haradan_adj2[limit] != '\n'; limit++)
 	;
       limit--;
       roll = number (0, limit);
-      sprintf (adj, "%s", haradun_adj2[roll]);
+      sprintf (adj, "%s", haradan_adj2[roll]);
       return adj;
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mirkwood Orc"))
@@ -2019,13 +2019,13 @@ return_adj1 (CHAR_DATA * mob)
       sprintf (adj, "%s", human_adj1[roll]);
       return adj;
     }
-  if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Haradun"))
+  if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Haradan"))
     {
-      for (limit = 0; *haradun_adj1[limit] != '\n'; limit++)
+      for (limit = 0; *haradan_adj1[limit] != '\n'; limit++)
 	;
       limit--;
       roll = number (0, limit);
-      sprintf (adj, "%s", haradun_adj1[roll]);
+      sprintf (adj, "%s", haradan_adj1[roll]);
       return adj;
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mirkwood Orc"))
@@ -2193,11 +2193,11 @@ return_adj1 (CHAR_DATA * mob)
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Half-Orc"))
     {
-      for (limit = 0; *haradun_adj1[limit] != '\n'; limit++)
+      for (limit = 0; *haradan_adj1[limit] != '\n'; limit++)
 	;
       limit--;
       roll = number (0, limit);
-      sprintf (adj, "%s", haradun_adj1[roll]);
+      sprintf (adj, "%s", haradan_adj1[roll]);
       return adj;
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Horse") ||
