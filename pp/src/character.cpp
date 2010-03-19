@@ -27,6 +27,328 @@
 
 extern rpie::server engine;
 
+std::map<int, Trait> globalTraitMap;
+std::multimap<std::string, int> nameToTraitID;
+
+Prerequisite::Prerequisite(const Trait *requiredTrait) {
+	this->skill = 0;
+	this->requiredSkillLevel = 0;
+	this->attribute = "";
+	this->requiredAttributeLevel = 0;
+	
+	if (requiredTrait != NULL) {
+		this->requiredTrait = requiredTrait->getID();
+	}
+}
+
+Prerequisite::Prerequisite(int skill, int requiredSkillLevel) {
+	this->skill = skill;
+	this->requiredSkillLevel = requiredSkillLevel;
+	this->attribute = "";
+	this->requiredAttributeLevel = 0;
+	this->requiredTrait = -1;
+}
+
+Prerequisite::Prerequisite(std::string attribute, int requiredAttributeLevel) {
+	this->skill = 0;
+	this->requiredSkillLevel = 0;
+	this->attribute = attribute;
+	this->requiredAttributeLevel = requiredAttributeLevel;
+	this->requiredTrait = -1;
+}
+
+Prerequisite::Prerequisite(int skill, std::string attribute, int requiredSkillLevel, int requiredAttributeLevel) {
+	this->skill = skill;
+	this->requiredSkillLevel = requireSkillLevel;
+	this->attribute = attribute;
+	this->requiredAttributeLevel = requiredAttributeLevel;
+	this->requiredTrait = -1;
+}
+
+std::string Prerequisite::printPrerequisite() {
+	std::stringstream output;
+	if (skill > 0) {
+		output << "This trait requires a skill of #6" << requiredSkillLevel << "#0 in #3" << skills[skill] << "#0";
+		if (attribute != "") {
+			output << " as well as #6" << requiredAttributeLevel << " #3" << attribute << "#0."
+		}
+		else {
+			output << ".";
+		}
+	}
+	else if (attribute != "") {
+		output << "This trait requires #6" << requiredAttributeLevel << " #3" << attribute << "#0.";
+	}
+	else if (requiredTrait > -1) {
+		std::map<int, TraitLevel>::iterator traitIt = globalTraitMap.find(requiredTrait);
+		if (traitIt != globalTraitMap.end()) {
+			output << "This trait has #3" << traitIt->second.getName() << "#0 (ID: #6" << traitIt->second.getID() << "#0) as a prerequisite."; 
+		}
+		else {
+			output << "#9Error: A nonexistent trait is listed as a prerequisite. The nonexistent Trait ID is " << requiredTrait << ".";
+		}
+	}
+	output << "\n";
+	return output.str();
+}
+
+TraitLevel::TraitLevel() {
+	this->ID = -1;
+}
+
+TraitLevel::TraitLevel(std::string name, int ID, Type type) {
+	this->name = name;
+	this->ID = ID;
+	this->type = type;
+
+	strength = 0;
+	dexterity = 0;
+	constitution = 0;
+	intelligence = 0;
+	willpower = 0;
+	agility = 0;
+	power = 0;
+
+	globalTraitMap[ID] = this;
+	nameToTraitID.insert(std::pair<std::string, int> (name, ID));
+}
+
+int TraitLevel::getID() {
+	return ID;
+}
+
+std::string TraitLevel::getName() {
+	return name;
+}
+
+int TraitLevel::setDuration(int seconds) {
+	if (seconds > -1) {
+		this->durationSeconds = seconds;
+	}
+	else {
+		durationSeconds = 0;
+	}
+	return durationSeconds;
+}
+
+void TraitLevel::editDescription(std::string description) {
+	this->description = description;
+}
+
+std::string TraitLevel::editSkillModifier(int skill, int modifier, bool setsSkillToModifier) {
+	if (modifier == 0 && !setsSkillToModifier) {
+		return ("Please specify a non-zero modifier unless using the trait to fix a skill level.");
+	}
+	skillModifiers[skill] = std::pair<int, bool>(modifier, setsSkillToModifier);
+	affectsSkills = true;
+
+	return (" modifier set to: " + MAKE_STRING(modifier) + ".");
+}
+
+std::string TraitLevel::editAttributeModifier(std::string attribute, int modifier) {
+	if (!attribute.empty()) {
+		std::string tempAttribute = "";
+		switch (tolower(attribute[0])) {
+			case 's':
+				strength = modifier;
+				tempAttribute = "strength";
+				break;
+			case 'd':
+				dexterity = modifier;
+				tempAttribute = "dexterity";
+				break;
+			case 'c':
+				constitution = modifier;
+				tempAttribute = "constitution";
+				break;
+			case 'i':
+				intelligence = modifier;
+				tempAttribute = "intelligence";
+				break;
+			case 'w':
+				willpower = modifier;
+				tempAttribute = "willpower";
+				break;
+			case 'a':
+				agility = modifier;
+				tempAttribute = "agility";
+				break;
+			case 'p':
+				power = modifier;
+				tempAttribute = "power";
+				break;
+			default:
+				return ("Attribute " + attribute + " not found.");
+		}
+		affectsAttributes = true;
+		return ("Attribute " + tempAttribute + " modifier set to: " + MAKE_STRING(modifier) + ".");
+	}
+	else {
+		return ("Which attribute modifier do you wish to modify?");
+	}
+}
+
+void TraitLevel::removeSkillModifier(int skill) {
+	std::map<int, std::pair<int, bool> >::iterator it = skillModifiers.find(skill);
+
+	if (it != skillModifiers.end()) {
+		skillModifiers.erase(it);
+	}
+	affectsSkills = !skillModifiers.empty();
+}
+
+std::string TraitLevel::removeAttributeModifier(std::string attribute) {
+	if (!attribute.empty()) {
+		std::string tempAttribute = "";
+		switch (tolower(attribute[0])) {
+			case 's':
+				strength = 0;
+				tempAttribute = "strength";
+				break;
+			case 'd':
+				dexterity = 0;
+				tempAttribute = "dexterity";
+				break;
+			case 'c':
+				constitution = 0;
+				tempAttribute = "constitution";
+				break;
+			case 'i':
+				intelligence = 0;
+				tempAttribute = "intelligence";
+				break;
+			case 'w':
+				willpower = 0;
+				tempAttribute = "willpower";
+				break;
+			case 'a':
+				agility = 0;
+				tempAttribute = "agility";
+				break;
+			case 'p':
+				power = 0;
+				tempAttribute = "power";
+				break;
+			default:
+				return ("Attribute " + attribute + " not found.");
+		}
+		affectsAttributes = (strength != 0 || dexterity != 0 || constitution != 0 || intelligence != 0
+			|| willpower != 0 || agility != 0 || power != 0);
+		return ("Attribute " + tempAttribute + " modifier removed.");
+	}
+	else {
+		return ("Which attribute modifier do you wish to remove?");
+	}
+}
+
+void TraitLevel::displayTrait(CHAR_DATA *ch) {
+	if (ch == NULL) {
+		return;
+	}
+	
+	std::stringstream output;
+
+	char *descriptionToFormat = new char[description.length() + 1];
+	char *formattedDescription;
+	strcpy(descriptionToFormat, description.c_str());
+	reformat_desc(descriptionToFormat, &formattedDescription);
+	delete [] descriptionToFormat;
+
+	output << "#3" << name << "\n#0" << formattedDescription;
+	mem_free(formattedDescription);
+	
+	if (affectsSkills) {
+		output << "\n#6Affects on Skills:#0";
+		std::map<int, std::pair<int, bool> >::iterator it;
+		for (it = skillModifiers.begin(); it != skillModifiers.end(); it++) {
+			if (ch->skills[it->first]) {
+				if (it->second.second) {
+					if (it->second.first == 0) {
+						output << "\n" << skills[it->first] << " is futile for you.";
+					}
+					else if (it->second.first < ch->skills[it->first]) {
+						output << "\nYour knowledge of " << skills[it->first] << " is limited by this trait.";
+					}
+					else if (it->second.first > ch->skills[it->first]) {
+						output << "\nYour " << skills[it->first] << " skill is improved.";
+					}
+				}
+				else {
+					if (it->second.first < 0) {
+						output << "\nYour " << skills[it->first] << " skill is hindered.";
+					}
+					else if (it->second.first > 0) {
+						output << "\nYour " << skills[it->first] << " skill is improved.";
+					}
+				}
+			}
+		}
+	}
+
+	if (affectsAttributes) {
+		if (affectsSkills) {
+			output << "\n";
+		}
+		output << "\n#6Affects on Attributes:#0";
+		
+		if (strength > 0) {
+			output << "\nYour strength is increased.";
+		}
+		else if (strength < 0) {
+			output << "\nYour strength is decreased.";
+		}
+
+		if (dexterity > 0) {
+			output << "\nYour dexterity is increased.";
+		}
+		else if (dexterity < 0) {
+			output << "\nYour dexterity is decreased.";
+		}
+
+		if (constitution > 0) {
+			output << "\nYour constitution is increased.";
+		}
+		else if (constitution < 0) {
+			output << "\nYour constitution is decreased.";
+		}
+
+		if (intelligence > 0) {
+			output << "\nYour intelligence is increased.";
+		}
+		else if (intelligence < 0) {
+			output << "\nYour intelligence is decreased.";
+		}
+
+		if (willpower > 0) {
+			output << "\nYour willpower is increased.";
+		}
+		else if (willpower < 0) {
+			output << "\nYour willpower is decreased.";
+		}
+
+		if (agility > 0) {
+			output << "\nYour agility is increased.";
+		}
+		else if (agility < 0) {
+			output << "\nYour agility is decreased.";
+		}
+
+		if (power > 0) {
+			output << "\nYour power is increased.";
+		}
+		else if (power < 0) {
+			output << "\nYour power is decreased.";
+		}
+	}
+	output << "\n";
+	send_to_char(output.str().c_str(), ch);
+}
+
+void Trait::editTraitType(Type type) {
+	this->type = type;
+}
+
+
 CHAR_DATA *
 new_char (int pc_type)
 {

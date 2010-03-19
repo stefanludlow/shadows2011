@@ -1248,9 +1248,9 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 
 	//to allow tabs and newlines for poetry or songs
 	newString = argument;
-	newString.findAndReplace("\\t", "\t");
-	newString.findAndReplace("\\n", "\n");
-	sprintf(argument, newString.getRemainingArgument().c_str());	
+	newString.argReplace("\\t", "\t");
+	newString.argReplace("\\n", "\n");
+	sprintf(argument, newString.getCArg());	
 	
 	sprintf (buf4, argument);	/* The intended message, sent to the player. */
 	sprintf (buf5, argument);

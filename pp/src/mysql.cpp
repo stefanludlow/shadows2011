@@ -2598,11 +2598,11 @@ num_starting_locs (int race)
 		flags = atoi (lookup_race_variable (race, RACE_START_LOC));
 		if (IS_SET (flags, RACE_HOME_GONDOR))
 			start_loc++;
-		if (IS_SET (flags, RACE_HOME_ANGOST))
+		if (IS_SET (flags, RACE_HOME_CAOLAFON))
 			start_loc++;
 		if (IS_SET (flags, RACE_HOME_HARAD))
 			start_loc++;
-		if (IS_SET (flags, RACE_HOME_MORDOR))
+		if (IS_SET (flags, RACE_HOME_MORDOR_ORC))
 			start_loc++;
 		return start_loc;
 	}

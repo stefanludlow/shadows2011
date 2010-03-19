@@ -47,57 +47,7 @@ const char *variable_races[] = {
   "Arachnid",
   "Wolf",
   "Mordorian Orc",
-  "Snaga",
-  "Frog",
   "\n"
-};
-
-const char *frog_adj1[] = {
-"orange-brown",
-"spotted-green",
-"mottled-grey",
-"yellow-green",
-"mud-brown",
-"albino-white",
-"salt-and-pepper",
-"bronze-colored",
-"grass-shaded",
-"moss-hued",
-"brown-stripped",
-"black-spotted",
-"wheat-tinged",
-"lime-green",
-"asparagus-toned",
-"myrtle-washed",
-"emerald-flushed",
-"garish-jade",
-"vivid-chartreuse",
-"copper-tinted",
-"\n"
-};
-
-const char *frog_adj2[] = {
-"thick-legged",
-"web-toed",
-"bulbous-eyed",
-"yellow-eyed",
-"slimy-skinned",
-"wart-covered",
-"smooth-skinned",
-"spot-covered",
-"palm-sized",
-"black-eyed",
-"white-bellied",
-"round-bodied",
-"three-toed",
-"pebble-textured",
-"long-legged",
-"leaf-shaped",
-"short-armed",
-"thin-legged",
-"thick-bodied",
-"toe-clawed",
-"\n"
 };
 
 const char *spider_adj1[] = {
@@ -1880,7 +1830,7 @@ return_adj2 (CHAR_DATA * mob)
       sprintf (adj, "%s", orc_adj2[roll]);
       return adj;
     }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mountain Orc")||!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Snaga"))
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mountain Orc"))
     {
       for (limit = 0; *goblin_adj2[limit] != '\n'; limit++)
 	;
@@ -1950,16 +1900,7 @@ return_adj2 (CHAR_DATA * mob)
       sprintf (adj, "%s", warg_adj2[roll]);
       return adj;
     }
-else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Frog"))
-    {
-      for (limit = 0; *frog_adj2[limit] != '\n'; limit++)
-	;
-      limit--;
-      roll = number (0, limit);
-      sprintf (adj, "%s", frog_adj2[roll]);
-      return adj;
-    }
- else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Wolf"))
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Wolf"))
     {
       for (limit = 0; *wolf_adj2[limit] != '\n'; limit++)
 	;
@@ -2096,7 +2037,7 @@ return_adj1 (CHAR_DATA * mob)
       sprintf (adj, "%s", orc_adj1[roll]);
       return adj;
     }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mountain Orc")|| !str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Snaga"))
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mountain Orc"))
     {
       for (limit = 0; *goblin_adj1[limit] != '\n'; limit++)
 	;
@@ -2162,15 +2103,6 @@ return_adj1 (CHAR_DATA * mob)
       limit--;
       roll = number (0, limit);
       sprintf (adj, "%s", warg_adj1[roll]);
-      return adj;
-    }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Frog"))
-    {
-      for (limit = 0; *frog_adj1[limit] != '\n'; limit++)
-	;
-      limit--;
-      roll = number (0, limit);
-      sprintf (adj, "%s", frog_adj1[roll]);
       return adj;
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Wolf"))
@@ -2313,17 +2245,8 @@ return_name (CHAR_DATA * mob)
       else
 	return "orc";
     }
-  
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Snaga"))
-    {
-      if (GET_SEX (mob) == SEX_MALE)
-	return "male goblin";
-      else if (GET_SEX (mob) == SEX_FEMALE)
-	return "female goblin";
-      else
-	return "goblin";
-    }
-    else if (!str_cmp
+  else
+    if (!str_cmp
 	(lookup_race_variable (mob->race, RACE_NAME), "Barrow-Wight"))
     {
       mob->sex = SEX_NEUTRAL;
@@ -2466,11 +2389,7 @@ return_name (CHAR_DATA * mob)
       strcat (buf, "warg");
       return buf;
     }
-if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Frog"))
-    {
-      strcat (buf, "frog");
-      return buf;
-    }
+
   if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Wolf"))
     {
       strcat (buf, "wolf");
@@ -2888,7 +2807,7 @@ create_description (CHAR_DATA * mob)
       else if (roll == 9)
 	sprintf (buf, "%s loiters here.", sdesc);
     }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Orc") || !str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Snaga"))
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Orc"))
     {
       roll = number (1, 9);
       if (roll == 1)
@@ -2916,21 +2835,7 @@ create_description (CHAR_DATA * mob)
       else if (roll == 9)
 	sprintf (buf, "%s skitters by.", sdesc);
     }
-else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Frog"))
-    {
-      roll = number (1, 5);
-      if (roll == 1)
-	sprintf (buf, "%s sits here, throat expanding as it croaks loudly.", sdesc);
-      else if (roll == 2)
-	sprintf (buf, "%s lies here, wallowing in mud and filth.", sdesc);
-      else if (roll == 3)
-	sprintf (buf, "%s sits here, watching you with its beady eyes.", sdesc);
-      else if (roll == 4)
-	sprintf (buf, "%s pulls insects out of the air with its long tongue.", sdesc);
-      else if (roll == 5)
-	sprintf (buf, "%s crawls along, leaving behind a slimy trail.", sdesc);
-    }
-    
+
   if (!*buf)
     sprintf (buf, "%s is here.", sdesc);
 

@@ -2349,8 +2349,9 @@ struct race_data
 #define RACE_HOME_GONDOR		( 1 << 0 ) /* 1 */
 #define RACE_HOME_MORDOR    ( 1 << 1 )     /* 2 */
 #define RACE_HOME_HARAD     ( 1 << 2 )     /* 4 */
-#define RACE_HOME_ANGOST	( 1 << 3 )     /* 8 */
-#define RACE_HOME_MORDOR		( 1 << 4)     /* 16 - orcs */
+#define RACE_HOME_CAOLAFON	( 1 << 3 )     /* 8 */
+#define RACE_HOME_MORDOR_ORC ( 1 << 4)     /* 16 - orcs */
+#define RACE_HOME_BALCHOTH   ( 1 << 5)     /* 32 */
 
 /* These should match the order of the rows in the races */
 /* database, since they're read in ascending order. */
@@ -2484,18 +2485,18 @@ struct encumberance_info
 #define NOPETITION		( 1 << 7 )	/* No Petition */
 #define PRIVATE			( 1 << 8 )	/* Non-Guide-reviewable app */
 #define START_GONDOR            ( 1 << 9 )	/* Human, chose to start in Gondor */
-#define START_MORDOR            ( 1 << 10 )	/* Human, chose to start in Mordor */
+#define START_MORDOR_ORC            ( 1 << 10 )	/* Human, chose to start in Mordor */
 #define NO_PLAYERPORT		( 1 << 11 )	/* Admins w/out admin access to 4500 */
 #define MUTE_BEEPS		( 1 << 12 )	/* Doesn't receive NOTIFY beeps */
 #define COMBAT_FILTER		( 1 << 13 )	/* Only receives local combat messages */
 #define GROUP_CLOSED		( 1 << 14 )	/* Not accepting any other followers */
 #define QUIET_SCAN		( 1 << 15 ) /* quick and quiet scan when entering rooms */
 #define NO_BUILDERPORT          ( 1 << 16 )     /* Admins w/o access to 4501 */
-#define START_ANGOST             ( 1 << 17 ) /* Players starting on human/elf/dwarf side of Angost */
-#define START_HARAD             ( 1 << 18 ) /* FJ */
-#define START_MORDOR				( 1 << 19 ) /* Start in moria orcs */
+#define START_CAOLAFON             ( 1 << 17 ) /* Players starting on human/elf/dwarf side of Caolafon */
+#define START_HARAD             ( 1 << 18 ) /* Mordor Haradrim */
+#define START_MORDOR_ORC_ORC			( 1 << 19 ) /* Start in Mordor orcs */
 #define IS_CRAFTER              ( 1 << 20)  /* required to use cset */
-#define REBOOT_ACCESS		( 1 << 21) /* Allows non L5's to use reboot */
+#define START_BALCHOTH				( 1 << 21) /* Start in the Balchoth Vanguard */
 
 
 /* char_data.guardian_flags - controls notification of PC initiated attacks */

@@ -28,6 +28,7 @@
 #include "sys/stat.h"
 #include "clan.h"		/* clan__assert_objs() */
 #include "utility.h"
+#include <sstream>
 
 char s_buf[4096];
 char b_buf[B_BUF_SIZE];
@@ -1655,96 +1656,97 @@ do_broadcast (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 void
-do_zecho (CHAR_DATA * ch, char *argument, int cmd)
-{
-  int zone = -1;
-  int first_room = -1;
-  int last_room = -1;
-  ROOM_DATA *room;
-  char buf[MAX_STRING_LENGTH];
-  char mess[MAX_STRING_LENGTH];
+do_zecho (CHAR_DATA * ch, char *argument, int cmd){ // Changes by Case
+	Stringstack args = argument;
+	int firstRange = 0; 
+	int secondRange = 0;
+	int zone = -1;
 
-  argument = one_argument (argument, buf);
-
-  if (!*buf || !strcmp (buf, "?"))
-    {
-      send_to_char ("  zecho <zone> Message        send message to specific "
-		    "zone.\n", ch);
-      send_to_char ("  zecho Message               send message to zone you "
-		    "are in.\n", ch);
-	  send_to_char ("  zecho r <first room num> <last room num> Message   send message to rooms in a range.\n", ch);	    
-      return;
-    }
-
-  while (*argument == ' ')
-    argument++;
-
-  if (isdigit (*buf) && atoi (buf) < 100)
-    {
-      zone = atoi (buf);
-      sprintf(mess, argument);
-    }
-  else if (!strcmp(buf, "r"))
-  	{
-  	argument = one_argument (argument, buf);
-  	if (isdigit (*buf))
-	  	first_room = atoi (buf);
-  	else
-  		{
-  		send_to_char ("  zecho r <first room num> <last room num> Message   send message to rooms in a range.\n", ch);	    
-        return;
-  		}
-  		
-  	argument = one_argument (argument, buf);
-  	if (isdigit (*buf))
-	  	last_room = atoi (buf);
-  	else
-  		{
-  		send_to_char ("  zecho r <first room num> <last room num> Message   send message to rooms in a range.\n", ch);	    
-        return;
-  		}
-  		
-  	sprintf(mess, argument);  
-  	}
-  else
-  	{
-    zone = ch->in_room / 1000;
-    sprintf(mess, buf);
+	// Ascertain what version of zecho is being used
+	if (args.pop() == "?" || args.last() == "")
+	{
+		send_to_char ("  zecho <zone> Message - send message to specific "
+			"zone.\n", ch);
+		send_to_char ("  zecho Message - send message to zone you "
+			"are in.\n", ch);
+		send_to_char ("  zecho r <first room num> <last room num> Message - send message to ANY rooms in a range. Be careful!\n", ch);	    
+		return;
 	}
 	
-  strcat (mess, "\n");
-  
-  if (zone >= 0)
-  	{
-  	sprintf (buf, "(to zone %d): %s", zone, mess);
-  	send_to_char (buf, ch);
-  	}
-  else
-  	{
-  	sprintf (buf, "(to rooms %d  to %d): %s", first_room, last_room, mess);
-  	send_to_char (buf, ch);
-  	}
-  	
-  for (room = full_room_list; room; room = room->lnext)
-  	{
-  	if (zone >= 0)
-  		{
-    if (room->people && room->zone == zone)
-	    	{
-			send_to_room (mess, room->nVirtual);
+	// Zecho over range
+	if (args.last() == "r") {
+		args.pop();
+		if (args.toInt() > 0 && args.toInt() < 100000) {
+			firstRange = args.toInt();
+			args.pop();
+			if (args.toInt() > 0 && args.toInt() < 100000) {
+				if (firstRange > args.toInt()) {
+					secondRange = firstRange;
+					firstRange = args.toInt();
+				}
+				else {
+					secondRange = args.toInt();
+				}
 			}
-  	  	}
-  	else if ((first_room > 0) && (last_room > 0))
-  		{
-  		if ((room->people) &&
-  			(room->nVirtual >= first_room) &&
-  			(room->nVirtual <= last_room))
-  			{
-			send_to_room (mess, room->nVirtual);
+			else {
+				send_to_char ("  zecho r <first room num> <last room num> Message - send message to ANY rooms in a range. Be careful!\n", ch);
+				return;
 			}
-  		}
-	}//for (room = full_room_list
-  	  	
+		}
+		else {
+			send_to_char ("  zecho r <first room num> <last room num> Message - send message to ANY rooms in a range. Be careful!\n", ch);
+			return;
+		}
+	}
+	else if (args.toInt() > 0 && args.toInt() < 100) { // Zecho over a zone
+		zone = args.toInt();
+	} 
+	else { // Zecho over this zone
+		zone = ch->room->zone;
+
+		if (args.getArg() != "") {
+			args = (args.recall(0) + " " + args.getArg()); // Rebuild argument since we've popped a word
+		}
+		else {
+			args = args.recall(0);
+		}
+	}
+
+	if (args.getArg() == "") {
+		send_to_char("What do you want to zecho?", ch);
+		return;
+	}
+
+	if (zone > -1) { // Set ranges to all the rooms in target zone
+		firstRange = zone * 1000;
+		secondRange = firstRange + 999;
+	}
+
+	args[-1] = args[-1] + "\n"; // Add a new line to the end of the echo
+
+	// Block to send echo to admin
+	// If they're in the zone, they'll get the echo in the same output as this stream
+	std::stringstream toAdmin;
+
+	toAdmin << "(To rooms " << firstRange << " to " << secondRange << "): ";
+
+	if (!(ch->room->nVirtual >= firstRange && ch->room->nVirtual <= secondRange)) {
+		toAdmin << args.getArg();
+	}
+	send_to_char (toAdmin.str().c_str(), ch);
+
+	// Block to send zecho to players/admins in each room
+	char *message = new char[args.getArg().size() + 1];
+	strncpy(message, args.getCArg(), args.getArg().size() + 1); // send_to_room doesn't take a const char *
+
+	for (ROOM_DATA *room = full_room_list; room; room = room->lnext) {
+		if ((room->people) && (room->nVirtual >= firstRange) &&
+			(room->nVirtual <= secondRange)) {
+			send_to_room (message, room->nVirtual);
+		}
+	}
+	delete [] message;
+	message = NULL;
 }
 
 void

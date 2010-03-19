@@ -2708,9 +2708,9 @@ equip_newbie (CHAR_DATA * ch)
 
 		}//end Harad
 
-//Start in Mordor
+//Start in Moria
 	/* set tobj at end of func for pack for money loading */
-	else if (IS_SET (ch->plr_flags, START_MORDOR))
+	else if (IS_SET (ch->plr_flags, START_MORDOR_ORC))
 		{
 		if ((obj = load_object (5011))) //pants
 			equip_char (ch,obj, WEAR_LEGS);
@@ -2771,7 +2771,7 @@ equip_newbie (CHAR_DATA * ch)
 			tobj = obj; 
 			}
 			
-		/* mordor money */
+		/* moria money */
 /* 100 to 300 spread, thus 2 to 6 pieces of 50 */
 		if (tobj && (obj = load_object (5032))) //yrch token
 			{
@@ -2779,10 +2779,10 @@ equip_newbie (CHAR_DATA * ch)
 			obj_to_obj (obj, tobj);
 			}
 			
-		}//end Mordor 
+		}//end Moria 
 
 //start in Angost
-	else if (IS_SET (ch->plr_flags, START_ANGOST))
+	else if (IS_SET (ch->plr_flags, START_CAOLAFON))
 		{
 		if (ch->sex == 1) //male Angost
 			{
@@ -4487,7 +4487,7 @@ race_selection (DESCRIPTOR_DATA * d, char *arg)
 
 	*race_name = '\0';
 
-	d->character->plr_flags &= ~(START_GONDOR | START_MORDOR | START_HARAD | START_ANGOST | START_MORDOR);
+	d->character->plr_flags &= ~(START_GONDOR | START_MORDOR_ORC | START_HARAD | START_CAOLAFON | START_BALCHOTH);
 
 	while ((row = mysql_fetch_row (result)))
 	{
@@ -4688,20 +4688,25 @@ location_selection (DESCRIPTOR_DATA * d, char *argument)
 		if (i++ == atoi(buf))
 			d->character->plr_flags |= START_GONDOR;
 	}
-	if (IS_SET (flags, RACE_HOME_ANGOST))
+	if (IS_SET (flags, RACE_HOME_CAOLAFON))
 	{
 		if (i++ == atoi(buf))
-			d->character->plr_flags |= START_ANGOST;
+			d->character->plr_flags |= START_CAOLAFON;
 	}
 	if (IS_SET (flags, RACE_HOME_HARAD))
 	{
 		if (i++ == atoi(buf))
 			d->character->plr_flags |= START_HARAD;
 	}
-	if (IS_SET (flags, RACE_HOME_MORDOR))
+	if (IS_SET (flags, RACE_HOME_MORDOR_ORC))
 	{
 		if (i++ == atoi(buf))
-			d->character->plr_flags |= START_MORDOR;
+			d->character->plr_flags |= START_MORDOR_ORC;
+	}
+	if (IS_SET (flags, RACE_HOME_BALCHOTH)) {
+		if (i++ == atoi(buf)) {
+			d->character->plr_flags |= START_BALCHOTH;
+		}
 	}
 
 	if (d->character->pc->nanny_state)
@@ -4990,9 +4995,9 @@ get_native_tongue(CHAR_DATA* ch)
 			return SKILL_SPEAK_WESTRON;
 		if (IS_SET (ch->plr_flags, START_HARAD))
 			return SKILL_SPEAK_HARADAIC;
-		if (IS_SET (ch->plr_flags, START_ANGOST))
+		if (IS_SET (ch->plr_flags, START_CAOLAFON))
 			return SKILL_SPEAK_ATLIDUK;
-		/* START_MORDOR - no humans start here */
+		/* START_MORDOR_ORC_ORC - no humans start here */
 
 		/* Error - human is not starting anywhere. Set to Westron */
 		fprintf(stderr,"Error - Common Human %s not starting anywhere\n",ch->tname);
@@ -5526,19 +5531,19 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The City of Minas Tirith in Gondor\n");
 			strcat (b_buf, location_string.c_str());
 		}
-		if (IS_SET (flags, RACE_HOME_ANGOST))
+		if (IS_SET (flags, RACE_HOME_CAOLAFON))
 		{
-			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Northman Burg of Angost near Moria\n");
+			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Northman Village of Caolafan by the Swamps of Wetwang\n");
 			strcat (b_buf, location_string.c_str());
 		}
 		if (IS_SET (flags, RACE_HOME_HARAD))
 		{
-			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Haradaic City of Fahad'Jafari South of the River Poros\n");
+			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Haradaic Contingent Hosted by Mordor\n");
 			strcat (b_buf, location_string.c_str());
 		}
-		if (IS_SET (flags, RACE_HOME_MORDOR))
+		if (IS_SET (flags, RACE_HOME_MORDOR_ORC))
 		{
-			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Orc-Infested Mines of Moria\n");
+			location_string = MAKE_STRING("   #2") + MAKE_STRING(i++) + MAKE_STRING("#0: The Orkish Inhabitants of The Spire\n");
 			strcat (b_buf, location_string.c_str());
 		}
 		strcat (b_buf, "\n#2Choose starting location:#0 ");
@@ -5768,14 +5773,17 @@ create_menu_actions (DESCRIPTOR_DATA * d, char *arg)
 			&& lookup_race_variable (ch->race, RACE_START_LOC))
 		{
 			int flags = strtol (lookup_race_variable (ch->race, RACE_START_LOC), NULL, 10);
-			if (IS_SET (flags, RACE_HOME_ANGOST))
-				ch->plr_flags |= START_ANGOST;
+			if (IS_SET (flags, RACE_HOME_CAOLAFON))
+				ch->plr_flags |= START_CAOLAFON;
 			else if (IS_SET (flags, RACE_HOME_GONDOR))
 				ch->plr_flags |= START_GONDOR;
 			else if (IS_SET (flags, RACE_HOME_HARAD))
 				ch->plr_flags |= START_HARAD;
-			else if (IS_SET (flags, RACE_HOME_MORDOR))
-				ch->plr_flags |= START_MORDOR;
+			else if (IS_SET (flags, RACE_HOME_MORDOR_ORC))
+				ch->plr_flags |= START_MORDOR_ORC;
+			else if (IS_SET (flags, RACE_HOME_BALCHOTH)) {
+				ch->plr_flags |= START_BALCHOTH;
+			}
 		}
 
 		ch->in_room = NOWHERE;

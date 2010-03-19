@@ -23,37 +23,28 @@ CLAN_DATA *clan_list = NULL;
 
 /*
 CHANGES:
-26th August 2009 - Kite - All nee forum linking back to the way it was.
+14th March 2010 - Kite - Total redo of clanning for new forums.
 
-12549	Abdul Matin				abdul-matin
 15866	Angost Military			dalewatch
-15471	Battalion Officers			strongroom_eradan
-15870	Blackrend				blackrend
-15876	Cartel Morvolok			cartel_morvolok
-15873	Crimson Arms of Burzumlub		crimson_arms
+15471	Battalion Officers		strongroom_eradan
+15873	Crimson Arms of Burzumlub	crimson_arms
 15297	Family of Fellowship Members	fellow_family
 14156	Gondor Players			mt_citizens
 15877	Gondorian Nobles			gondorian_nobles
 15891	Guilds of the Outpost		outpost_guilds
-14181	Hawk and Dove				hawk_dove_2
+14181	Hawk and Dove			hawk_dove_2
 14957	Heren Carnatalion			heren_carnatalion
 15897	Riverwatch				riverwatch
-15860	Silvermoon Cobra			cobra
-15892	The Ash Circle			ash_circle
-11723	The Battalions of Ithilien		ithilien_battalion
-15296	The Battered Shield			battered_shield
-15893	The Bone Face Tribe			boneface
+11723	The Battalions of Ithilien	ithilien_battalion
+15296	The Battered Shield		battered_shield
+15893	The Bone Face Tribe		boneface
 15872	Thornhill Farm			thornhill_farm
-15641	Tower of Craban Gador		crabangador
 15874	Villeins Assembly			villein_assembly
 14214	Wardenry				z3_astirian_wardens
-15871	Gondorian Embassy in Fahad'Jafari	gondor_embassy
-14676	MT Council Members			mtc_council
-15869	The March Wardens of Moria		marchwardens
-15864	Free Peoples of the North		outpost_citizens
-15896	Gladiators of Moria			glad_moria
-15863	Moria Blackbloods			moria_dwellers
-15852	The Haradwaith Player's Forum	fahad_jafari
+15905 Balchoth in Mordor 		balchoth_vanguard
+15906 Haradrim in Mordor 		fahad_jafari
+15907 Blackbloods in Mordor		vadok_kraun
+15908 Caolafon				caolafon-citizen
 
 
 */
@@ -68,25 +59,21 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
     {
       return;
     }
-	if (strcmp (clan, "abdul-matin") == STR_MATCH)
+	if (strcmp (clan, "caolafon-citizen") == STR_MATCH)
     	{
-      		nGroupId = 12549;
+      		nGroupId = 15908;
 	}
- 	else if (strcmp (clan, "dalewatch") == STR_MATCH)
+ 	else if (strcmp (clan, "vadok_kraun") == STR_MATCH)
        {
-          	nGroupId = 15866;
+          	nGroupId = 15907;
        }
 	else if (strcmp (clan, "strongroom_eradan") == STR_MATCH)
 	{
 		nGroupId = 15471;
 	}
-	else if (strcmp (clan, "blackrend") == STR_MATCH)
+	else if (strcmp (clan, "balchoth_vanguard") == STR_MATCH)
 	{
-		nGroupId = 15870;
-	}
-	else if (strcmp (clan, "cartel_morvolok") == STR_MATCH)
-	{
-		nGroupId = 15876;
+		nGroupId = 15905;
 	}
 	else if (strcmp (clan, "crimson_arms") == STR_MATCH)
 	{
@@ -98,11 +85,11 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	}
 	else if (strcmp (clan, "mt_citizens") == STR_MATCH)
 	{
-		nGroupId = 15877;
+		nGroupId = 14156;
 	}
 	else if (strcmp (clan, "gondorian_nobles") == STR_MATCH)
 	{
-		nGroupId = 14156;
+		nGroupId = 15877;
 	}
 	else if (strcmp (clan, "outpost_guilds") == STR_MATCH)
 	{
@@ -120,14 +107,6 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	{
 		nGroupId = 15897;
 	}
-	else if (strcmp (clan, "cobra") == STR_MATCH)
-	{
-		nGroupId = 15860;
-	}
-	else if (strcmp (clan, "ash_circle") == STR_MATCH)
-	{
-		nGroupId = 15892;
-	}
 	else if (strcmp (clan, "ithilien_battalion") == STR_MATCH)
 	{
 		nGroupId = 11723;
@@ -144,10 +123,6 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	{
 		nGroupId = 15872;
 	}
-	else if (strcmp (clan, "crabangador") == STR_MATCH)
-	{
-		nGroupId = 15641;
-	}
 	else if (strcmp (clan, "villein_assembly") == STR_MATCH)
 	{
 		nGroupId = 15874;
@@ -156,25 +131,9 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	{
 		nGroupId = 14214;
 	}
-	else if (strcmp (clan, "gondor_embassy") == STR_MATCH)
-	{
-		nGroupId = 15871;
-	}
-	else if (strcmp (clan, "mtc_council") == STR_MATCH)
-	{
-		nGroupId = 14676;
-	}
-	else if (strcmp (clan, "marchwardens") == STR_MATCH)
-	{
-		nGroupId = 15869;
-	}
 	else if (strcmp (clan, "outpost_citizens") == STR_MATCH)
 	{
 		nGroupId = 15864;
-	}
-	else if (strcmp (clan, "glad_moria") == STR_MATCH)
-	{
-		nGroupId = 15896;
 	}
 	else if (strcmp (clan, "moria_dwellers") == STR_MATCH)
 	{
@@ -182,7 +141,7 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	}
 	else if (strcmp (clan, "fahad_jafari") == STR_MATCH)
 	{
-		nGroupId = 15852;
+		nGroupId = 15906;
 	}
   // Avoid giving away ImmPCs in the Forums
   if (nGroupId > 0 && !GET_TRUST (ch) && !IS_SET (ch->flags, FLAG_ISADMIN))
@@ -209,123 +168,90 @@ clan_forum_remove (CHAR_DATA * ch, char *clan)
       return;
     }
 
-	if (strcmp (clan, "abdul-matin") == STR_MATCH)
+	if (strcmp (clan, "caolafon-citizen") == STR_MATCH)
     	{
-      		nGroupId = 12549;
+      		nGroupId = 15908;
 	}
- 	else if (strcmp (clan, "dalewatch") == STR_MATCH)
-        {
-          	nGroupId = 15866;
-        }
+ 	else if (strcmp (clan, "vadok_kraun") == STR_MATCH)
+       {
+          	nGroupId = 15907;
+       }
 	else if (strcmp (clan, "strongroom_eradan") == STR_MATCH)
 	{
 		nGroupId = 15471;
 	}
-	else if (strcmp (clan, "blackrend") == STR_MATCH)
-				{
-		nGroupId = 15870;
-				}
-	else if (strcmp (clan, "cartel_morvolok") == STR_MATCH)
-				{
-		nGroupId = 15876;
-				}
+	else if (strcmp (clan, "balchoth_vanguard") == STR_MATCH)
+	{
+		nGroupId = 15905;
+	}
 	else if (strcmp (clan, "crimson_arms") == STR_MATCH)
-				{
+	{
 		nGroupId = 15873;
-				}
+	}
 	else if (strcmp (clan, "fellow_family") == STR_MATCH)
-				{
+	{
 		nGroupId = 15297;
-				}
+	}
 	else if (strcmp (clan, "mt_citizens") == STR_MATCH)
-				{
-		nGroupId = 15877;
-				}
-	else if (strcmp (clan, "gondorian_nobles") == STR_MATCH)
-				{
+	{
 		nGroupId = 14156;
-				}
+	}
+	else if (strcmp (clan, "gondorian_nobles") == STR_MATCH)
+	{
+		nGroupId = 15877;
+	}
 	else if (strcmp (clan, "outpost_guilds") == STR_MATCH)
-				{
+	{
 		nGroupId = 15891;
-				}
+	}
 	else if (strcmp (clan, "hawk_dove_2") == STR_MATCH)
-				{
+	{
 		nGroupId = 14181;
-				}
+	}
 	else if (strcmp (clan, "heren_carnatalion") == STR_MATCH)
-				{
+	{
 		nGroupId = 14957;
-				}
+	}
 	else if (strcmp (clan, "riverwatch") == STR_MATCH)
-				{
+	{
 		nGroupId = 15897;
-				}
-	else if (strcmp (clan, "cobra") == STR_MATCH)
-				{
-		nGroupId = 15860;
-				}
-	else if (strcmp (clan, "ash_circle") == STR_MATCH)
-				{
-		nGroupId = 15892;
-				}
+	}
 	else if (strcmp (clan, "ithilien_battalion") == STR_MATCH)
-				{
+	{
 		nGroupId = 11723;
-				}
+	}
 	else if (strcmp (clan, "battered_shield") == STR_MATCH)
-				{
+	{
 		nGroupId = 15296;
-				}
+	}
 	else if (strcmp (clan, "boneface") == STR_MATCH)
-				{
+	{
 		nGroupId = 15893;
-				}
+	}
 	else if (strcmp (clan, "thornhill_farm") == STR_MATCH)
-				{
+	{
 		nGroupId = 15872;
-				}
-	else if (strcmp (clan, "crabangador") == STR_MATCH)
-				{
-		nGroupId = 15641;
-				}
+	}
 	else if (strcmp (clan, "villein_assembly") == STR_MATCH)
-				{
+	{
 		nGroupId = 15874;
-				}
+	}
 	else if (strcmp (clan, "z3_astirian_wardens") == STR_MATCH)
-				{
+	{
 		nGroupId = 14214;
-				}
-	else if (strcmp (clan, "gondor_embassy") == STR_MATCH)
-				{
-		nGroupId = 15871;
-				}
-	else if (strcmp (clan, "mtc_council") == STR_MATCH)
-				{
-		nGroupId = 14676;
-				}
-	else if (strcmp (clan, "marchwardens") == STR_MATCH)
-				{
-		nGroupId = 15869;
-				}
+	}
 	else if (strcmp (clan, "outpost_citizens") == STR_MATCH)
-				{
+	{
 		nGroupId = 15864;
-				}
-	else if (strcmp (clan, "glad_moria") == STR_MATCH)
-				{
-		nGroupId = 15896;
-				}
+	}
 	else if (strcmp (clan, "moria_dwellers") == STR_MATCH)
-				{
+	{
 		nGroupId = 15863;
-				}
+	}
 	else if (strcmp (clan, "fahad_jafari") == STR_MATCH)
-				{
-		nGroupId = 15852;
-				}
-  else
+	{
+		nGroupId = 15906;
+	}  else
     {
       return;
     }
@@ -350,7 +276,7 @@ clan_forum_remove_all (CHAR_DATA * ch)
 	       "USING phpbb3.phpbb_user_group fug "
 	       "JOIN phpbb3.phpbb_users fu "
 	       "ON fug.user_id = fu.user_id "
-	       "WHERE group_id in (12549,15866,15471,15870,15876,15873,15297,14156,15877,15891,14181,14957,15897,15860,15892,11723,15296,15893,15872,15641,15874,14214,15871,14676,15869,15864,15896,15863,15852) "
+	       "WHERE group_id in (15866,15471,15873,15297,14156,15877,15891,14181,14957,15897,11723,15296,15893,15872,15874,14214,15905,15906,15907,15908) "
 	       "AND username = '%s';", ch->pc->account_name);
       mysql_safe_query (buf);
     }
@@ -4150,7 +4076,7 @@ void do_checkPay (CHAR_DATA * ch, char *argument, int cmd)
    	while (p_row = mysql_fetch_row (p_result))
    	{
       		arg = p_row[4];                  		  	   //Pass the job string as a Stringstack to break it down into integer fields.
-      		arg.findAndReplace("Affect\t", "");         	   //Jobs are returned as "Affect\t600 30 854623 30 0 11087 0". Remove the beginning so we are left with "600 30 854623 30 0 11087 0"
+      		arg.argReplace("Affect\t", "");         	   //Jobs are returned as "Affect\t600 30 854623 30 0 11087 0". Remove the beginning so we are left with "600 30 854623 30 0 11087 0"
       		arg.popAll();                     		  	   //Popping the entire argument leaves fewer lines of code than popping one at a time. Possibly more efficient?
       		job = atoi(arg.recall(0).c_str());          	   //The first argument is the job. 600 = job 1, 601 = job 2, 603 = job 3
       		payday = atoi(arg.recall(1).c_str());       	   //Payday is the days between payday, not the date. This is the second argument of the job string.

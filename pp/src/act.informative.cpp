@@ -7922,18 +7922,19 @@ void do_where (CHAR_DATA * ch, char *argument, int cmd) {
 }
 
 //Will allow sphere counts in who to count by zones instead of clanning. - Vader
+// 0 = Guest, 1 = Gondor, 2 = Northmen, 3 = Fahad Jafari, 4 = Orcs,  5 = Mordor
 int kingdom_from_zone (CHAR_DATA *ch)
 {
 	int zone = ch->in_room / 1000;
 	if (IS_SET(ch->flags, FLAG_GUEST))
 		return 0;
-	else if (zone == 23 || zone == 5 || zone == 6)
+	else if (zone == 23)
 		return 5;
-	else if (zone == 41 || zone == 40)
-		return 4;
-	else if (zone == 73 || zone == 80 || zone == 81 || zone == 82)
-		return 3;
-	else if (zone == 42 || zone == 43)
+	//else if (zone == 41 || zone == 40)
+	//	return 4;
+	//else if (zone == 73 || zone == 80 || zone == 81 || zone == 82)
+	//	return 3;
+	else if (zone == 45)
 		return 2;
 	else if (zone == 1  || zone == 2  || zone == 3  || zone == 4  ||
 		  zone == 8  || zone == 10 || zone == 11 || zone == 12 ||
@@ -7951,6 +7952,9 @@ int kingdom_from_zone (CHAR_DATA *ch)
 
 void roomCount(ROOM_DATA *rd)
 {
+	if (rd == NULL) {
+		return;
+	}
 	rd->occupants = 0;
 	for (CHAR_DATA *tch = rd->people; tch; tch = tch->next_in_room)
 	{
@@ -7975,8 +7979,12 @@ std::string gatheringPlaceCore(int room_num, std::string name, bool colorise)
 	
 	ROOM_DATA* rd = vtor(room_num);
 	roomCount(rd);
+
+	int num_occu = 0;
 	
-	int num_occu = rd->occupants;
+	if (rd != NULL) {
+		num_occu = rd->occupants;
+	}
 	
 	if (num_occu > 0)
 	{
@@ -8011,7 +8019,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	availableAdminsStream << std::endl << "#2Available Staff#0:" << std::endl;
 	bool availableAdmins = false;
 
-	int sphere = kingdom_from_zone(ch); // 0 = Guest, 1 = Gondor, 2 = Northmen, 3 = Fahad Jafari, 4 = Orcs,  5 = Mordor
+	int sphere = kingdom_from_zone(ch);
 
 	for (d = descriptor_list; d; d = d->next)
 	{
@@ -8070,16 +8078,16 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 			whoStream << "In the Kingdom of Gondor, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			break;
 		case 2:
-			whoStream << "In the Angost Region, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
+			whoStream << "Around Caolafon, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			break;
-		case 3:
-			whoStream << "In Fahad Jafari, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
-			break;
-		case 4:
-			whoStream << "In the Mines Of Moria, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
-			break;
+		//case 3:
+		//	whoStream << "In Fahad Jafari, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
+		//	break;
+		//case 4:
+		//	whoStream << "In the Mines Of Moria, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
+		//	break;
 		case 5:
-			whoStream << "In Mordor, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
+			whoStream << "Lurking around the Mordorian Spire, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			break;
 		default:
 			break;
@@ -8128,26 +8136,24 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 
 	else if (sphere == 2)
 	{	
-		whoStream << gatheringPlace(42002, "Halburg's Rest Mead Hall");
-		whoStream << gatheringPlace(43054, "The Dalewatch Mess Hall");
+		whoStream << gatheringPlace(45001, "The Boar's Head Inn");
+		//whoStream << gatheringPlace(43054, "The Dalewatch Mess Hall");
 	}
-	else if (sphere == 3)
-	{
-		whoStream << gatheringPlace(80129, "the Drifting Lily Inn");
-		whoStream << gatheringPlace(80239, "the Drowning Corsair");
-	}
-
-	else if (sphere == 4)
-	{
-		whoStream << gatheringPlace(41425, "Da Bleedin' Fist Waterhole");
-		whoStream << gatheringPlace(41470, "Grutz's Guttahs' cave");
-
-		if (is_clan_member(ch, "blackrend"))
-		{
-			whoStream << gatheringPlace(41207, "Blackrend's Cave");
-		}
-	}
-
+	//else if (sphere == 3)
+	//{
+	//	whoStream << gatheringPlace(80129, "the Drifting Lily Inn");
+	//	whoStream << gatheringPlace(80239, "the Drowning Corsair");
+	//}
+	//else if (sphere == 4)
+	//{
+	//	whoStream << gatheringPlace(41425, "Da Bleedin' Fist Waterhole");
+	//	whoStream << gatheringPlace(41470, "Grutz's Guttahs' cave");
+	//
+	//	if (is_clan_member(ch, "blackrend"))
+	//	{
+	//		whoStream << gatheringPlace(41207, "Blackrend's Cave");
+	//	}
+	//}
 	else if (sphere == 5)
 	{
 		whoStream << gatheringPlace(23046, "The Spear's Thrust");

@@ -7,6 +7,90 @@
 #include "constants.h"
 #include "structs.h"
 
+class Prerequisite {
+private:
+	int skill;
+	std::string attribute;
+	int requiredSkillLevel;
+	int requiredAttributeLevel;
+	int requiredTrait;
+
+public:
+	Prerequisite(int skill, int requiredSkillLevel);
+	Prerequisite(std::string attribute, int requiredAttributeLevel);
+	Prerequisite(int skill, std::string attribute, int requiredSkillLevel, int requiredAttributeLevel);
+	Prerequisite(int requiredTrait);
+
+	std::string printPrerequisite();
+};
+
+class TraitLevel {
+private:
+	int ID;
+	std::string name;
+	std::string description;
+	
+	int durationSeconds;
+
+	bool affectsSkills;
+	bool affectsAttributes;
+
+	std::map<int, std::pair<int, bool> > skillModifiers;
+	std::vector<Prerequisite> prerequisites;
+	
+	int strength;
+	int dexterity;
+	int constitution;
+	int intelligence;
+	int willpower;
+	int agility;
+	int power;
+
+public:
+	TraitLevel();
+	TraitLevel(std::string name, int ID, Type type);
+
+	std::string getName();
+
+	void setDuration(int seconds);
+
+	void editDescription(std::string description);
+	std::string editSkillModifier(int skill, int modifier, bool setsSkillToModifier);
+	std::string editAttributeModifier(std::string attribute, int modifier);
+
+	void addPrerequisite(Prerequisite input);
+	void removePrerequisite(int index); // Output should display a number beside each pre-req
+
+	void removeSkillModifier(int skill);
+	std::string removeAttributeModifier(std::string attribute);
+
+	void displayTraitLevel(CHAR_DATA *ch);
+};
+
+class Trait {
+public:
+	enum Type {
+		RACIAL = 0,
+		POWER = 1,
+		ORIGIN = 2,
+		LEARNED = 3,
+		AWARDED = 4,
+		OATH = 5
+	}; // If this is changed, update the vector intToTraitType in load_traits() and do_traits "create"'s conversion from string to Trait::Type
+
+private:
+	int ID;
+	Type type;
+	std::vector<TraitLevel> traits;
+
+public:
+	void editTraitType(Type type);
+
+	int getID();
+
+};
+extern std::map<int, Trait> globalTraitMap;
+
 class pc_data {
 public:
 	int char_num;	//Our new UID
@@ -78,6 +162,8 @@ public:
 	time_t last_disconnect;
 	time_t last_connect;
 	time_t last_died;
+
+	std::map<int, time_t> characterTraits;
 	
 	SUBCRAFT_HEAD_DATA *edit_craft;
 

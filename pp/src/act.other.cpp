@@ -104,13 +104,18 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 
   from_room = ch->in_room;
 
-	// grommit - All characters get basic westron, EXCEPT ORCS	
-  if (ch->skills[SKILL_SPEAK_WESTRON] < 20 && (ch->race > 121 || ch->race < 119))
+  if ((IS_SET (ch->plr_flags, START_HARAD) ||
+	  IS_SET (ch->plr_flags, START_MORDOR_ORC) ||
+	  IS_SET (ch->plr_flags, START_BALCHOTH)) &&
+	  ch->skills[SKILL_SPEAK_BLACK_SPEECH] < 20)
 	{
-		ch->skills[SKILL_SPEAK_WESTRON] = 20 ; 
-		ch->pc->skills[SKILL_SPEAK_WESTRON] = 20;
+		ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20 ; 
+		ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
     }
-  // grommit - All characters are maxed at their native tongue
+  else if (ch->skills[SKILL_SPEAK_WESTRON] < 20) {
+	  	ch->skills[SKILL_SPEAK_WESTRON] = 20; 
+		ch->pc->skills[SKILL_SPEAK_WESTRON] = 20;
+  }
 	int	native_tongue = get_native_tongue(ch);
 	if (native_tongue)
 	{
@@ -123,7 +128,7 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
     char_from_room (ch);
 	char_to_room (ch, HARADRIM_START_LOC);
 	ch->was_in_room = 0;
-	add_clan (ch, "fahad_jafari", CLAN_MEMBER);
+	add_clan (ch, "mordor_slavers", CLAN_MEMBER);
 	/* people who do not have Haradaic as their native get basic proficiency */
 	if (!ch->skills[SKILL_SPEAK_HARADAIC] || ch->skills[SKILL_SPEAK_HARADAIC] < 20)
 	{
@@ -132,13 +137,14 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	commenced_in = 2;
   }
-  else if (IS_SET (ch->plr_flags, START_ANGOST))
+  else if (IS_SET (ch->plr_flags, START_CAOLAFON))
     {
       char_from_room (ch);
-      char_to_room (ch, ANGOST_START_LOC);
+      char_to_room (ch, CAOLAFON_START_LOC);
       ch->was_in_room = 0;
-      add_clan (ch, "outpost_citizens", CLAN_MEMBER);
-      /* people without atliduk as native tongue get it at basic profficiency */
+      add_clan (ch, "caolafon-citizen", CLAN_MEMBER);
+
+      /* people without Atliduk as native tongue get it at basic proficiency */
       if (!ch->skills[SKILL_SPEAK_ATLIDUK] || ch->skills[SKILL_SPEAK_ATLIDUK] < 20)
 	{
 	  ch->skills[SKILL_SPEAK_ATLIDUK] = 20;
@@ -146,21 +152,28 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	}
       commenced_in = 3;
     }
-  else if (IS_SET (ch->plr_flags, START_MORDOR))
+  else if (IS_SET (ch->plr_flags, START_MORDOR_ORC))
   {
 	  char_from_room(ch);
 	  char_to_room(ch, MORDOR_START_LOC);
 	  ch->was_in_room = 0;
-	  add_clan (ch,"mordor_char",CLAN_MEMBER);
+	  add_clan (ch,"vadok_kraun",CLAN_MEMBER);
+	  
+	  ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
+	  ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
 
-
-	  // no region-wide language is set 
-	  // Grommit - make racial language adjustments here  
-	  if (ch->race == 121) // Mordorian orc 
-		  ch->skills[SKILL_SPEAK_BLACK_SPEECH]=20;
-	  if (ch->race == 120 || ch->race == 119) // Mountain or mirkwood orcs
-		  ch->skills[SKILL_SPEAK_WESTRON]=10;
 	  commenced_in = 4;
+  }
+  else if (IS_SET (ch->plr_flags, START_BALCHOTH)) {
+	  char_from_room(ch);
+	  char_to_room(ch, BALCHOTH_START_LOC);
+	  ch->was_in_room = 0;
+	  add_clan(ch, "balchoth_vanguard", CLAN_MEMBER);
+
+	  ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
+	  ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
+
+	  commenced_in = 5;
   }
   else
     {
@@ -193,13 +206,16 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	//	   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Tur Edendor.]#0", char_short(ch));
 	//	   break;
 		 case 2:
-		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Fahad'Jafari.]#0", char_short(ch));
+		   sprintf (buf, "#3[%s has entered Middle-earth for the first time within the Haradaic Host in Mordor.]#0", char_short(ch));
 		   break;
 		 case 3:
-		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Angost.]#0", char_short(ch));
+		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Caolafon by the Wetwang.]#0", char_short(ch));
 		   break;
 		 case 4:
-		   sprintf (buf, "#3[%s has entered Middle-earth for the first time in Mordor.]#0", char_short(ch));
+		   sprintf (buf, "#3[%s has entered Middle-earth for the first time as an orkin within Mordor.]#0", char_short(ch));
+		   break;
+		 case 5:
+		   sprintf (buf, "#3[%s has entered Middle-earth for the first time within the Balchoth Vanguard.]#0", char_short(ch));
 		   break;
 	   }
 
