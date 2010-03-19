@@ -29,6 +29,7 @@
 #include "utils.h"
 #include "utility.h"
 #include "decl.h"
+#include "clan.h"
 
 extern RACE_TABLE_ENTRY *entry;
 extern CHAR_DATA *loaded_list;

@@ -67,6 +67,7 @@ void do_checkPay (CHAR_DATA * ch, char *argument, int cmd);
 void do_setPay (CHAR_DATA * ch, char *argument, int cmd);
 void clan_forum_remove_all (CHAR_DATA * ch);
 
+void clan_forum_add (CHAR_DATA * ch, char *clan, char *rank);
 char *get_shared_clan (CHAR_DATA * ch, CHAR_DATA * other);
 void add_clan_id (CHAR_DATA * ch, char *clan_name, const char *clan_flags);
 void add_clan_id_string (char *string, char *clan_name, char *clan_flags);
