@@ -2370,7 +2370,15 @@ perform_pfile_update (CHAR_DATA * ch)
 	ch->tmp_con = ch->con;
 	ch->tmp_aur = ch->aur;
 	ch->tmp_intel = ch->intel;
+	
+	// Add PCs to their respective forum clans upon login
+	int flags;
+	char *clanID;
+	char clan_name[MAX_STRING_LENGTH];
 
+	for (clanID = ch->clans; get_next_clan (&clanID, clan_name, &flags);) {
+		clan_forum_add (ch, clan_name, value_to_clan_flags (flags));
+	}
 }
 
 void

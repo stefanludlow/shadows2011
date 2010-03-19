@@ -42,7 +42,7 @@ CHANGES:
 15874	Villeins Assembly			villein_assembly
 14214	Wardenry				z3_astirian_wardens
 15905 Balchoth in Mordor 		balchoth_vanguard
-15906 Haradrim in Mordor 		fahad_jafari
+15906 Haradrim in Mordor 		mordor_slavers
 15907 Blackbloods in Mordor		vadok_kraun
 15908 Caolafon				caolafon-citizen
 
@@ -139,7 +139,7 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	{
 		nGroupId = 15863;
 	}
-	else if (strcmp (clan, "fahad_jafari") == STR_MATCH)
+	else if (strcmp (clan, "mordor_slavers") == STR_MATCH)
 	{
 		nGroupId = 15906;
 	}
@@ -150,7 +150,8 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	       "INSERT INTO phpbb3.phpbb_user_group "
 	       "SELECT ( %d ), user_id, ( 0 ),( 0 ) "
 	       "FROM phpbb3.phpbb_users "
-	       "WHERE username = '%s';", nGroupId, ch->pc->account_name);
+	       "WHERE username = '%s' "
+		   "AND group_id != %d;", nGroupId, ch->pc->account_name, nGroupId);
       mysql_safe_query (buf);
     }
 
