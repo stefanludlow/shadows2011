@@ -3898,64 +3898,63 @@ delayed_pick (CHAR_DATA * ch) {
 void
 enter_vehicle (CHAR_DATA * ch, CHAR_DATA * ent_mob)
 {
-  if (!ent_mob->mob)
-    {
-      send_to_char ("You can't.\n", ch);
-      return;
-    }
+	if (!ent_mob->mob)
+	{
+		send_to_char ("You can't.\n", ch);
+		return;
+	}
 
-  for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
-  {
-	  AFFECTED_TYPE *af;
-	  if (!(af = get_affect(tch, MAGIC_GUARD)) || af->a.spell.modifier || (CHAR_DATA *) af->a.spell.t != ent_mob)
-		  continue;
-	  act ("You cannot enter that as $N is guarding it.", true, ch, 0, tch, TO_CHAR);
-	  return;
-  }
+	for (CHAR_DATA *tch = ch->room->people; tch; tch = tch->next_in_room)
+	{
+		AFFECTED_TYPE *af;
+		if (!(af = get_affect(tch, MAGIC_GUARD)) || af->a.spell.modifier || (CHAR_DATA *) af->a.spell.t != ent_mob)
+			continue;
+		act ("You cannot enter that as $N is guarding it.", true, ch, 0, tch, TO_CHAR);
+		return;
+	}
 
-  if (!vtor (ent_mob->mob->nVirtual))
-    {
-      send_to_char ("A note on the entrance says, 'broken'\n", ch);
-      system_log ("Attempt to use a broken boat or hitch, enter_vehicle()",
-		  true);
-      return;
-    }
+	if (!vtor (ent_mob->mob->nVirtual))
+	{
+		send_to_char ("A note on the entrance says, 'broken'\n", ch);
+		system_log ("Attempt to use a broken boat or hitch, enter_vehicle()",
+			true);
+		return;
+	}
 
-    	if (ch == ent_mob)
-      		return;  //you can't enter yourself 
-    
-		if (!room_avail(vtor (ent_mob->mob->nVirtual), NULL, ch))
-			{
-				send_to_char("There is not enough room.\n", ch);
-				return;
-			}
+	if (ch == ent_mob)
+		return;  //you can't enter yourself 
 
-  if (ent_mob->mob->vehicle_type == VEHICLE_HITCH)
-    {
-      act ("You climb into $N.", false, ch, 0, ent_mob, TO_CHAR);
-      act ("$n climbs into $N.", true, ch, 0, ent_mob, TO_NOTVICT);
-    }
+	if (!room_avail(vtor (ent_mob->mob->nVirtual), NULL, ch))
+	{
+		send_to_char("There is not enough room.\n", ch);
+		return;
+	}
 
-  else if (ch->room->sector_type != SECT_DOCK)
-    send_to_char ("You swim close, grab some netting, and hoist "
-		  "yourself aboard.\n", ch);
+	if (IS_SET (ent_mob->act, ACT_MOUNT) && IS_SET(ent_mob->act, ACT_VEHICLE)) {
+		act ("You climb into $N.", false, ch, 0, ent_mob, TO_CHAR);
+		act ("$n climbs into $N.", true, ch, 0, ent_mob, TO_NOTVICT);
+	}
+	else {
+		act ("You enter $N.", false, ch, 0, ent_mob, TO_CHAR);
+		act ("$n enters $N.", true, ch, 0, ent_mob, TO_NOTVICT);
+	}
 
-  char_from_room (ch);
+	char_from_room (ch);
 
-  remove_affect_type (ch, MAGIC_SNEAK);
-  remove_affect_type (ch, MAGIC_HIDDEN);
+	remove_affect_type (ch, MAGIC_SNEAK);
+	remove_affect_type (ch, MAGIC_HIDDEN);
 
-  char_to_room (ch, ent_mob->mob->nVirtual);
+	char_to_room (ch, ent_mob->mob->nVirtual);
 
-  ch->vehicle = ent_mob;
-  ch->coldload_id = ent_mob->coldload_id;
+	ch->vehicle = ent_mob;
+	ch->coldload_id = ent_mob->coldload_id;
 
-  if (!IS_NPC (ch))
-    ch->pc->boat_virtual = ent_mob->mob->nVirtual;
+	if (!IS_NPC (ch))
+		ch->pc->boat_virtual = ent_mob->mob->nVirtual;
 
-  act ("$n has boarded.", true, ch, 0, 0, TO_ROOM);
+	act ("$n has boarded.", true, ch, 0, 0, TO_ROOM);
 
-  do_look (ch, "", 15);
+	do_look (ch, "", 15);
 }
 
 void

@@ -48,7 +48,7 @@ typedef struct spell_table_data SPELL_TABLE_DATA;
 typedef struct help_info HELP_INFO;
 typedef struct writing_data WRITING_DATA;
 typedef struct site_info SITE_INFO;
-typedef struct wound_data WOUND_DATA;
+typedef class wound_data WOUND_DATA;
 typedef struct affected_type AFFECTED_TYPE;
 typedef struct alias_data ALIAS_DATA;
 typedef struct board_data BOARD_DATA;
@@ -1589,22 +1589,46 @@ struct lodged_missile_info
   LODGED_MISSILE_INFO *next;
 };
 
-struct wound_data
-{
-  char *location;
-  char *type;
-  char *name;
-  char *severity;
-  int damage;
-  int bleeding;
-  int poison;
-  int infection;
-  int healerskill;
-  int bindskill;
-  int lasthealed;
-  int lastbled;
-  int lastbound;
-  WOUND_DATA *next;
+class wound_data {
+public:
+	char *location;
+	char *type;
+	char *name;
+	char *severity;
+	int damage;
+	int bleeding;
+	int poison;
+	int infection;
+	int healerskill;
+	int bindskill;
+	int lasthealed;
+	int lastbled;
+	int lastbound;
+	WOUND_DATA *next;
+
+	wound_data() {
+		location = NULL;
+		type = NULL;
+		name = NULL;
+		severity = NULL;
+		damage = 0;
+		bleeding = 0;
+		poison = 0;
+		infection = 0;
+		healerskill = 0;
+		bindskill = 0;
+		lasthealed = 0;
+		lastbled = 0;
+		lastbound = 0;
+		next = NULL;
+	}
+
+	//~wound_data() {
+	//	free_mem(location);
+	//	free_mem(type);
+	//	free_mem(name);
+	//	free_mem(severity);
+	//}
 };
 
 struct repair_data
