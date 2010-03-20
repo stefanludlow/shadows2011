@@ -2379,6 +2379,7 @@ perform_pfile_update (CHAR_DATA * ch)
 		char clan_name[MAX_STRING_LENGTH];
 
 		for (clanID = ch->clans; get_next_clan (&clanID, clan_name, &flags);) {
+			clan_forum_remove (ch, clan_name);
 			clan_forum_add (ch, clan_name, value_to_clan_flags (flags));
 		}
 	}

@@ -146,15 +146,13 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
   // Avoid giving away ImmPCs in the Forums
   if (nGroupId > 0 && !GET_TRUST (ch) && !IS_SET (ch->flags, FLAG_ISADMIN))
     {
-      sprintf (buf,
-	       "INSERT INTO phpbb3.phpbb_user_group "
-	       "SELECT ( %d ), user_id, ( 0 ),( 0 ) "
-	       "FROM phpbb3.phpbb_users "
-	       "WHERE username = '%s' "
-		   "AND group_id != %d;", nGroupId, ch->pc->account_name, nGroupId);
-      mysql_safe_query (buf);
+		sprintf (buf,
+			"INSERT INTO phpbb3.phpbb_user_group "
+			"SELECT ( %d ), user_id, ( 0 ),( 0 ) "
+			"FROM phpbb3.phpbb_users "
+			"WHERE username = '%s';", nGroupId, ch->pc->account_name);
+		mysql_safe_query (buf);
     }
-
 }
 
 void
