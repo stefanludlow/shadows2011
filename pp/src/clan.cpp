@@ -247,7 +247,7 @@ clan_forum_remove (CHAR_DATA * ch, char *clan)
 	{
 		nGroupId = 15863;
 	}
-	else if (strcmp (clan, "fahad_jafari") == STR_MATCH)
+	else if (strcmp (clan, "mordor_slavers") == STR_MATCH)
 	{
 		nGroupId = 15906;
 	}  else
