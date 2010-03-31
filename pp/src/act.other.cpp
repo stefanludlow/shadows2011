@@ -129,12 +129,10 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	char_to_room (ch, HARADRIM_START_LOC);
 	ch->was_in_room = 0;
 	add_clan (ch, "mordor_slavers", CLAN_MEMBER);
-	/* people who do not have Haradaic as their native get basic proficiency */
-	if (!ch->skills[SKILL_SPEAK_HARADAIC] || ch->skills[SKILL_SPEAK_HARADAIC] < 20)
-	{
-	  ch->skills[SKILL_SPEAK_HARADAIC] = 20;
-	  ch->pc->skills[SKILL_SPEAK_HARADAIC] = 20;
-	}
+
+	  ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
+	  ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
+
 	commenced_in = 2;
   }
   else if (IS_SET (ch->plr_flags, START_CAOLAFON))
@@ -158,6 +156,7 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	  char_to_room(ch, MORDOR_START_LOC);
 	  ch->was_in_room = 0;
 	  add_clan (ch,"vadok_kraun",CLAN_MEMBER);
+	  add_clan (ch,"mordor_char",CLAN_MEMBER);
 	  
 	  ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
 	  ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
@@ -169,6 +168,7 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	  char_to_room(ch, BALCHOTH_START_LOC);
 	  ch->was_in_room = 0;
 	  add_clan(ch, "balchoth_vanguard", CLAN_MEMBER);
+	  add_clan(ch, "mordor_char", CLAN_MEMBER);
 
 	  ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
 	  ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
