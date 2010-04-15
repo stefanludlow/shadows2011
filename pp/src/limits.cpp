@@ -397,7 +397,7 @@ point_update (void)
 			else if (ch->race == 23) {
 				base = BASE_PC_DWARF_HEALING;
 			}
-			else if (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29) {
+			else if (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 86 ||ch->race == 29) {
 				base = BASE_PC_ORCTROLL_HEALING;
 			}
 			// End Power changes to healing
@@ -605,7 +605,7 @@ point_update (void)
 			else if (ch->race == 23) {
 				base = BASE_PC_DWARF_HEALING;
 			}
-			else if (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29) {
+			else if (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 28 || ch->race == 29) {
 				base = BASE_PC_ORCTROLL_HEALING;
 			}
 			// End Power changes to healing

@@ -147,31 +147,38 @@ do_follow (CHAR_DATA * ch, char *argument, int cmd)
 
 std::string tactical_status (CHAR_DATA * ch)
 {
-  CHAR_DATA *tch;
-  AFFECTED_TYPE *af;
-  std::ostringstream status;
-  int i = 0;
+	CHAR_DATA *tch;
+	AFFECTED_TYPE *af;
+	std::ostringstream status;
+	int i = 0;
+	CHAR_DATA *guardedChar = NULL;
 
-	if (get_affect (ch, MAGIC_HIDDEN))
-	{
-		status << " #1(hidden)#0";
-   }
-
-	if ((af = get_affect (ch, MAGIC_GUARD)))
-	{
-	  tch = (CHAR_DATA*) af->a.spell.t;
-	  status << " #6(guarding: " << tch->short_descr << ")#0";
+	if (af = get_affect(ch, MAGIC_GUARD)) {
+		guardedChar = (CHAR_DATA *) af->a.spell.t;
 	}
 
 	if ((af = get_affect (ch, AFFECT_GUARD_DIR)))
 	{
-	  status << " #6(guarding: " << dirs[af->a.shadow.edge] << ")#0";
+		status << " #6(guarding: " << dirs[af->a.shadow.edge] << ")#0";
 	}
 
-	for (tch = ch->room->people; tch; tch = tch->next_in_room)
+	if (get_affect (ch, MAGIC_HIDDEN))
 	{
-		if ((af = get_affect (tch, MAGIC_GUARD)) && ((CHAR_DATA *) af->a.spell.t) == ch)
-		i++;
+		status << " #1(hidden)#0";
+	}
+
+	for (tch = ch->room->people; tch; tch = tch->next_in_room) {
+		CHAR_DATA *tempChar = NULL;
+
+		if ((af = get_affect (tch, MAGIC_GUARD)) && (tempChar = (CHAR_DATA *) af->a.spell.t) == ch) {
+			i++;
+		}
+
+		if (guardedChar != NULL) {
+			if (guardedChar == tch) {
+				status << " #6(guarding: " << char_short(guardedChar) << ")#0";
+			}
+		}
 	}
 
 	if (i > 0)

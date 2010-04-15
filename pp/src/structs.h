@@ -745,7 +745,6 @@ typedef signed char shortint;
 
 #define ACT_MEMORY	    ( 1 << 0 )
 #define ACT_SENTINEL    ( 1 << 1 )
-#define ACT_SCAVENGER   ( 1 << 2 )
 #define ACT_NOCOMMAND   ( 1 << 2 )
 #define ACT_ISNPC       ( 1 << 3 )
 #define ACT_NOVNPC	    ( 1 << 4 )	/* Shopkeep doesn't have vNPC buyers */
@@ -753,7 +752,7 @@ typedef signed char shortint;
 #define ACT_STAY_ZONE  	( 1 << 6 )
 #define ACT_WIMPY     	( 1 << 7 )
 #define ACT_PURSUE		( 1 << 8 )
-#define ACT_THIEF	    ( 1 << 9 )
+#define ACT_SOLDIER     ( 1 << 9 )  /* Thief converted to Soldier - Case */
 #define ACT_NOORDER	    ( 1 << 10 )
 #define ACT_NOBUY	    ( 1 << 11 )
 #define ACT_ENFORCER	( 1 << 12 )

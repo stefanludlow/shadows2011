@@ -104,18 +104,18 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 
   from_room = ch->in_room;
 
-  if ((IS_SET (ch->plr_flags, START_HARAD) ||
-	  IS_SET (ch->plr_flags, START_MORDOR_ORC) ||
-	  IS_SET (ch->plr_flags, START_BALCHOTH)) &&
-	  ch->skills[SKILL_SPEAK_BLACK_SPEECH] < 20)
-	{
-		ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20 ; 
-		ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
+if ((IS_SET (ch->plr_flags, START_HARAD) ||
+    IS_SET (ch->plr_flags, START_MORDOR_ORC) ||
+    IS_SET (ch->plr_flags, START_BALCHOTH))) {
+    if (ch->skills[SKILL_SPEAK_BLACK_SPEECH] < 20) {
+    ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20 ; 
+    ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
     }
-  else if (ch->skills[SKILL_SPEAK_WESTRON] < 20) {
-	  	ch->skills[SKILL_SPEAK_WESTRON] = 20; 
-		ch->pc->skills[SKILL_SPEAK_WESTRON] = 20;
-  }
+    }
+    else if (ch->skills[SKILL_SPEAK_WESTRON] < 20) {
+    ch->skills[SKILL_SPEAK_WESTRON] = 20; 
+    ch->pc->skills[SKILL_SPEAK_WESTRON] = 20;
+    }
 	int	native_tongue = get_native_tongue(ch);
 	if (native_tongue)
 	{

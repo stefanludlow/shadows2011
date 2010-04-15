@@ -21,12 +21,11 @@ const char *variable_races[] = {
   "Common Human",
   "Mordorian Human",
   "Eotheod",
-  "Free Man of the North",
+  "Balchoth",
   "Eriadorian Man",
   "Haradan",
   "Dwarf",
   "Mountain Orc",
-  "Mirkwood Orc",
   "Noldo Elf",
   "Sinda Elf",
   "Vanya Elf",
@@ -47,8 +46,60 @@ const char *variable_races[] = {
   "Arachnid",
   "Wolf",
   "Mordorian Orc",
+  "Snaga",
+  "Frog",
   "\n"
 };
+
+
+const char *frog_adj1[] = {
+"orange-brown",
+"spotted-green",
+"mottled-grey",
+"yellow-green",
+"mud-brown",
+"albino-white",
+"salt-and-pepper",
+"bronze-colored",
+"grass-shaded",
+"moss-hued",
+"brown-stripped",
+"black-spotted",
+"wheat-tinged",
+"lime-green",
+"asparagus-toned",
+"myrtle-washed",
+"emerald-flushed",
+"garish-jade"
+"vivid-chartreuse",
+"copper-tinted",
+  "\n"
+};
+
+const char *frog_adj2[] = {
+"thick-legged",
+"web-toed",
+"bulbous-eyed",
+"yellow-eyed",
+"slimy-skinned",
+"wart-covered",
+"smooth-skinned",
+"spot-covered",
+"palm-sized",
+"black-eyed",
+"white-bellied",
+"round-bodied",
+"three-toed",
+"pebble-textured",
+"long-legged",
+"leaf-shaped",
+"short-armed",
+"thin-legged",
+"thick-bodied",
+"toe-clawed",
+  "\n"
+};
+
 
 const char *spider_adj1[] = {
   "brown-striped",
@@ -119,6 +170,129 @@ const char *rat_adj1[] = {
   "\n"
 };
 
+const char *balchoth_adj1[] = {
+"stringy-haired",
+"balding",
+"bald",
+"rakish",
+"widow-peaked",
+"powerful",
+"angular",
+"dusk-skinned",
+"glossy-black-haired",
+"dull-black-haired",
+"oily-haired",
+"midnight-haired",
+"black-haired",
+"ebon-haired",
+"dark-haired",
+"braided-haired",
+"wiry-haired",
+"stalwart",
+"dull-haired",
+"compact",
+"angular",
+"wizened",
+"athletic",
+"muscular",
+"brawny",
+"burly",
+"strapping",
+"robust",
+"sturdy",
+"hale",
+"squat",
+"sinewy",
+"stooped",
+"crook-backed",
+"straight-limbed",
+"sturdy-limbed",
+"solid",
+"swarthy",
+"dark-skinned",
+"tawny-skinned",
+"thewy",
+"thick-set",
+"lean",
+"taut-muscled",
+"toned",
+"swarthy-skinned",
+"solidly-built",
+"gangly",
+"rangy",
+"slinky",
+"raw-boned",
+"ropey",
+"corded",
+"worn",
+"gaunt",
+"bony",
+"stocky",
+"weathered",
+"leathery-skinned",
+"veiny",
+"sturdy",
+"weather-beaten",
+"short",
+"stout",
+"ugly",
+"handsome",
+"\n"
+};
+
+const char *balchoth_adj2[] = {
+"dull-eyed",
+"dark-eyed",
+"dusky-eyed",
+"hard-eyed",
+"stormy-eyed",
+"hawk-browed",
+"keen-eyed",
+"dark-brown-eyed",
+"sunken-eyed",
+"glint-eyed",
+"black-eyed",
+"dark-eyed",
+"obsidian-eyed",
+"sharp-eyed",
+"angular-featured",
+"glassy-eyed",
+"squint-eyed",
+"narrow-eyed",
+"one-eyed",
+"bushy-eyebrowed",
+"pinch-featured",
+"broad-nosed",
+"narrow-nosed",
+"hook-nosed",
+"beak-nosed",
+"hawk-nosed",
+"sharp-nosed",
+"crook-nosed",
+"gaunt-cheeked",
+"thin-lipped",
+"dry-lipped",
+"thick-lipped",
+"cleft-chinned",
+"wide-jawed",
+"square-jawed",
+"long-faced",
+"drawn-faced",
+"magnificently-tattooed",
+"tattoo-covered",
+"tattooed",
+"scar-faced",
+"pox-scarred",
+"heavily-scarred",
+"facial-tattooed",
+"stern-featured",
+"broad-faced",
+"intricately-tattooed",
+"heavily-tattooed",
+"tanned",
+"\n"
+};
+
 const char *rat_adj2[] = {
   "scrawny",
   "emaciated",
@@ -145,6 +319,8 @@ const char *rat_adj2[] = {
   "crippled",
   "\n"
 };
+
+
 
 const char *wight_adj1[] = {
   "gaunt",
@@ -1677,7 +1853,7 @@ const char *urukhai_adj2[] = {
 };
 
 
-const char *goblin_adj1[] = {
+const char *snaga_adj1[] = {
   "acned",
   "cadaverous",
   "dirty",
@@ -1748,7 +1924,7 @@ const char *goblin_adj1[] = {
   "\n"
 };
 
-const char *goblin_adj2[] = {
+const char *snaga_adj2[] = {
   "black-haired",
   "coal-haired",
   "ebony-haired",
@@ -1803,7 +1979,7 @@ return_adj2 (CHAR_DATA * mob)
   static char adj[MAX_STRING_LENGTH];
 
   if (!str_cmp
-      (lookup_race_variable (mob->race, RACE_NAME), "Common Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Mordorian Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Eriadorian Man") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Free Man of the North") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Eotheod"))
+      (lookup_race_variable (mob->race, RACE_NAME), "Common Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Mordorian Human") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Eriadorian Man") || !str_cmp(lookup_race_variable (mob->race, RACE_NAME), "Eotheod"))
     {
       for (limit = 0; *human_adj2[limit] != '\n'; limit++)
 	;
@@ -1821,22 +1997,31 @@ return_adj2 (CHAR_DATA * mob)
       sprintf (adj, "%s", haradan_adj2[roll]);
       return adj;
     }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mirkwood Orc"))
+  if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Balchoth"))
     {
-      for (limit = 0; *orc_adj2[limit] != '\n'; limit++)
+      for (limit = 0; *balchoth_adj2[limit] != '\n'; limit++)
 	;
       limit--;
       roll = number (0, limit);
-      sprintf (adj, "%s", orc_adj2[roll]);
+      sprintf (adj, "%s", balchoth_adj2[roll]);
+      return adj;
+    }
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Snaga"))
+    {
+      for (limit = 0; *snaga_adj2[limit] != '\n'; limit++)
+	;
+      limit--;
+      roll = number (0, limit);
+      sprintf (adj, "%s", snaga_adj2[roll]);
       return adj;
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mountain Orc"))
     {
-      for (limit = 0; *goblin_adj2[limit] != '\n'; limit++)
+      for (limit = 0; *snaga_adj2[limit] != '\n'; limit++)
 	;
       limit--;
       roll = number (0, limit);
-      sprintf (adj, "%s", goblin_adj2[roll]);
+      sprintf (adj, "%s", snaga_adj2[roll]);
       return adj;
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mordorian Orc"))
@@ -1979,6 +2164,15 @@ return_adj2 (CHAR_DATA * mob)
       sprintf (adj, "%s", spider_adj2[roll]);
       return adj;
     }
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Frog"))
+    {
+      for (limit = 0; *frog_adj2[limit] != '\n'; limit++)
+	;
+      limit--;
+      roll = number (0, limit);
+      sprintf (adj, "%s", frog_adj2[roll]);
+      return adj;
+    }
   else
     if (!str_cmp
 	(lookup_race_variable (mob->race, RACE_NAME), "Barrow-Wight"))
@@ -2028,7 +2222,16 @@ return_adj1 (CHAR_DATA * mob)
       sprintf (adj, "%s", haradan_adj1[roll]);
       return adj;
     }
-  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mirkwood Orc"))
+  if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Balchoth"))
+    {
+      for (limit = 0; *balchoth_adj1[limit] != '\n'; limit++)
+	;
+      limit--;
+      roll = number (0, limit);
+      sprintf (adj, "%s", balchoth_adj1[roll]);
+      return adj;
+    }
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Snaga"))
     {
       for (limit = 0; *orc_adj1[limit] != '\n'; limit++)
 	;
@@ -2039,11 +2242,11 @@ return_adj1 (CHAR_DATA * mob)
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mountain Orc"))
     {
-      for (limit = 0; *goblin_adj1[limit] != '\n'; limit++)
+      for (limit = 0; *snaga_adj1[limit] != '\n'; limit++)
 	;
       limit--;
       roll = number (0, limit);
-      sprintf (adj, "%s", goblin_adj1[roll]);
+      sprintf (adj, "%s", snaga_adj1[roll]);
       return adj;
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mordorian Orc"))
@@ -2162,6 +2365,15 @@ return_adj1 (CHAR_DATA * mob)
       sprintf (adj, "%s", bird_adj1[roll]);
       return adj;
     }
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Frog"))
+    {
+      for (limit = 0; *frog_adj1[limit] != '\n'; limit++)
+	;
+      limit--;
+      roll = number (0, limit);
+      sprintf (adj, "%s", frog_adj1[roll]);
+      return adj;
+    }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Rat"))
     {
       for (limit = 0; *rat_adj1[limit] != '\n'; limit++)
@@ -2234,8 +2446,7 @@ return_name (CHAR_DATA * mob)
 
   *buf = '\0';
 
-  if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Mirkwood Orc") 
-	  || !str_cmp(lookup_race_variable(mob->race,RACE_NAME),"Mordorian Orc")
+  if (!str_cmp(lookup_race_variable(mob->race,RACE_NAME),"Mordorian Orc")
 	  || !str_cmp(lookup_race_variable(mob->race,RACE_NAME),"Mountain Orc"))
     {
       if (GET_SEX (mob) == SEX_MALE)
@@ -2245,12 +2456,28 @@ return_name (CHAR_DATA * mob)
       else
 	return "orc";
     }
+  if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Snaga"))
+    {
+      if (GET_SEX (mob) == SEX_MALE)
+	return "snaga";
+      else if (GET_SEX (mob) == SEX_FEMALE)
+	return "female snaga";
+      else
+	return "snaga";
+    }
   else
     if (!str_cmp
 	(lookup_race_variable (mob->race, RACE_NAME), "Barrow-Wight"))
     {
       mob->sex = SEX_NEUTRAL;
       return "wight";
+    }
+  else
+    if (!str_cmp
+	(lookup_race_variable (mob->race, RACE_NAME), "Frog"))
+    {
+      mob->sex = SEX_NEUTRAL;
+      return "frog";
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Noldo Elf")
 	   || !str_cmp (lookup_race_variable (mob->race, RACE_NAME),
@@ -2756,6 +2983,20 @@ create_description (CHAR_DATA * mob)
 	sprintf (buf, "%s stands here, glaring angrily.", sdesc);
       else if (roll == 5)
 	sprintf (buf, "%s is here, glaring at passersby.", sdesc);
+    }
+  else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Frog"))
+    {
+      roll = number (1, 5);
+      if (roll == 1)
+	sprintf (buf, "%s, throat expanding as it croaks loudly.", sdesc);
+      else if (roll == 2)
+	sprintf (buf, "%s, wallowing in mud and filth.", sdesc);
+      else if (roll == 3)
+	sprintf (buf, "%s is here, watching you with its beady eyes.", sdesc);
+      else if (roll == 4)
+	sprintf (buf, "%s is here, pulling insects out of the air with its long tongue.", sdesc);
+      else if (roll == 5)
+	sprintf (buf, "%s crawls along, leaving behind a slimy trail.", sdesc);
     }
   else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Uruk-Hai"))
     {

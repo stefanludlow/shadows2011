@@ -2655,18 +2655,18 @@ equip_newbie (CHAR_DATA * ch)
 		{
 		if (ch->sex == 1)
 			{
-			if ((obj = load_object (6276))) //pants
+			if ((obj = load_object (98975))) //pants
 				equip_char (ch, obj, WEAR_LEGS);
-			if ((obj = load_object (6213))) //shirt
+			if ((obj = load_object (98882))) //shirt
 				equip_char (ch, obj, WEAR_BODY);
-			if ((obj = load_object (6097)))//sandals
+			if ((obj = load_object (127)))//sandals
 				equip_char (ch, obj, WEAR_FEET);
-			if ((obj = load_object (97312)))//sash
+			if ((obj = load_object (113)))//sash
 				equip_char (ch, obj, WEAR_WAIST);
-			if ((obj = load_object (1452)))//scarf
-				equip_char (ch, obj, WEAR_HEAD);
+			// if ((obj = load_object (1452)))//scarf
+			//	equip_char (ch, obj, WEAR_HEAD);
 			
-			if ((obj = load_object (1180)))//stachel
+			if ((obj = load_object (1606)))//stachel
 				{
 				equip_char (ch, obj, WEAR_SHOULDER_R);
 				tobj = obj;
@@ -2676,18 +2676,18 @@ equip_newbie (CHAR_DATA * ch)
 			{
 			if ((obj = load_object (6168))) //skirt
 				equip_char (ch, obj, WEAR_LEGS);
-			if ((obj = load_object (6253))) //blouse
+			if ((obj = load_object (6211))) //blouse
 				equip_char (ch, obj, WEAR_BODY);
-			if ((obj = load_object (6096))) //sandals
+			if ((obj = load_object (6108))) //sandals
 				equip_char (ch, obj, WEAR_FEET);
-			if ((obj = load_object (6249))) //sash
+			if ((obj = load_object (97312))) 
 				equip_char (ch, obj, WEAR_WAIST);
-			if ((obj = load_object (6585))) //colored scarf
-				equip_char (ch, obj, WEAR_HEAD);
-			if ((obj = load_object (911))) //cloak
-				equip_char (ch, obj, WEAR_ABOUT);
+			if ((obj = load_object (2062))) 
+				equip_char (ch, obj, WEAR_HAIR);
+		//	if ((obj = load_object (911))) //cloak
+		//		equip_char (ch, obj, WEAR_ABOUT);
 
-			if ((obj = load_object (1180))) //satchel
+			if ((obj = load_object (1606))) //satchel
 				{
 				equip_char (ch, obj, WEAR_SHOULDER_R);
 				tobj = obj;
@@ -2695,15 +2695,11 @@ equip_newbie (CHAR_DATA * ch)
 			}//end female Harad
 
 		//general stachel contents	
-		if (tobj && (obj = load_object (80013))) //heavy silver coin
+	/* 100 to 300 spread, thus 2 to 6 pieces of 50 */
+		if (tobj && (obj = load_object (5032))) //yrch token
 			{
-			obj->count = 5;
-			obj_to_obj(obj, tobj);
-			}
-		if (tobj && (obj = load_object (80012))) //thin silver coin
-			{
-			obj->count = number (3, 5);
-			obj_to_obj(obj, tobj);
+			obj->count = number (2, 6);
+			obj_to_obj (obj, tobj);
 			}
 
 		}//end Harad
@@ -2786,18 +2782,16 @@ equip_newbie (CHAR_DATA * ch)
 		{
 		if (ch->sex == 1) //male Angost
 			{
-			if ((obj = load_colored_object(42121, "earthen brown")))
+			if ((obj = load_object(42121)))
 				equip_char (ch, obj, WEAR_BODY); //tunic
-			if ((obj = load_colored_object(42122, "earthen brown")))
+			if ((obj = load_object(42122)))
 				equip_char (ch, obj, WEAR_LEGS); //trousers
-			if ((obj = load_colored_object(42124, "dark grey")))
+			if ((obj = load_object(42124)))
 				equip_char (ch, obj, WEAR_ABOUT); //cloak
-			if ((obj = load_colored_object(98026, "brown"))) 
-				equip_char (ch, obj, WEAR_HANDS); //gloves
 				
-			if ((obj = load_object (104))) //belt
+			if ((obj = load_object (1014))) //belt
 				equip_char (ch, obj, WEAR_WAIST);
-			if ((obj = load_object (42125))) //sandals
+			if ((obj = load_object (1013))) //boots
 				equip_char (ch, obj, WEAR_FEET);
 			
 			if ((obj = load_object (98))) //sheathe
@@ -2806,7 +2800,7 @@ equip_newbie (CHAR_DATA * ch)
 				sobj = obj;
 				}
 
-			if ((obj = load_colored_object (97036, "brown")))
+			if ((obj = load_object (97036)))
 				{
 				equip_char (ch, obj, WEAR_BELT_1); //pouch
 				tobj = obj;
@@ -2814,16 +2808,16 @@ equip_newbie (CHAR_DATA * ch)
 			}
 		else //female Angost
 			{
-			if ((obj = load_colored_object(42135, "earthen brown")))
+			if ((obj = load_object(42135)))
 				equip_char (ch, obj, WEAR_BODY); //dress
-			if ((obj = load_colored_object(6175, "brown")))
+			if ((obj = load_object(6175)))
 				equip_char (ch, obj, WEAR_ARMS); //sleeves
-			if ((obj = load_colored_object(98825, "brown")))
+			if ((obj = load_object(98819)))
 				equip_char (ch, obj, WEAR_LEGS); //leggings
 				
-			if ((obj = load_object(97810))) //belt
-				equip_char (ch, obj, WEAR_WAIST); 
-			if ((obj = load_object (42125))) //sandals
+		//	if ((obj = load_object(97810))) //belt
+		//		equip_char (ch, obj, WEAR_WAIST); 
+			if ((obj = load_object (2406))) //sandals
 				equip_char (ch, obj, WEAR_FEET);
 			if ((obj = load_object (42123))) //cloak
 				equip_char (ch, obj, WEAR_ABOUT);
@@ -2834,7 +2828,7 @@ equip_newbie (CHAR_DATA * ch)
 				sobj = obj;
 				}
 
-			if ((obj = load_colored_object (97036, "brown")))
+			if ((obj = load_object (97036)))
 				{
 				equip_char (ch, obj, WEAR_BELT_1); //pouch
 				tobj = obj;
@@ -2842,50 +2836,46 @@ equip_newbie (CHAR_DATA * ch)
 			}//end female Angost
 		
 		//everyone in Angost
-		if ((obj = load_object (1659))) //filled waterskin
+		if ((obj = load_object (1002))) //backpack
 			{
-			obj->o.od.value[1] = 20;
-			obj->o.od.value[2] = 34;
-			equip_char (ch, obj, WEAR_SHOULDER_L);
+			equip_char (ch, obj, WEAR_BACK);
+			tobj = obj;
 			}
-		
-		if (sobj && (obj = load_object (98508))) //longknife in sheathe
+			
+		/* backpack gear...bread knife etc */
+		if (tobj)
 			{
-			obj_to_obj (obj, sobj);
-			}
-		
-		if (tobj) //pouch contents
-			{
-			if ((obj = load_object (42133))) //shillings
-				{
-				obj->count = 40;
-				obj_to_obj(obj, tobj);
-				}
-			if ((obj = load_object (42132))) //penny
-				{
-				obj->count = 10;
-				obj_to_obj(obj, tobj);
-				}
-			if ((obj = load_object (42131))) //farthing
-				{
-				obj->count = 10;
+			if ((obj = load_object (804))) //bread
 				obj_to_obj (obj, tobj);
-				}
-			if ((obj = load_object (42139))) //jerky
+			if ((obj = load_object (804))) //bread
+				obj_to_obj (obj, tobj);
+			if ((obj = load_object (804))) //bread
+				obj_to_obj (obj, tobj);
+			if ((obj = load_object (804))) //bread
+				obj_to_obj (obj, tobj);
+			if ((obj = load_object (1560))) //gondorian waterskin
 				{
-				obj->count = 6;
+				obj->o.od.value[1] = 7;
 				obj_to_obj (obj, tobj);
 				}
 		
+			if ((obj = load_object (1015))) //knife
+				obj_to_obj (obj, tobj);
 			if ((obj = load_object (1070))) //torch
 				obj_to_obj (obj, tobj);
-		
-			if ((obj = load_object (1598))) //dice
+				
+			if ((obj = load_object (1544))) //silver tree coin
 				{
 				obj->count = 2;
 				obj_to_obj (obj, tobj);
 				}
-			}//end pouch contents
+			
+			if ((obj = load_object (1540))) //silver royal
+				{
+				obj->count = number (3, 6);
+				obj_to_obj (obj, tobj);
+				}
+			} //end gondor pack stuff
 			
 		} //end Angost
 		
@@ -3487,7 +3477,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	if (d->character->race == 86) //Olog-hai
 	{
         d->character->max_hit =
-            50 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 25) * 4);
+            200 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 25) * 4);
         d->character->hit = d->character->max_hit;
 	d->character->armor = 3;	
 }

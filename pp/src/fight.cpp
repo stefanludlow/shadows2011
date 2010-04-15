@@ -3228,7 +3228,13 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
     dam += dice (2, 4);
   else
   {
-	  float upperval = sqrt(GET_STR(src)*GET_STR(src)/5)-2;
+	  float upperval = 0;
+    if (src->race == 86) {
+    upperval = sqrt(GET_STR(src)*GET_STR(src)/5);
+    }
+    else {
+    upperval = sqrt(GET_STR(src)*GET_STR(src)/5)-2;
+    }
 	  if (upperval < 1)
 		  upperval = 1;
 	  potential_damage = MAX((int) potential_damage, number(GET_STR(src)/10, (int)upperval));

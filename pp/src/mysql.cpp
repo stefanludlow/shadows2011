@@ -2372,17 +2372,17 @@ perform_pfile_update (CHAR_DATA * ch)
 	ch->tmp_aur = ch->aur;
 	ch->tmp_intel = ch->intel;
 	
-	if (engine.in_play_mode()) {
+	// if (engine.in_play_mode()) {
 		// Add PCs to their respective forum clans upon login
-		int flags;
-		char *clanID;
-		char clan_name[MAX_STRING_LENGTH];
+		// int flags;
+		// char *clanID;
+		// char clan_name[MAX_STRING_LENGTH];
 
-		for (clanID = ch->clans; get_next_clan (&clanID, clan_name, &flags);) {
-			clan_forum_remove (ch, clan_name);
-			clan_forum_add (ch, clan_name, value_to_clan_flags (flags));
-		}
-	}
+		// for (clanID = ch->clans; get_next_clan (&clanID, clan_name, &flags);) {
+		//	clan_forum_remove_all (ch);
+		//	clan_forum_add (ch, clan_name, value_to_clan_flags (flags));
+		// }
+	// }
 }
 
 void
@@ -3098,15 +3098,19 @@ load_char_mysql (const char *name)
 		ch->coldload_id = get_next_coldload_id (1);
 
 	if (ch->race == 28)
-	{
-		ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
-		ch->armor = 3;
-	}
-	else
-	{
-		ch->max_hit = 50 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
-		ch->armor = 0;
-	}
+    {
+    ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
+    ch->armor = 3;
+    }
+    else if (ch->race == 86) {
+    ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
+    ch->armor = 2;
+    }
+    else
+    {
+    ch->max_hit = 50 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
+    ch->armor = 0;
+    }
 
 	if (!ch->max_mana
 		&& (ch->skills[SKILL_BLACK_WISE] || ch->skills[SKILL_WHITE_WISE]

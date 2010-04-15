@@ -2446,7 +2446,7 @@ char *
 figure_location (CHAR_DATA * tar, int location)
 {
 	int locroll = number (1, 100);
-	static char loc[50];
+	static char loc[100];
 
 	// Location 0: Body area.
 	// Location 1: Leg area.

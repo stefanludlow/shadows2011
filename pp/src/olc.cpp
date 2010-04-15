@@ -13777,12 +13777,10 @@ do_instruct (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char ("  Sentinel:    No.   The mob will "
 				"wander.\n", ch);
 
-			if (IS_SET (mob->act, ACT_SCAVENGER))
-				send_to_char ("  Scavenger:   Yes.  The mob will tend to pick "
-				"things up.\n", ch);
+			if (IS_SET (mob->act, ACT_SOLDIER))
+				send_to_char ("  Soldier:   Yes.  This mob will not attack wildlife.\n", ch);
 			else
-				send_to_char ("  Scavenger:   No.   The mob will not pick "
-				"things up.\n", ch);
+				send_to_char ("  Soldier:   No. This mob will attack wildlife.\n", ch);
 
 			if (IS_SET (mob->act, ACT_AGGRESSIVE))
 				send_to_char ("  Aggressive:  Yes.  The mob will attack "
@@ -13878,7 +13876,6 @@ do_instruct (CHAR_DATA * ch, char *argument, int cmd)
 			if ((ind = index_lookup (action_bits, buf)) != -1 &&
 				(1 << ind == ACT_AGGRESSIVE ||
 				1 << ind == ACT_PURSUE ||
-				1 << ind == ACT_SCAVENGER ||
 				1 << ind == ACT_SENTINEL ||
 				1 << ind == ACT_WIMPY || 1 << ind == ACT_PASSIVE))
 			{

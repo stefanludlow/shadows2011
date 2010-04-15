@@ -25,7 +25,7 @@ CLAN_DATA *clan_list = NULL;
 CHANGES:
 14th March 2010 - Kite - Total redo of clanning for new forums.
 
-15866	Angost Military			dalewatch
+
 15471	Battalion Officers		strongroom_eradan
 15873	Crimson Arms of Burzumlub	crimson_arms
 15297	Family of Fellowship Members	fellow_family
@@ -45,7 +45,8 @@ CHANGES:
 15906 Haradrim in Mordor 		mordor_slavers
 15907 Blackbloods in Mordor		vadok_kraun
 15908 Caolafon				caolafon-citizen
-
+cao_guild : 15911
+cao_marsh : 15910
 
 */
 void
@@ -142,6 +143,14 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	else if (strcmp (clan, "mordor_slavers") == STR_MATCH)
 	{
 		nGroupId = 15906;
+	}  
+	else if (strcmp (clan, "cao_guild") == STR_MATCH)
+	{
+		nGroupId = 15911;
+	}
+	else if (strcmp (clan, "cao_marsh") == STR_MATCH)
+	{
+		nGroupId = 15910;
 	}
   // Avoid giving away ImmPCs in the Forums
   if (nGroupId > 0 && !GET_TRUST (ch) && !IS_SET (ch->flags, FLAG_ISADMIN))
@@ -250,7 +259,16 @@ clan_forum_remove (CHAR_DATA * ch, char *clan)
 	else if (strcmp (clan, "mordor_slavers") == STR_MATCH)
 	{
 		nGroupId = 15906;
-	}  else
+	}  
+	else if (strcmp (clan, "cao_guild") == STR_MATCH)
+	{
+		nGroupId = 15911;
+	}
+	else if (strcmp (clan, "cao_marsh") == STR_MATCH)
+	{
+		nGroupId = 15910;
+	}
+else
     {
       return;
     }
@@ -275,7 +293,7 @@ clan_forum_remove_all (CHAR_DATA * ch)
 	       "USING phpbb3.phpbb_user_group fug "
 	       "JOIN phpbb3.phpbb_users fu "
 	       "ON fug.user_id = fu.user_id "
-	       "WHERE group_id in (15866,15471,15873,15297,14156,15877,15891,14181,14957,15897,11723,15296,15893,15872,15874,14214,15905,15906,15907,15908) "
+	       "WHERE group_id in (15910,15911,15906,15863,15864,14214,15874,15872,15893,15296,11723,15897,14957,14181,15891,15877,14156,15297,15873,15905,15471,15907,15908) "
 	       "AND username = '%s';", ch->pc->account_name);
       mysql_safe_query (buf);
     }
