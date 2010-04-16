@@ -2157,14 +2157,14 @@ extract_char (CHAR_DATA * ch)
 
   //for (k = character_list; k; k = k->next)
   for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
-    {
-	k = *tch_iterator;
-      if (k->deleted)
-	continue;
-      if ((af = get_affect (k, MAGIC_GUARD)) && af->a.spell.modifier == 1 && 
-	  (CHAR_DATA *) af->a.spell.t == ch)
-	affect_remove (k, af);
-    }
+  {
+	  k = *tch_iterator;
+	  if (k->deleted)
+		  continue;
+	  if ((af = get_affect (k, MAGIC_GUARD)) && af->a.spell.modifier == 0 && 
+		  (CHAR_DATA *) af->a.spell.t == ch)
+		  affect_remove (k, af);
+  }
 
   //for (k = character_list; k; k = k->next)
   for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)

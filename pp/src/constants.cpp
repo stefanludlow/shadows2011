@@ -522,7 +522,7 @@ const char *action_bits[] = {
   "Stayzone",
   "Wimpy",
   "Pursue",
-  "Thief",
+  "Soldier",
   "NoOrder",
   "NoBuy",
   "Enforcer",
