@@ -47,28 +47,10 @@ const char *player_bits[] = {
 	"\n"
 };
 
-const int SPHERE_COUNT = 7;
-
-/* flag is 1 << index */
-/*  SPHERE_INFO spheres[] = {  ONLY ADD TO THE END OF THIS OR YOU WILL SCREW UP CURRENT FLAGS 
-{"MT",true},           
-{"PelAnor",true},      
-{"Northlands",true},
-{"Mordor",true},
-{"Harad",true},
-{"Battalions",true},
-{"Guldur",false},
-{"Undeep",false},
-}; */
+const int SPHERE_COUNT = 1;
 
 SPHERE_INFO spheres[] = {  //ONLY ADD TO THE END OF THIS OR YOU WILL SCREW UP CURRENT FLAGS 
-	{"Gondor",true},
-	{"Mordor",true},
-	{"Harad",true},
-	{"Battalions",false},
-	{"Guldur",false},
-	{"Undeep",false},
-	{"Northlands",true},
+	{"all",true},
 };
 
 extern rpie::server engine;

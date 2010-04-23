@@ -2476,6 +2476,8 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	/* there is no 'all' anymore. Check for match on all sphere names */
+	/* All is back, but implemented as the only entry in this list. Leave it thus
+	   so it's easy to add more later if desired again - 4/23/10 Grommit */
 	int sphereIndex = -1;
 	for (int i=0; i<SPHERE_COUNT; i++)
 	{
@@ -2487,14 +2489,14 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 		}
 	}
 
-	if (!strcasecmp(buf,"emergency"))
+	/*if (!strcasecmp(buf,"emergency")) - removing emergency 4/23/10 Grommit
 	{
 		sphereName="#1Emergency#0";
 		emergencyPetition = true;	
-	}
+	}*
 
 	/* check to see if the word matched a sphere. if so, go with it, otherwise check for admin name */
-	if (sphereIndex>=0 || emergencyPetition)
+	if (sphereIndex>=0 || emergencyPetition) /* Leave this in in case we re-activate emergency -4/23/10 Grommit */
 	{
 		std::stringstream petitionStream;
 		petitionStream << "#6[" << (ch->getNaughtyFlag() ? "#1!" : "#6_")
