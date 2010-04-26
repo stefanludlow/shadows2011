@@ -6432,14 +6432,14 @@ int wieldHandCount(int race,int skill)
 		case SKILL_MEDIUM_EDGE:
 		case SKILL_MEDIUM_BLUNT:
 		case SKILL_MEDIUM_PIERCE:
-			if (race==21 || race==119) //hobbit and smallest orc, Mountain, need to two-hand these
+			if (race==21 || race==119 || race==24) //hobbit and smallest orc, Mountain, need to two-hand these, ditto Snaga
 				return 2;
 			return 1; //everyone else single hands
 
 		case SKILL_HEAVY_EDGE:
 		case SKILL_HEAVY_BLUNT:
 		case SKILL_HEAVY_PIERCE:
-			if (race == 21 || race == 119 || race == 120) // Mountains and Mirks and hobbits, no go
+			if (race == 21 || race == 119 || race == 120 || race == 24) // Mountains and Mirks and hobbits and Snaga, no go
 				return 0;
 			if (race == 86 || race == 28) // Olog and trolls can single hand them
 				return 1;
@@ -6453,13 +6453,13 @@ int wieldHandCount(int race,int skill)
 	    case SKILL_STAFF:
 			/* bug: if we ever move something other than LIGHT_ / MEDIUM_ / HEAVY_ to one handed, dual not pickable */
 			/* thus if you change this, go edit is_restricted_skill in utility.cpp */
-			if (race == 21 || race == 119 || race == 120) // Mountains and Mirks and hobbits, no go
+			if (race == 21 || race == 119 || race == 120 || race == 24) // Mountains and Mirks and hobbits and snaga, no go
 				return 0;
 			return 2; //Everyone else use two
 
 		case SKILL_LONGBOW:
-			// hobbits, dwarves, mountains, mirkwoods - no longbow
-			if (race == 21 || race == 23 || race == 119 || race == 120)
+			// hobbits, dwarves, mountains, mirkwoods, snaga - no longbow
+			if (race == 21 || race == 23 || race == 119 || race == 120 || race == 24)
 				return 0;
 			return 1; //everyone else (this means people can dual wield bows, but they're unloadable that way)
 

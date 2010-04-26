@@ -8049,29 +8049,29 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	if (mortals < 1) {
-		whoStream << std::endl << "There aren't any beings within Middle-earth";
+		whoStream << std::endl << "There aren't any beings within Middle-earth. ";
 	}
 	else if (mortals == 1) {
-		whoStream << std::endl << "There is a single presence within Middle-earth";
+		whoStream << std::endl << "There is a single presence within Middle-earth. ";
 	}
 	else {
-		whoStream << std::endl << "There are #2" << mortals << "#0 presences within Middle-earth";
+	  whoStream << std::endl << "There are #2" << mortals << "#0 presences within Middle-earth. " << std::endl;
 	}
 	
-	if (immortals == 1) {
-		if (mortals == 1) {
-			whoStream << " and it is an administrator." << std::endl;
-		}
-		else {
-			whoStream << ", of which #21#0 is an administrator." << std::endl;
-		}
-	}
-	else if (immortals > 1) {
-		whoStream << ", of which #2" << immortals << "#0 are administrators." << std::endl;
-	}
-	else {
-		whoStream << "." << std::endl;
-	}
+//	if (immortals == 1) {
+//		if (mortals == 1) {
+//			whoStream << " and it is an administrator." << std::endl;
+//		}
+//		else {
+//			whoStream << ", of which #21#0 is an administrator." << std::endl;
+//		}
+//	}
+//	else if (immortals > 1) {
+//		whoStream << ", of which #2" << immortals << "#0 are administrators." << std::endl;
+//	}
+//	else {
+//		whoStream << "." << std::endl;
+//	}
 
 	switch (sphere) {
 		case 1:
