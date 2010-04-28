@@ -6458,8 +6458,8 @@ int wieldHandCount(int race,int skill)
 			return 2; //Everyone else use two
 
 		case SKILL_LONGBOW:
-			// hobbits, dwarves, mountains, mirkwoods, snaga - no longbow
-			if (race == 21 || race == 23 || race == 119 || race == 120 || race == 24)
+			// hobbits, dwarves, mountains, mirkwoods, snaga, balchoth - no longbow
+			if (race == 21 || race == 23 || race == 119 || race == 120 || race == 24 || race == 128)
 				return 0;
 			return 1; //everyone else (this means people can dual wield bows, but they're unloadable that way)
 

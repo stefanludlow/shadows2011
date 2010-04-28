@@ -8049,10 +8049,10 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	if (mortals < 1) {
-		whoStream << std::endl << "There aren't any beings within Middle-earth. ";
+	  whoStream << std::endl << "There aren't any beings within Middle-earth. " << std::endl;
 	}
 	else if (mortals == 1) {
-		whoStream << std::endl << "There is a single presence within Middle-earth. ";
+	  whoStream << std::endl << "There is a single presence within Middle-earth. " << std::endl;
 	}
 	else {
 	  whoStream << std::endl << "There are #2" << mortals << "#0 presences within Middle-earth. " << std::endl;
