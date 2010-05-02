@@ -1587,7 +1587,7 @@ do_health (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 char *
-expand_wound_loc (char *location)
+expand_wound_loc (const char *location)
 {
 	static char buf[30];
 

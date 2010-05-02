@@ -3380,8 +3380,21 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 
 	load_saved_mobiles (d->character, buf);
 	*buf = '\0';
-	if (d->character->pc->last_logoff)
+	if (d->character->pc->last_logoff) {
 		offline_healing (d->character, d->character->pc->last_logoff);
+
+		time_t elapsedTime = (time(0) - d->character->pc->last_logoff) / 60;
+		for (int i = SKILL_BRAWLING; i < SKILL_PARRY; i++) {
+			AFFECTED_TYPE *skillGain = get_affect(ch, MAGIC_SKILL_GAIN_STOP + i);
+			if ((skillGain->a.spell.duration - elapsedTime) <= 0) {
+				affect_remove (ch, skillGain);
+			}
+		}
+		AFFECTED_TYPE *skillGain = get_affect(ch, MAGIC_SKILL_GAIN_STOP + SKILL_DODGE);
+		if ((skillGain->a.spell.duration - elapsedTime) <= 0) {
+			affect_remove (ch, skillGain);
+		}
+	}
 
 	if (d->character->room->nVirtual == LINKDEATH_HOLDING_ROOM)
 	{

@@ -507,7 +507,7 @@ const char *affected_bits[] = {
   "Fear",			/* 20 */
   "Follow",
   "Hooded",
-  "Charm",			/* was affected_bits[21] */
+  "Sunlight Penalty",	/* was affected_bits[21] */
   "\n"
 };
 

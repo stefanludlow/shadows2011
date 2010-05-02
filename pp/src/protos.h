@@ -836,7 +836,7 @@ void lodge_from_char (CHAR_DATA * ch, LODGED_OBJECT_INFO * lodged);
 void lodge_from_obj (OBJ_DATA * obj, LODGED_OBJECT_INFO * lodged);
 void wound_from_char (CHAR_DATA * ch, WOUND_DATA * wound);
 void wound_from_obj (OBJ_DATA * obj, WOUND_DATA * wound);
-char *expand_wound_loc (char *location);
+char *expand_wound_loc (const char *location);
 char *show_wounds (CHAR_DATA * ch, int mode);
 int determine_material (OBJ_DATA * obj);
 char *figure_location (CHAR_DATA * tar, int location);
@@ -949,7 +949,7 @@ void update_crafts_database (void);
 
 int mysql_safe_query (char *fmt, ...);
 void load_race_table (void);
-char *expand_wound_loc (char *location);
+char *expand_wound_loc (const char *location);
 int number (int from, int to);
 void hunger_thirst_process (CHAR_DATA * ch);
 void add_shop (int vnum);

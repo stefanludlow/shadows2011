@@ -2736,7 +2736,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 		}
 
 		if (af->type >= MAGIC_SKILL_GAIN_STOP
-			&& af->type < MAGIC_SPELL_GAIN_STOP)
+			&& af->type < MAGIC_SPELL_GAIN_STOP && (GET_TRUST(ch) > 4))
 		{
 			sprintf (buf, "#2%5d#0   May improve %s again in %d RL minutes.\n",
 				af->type, skills[af->type - MAGIC_SKILL_GAIN_STOP],
@@ -4257,6 +4257,20 @@ objstat (CHAR_DATA * ch, char *name)
 		sprintf (buf + strlen (buf), "#2Oval 4 -  Pick Penalty:#0     %d\n",
 			j->o.od.value[4]);
 		sprintf (buf + strlen (buf), "#2Oval 5 -  Master Floorplan:#0 %d\n",
+			j->o.od.value[5]);
+		break;
+
+	case ITEM_SHIELD:
+		sprintf (buf, "#2Oval 0 -  Minimum Damage Reduction:#0 %d\n", j->o.od.value[0]);
+		sprintf (buf + strlen (buf), "#2Oval 1 -  Maximum Damage Reduction:#0    %d\n",
+			j->o.od.value[1]);
+		sprintf (buf + strlen (buf), "#2Oval 2 -  Shield Coverage (Percent):#0        %d\n",
+			j->o.od.value[2]);
+		sprintf (buf + strlen (buf), "#2Oval 3 -  Shield Reinforcement (Ratio):#0        %d\n",
+			j->o.od.value[3]);
+		sprintf (buf + strlen (buf), "#2Oval 4 -  Unused:#0     %d\n",
+			j->o.od.value[4]);
+		sprintf (buf + strlen (buf), "#2Oval 5 -  Unused:#0 %d\n",
 			j->o.od.value[5]);
 		break;
 

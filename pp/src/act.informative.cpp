@@ -4418,6 +4418,10 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 
       send_to_char ("\n", ch);
 
+	  if (get_affect(ch, MAGIC_AFFECT_INFRAVISION) && is_dark(ch->room)) {
+		  send_to_char("#4It is dark.#0\n", ch);
+	  }
+
       if (weather_info[ch->room->zone].state == HEAVY_SNOW
 	  && !IS_SET (ch->room->room_flags, INDOORS)
 	  && IS_MORTAL (ch)

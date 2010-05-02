@@ -641,40 +641,44 @@ do_whirl (CHAR_DATA * ch, char *argument, int cmd)
   ch->whirling = 1;
 }
 
-/** There is no block from a critical hit. 
+/*
 ** If you are under cover, all other shots are misses. 
 ** If you are not under cover, then you have a chance to block missiles with your shield.
 **/
 int
 projectile_shield_block (CHAR_DATA * ch, int result)
 {
-  OBJ_DATA *shield_obj;
-  int roll, dir = 0;
-	
-  if (result == CRITICAL_HIT)
-    return 0;
+	OBJ_DATA *shield_obj;
+	int roll, dir = 0;
+
+	//if (result == CRITICAL_HIT)
+	//return 0;
 
 	dir = ch->cover_from_dir;
-    
+
 	if ((dir == 0 && get_affect (ch, AFFECT_COVER_NORTH))||
-				(dir == 1 && get_affect (ch, AFFECT_COVER_EAST))||
-				(dir == 2 && get_affect (ch, AFFECT_COVER_SOUTH))||
-				(dir == 3 && get_affect (ch, AFFECT_COVER_WEST))||
-				(dir == 4 && get_affect (ch, AFFECT_COVER_UP))||
-				(dir == 5 && get_affect (ch, AFFECT_COVER_DOWN)))
-			return 1;
+		(dir == 1 && get_affect (ch, AFFECT_COVER_EAST))||
+		(dir == 2 && get_affect (ch, AFFECT_COVER_SOUTH))||
+		(dir == 3 && get_affect (ch, AFFECT_COVER_WEST))||
+		(dir == 4 && get_affect (ch, AFFECT_COVER_UP))||
+		(dir == 5 && get_affect (ch, AFFECT_COVER_DOWN)))
+		return 1;
 
-  if ((shield_obj = get_equip (ch, WEAR_SHIELD)) && number (1, 25) <= ch->dex)
-    {
-      skill_use (ch, SKILL_BLOCK, 0);
-      roll = number (1, MAX(100, skill_level(ch, SKILL_BLOCK, 0)));
-      if (roll <= ch->skills[SKILL_BLOCK])
+	if ((shield_obj = get_equip (ch, WEAR_SHIELD)) && number (1, 20) <= ch->dex)
 	{
-	  return 1;
+		skill_use (ch, SKILL_BLOCK, 0);
+		roll = number (1, MAX(100, skill_level(ch, SKILL_BLOCK, 0)));
+		if (result == CRITICAL_HIT) {
+			roll += 20;
+		}
+		int rollCoverage = number(1, 100);
+		if (roll <= ch->skills[SKILL_BLOCK] && rollCoverage <= shield_obj->o.od.value[2])
+		{
+			return 1;
+		}
 	}
-    }
 
-  return 0;
+	return 0;
 }
 
 int
@@ -732,7 +736,7 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
  	if (target->room->sector_type ==SECT_TRAIL) 
 		att_modifier += 5; 
  	if (target->room->sector_type ==SECT_FIELD)
- 		att_modifier += 10; 
+ 		att_modifier += 0; 
  	if (target->room->sector_type ==SECT_WOODS)
  		att_modifier += 15; 
  	if (target->room->sector_type ==SECT_FOREST) 
@@ -742,9 +746,9 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
  	if (target->room->sector_type ==SECT_MOUNTAIN) 
  		att_modifier += 20; 
  	if (target->room->sector_type ==SECT_SWAMP)
- 		att_modifier += -10; 
+ 		att_modifier += 10; 
  	if (target->room->sector_type ==SECT_HEATH)
- 		att_modifier += -5;
+ 		att_modifier += 5;
 
 // Random modifier
   roll = number (1, MAX(100, skill_level(ch, ch_skill, 0)));
@@ -851,104 +855,117 @@ calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
   *location = -1;
 
   while (roll > 0)
-    roll = roll - body_tab[body_type][++(*location)].percent;
+	  roll = roll - body_tab[body_type][++(*location)].percent;
 
   wear_loc1 = body_tab[body_type][*location].wear_loc1;
   wear_loc2 = body_tab[body_type][*location].wear_loc2;
 
   if (wear_loc1)
-    {
-      armor1 = get_equip (target, wear_loc1);
-      if (armor1 && GET_ITEM_TYPE (armor1) != ITEM_ARMOR)
-	armor1 = NULL;
-    }
+  {
+	  armor1 = get_equip (target, wear_loc1);
+	  if (armor1 && GET_ITEM_TYPE (armor1) != ITEM_ARMOR)
+		  armor1 = NULL;
+  }
   if (wear_loc2)
-    {
-      armor2 = get_equip (target, wear_loc2);
-      if (armor2 && GET_ITEM_TYPE (armor2) != ITEM_ARMOR)
-	armor2 = NULL;
-    }
+  {
+	  armor2 = get_equip (target, wear_loc2);
+	  if (armor2 && GET_ITEM_TYPE (armor2) != ITEM_ARMOR)
+		  armor2 = NULL;
+  }
 
   if (missile)
-    {
-      if (GET_ITEM_TYPE (missile) == ITEM_MISSILE
-	  || GET_ITEM_TYPE (missile) == ITEM_BULLET)
-	*damage = dice (missile->o.od.value[0], missile->o.od.value[1]);
-      else if (GET_ITEM_TYPE (missile) == ITEM_WEAPON && IS_SET(missile->obj_flags.extra_flags,ITEM_THROWING))
-	*damage = dice (missile->o.od.value[1], missile->o.od.value[2]);
-      else
-	*damage = dice (1, 3);
+  {
+	  if (GET_ITEM_TYPE (missile) == ITEM_MISSILE
+		  || GET_ITEM_TYPE (missile) == ITEM_BULLET)
+		  *damage = dice (missile->o.od.value[0], missile->o.od.value[1]);
+	  else if (GET_ITEM_TYPE (missile) == ITEM_WEAPON && IS_SET(missile->obj_flags.extra_flags,ITEM_THROWING))
+		  *damage = dice (missile->o.od.value[1], missile->o.od.value[2]);
+	  else
+		  *damage = dice (1, 3);
 
-      if (weapon)		/*  Launched from a bow/sling */
-	*damage += weapon->o.od.value[4];
+	  if (weapon)		/*  Launched from a bow/sling */
+		  *damage += weapon->o.od.value[4];
 
-      if (weapon || IS_SET (missile->obj_flags.extra_flags, ITEM_THROWING))
-	{
-	  if (result == HIT)
-	    {			/* Multiply in critical hits to raw damage amount. */
-	      *damage += number (3, 5);
-	      *damage *= 1.75;
-	    }
-	  else if (result == CRITICAL_HIT)
-	    {
-	      *damage += number (4, 6);
-	      *damage *= 2.75;
-	    }
+	  *damage *= 1.5; // Increasing damage by 50% - Case
+	                  // Armour reduction before crits - Case
 
-	}
+	  if (armor1 != NULL)
+	  {
+		  if (armor1->o.armor.armor_type > 3) {
+			  *damage -= (2 * armor1->o.armor.armor_value);
+		  }
+		  else {
+			  *damage -= armor1->o.armor.armor_value;
+		  }
+		  *damage += weapon_armor_table[1][armor1->o.armor.armor_type];
+	  }
+	  if (armor2 != NULL)
+	  {
+		  if (armor2->o.armor.armor_type > 3) {
+			  *damage -= (2 * armor2->o.armor.armor_value);
+		  }
+		  else {
+			  *damage -= armor2->o.armor.armor_value;
+		  }
+		  *damage += weapon_armor_table[1][armor2->o.armor.armor_type];
+	  }
+	  if (target->armor)
+	  {
+		  *damage -= target->armor;
+	  }
 
-      if (armor1 != NULL)
-	{
-	  *damage -= armor1->o.armor.armor_value;
-	  *damage += weapon_armor_table[1][armor1->o.armor.armor_type];
-	}
-      if (armor2 != NULL)
-	{
-	  *damage -= armor2->o.armor.armor_value;
-	  *damage += weapon_armor_table[1][armor2->o.armor.armor_type];
-	}
-      if (target->armor)
-	{
-	  *damage -= target->armor;
-	}
+	  if (weapon || IS_SET (missile->obj_flags.extra_flags, ITEM_THROWING))
+	  {
+		  if (result == HIT)
+		  {			/* Multiply in critical hits to raw damage amount. */
+			  *damage += number (3, 5);
+			  *damage *= 1.75;
+		  }
+		  else if (result == CRITICAL_HIT)
+		  {
+			  *damage += number (4, 6);
+			  *damage *= 2.75;
+		  }
 
-      if (weapon)
-	{
-	  if (result != GLANCING_HIT)
-	    {			/* Shot lodged in target, piercing the armor. */
-	      if (*location == 2)
-		*damage *= 1.75;
-	      else if (*location == 3)
-		*damage *= 2.25;
-	      else if (*location == 4)
-		*damage *= 3.00;
-	    }
-	}
+	  }
 
-   if (weapon || IS_SET (missile->obj_flags.extra_flags, ITEM_THROWING))
+	  if (weapon)
+	  {
+		  if (result != GLANCING_HIT)
+		  {			/* Shot lodged in target, piercing the armor. */
+			  if (*location == 2)
+				  *damage *= 1.75;
+			  else if (*location == 3)
+				  *damage *= 2.25;
+			  else if (*location == 4)
+				  *damage *= 3.00;
+		  }
+	  }
 
-      if (missile)
-	{
-	  if (!(GET_ITEM_TYPE (missile) == ITEM_WEAPON && IS_SET (missile->obj_flags.extra_flags, ITEM_THROWING))
-	      && GET_ITEM_TYPE (missile) != ITEM_MISSILE
-	      && GET_ITEM_TYPE (missile) != ITEM_BULLET)
-	    *damage = 0;
-	}
-    }
+	  if (weapon || IS_SET (missile->obj_flags.extra_flags, ITEM_THROWING))
+
+		  if (missile)
+		  {
+			  if (!(GET_ITEM_TYPE (missile) == ITEM_WEAPON && IS_SET (missile->obj_flags.extra_flags, ITEM_THROWING))
+				  && GET_ITEM_TYPE (missile) != ITEM_MISSILE
+				  && GET_ITEM_TYPE (missile) != ITEM_BULLET)
+				  *damage = 0;
+		  }
+  }
 
   if (weapon && weapon->o.weapon.use_skill == SKILL_SLING)
-    {
-      if (att_modifier < 0)
-	att_modifier *= -1;
-      if (att_modifier <= 1)
-	*damage *= 0.250;
-      else if (att_modifier > 1 && att_modifier <= 2)
-	*damage *= 0.500;
-      else if (att_modifier > 2 && att_modifier <= 3)
-	*damage *= 0.750;
-      else if (att_modifier > 3)
-	;
-    }
+  {
+	  if (att_modifier < 0)
+		  att_modifier *= -1;
+	  if (att_modifier <= 1)
+		  *damage *= 0.250;
+	  else if (att_modifier > 1 && att_modifier <= 2)
+		  *damage *= 0.500;
+	  else if (att_modifier > 2 && att_modifier <= 3)
+		  *damage *= 0.750;
+	  else if (att_modifier > 3)
+		  ;
+  }
 
   return result;
 }
