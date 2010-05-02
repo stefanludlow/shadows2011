@@ -4261,12 +4261,13 @@ objstat (CHAR_DATA * ch, char *name)
 		break;
 
 	case ITEM_SHIELD:
-		sprintf (buf, "#2Oval 0 -  Minimum Damage Reduction:#0 %d\n", j->o.od.value[0]);
-		sprintf (buf + strlen (buf), "#2Oval 1 -  Maximum Damage Reduction:#0    %d\n",
+		sprintf (buf,                "#2Oval 0 -  Minimum Damage Reduction:#0     %d\n", 
+			j->o.od.value[0]);
+		sprintf (buf + strlen (buf), "#2Oval 1 -  Maximum Damage Reduction:#0     %d\n",
 			j->o.od.value[1]);
-		sprintf (buf + strlen (buf), "#2Oval 2 -  Shield Coverage (Percent):#0        %d\n",
+		sprintf (buf + strlen (buf), "#2Oval 2 -  Shield Coverage (Percent):#0    %d\n",
 			j->o.od.value[2]);
-		sprintf (buf + strlen (buf), "#2Oval 3 -  Shield Reinforcement (Ratio):#0        %d\n",
+		sprintf (buf + strlen (buf), "#2Oval 3 -  Shield Reinforcement (Ratio):#0 %d\n",
 			j->o.od.value[3]);
 		sprintf (buf + strlen (buf), "#2Oval 4 -  Unused:#0     %d\n",
 			j->o.od.value[4]);

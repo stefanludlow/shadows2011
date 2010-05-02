@@ -195,7 +195,7 @@ const int weapon_armor_table[6][6] = {
 ***/
 
 const int weapon_armor_table[6][6] = {
-	// Q   L   R   S   M   P
+   // Q   L   R   S   M   P
 	{-1, -1, -2, -2, -1, -1},		// stab
 	{ 0,  0, -2, -1, -3, -3},		// pierce
 	{ 0,  0, -2, -1, -2, -2},		// chop
@@ -213,7 +213,7 @@ const int weapon_nat_attack_table[4][6] = {
 };
 */
 const int weapon_nat_attack_table[4][6]={
-	// Q   L   R   S   M   P
+   // Q   L   R   S   M   P
 	{-1, -3, -5, -6, -6, -8},  // punch
 	{ 0, -3, -2, -2, -2, -1},  // bite
 	{ 0, -3, -2, -2, -2, -1},  // claw
@@ -3017,7 +3017,7 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 						hitLoc += "shoulder";
 				}
 				location = expand_wound_loc(hitLoc.c_str());
-				if (wound_to_char (tar, location, damage, hit_type, 0, 0, 0)) {
+				if (wound_to_char (tar, location, damage, 3, 0, 0, 0)) {
 					def_result = RESULT_DEAD;
 				}
 				damage = 0;
