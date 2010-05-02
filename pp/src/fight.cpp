@@ -1290,10 +1290,14 @@ raw_kill (CHAR_DATA * ch)
 				remove_affect_type(tch, MAGIC_GUARD);
 	}
 
-	if (!IS_SET (ch->plr_flags, FLAG_PETRIFIED))
+	if (!IS_SET (ch->plr_flags, FLAG_PETRIFIED)) {
+		remove_affect_type (ch, MAGIC_HIDDEN);
 		make_corpse (ch);
-	else
+	}
+	else {
+		remove_affect_type (ch, MAGIC_HIDDEN);
 		make_statue (ch);
+	}
 
 	if (IS_SET (ch->plr_flags, FLAG_PETRIFIED))
 	{
@@ -1514,7 +1518,7 @@ hit_char (CHAR_DATA * ch, CHAR_DATA * victim, int strike_parm)
 	if (GET_FLAG (ch, FLAG_FLEE))
 	{
 		if (!ch->primary_delay && !flee_attempt(ch))
-			ch->primary_delay=16;
+			ch->primary_delay=25;
 
 		return;
 	}
@@ -3017,7 +3021,7 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 						hitLoc += "shoulder";
 				}
 				location = expand_wound_loc(hitLoc.c_str());
-				if (wound_to_char (tar, location, damage, 3, 0, 0, 0)) {
+				if (wound_to_char (tar, location, damage, 10, 0, 0, 0)) {
 					def_result = RESULT_DEAD;
 				}
 				damage = 0;
@@ -3355,7 +3359,7 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 	else if (off_result == RESULT_BLOCK)
 	{
 		OBJ_DATA *shield = get_equip(tar, WEAR_SHIELD); 
-		dam -= (shield->o.od.value[3] * number(shield->o.od.value[0], shield->o.od.value[1]));
+		dam -= number(shield->o.od.value[0], shield->o.od.value[1]);
 		if (dam <= 0) {
 			*damage = 0;
 			return;
@@ -4781,7 +4785,7 @@ sa_rescue (SECOND_AFFECT * sa)
 		act ("You try again, but fail to rescue $n.",
 			false, rescuee, 0, sa->ch, TO_VICT);
 
-		add_second_affect (SA_RESCUE, number(3,10-GET_INT(sa->ch)/4), sa->ch, sa->obj, NULL, 0);
+		add_second_affect (SA_RESCUE, number(5, 15), sa->ch, sa->obj, NULL, 0);
 
 		return;
 	}
@@ -4849,10 +4853,22 @@ sa_rescue (SECOND_AFFECT * sa)
 				send_to_char("#6You get pushed out of the melee as you are rescued.#0\n", rescuee);
 			}
 		}
+
+		if (sa->ch->agi <= 9)
+			sa->ch->balance += -15;
+		else if (sa->ch->agi > 9 && sa->ch->agi <= 13)
+			sa->ch->balance += -13;
+		else if (sa->ch->agi > 13 && sa->ch->agi <= 15)
+			sa->ch->balance += -11;
+		else if (sa->ch->agi > 15 && sa->ch->agi <= 18)
+			sa->ch->balance += -9;
+		else
+			sa->ch->balance += -7;
+		sa->ch->balance = MAX (sa->ch->balance, -50);
 	}
 	else if (result == 4) // Has too many people fighting them
 	{
-		add_second_affect (SA_RESCUE, 3, sa->ch, sa->obj, NULL, 0);
+		add_second_affect (SA_RESCUE, number(5, 10), sa->ch, sa->obj, NULL, 0);
 		return;
 	}
 }
@@ -5009,6 +5025,10 @@ do_rescue (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+	if (ch->balance < 0) {
+		act("You are off balance, you cannot rescue $N.", false, ch, 0, friendPtr, TO_CHAR);
+	}
+
 	if (sa)
 	{
 
@@ -5063,6 +5083,18 @@ do_rescue (CHAR_DATA * ch, char *argument, int cmd)
 				still_fighting_char = pNumberCheck;
 				still_fighting = true;
 			}
+
+			if (ch->agi <= 9)
+				ch->balance += -15;
+			else if (ch->agi > 9 && ch->agi <= 13)
+				ch->balance += -13;
+			else if (ch->agi > 13 && ch->agi <= 15)
+				ch->balance += -11;
+			else if (ch->agi > 15 && ch->agi <= 18)
+				ch->balance += -9;
+			else
+				ch->balance += -7;
+			ch->balance = MAX (ch->balance, -50);
 		}
 
 		if (still_fighting)

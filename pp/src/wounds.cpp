@@ -287,6 +287,12 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 				break;
 			}
 		}
+		else if (type == 10) { // stun etc
+			sprintf(name, "numbness");
+		}
+		else {
+			sprintf(name, "ERROR");
+		}
 
 		if (str_cmp (location, "bloodloss"))
 		{
@@ -1143,7 +1149,7 @@ delayed_treatment (CHAR_DATA * ch)
 					adjust_wound (tch, wound, 1);
 
 				//50% chance to cause infections but elves don't get infected						
-				if (!wound->infection && dice(1, 10) <= 5 && !(tch->race >= 16 && tch->race <= 19 || tch->race == 93))
+				if (!wound->infection && dice(1, 10) <= 5 && !(tch->race >= 16 && tch->race <= 19 || tch->race == 93) && strn_cmp(wound->type, "stun", 4))
 					wound->infection = WOUND_INFECTIONS;
 
 				wound->lasthealed = time (0);
@@ -1859,11 +1865,15 @@ show_wounds (CHAR_DATA * ch, int mode)
 			sprintf (buf4, "wound on the %s",
 				expand_wound_loc (wound->location));
 		}
-		else //mode is not 0 or bindskill <=1
+		else if (strncmp(wound->name, "numbness", 7))  //mode is not 0 or bindskill <=1
 		{
 			sprintf (buf4, "%s %s on the %s", wound->severity, wound->name,
 				expand_wound_loc (wound->location));
 		}
+		else {
+			sprintf (buf4, "%s numbness in the %s", wound->severity, expand_wound_loc (wound->location));
+		}
+
 		if (mode == 1 && wound->infection)
 			strcat (buf4, " #3(infected)#0");
 		if (mode == 1 && wound->bleeding)
@@ -1885,11 +1895,13 @@ show_wounds (CHAR_DATA * ch, int mode)
 			strcat (buf4, " #6(treated)#0");
 		if (mode == 1 && wound->healerskill == -1)
 			strcat (buf4, " #4(tended)#0");
-		strcat (buf, buf4);
-		if (!wound->next)
-			strcat (buf, ".#0");
-		else
-			strcat (buf, ", ");
+
+			strcat (buf, buf4);
+
+			if (!wound->next)
+				strcat (buf, ".#0");
+			else
+				strcat (buf, ", ");
 		*buf4 = '\0';
 	}
 
@@ -2922,7 +2934,7 @@ natural_healing_check (CHAR_DATA * ch, WOUND_DATA * wound)
 		&& str_cmp (wound->severity, "minor") != STR_MATCH)
 	{
 
-		if (hr * ch->con + wound->bindskill < number (1, 80) && !(ch->race >= 16 && ch->race <= 19 || ch->race == 93)) // Elves don't get infected - Case
+		if (hr * ch->con + wound->bindskill < number (1, 80) && !(ch->race >= 16 && ch->race <= 19 || ch->race == 93) && strn_cmp(wound->type, "stun", 4)) // Elves don't get infected - Case
 		{
 			sprintf (buf,
 				"The stinging sensation in the %s %s on your %s intensifies.",

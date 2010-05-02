@@ -465,7 +465,7 @@ update_room_tracks (void)
     }
 }
 
-#define TRACK_LIMIT_PER_ROOM		5
+#define TRACK_LIMIT_PER_ROOM		15
 
 void
 leave_tracks (CHAR_DATA * ch, int to_dir, int from_dir)
@@ -1245,10 +1245,16 @@ enter_room (QE_DATA * qe)
   prevroom = vtor (roomnum);
 
   // Sneakers who make separate successful SNEAK checks leave no tracks.
+  int sneakBleeding = 0;
+  int sneakRoll = number(1, 100);
+  for (WOUND_DATA *wound = ch->wounds; wound; wound = wound->next)
+  {
+	  sneakBleeding += wound->bleeding;
+  }
 
-  if (!IS_SET (qe->flags, MF_SNEAK) ||
-      odds_sqrt (ch->skills[SKILL_SNEAK]) < number (1, 100))
+  if (!IS_SET (qe->flags, MF_SNEAK) || (ch->skills[SKILL_SNEAK] < sneakRoll || sneakBleeding > 2)) {
     leave_tracks (ch, qe->dir, ch->from_dir);
+  }
 
   char_from_room (ch);
 

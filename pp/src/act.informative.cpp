@@ -7964,11 +7964,11 @@ void roomCount(ROOM_DATA *rd)
 	{
 		if (!IS_NPC(tch))
       	{
-        	if (!IS_LINKDEAD(tch) && IS_MORTAL(tch))
+        	if (!IS_LINKDEAD(tch) && IS_MORTAL(tch) && !get_affect(tch, MAGIC_HIDDEN))
             	rd->occupants++;
       	}
-      	else if (tch->desc && tch->desc->original)
-		rd->occupants++;
+      	else if (tch->desc && tch->desc->original && !get_affect(tch, MAGIC_HIDDEN))
+			rd->occupants++;
 	}
 }
 
@@ -7982,7 +7982,7 @@ std::string gatheringPlaceCore(int room_num, std::string name, bool colorise)
 	std::stringstream placestream;
 	
 	ROOM_DATA* rd = vtor(room_num);
-	roomCount(rd);
+	roomCount(rd); // This only called once, here, so I'm stopping it include hidden PCs
 
 	int num_occu = 0;
 	

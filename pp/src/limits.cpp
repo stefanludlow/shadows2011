@@ -686,7 +686,7 @@ point_update (void)
 			ch->damage = 0;
 
 		if (ch->room && sun_light && IS_SET (ch->affected_by, AFF_SUNLIGHT_PET)
-			&& !is_overcast (ch->room))
+			&& !is_overcast (ch->room) && ch->room->sector_type != SECT_FOREST && ch->room->sector_type != SECT_WOODS)
 		{
 			ch->plr_flags |= FLAG_PETRIFIED;
 			die (ch);
@@ -1073,16 +1073,34 @@ skill_level (CHAR_DATA * ch, int skill, int diff_mod)
 		skill_lev -= af->a.spell.modifier;
 
 	if (get_affect(ch, AFF_SUNLIGHT_PEN) && sun_light
-		&& ch->room->sector_type != SECT_INSIDE && !IS_SET (ch->room->room_flags, INDOORS))
-	{
-		if (weather_info[ch->room->zone].clouds == CLEAR_SKY)
-			skill_lev -= 30;
-		else if (weather_info[ch->room->zone].clouds == LIGHT_CLOUDS)
-			skill_lev -= 15;
-		else if (weather_info[ch->room->zone].clouds == HEAVY_CLOUDS)
-			skill_lev -= 10;
-		else if (weather_info[ch->room->zone].clouds == OVERCAST)
-			skill_lev -= 5;
+		&& ch->room->sector_type != SECT_INSIDE && !IS_SET (ch->room->room_flags, INDOORS)) {
+		int penalty = 0;
+
+		if (weather_info[ch->room->zone].clouds == CLEAR_SKY) {
+			penalty = 30;
+		}
+		else if (weather_info[ch->room->zone].clouds == LIGHT_CLOUDS) {
+			penalty = 15;
+		}
+		else if (weather_info[ch->room->zone].clouds == HEAVY_CLOUDS) {
+			penalty = 10;
+		}
+		else if (weather_info[ch->room->zone].clouds == OVERCAST) {
+			penalty = 5;
+		}
+
+		if (ch->room->sector_type == SECT_WOODS) {
+			penalty *= 0.75;
+		}
+		else if (ch->room->sector_type == SECT_FOREST) {
+			penalty *= 0.5;
+		}
+		else if (ch->room->sector_type == SECT_HILLS ||
+				 ch->room->sector_type == SECT_FIELD ||
+				 ch->room->sector_type == SECT_MOUNTAIN) {
+			penalty += 5;
+		}
+		skill_lev -= penalty;
 	}
 
 	for (obj = ch->equip; obj; obj = obj->next_content)
