@@ -3386,12 +3386,12 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		time_t elapsedTime = (time(0) - d->character->pc->last_logoff) / 60;
 		for (int skillIt = SKILL_BRAWLING; skillIt < SKILL_PARRY; skillIt++) {
 			AFFECTED_TYPE *skillGain = get_affect(d->character, MAGIC_SKILL_GAIN_STOP + skillIt);
-			if ((skillGain->a.spell.duration - elapsedTime) <= 0) {
+			if (skillGain && (skillGain->a.spell.duration - elapsedTime) <= 0) {
 				affect_remove (d->character, skillGain);
 			}
 		}
 		AFFECTED_TYPE *skillGain = get_affect(d->character, MAGIC_SKILL_GAIN_STOP + SKILL_DODGE);
-		if ((skillGain->a.spell.duration - elapsedTime) <= 0) {
+		if (skillGain && (skillGain->a.spell.duration - elapsedTime) <= 0) {
 			affect_remove (d->character, skillGain);
 		}
 	}
