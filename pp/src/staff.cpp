@@ -2736,7 +2736,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 		}
 
 		if (af->type >= MAGIC_SKILL_GAIN_STOP
-			&& af->type < MAGIC_SPELL_GAIN_STOP && (GET_TRUST(ch) > 4))
+			&& af->type < MAGIC_SPELL_GAIN_STOP && (GET_TRUST(ch) > 4) && engine.in_play_mode())
 		{
 			sprintf (buf, "#2%5d#0   May improve %s again in %d RL minutes.\n",
 				af->type, skills[af->type - MAGIC_SKILL_GAIN_STOP],

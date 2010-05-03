@@ -580,7 +580,7 @@ get_obj_affect (OBJ_DATA * obj, int type)
 AFFECTED_TYPE *
 get_affect (const CHAR_DATA * ch, int affect_type)
 {
-  AFFECTED_TYPE *af;
+  AFFECTED_TYPE *af = NULL;
 
   for (af = ch->hour_affects; af && af->type != affect_type; af = af->next);
 
@@ -589,7 +589,7 @@ get_affect (const CHAR_DATA * ch, int affect_type)
 
 
 /* Insert an affect_type in a char_data structure
-   Automatically sets apropriate bits and apply's.
+   Automatically sets appropriate bits and applies.
 */
 
 void
