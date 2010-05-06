@@ -479,7 +479,7 @@ point_update (void)
 			if (playing_time.hour >= 10 && ch->desc->acct)
 			{
 				//restoring the deduction of rpp for races -- Huan
-				ch->desc->acct->pay_application_cost (ch->pc->app_cost);
+			  ch->desc->acct->pay_application_cost (ch->pc->app_cost, ch->tname);
 				ch->pc->app_cost = 0;
 				save_char (ch, true);
 			}
