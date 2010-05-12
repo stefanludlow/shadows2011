@@ -3389,10 +3389,18 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 			if (skillGain && (skillGain->a.spell.duration - elapsedTime) <= 0) {
 				affect_remove (d->character, skillGain);
 			}
+			else if (skillGain)
+			{
+			  skillGain->a.spell.duration-=elapsedTime;
+			}
 		}
 		AFFECTED_TYPE *skillGain = get_affect(d->character, MAGIC_SKILL_GAIN_STOP + SKILL_DODGE);
 		if (skillGain && (skillGain->a.spell.duration - elapsedTime) <= 0) {
 			affect_remove (d->character, skillGain);
+		}
+		else if (skillGain)
+		{
+		  skillGain->a.spell.duration-=elapsedTime;
 		}
 	}
 

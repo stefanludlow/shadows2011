@@ -3020,8 +3020,9 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 					default:
 						hitLoc += "shoulder";
 				}
-				location = expand_wound_loc(hitLoc.c_str());
-				if (wound_to_char (tar, location, damage, 10, 0, 0, 0)) {
+				char locbuf[20]; //disgusting but necessary for now - Grommit
+				sprintf (locbuf, "%s", hitLoc.c_str());
+				if (wound_to_char (tar, locbuf, damage, 10, 0, 0, 0)) {
 					def_result = RESULT_DEAD;
 				}
 				damage = 0;

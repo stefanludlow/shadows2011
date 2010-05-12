@@ -561,14 +561,14 @@ class account
       msg.subject="Auto-RPP Deduction for Race";
       oss <<  "Removed " << application_cost << " RPP as cost for race, after 12 hours play time.\n"
 	  << "RPP was changed from " << start_rpp << " to " << roleplay_points << ".\n";
-      msg.message = strdup(oss.str().c_str());
+      char msgbuff[4096];
+      sprintf(msgbuff,"%s",oss.str().c_str());
+      msg.message = msgbuff;
       msg.flags=0;
-      msg.date = strdup (ctime((const time_t*) time(0)));
+      char datebuff[1024];
+      sprintf(datebuff,"%s", ctime((const time_t*) time(0)));
+      msg.date = datebuff;
       add_message_to_mysql_player_notes(character_name,"System",&msg);
-      if (!msg.message)
-	free(msg.message);
-      if (!msg.date)
-	free(msg.date);
      }
 
 
