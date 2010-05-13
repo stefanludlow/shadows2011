@@ -3159,8 +3159,8 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 }
 
 void
-figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
-			   int off_result, int *damage, int *location)
+	figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
+	int off_result, int *damage, int *location)
 {
 	OBJ_DATA *eq;
 	char buf[MAX_STRING_LENGTH];
@@ -3289,75 +3289,7 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 	if (potential_damage > 0)
 		dam += potential_damage;
 
-	/* Subtract the armor protection at the hit location */
-
-	eq = get_equip (tar, wear_loc1);
-
-	if (eq && eq->obj_flags.type_flag == ITEM_ARMOR)
-		if (attack_weapon || !shock)
-			dam -= eq->o.armor.armor_value;
-
-	/* Mobs will have marmor, which is natural armor */
-
-	if (attack_weapon || !shock)
-		dam -= (tar->armor);
-
-	/* Weapon vs armor */
-
-	if (attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
-		dam += weapon_armor_table[attack_weapon->o.weapon.hit_type] [eq->o.armor.armor_type];
-	else if (!attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
-		dam += weapon_nat_attack_table[src->nat_attack_type] [eq->o.armor.armor_type];
-
-	if (number(0,1))  
-	{
-		eq = get_equip (tar, wear_loc2);
-
-		if (eq && eq->obj_flags.type_flag == ITEM_ARMOR)
-			if (attack_weapon || !shock)
-				dam -= eq->o.armor.armor_value;
-
-		if (attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
-			dam += weapon_armor_table[attack_weapon->o.weapon.hit_type]
-		[eq->o.armor.armor_type];
-		else if (!attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
-			dam += weapon_nat_attack_table[src->nat_attack_type]
-		[eq->o.armor.armor_type];
-	}
-
-	/* Multiply by hit location multiplier */
-
-	dam *= (body_tab[body_type][*location].damage_mult * 1.0) /
-		(body_tab[body_type][*location].damage_div * 1.0);
-
-	///* Modifiers by skill level - Case */
-	//int rawSkill = src->skills[attack_weapon->o.od.value[3]];
-	//if (rawSkill == 0) {
-	//	//rawSkill = src->skills[SKILL_OFFENSE]; // -2 OFFENSE???
-	//}
-		
-	/* Multiply in critical strike bonus */
-
-	if (off_result == RESULT_HIT
-		|| (off_result == RESULT_HIT
-		&& (!attack_weapon && src->nat_attack_type == 0)))
-		dam *= 1;
-	else if (off_result == RESULT_HIT1)
-		dam *= 1.3;
-	else if (off_result == RESULT_HIT2)
-		dam *= 1.5;
-	else if (off_result == RESULT_HIT3
-		|| (off_result == RESULT_HIT && !attack_weapon))
-	{
-		dam += 2;
-		dam *= 1.7;
-	}
-	else if (off_result == RESULT_HIT4)
-	{
-		dam += 3;
-		dam *= 2;
-	}
-	else if (off_result == RESULT_BLOCK)
+	if (off_result == RESULT_BLOCK)
 	{
 		OBJ_DATA *shield = get_equip(tar, WEAR_SHIELD); 
 		dam -= number(shield->o.od.value[0], shield->o.od.value[1]);
@@ -3367,8 +3299,79 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 		}
 	}
 	else {
-		*damage = 0;
-		return;
+
+		/* Subtract the armor protection at the hit location */
+
+		eq = get_equip (tar, wear_loc1);
+
+		if (eq && eq->obj_flags.type_flag == ITEM_ARMOR)
+			if (attack_weapon || !shock)
+				dam -= eq->o.armor.armor_value;
+
+		/* Mobs will have marmor, which is natural armor */
+
+		if (attack_weapon || !shock)
+			dam -= (tar->armor);
+
+		/* Weapon vs armor */
+
+		if (attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
+			dam += weapon_armor_table[attack_weapon->o.weapon.hit_type] [eq->o.armor.armor_type];
+		else if (!attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
+			dam += weapon_nat_attack_table[src->nat_attack_type] [eq->o.armor.armor_type];
+
+		if (number(0,1))  
+		{
+			eq = get_equip (tar, wear_loc2);
+
+			if (eq && eq->obj_flags.type_flag == ITEM_ARMOR)
+				if (attack_weapon || !shock)
+					dam -= eq->o.armor.armor_value;
+
+			if (attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
+				dam += weapon_armor_table[attack_weapon->o.weapon.hit_type]
+			[eq->o.armor.armor_type];
+			else if (!attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
+				dam += weapon_nat_attack_table[src->nat_attack_type]
+			[eq->o.armor.armor_type];
+		}
+
+		/* Multiply by hit location multiplier */
+
+		dam *= (body_tab[body_type][*location].damage_mult * 1.0) /
+			(body_tab[body_type][*location].damage_div * 1.0);
+
+		///* Modifiers by skill level - Case */
+		//int rawSkill = src->skills[attack_weapon->o.od.value[3]];
+		//if (rawSkill == 0) {
+		//	//rawSkill = src->skills[SKILL_OFFENSE]; // -2 OFFENSE???
+		//}
+
+		/* Multiply in critical strike bonus */
+
+		if (off_result == RESULT_HIT
+			|| (off_result == RESULT_HIT
+			&& (!attack_weapon && src->nat_attack_type == 0)))
+			dam *= 1;
+		else if (off_result == RESULT_HIT1)
+			dam *= 1.3;
+		else if (off_result == RESULT_HIT2)
+			dam *= 1.5;
+		else if (off_result == RESULT_HIT3
+			|| (off_result == RESULT_HIT && !attack_weapon))
+		{
+			dam += 2;
+			dam *= 1.7;
+		}
+		else if (off_result == RESULT_HIT4)
+		{
+			dam += 3;
+			dam *= 2;
+		}
+		else {
+			*damage = 0;
+			return;
+		}
 	}
 
 
@@ -3398,6 +3401,8 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 
 	*damage = (int)dam;
 }
+
+
 
 int
 weaken (CHAR_DATA * victim, uint16 hp_penalty, uint16 mp_penalty,
