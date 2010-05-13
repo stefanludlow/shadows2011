@@ -794,7 +794,7 @@ fread_obj (FILE * fp)
 
   /* Weapons and Armour should default to prototype values at loadtime */
 
-  if (GET_ITEM_TYPE (obj) == ITEM_ARMOR || GET_ITEM_TYPE (obj) == ITEM_WEAPON || GET_ITEM_TYPE(obj) == ITEM_MISSILE)
+  if (GET_ITEM_TYPE (obj) == ITEM_ARMOR || GET_ITEM_TYPE (obj) == ITEM_WEAPON || GET_ITEM_TYPE(obj) == ITEM_MISSILE || GET_ITEM_TYPE(obj) == ITEM_SHIELD)
   {
 	for (int index = 0; index < 6; index++)
 	{
