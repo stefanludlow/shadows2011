@@ -1868,9 +1868,9 @@ file_to_string (char *name)
 
 	num_chars = fread (tmp, 1, MAX_STRING_LENGTH - 1, fl);
 	tmp[num_chars] = '\0';
-	std::string tempString = num_chars;
-	num_chars += "\r\0";
-	string = duplicateString(num_chars.c_str());
+	std::string tempString = tmp;
+	tempString += "\r\0";
+	string = duplicateString(tempString.c_str());
 
 	fclose (fl);
 
