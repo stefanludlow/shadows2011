@@ -3529,7 +3529,7 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
 					break;
 			magic_add_affect (victim, i, -1, 0, 0, 0, 0);
 			af = get_affect (victim, i);
-			af->a.craft =  new affected_craft_type;
+			af->a.craft = new affect_craft_type;
 			af->a.craft->phase = NULL;
 			af->a.craft->subcraft = NULL;
 			af->a.craft->target_ch = NULL;
