@@ -47,7 +47,7 @@
 
 #define PATH_TO_WEBSITE		"/home/shadows/public_html"
 
-#define B_BUF_SIZE				200000
+#define B_BUF_SIZE				262144
 
 
 /* Misc defines */

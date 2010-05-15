@@ -29,7 +29,7 @@
 #include "clan.h"		/* clan__assert_objs() */
 #include "utility.h"
 
-char s_buf[4096];
+char s_buf[8192];
 char b_buf[B_BUF_SIZE];
 
 const char *player_bits[] = {
@@ -8965,24 +8965,19 @@ void
 list_all_crafts (CHAR_DATA * ch)
 {
 	SUBCRAFT_HEAD_DATA *craft;
-	char *p;
+	std::ostringstream craftList;
+	char craftLine[1024];
 
-	*b_buf = '\0';
-	p = b_buf;
+	craftList << "We currently have the following crafts available:\n\n";
 
-	sprintf (p, "We currently have the following crafts available:\n\n");
-	p += strlen (p);
-
-	for (craft = crafts; craft; craft = craft->next)
-	{
-
-		sprintf (p, "#6Craft:#0 %-20s #6Sub:#0 %-24s #6Cmd:#0 %-10s\n",
+	for (craft = crafts; craft; craft = craft->next) {
+		sprintf (craftline, "#6Craft:#0 %-20s #6Sub:#0 %-24s #6Cmd:#0 %-10s\n", 
 			craft->craft_name, craft->subcraft_name, craft->command);
-		p += strlen (p);
+		craftsList << craftLine;
 	}
 
 	send_to_char ("\n", ch);
-	page_string (ch->desc, b_buf);
+	page_string (ch->desc, craftsList.str().c_str());
 }
 
 void
