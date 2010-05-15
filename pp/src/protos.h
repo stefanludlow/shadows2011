@@ -30,10 +30,6 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
-#ifndef MACOSX
-#include <malloc.h>
-#endif
-
 #include <sys/time.h>
 #include <mysql/mysql.h>
 #include <list>
@@ -72,12 +68,12 @@ extern int world_version_out;
 extern const int restricted_skills[];
 
 extern int pulse_violence;
-extern int x1;
 extern int sun_light;
 extern int global_moon_light;
 extern int moon_light[];
 extern int desc_weather[];
 extern int MAX_ZONE;
+extern int OBJECT_MAX_ZONE;
 extern int new_auctions;
 extern int sold_auctions;
 extern int auction_bids;
@@ -110,7 +106,6 @@ extern const char *frames[];
 extern const char* const speeds[];
 extern const char* const mount_speeds[];
 extern const char* const mount_speeds_ing[];
-extern bool memory_check;
 extern const char *skills[];
 extern const char *rs_name[];	// fight.c
 extern const char *attack_names[];	// fight.c
@@ -319,7 +314,6 @@ void do_hedit (CHAR_DATA * ch, char *argument, int cmd);
 void do_help (CHAR_DATA * ch, char *argument, int cmd);
 void do_hex (CHAR_DATA * ch, char *argument, int cmd);
 void do_hide (CHAR_DATA * ch, char *argument, int cmd);
-void do_hire (CHAR_DATA * ch, char *argument, int cmd);
 void do_hit (CHAR_DATA * ch, char *argument, int cmd);
 void do_hitch (CHAR_DATA * ch, char *argument, int cmd);
 void do_hood (CHAR_DATA * ch, char *argument, int cmd);
@@ -511,7 +505,6 @@ void do_stat (CHAR_DATA * ch, char *argument, int cmd);
 void do_stayput (CHAR_DATA * ch, char *argument, int cmd);
 void do_steal (CHAR_DATA * ch, char *argument, int cmd);
 void do_stop (CHAR_DATA * ch, char *argument, int cmd);
-void do_stronghold(CHAR_DATA * ch, char *argument, int cmd);
 void do_strike (CHAR_DATA * ch, char *argument, int cmd);
 void do_study (CHAR_DATA * ch, char *argument, int cmd);
 void do_subdue (CHAR_DATA * ch, char *argument, int cmd);
@@ -609,6 +602,7 @@ int multipleRoomCount (int amount, ...);
 std::string gatheringPlace(int room_num, std::string name);
 std::string gatheringPlaceCore(int room_num, std::string name, bool colorise);
 
+
 //nanny.cpp
 //============VERMONKEY=================
 #define NORTHMAN_ONUM_POUND 42134
@@ -653,7 +647,7 @@ int is_arena_clear (void);
 void morgul_arena_cleanup (void);	/* arena.c */
 void arena__death (CHAR_DATA * ch);
 void arena_combat_message (CHAR_DATA * src, CHAR_DATA * tar, char *location,
-			   int damage, int room);
+						   int damage, int room);
 void arena__update_delays (void);
 void arena__do_shout (CHAR_DATA * ch, char *argument, int cmd);	/* arena.c */
 void arena__do_look (CHAR_DATA * ch, char *argument, int cmd);
@@ -793,7 +787,7 @@ std::string resolved_host (char *ip);
 void mysql_secure_query (MYSQL * conn, char *query, int length);
 void retrieve_mysql_board_listing (CHAR_DATA * ch, char *board_name);
 void display_mysql_board_message (CHAR_DATA * ch, char *board_name,
-				  int msg_num, bool bHideHeader);
+								  int msg_num, bool bHideHeader);
 int get_comestible_range (int num);
 void show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode);
 int has_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft);
@@ -823,13 +817,13 @@ char *char_long (CHAR_DATA * c, int show_tname);
 void combat_round (void);
 void write_obj_data_mysql (OBJ_DATA * obj, char *wc, int pos, int objstack);
 void scribe (int new_message, int nVirtual, char *author, char *date,
-	     char *message, long flags);
+			 char *message, long flags);
 void wear_off_message (CHAR_DATA * ch, ENCHANTMENT_DATA * ench);
 char *show_enchantment (ENCHANTMENT_DATA * enchantment);
 int general_damage (CHAR_DATA * ch, int amount);
 void initialize_weather_zones (void);
 int wound_to_char (CHAR_DATA * ch, char *location, int damage, int type,
-		   int bleeding, int poison, int infection);
+				   int bleeding, int poison, int infection);
 char *downsized_wound (CHAR_DATA * ch, WOUND_DATA * wound);
 void heal_all_wounds (CHAR_DATA * ch);
 void lodge_from_char (CHAR_DATA * ch, LODGED_OBJECT_INFO * lodged);
@@ -867,17 +861,17 @@ int trades_in (CHAR_DATA * keeper, OBJ_DATA * obj);
 int keeper_has_item (CHAR_DATA * keeper, int ovnum);
 void redeem_order (CHAR_DATA * ch, OBJ_DATA * ticket, CHAR_DATA * keeper);
 float calculate_sale_price (OBJ_DATA * obj, CHAR_DATA * keeper,
-			    CHAR_DATA * ch, int quantity, bool round_result,
-			    bool sell);
+							CHAR_DATA * ch, int quantity, bool round_result,
+							bool sell);
 void get_damage (CHAR_DATA * ch, CHAR_DATA * victim, int *dam, int attack_num,
-		 int *location);
+				 int *location);
 void affect_modify (CHAR_DATA * ch, int type, int loc, int mod, int bitv,
-		    int add, int sn);
+					int add, int sn);
 int get_damage_total (CHAR_DATA * ch);
 void affect_to_char (CHAR_DATA * ch, struct affected_type *af);
 void affect_remove (CHAR_DATA * ch, struct affected_type *af);
 void affect_join (CHAR_DATA * ch, struct affected_type *af, bool avg_dur,
-		  bool avg_mod);
+				  bool avg_mod);
 OBJ_DATA *create_money (int amount);
 int isname (const char *str, char *namelist);
 int isnamec (char *str, char *namelist);
@@ -923,7 +917,7 @@ OBJ_DATA *get_obj_in_list_vis (CHAR_DATA * ch, const char *name, OBJ_DATA * list
 OBJ_DATA *get_obj_vis (CHAR_DATA * ch, char *name);
 void extract_char (CHAR_DATA * ch);
 int generic_find (char *arg, int bitvector, CHAR_DATA * ch,
-		  CHAR_DATA ** tar_ch, OBJ_DATA ** tar_obj);
+				  CHAR_DATA ** tar_ch, OBJ_DATA ** tar_obj);
 char *swap_xmote_target (CHAR_DATA * ch, char *argument, int cmd);
 void clear_pmote (CHAR_DATA * ch);
 void clear_voice (CHAR_DATA * ch);
@@ -933,7 +927,7 @@ void clear_dmote (CHAR_DATA * ch);
 
 void boot_crafts (void);
 void insert_string_variables (OBJ_DATA * new_obj, OBJ_DATA * proto,
-			      char *string);
+							  char *string);
 void boot_db (void);
 void delayed_remove (CHAR_DATA * ch);
 void reg_read_crafts (FILE * fp_reg, char *buf);
@@ -971,10 +965,10 @@ int is_tagged (char *name_str);
 void update_char_objects (CHAR_DATA * ch);
 int is_number (std::string);
 int do_simple_move (CHAR_DATA * ch, int dir, int following, int falling,
-		    int speed);
+					int speed);
 void raw_kill (CHAR_DATA * ch);
 OBJ_DATA *get_object_in_equip_vis (CHAR_DATA * ch, char *arg,
-				   OBJ_DATA * equipment[], int *j);
+								   OBJ_DATA * equipment[], int *j);
 void gain_condition (CHAR_DATA * ch, int condition, int value);
 void npc_evasion (CHAR_DATA * ch, int dir);
 void refresh_map (void);
@@ -998,12 +992,11 @@ int m_prog (CHAR_DATA *ch, char *argument);
 int m_prog (CHAR_DATA *ch, char *argument, room_prog prog);
 int o_prog (CHAR_DATA *ch, char *argument, room_prog prog);
 void do_mpstat (CHAR_DATA *ch, char *argument, int cmd);
-void add_memory (CHAR_DATA * add, CHAR_DATA * mob);
 bool get_obj_in_equip_num (CHAR_DATA * ch, long vnum);
 void spitstat (CHAR_DATA * ch, struct descriptor_data *recipient);
 void save_char_objs (CHAR_DATA * ch, char *name);
 void criminalize (CHAR_DATA * ch, CHAR_DATA * vict, int zone,
-		  int penalty_time);
+				  int penalty_time);
 int skill_level (CHAR_DATA * ch, int skill, int diff_mod);
 int skill_use (CHAR_DATA * ch, int skill, int diff_mod);
 void add_mob_to_hash (CHAR_DATA * add_mob);
@@ -1034,7 +1027,6 @@ MYSQL_RES *mysql_player_search (int search_type, char *string, int timeframe);
 CHAR_DATA *load_char_mysql (const char *name);
 int save_char (CHAR_DATA * ch, int save_objs);
 void save_char_mysql (CHAR_DATA * ch);
-int mem_free (malloc_t ptr);
 AFFECTED_TYPE *is_room_affected (AFFECTED_TYPE * af, int type);
 void room_update (void);
 void apply_race_affects (CHAR_DATA * tch);
@@ -1060,7 +1052,7 @@ void add_threat (CHAR_DATA * victim, CHAR_DATA * threat, int amount);
 void show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode);
 void combine_money_inv (OBJ_DATA * source, CHAR_DATA * ch);
 void combine_money_obj (OBJ_DATA * source, OBJ_DATA * container,
-			CHAR_DATA * ch);
+						CHAR_DATA * ch);
 void show_waiting_prisoners (CHAR_DATA * ch);
 void notify_captors (CHAR_DATA * ch);
 void notify_guardians (CHAR_DATA * ch, CHAR_DATA * tch, int cmd);
@@ -1078,10 +1070,10 @@ OBJ_DATA *find_dwelling_obj (int dwelling_room);
 void add_room_affect (AFFECTED_TYPE ** af, int type, int duration);
 void cleanup_the_dead (int mode);
 int calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
-			      CHAR_DATA * target, int def_modifier,
-			      OBJ_DATA * weapon, OBJ_DATA * missile,
-			      AFFECTED_TYPE * spell, int *location,
-			      float *damage);
+							  CHAR_DATA * target, int def_modifier,
+							  OBJ_DATA * weapon, OBJ_DATA * missile,
+							  AFFECTED_TYPE * spell, int *location,
+							  float *damage);
 int projectile_shield_block (CHAR_DATA * ch, int result);
 int save_dwelling_rooms ();
 void load_dwelling_rooms ();
@@ -1096,19 +1088,14 @@ void ban_host (char *host, char *banned_by, int length);
 void list_validate (char *name);
 int unused_writing_id (void);
 void act_black_curse (CHAR_DATA * ch);
-void print_mem_stats (CHAR_DATA * ch);
-void init_memory ();
-char *get_mem (int size);
-char *add_hash (const char *string);
-char *str_dup (const char *string);
 void process_reviews (void);
-PHASE_DATA *new_phase (void);
+//PHASE_DATA *new_phase (void);
 CHAR_DATA *new_char (int pc_type);
 OBJ_DATA *new_object ();
 int attempt_disarm (CHAR_DATA * ch, CHAR_DATA * victim);
 void forget (CHAR_DATA * ch, CHAR_DATA * foe);
 void sort_int_array (int *array, int entries);
-malloc_t alloc (int bytes, int dtype);
+void* alloc (int bytes);
 int redefine_mobiles (CHAR_DATA * proto);
 AFFECTED_TYPE *get_obj_affect (OBJ_DATA * obj, int type);
 AFFECTED_TYPE *get_obj_affect_location (OBJ_DATA * obj, int location);
@@ -1125,18 +1112,18 @@ void traslate_it (int num);
 OBJ_DATA *get_obj_in_dark (CHAR_DATA * ch, char *name, OBJ_DATA * list);
 char getall (char *name, char *newname);
 int magic_add_affect (CHAR_DATA * ch, int type, int duration,
-		      int modifier, int location, int bitvector, int sn);
+					  int modifier, int location, int bitvector, int sn);
 void magic_affect (CHAR_DATA * ch, int magic);
 int magic_add_obj_affect (OBJ_DATA * obj, int type, int duration,
-			  int modifier, int location, int bitvector, int sn);
+						  int modifier, int location, int bitvector, int sn);
 void define_variable (CHAR_DATA * mob, MOBPROG_DATA * program,
-		      char *argument);
+					  char *argument);
 VAR_DATA *setvar (CHAR_DATA * mob, char *var_name, int value, int type);
 VAR_DATA *getvar (CHAR_DATA * mob, char *var_name);
 int mp_eval_eq (CHAR_DATA * mob, char **equation);
 FILE *open_and_rename (CHAR_DATA * ch, char *name, int zone);
 int weaken (CHAR_DATA * victim, uint16 hp_penalty, uint16 mp_penalty,
-	    char *log_msg);
+			char *log_msg);
 void save_writing (OBJ_DATA * obj);
 void load_writing (OBJ_DATA * obj);
 void load_all_writing (void);
@@ -1148,7 +1135,7 @@ int getCharNum(CHAR_DATA * ch, bool isMob);
 void save_skills_mysql(CHAR_DATA * ch, bool isMob);
 void load_skills_mysql(CHAR_DATA * ch, bool isMob);
 void lodge_missile (CHAR_DATA * target, OBJ_DATA * ammo,
-		    char *strike_location);
+					char *strike_location);
 void stock_new_deliveries ();
 void save_tracks ();
 void load_tracks ();
@@ -1184,8 +1171,8 @@ int add_registry (int reg_index, int value, const char *string);
 void write_board_list (void);
 BOARD_DATA *board_lookup (const char *name);
 void add_message (int new_message, const char *name, int nVirtual, const char *poster,
-		  char *date, char *subject, char *info, char *message,
-		  long flags);
+				  char *date, char *subject, char *info, char *message,
+				  long flags);
 void update_assist_queue (CHAR_DATA * ch, bool remove);
 int get_queue_position (CHAR_DATA * ch);
 void add_char (char *buf, char c);
@@ -1200,14 +1187,14 @@ void send_to_room_unf (char *message, int room_num);
 void mark_as_read (CHAR_DATA * ch, int number);
 int adjust_wound (CHAR_DATA * ch, WOUND_DATA * wound, int amount);
 struct message_data *load_mysql_message (char *msg_name, int board_type,
-					 int msg_number);
+	int msg_number);
 int erase_mysql_board_post (CHAR_DATA * ch, char *name, int board_type,
-			    char *argument);
+							char *argument);
 int get_mysql_board_listing (CHAR_DATA * ch, int board_type, char *name);
 void add_message_to_mysql_vboard (const char *name, const char *poster,
-				  struct message_data *message);
+struct message_data *message);
 void add_message_to_mysql_player_notes (const char *name, const char *poster,
-					struct message_data *message);
+struct message_data *message);
 
 char *lookup_race_variable (int id, int which_var);
 int lookup_race_id (const char *name);
@@ -1223,7 +1210,7 @@ int knows_spell (CHAR_DATA * ch, int id);
 int caster_type (CHAR_DATA * ch);
 void const_to_non_const_cstr (const char * string, char * edit_string);
 void act (char *str, int hide_invisible, CHAR_DATA * ch, OBJ_DATA * obj,
-	  void *vict_obj, int type);
+		  void *vict_obj, int type);
 CHAR_DATA *try_load_char (char *name);
 void dream (CHAR_DATA * ch);
 void awaken_break_delay (CHAR_DATA * ch);
@@ -1282,16 +1269,16 @@ int track (CHAR_DATA * ch, int to_room);
 int release_prisoner (CHAR_DATA * ch, CHAR_DATA * target);
 void name_to_ident (CHAR_DATA * ch, char *buf);
 void figure_damage (CHAR_DATA * src, CHAR_DATA * tar,
-		    OBJ_DATA * attack_weapon, int off_result,
-		    int *damage, int *location);
+					OBJ_DATA * attack_weapon, int off_result,
+					int *damage, int *location);
 void combat_results (CHAR_DATA * src, CHAR_DATA * tar,
-		     OBJ_DATA * attack_weapon, OBJ_DATA * defense_weapon,
-		     OBJ_DATA * broken_eq, int damage, char *location,
-		     int off_result, int def_result, int attack_num, char *fd,
-		     int off_success, int def_success);
+					 OBJ_DATA * attack_weapon, OBJ_DATA * defense_weapon,
+					 OBJ_DATA * broken_eq, int damage, char *location,
+					 int off_result, int def_result, int attack_num, char *fd,
+					 int off_success, int def_success);
 void fix_offense (CHAR_DATA * ch);
 void add_second_affect (int type, int seconds, CHAR_DATA * ch,
-			OBJ_DATA * obj, const char *info, int info2);
+						OBJ_DATA * obj, const char *info, int info2);
 void second_affect_update (void);
 void hour_affect_update (void);
 void remove_cover (CHAR_DATA *ch, int type);
@@ -1309,25 +1296,24 @@ OBJ_DATA *has_key (CHAR_DATA * ch, OBJ_DATA * obj, int key);
 
 inline int is_brother (CHAR_DATA * ch, CHAR_DATA * tch) 
 {
-  int flags;
-  char *c1;
-  char clan_name[MAX_STRING_LENGTH];
+	int flags;
+	char *c1;
+	char clan_name[MAX_STRING_LENGTH];
 
-  for (c1 = ch->clans; get_next_clan (&c1, clan_name, &flags);)
-    {
+	for (c1 = ch->clans; get_next_clan (&c1, clan_name, &flags);)
+	{
 
-      if (get_clan (tch, clan_name, &flags))
-	return 1;
-    }
+		if (get_clan (tch, clan_name, &flags))
+			return 1;
+	}
 
-  return 0;
+	return 0;
 }
 
 void refresh_zone (void);
 int is_leader (CHAR_DATA * src, CHAR_DATA * tar);
 void invite_accept (CHAR_DATA * ch, char *argument);
 void tashal_prisoner_release (CHAR_DATA * ch);
-malloc_t get_perm (int size);
 int flee_attempt (CHAR_DATA * ch);
 SECOND_AFFECT *get_second_affect (CHAR_DATA * ch, int type, OBJ_DATA * obj);
 void clear_player_from_second_affects (CHAR_DATA *ch);
@@ -1354,7 +1340,7 @@ inline int get_trust (CHAR_DATA * ch) {
 	return ch->pc->level;
 }
 
-
+void add_memory (CHAR_DATA * add, CHAR_DATA * mob);
 int real_trust (CHAR_DATA * ch);
 int is_obj_here (CHAR_DATA * ch, OBJ_DATA * obj, int check);
 void jailer_func (CHAR_DATA * ch);
@@ -1374,10 +1360,9 @@ void skill_selection (struct descriptor_data *d, char *argument);
 void skill_display (struct descriptor_data *d);
 char *read_a_line (FILE * fp);
 struct message_data *load_message (char *msg_name, int pc_message,
-				   int msg_number);
-void unload_message (struct message_data *message);
+	int msg_number);
 OBJ_DATA *get_item_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item,
-			PHASE_DATA * phase);
+						PHASE_DATA * phase);
 void reformat_desc (char *s, char **t);
 void reformat_string (char *s, char **t);
 void process_quarter_events (void);
@@ -1410,7 +1395,6 @@ void export_who_list(void);
 void clear_watch (CHAR_DATA * ch);
 void show_unread_messages (CHAR_DATA * ch);
 char *file_to_string (char *name);
-void check_memory ();
 OBJ_DATA *get_bow (CHAR_DATA * ch);
 int is_incantation (char *argument);
 void magic_incantation (CHAR_DATA * ch, char *argument);
@@ -1420,7 +1404,7 @@ int is_restricted_profession (CHAR_DATA * ch, char *skill_list);
 void release_nonplaying_pc (CHAR_DATA * ch);
 void release_pc (CHAR_DATA * ch);
 void hitches_follow (CHAR_DATA * ch, int dir, int leave_time,
-		     int arrive_time);
+					 int arrive_time);
 void dump_rider (CHAR_DATA * rider, int forced);
 CHAR_DATA *load_saved_mobiles (CHAR_DATA * ch, char *name);
 void save_mobile (CHAR_DATA * mob, FILE * fp, char *save_reason, int extract);
@@ -1429,7 +1413,7 @@ CHAR_DATA *load_a_saved_mobile (int nVirtual, FILE * fp, bool stable);
 int hitch_char (CHAR_DATA * ch, CHAR_DATA * hitch);
 void load_rooms (void);
 void job_add_affect (CHAR_DATA * ch, int type, int days, int pay_date,
-		     int cash, int count, int object_vnum, int employer);
+					 int cash, int count, int object_vnum, int employer);
 void remove_object_affect (OBJ_DATA * attack_weapon, AFFECTED_TYPE * af);
 AFFECTED_TYPE *get_obj_affect_type (OBJ_DATA * obj, int type);
 CHAR_DATA *is_guarded (CHAR_DATA * victim, CHAR_DATA * criminal);
@@ -1455,7 +1439,7 @@ int would_reveal (CHAR_DATA * ch);
 void shadowers_shadow (CHAR_DATA * ch, int to_room, int move_dir);
 int could_see (CHAR_DATA * ch, CHAR_DATA * target);
 void craft_command (CHAR_DATA * ch, char *command_args,
-		    AFFECTED_TYPE * craft_affect);
+					AFFECTED_TYPE * craft_affect);
 AFFECTED_TYPE *is_craft_command (CHAR_DATA * ch, char *argument);
 void activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af);
 char *obj_short_desc (OBJ_DATA * obj);
@@ -1467,7 +1451,7 @@ ALIAS_DATA *is_alias (CHAR_DATA * ch, char *argument);
 void alias_free (ALIAS_DATA * alias);
 void update_weapon_skills (OBJ_DATA * obj);
 void missing_item_msg (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item,
-		       char *header);
+					   char *header);
 
 void web_reply (struct descriptor_data *d, char *reply, char *message);
 void web_verify_logon (struct descriptor_data *d, char *argument);
@@ -1481,7 +1465,7 @@ char *generate_password (int argc, char **argv);
 void web_send_room (struct descriptor_data *d, int room_num);
 int can_move (CHAR_DATA * ch);
 void magic_add_delayed_affect (CHAR_DATA * victim, int sn, int delay,
-			       int duration, int power);
+							   int duration, int power);
 void rl_minute_delayed_affects (void);
 int enforcer (CHAR_DATA * ch, CHAR_DATA * crim, int will_act, int witness);
 void offline_healing (CHAR_DATA * ch, int since);
@@ -1490,7 +1474,7 @@ void add_criminal_time (CHAR_DATA * ch, int zone, int penalty_time);
 void remove_affect_type (CHAR_DATA * ch, int type);
 int could_see_obj (CHAR_DATA * ch, OBJ_DATA * obj);
 OBJ_DATA *get_obj_in_list_vis_not_money (CHAR_DATA * ch, char *name,
-					 OBJ_DATA * list);
+										 OBJ_DATA * list);
 void init_mysql (void);
 void refresh_db_connection (void);
 void reload_sitebans (void);
@@ -1514,8 +1498,8 @@ void write_obj_suppliment (struct char_data *ch, FILE * fp);
 void unstable (CHAR_DATA * ch, OBJ_DATA * ticket, CHAR_DATA * keeper);
 int apply_affect (CHAR_DATA * ch, int sn, int duration, int power);
 void craft_prepare_message (CHAR_DATA * ch, char *message, CHAR_DATA * n,
-			    CHAR_DATA * N, CHAR_DATA * T, char *phase_msg,
-			    OBJ_DATA * tool, OBJ_DATA ** obj_list);
+							CHAR_DATA * N, CHAR_DATA * T, char *phase_msg,
+							OBJ_DATA * tool, OBJ_DATA ** obj_list);
 void spell_defenses (CHAR_DATA * defender, CHAR_DATA * target);
 int odds_sqrt (int percent);
 void activate_resets (CHAR_DATA * ch);
@@ -1539,22 +1523,22 @@ void load_bhelp (void);
 HELP_DATA *is_help (CHAR_DATA * ch, HELP_DATA * list, char *topic);
 void write_help (char *filename, HELP_DATA * list);
 int doc_parse (CHAR_DATA * ch, char *argument, char **start, int *length,
-	       int *start_line, int *doc_type);
+			   int *start_line, int *doc_type);
 char *get_text_buffer (CHAR_DATA * ch, TEXT_DATA * list, char *text_name);
 TEXT_DATA *find_text (CHAR_DATA * ch, TEXT_DATA * list, char *buf);
 void load_documents (void);
 void write_text (CHAR_DATA * ch, TEXT_DATA * text);
 HELP_DATA *add_help_topics (CHAR_DATA * ch, HELP_DATA ** list,
-			    char *argument);
+							char *argument);
 void delete_help_topics (CHAR_DATA * ch, HELP_DATA ** list, char *argument);
 TEXT_DATA *add_document (CHAR_DATA * ch, TEXT_DATA ** list, char *argument);
 void delete_document (CHAR_DATA * ch, TEXT_DATA ** list, char *argument);
 int get_next_coldload_id (int for_a_pc);
 void load_dynamic_registry (void);
 int can_subtract_money (CHAR_DATA * ch, int farthings_to_subtract,
-			int currency_type);
+						int currency_type);
 void subtract_money (CHAR_DATA * ch, int farthings_to_subtract,
-		     int currency_type);
+					 int currency_type);
 void keeper_money_to_char (CHAR_DATA * keeper, CHAR_DATA * ch, int money);
 int redefine_objects (OBJ_DATA * proto);
 void money_from_char_to_room (CHAR_DATA * ch, int vnum);
@@ -1589,126 +1573,126 @@ int weather_object_exists(OBJ_DATA * list, int vnum);
 /* Magical effect functions for spellcasting */
 
 void creation_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			    void *target, int target_type);
+							void *target, int target_type);
 void creation_plant_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			   void *target, int target_type);
+						   void *target, int target_type);
 void creation_image_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			   void *target, int target_type);
+						   void *target, int target_type);
 void creation_light_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			   void *target, int target_type);
+						   void *target, int target_type);
 void creation_darkness_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			      void *target, int target_type);
+							  void *target, int target_type);
 void creation_power_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			   void *target, int target_type);
+						   void *target, int target_type);
 void creation_mind_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			  int target_type);
+						  int target_type);
 void creation_spirit_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			    void *target, int target_type);
+							void *target, int target_type);
 void creation_air_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			 int target_type);
+						 int target_type);
 void creation_earth_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			   void *target, int target_type);
+						   void *target, int target_type);
 void creation_fire_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			  int target_type);
+						  int target_type);
 void creation_water_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			   void *target, int target_type);
+						   void *target, int target_type);
 void destruction_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			       void *target, int target_type);
+							   void *target, int target_type);
 void destruction_plant_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			      void *target, int target_type);
+							  void *target, int target_type);
 void destruction_image_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			      void *target, int target_type);
+							  void *target, int target_type);
 void destruction_light_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			      void *target, int target_type);
+							  void *target, int target_type);
 void destruction_darkness_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				 void *target, int target_type);
+								 void *target, int target_type);
 void destruction_power_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			      void *target, int target_type);
+							  void *target, int target_type);
 void destruction_mind_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			     void *target, int target_type);
+							 void *target, int target_type);
 void destruction_spirit_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			       void *target, int target_type);
+							   void *target, int target_type);
 void destruction_air_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			    void *target, int target_type);
+							void *target, int target_type);
 void destruction_earth_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			      void *target, int target_type);
+							  void *target, int target_type);
 void destruction_fire_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			     void *target, int target_type);
+							 void *target, int target_type);
 void destruction_water_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			      void *target, int target_type);
+							  void *target, int target_type);
 void transformation_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				  void *target, int target_type);
+								  void *target, int target_type);
 void transformation_plant_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				 void *target, int target_type);
+								 void *target, int target_type);
 void transformation_image_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				 void *target, int target_type);
+								 void *target, int target_type);
 void transformation_light_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				 void *target, int target_type);
+								 void *target, int target_type);
 void transformation_darkness_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				    void *target, int target_type);
+									void *target, int target_type);
 void transformation_power_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				 void *target, int target_type);
+								 void *target, int target_type);
 void transformation_mind_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				void *target, int target_type);
+								void *target, int target_type);
 void transformation_spirit_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				  void *target, int target_type);
+								  void *target, int target_type);
 void transformation_air_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			       void *target, int target_type);
+							   void *target, int target_type);
 void transformation_earth_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				 void *target, int target_type);
+								 void *target, int target_type);
 void transformation_fire_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				void *target, int target_type);
+								void *target, int target_type);
 void transformation_water_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				 void *target, int target_type);
+								 void *target, int target_type);
 void perception_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			      void *target, int target_type);
+							  void *target, int target_type);
 void perception_plant_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			     void *target, int target_type);
+							 void *target, int target_type);
 void perception_image_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			     void *target, int target_type);
+							 void *target, int target_type);
 void perception_light_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			     void *target, int target_type);
+							 void *target, int target_type);
 void perception_darkness_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-				void *target, int target_type);
+								void *target, int target_type);
 void perception_power_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			     void *target, int target_type);
+							 void *target, int target_type);
 void perception_mind_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			    void *target, int target_type);
+							void *target, int target_type);
 void perception_spirit_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			      void *target, int target_type);
+							  void *target, int target_type);
 void perception_air_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			   void *target, int target_type);
+						   void *target, int target_type);
 void perception_earth_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			     void *target, int target_type);
+							 void *target, int target_type);
 void perception_fire_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			    void *target, int target_type);
+							void *target, int target_type);
 void perception_water_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			     void *target, int target_type);
+							 void *target, int target_type);
 void control_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			   void *target, int target_type);
+						   void *target, int target_type);
 void control_plant_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			  int target_type);
+						  int target_type);
 void control_image_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			  int target_type);
+						  int target_type);
 void control_light_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			  int target_type);
+						  int target_type);
 void control_darkness_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			     void *target, int target_type);
+							 void *target, int target_type);
 void control_power_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			  int target_type);
+						  int target_type);
 void control_mind_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			 int target_type);
+						 int target_type);
 void control_spirit_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
-			   void *target, int target_type);
+						   void *target, int target_type);
 void control_air_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			int target_type);
+						int target_type);
 void control_earth_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			  int target_type);
+						  int target_type);
 void control_fire_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			 int target_type);
+						 int target_type);
 void control_water_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell, void *target,
-			  int target_type);
-			  
+						  int target_type);
+
 // Let's give this a shot.
 bool IS_NPC (const CHAR_DATA *ch);
 bool IS_NPC (CHAR_DATA *ch);
@@ -1725,4 +1709,12 @@ bool inline isDwarf(char_data *ch) {
 bool inline isOrkin(char_data *ch) {
 	return (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29 || ch->race == 86 || ch->race == 121);
 }
+
+// Memory functions - Case
+void replaceString(char *&destination, const char *source);
+char* duplicateString(const char *source);
+
+int free_mem (char *&ptr);
+int free_mem (void *ptr);
+int free_mem_array (void *ptr);
 #endif // _rpie_protos_h_

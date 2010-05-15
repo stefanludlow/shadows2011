@@ -64,11 +64,11 @@
 
 #define OOC_TERMINAL_OBJECT		125
 
-#define MINAS_TIRITH_START_LOC		371
-#define MINAS_MORGUL_START_LOC		6120
+#define MINAS_TIRITH_START_LOC  371
+#define MINAS_MORGUL_START_LOC	6120
 #define OSGILIATH_START_LOC		371
-#define HARADRIM_START_LOC      	66677
-#define CAOLAFON_START_LOC         	45001
+#define HARADRIM_START_LOC      66677
+#define CAOLAFON_START_LOC      45001
 #define EDEN_START_LOC			6120
 #define MORDOR_START_LOC		23040 /* orcs */
 #define BALCHOTH_START_LOC		23000
@@ -83,11 +83,11 @@
 #define MAX_SPECIAL_ROLES		50
 
 #define CONSTITUTION_MULTIPLIER		3	/* Damage absorption limit for any */
-						/* humanoid N/PC is 50 + (con+power) x multiplier */
+/* humanoid N/PC is 50 + (con+power) x multiplier */
 
 #define COMBAT_BRUTALITY        1.85	/* A quick way to adjust the brutality of */
-					/* combat; a setting of 175% seems pretty nasty, */
-					/* brutish, and short. Be careful with this! */
+/* combat; a setting of 175% seems pretty nasty, */
+/* brutish, and short. Be careful with this! */
 
 /* color system */
 

@@ -74,7 +74,7 @@ Stringstack::Stringstack(std::istream &input, bool removeSpaces) {
 
 Stringstack& Stringstack::operator= (const std::string &newString) {
 	argument = newString;
-	
+
 	argumentMemory.clear();
 
 	if (removeSpaces) {
@@ -87,7 +87,7 @@ Stringstack& Stringstack::operator= (const std::string &newString) {
 
 Stringstack& Stringstack::operator= (const char *newString) {
 	argument = newString;
-	
+
 	argumentMemory.clear();
 
 	if (removeSpaces) {
@@ -128,7 +128,7 @@ std::string Stringstack::pop() {
 	if (removeSpaces) {
 		Stringstack::trim(argument);
 	}
-	
+
 	if (finished && isFinished()) { // Keeping the short circuit just in case [] operator is used to set argument to ""
 		return "";
 	}
@@ -254,7 +254,7 @@ std::string Stringstack::popUntil(std::string delimit, bool eraseDelimit) {
 	}
 	size_t tempPos = argument.find(delimit);
 	size_t delimitWidth = delimit.size();
-	
+
 	if (delimitWidth == 0) {
 		return "";
 	}

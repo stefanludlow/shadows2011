@@ -397,7 +397,7 @@ point_update (void)
 			else if (ch->race == 23) {
 				base = BASE_PC_DWARF_HEALING;
 			}
-			else if (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 86 ||ch->race == 29) {
+			else if (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29) {
 				base = BASE_PC_ORCTROLL_HEALING;
 			}
 			// End Power changes to healing
@@ -479,7 +479,7 @@ point_update (void)
 			if (playing_time.hour >= 10 && ch->desc->acct)
 			{
 				//restoring the deduction of rpp for races -- Huan
-			  ch->desc->acct->pay_application_cost (ch->pc->app_cost, ch->tname);
+				ch->desc->acct->pay_application_cost (ch->pc->app_cost);
 				ch->pc->app_cost = 0;
 				save_char (ch, true);
 			}
@@ -605,7 +605,7 @@ point_update (void)
 				else if (ch->race == 23) {
 					base = BASE_PC_DWARF_HEALING;
 				}
-				else if (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 28 || ch->race == 29) {
+				else if (ch->race == 24 || ch->race == 25 || ch->race == 28 || ch->race == 29) {
 					base = BASE_PC_ORCTROLL_HEALING;
 				}
 				// End Power changes to healing
@@ -691,7 +691,6 @@ point_update (void)
 			ch->plr_flags |= FLAG_PETRIFIED;
 			die (ch);
 		}
-
 	}				/* for */
 }
 
@@ -770,7 +769,7 @@ hourly_update (void)
 
 					if (neg->time_when_forgotten <= current_time)
 					{
-						mem_free (neg);
+						free_mem (neg);
 					}
 					else
 					{
@@ -819,6 +818,7 @@ hourly_update (void)
 			morph_obj (obj);
 			continue;
 		}
+
 
 		/* Mob jailbags need to disappear after a time */
 
@@ -953,7 +953,7 @@ remove_room_affect (ROOM_DATA * room, int type)
 	{
 		free_af = room->affects;
 		room->affects = free_af->next;
-		mem_free (free_af);
+		free_mem (free_af);
 		return 1;
 	}
 
@@ -962,7 +962,7 @@ remove_room_affect (ROOM_DATA * room, int type)
 		{
 			free_af = af->next;
 			af->next = free_af->next;
-			mem_free (free_af);
+			free_mem (free_af);
 			return 1;
 		}
 
@@ -1052,9 +1052,9 @@ skill_level (CHAR_DATA * ch, int skill, int diff_mod)
 	AFFECTED_TYPE *af;
 
 	if (skill >= 0) {
-		if (!(ch->skills[skill]))
+		if (!(ch->skills[skill])) {
 			return 0;
-
+		}
 		skill_lev = ch->skills[skill];
 	}
 	else if (skill == SKILL_OFFENSE) {
@@ -1063,6 +1063,8 @@ skill_level (CHAR_DATA * ch, int skill, int diff_mod)
 	else {
 		throw std::runtime_error("BAD SKILL VALUE PASSED TO skill_level()");
 	}
+
+	skill_lev = ch->skills[skill];
 
 	skill_lev -= diff_mod;
 
@@ -1074,33 +1076,33 @@ skill_level (CHAR_DATA * ch, int skill, int diff_mod)
 
 	if (get_affect(ch, AFF_SUNLIGHT_PEN) && sun_light
 		&& ch->room->sector_type != SECT_INSIDE && !IS_SET (ch->room->room_flags, INDOORS)) {
-		int penalty = 0;
+			int penalty = 0;
 
-		if (weather_info[ch->room->zone].clouds == CLEAR_SKY) {
-			penalty = 30;
-		}
-		else if (weather_info[ch->room->zone].clouds == LIGHT_CLOUDS) {
-			penalty = 15;
-		}
-		else if (weather_info[ch->room->zone].clouds == HEAVY_CLOUDS) {
-			penalty = 10;
-		}
-		else if (weather_info[ch->room->zone].clouds == OVERCAST) {
-			penalty = 5;
-		}
+			if (weather_info[ch->room->zone].clouds == CLEAR_SKY) {
+				penalty = 30;
+			}
+			else if (weather_info[ch->room->zone].clouds == LIGHT_CLOUDS) {
+				penalty = 15;
+			}
+			else if (weather_info[ch->room->zone].clouds == HEAVY_CLOUDS) {
+				penalty = 10;
+			}
+			else if (weather_info[ch->room->zone].clouds == OVERCAST) {
+				penalty = 5;
+			}
 
-		if (ch->room->sector_type == SECT_WOODS) {
-			penalty *= 0.75;
-		}
-		else if (ch->room->sector_type == SECT_FOREST) {
-			penalty *= 0.5;
-		}
-		else if (ch->room->sector_type == SECT_HILLS ||
-				 ch->room->sector_type == SECT_FIELD ||
-				 ch->room->sector_type == SECT_MOUNTAIN) {
-			penalty += 5;
-		}
-		skill_lev -= penalty;
+			if (ch->room->sector_type == SECT_WOODS) {
+				penalty *= 0.75;
+			}
+			else if (ch->room->sector_type == SECT_FOREST) {
+				penalty *= 0.5;
+			}
+			else if (ch->room->sector_type == SECT_HILLS ||
+				ch->room->sector_type == SECT_FIELD ||
+				ch->room->sector_type == SECT_MOUNTAIN) {
+					penalty += 5;
+			}
+			skill_lev -= penalty;
 	}
 
 	for (obj = ch->equip; obj; obj = obj->next_content)
@@ -1201,6 +1203,5 @@ skill_use (CHAR_DATA * ch, int skill, int diff_mod)
 			return 2;
 		}
 	}
-
 	return 0;
 }

@@ -61,7 +61,7 @@ template <typename _bit_flags>
 inline _bit_flags
 set_flags (_bit_flags& __stored_flags, _bit_flags __new_flags)
 {
-  return (__stored_flags |= __new_flags);
+	return (__stored_flags |= __new_flags);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -92,7 +92,7 @@ template <typename _bit_flags>
 inline _bit_flags
 clear_flags (_bit_flags& __stored_flags, _bit_flags __old_flags)
 {
-  return (__stored_flags &= ~__old_flags);
+	return (__stored_flags &= ~__old_flags);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -122,7 +122,7 @@ template <typename _bit_flags>
 inline _bit_flags
 toggle_flags (_bit_flags& __stored_flags, _bit_flags __toggled_flags)
 {
-  return (__stored_flags ^= __toggled_flags);
+	return (__stored_flags ^= __toggled_flags);
 }
 
 #ifdef __APPLE__
@@ -134,14 +134,14 @@ template <typename _value>
 inline _value
 MIN (const _value __x, const _value __y)
 {
-  return (__x < __y ? __x : __y);
+	return (__x < __y ? __x : __y);
 }
 
 template <typename _value>
 inline _value
 MAX (const _value __x, const _value __y)
 {
-  return (__x > __y ? __x : __y);
+	return (__x > __y ? __x : __y);
 }
 
 
@@ -150,15 +150,15 @@ char* one_argument (char* argument, char* arg_first);
 std::string one_argument (std::string& argument, std::string& arg_first);
 
 struct ci_equal_to : std::binary_function <std::string, std::string, bool>
-  {
-  struct compare_equal 
-	  : public std::binary_function <unsigned char, unsigned char,bool>
-    {
-    bool operator() (const unsigned char& c1, const unsigned char& c2) const;
-    };  // end of compare_equal
+{
+	struct compare_equal 
+		: public std::binary_function <unsigned char, unsigned char,bool>
+	{
+		bool operator() (const unsigned char& c1, const unsigned char& c2) const;
+	};  // end of compare_equal
 
-  bool operator() (const std::string & s1, const std::string & s2) const;
-  }; // end of ci_equal_to
+	bool operator() (const std::string & s1, const std::string & s2) const;
+}; // end of ci_equal_to
 bool ciStringEqual (const std::string & s1, const std::string & s2);
 
 

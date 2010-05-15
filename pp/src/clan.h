@@ -52,13 +52,13 @@ typedef struct clan_data CLAN_DATA;
 
 struct clan_data
 {
-  char *name;
-  int zone;
-  char *literal;
-  int member_vnum;
-  int leader_vnum;
-  int omni_vnum;
-  CLAN_DATA *next;
+	char *name;
+	int zone;
+	char *literal;
+	int member_vnum;
+	int leader_vnum;
+	int omni_vnum;
+	CLAN_DATA *next;
 };
 
 /* player interface */
@@ -66,9 +66,9 @@ void do_clan (CHAR_DATA * ch, char *argument, int cmd);
 void do_checkPay (CHAR_DATA * ch, char *argument, int cmd);
 void do_setPay (CHAR_DATA * ch, char *argument, int cmd);
 void clan_forum_remove_all (CHAR_DATA * ch);
-
 void clan_forum_add (CHAR_DATA * ch, char *clan, char *rank);
 void clan_forum_remove (CHAR_DATA * ch, char *clan);
+
 char *get_shared_clan (CHAR_DATA * ch, CHAR_DATA * other);
 void add_clan_id (CHAR_DATA * ch, char *clan_name, const char *clan_flags);
 void add_clan_id_string (char *string, char *clan_name, char *clan_flags);
@@ -88,11 +88,11 @@ bool outranks(char *, char *, char *);
 
 inline int is_area_enforcer (CHAR_DATA * ch)
 {
-  // this func gets called lots but the result rarely changes
-  if (!ch->enforcement[0])
-    update_enforcement_array (ch);
+	// this func gets called lots but the result rarely changes
+	if (!ch->enforcement[0])
+		update_enforcement_array (ch);
 
-  return ch->enforcement[ch->room->zone];
+	return ch->enforcement[ch->room->zone];
 }
 
 int is_area_leader (CHAR_DATA * ch);

@@ -10,10 +10,10 @@
 class pc_data {
 public:
 	int char_num;	//Our new UID
-	
+
 	ALIAS_DATA *aliases;
 	ALIAS_DATA *execute_alias;
-	
+
 	bitflag nanny_state;
 	bitflag role;
 
@@ -72,13 +72,13 @@ public:
 
 	shortint skills[MAX_SKILLS];
 	struct descriptor_data *owner;
-	
+
 	time_t last_logon;
 	time_t last_logoff;
 	time_t last_disconnect;
 	time_t last_connect;
 	time_t last_died;
-	
+
 	SUBCRAFT_HEAD_DATA *edit_craft;
 
 	pc_data();
@@ -97,7 +97,7 @@ public:
 	// Corpses
 	int skinned_vnum;		/* What mob skins into */
 	int carcass_vnum;		/* What mob leaves for a carcass */
-	
+
 	// Attributes
 	int damnodice;
 	int damsizedice;
@@ -119,7 +119,7 @@ public:
 	int reset_cmd;		/* mobs only */
 	int currency_type;
 	int jail;			/* What jail the enforcer brings criminals to */
-		
+
 	RESET_DATA *resets;
 
 	// Mob Triggers
@@ -136,7 +136,7 @@ private:
 
 public:
 	AFFECTED_TYPE *hour_affects;
-	
+
 	ATTACKER_DATA *attackers;
 
 	bitflag act;
@@ -183,7 +183,7 @@ public:
 	CHAR_DATA *ranged_enemy;
 
 	ENCHANTMENT_DATA *enchantments;
-	
+
 	// Attributes
 	int str;
 	int intel;
@@ -225,7 +225,7 @@ public:
 	int carry_weight;
 	int carry_items;
 	int lastregen;
-	
+
 	// Combat variables
 	int fight_percentage;
 	int primary_delay;		/* ticks to next hit */
@@ -303,7 +303,7 @@ public:
 	int from_dir;
 	// int nightmare;		/* Nightmare sequence # */ // May get away with commenting this out - Case
 	// int poison_type;		/* Bite causes poison */  // Should be removed when it's possible - Case
-	
+
 	LODGED_OBJECT_INFO *lodged;
 
 	long affected_by;
@@ -311,7 +311,7 @@ public:
 	MOB_DATA *mob;
 
 	MOBPROG_DATA *prog;
-	
+
 	MOVE_DATA *moves;
 
 	OBJ_DATA *equip;
@@ -350,9 +350,9 @@ public:
 
 	void deep_copy (CHAR_DATA *copy_from);
 	void partial_deep_copy (CHAR_DATA *copy_from);
-	
+
 	std::pair<int, std::string> reportWhere(bool checkClan, int RPP, std::string whichClan);
-	
+
 	// Character Flags For reportWhere()
 	bool getNaughtyFlag();
 	bool getRPFlag();
@@ -373,8 +373,8 @@ public:
 	// Lexing methods
 	unsigned int getWrapLength();
 	void setWrapLength(unsigned int length);
-	
+
 	int get_char_num();
-	
+
 };
 #endif

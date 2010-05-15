@@ -105,7 +105,7 @@ reformat_say_string (char *source, char **target, CHAR_DATA * to)
 		result[strlen (result) - 1] != '?')
 		result[strlen (result)] = '.';
 
-	*target = str_dup (result);
+	*target = duplicateString (result);
 }
 
 #include <memory>
@@ -143,14 +143,14 @@ do_ooc (CHAR_DATA * ch, char *argument, int cmd)
 		std::string formatted = argument;
 		formatted[0] = toupper (formatted[0]);
 		char *p = 0;
-		char *s = str_dup (formatted.c_str ());
+		char *s = duplicateString (formatted.c_str ());
 		reformat_say_string (s, &p, 0);
 		sprintf (buf, "$n says, out of character,\n   \"%s\"", p + i);
 		act (buf, false, ch, 0, 0, TO_ROOM);
 		sprintf (buf, "You say, out of character,\n   \"%s\"\n", p + i);
 		send_to_char (buf, ch);
-		mem_free (s);
-		mem_free (p);
+		free_mem (s);
+		free_mem (p);
 	}
 }
 
@@ -178,8 +178,8 @@ do_pmote (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	else if (IS_NPC(ch) && argument)
-	{	
-		ch->pmote_str = add_hash (argument);
+	{
+		ch->pmote_str = duplicateString (argument);
 	}
 
 	else
@@ -194,7 +194,7 @@ do_pmote (CHAR_DATA * ch, char *argument, int cmd)
 
 		sprintf (buf, "You pmote: %s", result);
 
-		ch->pmote_str = add_hash (result);
+		ch->pmote_str = duplicateString (result);
 
 		act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	}
@@ -229,7 +229,7 @@ do_dmote (CHAR_DATA * ch, char *argument, int cmd)
 
 		sprintf (buf, "You dmote: %s", argument);
 
-		ch->dmote_str = add_hash (argument);
+		ch->dmote_str = duplicateString (argument);
 
 		act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	}
@@ -240,7 +240,7 @@ clear_dmote (CHAR_DATA * ch)
 {
 	if (ch->dmote_str)
 	{
-		mem_free (ch->dmote_str); // char*
+		free_mem (ch->dmote_str); // char*
 		ch->dmote_str = NULL;
 	}
 }
@@ -311,7 +311,7 @@ do_omote (CHAR_DATA * ch, char *argument, int cmd)
 	/* free old string */
 	clear_omote(obj);
 	/* add new one */
-	obj->omote_str = add_hash (buf);
+	obj->omote_str = duplicateString (buf);
 	sprintf (buf, "You omote: %s %s", obj->short_description, obj->omote_str);
 
 	if (obj->short_description[0] == '#')
@@ -348,7 +348,7 @@ void do_think (CHAR_DATA * ch, char *argument, int cmd) {
 	sprintf (buf1, "%s thinks, \"%s\"", GET_NAME (ch), argument);
 	reformat_say_string (argument, &p, 0);
 	sprintf (buf2, "#6You hear #5%s#6 think,\n   \"%s\"#0\n", char_short (ch), p);
-	mem_free (p); // char*
+	free_mem (p); // char*
 
 	act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 
@@ -377,7 +377,7 @@ void do_think (CHAR_DATA * ch, char *argument, int cmd) {
 		else if (GET_TRUST(tch) && !(tch->hasMortalBody())) { /* L5 PCs can use telepath but are not excluded from skill_telepathy */
 			continue;
 		}
-		else if (skill_use (tch, SKILL_TELEPATHY, ch->skills[SKILL_TELEPATHY] / 3) 
+		else if (skill_use (tch, SKILL_TELEPATHY, ch->skills[SKILL_TELEPATHY] / 3)
 			|| (IS_NPC (ch) && tch->skills[SKILL_TELEPATHY])) {
 				send_to_char (buf2, tch);
 		}
@@ -516,7 +516,7 @@ personalize_emote (CHAR_DATA * src, char *emote)
 			continue;
 		if (get_affect (tch, MAGIC_SENT))
 			continue;
-	// Hibou's potential emote fix.
+		// Hibou's potential emote fix.
 		if (IS_NPC(src)) {
 			act (copy, false, tch, 0, 0, TO_ROOM | TO_CHAR | _ACT_FORMAT);
 			continue; }
@@ -574,7 +574,7 @@ do_emote (CHAR_DATA * ch, char *argument, int cmd)
 		if (!result)
 			return;
 
-		sprintf (buf, "%s", result);  
+		sprintf (buf, "%s", result);
 
 
 		personalize_emote (ch, buf); //adjusts for "you" if needed
@@ -862,7 +862,7 @@ do_mute (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (!get_affect (ch, MUTE_EAVESDROP))
 		{
-			af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+			af = (AFFECTED_TYPE *) alloc(sizeof(AFFECTED_TYPE));
 
 			af->type = MUTE_EAVESDROP;
 			af->a.listening.duration = -1;
@@ -932,7 +932,7 @@ do_voice (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			sprintf (buf, "Your voice string has been set to: (#2%s#0)",
 				argument);
-			ch->voice_str = add_hash (argument);
+			ch->voice_str = duplicateString (argument);
 		}
 
 		act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
@@ -1025,8 +1025,8 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 
 	/* We modify *argument, make sure we don't */
 	/*  have a problem with const arguments   */
-	//  strcpy (argbuf, argument);	
-	//  argument = argbuf;		
+	//  strcpy (argbuf, argument);
+	//  argument = argbuf;
 
 	while (isspace (*argument))
 		argument++;
@@ -1059,14 +1059,13 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		sprintf (buf, "%s", argument);
 		i = 1;
-		
+
 		while (isspace (buf[i])) {
 			i++;
 		}
 
 		if (buf[i] == ')') {
 			send_to_char ("What did you wish to say?\n", ch);
-			mem_free (argument);
 			return;
 		}
 
@@ -1074,7 +1073,6 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 			if (buf[i] == '\0')
 			{
 				send_to_char ("What did you wish to say?\n", ch);
-				mem_free (argument);
 				return;
 			}
 			if (buf[i] == '*')
@@ -1092,7 +1090,6 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 				{
 					sprintf (buf, "I don't see %s here.\n", key);
 					send_to_char (buf, ch);
-					mem_free (argument);
 					return;
 				}
 
@@ -1119,7 +1116,6 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 				{
 					sprintf (buf, "I don't see %s here.\n", key);
 					send_to_char (buf, ch);
-					mem_free (argument);
 					return;
 				}
 
@@ -1136,19 +1132,16 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 			argument++;
 			if (*argument == '\0') {
 				send_to_char ("What did you wish to say?\n", ch);
-				mem_free (argument);
 				return;
 			}
 		}
 
 		if (*(++argument) == '\0') {
 			send_to_char ("What did you wish to say?\n", ch);
-			mem_free (argument);
 			return;
 		}
 		else if (*(++argument) == '\0') {
 			send_to_char ("What did you wish to say?\n", ch);
-			mem_free (argument);
 			return;
 		}
 
@@ -1163,7 +1156,6 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 		if (!*argument)
 		{
 			send_to_char ("What did you wish to say?\n", ch);
-			mem_free (argument);
 			return;
 		}
 	}
@@ -1176,7 +1168,6 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	if (!*argument)
 	{
 		send_to_char ("What did you wish to say?\n", ch);
-		mem_free (argument);
 		return;
 	}
 
@@ -1190,21 +1181,18 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 		if (!*argument)
 		{
 			send_to_char ("What did you wish to tell?\n", ch);
-			mem_free (argument);
 			return;
 		}
 
 		if (!(target = get_char_room_vis (ch, buf)))
 		{
 			send_to_char ("Tell who?\n", ch);
-			mem_free (argument);
 			return;
 		}
 
 		if (target == ch)
 		{
 			send_to_char ("You want to tell yourself?\n", ch);
-			mem_free (argument);
 			return;
 		}
 
@@ -1223,7 +1211,6 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 		else
 			send_to_char ("What would you like to say?\n", ch);
 
-		mem_free (argument);
 		return;
 	}
 
@@ -1241,17 +1228,15 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char
 			("You can't even make a guess at the language you want to speak.\n",
 			ch);
-		mem_free (argument);
 		return;
 	}
-
 
 	//to allow tabs and newlines for poetry or songs
 	newString = argument;
 	newString.argReplace("\\t", "\t");
 	newString.argReplace("\\n", "\n");
-	sprintf(argument, newString.getCArg());	
-	
+	sprintf(argument, newString.getArg().c_str());
+
 	sprintf (buf4, argument);	/* The intended message, sent to the player. */
 	sprintf (buf5, argument);
 	sprintf (buf2, argument);
@@ -1260,12 +1245,12 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (buf4[strlen (buf4) - 1] == '?')
 		{
-			utters[cmd] = str_dup ("ask");
+			utters[cmd] = duplicateString ("ask");
 			allocd = true;
 		}
 		else if (buf4[strlen (buf4) - 1] == '!')
 		{
-			utters[cmd] = str_dup ("exclaim");
+			utters[cmd] = duplicateString ("exclaim");
 			allocd = true;
 		}
 	}
@@ -1273,12 +1258,12 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (buf4[strlen (buf4) - 1] == '?')
 		{
-			utters[cmd] = str_dup ("ask");
+			utters[cmd] = duplicateString ("ask");
 			allocd = true;
 		}
 		else if (buf4[strlen (buf4) - 1] == '!')
 		{
-			utters[cmd] = str_dup ("emphatically tell");
+			utters[cmd] = duplicateString ("emphatically tell");
 			allocd = true;
 		}
 	}
@@ -1682,10 +1667,8 @@ void do_say (CHAR_DATA * ch, char *argument, int cmd)
 	if (cmd == 0)
 	{
 		if (allocd)
-			mem_free (utters[cmd]); // char[]
+			free_mem (utters[cmd]); // char[]
 	}
-
-	mem_free (argument); // char * ??? <- why freeing this here???
 }
 
 void
@@ -1717,7 +1700,7 @@ do_ichat (CHAR_DATA * ch, char *argument, int cmd)
 	else
 	{
 		/// Use the admin's wiznet flag (ignore the NPC's)
-		bool ch_wiznet_set = 
+		bool ch_wiznet_set =
 			(IS_NPC(ch) && ch->desc->original)
 			? GET_FLAG (ch->desc->original, FLAG_WIZNET)
 			: GET_FLAG (ch, FLAG_WIZNET);
@@ -1733,12 +1716,12 @@ do_ichat (CHAR_DATA * ch, char *argument, int cmd)
 		if (IS_NPC (ch) && ch->desc->original)
 		{
 			sprintf (buf1, "#1[Wiznet: %s (%s)]#0 %s\n",
-				GET_NAME (ch->desc->original), 
+				GET_NAME (ch->desc->original),
 				GET_NAME (ch), CAP (argument));
 		}
 		else
 		{
-			sprintf (buf1, "#1[Wiznet: %s]#0 %s\n", 
+			sprintf (buf1, "#1[Wiznet: %s]#0 %s\n",
 				GET_NAME (ch), CAP (argument));
 		}
 
@@ -1754,7 +1737,7 @@ do_ichat (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				*s_buf = '\0';
 
-				bool tch_wiznet_set = 
+				bool tch_wiznet_set =
 					(i->original)
 					? GET_FLAG (i->original, FLAG_WIZNET)
 					: GET_FLAG (i->character, FLAG_WIZNET);
@@ -1771,7 +1754,7 @@ do_ichat (CHAR_DATA * ch, char *argument, int cmd)
 						CHAR_DATA *tch = (i->original)
 							? (i->original)
 							: (i->character);
-						sprintf 
+						sprintf
 							(s_buf, "#2[%s is not listening to the wiznet.]#0\n",
 							GET_NAME (tch));
 					}
@@ -1787,7 +1770,7 @@ do_ichat (CHAR_DATA * ch, char *argument, int cmd)
 				}
 			}
 		}
-		mem_free (p); // char*
+		free_mem (p); // char*
 	}
 }
 
@@ -1848,7 +1831,7 @@ do_fivenet (CHAR_DATA * ch, char *argument, int cmd)
 					}
 				}
 			}
-			mem_free (p); // char*
+			free_mem (p); // char*
 	}
 
 }
@@ -1916,12 +1899,12 @@ do_immtell (CHAR_DATA * ch, char *argument, int cmd)
 			CAP (message));
 		reformat_string (buf, &p);
 		send_to_char (p, vict);
-		mem_free (p); // char*
+		free_mem (p); // char*
 
 		sprintf (buf, "#5[To %s]#0 %s\n", GET_NAME (vict), CAP (message));
 		reformat_string (buf, &p);
 		send_to_char (p, ch);
-		mem_free (p); // char*
+		free_mem (p); // char*
 	}
 }
 
@@ -2379,7 +2362,7 @@ do_whisper (CHAR_DATA * ch, char *argument, int cmd)
 		sprintf (p, buf3);
 	}
 
-	mem_free (p); // char*
+	free_mem (p); // char*
 
 	trigger (ch, argument, TRIG_WHISPER);
 }
@@ -2477,7 +2460,8 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 
 	/* there is no 'all' anymore. Check for match on all sphere names */
 	/* All is back, but implemented as the only entry in this list. Leave it thus
-	   so it's easy to add more later if desired again - 4/23/10 Grommit */
+	so it's easy to add more later if desired again - 4/23/10 Grommit */
+
 	int sphereIndex = -1;
 	for (int i=0; i<SPHERE_COUNT; i++)
 	{
@@ -2489,14 +2473,15 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 		}
 	}
 
-	/*if (!strcasecmp(buf,"emergency")) - removing emergency 4/23/10 Grommit
+	/*if (!strcasecmp(buf,"emergency"))
 	{
-		sphereName="#1Emergency#0";
-		emergencyPetition = true;	
-	}*
+	sphereName="#1Emergency#0";
+	emergencyPetition = true;
+	}
+	*/
 
 	/* check to see if the word matched a sphere. if so, go with it, otherwise check for admin name */
-	if (sphereIndex>=0 || emergencyPetition) /* Leave this in in case we re-activate emergency -4/23/10 Grommit */
+	if (sphereIndex>=0 || emergencyPetition)  /* Leave this in in case we re-activate emergency -4/23/10 Grommit */
 	{
 		std::stringstream petitionStream;
 		petitionStream << "#6[" << (ch->getNaughtyFlag() ? "#1!" : "#6_")
@@ -2568,7 +2553,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			current_time = time (0);
 			ctime_r (&current_time, date);
 			if (strlen (date) > 1)
-				date[strlen (date) - 1] = '\0';
+			date[strlen (date) - 1] = '\0';
 
 			int row_count = 0;
 			CHAR_DATA* sqlch = 0;
@@ -2578,56 +2563,56 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			std::string player_db = engine.get_config ("player_db");
 
 			mysql_safe_query ("SELECT name FROM %s.pfiles WHERE level>0",
-				player_db.c_str ());
+			player_db.c_str ());
 
 			if ((result = mysql_store_result (database)) != NULL)
 			{
-				row_count = mysql_num_rows(result);
-				for (int i=0; i<row_count; i++)
-				{
-					row = mysql_fetch_row (result);
-					sqlch = load_pc(row[0]);
-					/* do not send to this admin if they are not assigned to this sphere
-//					fprintf(stderr,"Checking %s for flag %d in their %d\n",sqlch->tname,(1<<sphereIndex),sqlch->petition_flags);
-					if (sqlch && IS_SET(sqlch->petition_flags,(1<<sphereIndex)))
-					{
-//						fprintf(stderr,"Sending HM to %s\n",sqlch->tname);
-						/* send the HM 
-						mysql_safe_query
-							("INSERT INTO hobbitmail (account, flags, from_line, from_account, sent_date, subject, message, timestamp, to_line)"
-							" VALUES ('%s', %d, '%s', '%s', '%s', '%s', '%s', UNIX_TIMESTAMP(), '%s' )",
-							sqlch->tname, 0 /* no flags , ch->tname,
-							ch->pc->account_name, date, "Logged petition", buf,
-							sqlch->tname);
-						unload_pc(sqlch);
-					}
-				} /* iterate rows of admins 
+			row_count = mysql_num_rows(result);
+			for (int i=0; i<row_count; i++)
+			{
+			row = mysql_fetch_row (result);
+			sqlch = load_pc(row[0]);
+			/* do not send to this admin if they are not assigned to this sphere
+			//					fprintf(stderr,"Checking %s for flag %d in their %d\n",sqlch->tname,(1<<sphereIndex),sqlch->petition_flags);
+			if (sqlch && IS_SET(sqlch->petition_flags,(1<<sphereIndex)))
+			{
+			//						fprintf(stderr,"Sending HM to %s\n",sqlch->tname);
+			/* send the HM
+			mysql_safe_query
+			("INSERT INTO hobbitmail (account, flags, from_line, from_account, sent_date, subject, message, timestamp, to_line)"
+			" VALUES ('%s', %d, '%s', '%s', '%s', '%s', '%s', UNIX_TIMESTAMP(), '%s' )",
+			sqlch->tname, 0 /* no flags , ch->tname,
+			ch->pc->account_name, date, "Logged petition", buf,
+			sqlch->tname);
+			unload_pc(sqlch);
+			}
+			} /* iterate rows of admins
 
-				mysql_free_result(result); /* clear the result 
-			} /* successful query for admins 
+			mysql_free_result(result); /* clear the result
+			} /* successful query for admins
 			else
 			{
-				/*no admins found 
-				throw std::runtime_error("No admins found in act.comm.cpp, do_petition!");
+			/*no admins found
+			throw std::runtime_error("No admins found in act.comm.cpp, do_petition!");
 			}*/
-	
-		
+
+
 		} /* end of 'it wasn't sent' block */
 
-	/* clean up and sent echo back to user */
-	mem_free (p); // char*
+		/* clean up and sent echo back to user */
+		free_mem (p); // char*
 
 		sprintf (buf, "You petitioned: %s\n", CAP (argument));
 		reformat_string (buf, &p);
 		send_to_char (p, ch);
-		mem_free (p); // char*
+		free_mem (p); // char*
 
 		if (!sent)
 		{
 			if (emergencyPetition)
 			{
 				send_to_char("#1No one was present to receive your emergency petition.\n"
-				"Please petition your sphere to have your request logged for review.\n#0",ch);
+					"Please petition your sphere to have your request logged for review.\n#0",ch);
 			}
 			else
 			{
@@ -2635,9 +2620,9 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			}
 
 		}
-	
+
 		return;
-		
+
 	}
 	/* not a sphere...first check if it's an admin, otherwise splat them the sphere list */
 
@@ -2688,19 +2673,19 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 	std::stringstream petitionStream;
 
 	petitionStream << "#6[" << (ch->getNaughtyFlag() ? "#1!" : "#6_")
-	<< (ch->getRPFlag() ? "#2R" : "#6_") << (ch->getPlotFlag() ? "#3P" : "#6_")
-	<< "#6]";
+		<< (ch->getRPFlag() ? "#2R" : "#6_") << (ch->getPlotFlag() ? "#3P" : "#6_")
+		<< "#6]";
 
 	sprintf (buf, "%s#5[Private Petition: %s]#0 %s\n", petitionStream.str().c_str(),
-	IS_NPC (ch) ? ch->short_descr : GET_NAME (ch), CAP (argument));
+		IS_NPC (ch) ? ch->short_descr : GET_NAME (ch), CAP (argument));
 
 	reformat_string (buf, &p);
 	send_to_char (p, admin);
-	mem_free (p); // char*
+	free_mem (p); // char*
 	sprintf (buf, "You petitioned %s: %s\n", GET_NAME (admin), CAP (argument));
 	reformat_string (buf, &p);
 	send_to_char (p, ch);
-	mem_free (p); // char*
+	free_mem (p); // char*
 
 	/* successfully sent to that named staff member */
 	unload_pc (admin);
@@ -2761,9 +2746,9 @@ do_shout (CHAR_DATA *ch, char * arg, int cmd)
 
 	argument[0] = toupper(argument[0]);
 	char *buf;
-	char *orig = str_dup((char *) argument.c_str());
+	char *orig = duplicateString((char *) argument.c_str());
 	reformat_say_string (orig, &buf, 0);
-	mem_free(orig);
+	free_mem(orig);
 	argument = buf;
 
 	std::string toplayer = argument;
@@ -2794,7 +2779,7 @@ do_shout (CHAR_DATA *ch, char * arg, int cmd)
 		output = MAKE_STRING("#5") + MAKE_STRING(char_short(ch)) + MAKE_STRING("#0 ");
 		output[2] = toupper(output[2]);
 		if (GET_TRUST(tch) && GET_FLAG(tch, FLAG_SEE_NAME))
-		{	
+		{
 			output += MAKE_STRING("(") + MAKE_STRING(GET_NAME(ch)) + ") ";
 		}
 		output += "shouts,";
@@ -2823,7 +2808,7 @@ do_shout (CHAR_DATA *ch, char * arg, int cmd)
 		{
 			output += MAKE_STRING("\n    \"") + toplayer + "\"\n";
 		}
-		send_to_char(output.c_str(), tch);	
+		send_to_char(output.c_str(), tch);
 	}
 
 	if (ch->in_room == 5144 || ch->in_room == 5201 || ch->in_room == 5200)
@@ -2856,7 +2841,7 @@ do_shout (CHAR_DATA *ch, char * arg, int cmd)
 				}
 				output = MAKE_STRING("You hear a ") + sex_string + MAKE_STRING("voice ");
 				if (GET_TRUST(tch) && GET_FLAG(tch, FLAG_SEE_NAME))
-				{	
+				{
 					output += MAKE_STRING("(") + MAKE_STRING(GET_NAME(ch)) + ") ";
 				}
 				if (!IS_SET(ch->room->room_flags, OOC))
@@ -2917,7 +2902,7 @@ do_shout (CHAR_DATA *ch, char * arg, int cmd)
 					}
 					output = MAKE_STRING("You hear a ") + sex_string + MAKE_STRING("voice ");
 					if (GET_TRUST(tch) && GET_FLAG(tch, FLAG_SEE_NAME))
-					{	
+					{
 						output += MAKE_STRING("(") + MAKE_STRING(GET_NAME(ch)) + ") ";
 					}
 					if (!IS_SET(ch->room->room_flags, OOC))
@@ -3499,7 +3484,7 @@ clear_voice (CHAR_DATA * ch)
 {
 	if (ch->voice_str)
 	{
-		mem_free (ch->voice_str); // char*
+		free_mem (ch->voice_str); // char*
 		ch->voice_str = NULL;
 	}
 }
@@ -3519,7 +3504,7 @@ clear_travel (CHAR_DATA * ch)
 {
 	if (ch->travel_str)
 	{
-		mem_free (ch->travel_str); // char*
+		free_mem (ch->travel_str); // char*
 		ch->travel_str = NULL;
 		send_to_char ("Your travel string has been cleared.\n", ch);
 	}
@@ -3580,7 +3565,7 @@ do_travel (CHAR_DATA * ch, char *argument, int cmd)
 
 			sprintf (buf, "Your travel string has been set to: (%s)",
 				result);
-			ch->travel_str = add_hash (result);
+			ch->travel_str = duplicateString (result);
 		}
 		act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 	}
@@ -3702,7 +3687,7 @@ bool evaluate_emote_string (CHAR_DATA * ch, std::string * first_person, std::str
 		}
 		first_person->assign(error_string);
 	}
-	else 
+	else
 		first_person->assign(argument);
 
 	return true;
@@ -3812,7 +3797,7 @@ do_plan (CHAR_DATA * ch, char *argument, int cmd)
 					char *p;
 					reformat_string (buf, &p);
 					send_to_char (p, ch);
-					mem_free (p);
+					free_mem (p);
 				}
 
 				// bad message size

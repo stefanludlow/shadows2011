@@ -166,36 +166,10 @@ const char *break_def[] = {
 	"knock aside", "knocks aside",	/* slash */
 	"maneuver around", "maneuvers around",	/* lash */
 	"force through", "forces through"  /* natural */
-};				
-
-/* original
-
-The original system is balanced vs the common assault types.
-Leather and scale perform very slightly better on average.
-
-// Q   L   R   S   M   P
-{ -1, -1, -1, -1, -2, -2  },   // stab
-{  1,  1,  1,  1,  0, -1  },   // pierce
-{  0, -1,  0,  0,  1,  2  },   // chop
-{ -1, -2, -1, -1,  2,  2  },   // bludgeon
-{  1,  2,  1,  0, -1, -1  },   // slash
-{ -1, -3, -3, -3, -3, -4  }    // lash
-
-*/
-/** This system worked for a long time, but was unbalanced in practical useage
-const int weapon_armor_table[6][6] = {
-// Q   L   R   S   M   P
-{0, 2, 0, -1, 1, 0},		// stab
-{0, 2, 0, -1, 1, -1},		// pierce
-{0, 0, 0, 0, -1, 1},		// chop
-{0, 0, 0, 1, 0, 1},		// bludgeon
-{0, 1, 0, 0, -1, -1},		// slash
-{0, -1, -2, -2, -2, -3}	// lash
 };
-***/
 
 const int weapon_armor_table[6][6] = {
-   // Q   L   R   S   M   P
+	// Q   L   R   S   M   P
 	{-1, -1, -2, -2, -1, -1},		// stab
 	{ 0,  0, -2, -1, -3, -3},		// pierce
 	{ 0,  0, -2, -1, -2, -2},		// chop
@@ -203,17 +177,9 @@ const int weapon_armor_table[6][6] = {
 	{ 0, -1, -1, -2, -2, -3},		// slash
 	{-2, -3, -5, -8, -5, -8}	    // lash
 };
-/* old system
-const int weapon_nat_attack_table[4][6] = {
-// Q   L   R   S   M   P
-{-1, -2, -1, -1, 2, 2},	// punch
-{1, 1, 1, 1, -2, -2},		// bite
-{0, -1, 0, 0, 1, 2},		// claw
-{1, 1, 1, 1, 0, -1}		// peck
-};
-*/
+
 const int weapon_nat_attack_table[4][6]={
-   // Q   L   R   S   M   P
+	// Q   L   R   S   M   P
 	{-1, -3, -5, -6, -6, -8},  // punch
 	{ 0, -3, -2, -2, -2, -1},  // bite
 	{ 0, -3, -2, -2, -2, -1},  // claw
@@ -291,7 +257,7 @@ add_criminal_time (CHAR_DATA * ch, int zone, int penalty_time)
 
 // criminalize
 //
-// References:
+// Refrences:
 // * act.movement.c - do_pick() on failed door pick
 // * act.offensive.c - do_throw() on ch!fighting and damage > 3
 // * act.offensive.c - fire_sling() on ch!fighting and damage > 3
@@ -630,7 +596,7 @@ fighting_sounds (CHAR_DATA * ch, ROOM_DATA * room)
 			if (!next_room->affects)
 			{
 				next_room->affects =
-					(AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+					(AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 				next_room->affects->type = MAGIC_ROOM_FIGHT_NOISE;
 				next_room->affects->a.room.duration = from_dir;
 				next_room->affects->next = NULL;
@@ -641,7 +607,7 @@ fighting_sounds (CHAR_DATA * ch, ROOM_DATA * room)
 					if (!af->next)
 					{
 						af->next =
-							(AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE), 13);
+							(AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
 						af->next->type = MAGIC_ROOM_FIGHT_NOISE;
 						af->next->a.room.duration = from_dir;
 						af->next->next = NULL;
@@ -816,24 +782,24 @@ make_statue (CHAR_DATA * ch)
 		sprintf (buf, "statue npc_%s", buf2);
 	}
 
-	statue->name = str_dup (buf);
+	statue->name = duplicateString (buf);
 
 	sprintf (buf, "An eerily lifelike statue of %s looms here.",
 		ch->short_descr);
-	statue->description = str_dup (buf);
+	statue->description = duplicateString (buf);
 
 	sprintf (buf, "an eerily lifelike statue of %s", ch->short_descr);
-	statue->short_description = str_dup (buf);
+	statue->short_description = duplicateString (buf);
 
 	for (wound = ch->wounds; wound; wound = wound->next)
 	{
 		if (!statue->wounds)
 		{
-			CREATE (statue->wounds, WOUND_DATA, 1);
-			statue->wounds->location = add_hash (wound->location);
-			statue->wounds->type = add_hash (wound->type);
-			statue->wounds->name = add_hash (wound->name);
-			statue->wounds->severity = add_hash (wound->severity);
+			statue->wounds = new WOUND_DATA;
+			statue->wounds->location = duplicateString (wound->location);
+			statue->wounds->type = duplicateString (wound->type);
+			statue->wounds->name = duplicateString (wound->name);
+			statue->wounds->severity = duplicateString (wound->severity);
 			statue->wounds->bleeding = 0;
 			statue->wounds->poison = wound->poison;
 			statue->wounds->infection = wound->infection;
@@ -847,11 +813,11 @@ make_statue (CHAR_DATA * ch)
 			{
 				if (cwound->next)
 					continue;
-				CREATE (cwound->next, WOUND_DATA, 1);
-				cwound->next->location = add_hash (wound->location);
-				cwound->next->type = add_hash (wound->type);
-				cwound->next->name = add_hash (wound->name);
-				cwound->next->severity = add_hash (wound->severity);
+				cwound->next = new WOUND_DATA;
+				cwound->next->location = duplicateString (wound->location);
+				cwound->next->type = duplicateString (wound->type);
+				cwound->next->name = duplicateString (wound->name);
+				cwound->next->severity = duplicateString (wound->severity);
 				cwound->next->bleeding = 0;
 				cwound->next->poison = wound->poison;
 				cwound->next->infection = wound->infection;
@@ -867,9 +833,9 @@ make_statue (CHAR_DATA * ch)
 	{
 		if (!statue->lodged)
 		{
-			CREATE (statue->lodged, LODGED_OBJECT_INFO, 1);
+			statue->lodged = new LODGED_OBJECT_INFO;
 			statue->lodged->vnum = lodged->vnum;
-			statue->lodged->location = add_hash (lodged->location);
+			statue->lodged->location = duplicateString (lodged->location);
 			statue->lodged->next = NULL;
 		}
 		else
@@ -877,9 +843,9 @@ make_statue (CHAR_DATA * ch)
 			{
 				if (!clodged->next)
 				{
-					CREATE (clodged->next, LODGED_OBJECT_INFO, 1);
+					clodged->next = new LODGED_OBJECT_INFO;
 					clodged->next->vnum = lodged->vnum;
-					clodged->next->location = add_hash (lodged->location);
+					clodged->next->location = duplicateString (lodged->location);
 					clodged->next->next = NULL;
 					break;
 				}
@@ -941,23 +907,23 @@ make_corpse (CHAR_DATA * ch)
 		sprintf (buf, "corpse npc %s", GET_NAMES (ch));
 	}
 
-	corpse->name = str_dup (buf);
+	corpse->name = duplicateString (buf);
 
 	sprintf (buf, "The corpse of %s is lying here.", ch->short_descr);
-	corpse->description = str_dup (buf);
+	corpse->description = duplicateString (buf);
 
 	sprintf (buf, "the corpse of %s", ch->short_descr);
-	corpse->short_description = str_dup (buf);
+	corpse->short_description = duplicateString (buf);
 
 	for (wound = ch->wounds; wound; wound = wound->next)
 	{
 		if (!corpse->wounds)
 		{
-			CREATE (corpse->wounds, WOUND_DATA, 1);
-			corpse->wounds->location = add_hash (wound->location);
-			corpse->wounds->type = add_hash (wound->type);
-			corpse->wounds->name = add_hash (wound->name);
-			corpse->wounds->severity = add_hash (wound->severity);
+			corpse->wounds = new WOUND_DATA;
+			corpse->wounds->location = duplicateString (wound->location);
+			corpse->wounds->type = duplicateString (wound->type);
+			corpse->wounds->name = duplicateString (wound->name);
+			corpse->wounds->severity = duplicateString (wound->severity);
 			corpse->wounds->bleeding = 0;
 			corpse->wounds->poison = wound->poison;
 			corpse->wounds->infection = wound->infection;
@@ -971,11 +937,11 @@ make_corpse (CHAR_DATA * ch)
 			{
 				if (cwound->next)
 					continue;
-				CREATE (cwound->next, WOUND_DATA, 1);
-				cwound->next->location = add_hash (wound->location);
-				cwound->next->type = add_hash (wound->type);
-				cwound->next->name = add_hash (wound->name);
-				cwound->next->severity = add_hash (wound->severity);
+				cwound->next = new WOUND_DATA;
+				cwound->next->location = duplicateString (wound->location);
+				cwound->next->type = duplicateString (wound->type);
+				cwound->next->name = duplicateString (wound->name);
+				cwound->next->severity = duplicateString (wound->severity);
 				cwound->next->bleeding = 0;
 				cwound->next->poison = wound->poison;
 				cwound->next->infection = wound->infection;
@@ -991,9 +957,9 @@ make_corpse (CHAR_DATA * ch)
 	{
 		if (!corpse->lodged)
 		{
-			CREATE (corpse->lodged, LODGED_OBJECT_INFO, 1);
+			corpse->lodged = new LODGED_OBJECT_INFO;
 			corpse->lodged->vnum = lodged->vnum;
-			corpse->lodged->location = add_hash (lodged->location);
+			corpse->lodged->location = duplicateString (lodged->location);
 			corpse->lodged->next = NULL;
 		}
 		else
@@ -1001,9 +967,9 @@ make_corpse (CHAR_DATA * ch)
 			{
 				if (!clodged->next)
 				{
-					CREATE (clodged->next, LODGED_OBJECT_INFO, 1);
+					clodged->next = new LODGED_OBJECT_INFO;
 					clodged->next->vnum = lodged->vnum;
-					clodged->next->location = add_hash (lodged->location);
+					clodged->next->location = duplicateString (lodged->location);
 					clodged->next->next = NULL;
 					break;
 				}
@@ -1290,14 +1256,10 @@ raw_kill (CHAR_DATA * ch)
 				remove_affect_type(tch, MAGIC_GUARD);
 	}
 
-	if (!IS_SET (ch->plr_flags, FLAG_PETRIFIED)) {
-		remove_affect_type (ch, MAGIC_HIDDEN);
+	if (!IS_SET (ch->plr_flags, FLAG_PETRIFIED))
 		make_corpse (ch);
-	}
-	else {
-		remove_affect_type (ch, MAGIC_HIDDEN);
+	else
 		make_statue (ch);
-	}
 
 	if (IS_SET (ch->plr_flags, FLAG_PETRIFIED))
 	{
@@ -1459,7 +1421,7 @@ die (CHAR_DATA * ch)
 			add_message (1, "Deaths", -5, "Server", date, ch->tname, "", msg,
 				0);
 
-			mem_free (date);
+			free_mem (date);
 		}
 
 		if (!IS_SET (ch->flags, FLAG_GUEST))
@@ -1884,8 +1846,8 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 
 	attack_modifier = attack_modifier * enc_tab[i].penalty;
 	// sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
-	/* Move costs */    
-	/** 
+	/* Move costs */
+	/**
 	move_cost = enc_tab[i].move + 2.0 for Frantic
 	move_cost = enc_tab[i].move + 1.5 for Aggressive
 	move_cost = enc_tab[i].move + 1.0 for Normal
@@ -1897,7 +1859,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 
 
 
-	/* 50% chance to lose a move if they would have lost no points */  
+	/* 50% chance to lose a move if they would have lost no points */
 	if ((number (1, 100) > 50) && (movecost <= 1))
 		movecost = 1;
 
@@ -2114,8 +2076,8 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	// sprintf (AD, "Enc %3.2f ", enc_tab[i].penalty);
 	defense_modifier = defense_modifier * enc_tab[i].penalty;
 
-	/* Move costs */    
-	/** 
+	/* Move costs */
+	/**
 	move_cost = enc_tab[i].move + 2.0 for Frantic
 	move_cost = enc_tab[i].move + 1.5 for Aggressive
 	move_cost = enc_tab[i].move + 1.0 for Normal
@@ -2124,7 +2086,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	**/
 
 	movecost = int (enc_tab[i].move + (0.5) * (4 - tar->fight_mode));
-	/* 50% chance to lose a move if they would have lost no points */  
+	/* 50% chance to lose a move if they would have lost no points */
 	if ((number (1, 100) > 50) && (movecost <= 1))
 		movecost = 1;
 
@@ -2912,7 +2874,7 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 			obj_to_room (unequip_char (tar, WEAR_BOTH), tar->in_room);
 		else if (get_equip (tar, WEAR_SHIELD) == defense_weapon)
 			obj_to_room (unequip_char (tar, WEAR_SHIELD), tar->in_room);
-		else 
+		else
 			system_log ("Disarm, but couldn't find weapons's hand. (defender)",
 			true);
 
@@ -3029,7 +2991,7 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 			}
 		}
 	}
-	
+
 	if (!invulnerability && damage
 		&& wound_to_char (tar, location, damage, hit_type, 0, 0, 0))
 	{
@@ -3038,7 +3000,6 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 
 	if (def_result != RESULT_DEAD)
 	{
-
 		if (tar->fighting && IS_SET (tar->act, ACT_VEHICLE))
 			stop_fighting (tar);
 
@@ -3159,8 +3120,8 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 }
 
 void
-	figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
-	int off_result, int *damage, int *location)
+figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
+			   int off_result, int *damage, int *location)
 {
 	OBJ_DATA *eq;
 	char buf[MAX_STRING_LENGTH];
@@ -3214,15 +3175,15 @@ void
 
 				else if(attack_weapon->o.weapon.dice > 1)
 					dam +=
-					dice (attack_weapon->o.weapon.dice, 
-					attack_weapon->o.weapon.sides + 1); 
+					dice (attack_weapon->o.weapon.dice,
+					attack_weapon->o.weapon.sides + 1);
 			}
 			else if ((attack_weapon->o.od.value[3] == SKILL_HEAVY_EDGE
 				|| attack_weapon->o.od.value[3] == SKILL_HEAVY_BLUNT
 				|| attack_weapon->o.od.value[3] == SKILL_HEAVY_PIERCE)
 				&& (attack_weapon->location == WEAR_PRIM || WEAR_SEC))
 			{
-				if (attack_weapon->o.weapon.sides < 2) 
+				if (attack_weapon->o.weapon.sides < 2)
 				{
 					attack_weapon->o.weapon.sides = 2;
 				}
@@ -3234,8 +3195,8 @@ void
 
 				else if(attack_weapon->o.weapon.dice > 1)
 					dam +=
-					dice (attack_weapon->o.weapon.dice, 
-					attack_weapon->o.weapon.sides - 1); 
+					dice (attack_weapon->o.weapon.dice,
+					attack_weapon->o.weapon.sides - 1);
 			}
 			else
 				dam +=
@@ -3299,7 +3260,6 @@ void
 		}
 	}
 	else {
-
 		/* Subtract the armor protection at the hit location */
 
 		eq = get_equip (tar, wear_loc1);
@@ -3320,7 +3280,7 @@ void
 		else if (!attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
 			dam += weapon_nat_attack_table[src->nat_attack_type] [eq->o.armor.armor_type];
 
-		if (number(0,1))  
+		if (number(0,1))
 		{
 			eq = get_equip (tar, wear_loc2);
 
@@ -3340,12 +3300,6 @@ void
 
 		dam *= (body_tab[body_type][*location].damage_mult * 1.0) /
 			(body_tab[body_type][*location].damage_div * 1.0);
-
-		///* Modifiers by skill level - Case */
-		//int rawSkill = src->skills[attack_weapon->o.od.value[3]];
-		//if (rawSkill == 0) {
-		//	//rawSkill = src->skills[SKILL_OFFENSE]; // -2 OFFENSE???
-		//}
 
 		/* Multiply in critical strike bonus */
 
@@ -3368,12 +3322,12 @@ void
 			dam += 3;
 			dam *= 2;
 		}
-		else {
+		else
+		{
 			*damage = 0;
 			return;
 		}
 	}
-
 
 	/* Subtract/add spell offsets */
 
@@ -3402,8 +3356,6 @@ void
 	*damage = (int)dam;
 }
 
-
-
 int
 weaken (CHAR_DATA * victim, uint16 hp_penalty, uint16 mp_penalty,
 		char *log_msg)
@@ -3411,7 +3363,7 @@ weaken (CHAR_DATA * victim, uint16 hp_penalty, uint16 mp_penalty,
 	char buf[MAX_STRING_LENGTH];
 
 	/* dwarves and elves immune to endurance loss */
-	if (victim->race == 23 || (victim->race >=16 && victim->race <= 19)  || victim->race==93) 
+	if (victim->race == 23 || (victim->race >=16 && victim->race <= 19)  || victim->race==93)
 	{
 		mp_penalty = 0;
 	}
@@ -4749,7 +4701,7 @@ compete (CHAR_DATA * ch, CHAR_DATA * src, CHAR_DATA * tar, int iterations)
 	src->flags &= ~FLAG_COMPETE;
 	tar->flags &= ~FLAG_COMPETE;
 
-	mem_free(name);
+	free_mem(name);
 
 	/*
 	for (obj = src->room->contents; obj; obj = next_obj)
@@ -4791,7 +4743,7 @@ sa_rescue (SECOND_AFFECT * sa)
 		act ("You try again, but fail to rescue $n.",
 			false, rescuee, 0, sa->ch, TO_VICT);
 
-		add_second_affect (SA_RESCUE, number(5, 15), sa->ch, sa->obj, NULL, 0);
+		add_second_affect (SA_RESCUE, number(3,10-GET_INT(sa->ch)/4), sa->ch, sa->obj, NULL, 0);
 
 		return;
 	}
@@ -4859,7 +4811,6 @@ sa_rescue (SECOND_AFFECT * sa)
 				send_to_char("#6You get pushed out of the melee as you are rescued.#0\n", rescuee);
 			}
 		}
-
 		if (sa->ch->agi <= 9)
 			sa->ch->balance += -15;
 		else if (sa->ch->agi > 9 && sa->ch->agi <= 13)
@@ -4874,7 +4825,7 @@ sa_rescue (SECOND_AFFECT * sa)
 	}
 	else if (result == 4) // Has too many people fighting them
 	{
-		add_second_affect (SA_RESCUE, number(5, 10), sa->ch, sa->obj, NULL, 0);
+		add_second_affect (SA_RESCUE, 3, sa->ch, sa->obj, NULL, 0);
 		return;
 	}
 }
@@ -5033,6 +4984,7 @@ do_rescue (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (ch->balance < 0) {
 		act("You are off balance, you cannot rescue $N.", false, ch, 0, friendPtr, TO_CHAR);
+		return;
 	}
 
 	if (sa)
@@ -5068,6 +5020,18 @@ do_rescue (CHAR_DATA * ch, char *argument, int cmd)
 		act ("$N draws your attention.", false, tch, 0, ch, TO_CHAR);
 		act ("$N draws $n's attention.", false, tch, 0, ch, TO_NOTVICT);
 
+		if (ch->agi <= 9)
+			ch->balance += -15;
+		else if (ch->agi > 9 && ch->agi <= 13)
+			ch->balance += -13;
+		else if (ch->agi > 13 && ch->agi <= 15)
+			ch->balance += -11;
+		else if (ch->agi > 15 && ch->agi <= 18)
+			ch->balance += -9;
+		else
+			ch->balance += -7;
+		ch->balance = MAX (ch->balance, -50);
+
 		if (GET_POS (ch) != POSITION_DEAD && GET_POS (tch) != POSITION_DEAD)
 			criminalize (ch, tch, ch->room->zone, CRIME_KILL);
 
@@ -5089,18 +5053,6 @@ do_rescue (CHAR_DATA * ch, char *argument, int cmd)
 				still_fighting_char = pNumberCheck;
 				still_fighting = true;
 			}
-
-			if (ch->agi <= 9)
-				ch->balance += -15;
-			else if (ch->agi > 9 && ch->agi <= 13)
-				ch->balance += -13;
-			else if (ch->agi > 13 && ch->agi <= 15)
-				ch->balance += -11;
-			else if (ch->agi > 15 && ch->agi <= 18)
-				ch->balance += -9;
-			else
-				ch->balance += -7;
-			ch->balance = MAX (ch->balance, -50);
 		}
 
 		if (still_fighting)

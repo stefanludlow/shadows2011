@@ -30,9 +30,9 @@
 #define IF_STR(st) ((st) ? (st) : "\0")
 #define CAP(st)  (*(st) = toupper(*(st)), st)
 #define LOW(st)  (*(st) = tolower(*(st)), st)
-#define CREATE(result, type, number)  do {\
-	if (!((result) = (type *) alloc ((number) * sizeof(type), 16)))\
-		{ perror("CREATE: alloc failure"); abort(); } } while(0)
+//#define CREATE(result, type, number)  do {\
+//	if (!((result) = (type *) alloc ((number) * sizeof(type), 16)))\
+//		{ perror("CREATE: alloc failure"); abort(); } } while(0)
 #define IS_SET(flag,bit)  ((flag) & (bit))
 #define IS_AFFECTED(ch,skill) ( IS_SET((ch)->affected_by, (skill)) )
 
@@ -42,9 +42,9 @@
 
 #define TOGGLE_BIT(var,bit)  ((var) = (var) ^ (bit) )
 #define TOGGLE(flag, bit) { if ( IS_SET (flag, bit) ) \
-                               flag &= ~bit; \
-                            else \
-                               flag |= bit; \
+	flag &= ~bit; \
+							else \
+							flag |= bit; \
 			   }
 
 #define CAN_SEE(sub, obj)	( ( (IS_LIGHT (obj->room) || \
@@ -60,7 +60,7 @@
 	!get_affect (sub, MAGIC_AFFECT_SENSE_LIFE))) && \
 	\
 	(!get_affect (obj, MAGIC_HIDDEN) || are_grouped (obj, sub)) && \
-        \
+	\
 	!is_blind (sub) && \
 	!IS_SET (obj->flags, FLAG_WIZINVIS) && \
 	((weather_info[obj->room->zone].state != HEAVY_SNOW || \
@@ -122,10 +122,10 @@
 
 #define IS_OBJ_VIS(sub, obj)										\
 	( (( !IS_SET((obj)->obj_flags.extra_flags, ITEM_INVISIBLE) || 	\
-	     get_affect (sub, MAGIC_AFFECT_SEE_INVISIBLE) ) &&					\
-		 !is_blind (sub))                                           \
-         || obj->location == WEAR_BLINDFOLD                         \
-	     || !IS_MORTAL(sub))
+	get_affect (sub, MAGIC_AFFECT_SEE_INVISIBLE) ) &&					\
+	!is_blind (sub))                                           \
+	|| obj->location == WEAR_BLINDFOLD                         \
+	|| !IS_MORTAL(sub))
 
 #define GET_MATERIAL_TYPE(obj) (determine_material(obj))
 
@@ -133,7 +133,7 @@
 
 #define CAN_WEAR(obj, part) (IS_SET((obj)->obj_flags.wear_flags,part))
 #define IS_WEARABLE(obj) ((obj)->obj_flags.wear_flags &            \
-				(ITEM_WEAR_BODY | ITEM_WEAR_LEGS | ITEM_WEAR_ARMS))
+	(ITEM_WEAR_BODY | ITEM_WEAR_LEGS | ITEM_WEAR_ARMS))
 
 #define GET_OBJ_WEIGHT(obj) ((obj)->obj_flags.weight)
 #define OBJ_MASS(obj) obj_mass(obj)
@@ -147,12 +147,12 @@
 #define IS_ENCUMBERED(ch) (GET_STR (ch) * enc_tab [1].str_mult_wt < IS_CARRYING_W (ch))
 
 #define CAN_CARRY_OBJ(ch,obj)  \
-   (((IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(obj)) <= CAN_CARRY_W(ch)) &&   \
-    ((IS_CARRYING_N(ch) + 1) <= CAN_CARRY_N(ch)))
+	(((IS_CARRYING_W(ch) + GET_OBJ_WEIGHT(obj)) <= CAN_CARRY_W(ch)) &&   \
+	((IS_CARRYING_N(ch) + 1) <= CAN_CARRY_N(ch)))
 
 #define CAN_GET_OBJ(ch, obj)   \
-   (CAN_WEAR((obj), ITEM_TAKE) && CAN_CARRY_OBJ((ch),(obj)) &&          \
-    CAN_SEE_OBJ((ch),(obj)))
+	(CAN_WEAR((obj), ITEM_TAKE) && CAN_CARRY_OBJ((ch),(obj)) &&          \
+	CAN_SEE_OBJ((ch),(obj)))
 
 #define IS_OBJ_STAT(obj,stat) (IS_SET((obj)->obj_flags.extra_flags,stat))
 #define IS_MERCHANT(mob) (IS_SET((mob)->hmflags,HM_KEEPER))
@@ -165,7 +165,7 @@
 	char_short((ch)) : "someone")
 
 /* #define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
-	(obj)->short_description  : "something")
+(obj)->short_description  : "something")
 */
 
 #define OBJS(obj, vict) (CAN_SEE_OBJ((vict), (obj)) ? \
@@ -175,52 +175,52 @@
 	fname((obj)->name) : "something")
 
 #define IS_OUTSIDE(ch) (!IS_SET((ch)->room->room_flags,INDOORS) && \
-			ch->room->sector_type != SECT_INSIDE && \ 
-			ch->room->sector_type != SECT_CAVE && \
-			ch->room->sector_type != SECT_UNDERWATER)
+	ch->room->sector_type != SECT_INSIDE && \
+	ch->room->sector_type != SECT_CAVE && \
+	ch->room->sector_type != SECT_UNDERWATER)
 
 #define EXIT(ch, door)  ((ch->room) ? (ch)->room->dir_option[door] : NULL)
 
 #define CAN_GO(ch, door) (EXIT(ch,door)  &&  (EXIT(ch,door)->to_room != NOWHERE) \
-                          && !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
+	&& !IS_SET(EXIT(ch, door)->exit_info, EX_CLOSED))
 
 #define CAN_FLEE_SOMEWHERE(ch) (CAN_GO(ch, NORTH) || CAN_GO(ch, SOUTH) || \
-								CAN_GO(ch, EAST) || CAN_GO(ch, WEST))
+	CAN_GO(ch, EAST) || CAN_GO(ch, WEST))
 
 #define SWIM_ONLY(room) ((room)->sector_type == SECT_OCEAN || \
-					 	(room)->sector_type == SECT_REEF ||  \
-						(room)->sector_type == SECT_RIVER || \
-						(room)->sector_type == SECT_LAKE || \
-						(room)->sector_type == SECT_UNDERWATER || \
-						is_room_affected (room->affects, MAGIC_ROOM_FLOOD) )
+	(room)->sector_type == SECT_REEF ||  \
+	(room)->sector_type == SECT_RIVER || \
+	(room)->sector_type == SECT_LAKE || \
+	(room)->sector_type == SECT_UNDERWATER || \
+	is_room_affected (room->affects, MAGIC_ROOM_FLOOD) )
 
 #define IS_SWIMMING(ch) SWIM_ONLY((ch)->room)
 
 #define IS_DROWNING(ch) (IS_SWIMMING(ch) && IS_MORTAL(ch)) && \
-				(get_affect (ch, AFFECT_HOLDING_BREATH) && \
-				get_affect (ch, AFFECT_HOLDING_BREATH)->a.spell.duration <= 0)
+	(get_affect (ch, AFFECT_HOLDING_BREATH) && \
+	get_affect (ch, AFFECT_HOLDING_BREATH)->a.spell.duration <= 0)
 
 #define IS_FROZEN(zone) (IS_SET(zone_table[(zone)].flags,Z_FROZEN))
 
 #define IS_SUBDUEE(ch) (is_he_here (ch, (ch)->subdue, 0) && \
-                        GET_FLAG (ch, FLAG_SUBDUEE))
+	GET_FLAG (ch, FLAG_SUBDUEE))
 #define IS_SUBDUER(ch) (is_he_here (ch, (ch)->subdue, 0) && \
-                        GET_FLAG (ch, FLAG_SUBDUER))
+	GET_FLAG (ch, FLAG_SUBDUER))
 
 #define IS_MOUNT(ch) (IS_SET (ch->act, ACT_MOUNT))
 
 #define IS_RIDER(ch) (is_he_here (ch, (ch)->mount, 0) && \
-                      !IS_SET (ch->act, ACT_MOUNT))
+	!IS_SET (ch->act, ACT_MOUNT))
 #define IS_RIDEE(ch) (is_he_here (ch, (ch)->mount, 0) && \
-                      IS_SET (ch->act, ACT_MOUNT))
+	IS_SET (ch->act, ACT_MOUNT))
 
 #define IS_HITCHER(ch) (is_he_here (ch, (ch)->hitchee, 0) &&	\
-						ch->hitchee->hitcher == ch)
+	ch->hitchee->hitcher == ch)
 #define IS_HITCHEE(ch) (is_he_here (ch, (ch)->hitcher, 0) &&	\
-						ch->hitcher->hitchee == ch)
+	ch->hitcher->hitchee == ch)
 
 #define IS_TABLE(obj) (GET_ITEM_TYPE (obj) == ITEM_CONTAINER && \
-                       IS_SET (obj->obj_flags.extra_flags, ITEM_TABLE))
+	IS_SET (obj->obj_flags.extra_flags, ITEM_TABLE))
 
 
 #define SEND_TO_Q(messg, desc)  write_to_q ((messg), (desc) ? &(desc)->output : NULL)

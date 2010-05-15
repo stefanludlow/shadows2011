@@ -1,5 +1,5 @@
 /*------------------------------------------------------------------------\
-|  mobact.c : Mobile AI Routines                      www.middle-earth.us | 
+|  mobact.c : Mobile AI Routines                      www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
 \------------------------------------------------------------------------*/
@@ -324,10 +324,10 @@ mob_wander (CHAR_DATA * ch)
 		if (room_exit_zone == 76)
 			room_exit_zone = 10;
 
-		if (!IS_SET (room_exit->room_flags, NO_MOB) 
-			&& !(IS_MERCHANT (ch) 
-			&& IS_SET (room_exit->room_flags, NO_MERCHANT)) 
-			&& !(ch->mob->noaccess_flags & room_exit->room_flags) 
+		if (!IS_SET (room_exit->room_flags, NO_MOB)
+			&& !(IS_MERCHANT (ch)
+			&& IS_SET (room_exit->room_flags, NO_MERCHANT))
+			&& !(ch->mob->noaccess_flags & room_exit->room_flags)
 			&& (!ch->mob->access_flags || ch->mob->access_flags & room_exit->room_flags)
 			&& !(IS_SET (ch->act, ACT_STAY_ZONE) && zone != room_exit_zone)
 			&& !(IS_SET (ch->act, ACT_FLYING) && (room_exit->sector_type == SECT_UNDERWATER))
@@ -574,11 +574,11 @@ jailer_func (CHAR_DATA * ch)
 	{
 		sprintf (buf, "A prison bag, labeled '%s %s' sits here.",
 			JAILBAG_DESC_PREPEND, victim->short_descr);
-		bag->description = str_dup (buf);
+		bag->description = duplicateString (buf);
 
 		sprintf (buf, "a bag labeled '%s %s'", JAILBAG_DESC_PREPEND,
 			victim->short_descr);
-		bag->short_description = str_dup (buf);
+		bag->short_description = duplicateString (buf);
 
 		if (IS_NPC (victim))
 			bag->obj_timer = 24 * 4;	/* one rl day */
@@ -794,7 +794,8 @@ mob_weather_reaction (CHAR_DATA * ch)
 	{
 		if (!af)
 		{
-			CREATE (af, AFFECTED_TYPE, 1);
+			af = new AFFECTED_TYPE;
+			af->next = NULL;
 			af->type = MAGIC_RAISED_HOOD;
 			affect_to_char (ch, af);
 		}
@@ -835,13 +836,13 @@ add_attacker (CHAR_DATA * victim, CHAR_DATA * threat)
 
 	if (!victim->attackers)
 	{
-		CREATE (victim->attackers, ATTACKER_DATA, 1);
+		victim->attackers = new ATTACKER_DATA;
 		victim->attackers->attacker = threat;
 		victim->attackers->next = NULL;
 	}
 	else
 	{
-		CREATE (tmp_att, ATTACKER_DATA, 1);
+		tmp_att = new ATTACKER_DATA;
 		tmp_att->next = victim->attackers;
 		victim->attackers = tmp_att;
 	}
@@ -865,14 +866,14 @@ add_threat (CHAR_DATA * victim, CHAR_DATA * threat, int amount)
 
 	if (!victim->threats)
 	{
-		CREATE (victim->threats, THREAT_DATA, 1);
+		victim->threats = new THREAT_DATA;
 		victim->threats->source = threat;
 		victim->threats->level = amount;
 		victim->threats->next = NULL;
 	}
 	else
 	{
-		CREATE (tmp, THREAT_DATA, 1);
+		tmp = new THREAT_DATA;
 		tmp->next = victim->threats;
 		victim->threats = tmp;
 	}
@@ -1035,7 +1036,7 @@ morale_broken (CHAR_DATA * ch)
 
 			if (ch->race == lookup_race_variable (lookup_race_id ("warhorse"), RACE_NAME) && skill_use (ch->mount, SKILL_RIDE, -20) )
 			morale_held = true;
-			else if (ch->race == lookup_race_variable (lookup_race_id ("warg"), RACE_NAME) && skill_use (ch->mount, SKILL_RIDE, -10) ) 
+			else if (ch->race == lookup_race_variable (lookup_race_id ("warg"), RACE_NAME) && skill_use (ch->mount, SKILL_RIDE, -10) )
 			morale_held = true;
 			else if (skill_use (ch->mount, SKILL_RIDE, 20) )
 			morale_held = true;
@@ -1081,7 +1082,7 @@ threat_from_char (CHAR_DATA * ch, THREAT_DATA * att)
 				tempatt->next = tempatt->next->next;
 	}
 
-	mem_free (att);
+	free_mem (att);
 }
 
 void
@@ -1107,7 +1108,7 @@ remove_threat (CHAR_DATA * victim, CHAR_DATA * threat)
 	}
 
 	if (targ_threat)
-		mem_free (targ_threat);
+		free_mem (targ_threat);
 }
 
 void
@@ -1128,7 +1129,7 @@ attacker_from_char (CHAR_DATA * ch, ATTACKER_DATA * att)
 				tempatt->next = tempatt->next->next;
 	}
 
-	mem_free (att);
+	free_mem (att);
 }
 
 
@@ -1156,7 +1157,7 @@ remove_attacker (CHAR_DATA * victim, CHAR_DATA * threat)
 	}
 
 	if (targ_att)
-		mem_free (targ_att);
+		free_mem (targ_att);
 }
 
 
@@ -1172,8 +1173,8 @@ npc_evasion (CHAR_DATA * ch, int dir)
 	do_stand (ch, "", 0);
 
 	// Try to control our mounts!
-	if (IS_SET (ch->act, ACT_MOUNT) 
-		&& ch->mount 
+	if (IS_SET (ch->act, ACT_MOUNT)
+		&& ch->mount
 		&& skill_use (ch->mount, SKILL_RIDE, 15))
 	{
 		return;
@@ -1983,7 +1984,7 @@ evaluate_threats (CHAR_DATA * ch)
 				}
 				return 1;
 
-				/* FIXME 
+				/* FIXME
 				for ( i = 0; i <= 6; i++ ) {
 				if ( CAN_GO (ch, i) ) {
 				do_move (ch, "", i);
@@ -2458,7 +2459,6 @@ would_attack (CHAR_DATA * ch, CHAR_DATA * tch)
 			return 0;
 		}
 	}
-
 	/* Wrestling */
 
 	if (tch->fighting && GET_FLAG (tch, FLAG_SUBDUING))

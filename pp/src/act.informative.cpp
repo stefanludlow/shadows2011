@@ -197,7 +197,8 @@ target_sighted (CHAR_DATA * ch, CHAR_DATA * target)
 
 	if (!ch->sighted)
 	{
-		CREATE (ch->sighted, SIGHTED_DATA, 1);
+		ch->sighted = new SIGHTED_DATA;
+		ch->sighted->next = NULL;
 		ch->sighted->target = target;
 		return;
 	}
@@ -207,7 +208,8 @@ target_sighted (CHAR_DATA * ch, CHAR_DATA * target)
 			return;
 		if (!sighted->next)
 		{
-			CREATE (sighted->next, SIGHTED_DATA, 1);
+			sighted->next = new SIGHTED_DATA;
+			sighted->next->next = NULL;
 			sighted->next->target = target;
 			return;
 		}
@@ -264,7 +266,7 @@ do_point (CHAR_DATA * ch, char *argument, int cmd)
 	room = vtor (EXIT (ch, dir)->to_room);
 	exit = EXIT (ch, dir);
 
-	if (exit 
+	if (exit
 		&& IS_SET (exit->exit_info, EX_ISDOOR)
 		&& IS_SET (exit->exit_info, EX_CLOSED)
 		&& !IS_SET (exit->exit_info, EX_ISGATE))
@@ -305,7 +307,7 @@ do_point (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char ("You don't see them within range.\n", ch);
 				return;
 			}
-			if (exit 
+			if (exit
 				&& IS_SET (exit->exit_info, EX_ISDOOR)
 				&& IS_SET (exit->exit_info, EX_CLOSED)
 				&& !IS_SET (exit->exit_info, EX_ISGATE))
@@ -433,7 +435,7 @@ do_title (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	skill =
-		(ch->skills[ch->writes] * 0.70) + (ch->skills[ch->speaks] * 0.30); 
+		(ch->skills[ch->writes] * 0.70) + (ch->skills[ch->speaks] * 0.30);
 
 	skill = (int) skill;
 	skill = MIN (95, (int) skill);
@@ -452,7 +454,7 @@ do_title (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	obj->book_title = add_hash (buf);
+	obj->book_title = duplicateString (buf);
 	obj->title_skill = (int) skill;
 	obj->title_script = ch->writes;
 	obj->title_language = ch->speaks;
@@ -535,7 +537,7 @@ do_timeconvert (CHAR_DATA * ch, char *argument, int cmd)
 			(hour * GAME_SECONDS_PER_HOUR)) / PULSES_PER_SEC);
 #else
 		(int) temp_time =
-			GAME_SECONDS_BEGINNING + 
+			GAME_SECONDS_BEGINNING +
 			(int) (ch->desc->acct->timezone * 60.0 * 60.0);
 		(int) temp_time +=
 			((((year - GAME_BASE_YEAR) * GAME_SECONDS_PER_YEAR) +
@@ -663,7 +665,7 @@ tilde_eliminator (char *string)
 	while ((p = strchr (string, '~')))
 		*p = '-';
 
-	return str_dup (string);
+	return duplicateString (string);
 }
 
 char *
@@ -1126,7 +1128,7 @@ act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 
 }*/
 
-/* New version of the compare command to compare objects 
+/* New version of the compare command to compare objects
 
 This function takes two object references as arguments
 and compares attributes such as weight and cost to give
@@ -1310,7 +1312,7 @@ do_compare(CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	/***** Compare time left in light objects ***/
-	if ( GET_ITEM_TYPE (obj1) == ITEM_LIGHT ) 
+	if ( GET_ITEM_TYPE (obj1) == ITEM_LIGHT )
 	{
 		if ( obj1->o.light.hours > obj2->o.light.hours )
 		{
@@ -1412,7 +1414,7 @@ decipher_script (CHAR_DATA * ch, int script, int language, int skill)
 	skill_use (ch, script, 0);
 	skill_use (ch, language, 0);
 
-	if (((ch->skills[script] * .70) + (ch->skills[language] * .30) ) >= check) 
+	if (((ch->skills[script] * .70) + (ch->skills[language] * .30) ) >= check)
 		return 1;
 	else
 		return 0;
@@ -1574,7 +1576,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 		strcat (buffer, "#0");
 		reformat_string (buffer, &p);
 		sprintf (buffer, "%s", p);
-		mem_free (p); // char*
+		free_mem (p); // char*
 		buffer[strlen (buffer) - 1] = '\0';
 	}
 
@@ -1595,7 +1597,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 
 		reformat_string (buffer, &p);
 		sprintf (buffer, "%s", p);
-		mem_free (p); //char*
+		free_mem (p); //char*
 		buffer[strlen (buffer) - 1] = '\0';
 	}
 
@@ -1675,7 +1677,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 					reformat_string (buf, &p);
 					strcat (buffer, "\n");
 					strcat (buffer, p);
-					mem_free (p); //char*
+					free_mem (p); //char*
 				}
 				page_string (ch->desc, buffer);
 				return;
@@ -1871,7 +1873,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 						if (IS_SET (obj->o.od.value[5], TREAT_FROST))
 							sprintf (buffer + strlen (buffer), " Frostbite");
 						if (IS_SET (obj->o.od.value[5], TREAT_BLEED))
-							sprintf (buffer + strlen (buffer), " Bleeding");	
+							sprintf (buffer + strlen (buffer), " Bleeding");
 					}
 					sprintf (buffer + strlen (buffer),
 						"\n   #6Uses Remaining:#0 %d\n",
@@ -1939,7 +1941,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 					reformat_string (buf, &p);
 					strcat (buffer, "\n");
 					strcat (buffer, p);
-					mem_free (p); //char*
+					free_mem (p); //char*
 					p = 0;
 				}
 			}
@@ -1986,7 +1988,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 					crafts_found != 1 ? "s" : "", buf);
 				reformat_string (output, &p);
 				sprintf (buffer + strlen (buffer), "\n%s", p);
-				mem_free (p); // char*;
+				free_mem (p); // char*;
 				p = 0;
 			}
 
@@ -2010,7 +2012,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 				reformat_string (buf, &p);
 				strcat (buffer, "\n");
 				strcat (buffer, p);
-				mem_free (p); //char*
+				free_mem (p); //char*
 				p = 0;
 			}
 
@@ -2041,7 +2043,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 				if (obj->wounds)
 					strcat (buffer, "\n");
 				strcat (buffer, p);
-				mem_free (p); //char*
+				free_mem (p); //char*
 				p = NULL;
 			}
 
@@ -2181,7 +2183,7 @@ list_obj_to_char (OBJ_DATA * list, CHAR_DATA * ch, int mode, int show)
 
 	found = false;
 
-	if (!list || (weather_info[ch->room->zone].state == HEAVY_SNOW 
+	if (!list || (weather_info[ch->room->zone].state == HEAVY_SNOW
 		&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
 		&& !IS_SET (ch->affected_by, AFF_INFRAVIS))
 		&& IS_MORTAL (ch)
@@ -2453,7 +2455,7 @@ enter_exit_msg (CHAR_DATA * ch, char *buffer)
 		return 0;
 
 
-	char* charShort = str_dup(char_short(ch));
+	char* charShort = duplicateString(char_short(ch));
 
 	sprintf (addon, "#3%s is %s %s%s%s.#0",
 		CAP (charShort),
@@ -2464,7 +2466,7 @@ enter_exit_msg (CHAR_DATA * ch, char *buffer)
 travel_str : (ch->travel_str ? ch->travel_str : ""))));
 	addon[2] = toupper (addon[2]);
 
-	mem_free(charShort);
+	free_mem(charShort);
 
 	return 1;
 }
@@ -2881,7 +2883,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 			{
 				if ( IS_SET(i->act, ACT_FLYING ))
 					strcat(buffer, " is here, flying.");
-				else 
+				else
 					strcat (buffer, " is here, swimming.");
 			}
 			else
@@ -3070,7 +3072,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 			strcat (buffer, "#0\n");
 			reformat_string (buffer, &p);
 			send_to_char (p, ch);
-			mem_free (p); // char*
+			free_mem (p); // char*
 		}
 
 		else
@@ -3184,7 +3186,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 					strcat (buffer, "#0\n");
 					reformat_string (buffer, &p);
 					send_to_char (p, ch);
-					mem_free (p); // char*
+					free_mem (p); // char*
 				}
 				else if ((af = get_affect (i, AFFECT_SHADOW)) &&
 					af->a.shadow.edge != -1)
@@ -3256,7 +3258,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 					strcat (buffer, "#0\n");
 					reformat_string (buffer, &p);
 					send_to_char (p, ch);
-					mem_free (p); //char*
+					free_mem (p); //char*
 				}
 			}
 		}
@@ -3305,7 +3307,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 		/* Show name (first keyword) if mobile is owned by the character examining the mobile*/
 		if (mode == 15)
 		{
-			if(IS_NPC(i)) 
+			if(IS_NPC(i))
 			{
 				if(i->mob->owner)
 				{
@@ -3367,7 +3369,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 			*buf2 = toupper (*buf2);
 			reformat_string (buf2, &p);
 			send_to_char (p, ch);
-			mem_free (p); //char*
+			free_mem (p); //char*
 			p = NULL;
 		}
 
@@ -3378,7 +3380,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 		buffer[0] = toupper(buffer[0]);
 		reformat_string (buffer, &p);
 		send_to_char (p, ch);
-		mem_free (p); // char*
+		free_mem (p); // char*
 		p = NULL;
 		}
 		*/
@@ -3435,7 +3437,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 			*buffer = toupper (*buffer);
 			reformat_string (buffer, &p);
 			send_to_char (p, ch);
-			mem_free (p); // char*
+			free_mem (p); // char*
 			p = NULL;
 		}
 
@@ -3461,7 +3463,7 @@ show_char_to_char (CHAR_DATA * i, CHAR_DATA * ch, int mode)
 			*buf2 = toupper (*buf2);
 			reformat_string (buf2, &p);
 			send_to_char (p, ch);
-			mem_free (p); //char*
+			free_mem (p); //char*
 			p = NULL;
 		}
 
@@ -3783,7 +3785,7 @@ delayed_search (CHAR_DATA * ch)
 /// By default, return the room's description. If there are extra descriptions
 /// defined, then pick the closest case and return that instead. If you have
 /// an extra description for the current weather & time scenario, return that.
-/// If you don't have a match for the current weather, but you do have a 
+/// If you don't have a match for the current weather, but you do have a
 /// description for night, and it is night time, return that description.
 /// Otherwise fall back on the default room description.
 //
@@ -3797,14 +3799,14 @@ room__get_description (ROOM_DATA * room)
 	{
 		int weather_room = desc_weather[room->zone];
 		char * extra_description = 0;
-		if ((weather_room != WR_NORMAL 
+		if ((weather_room != WR_NORMAL
 			&& (extra_description = room_extra->weather_desc[weather_room]))
 			|| (!sun_light
 			&& (extra_description = room_extra->weather_desc[WR_NIGHT])))
 		{
 			description = extra_description;
 		}
-	} 
+	}
 	return description;
 }
 
@@ -3827,7 +3829,7 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 	int nRoomVnum = 0, nZone = 1, original_loc = 0;
 	bool change = false, again = true, abrt = false;
 
-	char * blizzard_description = 
+	char * blizzard_description =
 		"   A howling blanket of white completely obscures your vision.\n";
 
 	const char *e_dirs[] =
@@ -3958,7 +3960,7 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 			send_to_char (exit->general_description, ch);
 
 		if ((af = get_affect (ch, AFFECT_SHADOW))
-			&& af->a.shadow.edge == dir 
+			&& af->a.shadow.edge == dir
 			&& IS_SET (exit->exit_info, EX_ISDOOR)
 			&& IS_SET (exit->exit_info, EX_CLOSED)
 			&& !IS_SET (exit->exit_info, EX_ISGATE))
@@ -4229,7 +4231,7 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 		if (obj && obj->obj_flags.type_flag == ITEM_BOARD)
 		{
 
-			//if (obj->clan_data 
+			//if (obj->clan_data
 			//&& !(is_clan_member(ch, obj->clan_data->name)))
 			//{
 			//show_obj_to_char (obj, ch, 15);
@@ -4378,7 +4380,7 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				if (!EXIT (ch, dir))
 					continue;
-				if (ch->room->secrets[dir] 
+				if (ch->room->secrets[dir]
 				&& IS_SET (EXIT (ch, dir)->exit_info, EX_CLOSED)
 					&& IS_MORTAL (ch))
 					continue;
@@ -4496,17 +4498,17 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 			if (weather_info[ch->room->zone].special_effect != NO_EFFECT)
 			{
 				//show effect specific message
-				if (weather_info[ch->room->zone].special_effect == VOLCANIC_SMOKE)	
+				if (weather_info[ch->room->zone].special_effect == VOLCANIC_SMOKE)
 				{
 					sprintf (buf + strlen (buf),
 						"#6A cloud of thick, dust filled volcanic smoke drifts through the air.\n#0");
 				}
-				else if (weather_info[ch->room->zone].special_effect == FOUL_STENCH)	
+				else if (weather_info[ch->room->zone].special_effect == FOUL_STENCH)
 				{
 					sprintf (buf + strlen (buf),
 						"#6A foul stench permeates the area.\n#0");
 				}
-				else if (weather_info[ch->room->zone].special_effect == LOW_MIST)	
+				else if (weather_info[ch->room->zone].special_effect == LOW_MIST)
 				{
 					sprintf (buf + strlen (buf),
 						"#6A low, eerie mist sits heavily upon the land.\n#0");
@@ -4579,7 +4581,7 @@ read_pc_message (CHAR_DATA * ch, char *name, char *argument)
 	if (ch == who && !message->flags)
 		mark_as_read (ch, atoi (buf));
 
-	unload_message (message);
+	free_mem(message);
 	unload_pc (who);
 
 	return 1;
@@ -4617,7 +4619,7 @@ read_virtual_message (CHAR_DATA * ch, char *name, char *argument)
 	send_to_char ("\n", ch);
 	page_string (ch->desc, b_buf);
 
-	unload_message (message);
+	free_mem(message);
 
 	return 1;
 }
@@ -4752,7 +4754,7 @@ do_exits (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (weather_info[ch->room->zone].state == HEAVY_SNOW 
+	if (weather_info[ch->room->zone].state == HEAVY_SNOW
 		&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
 		&& !IS_SET (ch->affected_by, AFF_INFRAVIS))
 		&& !IS_SET (ch->room->room_flags, INDOORS) && IS_MORTAL (ch))
@@ -4780,7 +4782,7 @@ do_exits (CHAR_DATA * ch, char *argument, int cmd)
 
 		strExit[0] = '\0';
 
-		if (IS_SET (exit->exit_info, EX_ISDOOR) 
+		if (IS_SET (exit->exit_info, EX_ISDOOR)
 			|| IS_SET (exit->exit_info, EX_ISGATE))
 		{
 
@@ -5222,8 +5224,6 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 
-
-
 	switch (GET_POS (ch))
 	{
 	case POSITION_DEAD:
@@ -5427,7 +5427,7 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 					vobj = vtoo (af->a.job.object_vnum);
 
 					sprintf (buf,
-						"   Job %d:  %d of %d days until payday\n", 
+						"   Job %d:  %d of %d days until payday\n",
 						af->type - JOB_1 + 1,
 						i,
 						af->a.job.days);
@@ -6067,7 +6067,7 @@ do_time (CHAR_DATA * ch, char *argument, int cmd)
 	send_to_char ("\n", ch);
 	send_to_char (p, ch);
 
-	mem_free (p); //char*
+	free_mem (p); //char*
 	p = NULL;
 
 	if (GET_TRUST (ch))
@@ -6664,19 +6664,19 @@ do_weather (CHAR_DATA * ch, char *argument, int cmd)
 	if (weather_info[ch->room->zone].special_effect != NO_EFFECT)
 	{
 		//show effect specific message
-		if (weather_info[ch->room->zone].special_effect == VOLCANIC_SMOKE)	
+		if (weather_info[ch->room->zone].special_effect == VOLCANIC_SMOKE)
 		{
 			send_to_char
 				("A cloud of thick, dust filled volcanic smoke drifts through the air.\n",
 				ch);
 		}
-		else if (weather_info[ch->room->zone].special_effect == FOUL_STENCH)	
+		else if (weather_info[ch->room->zone].special_effect == FOUL_STENCH)
 		{
 			send_to_char
 				("A foul stench permeates the area.\n",
 				ch);
 		}
-		else if (!weather_echo_state && weather_info[ch->room->zone].special_effect == LOW_MIST)	
+		else if (!weather_echo_state && weather_info[ch->room->zone].special_effect == LOW_MIST)
 		{
 			send_to_char
 				("A low, eerie mist sits heavily upon the land.\n",
@@ -6794,19 +6794,18 @@ do_hedit (CHAR_DATA * ch, char *argument, int cmd)
 
 	lvl = atoi (level);
 
-	ch->delay_who = str_dup (topic);
-	ch->delay_who2 = str_dup (subject);
+	ch->delay_who = duplicateString (topic);
+	ch->delay_who2 = duplicateString (subject);
 	ch->delay_info1 = lvl;
 
 	send_to_char ("Enter the text of this database entry:\n", ch);
 
 	make_quiet (ch);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
-
-	ch->desc->str = &ch->desc->pending_message->message;
+	free_mem(ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
-
 	ch->desc->proc = post_help;
 }
 
@@ -6920,7 +6919,7 @@ number_of_helpfiles_available (int player_level)
 	}
 	else
 	{
-		std::string error_message = 
+		std::string error_message =
 			"number_of_helpfiles_available: "
 			"'mysql_safe_query' failed for the following reason: ";
 		error_message += mysql_error (database);
@@ -6981,15 +6980,15 @@ output_categories_available (int player_level)
 			system_log (error_message.c_str (), true);
 		}
 	}
-	else 
+	else
 	{
-		std::string error_message = 
+		std::string error_message =
 			"output_categories_available: "
 			"'mysql_safe_query' failed to query shadows.helpfiles because: ";
 		error_message += mysql_error (database);
 
 		std::cerr << error_message << std::endl;
-		system_log (error_message.c_str (), true);      
+		system_log (error_message.c_str (), true);
 	}
 
 	return category_list;
@@ -7084,7 +7083,7 @@ do_help (CHAR_DATA * ch, char *argument, int cmd)
 		}
 
 		// Spit out a generic syntax message
-		sprintf (b_buf, 
+		sprintf (b_buf,
 			"\n                      #6%s Help Database#0\n\n"
 			"There are currently #6%d#0 helpfiles accessible to you"
 			" in our database.\n\n"
@@ -7095,8 +7094,8 @@ do_help (CHAR_DATA * ch, char *argument, int cmd)
 			" please see \'#6help help#0\'.\n\n"
 			"Our helpfiles on the Web:"
 			" #6http://www.middle-earth.us/index.php?display=help#0.\n",
-			MUD_NAME, 
-			help_available, 
+			MUD_NAME,
+			help_available,
 			category_list.empty () ? "#6None#0\n" : category_list.c_str (),
 			buf);
 
@@ -7627,10 +7626,10 @@ do_find (CHAR_DATA * ch, char *argument, int cmd)
 	{
 
 		if (*buf == '+')
-			must_list[musts++] = str_dup (buf + 1);
+			must_list[musts++] = duplicateString (buf + 1);
 
 		else if (*buf == '-')
-			not_list[nots++] = str_dup (buf + 1);
+			not_list[nots++] = duplicateString (buf + 1);
 
 		else if (isdigit (*buf))
 		{
@@ -7773,7 +7772,7 @@ do_locate (CHAR_DATA * ch, char *argument, int cmd)
 
 			argument = one_argument (argument, buf);
 
-			if ( !str_cmp (buf, "pc") ){ 
+			if ( !str_cmp (buf, "pc") ){
 				argument = one_argument (argument, buf);
 				pc_only++;
 			}
@@ -7928,25 +7927,24 @@ void do_where (CHAR_DATA * ch, char *argument, int cmd) {
 }
 
 //Will allow sphere counts in who to count by zones instead of clanning. - Vader
-// 0 = Guest, 1 = Gondor, 2 = Northmen, 3 = Fahad Jafari, 4 = Orcs,  5 = Mordor
 int kingdom_from_zone (CHAR_DATA *ch)
 {
 	int zone = ch->in_room / 1000;
 	if (IS_SET(ch->flags, FLAG_GUEST))
 		return 0;
-	else if (zone == 23)
+	else if (zone == 23 || zone == 5 || zone == 6)
 		return 5;
-	//else if (zone == 41 || zone == 40)
-	//	return 4;
-	//else if (zone == 73 || zone == 80 || zone == 81 || zone == 82)
-	//	return 3;
+	else if (zone == 41 || zone == 40)
+		return 4;
+	else if (zone == 73 || zone == 80 || zone == 81 || zone == 82)
+		return 3;
 	else if (zone == 45)
 		return 2;
 	else if (zone == 1  || zone == 2  || zone == 3  || zone == 4  ||
 		zone == 8  || zone == 10 || zone == 11 || zone == 12 ||
-		zone == 13 || zone == 14 || zone == 15 || zone == 18 || 
-		zone == 19 || zone == 21 || zone == 22 || zone == 38 || 
-		zone == 51 || zone == 54 || zone == 70 || zone == 71 || 
+		zone == 13 || zone == 14 || zone == 15 || zone == 18 ||
+		zone == 19 || zone == 21 || zone == 22 || zone == 38 ||
+		zone == 51 || zone == 54 || zone == 70 || zone == 71 ||
 		zone == 72 || zone == 74 || zone == 75 || zone == 76 ||
 		zone == 77 || zone == 78 || zone == 79 || zone == 96)
 		return 1;
@@ -7955,6 +7953,7 @@ int kingdom_from_zone (CHAR_DATA *ch)
 
 //This helper function counts how many players are in the room.
 //Anytime a new room is reference with vtor, run this command. - Vader
+// Err, no Vader, if it mattered so much, put it in vtor. This command ignores hidden people now - Case
 
 void roomCount(ROOM_DATA *rd)
 {
@@ -7984,13 +7983,9 @@ std::string gatheringPlaceCore(int room_num, std::string name, bool colorise)
 	std::stringstream placestream;
 
 	ROOM_DATA* rd = vtor(room_num);
-	roomCount(rd); // This only called once, here, so I'm stopping it include hidden PCs
+	roomCount(rd);
 
-	int num_occu = 0;
-
-	if (rd != NULL) {
-		num_occu = rd->occupants;
-	}
+	int num_occu = rd->occupants;
 
 	if (num_occu > 0)
 	{
@@ -8025,7 +8020,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	availableAdminsStream << std::endl << "#2Available Staff#0:" << std::endl;
 	bool availableAdmins = false;
 
-	int sphere = kingdom_from_zone(ch);
+	int sphere = kingdom_from_zone(ch); // 0 = Guest, 1 = Gondor, 2 = Northmen, 3 = Fahad Jafari, 4 = Orcs,  5 = Mordor
 
 	for (d = descriptor_list; d; d = d->next)
 	{
@@ -8064,20 +8059,20 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		whoStream << std::endl << "There are #2" << mortals << "#0 presences within Middle-earth. " << std::endl;
 	}
 
-	//	if (immortals == 1) {
-	//		if (mortals == 1) {
-	//			whoStream << " and it is an administrator." << std::endl;
-	//		}
-	//		else {
-	//			whoStream << ", of which #21#0 is an administrator." << std::endl;
-	//		}
-	//	}
-	//	else if (immortals > 1) {
-	//		whoStream << ", of which #2" << immortals << "#0 are administrators." << std::endl;
-	//	}
-	//	else {
-	//		whoStream << "." << std::endl;
-	//	}
+	//     if (immortals == 1) {
+	//             if (mortals == 1) {
+	//                     whoStream << " and it is an administrator." << std::endl;
+	//             }
+	//             else {
+	//                     whoStream << ", of which #21#0 is an administrator." << std::endl;
+	//             }
+	//     }
+	//     else if (immortals > 1) {
+	//             whoStream << ", of which #2" << immortals << "#0 are administrators." << std::endl;
+	//     }
+	//     else {
+	//             whoStream << "." << std::endl;
+	//     }
 
 	switch (sphere) {
 		case 1:
@@ -8099,6 +8094,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 			break;
 	}
 
+
 	if (sphere > 0 && clanCount != 1) {
 		whoStream << "s." << std::endl;
 	}
@@ -8110,12 +8106,12 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		whoStream << "Outside of the scope of Arda [#6" << ch->in_room / 1000 << "#0] " << std::endl;
 
 	if (sphere == 1)
-	{	
+	{
 
 		whoStream << gatheringPlace(3271, "the Wardog Commons");
 		whoStream << gatheringPlace(1108, "the Battered Shield");
 		whoStream << gatheringPlace(1111, "the Gilded Lily");
-		whoStream << gatheringPlace(3831, "the Copper Tankard Tavern");	
+		whoStream << gatheringPlace(3831, "the Copper Tankard Tavern");
 		whoStream << gatheringPlace(54454, "the White Hart Tavern");
 
 		//Show battalion information to only those who can access it - Vader
@@ -8141,29 +8137,19 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	else if (sphere == 2)
-	{	
+	{
 		whoStream << gatheringPlace(45001, "The Boar's Head Inn");
-		//whoStream << gatheringPlace(43054, "The Dalewatch Mess Hall");
 	}
-	//else if (sphere == 3)
-	//{
-	//	whoStream << gatheringPlace(80129, "the Drifting Lily Inn");
-	//	whoStream << gatheringPlace(80239, "the Drowning Corsair");
-	//}
-	//else if (sphere == 4)
-	//{
-	//	whoStream << gatheringPlace(41425, "Da Bleedin' Fist Waterhole");
-	//	whoStream << gatheringPlace(41470, "Grutz's Guttahs' cave");
-	//
-	//	if (is_clan_member(ch, "blackrend"))
-	//	{
-	//		whoStream << gatheringPlace(41207, "Blackrend's Cave");
-	//	}
-	//}
+	else if (sphere == 3)
+	{
+		whoStream << gatheringPlace(80129, "the Drifting Lily Inn");
+		whoStream << gatheringPlace(80239, "the Drowning Corsair");
+	}
 	else if (sphere == 5)
 	{
 		whoStream << gatheringPlace(23046, "The Spear's Thrust");
 	}
+
 
 	if (guests != 1) {
 		whoStream << "Additionally, there are #2" << guests << "#0 guests visiting our out of character Guest Lounge." << std::endl;
@@ -9052,7 +9038,7 @@ void
 do_qscan (CHAR_DATA * ch, char *argument, int cmd)
 {
 	do_scan (ch, "", 1);
-	return;	
+	return;
 }
 
 void
@@ -9164,7 +9150,7 @@ char* coin_sdesc( const int objnum, const bool plural )
 	case 5034:
 		if (plural)
 			return "hexagonal tokens of blackened steel";
-		else 
+		else
 			return "hexagonal token of blackened steel";
 	case 5035:
 		if (plural)
@@ -9383,7 +9369,7 @@ void delayed_count_coin (CHAR_DATA * ch)
 			sprintf( buf, "By your count, you have %d coppers' worth in coin:", money[0] );
 	else
 		if(money[1])
-			sprintf (buf, "By your count, you have %s in coin:", amount.c_str());		
+			sprintf (buf, "By your count, you have %s in coin:", amount.c_str());
 		else
 			send_to_char ("You don't seem to have any coin.\n", ch);
 	act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
@@ -9519,7 +9505,7 @@ post_track_response (DESCRIPTOR_DATA * d)
 	mysql_free_result (result);
 	result = NULL;
 
-	unload_message (message);
+	free_mem(message);
 }
 
 int
@@ -9738,7 +9724,7 @@ do_erase (CHAR_DATA * ch, char *argument, int cmd)
 		&& strcasecmp (GET_NAME (ch), message->poster) != STR_MATCH)
 	{
 		send_to_char ("You can only erase your own messages.\n", ch);
-		unload_message (message);
+		free_mem(message);
 		return;
 	}
 
@@ -9747,7 +9733,7 @@ do_erase (CHAR_DATA * ch, char *argument, int cmd)
 	else
 		send_to_char ("There was a problem erasing that message.\n", ch);
 
-	unload_message (message);
+	free_mem(message);
 }
 
 int
@@ -9770,23 +9756,24 @@ write_virtual_board (CHAR_DATA * ch, char *name, char *argument)
 	while (*argument == ' ')
 		argument++;
 
-	ch->desc->pending_message =
-		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+	free_mem (ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	/* We need to borrow the poster slot to save the board name */
 
-	ch->desc->pending_message->poster = add_hash (name);
+	ch->desc->pending_message->poster = duplicateString (name);
 	ch->desc->pending_message->message = NULL;
 	ch->desc->pending_message->nVirtual = -2;
-	ch->desc->pending_message->info = add_hash ("");
-	ch->desc->pending_message->subject = add_hash (argument);
+	ch->desc->pending_message->info = duplicateString ("");
+	ch->desc->pending_message->subject = duplicateString (argument);
 	ch->desc->pending_message->flags = MF_READ;
 
 	make_quiet (ch);
 
 	send_to_char ("Enter your note, terminate with an '@'\n\n", ch);
 
-	ch->desc->str = &ch->desc->pending_message->message;
+
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->desc->proc = post_to_mysql_virtual_board;
@@ -9822,7 +9809,7 @@ post_player_message (DESCRIPTOR_DATA * d)
 		d->pending_message->message,	/* message */
 		d->pending_message->flags);
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 
 	d->pending_message = NULL;
 }
@@ -9856,23 +9843,23 @@ write_pc_board (CHAR_DATA * ch, char *name, char *argument)
 	while (*argument == ' ')
 		argument++;
 
-	ch->desc->pending_message =
-		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+	free_mem(ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	/* We need to borrow the poster slot to save the board name */
 
-	ch->desc->pending_message->poster = add_hash (name);
+	ch->desc->pending_message->poster = duplicateString (name);
 	ch->desc->pending_message->message = NULL;
 	ch->desc->pending_message->nVirtual = -1;
-	ch->desc->pending_message->info = add_hash ("");
-	ch->desc->pending_message->subject = add_hash (argument);
+	ch->desc->pending_message->info = duplicateString ("");
+	ch->desc->pending_message->subject = duplicateString (argument);
 	ch->desc->pending_message->flags = 0;
 
 	make_quiet (ch);
 
 	send_to_char ("Enter your note, terminate with an '@'\n\n", ch);
 
-	ch->desc->str = &ch->desc->pending_message->message;
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->desc->proc = post_to_mysql_player_board;
@@ -9908,7 +9895,7 @@ post_journal (DESCRIPTOR_DATA * d)
 		d->pending_message->message,	/* message */
 		d->pending_message->flags);
 
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 
 	d->pending_message = NULL;
 }
@@ -9926,22 +9913,22 @@ write_journal (CHAR_DATA * ch, char *argument)
 	while (*argument == ' ')
 		argument++;
 
-	ch->desc->pending_message =
-		(MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+	free_mem(ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	/* We need to borrow the poster slot to save the board name */
 
-	ch->desc->pending_message->poster = add_hash (ch->tname);
+	ch->desc->pending_message->poster = duplicateString (ch->tname);
 	ch->desc->pending_message->message = NULL;
 	ch->desc->pending_message->nVirtual = -1;
-	ch->desc->pending_message->info = add_hash ("");
-	ch->desc->pending_message->subject = add_hash (argument);
+	ch->desc->pending_message->info = duplicateString ("");
+	ch->desc->pending_message->subject = duplicateString (argument);
 
 	make_quiet (ch);
 
 	send_to_char ("Type your journal entry; terminate with an '@'\n\n", ch);
 
-	ch->desc->str = &ch->desc->pending_message->message;
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->desc->proc = post_to_mysql_journal;
@@ -10010,15 +9997,16 @@ do_write (CHAR_DATA * ch, char *argument, int cmd)
 
 	strcpy (title, argument);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
+	free_mem(ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	/* We need to borrow the poster slot to save the board name */
 
-	ch->desc->pending_message->poster = add_hash (buf);
+	ch->desc->pending_message->poster = duplicateString (buf);
 	ch->desc->pending_message->message = NULL;
 	ch->desc->pending_message->nVirtual = 0;
-	ch->desc->pending_message->info = add_hash ("");
-	ch->desc->pending_message->subject = add_hash (title);
+	ch->desc->pending_message->info = duplicateString ("");
+	ch->desc->pending_message->subject = duplicateString (title);
 
 	ch->desc->pending_message->flags = 0;
 
@@ -10031,7 +10019,7 @@ do_write (CHAR_DATA * ch, char *argument, int cmd)
 
 	make_quiet (ch);
 
-	ch->desc->str = &ch->desc->pending_message->message;
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->desc->proc = post_message;
@@ -10107,7 +10095,7 @@ read_journal_message (CHAR_DATA * ch, CHAR_DATA * reader, char *argument)
 		page_string (reader->desc, b_buf);
 	}
 
-	unload_message (message);
+	free_mem(message);
 
 	return 1;
 }
@@ -10175,10 +10163,13 @@ do_jread (CHAR_DATA * ch, char *argument, int cmd)
 void
 post_message (DESCRIPTOR_DATA * d)
 {
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message) {
 		send_to_char ("No message posted.\n", d->character);
-	else
+		free_mem(d->pending_message);
+	}
+	else {
 		post_to_mysql_board (d);
+	}
 }
 
 void
@@ -10192,14 +10183,12 @@ add_board (int level, char *name, char *title)
 	if (board_lookup (name))
 		return;
 
-	CREATE (board_entry, BOARD_DATA, 1);
-
-	board_entry->level = level;
-	board_entry->name = add_hash (name);
-	board_entry->title = add_hash (title);
-	board_entry->next_virtual = 1;
-
+	board_entry = new BOARD_DATA;
 	board_entry->next = NULL;
+	board_entry->level = level;
+	board_entry->name = duplicateString (name);
+	board_entry->title = duplicateString (title);
+	board_entry->next_virtual = 1;
 
 	/* Add board_entry to end of full_board_list */
 
@@ -10387,7 +10376,7 @@ add_message (int new_message, const char *name, int nVirtual, const char *poster
 		return;
 	}
 
-	msg = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+	msg = new MESSAGE_DATA;
 
 	if (nVirtual == -1)
 	{
@@ -10496,12 +10485,12 @@ add_message (int new_message, const char *name, int nVirtual, const char *poster
 	else
 		msg->nVirtual = i;
 	msg->flags = flags;
-	msg->poster = add_hash (poster);
-	msg->date = add_hash (date);
+	msg->poster = duplicateString (poster);
+	msg->date = duplicateString (date);
 	msg->subject = tilde_eliminator (subject);
-	msg->info = add_hash (info);
+	msg->info = duplicateString (info);
 	msg->message = tilde_eliminator (message);
-	msg->icdate = add_hash (date_buf);
+	msg->icdate = duplicateString (date_buf);
 
 	if (named || new_message == 2)
 		sprintf (msg_file_name, PLAYER_BOARD_DIR "/%s.%06d", name, nVirtual);
@@ -10529,13 +10518,13 @@ add_message (int new_message, const char *name, int nVirtual, const char *poster
 
 	if (!new_message)
 	{
-		unload_message (msg);
+		free_mem(msg);
 		return;
 	}
 
 	system_log ("Reached end of add_message()", true);
 
-	unload_message (msg);
+	free_mem(msg);
 }
 
 
@@ -10549,7 +10538,7 @@ read_a_line (FILE * fp)
 	if (*buf)
 		buf[strlen (buf) - 1] = '\0';
 
-	return str_dup (buf);
+	return duplicateString (buf);
 }
 
 MESSAGE_DATA *
@@ -10601,7 +10590,7 @@ load_message (char *msg_name, int pc_message, int msg_number)
 			return NULL;
 		}
 
-		message = (MESSAGE_DATA *) alloc (sizeof (MESSAGE_DATA), 1);
+		message = new MESSAGE_DATA;
 
 		message->nVirtual = msg_number;
 		message->poster = read_a_line (fp_message);
@@ -10673,38 +10662,11 @@ load_message (char *msg_name, int pc_message, int msg_number)
 				tilde = false;
 		}
 
-		message->icdate = add_hash (date_buf);
+		message->icdate = duplicateString (date_buf);
 
 		fclose (fp_message);
 
 		return message;
-}
-
-void
-unload_message (MESSAGE_DATA * message)
-{
-	if (message->poster)
-		mem_free (message->poster);
-
-	if (message->date)
-		mem_free (message->date);
-
-	if (message->subject)
-		mem_free (message->subject);
-
-	if (message->info)
-		mem_free (message->info);
-
-	if (message->message)
-		mem_free (message->message);
-
-	if (message->icdate)
-		mem_free (message->icdate);
-
-	if (message->target)
-		mem_free (message->target);
-
-	mem_free (message); // MESSAGE_DATA*
 }
 
 void
@@ -11096,7 +11058,7 @@ post_writing (DESCRIPTOR_DATA * d)
 	}
 
 	mod =
-		(skill_level(ch, ch->writes, 0) * 0.70) + 
+		(skill_level(ch, ch->writes, 0) * 0.70) +
 		(skill_level(ch, ch->speaks, 0) * 0.30);
 
 
@@ -11104,10 +11066,11 @@ post_writing (DESCRIPTOR_DATA * d)
 
 	if (GET_ITEM_TYPE (obj) == ITEM_PARCHMENT)
 	{
-		CREATE (obj->writing, WRITING_DATA, 1);
-		obj->writing->ink = add_hash (ch->delay_who);
-		obj->writing->author = add_hash (ch->tname);
-		obj->writing->date = add_hash (date);
+		obj->writing = new WRITING_DATA;
+		obj->writing->next_page = NULL;
+		obj->writing->ink = duplicateString (ch->delay_who);
+		obj->writing->author = duplicateString (ch->tname);
+		obj->writing->date = duplicateString (date);
 		obj->writing->language = ch->speaks;
 		obj->writing->script = ch->writes;
 		obj->writing->message = tilde_eliminator (message);
@@ -11123,9 +11086,9 @@ post_writing (DESCRIPTOR_DATA * d)
 				writing = writing->next_page;
 			}
 		}
-		writing->ink = add_hash (ch->delay_who);
-		writing->author = add_hash (ch->tname);
-		writing->date = add_hash (date);
+		writing->ink = duplicateString (ch->delay_who);
+		writing->author = duplicateString (ch->tname);
+		writing->date = duplicateString (date);
 		writing->language = ch->speaks;
 		writing->script = ch->writes;
 		writing->message = tilde_eliminator (message);
@@ -11134,7 +11097,7 @@ post_writing (DESCRIPTOR_DATA * d)
 
 	ch->pc->writing_on = NULL;
 	ch->delay_who = NULL;
-	unload_message (d->pending_message);
+	free_mem(d->pending_message);
 
 	skill_use (ch, ch->writes, 0);
 	if (!number (0, 1))
@@ -11326,13 +11289,14 @@ do_tear (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (*page->message && strcasecmp (page->message, "blank") != STR_MATCH)
 		{
-			CREATE (parchment->writing, WRITING_DATA, 1);
-			parchment->writing->ink = add_hash (page->ink);
-			parchment->writing->author = add_hash (page->author);
-			parchment->writing->date = add_hash (page->date);
+			parchment->writing = new WRITING_DATA;
+			parchment->writing->next_page = NULL;
+			parchment->writing->ink = duplicateString (page->ink);
+			parchment->writing->author = duplicateString (page->author);
+			parchment->writing->date = duplicateString (page->date);
 			parchment->writing->language = page->language;
 			parchment->writing->script = page->script;
-			parchment->writing->message = add_hash (page->message);
+			parchment->writing->message = duplicateString (page->message);
 			parchment->writing->skill = page->skill;;
 		}
 
@@ -11570,9 +11534,8 @@ do_scribe (CHAR_DATA * ch, char *argument, int cmd)
 	buffer[3] = toupper (buffer[3]);
 	act (buffer, true, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
 
-	CREATE (ch->desc->pending_message, MESSAGE_DATA, 1);
-
-	ch->desc->pending_message->message = NULL;
+	free_mem(ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	send_to_char
 		("Scribe your message; terminate with an '@'. Please keep its length plausible\nfor the size of the writing object, since we have opted against coded limits.\n",
@@ -11583,7 +11546,7 @@ do_scribe (CHAR_DATA * ch, char *argument, int cmd)
 
 	make_quiet (ch);
 
-	ch->desc->str = &ch->desc->pending_message->message;
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->max_str = MAX_STRING_LENGTH;
 
 	ch->desc->proc = post_writing;
@@ -11592,7 +11555,7 @@ do_scribe (CHAR_DATA * ch, char *argument, int cmd)
 
 void
 do_ticket (CHAR_DATA * ch, char *argument, int cmd)
-{	
+{
 	char buf[AVG_STRING_LENGTH];
 	char buf2[AVG_STRING_LENGTH];
 	char f_tick[AVG_STRING_LENGTH];
@@ -11654,8 +11617,8 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 
 		//browse_ticket(ch, first_tick, last_tick);
 		for (tick_num = first_tick; tick_num <= last_tick; tick_num ++)
-		{			  	
-			read_ticket(ch, tick_num);  	
+		{
+			read_ticket(ch, tick_num);
 		};
 
 	} //if browse
@@ -11736,7 +11699,7 @@ read_ticket (CHAR_DATA * ch, int tick_num)
 		if (*buf == ' ' || *buf == '\n')
 			fgets (buf, 255, fp);
 
-		//Look for the MOB				
+		//Look for the MOB
 		if (sscanf (buf, "%d %s", &nVirtual, hookup) != 2)
 		{
 			fclose (fp);
@@ -11744,16 +11707,16 @@ read_ticket (CHAR_DATA * ch, int tick_num)
 			sprintf(buf2 + strlen(buf2), "Bad file format-mob\n");
 			send_to_char(buf2, ch);
 			return;
-		}		
+		}
 
 		mob = load_a_saved_mobile (nVirtual, fp, true);
 
 		if (mob)
 		{
-			sprintf(buf2 + strlen(buf2), "Vnum: %d \nNamed: %s \nClans: %s \nOwner: %s \nStabled at: %s (%d) \n", mob->mob->nVirtual, mob->name, mob->clans, mob->mob->owner, vtor(mob->in_room)->name, mob->in_room);			
+			sprintf(buf2 + strlen(buf2), "Vnum: %d \nNamed: %s \nClans: %s \nOwner: %s \nStabled at: %s (%d) \n", mob->mob->nVirtual, mob->name, mob->clans, mob->mob->owner, vtor(mob->in_room)->name, mob->in_room);
 
 			save_mobile (mob, fp, "HITCH", 1);	/* Extracts the mobile */
-		}	
+		}
 
 		fclose (fp);
 		send_to_char(buf2, ch);
@@ -11801,12 +11764,12 @@ do_evaluate
 This command provides detailed information about a held object
 including weight, cost and any skill affects, as well as other
 object specific information such as time left for light objects
-and liquid left in drinks containers. 
+and liquid left in drinks containers.
 
 - Valarauka
 
 ***/
-void 
+void
 do_evaluate (CHAR_DATA *ch, char *argument, int cmd)
 {
 
@@ -11848,9 +11811,9 @@ do_evaluate (CHAR_DATA *ch, char *argument, int cmd)
 			return;
 	}
 
-	/*** Describe the object ***/	
+	/*** Describe the object ***/
 	if (obj) {
-		snprintf (buffer, MAX_STRING_LENGTH,  "\nIt is #2%s#0", obj->short_description); 
+		snprintf (buffer, MAX_STRING_LENGTH,  "\nIt is #2%s#0", obj->short_description);
 		act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 		*buffer = '\0';
 	}
@@ -11866,7 +11829,7 @@ do_evaluate (CHAR_DATA *ch, char *argument, int cmd)
 	return;
 }
 
-void 
+void
 show_evaluate_information (CHAR_DATA *ch, OBJ_DATA	*obj)
 {
 	int 		variance = 0;
@@ -11919,7 +11882,7 @@ show_evaluate_information (CHAR_DATA *ch, OBJ_DATA	*obj)
 		where as those with a low scan skill might be quite far from the actual weight.
 		The heavier an item, the harder it will be to get a very accurate estimate.
 
-		In addition, a skill check must then be passed to allow the player to see the 
+		In addition, a skill check must then be passed to allow the player to see the
 		estimated weight.
 		*/
 
@@ -11961,7 +11924,7 @@ show_evaluate_information (CHAR_DATA *ch, OBJ_DATA	*obj)
 		}
 	}
 	else{ /** no way to check weight - message for non-takeable objects **/
-		snprintf (buffer, MAX_STRING_LENGTH,  "\nYou can't even begin to guess how much this weighs.");  
+		snprintf (buffer, MAX_STRING_LENGTH,  "\nYou can't even begin to guess how much this weighs.");
 	}
 
 	act (buffer, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
@@ -12079,7 +12042,7 @@ show_evaluate_information (CHAR_DATA *ch, OBJ_DATA	*obj)
 		else {
 			if ( obj->o.drinkcon.capacity ) {
 				temp = (obj->o.drinkcon.volume * 3) / obj->o.drinkcon.capacity;
-			}	
+			}
 			else{
 				temp = 1;
 			}
@@ -12147,7 +12110,7 @@ show_evaluate_information (CHAR_DATA *ch, OBJ_DATA	*obj)
 			else if(hours > 12)
 			{
 				sprintf (buffer,
-					"\nYou notice that %s still appears fresh, though it is slowly beginning to lose its original unsullied appearance.", 
+					"\nYou notice that %s still appears fresh, though it is slowly beginning to lose its original unsullied appearance.",
 					obj->short_description);
 			}
 			else if(hours > 1)
@@ -12229,13 +12192,13 @@ void do_origins (CHAR_DATA *ch, char *argument, int cmd)
 	/* add the crafts list */
 	char* originlist = origins_list(ch,obj);
 	sprintf(output + strlen(output), originlist);
-	mem_free(originlist);
+	free_mem(originlist);
 	send_to_char(output,ch);
 }
 
 
 /* returns line formatted edition of crafts you can use something in */
-/* this must be mem_free'd to prevent leaks */
+/* this must be free_mem'd to prevent leaks */
 char * origins_list(CHAR_DATA * ch, OBJ_DATA * obj)
 {
 	char* p = 0;
@@ -12266,7 +12229,7 @@ char * origins_list(CHAR_DATA * ch, OBJ_DATA * obj)
 			if (!(af = get_affect (ch, i)))
 				continue;
 			/* this shouldn't happen since it's in the craft range of affect nums, but might as well check */
-			if (!af->a.craft || !af->a.craft->subcraft) 
+			if (!af->a.craft || !af->a.craft->subcraft)
 				continue;
 			/* if the craft does not produce this item, ignore that craft */
 			if (!craft_produces (af->a.craft->subcraft, obj->nVirtual))
@@ -12293,6 +12256,6 @@ char * origins_list(CHAR_DATA * ch, OBJ_DATA * obj)
 		reformat_string (output, &p);
 	}
 
-	/* return the str_dup'd version */
+	/* return the duplicateString'd version */
 	return p;
 }
