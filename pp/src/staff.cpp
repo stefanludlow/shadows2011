@@ -8971,13 +8971,13 @@ list_all_crafts (CHAR_DATA * ch)
 	craftList << "We currently have the following crafts available:\n\n";
 
 	for (craft = crafts; craft; craft = craft->next) {
-		sprintf (craftline, "#6Craft:#0 %-20s #6Sub:#0 %-24s #6Cmd:#0 %-10s\n", 
+		sprintf (craftLine, "#6Craft:#0 %-20s #6Sub:#0 %-24s #6Cmd:#0 %-10s\n", 
 			craft->craft_name, craft->subcraft_name, craft->command);
-		craftsList << craftLine;
+		craftList << craftLine;
 	}
 
 	send_to_char ("\n", ch);
-	page_string (ch->desc, craftsList.str().c_str());
+	page_string (ch->desc, craftList.str().c_str());
 }
 
 void
