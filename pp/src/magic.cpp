@@ -3297,7 +3297,7 @@ job_add_affect (CHAR_DATA * ch, int type, int days, int pay_date, int cash,
 	if ((af = get_affect (ch, type)))
 		affect_remove (ch, af);
 
-	af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
+	af = new AFFECTED_TYPE;
 
 	af->type = type;
 	af->a.job.days = days;

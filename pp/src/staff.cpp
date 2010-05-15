@@ -1487,7 +1487,7 @@ do_ban (CHAR_DATA * ch, char *argument, int cmd)
 					"      #2Accounts:#0 None Found\n");
 
 				ban_time = site->banned_on;
-				start_date = (char *) alloc (256);
+				start_date = new char[256];
 				if (asctime_r (localtime (&ban_time), start_date) != NULL)
 				{
 					start_date[strlen (start_date) - 1] = '\0';
@@ -1505,7 +1505,7 @@ do_ban (CHAR_DATA * ch, char *argument, int cmd)
 						start_date);
 
 					end_ban_time = site->banned_until;
-					end_date = (char *) alloc (256);
+					end_date = new char[256];
 					if (asctime_r (localtime (&end_ban_time), end_date) != NULL)
 					{
 						end_date[strlen (end_date) - 1] = '\0';
@@ -3545,7 +3545,7 @@ acctstat (CHAR_DATA * ch, char *name)
 	}
 
 	/* Retreive the timestamp for Last Activity ( default = "" ) */
-	date = (char *) alloc (256);
+	date = new char[256];
 	date[0] = '\0';
 	std::string player_db = engine.get_config ("player_db");
 	mysql_safe_query
@@ -3579,7 +3579,7 @@ acctstat (CHAR_DATA * ch, char *name)
 	free_mem (date);
 
 	/* Account Registration Date ( default = "None Recorded" ) */
-	date = (char *) alloc (256);
+	date = new char[256];
 	date[0] = '\0';
 	account_time = acct->created_on;
 	asctime_r (localtime (&account_time), date);
@@ -8913,7 +8913,7 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 
 	/* Add a new affect */
 
-	af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
+	af = new AFFECTED_TYPE;
 
 	af->type = affect_no;
 
@@ -9260,7 +9260,7 @@ alias_create (CHAR_DATA * ch, char *alias_cmd, char *value)
 	if (!get_line (&value, line))
 		return;
 
-	alias = (ALIAS_DATA *) alloc (sizeof (ALIAS_DATA));
+	alias = new ALIAS_DATA;
 
 	alias->command = duplicateString (alias_cmd);
 	alias->line = duplicateString (line);
@@ -9270,7 +9270,7 @@ alias_create (CHAR_DATA * ch, char *alias_cmd, char *value)
 
 	while (get_line (&value, line))
 	{
-		alias->next_line = (ALIAS_DATA *) alloc (sizeof (ALIAS_DATA));
+		alias->next_line = new ALIAS_DATA;
 		alias = alias->next_line;
 
 		alias->line = duplicateString (line);
@@ -10243,8 +10243,7 @@ edit_string (DESCRIPTOR_DATA * d, std::string argument)
 
 	if (argument[0] != '@')
 	{
-		p =
-			(char *) alloc (strlen (d->edit_string) + argument.length () + 2);
+		p = new char[strlen(d->edit_string) + argument.length() + 2];
 
 		strcpy (p, d->edit_string);
 		strcat (p, argument.c_str ());
@@ -10267,7 +10266,7 @@ edit_string (DESCRIPTOR_DATA * d, std::string argument)
 	new_doc_length = strlen (document) -
 		d->edit_length + strlen (d->edit_string) + 1;
 
-	new_doc = (char *) alloc (new_doc_length);
+	new_doc = new char[new_doc_length];
 
 	*new_doc = '\0';
 
@@ -10790,7 +10789,7 @@ add_help_topics (CHAR_DATA * ch, HELP_DATA ** list, char *argument)
 			last_element->next; last_element = last_element->next)
 			;
 
-	master_element = (HELP_DATA *) alloc (sizeof (HELP_DATA));
+	master_element = new HELP_DATA;
 	master_element->keywords = duplicateString (argument);
 	master_element->help_info = duplicateString ("");
 
@@ -10804,7 +10803,7 @@ add_help_topics (CHAR_DATA * ch, HELP_DATA ** list, char *argument)
 	for (p = one_argument (argument, buf); *buf; p = one_argument (p, buf))
 	{
 
-		element = (HELP_DATA *) alloc (sizeof (HELP_DATA));
+		element = new HELP_DATA;
 
 		element->master_element = master_element;
 		element->help_info = NULL;

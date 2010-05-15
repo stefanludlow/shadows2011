@@ -595,8 +595,7 @@ fighting_sounds (CHAR_DATA * ch, ROOM_DATA * room)
 		{
 			if (!next_room->affects)
 			{
-				next_room->affects =
-					(AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
+				next_room->affects = new AFFECTED_TYPE;
 				next_room->affects->type = MAGIC_ROOM_FIGHT_NOISE;
 				next_room->affects->a.room.duration = from_dir;
 				next_room->affects->next = NULL;
@@ -606,8 +605,7 @@ fighting_sounds (CHAR_DATA * ch, ROOM_DATA * room)
 				{
 					if (!af->next)
 					{
-						af->next =
-							(AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
+						af->next = new AFFECTED_TYPE;
 						af->next->type = MAGIC_ROOM_FIGHT_NOISE;
 						af->next->a.room.duration = from_dir;
 						af->next->next = NULL;

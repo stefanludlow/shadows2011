@@ -220,7 +220,7 @@ ve_setup_screen (DESCRIPTOR_DATA * c)
 		free_mem (c->lines);
 	}
 
-	c->lines = (LINE_DATA *) alloc (sizeof (LINE_DATA));
+	c->lines = new LINE_DATA;
 
 	c->line = 1;
 	c->col = 1;
@@ -546,7 +546,7 @@ ve_insert_char (DESCRIPTOR_DATA * c, char add_char)
 
 	if (!line_ptr)
 	{
-		line_ptr = (char *) alloc (insert_index + 2);	/* +1 for new ch; +1 for zero */
+		line_ptr = new char[insert_index + 2]; /* +1 for new ch; +1 for zero */
 
 		for (i = 0; i < insert_index; i++)
 			line_ptr[i] = ' ';
@@ -771,7 +771,7 @@ ve_reconstruct (DESCRIPTOR_DATA * c)
 	if (c->descStr)
 		free_mem (c->descStr);
 
-	c->descStr = (char *) alloc (str_len);
+	c->descStr = new char[str_len + 1];
 
 	*c->descStr = '\0';
 

@@ -3023,7 +3023,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	case 'l':			/* Pending applications */
 
 		current_time = time (0);
-		date = (char *) alloc (256);
+		date = new char[256];
 		date[0] = '\0';
 		if (asctime_r (localtime (&current_time), date) != NULL)
 		{
@@ -13565,7 +13565,7 @@ do_resets (CHAR_DATA * ch, char *argument, int cmd)
 	if (!strcmp (buf, "reply"))
 	{
 
-		reset = (RESET_DATA *) alloc (sizeof (RESET_DATA));
+		reset = new RESET_DATA;
 
 		reset->type = RESET_REPLY;
 
@@ -13655,7 +13655,7 @@ do_resets (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	reset = (RESET_DATA *) alloc (sizeof (RESET_DATA));
+	reset = new RESET_DATA;
 
 	reset->command = duplicateString (argument);
 

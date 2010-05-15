@@ -2875,7 +2875,7 @@ load_char_mysql (const char *name)
 					continue;
 				magic_add_affect (ch, i, -1, 0, 0, 0, 0);
 				af = get_affect (ch, i);
-				af->a.craft =(struct affect_craft_type *)alloc (sizeof (struct affect_craft_type));
+				af->a.craft = new affect_craft_type;
 				af->a.craft->subcraft = craft;
 				af->a.craft->phase = NULL;
 				af->a.craft->target_ch = NULL;
@@ -2885,7 +2885,7 @@ load_char_mysql (const char *name)
 			}
 			else if (!str_cmp (buf2, "Affect"))
 			{
-				af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
+				af = new AFFECTED_TYPE;
 
 				sscanf (buf, "Affect %d %d %d %d %d %d %d\n",
 					&af->type,

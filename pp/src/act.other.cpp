@@ -1009,7 +1009,7 @@ delayed_hide_obj (CHAR_DATA * ch)
 
 	remove_obj_affect (obj, MAGIC_HIDDEN);	/* Probably doesn't exist */
 
-	af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
+	af = new AFFECTED_TYPE;
 
 	af->type = MAGIC_HIDDEN;
 	af->a.hidden.duration = -1;
@@ -3529,7 +3529,7 @@ do_teach (CHAR_DATA * ch, char *argument, int cmd)
 					break;
 			magic_add_affect (victim, i, -1, 0, 0, 0, 0);
 			af = get_affect (victim, i);
-			af->a.craft = (struct affect_craft_type *)alloc (sizeof (struct affect_craft_type));
+			af->a.craft =  new affected_craft_type;
 			af->a.craft->phase = NULL;
 			af->a.craft->subcraft = NULL;
 			af->a.craft->target_ch = NULL;

@@ -747,7 +747,7 @@ write_to_q (const char *txt, struct txt_q *queue)
 		p++;
 	}
 
-	newPtr->text = (char *) alloc (char_count + 1);
+	newPtr->text = new char[char_count + 1];
 
 	p = txt;
 	m = newPtr->text;

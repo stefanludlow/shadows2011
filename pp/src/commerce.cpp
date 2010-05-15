@@ -3356,7 +3356,7 @@ do_buy (CHAR_DATA * ch, char *argument, int cmd)
 			discount = 0;		/* A CF by ch */
 
 		discount = -1 * discount; //changing to a lower price
-		neg = (NEGOTIATION_DATA *) alloc (sizeof (NEGOTIATION_DATA));
+		neg = new NEGOTIATION_DATA;
 		neg->ch_coldload_id = ch->coldload_id;
 		neg->obj_vnum = obj->nVirtual;
 		neg->time_when_forgotten = time (NULL) + 6 * 60 * 60;	/* 6 hours */
@@ -4543,7 +4543,7 @@ do_sell (CHAR_DATA * ch, char *argument, int cmd)
 		else
 			discount = 0;		/* A CF by ch */
 
-		neg = (NEGOTIATION_DATA *) alloc (sizeof (NEGOTIATION_DATA));
+		neg = new NEGOTIATION_DATA;
 		neg->ch_coldload_id = ch->coldload_id;
 		neg->obj_vnum = obj->nVirtual;
 		neg->time_when_forgotten = time (NULL) + 6 * 60 * 60;	/* 6 hours */

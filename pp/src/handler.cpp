@@ -3495,7 +3495,7 @@ add_room_affect (AFFECTED_TYPE ** af, int type, int duration)
 		return;
 	}
 
-	raffect = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
+	raffect = new AFFECTED_TYPE;
 
 	raffect->type = type;
 	raffect->a.room.duration = duration;
@@ -4351,9 +4351,7 @@ load_dynamic_registry (void)
 		if (!str_cmp (token, "newclanname"))
 		{
 
-			name_switch =
-				(struct name_switch_data *)
-				alloc (sizeof (struct name_switch_data));
+			name_switch = new name_switch_data;
 
 			argument = one_argument (argument, token);
 			name_switch->old_name = duplicateString (token);

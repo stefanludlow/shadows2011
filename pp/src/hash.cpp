@@ -1434,7 +1434,7 @@ reset_zone (int zone)
 			if (get_affect (mob, ra->type))
 				continue;
 
-			af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
+			af = new AFFECTED_TYPE;
 
 			af->type = ra->type;
 			af->a.spell.duration = ra->duration;
@@ -1464,7 +1464,7 @@ reset_zone (int zone)
 
 			if (ZCMD.arg1 == RESET_REPLY)
 			{
-				reset = (RESET_DATA *) alloc (sizeof (RESET_DATA));
+				reset = new RESET_DATA;
 
 				reset->type = RESET_REPLY;
 
@@ -1512,7 +1512,7 @@ reset_zone (int zone)
 
 			af = get_affect (mob, i);
 
-			af->a.craft =(struct affect_craft_type *)alloc (sizeof (struct affect_craft_type));
+			af->a.craft = new affect_craft_type;
 			af->a.craft->phase = NULL;
 			af->a.craft->target_ch = NULL;
 			af->a.craft->target_obj = NULL;

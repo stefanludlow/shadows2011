@@ -3271,7 +3271,7 @@ string_add (DESCRIPTOR_DATA * d, char *str)
 		}
 		else
 		{
-			p = (char *) alloc (strlen (d->descStr) + strlen (str) + 3);
+			p = new char[strlen(d->descStr) + strlen(str) + 3];
 			strcpy (p, d->descStr);
 			strcat (p, str);
 

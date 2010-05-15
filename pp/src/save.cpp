@@ -70,7 +70,7 @@ unspace (char *s)
 
 	orig = s;
 
-	result = (char *) alloc (strlen (s) + 1);
+	result = new char[strlen(s) + 1];
 
 	while (s && *s == ' ')
 		s++;
@@ -1664,7 +1664,7 @@ load_a_saved_mobile (int nVirtual, FILE * fp, bool stable)
 		else if (key_table[i].key_type == TYPE_AFFECT)
 		{
 
-			af = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
+			af = new AFFECTED_TYPE;
 
 			fscanf (fp, "%d %d %d %d %d %d %d\n",
 				&af->type,
@@ -1717,8 +1717,7 @@ load_a_saved_mobile (int nVirtual, FILE * fp, bool stable)
 
 		else if (key_table[i].key_type == TYPE_LODGED)
 		{
-			lodged =
-				(LODGED_OBJECT_INFO *) alloc (sizeof (LODGED_OBJECT_INFO));
+			lodged = new lodged_object_info;
 			lodged->next = NULL;
 
 			lodged->location = duplicateString (fread_word (fp));

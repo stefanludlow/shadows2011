@@ -189,7 +189,7 @@ setvar (CHAR_DATA * mob, char *var_name, int value, int type)
 	if (!(var = getvar (mob, var_name)))
 	{
 
-		var = (VAR_DATA *) alloc (sizeof (VAR_DATA));
+		var = new VAR_DATA;
 
 		var->name = duplicateString (var_name);
 
@@ -1701,7 +1701,7 @@ add_replace_mobprog_data (CHAR_DATA * ch, CHAR_DATA * mob,
 
 	if (!prog)
 	{
-		prog = (MOBPROG_DATA *) alloc (sizeof (MOBPROG_DATA));
+		prog = new MOBPROG_DATA;
 
 		if (last_prog)
 			last_prog->next = prog;
@@ -2000,7 +2000,7 @@ boot_mobprogs ()
 				last_prog && last_prog->next; last_prog = last_prog->next)
 				;
 
-			prog = (MOBPROG_DATA *) alloc (sizeof (MOBPROG_DATA));
+			prog = new MOBPROG_DATA;
 
 			if (last_prog)
 				last_prog->next = prog;

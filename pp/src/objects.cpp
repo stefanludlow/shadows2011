@@ -5774,7 +5774,7 @@ delayed_rummage (CHAR_DATA * ch)
 			act ("$n reveals some useful plant life.", true, ch, 0, 0, TO_ROOM);
 			if (!herbed)
 			{
-				herbed = (AFFECTED_TYPE *) alloc (sizeof (AFFECTED_TYPE));
+				herbed = new AFFECTED_TYPE
 				herbed->type = HERBED_COUNT;
 				herbed->a.herbed.timesHerbed = 1;
 				herbed->a.herbed.duration = HERB_RESET_DURATION;

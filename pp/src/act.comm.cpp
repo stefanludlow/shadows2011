@@ -862,7 +862,7 @@ do_mute (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (!get_affect (ch, MUTE_EAVESDROP))
 		{
-			af = (AFFECTED_TYPE *) alloc(sizeof(AFFECTED_TYPE));
+			af = new AFFECTED_TYPE;
 
 			af->type = MUTE_EAVESDROP;
 			af->a.listening.duration = -1;

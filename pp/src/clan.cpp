@@ -375,7 +375,7 @@ add_clandef (char *argument)
 	CLAN_DATA *clan;
 	char buf[MAX_STRING_LENGTH];
 
-	clan = (CLAN_DATA *) alloc (sizeof (CLAN_DATA));
+	clan = new CLAN_DATA;
 
 	argument = one_argument (argument, buf);
 	clan->name = duplicateString (buf);
@@ -977,7 +977,7 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
-		name_switch = (struct name_switch_data *) alloc (sizeof (struct name_switch_data));
+		name_switch = new name_switch_data;
 		name_switch->old_name = duplicateString (oldname);
 		name_switch->new_name = duplicateString (newname);
 
@@ -1107,7 +1107,7 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 				"exist.\n", ch);
 		}
 
-		clan = (CLAN_DATA *) alloc (sizeof (CLAN_DATA));
+		clan = new CLAN_DATA;
 
 		clan->name = duplicateString (name);
 		clan->zone = zone;
@@ -3505,36 +3505,25 @@ clan__do_load ()
 	}
 	while ((row = mysql_fetch_row (result)))
 	{
+		clan = new CLAN_DATA;
+		clan->name = duplicateString (row[0]);
+		clan->zone = strtol (row[2], NULL, 0);
+		clan->literal = duplicateString (row[1]);
+		clan->member_vnum = strtol (row[3], NULL, 0);
+		clan->leader_vnum = strtol (row[4], NULL, 0);
+		clan->omni_vnum = strtol (row[5], NULL, 0);
 
-		if ((clan = (CLAN_DATA *) alloc (sizeof (CLAN_DATA))) != NULL)
+		if (clan_list)
 		{
-			clan->name = duplicateString (row[0]);
-			clan->zone = strtol (row[2], NULL, 0);
-			clan->literal = duplicateString (row[1]);
-			clan->member_vnum = strtol (row[3], NULL, 0);
-			clan->leader_vnum = strtol (row[4], NULL, 0);
-			clan->omni_vnum = strtol (row[5], NULL, 0);
-
-			if (clan_list)
-			{
-				clan->next = NULL;
-				last_clan->next = clan;
-			}
-			else
-			{
-				clan->next = clan_list;
-				clan_list = clan;
-			}
-			last_clan = clan;
+			clan->next = NULL;
+			last_clan->next = clan;
 		}
 		else
 		{
-			sprintf (buf,
-				"clan__do_load: Unable to allocate memory for CLAN_DATA %s",
-				row[0]);
-			system_log (buf, true);
-			return;
+			clan->next = clan_list;
+			clan_list = clan;
 		}
+		last_clan = clan;
 	}
 	mysql_free_result (result);
 	result = NULL;

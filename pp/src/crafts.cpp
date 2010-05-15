@@ -213,7 +213,7 @@ is_craft_command (CHAR_DATA * ch, char *argument)
 		}
 		magic_add_affect (ch, i, -1, 0, 0, 0, 0);
 		af = get_affect (ch, i);
-		af->a.craft = (struct affect_craft_type *) alloc (sizeof (struct affect_craft_type));
+		af->a.craft = new affect_craft_type;
 		af->a.craft->subcraft = craft;
 		af->a.craft->phase = NULL;
 		af->a.craft->target_ch = NULL;
@@ -1214,7 +1214,7 @@ do_addcraft (CHAR_DATA * ch, char *argument, int cmd)
 						break;
 				magic_add_affect (edit_mob, i, -1, 0, 0, 0, 0);
 				af = get_affect (edit_mob, i);
-				af->a.craft = (struct affect_craft_type *)alloc (sizeof (struct affect_craft_type));
+				af->a.craft = new affect_craft_type;
 				af->a.craft->subcraft = craft;
 				af->a.craft->phase = NULL;
 				af->a.craft->target_ch = NULL;
@@ -1228,7 +1228,7 @@ do_addcraft (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		magic_add_affect (edit_mob, i, -1, 0, 0, 0, 0);
 		af = get_affect (edit_mob, i);
-		af->a.craft = (struct affect_craft_type *) alloc (sizeof (struct affect_craft_type));
+		af->a.craft = new affect_craft_type;
 		af->a.craft->subcraft = craft;
 		af->a.craft->phase = NULL;
 		af->a.craft->target_ch = NULL;
@@ -1261,7 +1261,7 @@ update_crafts (CHAR_DATA * ch)
 					break;
 			magic_add_affect (ch, i, -1, 0, 0, 0, 0);
 			af = get_affect (ch, i);
-			af->a.craft = (struct affect_craft_type *)alloc (sizeof (struct affect_craft_type));
+			af->a.craft = new affect_craft_type;
 			af->a.craft->subcraft = craft;
 			af->a.craft->phase = NULL;
 			af->a.craft->target_ch = NULL;
@@ -1278,7 +1278,7 @@ update_crafts (CHAR_DATA * ch)
 					break;
 			magic_add_affect (ch, i, -1, 0, 0, 0, 0);
 			af = get_affect (ch, i);
-			af->a.craft = (struct affect_craft_type *) alloc (sizeof (struct affect_craft_type));
+			af->a.craft = new affect_craft_type;
 			af->a.craft->subcraft = craft;
 			af->a.craft->phase = NULL;
 			af->a.craft->target_ch = NULL;
@@ -1591,7 +1591,7 @@ read_item_list (DEFAULT_ITEM_DATA ** items, char *list, PHASE_DATA * phase)
 	char *argument;
 	DEFAULT_ITEM_DATA *deflt;
 
-	*items = new DEFAULT_ITEM_DATA; //(DEFAULT_ITEM_DATA *) alloc (sizeof (DEFAULT_ITEM_DATA));
+	*items = new DEFAULT_ITEM_DATA;
 
 	deflt = *items;
 
@@ -1728,7 +1728,7 @@ subcraft_line (FILE * fp_reg, char *line)
 	{
 		if (!crafts)
 		{
-			crafts = subcraft = (SUBCRAFT_HEAD_DATA *) alloc (sizeof (SUBCRAFT_HEAD_DATA));
+			crafts = subcraft = new SUBCRAFT_HEAD_DATA;
 			crafts->next = NULL;
 			crafts->phases = NULL;
 			memset (crafts, 0, sizeof (SUBCRAFT_HEAD_DATA));
@@ -1738,7 +1738,7 @@ subcraft_line (FILE * fp_reg, char *line)
 			for (subcraft = crafts; subcraft->next; subcraft = subcraft->next)
 				;
 
-			subcraft->next = (SUBCRAFT_HEAD_DATA *) alloc (sizeof (SUBCRAFT_HEAD_DATA));
+			subcraft->next = new SUBCRAFT_HEAD_DATA;
 			subcraft = subcraft->next;
 			subcraft->phases = NULL;
 			memset (subcraft, 0, sizeof (SUBCRAFT_HEAD_DATA));
@@ -3150,7 +3150,7 @@ branch_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft)
 
 	magic_add_affect (ch, i, -1, 0, 0, 0, 0);
 	af = get_affect (ch, i);
-	af->a.craft = (struct affect_craft_type *) alloc (sizeof (struct affect_craft_type));
+	af->a.craft = new affect_craft_type;
 	af->a.craft->subcraft = tcraft;
 	af->a.craft->phase = NULL;
 	af->a.craft->target_ch = NULL;

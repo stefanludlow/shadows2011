@@ -2416,7 +2416,7 @@ move (CHAR_DATA * ch, char *argument, int dir, int speed)
 
 	if (*argument == '(')
 	{
-		tmp = (char *) alloc (strlen (argument));
+		tmp = new char[strlen(argument) + 1];
 		sprintf (buf, "%s", argument);
 		i = 1;
 		j = 0;
@@ -6221,7 +6221,7 @@ shadowers_shadow (CHAR_DATA * ch, int to_room, int move_dir)
 		if (!CAN_SEE (tch, ch))
 			continue;
 
-		move = (MOVE_DATA *) alloc (sizeof (MOVE_DATA));
+		move = new MOVE_DATA;
 
 		move->dir = move_dir;
 		move->flags = MF_TOEDGE;
@@ -6278,7 +6278,7 @@ shadowers_shadow (CHAR_DATA * ch, int to_room, int move_dir)
 
 			/* Make N/PC enter room of ch as ch leaves */
 
-			move = (MOVE_DATA *) alloc (sizeof (MOVE_DATA));
+			move = new MOVE_DATA;
 
 			move->dir = af->a.shadow.edge;
 			move->flags = MF_TONEXT_EDGE;
@@ -6290,7 +6290,7 @@ shadowers_shadow (CHAR_DATA * ch, int to_room, int move_dir)
 
 			/* Make N/PC move to edge joining room ch just entered */
 
-			move = (MOVE_DATA *) alloc (sizeof (MOVE_DATA));
+			move = new MOVE_DATA;
 
 			move->dir = move_dir;
 			move->flags = MF_TOEDGE;

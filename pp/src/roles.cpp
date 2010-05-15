@@ -264,7 +264,7 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
 
 				magic_add_affect (ch, index, -1, 0, 0, 0, 0);
 				af = get_affect (ch, index);
-				af->a.craft = (struct affect_craft_type *) alloc (sizeof (struct affect_craft_type));
+				af->a.craft = new affect_craft_type;
 				af->a.craft->subcraft = craft;
 				af->a.craft->phase = NULL;
 				af->a.craft->target_ch = NULL;
@@ -1245,7 +1245,7 @@ post_role (DESCRIPTOR_DATA * d)
 		}
 
 		/* Get a date string from current time ( default = "" ) */
-		date = (char *) alloc (256);
+		date = new char[256];
 		date[0] = '\0';
 		current_time = time (0);
 		if (asctime_r (localtime (&current_time), date) != NULL)

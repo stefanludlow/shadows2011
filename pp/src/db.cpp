@@ -1197,7 +1197,7 @@ boot_zones (void)
 				zone_table[zon].cmd[cmd_no].command == 'r')
 			{
 
-				ra = (RESET_AFFECT *) alloc (sizeof (RESET_AFFECT));
+				ra = new RESET_AFFECT;
 
 				fscanf (fl, "%d %d %d %d %d %d %d",
 					&ra->type,
@@ -1862,16 +1862,15 @@ file_to_string (char *name)
 	{
 		sprintf (tmp, "file_to_string(%s)", name);
 		perror (tmp);
-		string = (char *) alloc (1);
-		*string = '\0';
+		string = duplicateString('\0');
 		return (string);
 	}
 
 	num_chars = fread (tmp, 1, MAX_STRING_LENGTH - 1, fl);
 	tmp[num_chars] = '\0';
-	string = (char *) alloc (num_chars + 2);
-	strcpy (string, tmp);
-	strcat (string, "\r\0");
+	std::string tempString = num_chars;
+	num_chars += "\r\0";
+	string = duplicateString(num_chars.c_str());
 
 	fclose (fl);
 

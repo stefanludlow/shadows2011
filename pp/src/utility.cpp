@@ -3225,7 +3225,7 @@ add_text (TEXT_DATA ** list, char *filename, char *document_name)
 
 	doc = file_to_string (filename);
 
-	text = (TEXT_DATA *) alloc (sizeof (TEXT_DATA));
+	text = new TEXT_DATA;
 
 	if (list == NULL)
 		text->next = NULL;
@@ -3330,7 +3330,7 @@ load_help_file (FILE * fp)
 			if (!master_element)
 			{
 
-				master_element = (HELP_DATA *) alloc (sizeof (HELP_DATA));
+				master_element = new HELP_DATA;
 				master_element->keywords = duplicateString (buf);
 
 				if (!list)
@@ -3341,7 +3341,7 @@ load_help_file (FILE * fp)
 				last_element = master_element;
 			}
 
-			element = (HELP_DATA *) alloc (sizeof (HELP_DATA));
+			element = new HELP_DATA;
 
 			element->master_element = master_element;
 			element->help_info = NULL;
