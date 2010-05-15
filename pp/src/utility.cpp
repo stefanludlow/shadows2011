@@ -2427,7 +2427,7 @@ would_reveal (CHAR_DATA * ch)
 		if (GET_TRUST (tch))	/* Imms don't count */
 			continue;
 		
-		if (IS_SET(tch->act, ACT_WILDLIFE) {
+		if (IS_SET(tch->act, ACT_WILDLIFE)) {
 			continue;
 		}
 
