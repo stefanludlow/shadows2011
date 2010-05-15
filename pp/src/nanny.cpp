@@ -1622,7 +1622,7 @@ nanny_composing_message (DESCRIPTOR_DATA * d, char *argument)
 	message = new MUDMAIL_DATA;
 	message->from = duplicateString (d->pending_message->poster);
 	message->subject = duplicateString (d->pending_message->subject);
-	message->message = duplicateString (d->pending_message->message);
+	message->message = duplicateString (argument);
 	message->from_account = duplicateString (d->acct->name.c_str ());
 	message->date = duplicateString (date);
 	message->flags = 0;
