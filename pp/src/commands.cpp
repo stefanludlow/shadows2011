@@ -168,7 +168,7 @@ const class command_data commands[] = {
 	C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL},
 	{"omote", do_omote, REST, C_SUB | C_DOA | C_BLD | C_PAR | C_SPL | C_DEL},
 	{"origins", do_origins, REST, 0}, /* grommit */
-	{"ooc", do_ooc, REST, C_SPL | C_DEL},
+	{"ooc", do_ooc, REST, C_SPL | C_DEL | C_HID},
 	{"open", do_open, SIT, C_BLD},
 	{"order", do_order, REST, C_BLD},
 	{"outside", do_outside, FIGHT, C_HID | C_DOA | C_BLD},

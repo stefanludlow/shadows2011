@@ -4774,8 +4774,6 @@ r_atwrite (CHAR_DATA * ch, char *argument)
 		if (result)
 			mysql_free_result (result);
 	}
-
-	free_mem(date);
 	return;
 }
 
