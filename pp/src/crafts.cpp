@@ -1731,7 +1731,7 @@ subcraft_line (FILE * fp_reg, char *line)
 	  memset (subcraft, 0, sizeof(SUBCRAFT_HEAD_DATA));
 
 	  subcraft->next = crafts;
-	  crafts = subcraft
+	  crafts = subcraft;
 
 
 		argument = one_argument (argument, buf);
