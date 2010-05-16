@@ -2050,8 +2050,8 @@ public:
 		message_buy = NULL;
 		message_sell = NULL;
 
-		memset(delivery, 0, MAX_DELIVERIES);
-		memset(trades_in, 0, MAX_TRADES_IN);
+		memset(delivery, 0, (MAX_DELIVERIES * sizeof(int)));
+		memset(trades_in, 0, (MAX_TRADES_IN * sizeof(int)));
 
 		negotiations = NULL;
 	}
@@ -2394,6 +2394,7 @@ public:
 
 	affected_type() {
 		type = 0;
+		memset(affected_union, 0, sizeof(affected_union));
 		next = NULL;
 	}
 };
