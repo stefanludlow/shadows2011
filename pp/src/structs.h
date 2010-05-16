@@ -2394,7 +2394,7 @@ public:
 
 	affected_type() {
 		type = 0;
-		memset(affected_union, 0, sizeof(affected_union));
+		memset(a, 0, sizeof(affected_union));
 		next = NULL;
 	}
 };
