@@ -1418,8 +1418,6 @@ die (CHAR_DATA * ch)
 			add_message (1, ch->tname, -2, "Server", date, "Died.", "", msg, 0);
 			add_message (1, "Deaths", -5, "Server", date, ch->tname, "", msg,
 				0);
-
-			free_mem (date);
 		}
 
 		if (!IS_SET (ch->flags, FLAG_GUEST))

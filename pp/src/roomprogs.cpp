@@ -4697,7 +4697,6 @@ r_atwrite (CHAR_DATA * ch, char *argument)
 
 	if (strArgument.empty() || board.empty() || title.empty())
 	{
-		free_mem(date);
 		return;
 	}
 
