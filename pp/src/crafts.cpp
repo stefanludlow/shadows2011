@@ -1774,11 +1774,6 @@ subcraft_line (FILE * fp_reg, char *line)
 	}
 
 
-	/* Determine current subcraft */
-
-	for (subcraft = crafts; subcraft->next; subcraft = subcraft->next)
-		;
-
 	if (!subcraft->phases &&
 		(!str_cmp (buf, "fail:") || !str_cmp (buf, "failure:")))
 	{
