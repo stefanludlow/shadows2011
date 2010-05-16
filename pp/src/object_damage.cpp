@@ -352,7 +352,7 @@ object_damage__get_sdesc (OBJECT_DAMAGE * thisPtr)
 		+
 		strlen (damage_name[thisPtr->source]
 	[(thisPtr->material < MATERIAL_IRON) ? 0 : 1][thisPtr->name]) + 5;
-	str_sdesc = (char *) alloc (sizeof (char) * n_sdesc_length);
+	str_sdesc = new char[n_sdesc_length];
 	sprintf (str_sdesc, "%s %s %s",
 		(isvowel (damage_severity[thisPtr->severity][0])) ? "an" : "a",
 		damage_severity[thisPtr->severity],
