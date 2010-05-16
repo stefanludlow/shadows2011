@@ -2393,9 +2393,7 @@ public:
 	AFFECTED_TYPE *next;
 
 	affected_type() {
-		type = 0;
-		memset(a, 0, sizeof(affected_union));
-		next = NULL;
+		memset(this, 0, sizeof(affected_type));
 	}
 };
 
