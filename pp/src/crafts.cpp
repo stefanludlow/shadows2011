@@ -1522,7 +1522,7 @@ add_to_default_list (DEFAULT_ITEM_DATA * items, char *flag_vnum)
 
 	if (*flag_vnum == '-')
 	{
-		memset (items->items, 0, MAX_DEFAULT_ITEMS);
+	  memset (items->items, 0, sizeof(int)*MAX_DEFAULT_ITEMS);
 		return;
 	}
 
@@ -1726,27 +1726,13 @@ subcraft_line (FILE * fp_reg, char *line)
 
 	if (!str_cmp (buf, "craft"))
 	{
-		if (!crafts)
-		{
-			crafts = subcraft = new SUBCRAFT_HEAD_DATA;
-			crafts->next = NULL;
-			crafts->phases = NULL;
-			memset (crafts, 0, sizeof (SUBCRAFT_HEAD_DATA));
-		}
-		else
-		{
-			for (subcraft = crafts; subcraft->next; subcraft = subcraft->next)
-				;
 
-			subcraft->next = new SUBCRAFT_HEAD_DATA;
-			subcraft = subcraft->next;
-			subcraft->phases = NULL;
-			memset (subcraft, 0, sizeof (SUBCRAFT_HEAD_DATA));
-		}
+	  subcraft = new SUBCRAFT_HEAD_DATA;
+	  memset (subcraft, 0, sizeof(SUBCRAFT_HEAD_DATA));
 
-		subcraft->crafts_start = ftell (fp_reg) - strlen (line) - 1;
+	  subcraft->next = crafts;
+	  crafts = subcraft
 
-		subcraft->clans = duplicateString ("");
 
 		argument = one_argument (argument, buf);
 		subcraft->craft_name = duplicateString (buf);
@@ -1778,7 +1764,7 @@ subcraft_line (FILE * fp_reg, char *line)
 		subcraft->command = duplicateString (buf);
 
 		return;
-	}
+	} // end 'craft' line
 
 	if (!crafts)
 	{
@@ -2045,7 +2031,9 @@ subcraft_line (FILE * fp_reg, char *line)
 		argument++;
 
 	if (!str_cmp (buf, "end"))
-		subcraft->crafts_end = ftell (fp_reg);
+	  {
+	    //do nothing - used to store ftell but this was not used anywhere
+	  }
 
 	else if (!str_cmp (buf, "1st:"))
 		phase->first = read_extended_text (fp_reg, argument);
@@ -5358,7 +5346,7 @@ display_spec_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA *craft)
 				{
 					low_cost = 0;
 					high_cost = 0;
-					for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+					for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 					{
 						if (items->items[j]
 						&& items->items[j] != items->item_counts)

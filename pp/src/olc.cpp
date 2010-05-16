@@ -7125,8 +7125,6 @@ update_crafts_file (void)
 
 	for (craft = crafts; craft; craft = craft->next)
 	{
-		craft->crafts_start = ftell (fp);
-
 		fprintf (fp, "craft %s subcraft %s command %s\n",
 			craft->craft_name,
 			craft->subcraft_name,
@@ -7371,7 +7369,7 @@ update_crafts_file (void)
 						if (items->item_counts > 1)
 							fprintf (fp, " x%d", items->item_counts);
 
-						for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+						for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 						{
 							if (items->items[j]
 							&& items->items[j] != items->item_counts)
@@ -7401,7 +7399,7 @@ update_crafts_file (void)
 						if (fitems->item_counts > 1)
 							fprintf (fp, " x%d", fitems->item_counts);
 
-						for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+						for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 						{
 							if (fitems->items[j]
 							&& fitems->items[j] != fitems->item_counts)
@@ -7416,9 +7414,7 @@ update_crafts_file (void)
 				}//for (i = 1; craft->fails[i]; i++)
 			}//if (craft->fails)
 		}// for (phase = craft->phases; phase; phase = phase->next)
-		fprintf (fp, "end");
-		craft->crafts_end = ftell (fp);
-		fprintf (fp, "\n");
+		fprintf (fp, "end\n");
 	}//for (craft = crafts; craft; craft = craft->next)
 
 
@@ -7996,7 +7992,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 					craft->fails[0]->phase = NULL;
 				}
 
-				for (i = 0; i <= MAX_DEFAULT_ITEMS; i++)
+				for (i = 0; i < MAX_DEFAULT_ITEMS; i++)
 				{
 					fitems = craft->fails[i];
 
@@ -8021,7 +8017,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 					}
 				}//for (i = 0
 
-				memset (fitems->items, 0, MAX_DEFAULT_ITEMS);
+				memset (fitems->items, 0, sizeof(int)*MAX_DEFAULT_ITEMS);
 				fitems->item_counts = 0;
 
 				if (*buf == 'X' || *buf == 'x')
@@ -8035,7 +8031,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 
 				else if (isdigit (*buf))
 				{
-					for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+					for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 					{
 						if (!fitems->items[j])
 						{
@@ -8055,7 +8051,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 									objnum);
 								send_to_char (output, ch);
 
-								for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+								for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 									fitems->items[j] = 0;
 
 								break;
@@ -8078,7 +8074,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 					if (!isdigit (*buf))
 						break;
 
-					for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+					for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 					{
 						if (!fitems->items[j])
 						{
@@ -8153,7 +8149,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 					craft->obj_items[0]->phase = NULL;
 				}
 
-				for (i = 0; i <= MAX_DEFAULT_ITEMS; i++)
+				for (i = 0; i < MAX_DEFAULT_ITEMS; i++)
 				{
 					items = craft->obj_items[i];
 					if (i == objnum)
@@ -8174,7 +8170,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 						}
 					}
 				}//for (i = 0;
-				memset (items->items, 0, MAX_DEFAULT_ITEMS);
+				memset (items->items, 0, sizeof(int)*MAX_DEFAULT_ITEMS);
 				items->item_counts = 0;
 				if (*buf == 'X' || *buf == 'x')
 				{
@@ -8187,7 +8183,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 
 				else if (isdigit (*buf))
 				{
-					for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+					for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 					{
 						if (!items->items[j])
 						{
@@ -8207,7 +8203,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 									objnum);
 								send_to_char (output, ch);
 
-								for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+								for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 									items->items[j] = 0;
 
 								break;
@@ -8227,7 +8223,7 @@ do_cset (CHAR_DATA * ch, char *argument, int cmd)
 				{
 					if (!isdigit (*buf))
 						break;
-					for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+					for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 					{
 						if (!items->items[j])
 						{

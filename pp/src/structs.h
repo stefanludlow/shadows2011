@@ -3576,8 +3576,6 @@ public:
 	PHASE_DATA *phases;
 	DEFAULT_ITEM_DATA *obj_items[MAX_ITEMS_PER_SUBCRAFT];
 	int subcraft_flags;
-	long crafts_start;
-	long crafts_end;
 	int sectors[SECTORSMAX];
 	int seasons[SEASONSMAX];
 	int opening[OPENINGMAX];

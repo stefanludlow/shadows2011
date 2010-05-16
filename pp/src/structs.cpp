@@ -226,8 +226,6 @@ subcraft_head_data::subcraft_head_data() {
 	memset(weather, 0, WEATHERMAX * sizeof(int));
 
 	subcraft_flags = 0;
-	crafts_start = 0;
-	crafts_end = 0;
 	failmob = 0;
 	delay = 0;
 	faildelay = 0;
@@ -272,8 +270,6 @@ subcraft_head_data::subcraft_head_data(const subcraft_head_data &RHS) {
 	}
 
 	subcraft_flags = RHS.subcraft_flags;
-	crafts_start = RHS.crafts_start;
-	crafts_end = RHS.crafts_end;
 
 	memcpy(sectors, RHS.sectors, SECTORSMAX * sizeof(int));
 	memcpy(seasons, RHS.seasons, SEASONSMAX * sizeof(int));
@@ -355,8 +351,6 @@ subcraft_head_data& subcraft_head_data::operator= (const subcraft_head_data &RHS
 		}
 
 		subcraft_flags = RHS.subcraft_flags;
-		crafts_start = RHS.crafts_start;
-		crafts_end = RHS.crafts_end;
 
 		memcpy(sectors, RHS.sectors, 25 * sizeof(int));
 		memcpy(seasons, RHS.seasons, 7 * sizeof(int));

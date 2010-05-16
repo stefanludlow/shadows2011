@@ -9099,7 +9099,7 @@ display_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft)
 
 					float low_cost = 0;
 					float high_cost = 0;
-					for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+					for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 					{
 						if (items->items[j]
 						&& items->items[j] != items->item_counts)
@@ -9158,7 +9158,7 @@ display_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft)
 					sprintf (b_buf + strlen (b_buf), " Fail %d:", i );
 					if (fitems->item_counts > 1)
 						sprintf (b_buf + strlen (b_buf), " x%d", fitems->item_counts);
-					for (j = 0; j <= MAX_DEFAULT_ITEMS; j++)
+					for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 					{
 						if (fitems->items[j]
 						&& fitems->items[j] != fitems->item_counts)
