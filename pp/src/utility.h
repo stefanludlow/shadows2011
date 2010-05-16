@@ -148,6 +148,7 @@ MAX (const _value __x, const _value __y)
 // The following are defined in utility.cpp
 char* one_argument (char* argument, char* arg_first);
 std::string one_argument (std::string& argument, std::string& arg_first);
+void sort_crafts();
 
 struct ci_equal_to : std::binary_function <std::string, std::string, bool>
 {

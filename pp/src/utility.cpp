@@ -4016,3 +4016,26 @@ std::string get_date( )
 
 	return date_buf.str();
 }
+
+
+void sort_crafts()
+{
+  /* - fix compile error later
+  std::map <std::string,SUBCRAFT_HEAD_DATA*> craftmap;
+  std::map <std::string,SUBCRAFT_HEAD_DATA*>::iterator it;
+  SUBCRAFT_HEAD_DATA* i;
+
+  // insert all subcrafts keyed by their name 
+  for (i = crafts; i!=NULL; i=i->next)
+    {
+      craftmap.insert(std::pair<std::string,SUBCRAFT_HEAD_DATA> (i->subcraft_name,i));
+    }
+  
+  it = craftmap.begin();
+  crafts = i = it->second;
+  for (; it!=craftmap.end(); it++)
+    {
+      //finish later      
+    }
+  */
+}

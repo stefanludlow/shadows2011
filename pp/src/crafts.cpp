@@ -22,6 +22,9 @@
 
 #define s(a) send_to_char (a "\n", ch);
 
+
+SUBCRAFT_HEAD_DATA* tail_end=NULL; //used in subcraft_line to append crafts to tail of list without iteration
+
 extern rpie::server engine;
 extern const char *weather_states[];
 const char *phase_flags[] = {
@@ -1730,10 +1733,17 @@ subcraft_line (FILE * fp_reg, char *line)
 	  subcraft = new SUBCRAFT_HEAD_DATA;
 	  memset (subcraft, 0, sizeof(SUBCRAFT_HEAD_DATA));
 
-	  subcraft->next = crafts;
-	  crafts = subcraft;
+	  
+	  if (!crafts)
+	    {
+	      tail_end = crafts = subcraft;
+	    }
+	  else
+	    {
+	      tail_end->next = subcraft;
+	      tail_end = subcraft;
 
-
+	    }
 		argument = one_argument (argument, buf);
 		subcraft->craft_name = duplicateString (buf);
 
