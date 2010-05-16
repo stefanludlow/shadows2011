@@ -1358,20 +1358,6 @@ calc_lookup (CHAR_DATA * ch, int reg_index, int reg_entry)
 	return calced_value;
 }
 
-//void
-//print_mem_stats (CHAR_DATA * ch)
-//{
-//	extern int bytes_allocated;
-//	extern char *memory_next;
-//	extern char *memory_top;
-//	char buf[MAX_STRING_LENGTH];
-//
-//	sprintf (buf, "Bytes allocated:  %d  Internal free: %d", bytes_allocated,
-//		memory_top - memory_next);
-//
-//	system_log (buf, false);
-//}
-
 void
 sort_int_array (int *array, int entries)
 {
@@ -1402,185 +1388,6 @@ MEMORY_T *alloc_ptrs[MAX_ALLOC];
 int bytes_allocated = 0;
 int first_free = 0;
 int mud_memory = 0;
-
-
-#ifdef MEMORY_CHECK
-malloc_t
-alloc (int bytes, int dtype)
-{
-	char *p;
-	MEMORY_T *m;
-	extern int mem_allocated;
-
-	system_log ("Alloc...", false);
-
-	bytes += sizeof (MEMORY_T);
-
-	p = calloc (1, bytes);
-	m = (MEMORY_T *) p;
-
-	mem_allocated += bytes;
-
-	m->dtype = dtype;
-	m->entry = first_free;
-	m->bytes = bytes;
-	m->time_allocated = mud_time;
-
-	/*
-	memcpy (p, &dtype, 4);
-	memcpy (p + 4, &first_free, 4);
-	memcpy (p + 8, &bytes, 4);
-
-	printf ("Allocating %d, %d, %d\n", first_free, bytes, dtype);
-	*/
-
-	alloc_ptrs[first_free++] = m;
-
-	bytes_allocated += bytes;
-	mud_memory += bytes - sizeof (MEMORY_T);
-
-	if (x1)
-	{
-		printf ("+ #%d @ %Xd for %d bytes: %d  ",
-			first_free - 1, (int) p + sizeof (MEMORY_T), bytes, dtype);
-
-		switch (dtype)
-		{
-		case 1:
-			printf ("MESSAGE DATA");
-			break;
-		case 2:
-			printf ("write_to_q");
-			break;
-		case 3:
-			printf ("string_add");
-			break;
-		case 4:
-			printf ("file_to_string");
-			break;
-		case 5:
-			printf ("init_memory");
-			break;
-		case 6:
-			printf ("get_perm");
-			break;
-		case 7:
-			printf ("get_perm 2");
-			break;
-		case 8:
-			printf ("LINE_DATA");
-			break;
-		case 9:
-			printf ("ve_insert_char");
-			break;
-		case 10:
-			printf ("ve_reconstruct");
-			break;
-		case 11:
-			printf ("ROOM_AFFECT (unused)");
-			break;
-		case 12:
-			printf ("REGISTRY_DATA");
-			break;
-		case 13:
-			printf ("AFFECTED_TYPE");
-			break;
-		case 14:
-			printf ("unspace");
-			break;
-		case 15:
-			printf ("duplicateString: ");
-			break;
-		case 16:
-			printf ("CREATE");
-			break;
-		case 17:
-			printf ("DESCRIPTOR_DATA");
-			break;
-		case 18:
-			printf ("OBJ_DATA");
-			break;
-		case 19:
-			printf ("CHAR_DATA");
-			break;
-		case 20:
-			printf ("VAR_DATA");
-			break;
-		case 21:
-			printf ("MOBPROG_DATA");
-			break;
-		case 22:
-			printf ("emergency data");
-			break;
-		case 23:
-			printf ("affect_craft_type");
-			break;
-		case 24:
-			printf ("MOVE_DATA");
-			break;
-		case 25:
-			printf ("SUBCRAFT_HEAD_DATA");
-			break;
-		case 26:
-			printf ("PHASE_DATA");
-			break;
-		case 27:
-			printf ("DEFAULT_ITEM_DATA");
-			break;
-		case 28:
-			printf ("Alias information");
-			break;
-		case 29:
-			printf ("Delayed_affect_data");
-			break;
-		case 30:
-			printf ("AFFECTED_TYPE");
-			break;
-		case 31:
-			printf ("Random char array");
-			break;
-		case 32:
-			printf ("RANDOM_CH_DATA");
-			break;
-		case 33:
-			printf ("RESET_DATA");
-			break;
-		case 34:
-			printf ("RESET_AFFECT");
-			break;
-		case 35:
-			printf ("edit () buffer");
-			break;
-		case 36:
-			printf ("HELP_DATA");
-			break;
-		case 37:
-			printf ("TEXT_DATA");
-			break;
-		case 38:
-			printf ("name_switch_data");
-			break;
-		case 39:
-			printf ("CLAN_DATA");
-			break;
-		case 40:
-			printf ("NEGOTIATION_DATA");
-			break;
-		case 41:
-			printf ("Web buffer");
-			break;
-		default:
-			printf (" ** Unknown origin ** ");
-			break;
-		}
-
-		printf ("\n");
-	}
-
-	return p + sizeof (MEMORY_T);
-}
-
-#else /* NOVELL */
 
 char* duplicateString(const char *source) {
 	if (source != NULL && strcmp(source, "") == STR_MATCH) {
@@ -1622,46 +1429,6 @@ int free_mem_array (void *ptr) {
 	ptr = NULL;
 	return 1;
 }
-
-void* alloc (int bytes)
-{
-	char *p = new char[bytes];
-	return p;
-	//static int allocs = 0;
-	//char *p;
-	//extern char *emergency_data;
-	//extern int mem_allocated;
-
-	//allocs++;
-
-	//bytes += 4;
-
-	//p = (char *) calloc (1, bytes);
-
-	//mem_allocated += bytes;
-
-	//if (!p)
-	//{
-	//	free_mem (emergency_data);
-	//	system_log ("calloc failed.  Out of memory - forced to shutdown.",
-	//		true);
-	//	shutd = 1;
-	//	p = (char *) calloc (1, bytes);
-	//	mm ("calloc failed");
-	//}
-
-	//strncpy (p, "ZZZZ", 4);
-
-
-	////if (x1) // Unused testing mode, cast throws error - Case
-	////	printf ("+ @ %Xd  bytes = %d\n", (unsigned int) p, bytes);
-	//bytes_allocated += bytes;
-
-	//return p + 4;
-}
-
-
-#endif /* NOVELL */
 
 void
 add_char (char *buf, char c)
@@ -1806,26 +1573,6 @@ name_to_ident (CHAR_DATA * ch, char *ident)
 		sprintf (ident, "%d.%s", i, buf);
 }
 
-/*
-void name_to_ident (CHAR_DATA *ch, char *ident)
-{
-int			i = 1;
-CHAR_DATA	*tch;
-
-if ( !IS_NPC (ch) ) {
-strcpy (ident, GET_NAME (ch));
-return;
-}
-
-for ( tch = ch->room->people; ch != tch; tch = tch->next_in_room )
-if ( CAN_SEE (ch, tch) && isname (GET_NAME (ch), GET_NAMES (tch)) )
-i++;
-
-sprintf (ident, "%d.%s", i, GET_NAME (ch));
-}
-*/
-
-
 int
 real_trust (CHAR_DATA * ch)
 {
@@ -1839,24 +1586,6 @@ real_trust (CHAR_DATA * ch)
 
 	return ch->pc->level;
 }
-
-/* moved to protos.h - int get_trust (CHAR_DATA * ch) {
-if (!ch || !ch->desc || IS_SET (ch->flags, FLAG_GUEST)) {
-return 0;
-}
-
-ch = ch->desc->original != NULL ? ch->desc->original : ch->desc->character;
-
-if (!ch || !ch->pc || ch->pc->mortal_mode) {
-return 0;
-}
-
-//if (ch->isLevelFivePC()) {
-//	return 5;
-//}
-
-return ch->pc->level;
-}*/
 
 CHAR_DATA *
 get_pc (char *buf)
@@ -1961,7 +1690,6 @@ load_pc (const char *buf)
 	{
 		return NULL;
 	}
-
 
 	/* debugging why loaded_list gets set to something in the 0x65's.
 	this is ok or it would have crashed ch->next. - Grommit */
@@ -4018,24 +3746,32 @@ std::string get_date( )
 }
 
 
-void sort_crafts()
-{
-  /* - fix compile error later
-  std::map <std::string,SUBCRAFT_HEAD_DATA*> craftmap;
-  std::map <std::string,SUBCRAFT_HEAD_DATA*>::iterator it;
-  SUBCRAFT_HEAD_DATA* i;
+void sort_crafts() {
+	// - fix compile error later
+	std::map <std::string, SUBCRAFT_HEAD_DATA *> craftMap;
+	std::map <std::string, SUBCRAFT_HEAD_DATA *>::iterator it;
+	SUBCRAFT_HEAD_DATA* craftLoop;
 
-  // insert all subcrafts keyed by their name 
-  for (i = crafts; i!=NULL; i=i->next)
-    {
-      craftmap.insert(std::pair<std::string,SUBCRAFT_HEAD_DATA> (i->subcraft_name,i));
-    }
-  
-  it = craftmap.begin();
-  crafts = i = it->second;
-  for (; it!=craftmap.end(); it++)
-    {
-      //finish later      
-    }
-  */
+	// insert all subcrafts keyed by their name 
+	for (craftLoop = crafts; craftLoop != NULL; craftLoop = craftLoop->next) {
+		craftMap.insert(std::pair<std::string, SUBCRAFT_HEAD_DATA *> (craftLoop->subcraft_name, craftLoop));
+	}
+
+	if (!craftMap.empty()) {
+		//crafts = craftMap.begin()->second;
+		craftLoop = crafts = craftMap.begin()->second;
+		it = craftMap.begin();
+		it++;
+	}
+	else {
+		return;
+	}
+
+	//crafts = i = it->second;
+	for (; it != craftMap.end(); it++) {
+		craftLoop->next = it->second;
+		craftLoop = it->second;
+	}
+	it--;
+	it->second->next = NULL;
 }

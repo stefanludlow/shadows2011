@@ -1270,7 +1270,11 @@ do_order (CHAR_DATA * ch, char *argument, int cmd)
 			(int) val_in_farthings, quantity != 1 ? "are" : "is",
 			obj->order_time, obj->order_time != 1 ? "s" : "", date);
 
-		reformat_desc (buf, &tobj->full_description);
+		int bufferLength = strlen(buf) + 1;
+		char *descArray = new char[bufferLength];
+		strncpy(descArray, buf, bufferLength); 
+
+		reformat_desc (descArray, &tobj->full_description);
 
 		act ("$n hands $N $p.", false, keeper, tobj, ch,
 			TO_NOTVICT | _ACT_FORMAT);

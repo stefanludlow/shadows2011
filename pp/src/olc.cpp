@@ -11928,8 +11928,7 @@ reformat_desc (char *source, char **target)
 	if (strn_cmp (source, "   ", 3))
 	{
 		sprintf (buf, "   %s", source);
-		free_mem (source);
-		source = duplicateString (buf);
+		replaceString(source, buf);
 	}
 
 	s = source;
