@@ -1722,7 +1722,7 @@ subcraft_line (FILE * fp_reg, char *line)
 	char *argument = '\0';
 	char buf[MAX_STRING_LENGTH];
 	PHASE_DATA *phase = NULL;
-	SUBCRAFT_HEAD_DATA *subcraft;
+	SUBCRAFT_HEAD_DATA *subcraft=NULL;
 
 
 	argument = one_argument (line, buf);
@@ -1775,6 +1775,9 @@ subcraft_line (FILE * fp_reg, char *line)
 
 		return;
 	} // end 'craft' line
+
+	// Link to current craft
+	subcraft = tail_end;
 
 	if (!crafts)
 	{
