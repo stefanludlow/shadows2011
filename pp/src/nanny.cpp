@@ -2643,257 +2643,247 @@ equip_newbie (CHAR_DATA * ch)
 	int melee = 0, ranged = 0;
 
 	for (tobj = ch->equip; tobj; tobj = tobj->next_content)
-	{
+		{
 		if (tobj == ch->equip)
 			ch->equip = ch->equip->next_content;
 		else
 			ch->equip->next_content = tobj->next_content;
-	}
+		}
 
 	get_weapon_skills (ch, &melee, &ranged);
 
-	//Starting in Harad
+//Starting in Harad
 	if (IS_SET(ch->plr_flags, START_HARAD))
-	{
-		if (ch->sex == 1)
 		{
-			if ((obj = load_object (6276))) //pants
-				equip_char (ch, obj, WEAR_LEGS);
-			if ((obj = load_object (6213))) //shirt
-				equip_char (ch, obj, WEAR_BODY);
-			if ((obj = load_object (6097)))//sandals
-				equip_char (ch, obj, WEAR_FEET);
-			if ((obj = load_object (97312)))//sash
-				equip_char (ch, obj, WEAR_WAIST);
-			if ((obj = load_object (1452)))//scarf
-				equip_char (ch, obj, WEAR_HEAD);
-
-			if ((obj = load_object (1180)))//stachel
+		if (ch->sex == 1)
 			{
+			if ((obj = load_object (98975))) //pants
+				equip_char (ch, obj, WEAR_LEGS);
+			if ((obj = load_object (98882))) //shirt
+				equip_char (ch, obj, WEAR_BODY);
+			if ((obj = load_object (127)))//sandals
+				equip_char (ch, obj, WEAR_FEET);
+			if ((obj = load_object (113)))//sash
+				equip_char (ch, obj, WEAR_WAIST);
+			// if ((obj = load_object (1452)))//scarf
+			//	equip_char (ch, obj, WEAR_HEAD);
+			
+			if ((obj = load_object (1606)))//stachel
+				{
 				equip_char (ch, obj, WEAR_SHOULDER_R);
 				tobj = obj;
-			}
-		}//end male harad
+				}
+			}//end male harad
 		else
-		{
+			{
 			if ((obj = load_object (6168))) //skirt
 				equip_char (ch, obj, WEAR_LEGS);
-			if ((obj = load_object (6253))) //blouse
+			if ((obj = load_object (6211))) //blouse
 				equip_char (ch, obj, WEAR_BODY);
-			if ((obj = load_object (6096))) //sandals
+			if ((obj = load_object (6108))) //sandals
 				equip_char (ch, obj, WEAR_FEET);
-			if ((obj = load_object (6249))) //sash
+			if ((obj = load_object (97312))) 
 				equip_char (ch, obj, WEAR_WAIST);
-			if ((obj = load_object (6585))) //colored scarf
-				equip_char (ch, obj, WEAR_HEAD);
-			if ((obj = load_object (911))) //cloak
-				equip_char (ch, obj, WEAR_ABOUT);
+			if ((obj = load_object (2062))) 
+				equip_char (ch, obj, WEAR_HAIR);
+		//	if ((obj = load_object (911))) //cloak
+		//		equip_char (ch, obj, WEAR_ABOUT);
 
-			if ((obj = load_object (1180))) //satchel
-			{
+			if ((obj = load_object (1606))) //satchel
+				{
 				equip_char (ch, obj, WEAR_SHOULDER_R);
 				tobj = obj;
+				}
+			}//end female Harad
+
+		//general stachel contents	
+	/* 100 to 300 spread, thus 2 to 6 pieces of 50 */
+		if (tobj && (obj = load_object (5032))) //yrch token
+			{
+			obj->count = number (2, 6);
+			obj_to_obj (obj, tobj);
 			}
-		}//end female Harad
 
-		//general stachel contents
-		if (tobj && (obj = load_object (80013))) //heavy silver coin
-		{
-			obj->count = 5;
-			obj_to_obj(obj, tobj);
-		}
-		if (tobj && (obj = load_object (80012))) //thin silver coin
-		{
-			obj->count = number (3, 5);
-			obj_to_obj(obj, tobj);
-		}
+		}//end Harad
 
-	}//end Harad
-
-	//Start in Mordor
+//Start in Moria
 	/* set tobj at end of func for pack for money loading */
 	else if (IS_SET (ch->plr_flags, START_MORDOR_ORC))
-	{
+		{
 		if ((obj = load_object (5011))) //pants
 			equip_char (ch,obj, WEAR_LEGS);
 
-		if (number(0,1)) // cloak randomizer
-		{
+		if (number(0,1)) // cloak randomizer 
+			{
 			if ((obj = load_object (5112)))
 				equip_char (ch,obj, WEAR_ABOUT);
-		}
+			}
 		else
-		{
+			{
 			if ((obj = load_object (40140)))
 				equip_char (ch,obj, WEAR_ABOUT);
-		}
+			}
 
 		switch (number(1,4)) // belt randomizer
-		{
-		case 1:
-			if ((obj = load_object (40051)))
-				equip_char (ch,obj, WEAR_WAIST);
-			break;
-		case 2:
-			if ((obj = load_object (40135)))
-				equip_char (ch,obj, WEAR_WAIST);
-			break;
-		case 3:
-			if ((obj = load_object (40135)))
-				equip_char (ch,obj, WEAR_WAIST);
-			break;
-		default:
-			if ((obj = load_object (40136)))
-				equip_char (ch,obj, WEAR_WAIST);
-			break;
-		}
+			{
+			case 1:
+				if ((obj = load_object (40051)))
+					equip_char (ch,obj, WEAR_WAIST);
+				break;
+			case 2:
+				if ((obj = load_object (40135)))
+					equip_char (ch,obj, WEAR_WAIST);
+				break;
+			case 3:
+				if ((obj = load_object (40135)))
+					equip_char (ch,obj, WEAR_WAIST);
+				break;
+			default:
+				if ((obj = load_object (40136)))
+					equip_char (ch,obj, WEAR_WAIST);
+				break;
+			}
 
-		switch (number(1,3)) // boots randomizer
-		{
-		case 1:
-			if ((obj = load_object (40066)))
-				equip_char (ch,obj, WEAR_FEET);
-			break;
-		case 2:
-			if ((obj = load_object (40055)))
-				equip_char (ch,obj, WEAR_FEET);
-			break;
-		default:
-			if ((obj = load_object (40050)))
-				equip_char (ch,obj, WEAR_FEET);
-			break;
-		}
+		switch (number(1,3)) // boots randomizer 
+			{
+			case 1:
+				if ((obj = load_object (40066)))
+					equip_char (ch,obj, WEAR_FEET);
+				break;
+			case 2:
+				if ((obj = load_object (40055)))
+					equip_char (ch,obj, WEAR_FEET);
+				break;
+			default:
+				if ((obj = load_object (40050)))
+					equip_char (ch,obj, WEAR_FEET);
+				break;
+			}
 
-		if ((obj = load_object (1010))) // tunic
+		if ((obj = load_object (1010))) // tunic 
 			equip_char (ch,obj, WEAR_BODY);
 
 		if ((obj = load_object (5091))) // backpack
-		{
+			{
 			equip_char (ch,obj, WEAR_BACK );
-			tobj = obj;
-		}
-
-		/* mordor money */
-		/* 100 to 300 spread, thus 2 to 6 pieces of 50 */
+			tobj = obj; 
+			}
+			
+		/* moria money */
+/* 100 to 300 spread, thus 2 to 6 pieces of 50 */
 		if (tobj && (obj = load_object (5032))) //yrch token
-		{
+			{
 			obj->count = number (2, 6);
 			obj_to_obj (obj, tobj);
-		}
+			}
+			
+		}//end Moria 
 
-	}//end Mordor
-
-	//start in Angost
+//start in Angost
 	else if (IS_SET (ch->plr_flags, START_CAOLAFON))
-	{
-		if (ch->sex == 1) //male Angost
 		{
-			if ((obj = load_colored_object(42121, "earthen brown")))
-				equip_char (ch, obj, WEAR_BODY); //tunic
-			if ((obj = load_colored_object(42122, "earthen brown")))
-				equip_char (ch, obj, WEAR_LEGS); //trousers
-			if ((obj = load_colored_object(42124, "dark grey")))
-				equip_char (ch, obj, WEAR_ABOUT); //cloak
-			if ((obj = load_colored_object(98026, "brown")))
-				equip_char (ch, obj, WEAR_HANDS); //gloves
-
-			if ((obj = load_object (104))) //belt
-				equip_char (ch, obj, WEAR_WAIST);
-			if ((obj = load_object (42125))) //sandals
-				equip_char (ch, obj, WEAR_FEET);
-
-			if ((obj = load_object (98))) //sheathe
+		if (ch->sex == 1) //male Angost
 			{
+			if ((obj = load_object(42121)))
+				equip_char (ch, obj, WEAR_BODY); //tunic
+			if ((obj = load_object(42122)))
+				equip_char (ch, obj, WEAR_LEGS); //trousers
+			if ((obj = load_object(42124)))
+				equip_char (ch, obj, WEAR_ABOUT); //cloak
+				
+			if ((obj = load_object (1014))) //belt
+				equip_char (ch, obj, WEAR_WAIST);
+			if ((obj = load_object (1013))) //boots
+				equip_char (ch, obj, WEAR_FEET);
+			
+			if ((obj = load_object (98))) //sheathe
+				{
 				equip_char (ch, obj, WEAR_BELT_2);
 				sobj = obj;
-			}
+				}
 
-			if ((obj = load_colored_object (97036, "brown")))
-			{
+			if ((obj = load_object (97036)))
+				{
 				equip_char (ch, obj, WEAR_BELT_1); //pouch
 				tobj = obj;
+				}
 			}
-		}
 		else //female Angost
-		{
-			if ((obj = load_colored_object(42135, "earthen brown")))
+			{
+			if ((obj = load_object(42135)))
 				equip_char (ch, obj, WEAR_BODY); //dress
-			if ((obj = load_colored_object(6175, "brown")))
+			if ((obj = load_object(6175)))
 				equip_char (ch, obj, WEAR_ARMS); //sleeves
-			if ((obj = load_colored_object(98825, "brown")))
+			if ((obj = load_object(98819)))
 				equip_char (ch, obj, WEAR_LEGS); //leggings
-
-			if ((obj = load_object(97810))) //belt
-				equip_char (ch, obj, WEAR_WAIST);
-			if ((obj = load_object (42125))) //sandals
+				
+		//	if ((obj = load_object(97810))) //belt
+		//		equip_char (ch, obj, WEAR_WAIST); 
+			if ((obj = load_object (2406))) //sandals
 				equip_char (ch, obj, WEAR_FEET);
 			if ((obj = load_object (42123))) //cloak
 				equip_char (ch, obj, WEAR_ABOUT);
 
 			if ((obj = load_object (98))) //sheathe
-			{
+				{
 				equip_char (ch, obj, WEAR_BELT_2);
 				sobj = obj;
-			}
+				}
 
-			if ((obj = load_colored_object (97036, "brown")))
-			{
+			if ((obj = load_object (97036)))
+				{
 				equip_char (ch, obj, WEAR_BELT_1); //pouch
 				tobj = obj;
-			}
-		}//end female Angost
-
+				}
+			}//end female Angost
+		
 		//everyone in Angost
-		if ((obj = load_object (1659))) //filled waterskin
-		{
-			obj->o.od.value[1] = 20;
-			obj->o.od.value[2] = 34;
-			equip_char (ch, obj, WEAR_SHOULDER_L);
-		}
-
-		if (sobj && (obj = load_object (98508))) //longknife in sheathe
-		{
-			obj_to_obj (obj, sobj);
-		}
-
-		if (tobj) //pouch contents
-		{
-			if ((obj = load_object (42133))) //shillings
+		if ((obj = load_object (1002))) //backpack
 			{
-				obj->count = 40;
-				obj_to_obj(obj, tobj);
+			equip_char (ch, obj, WEAR_BACK);
+			tobj = obj;
 			}
-			if ((obj = load_object (42132))) //penny
+			
+		/* backpack gear...bread knife etc */
+		if (tobj)
 			{
-				obj->count = 10;
-				obj_to_obj(obj, tobj);
-			}
-			if ((obj = load_object (42131))) //farthing
-			{
-				obj->count = 10;
+			if ((obj = load_object (804))) //bread
 				obj_to_obj (obj, tobj);
-			}
-			if ((obj = load_object (42139))) //jerky
-			{
-				obj->count = 6;
+			if ((obj = load_object (804))) //bread
 				obj_to_obj (obj, tobj);
-			}
-
+			if ((obj = load_object (804))) //bread
+				obj_to_obj (obj, tobj);
+			if ((obj = load_object (804))) //bread
+				obj_to_obj (obj, tobj);
+			if ((obj = load_object (1560))) //gondorian waterskin
+				{
+				obj->o.od.value[1] = 7;
+				obj_to_obj (obj, tobj);
+				}
+		
+			if ((obj = load_object (1015))) //knife
+				obj_to_obj (obj, tobj);
 			if ((obj = load_object (1070))) //torch
 				obj_to_obj (obj, tobj);
-
-			if ((obj = load_object (1598))) //dice
-			{
+				
+			if ((obj = load_object (1544))) //silver tree coin
+				{
 				obj->count = 2;
 				obj_to_obj (obj, tobj);
-			}
-		}//end pouch contents
-
-	} //end Angost
-
-	//starting in Gondor - also default case
-	else
-	{
+				}
+			
+			if ((obj = load_object (1540))) //silver royal
+				{
+				obj->count = number (3, 6);
+				obj_to_obj (obj, tobj);
+				}
+			} //end gondor pack stuff
+			
+		} //end Angost
+		
+//starting in Gondor - also default case 
+	else 
+		{
 		if ((obj = load_object (1010))) //tunic
 			equip_char (ch, obj, WEAR_BODY);
 		if ((obj = load_object (1011))) //leggings
@@ -2906,16 +2896,16 @@ equip_newbie (CHAR_DATA * ch)
 
 		if ((obj = load_object (1014))) //belt
 			equip_char (ch, obj, WEAR_WAIST);
-
+			
 		if ((obj = load_object (1002))) //backpack
-		{
+			{
 			equip_char (ch, obj, WEAR_BACK);
 			tobj = obj;
-		}
-
+			}
+			
 		/* backpack gear...bread knife etc */
 		if (tobj)
-		{
+			{
 			if ((obj = load_object (804))) //bread
 				obj_to_obj (obj, tobj);
 			if ((obj = load_object (804))) //bread
@@ -2925,54 +2915,54 @@ equip_newbie (CHAR_DATA * ch)
 			if ((obj = load_object (804))) //bread
 				obj_to_obj (obj, tobj);
 			if ((obj = load_object (1560))) //gondorian waterskin
-			{
+				{
 				obj->o.od.value[1] = 7;
 				obj_to_obj (obj, tobj);
-			}
-
+				}
+		
 			if ((obj = load_object (1015))) //knife
 				obj_to_obj (obj, tobj);
 			if ((obj = load_object (1070))) //torch
 				obj_to_obj (obj, tobj);
-
+				
 			if ((obj = load_object (1544))) //silver tree coin
-			{
+				{
 				obj->count = 2;
 				obj_to_obj (obj, tobj);
-			}
-
+				}
+			
 			if ((obj = load_object (1540))) //silver royal
-			{
+				{
 				obj->count = number (3, 6);
 				obj_to_obj (obj, tobj);
-			}
-		} //end gondor pack stuff
-	} //end gondor-default case
+				}
+			} //end gondor pack stuff
+		} //end gondor-default case
 
-	//special case items
+//special case items
 	if (ch->skills[SKILL_HEALING] && (obj = load_object (HEALER_KIT_VNUM)))
 		obj_to_obj (obj, tobj);
 
 	if ((ch->skills[SKILL_SCRIPT_SARATI]) ||
-		(ch->skills[SKILL_SCRIPT_TENGWAR]) ||
-		(ch->skills[ SKILL_SCRIPT_BELERIAND_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_CERTHAS_DAERON]) ||
-		(ch->skills[SKILL_SCRIPT_ANGERTHAS_DAERON]) ||
-		(ch->skills[SKILL_SCRIPT_QUENYAN_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_ANGERTHAS_MORIA]) ||
-		(ch->skills[SKILL_SCRIPT_GONDORIAN_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_ARNORIAN_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_NUMENIAN_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_NORTHERN_TENGWAR]) ||
-		(ch->skills[SKILL_SCRIPT_ANGERTHAS_EREBOR]))
-	{
+	(ch->skills[SKILL_SCRIPT_TENGWAR]) ||
+	(ch->skills[ SKILL_SCRIPT_BELERIAND_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_CERTHAS_DAERON]) ||
+	(ch->skills[SKILL_SCRIPT_ANGERTHAS_DAERON]) ||
+	(ch->skills[SKILL_SCRIPT_QUENYAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_ANGERTHAS_MORIA]) ||
+	(ch->skills[SKILL_SCRIPT_GONDORIAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_ARNORIAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_NUMENIAN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_NORTHERN_TENGWAR]) ||
+	(ch->skills[SKILL_SCRIPT_ANGERTHAS_EREBOR]))
+		{
 		if ((obj = load_object (1170)))
 			obj_to_obj (obj, tobj);
 		if ((obj = load_object (63)))
 			obj_to_obj (obj, tobj);
 		if ((obj = load_object (79)))
 			obj_to_obj (obj, tobj);
-	}
+		}
 
 	ch->right_hand = NULL;
 	ch->left_hand = NULL;
