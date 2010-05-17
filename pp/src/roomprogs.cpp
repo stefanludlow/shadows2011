@@ -96,11 +96,15 @@ extern rpie::server engine;
 extern std::multimap<int, room_prog> mob_prog_list;
 extern std::multimap<int, room_prog> obj_prog_list;
 
-struct room_prog_var
+class room_prog_var
 {
 	std::string data;
 	std::string name;
 	room_prog_var *next_var;
+
+	room_prog_var() {
+		next_var = NULL;
+	}
 };
 
 
