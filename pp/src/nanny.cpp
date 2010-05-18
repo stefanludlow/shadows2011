@@ -2880,6 +2880,249 @@ equip_newbie (CHAR_DATA * ch)
 			} //end gondor pack stuff
 			
 		} //end Angost
+
+		else if (IS_SET (ch->plr_flags, START_BALCHOTH))
+		{
+			
+			/* AC3 bronze scale */
+			if ((obj = load_object (23089)))
+				equip_char(ch, obj, WEAR_HEAD);
+			if ((obj = load_object (23090)))
+				equip_char(ch, obj, WEAR_BODY);
+			if ((obj = load_object (23091)))
+				equip_char(ch, obj, WEAR_NECK_1);
+			if ((obj = load_object (23092)))
+				equip_char(ch, obj, WEAR_ARMS);
+			if ((obj = load_object (23093)))
+				equip_char(ch, obj, WEAR_LEGS);
+			if ((obj = load_object (23094)))
+				equip_char(ch, obj, WEAR_WAIST);
+			if ((obj = load_object (23087)))
+				equip_char(ch, obj, WEAR_FEET);
+
+			/* ovaloid kite/round shield */
+			if ((obj = load_object (23070)))
+				equip_char(ch, obj, WEAR_BACK);
+
+			/* Left shoulder contains bow, crossbow, or javelin */
+			if (ch->skills[SKILL_SHORTBOW])
+			{
+				if ((obj = load_object (23065)))
+					equip_char(ch, obj, WEAR_SHOULDER_L);
+
+				// quiver and arrows
+				if ((tobj = obj = load_object (1762)))
+				{
+					equip_char(ch, obj, WEAR_BELT_1);
+
+					if ((obj = load_object (23063)))
+					{
+						obj->count=15;
+						obj_to_obj (obj, tobj);
+					}
+				tobj=NULL; // Null out to reset state for if on satchel
+				}
+			}
+			else if (ch->skills[SKILL_CROSSBOW])
+			{
+				if ((obj = load_object (23067)))
+					equip_char(ch, obj, WEAR_SHOULDER_L);
+
+				// boltcase and bolts
+				if ((tobj = obj = load_object (1499)))
+				{
+					equip_char(ch, obj, WEAR_BELT_1);
+
+					if ((obj = load_object (157)))
+					{
+						obj->count=15;
+						obj_to_obj (obj, tobj);
+					}
+				tobj=NULL; // Null out to reset state for if on satchel
+				}
+			}
+			else if (ch->skills[SKILL_THROWN])
+			{
+				if ((tobj = obj = load_object (2260))) // shoulder strap
+				{	
+					equip_char(ch, obj, WEAR_SHOULDER_L);
+					if ((obj = load_object (23048)))  // Load Ballie Javelin and put it in the strap
+						obj_to_obj(obj,tobj);
+					tobj = NULL; // Null out to reset state for if on satchel
+				}
+			}
+
+			/* leather satchel */
+			if ((tobj = obj = load_object (1719)))
+				equip_char(ch, obj, WEAR_SHOULDER_R);
+
+			/* backpack gear...food knife etc */
+			if (tobj)
+			{
+				if ((obj = load_object (42139))) //beef jerky
+				{
+					obj->count = 5;
+					obj_to_obj (obj, tobj);
+				}
+
+				if ((obj = load_object (1560))) //standard waterskin
+				{
+					obj->o.od.value[1] = 7;
+					obj_to_obj (obj, tobj);
+				}
+
+				if ((obj = load_object (1015))) //knife
+					obj_to_obj (obj, tobj);
+
+				if ((obj = load_object (1070))) //torch
+					obj_to_obj (obj, tobj);
+
+				/* bandages specific to Balchoth as they don't get newb clothing to rip */
+				if ((obj = load_object (98120)))
+				{
+					obj->count = 5;
+					obj_to_obj (obj, tobj);
+				}
+
+				if ((obj = load_object (5032))) //50 blacks x 10 = 500 ycp
+				{
+					obj->count = 10;
+					obj_to_obj (obj, tobj);
+				}
+				//special case items
+				if (ch->skills[SKILL_HEALING] && (obj = load_object (HEALER_KIT_VNUM)))
+					obj_to_obj (obj, tobj);
+			} //end Balchoth pack stuff
+
+			/* Iterate through melee weapon skills and select the one with the highest cap. */
+			int max_skill_id=0;
+			int max_skill_val=0;
+			int tmp=0;
+
+			for (int i=SKILL_LIGHT_EDGE; i<=SKILL_POLEARM; i++)
+			{
+				if ((tmp=calc_lookup (ch, REG_CAP, i)) > max_skill_val)
+				{
+					max_skill_id=i;
+					max_skill_val=tmp;
+				}
+			}
+
+			/* load an appropriate weapon and container */
+			switch (max_skill_id)
+			{
+			case SKILL_LIGHT_EDGE:
+				if ((tobj = obj = load_object (98))) // brown leather sheath
+				{	
+					equip_char(ch, obj, WEAR_BELT_2);
+					if ((obj = load_object (23051)))  // load weapon and place in sheath
+						obj_to_obj(obj,tobj);
+					tobj = NULL; // Null out to reset state for if on satchel
+				}
+				break;
+
+			case SKILL_MEDIUM_EDGE:
+				if ((tobj = obj = load_object (98))) // brown leather sheath
+				{	
+					equip_char(ch, obj, WEAR_BELT_2);
+					if ((obj = load_object (23054)))  // load weapon and place in sheath
+						obj_to_obj(obj,tobj);
+					tobj = NULL; // Null out to reset state for if on satchel
+				}
+				break;
+
+			case SKILL_HEAVY_EDGE:
+				if ((tobj = obj = load_object (98))) // brown leather sheath
+				{	
+					equip_char(ch, obj, WEAR_BELT_2);
+					if ((obj = load_object (23062)))  // load weapon and place in sheath
+						obj_to_obj(obj,tobj);
+					tobj = NULL; // Null out to reset state for if on satchel
+				}
+				break;
+
+			case SKILL_LIGHT_BLUNT:
+				// Sorry! No such objects exist
+				break;
+
+			case SKILL_MEDIUM_BLUNT:
+				if ((tobj = obj = load_object (98))) // brown leather sheath
+				{	
+					equip_char(ch, obj, WEAR_BELT_2);
+					if ((obj = load_object (23050)))  // load weapon and place in sheath
+						obj_to_obj(obj,tobj);
+					tobj = NULL; // Null out to reset state for if on satchel
+				}
+				break;
+
+			case SKILL_HEAVY_BLUNT:
+				if ((tobj = obj = load_object (98))) // brown leather sheath
+				{	
+					equip_char(ch, obj, WEAR_BELT_2);
+					if ((obj = load_object (23052)))  // load weapon and place in sheath
+						obj_to_obj(obj,tobj);
+					tobj = NULL; // Null out to reset state for if on satchel
+				}
+				break;
+
+			case SKILL_LIGHT_PIERCE: //(dagger)
+				if ((tobj = obj = load_object (98))) // brown leather sheath
+				{	
+					equip_char(ch, obj, WEAR_BELT_2);
+					if ((obj = load_object (23046)))  // load weapon and place in sheath
+						obj_to_obj(obj,tobj);
+					tobj = NULL; // Null out to reset state for if on satchel
+				}
+				break;
+
+			case SKILL_MEDIUM_PIERCE:
+				/* this gets trickier. The PC could already have the shoulder_L spot taken
+					 * from the ranged weapons above */
+				if (get_equip(ch, WEAR_SHOULDER_L))
+				{
+					/* shoulder is not free. You'll just have to carry it */
+					if ((obj = load_object (23058)))
+						equip_char(ch, obj, WEAR_CARRY_R);
+				}
+				else
+				{
+					/* shoulder is free. Load up a strap */
+					if ((tobj = obj = load_object (2260))) // shoulder strap
+					{	
+						equip_char(ch, obj, WEAR_SHOULDER_L);
+
+						if ((obj = load_object (23058)))  // load weapon and place in strap
+							obj_to_obj(obj,tobj);
+						tobj = NULL; // Null out to reset state for if on satchel
+					}
+				}
+				break;
+			case SKILL_HEAVY_PIERCE:
+				/* this gets trickier. The PC could already have the shoulder_L spot taken
+					 * from the ranged weapons above */
+				if (get_equip(ch, WEAR_SHOULDER_L))
+				{
+					/* shoulder is not free. You'll just have to carry it */
+					if ((obj = load_object (23056)))
+						equip_char(ch, obj, WEAR_CARRY_R);
+				}
+				else
+				{
+					/* shoulder is free. Load up a strap */
+					if ((tobj = obj = load_object (2260))) // shoulder strap
+					{	
+						equip_char(ch, obj, WEAR_SHOULDER_L);
+
+						if ((obj = load_object (23056)))  // load weapon and place in strap
+							obj_to_obj(obj,tobj);
+						tobj = NULL; // Null out to reset state for if on satchel
+					}
+				}
+				break;
+			default:
+				//nothing
+			}// end weapon-loading switch
+	} // end Balchoth
 		
 //starting in Gondor - also default case 
 	else 

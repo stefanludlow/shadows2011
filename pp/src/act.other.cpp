@@ -76,7 +76,7 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	CHAR_DATA *tch, *tch_next;
 	DESCRIPTOR_DATA *td;
 	int from_room = 0, to_room = 0;
-	int commenced_in = 0; // 0 = gondor, 1 = mordor, 2 = haradrim, 3 = northman, 4 = orc
+	int commenced_in = 0; // 0 = gondor, 1 = mordor, 2 = haradrim, 3 = northman, 4 = orc, 5 = Balchoth
 	char buf[MAX_STRING_LENGTH];
 
 	if (!IS_SET (ch->plr_flags, NEWBIE))
@@ -104,17 +104,20 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 
 	from_room = ch->in_room;
 
+
+	/* BS for Harad, Mordor, Balchoth starts */
 	if ((IS_SET (ch->plr_flags, START_HARAD) ||
 		IS_SET (ch->plr_flags, START_MORDOR_ORC) ||
 		IS_SET (ch->plr_flags, START_BALCHOTH))) {
-			if (ch->skills[SKILL_SPEAK_BLACK_SPEECH] < 20) {
-				ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20 ;
-				ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
+			if (ch->skills[SKILL_SPEAK_BLACK_SPEECH] < 30) {
+				ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 30 ;
+				ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 30;
 			}
 	}
-	else if (ch->skills[SKILL_SPEAK_WESTRON] < 20) {
-		ch->skills[SKILL_SPEAK_WESTRON] = 20;
-		ch->pc->skills[SKILL_SPEAK_WESTRON] = 20;
+	/* Westron for all others */
+	else if (ch->skills[SKILL_SPEAK_WESTRON] < 30) {
+		ch->skills[SKILL_SPEAK_WESTRON] = 30;
+		ch->pc->skills[SKILL_SPEAK_WESTRON] = 30;
 	}
 	int     native_tongue = get_native_tongue(ch);
 	if (native_tongue)
@@ -129,10 +132,6 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 		char_to_room (ch, HARADRIM_START_LOC);
 		ch->was_in_room = 0;
 		add_clan (ch, "mordor_slavers", CLAN_MEMBER);
-
-		ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
-		ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
-
 		commenced_in = 2;
 	}
 	else if (IS_SET (ch->plr_flags, START_CAOLAFON))
@@ -143,10 +142,10 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 		add_clan (ch, "caolafon-citizen", CLAN_MEMBER);
 
 		/* people without Atliduk as native tongue get it at basic proficiency */
-		if (!ch->skills[SKILL_SPEAK_ATLIDUK] || ch->skills[SKILL_SPEAK_ATLIDUK] < 20)
+		if (!ch->skills[SKILL_SPEAK_ATLIDUK] || ch->skills[SKILL_SPEAK_ATLIDUK] < 30)
 		{
-			ch->skills[SKILL_SPEAK_ATLIDUK] = 20;
-			ch->pc->skills[SKILL_SPEAK_ATLIDUK] = 20;
+			ch->skills[SKILL_SPEAK_ATLIDUK] = 30;
+			ch->pc->skills[SKILL_SPEAK_ATLIDUK] = 30;
 		}
 		commenced_in = 3;
 	}
@@ -157,23 +156,32 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 		ch->was_in_room = 0;
 		add_clan (ch,"vadok_kraun",CLAN_MEMBER);
 		add_clan (ch,"mordor_char",CLAN_MEMBER);
-
-		ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
-		ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
-
 		commenced_in = 4;
 	}
 	else if (IS_SET (ch->plr_flags, START_BALCHOTH)) {
 		char_from_room(ch);
 		char_to_room(ch, BALCHOTH_START_LOC);
 		ch->was_in_room = 0;
-		add_clan(ch, "balchoth_vanguard", CLAN_MEMBER);
+		add_clan(ch, "balchoth_vanguard", CLAN_CORPORAL);
 		add_clan(ch, "mordor_char", CLAN_MEMBER);
-
-		ch->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
-		ch->pc->skills[SKILL_SPEAK_BLACK_SPEECH] = 20;
-
 		commenced_in = 5;
+
+		/* All combat skills possessed boosted by 10 */
+		for (int i=SKILL_LIGHT_EDGE; i<=SKILL_PARRY; i++)
+		{
+			if (ch->skills[i]>0)
+			{
+				ch->skills[i]+=10;
+				ch->pc->skills[i] = ch->skills[i];
+			}
+		}
+
+		/* Special case for Dodge */
+		if (ch->skills[SKILL_DODGE]>0)
+		{
+				ch->skills[SKILL_DODGE]+=10;
+				ch->pc->skills[SKILL_DODGE] = ch->skills[SKILL_DODGE];
+		}
 	}
 	else
 	{
