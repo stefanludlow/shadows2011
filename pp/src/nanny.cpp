@@ -3001,7 +3001,7 @@ equip_newbie (CHAR_DATA * ch)
 
 			for (int i=SKILL_LIGHT_EDGE; i<=SKILL_POLEARM; i++)
 			{
-				if ((tmp=calc_lookup (ch, REG_CAP, i)) > max_skill_val)
+				if (ch->skills[i] > 0 && (tmp=calc_lookup (ch, REG_CAP, i)) > max_skill_val)
 				{
 					max_skill_id=i;
 					max_skill_val=tmp;
