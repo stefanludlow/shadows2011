@@ -3120,6 +3120,7 @@ equip_newbie (CHAR_DATA * ch)
 				}
 				break;
 			default:
+				break;
 				//nothing
 			}// end weapon-loading switch
 	} // end Balchoth
