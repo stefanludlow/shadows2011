@@ -6733,7 +6733,7 @@ post_help (DESCRIPTOR_DATA * d)
 	if (strlen (date) > 1)
 		date[strlen (date) - 1] = '\0';
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No help entry written.\n", d->character);
 		d->pending_message = NULL;
@@ -9475,7 +9475,7 @@ post_track_response (DESCRIPTOR_DATA * d)
 
 	message =
 		load_message (d->character->delay_who, 5, d->character->delay_info1);
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No email sent.\n", d->character);
 	}
@@ -9796,7 +9796,7 @@ post_player_message (DESCRIPTOR_DATA * d)
 	if (strlen (date) > 1)
 		date[strlen (date) - 1] = '\0';
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 		send_to_char ("No message posted.\n", d->character);
 	else
 		add_message (1,		/* New message */
@@ -9882,7 +9882,7 @@ post_journal (DESCRIPTOR_DATA * d)
 	if (strlen (date) > 1)
 		date[strlen (date) - 1] = '\0';
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 		send_to_char ("No journal entry added.\n", d->character);
 	else
 		add_message (5,		/* New message */

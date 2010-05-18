@@ -522,7 +522,7 @@ post_brief (DESCRIPTOR_DATA * d)
 {
 	char	buf[MAX_STRING_LENGTH], buf2 [MAX_STRING_LENGTH];
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No role briefing was recorded.\n", d->character);
 		d->pending_message = NULL;

@@ -3834,7 +3834,7 @@ post_to_mysql_board (DESCRIPTOR_DATA * d)
 	MYSQL_ROW row;
 	time_t current_time;
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No message posted.\n", d->character);
 		free_mem(d->pending_message);
@@ -4681,7 +4681,7 @@ post_to_mysql_virtual_board (DESCRIPTOR_DATA * d)
 	int free_slot = 0;
 	time_t current_time;
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No message posted.\n", d->character);
 		free_mem(d->pending_message);
@@ -4736,7 +4736,7 @@ post_to_mysql_journal (DESCRIPTOR_DATA * d)
 	int free_slot = 0;
 	time_t current_time;
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No message posted.\n", d->character);
 		free_mem(d->pending_message);
@@ -4790,7 +4790,7 @@ post_to_mysql_player_board (DESCRIPTOR_DATA * d)
 	int free_slot = 0;
 	time_t current_time;
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No message posted.\n", d->character);
 		free_mem(d->pending_message);

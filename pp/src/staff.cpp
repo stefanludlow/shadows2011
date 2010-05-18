@@ -345,7 +345,7 @@ post_log (DESCRIPTOR_DATA * d)
 	char report[MAX_STRING_LENGTH];
 
 	ch = d->character;
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No newsletter report posted.\n", ch);
 		return;
@@ -1176,7 +1176,7 @@ post_email (DESCRIPTOR_DATA * d)
 	char from[MAX_STRING_LENGTH];
 	char buf[MAX_STRING_LENGTH];
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("Email aborted.\n", d->character);
 		d->pending_message = NULL;

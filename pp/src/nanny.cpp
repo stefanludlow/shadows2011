@@ -1284,7 +1284,7 @@ post_retirement (DESCRIPTOR_DATA * d)
 	ctime_r (&time_now, date);
 	date[strlen (date) - 1] = '\0';
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		SEND_TO_Q ("\n#2Character retirement aborted.#0\n", d);
 		display_main_menu (d);

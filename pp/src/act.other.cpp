@@ -1857,7 +1857,7 @@ post_idea (DESCRIPTOR_DATA * d)
 	date2[strlen (date2) - 1] = '\0';
 
 	ch = d->character;
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No suggestion report entered.\n", ch);
 		free_mem (date);
@@ -1952,7 +1952,7 @@ post_typo (DESCRIPTOR_DATA * d)
 	date2[strlen (date2) - 1] = '\0';
 
 	ch = d->character;
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No typo report posted.\n", ch);
 		return;
@@ -2062,7 +2062,7 @@ post_bug (DESCRIPTOR_DATA * d)
 	date2[strlen (date2) - 1] = '\0';
 
 	ch = d->character;
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No bug report posted.\n", ch);
 		free_mem (date);

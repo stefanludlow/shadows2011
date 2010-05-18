@@ -3999,7 +3999,7 @@ post_rdesc (DESCRIPTOR_DATA * d)
 	room = vtor (ch->delay_info1);
 	ch->delay_info1 = 0;
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No room description posted.\n", ch);
 		return;
@@ -5579,7 +5579,7 @@ post_odesc (DESCRIPTOR_DATA * d)
 	obj = vtoo (ch->delay_info1);
 	ch->delay_info1 = 0;
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No object description posted.\n", ch);
 		return;
@@ -7006,7 +7006,7 @@ post_mdesc (DESCRIPTOR_DATA * d)
 		return;
 	}
 
-	if (!*d->pending_message->message)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("No mobile description posted.\n", ch);
 		if (!IS_NPC(mob))
