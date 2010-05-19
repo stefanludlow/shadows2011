@@ -3737,13 +3737,13 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 			d->character->max_hit =
 			200 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur,25) * 4);
 		d->character->hit = d->character->max_hit;
-		d->character->armor = 3;
+		d->character->armor = 2;
 	}
 
 	if (d->character->race == 86)//Olog-hai
 	{
 		d->character->max_hit =
-			50 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 25) * 4);
+			200 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 25) * 4);
 		d->character->hit = d->character->max_hit;
 		d->character->armor = 3;
 	}
