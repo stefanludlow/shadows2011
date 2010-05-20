@@ -1390,7 +1390,9 @@ int first_free = 0;
 int mud_memory = 0;
 
 char* duplicateString(const char *source) {
-	if (source != NULL && strcmp(source, "") == STR_MATCH) {
+	if (source == NULL)
+		return NULL;
+	else if (strcmp(source, "") == STR_MATCH) {
 		static char *emptyString = "";
 		return emptyString;
 	}
