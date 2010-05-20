@@ -3364,6 +3364,7 @@ do_rpprg (CHAR_DATA * ch, char *argument, int cmd)
 			ch->desc->descStr = NULL;
 			ch->desc->proc = (CALL_PROC*) post_rpprg;
 			ch->desc->max_str = MAX_STRING_LENGTH;
+			ch->delay_info1 = i; // store which program to edit for the callback
 			return;
 		}
 	}
