@@ -1419,14 +1419,9 @@ int free_mem (char *&ptr) {
 }
 
 int free_mem (void *ptr) {
-	if (ptr!=NULL) {
-		delete ptr;
-		ptr = NULL;
-		return 1;
-	}
-	else {
-		return 0;
-	}
+	delete ptr;
+	ptr = NULL;
+	return 1;
 }
 
 int free_mem_array (void *ptr) {

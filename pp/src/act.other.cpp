@@ -1877,6 +1877,7 @@ post_idea (DESCRIPTOR_DATA * d)
 	send_to_char ("Thank you! Your suggestion has been recorded.\n\r", ch);
 
 	free_mem(d->pending_message);
+	d->pending_message = NULL;
 
 	free_mem (date);
 	free_mem (date2);
@@ -1977,6 +1978,7 @@ post_typo (DESCRIPTOR_DATA * d)
 		ch);
 
 	free_mem(d->pending_message);
+	d->pending_message=NULL;
 }
 
 void
@@ -2083,6 +2085,7 @@ post_bug (DESCRIPTOR_DATA * d)
 		("Thank you! Your bug report has been entered into our system.\n\r", ch);
 
 	free_mem(d->pending_message);
+	d->pending_message = NULL;
 
 	free_mem (date);
 	free_mem (date2);

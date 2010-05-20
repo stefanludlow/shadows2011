@@ -10166,6 +10166,7 @@ post_message (DESCRIPTOR_DATA * d)
 	if (!d->pending_message->message) {
 		send_to_char ("No message posted.\n", d->character);
 		free_mem(d->pending_message);
+		d->pending_message = NULL;
 	}
 	else {
 		post_to_mysql_board (d);
@@ -11101,6 +11102,7 @@ post_writing (DESCRIPTOR_DATA * d)
 	ch->pc->writing_on = NULL;
 	ch->delay_who = NULL;
 	free_mem(d->pending_message);
+	d->pending_message = NULL;
 
 	skill_use (ch, ch->writes, 0);
 	if (!number (0, 1))

@@ -2207,6 +2207,7 @@ email_acceptance (DESCRIPTOR_DATA * d)
 			d->pending_message->message, d->pending_message->flags);
 
 		free_mem(d->pending_message);
+		d->pending_message = NULL;
 		if (d->character->pc->msg)
 		{
 			free_mem (d->character->pc->msg);
@@ -2373,6 +2374,7 @@ email_rejection (DESCRIPTOR_DATA * d)
 			d->pending_message->message, d->pending_message->flags);
 
 		free_mem(d->pending_message);
+		d->pending_message = NULL;
 
 		sprintf (buf,
 			"\n#6Unfortunately, your application was declined on its most recent review.\n\n%s left the following comment(s) explaining why:#0\n"

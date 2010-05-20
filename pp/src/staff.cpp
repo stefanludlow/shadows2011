@@ -393,6 +393,7 @@ post_log (DESCRIPTOR_DATA * d)
 
 	ch->delay_who = NULL;
 	free_mem(d->pending_message);
+	d->pending_message = NULL;
 }
 
 void
