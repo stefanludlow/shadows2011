@@ -3327,12 +3327,10 @@ do_rpprg (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (i == j)
 		{
+			send_to_char ("Enter program now, Terminate entry with an '@'\n\r",	ch);
 			make_quiet (ch);
-			send_to_char ("Enter program now, Terminate entry with an '@'\n\r",
-				ch);
 			free_mem(ch->desc->descStr);
-			ch->desc->descStr = duplicateString(t->prog);
-			t->prog = 0;
+			ch->desc->descStr = t->prog;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
 		}
