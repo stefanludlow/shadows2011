@@ -3391,12 +3391,13 @@ do_rpapp (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (i == j)
 		{
+			send_to_char("Append to program now, Terminate entry with an '@'\n\r", ch);
 			make_quiet (ch);
-			send_to_char
-				("Append to program now, Terminate entry with an '@'\n\r", ch);
 			free_mem(ch->desc->descStr);
-			ch->desc->descStr = duplicateString(t->prog);
+			ch->desc->descStr = duplicateString(t->prog); // clone existing program as starting str
 			ch->desc->max_str = MAX_STRING_LENGTH;
+			ch->desc->proc = (CALL_PROC*) post_rpprg;
+			ch->delay_info1 = i; // store which program to edit for the callback
 			return;
 		}
 	}
