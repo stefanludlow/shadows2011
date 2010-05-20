@@ -3285,8 +3285,6 @@ string_add (DESCRIPTOR_DATA * d, char *str)
 
 	if (terminator)
 	{
-		free_mem(d->descStr);
-
 		if (d->character)
 			d->character->act &= ~PLR_QUIET;
 
@@ -3296,9 +3294,11 @@ string_add (DESCRIPTOR_DATA * d, char *str)
 			d->proc = NULL;
 			(proc) (d);
 		}
-
 		else if (d->connected == CON_CREATION)
 			create_menu_options (d);
+
+		free_mem(d->descStr);
+		d->descStr=NULL;
 	}
 
 	else
