@@ -251,7 +251,7 @@ struct descriptor_data
 	int max_columns;
 	int edit_mode;
 	struct timeval login_time;
-	struct message_data *pending_message;
+	message_data *pending_message;
 	int time_last_activity;
 	int idle;
 	char *stored;			/* miscellaneous storage */

@@ -9399,7 +9399,7 @@ tracking_system_response (CHAR_DATA * ch, MESSAGE_DATA * message)
 	if (!message)
 		return;
 
-	if (!*ch->desc->pending_message->message)
+	if (!ch->desc->pending_message->message || !*ch->desc->pending_message->message)
 		return;
 
 	account acct (message->poster);
@@ -10994,6 +10994,9 @@ post_writing (DESCRIPTOR_DATA * d)
 	char date[AVG_STRING_LENGTH] = "";
 	char message[MAX_STRING_LENGTH] = "";
 	float mod = 0;
+
+	if (!d->pending_message || !d->pending_message->message || !*d->pending_message->message)
+		return;
 
 	ch = d->character;
 

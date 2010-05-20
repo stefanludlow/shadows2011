@@ -3223,7 +3223,7 @@ sigsegv (int signo)
 void
 string_add (DESCRIPTOR_DATA * d, char *str)
 {
-	char *scan = "";
+	char *scan = NULL;
 	int terminator = 0;
 	char end_char;
 	char *p = "";
