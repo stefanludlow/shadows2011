@@ -3308,6 +3308,37 @@ do_rpkey (CHAR_DATA * ch, char *argument, int cmd)
 	return;
 }
 
+
+/* Procedure called upon completion of editing a room prog */
+/* the serial number of the prog is stored in delay_info1 */
+void post_rpprg (DESCRIPTOR_DATA * d)
+{
+	CHAR_DATA* ch = d->character;
+	int prog_number = ch->delay_info1;
+	ROOM_DATA* r = vtor(ch->in_room);
+	struct room_prog* prg = NULL;
+
+	if (!r)
+		return;
+
+	prg = r->prg;
+
+	/* Select the N-th prog */
+	for (int i=1; prg!=NULL; prg=prg->next, i++)
+	{
+		if (i==prog_number)
+		{
+			/* overwrite the program with the new string */
+			free_mem(prg->prog);
+			prg->prog = duplicateString(d->descStr);
+			break;
+		}
+	}
+
+	free_mem(d->descStr);
+	d->descStr = NULL;
+}
+
 void
 do_rpprg (CHAR_DATA * ch, char *argument, int cmd)
 {
@@ -3330,7 +3361,8 @@ do_rpprg (CHAR_DATA * ch, char *argument, int cmd)
 			send_to_char ("Enter program now, Terminate entry with an '@'\n\r",	ch);
 			make_quiet (ch);
 			free_mem(ch->desc->descStr);
-			ch->desc->descStr = t->prog;
+			ch->desc->descStr = NULL;
+			ch->desc->proc = (CALL_PROC*) post_rpprg;
 			ch->desc->max_str = MAX_STRING_LENGTH;
 			return;
 		}

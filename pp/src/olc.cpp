@@ -4006,6 +4006,7 @@ post_rdesc (DESCRIPTOR_DATA * d)
 	}
 
 	room->description = duplicateString (d->pending_message->message);
+	free_mem(d->pending_message);
 	d->pending_message = NULL;
 }
 
