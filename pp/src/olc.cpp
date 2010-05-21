@@ -5303,7 +5303,7 @@ do_ounused (CHAR_DATA * ch, char *argument, int cmd)
 
 	else if (!just_a_number (buf) || atoi (buf) < 0 || atoi (buf) >= OBJECT_MAX_ZONE)
 	{
-		send_to_char ("Syntax:  runused [zone #]\n", ch);
+		send_to_char ("Syntax:  ounused [zone #]\n", ch);
 		return;
 	}
 
