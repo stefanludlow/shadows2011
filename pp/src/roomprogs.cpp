@@ -2806,7 +2806,7 @@ do_opstat (CHAR_DATA *ch, char *argument, int cmd)
 		{
 			if (counter++ == atoi(ThisArgument.c_str()))
 			{
-				output += it->second.prog;
+				output += (it->second.prog == NULL ? "(null)\n" : it->second.prog);
 			}
 		}
 	}
