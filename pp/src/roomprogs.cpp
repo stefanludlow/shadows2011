@@ -3088,6 +3088,34 @@ do_optype (CHAR_DATA * ch, char *argument, int cmd)
 	return;
 }
 
+
+/* Procedure called upon completion of editing an object prog */
+/* the vnum of the object is stored in delay_info1 */
+/* and the serial number of the prog is stored in delay_info2 */
+void post_opprg (DESCRIPTOR_DATA * d)
+{
+	CHAR_DATA* ch = d->character;
+	int vnum = ch->delay_info1;
+	int prog_number = ch->delay_info2;
+
+	int count = 1;
+	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = obj_prog_list.equal_range(vnum);
+	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
+	{
+		if (count == prog_number)
+		{
+			/* overwrite the program with the new string */
+			free_mem(it->second.prog);
+			it->second.prog = duplicateString(d->descStr);
+			break;
+		}
+		count++;
+	}
+
+	free_mem(d->descStr);
+	d->descStr = NULL;
+}
+
 void
 do_opprg (CHAR_DATA * ch, char *argument, int cmd)
 {
@@ -3114,17 +3142,21 @@ do_opprg (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+	/* this is nearly unnecessary, but it does ensure that the program has been properly opadded first */
 	int count = 1;
 	std::pair<std::multimap<int, room_prog>::iterator, std::multimap<int, room_prog>::iterator> range = obj_prog_list.equal_range(ivnum);
 	for (std::multimap<int, room_prog>::iterator it = range.first; it != range.second; ++it)
 	{
 		if (count == iprognum)
 		{
+			send_to_char ("Enter program now, Terminate entry with an '@'\n\r",	ch);
 			make_quiet (ch);
-			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
-			ch->desc->descStr = duplicateString(it->second.prog);
-			it->second.prog = 0;
+			free_mem(ch->desc->descStr);
+			ch->desc->descStr = NULL;
+			ch->desc->proc = (CALL_PROC*) post_opprg;
 			ch->desc->max_str = MAX_STRING_LENGTH;
+			ch->delay_info1 = ivnum; // store the vnum of the item
+			ch->delay_info2 = iprognum; // store the serial number of the prog
 			return;
 		}
 		count++;
@@ -3168,11 +3200,14 @@ do_opapp (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (count == iprognum)
 		{
+			send_to_char ("Enter program now, Terminate entry with an '@'\n\r",	ch);
 			make_quiet (ch);
-			send_to_char ("Enter program now, Terminate entry with an '@'\n\r", ch);
 			free_mem(ch->desc->descStr);
-			ch->desc->descStr = duplicateString(it->second.prog);
+			ch->desc->descStr = duplicateString(it->second.prog); // clone existing program as starting str
+			ch->desc->proc = (CALL_PROC*) post_opprg;
 			ch->desc->max_str = MAX_STRING_LENGTH;
+			ch->delay_info1 = ivnum; // store the vnum of the item
+			ch->delay_info2 = iprognum; // store the serial number of the prog
 			return;
 		}
 		count++;
