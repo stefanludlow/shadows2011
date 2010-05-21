@@ -24,8 +24,6 @@
 
 
 #define ROOM_MAX		100000
-#define ZONE_SIZE		1000
-#define OBJECT_ZONE_SIZE 1100
 
 #define s(a) send_to_char (a "\n", ch);
 
