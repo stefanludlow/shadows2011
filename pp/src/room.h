@@ -149,7 +149,7 @@ inline ROOM_DATA * vtor(int roomVirtual)
 {
 	static ROOM_DATA *room = NULL;
 
-	if (roomVirtual < 100000)
+	if (roomVirtual < 110000)
 	{
 		room = globalRoomArray[roomVirtual];
 

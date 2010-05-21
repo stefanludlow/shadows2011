@@ -125,8 +125,7 @@ clone_contiguous_rblock (ROOM_DATA * start_room, int from_dir)
 
 	// Determine unused vnum for the new cloned room.
 
-	for (rnum = 100000; rnum <= 999999; rnum++)
-	{
+	for (rnum = 100000; rnum < 110000; rnum++) {
 		if (!vtor (rnum))
 			break;
 	}

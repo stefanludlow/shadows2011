@@ -992,7 +992,7 @@ allocate_room (int nVirtual)
 	else
 #endif
 		add_room_to_hash (new_room);
-	if (new_room->nVirtual < 100000) {
+	if (new_room->nVirtual < 110000) {
 		globalRoomArray[new_room->nVirtual] = (new_room);
 	}
 
