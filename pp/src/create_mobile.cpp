@@ -49,9 +49,9 @@ const char *variable_races[] = {
 	"Mordorian Orc",
 	"Snaga",
 	"Frog",
+	"Balchoth",
 	"\n"
 };
-
 
 const char *frog_adj1[] = {
 	"orange-brown",
@@ -77,8 +77,6 @@ const char *frog_adj1[] = {
 	"\n"
 };
 
-
-
 const char *frog_adj2[] = {
 	"thick-legged",
 	"web-toed",
@@ -103,6 +101,128 @@ const char *frog_adj2[] = {
 	"\n"
 };
 
+const char *balchoth_adj1[] = {
+	"stringy-haired",
+	"balding",
+	"bald",
+	"rakish",
+	"widow-peaked",
+	"powerful",
+	"angular",
+	"dusk-skinned",
+	"glossy-black-haired",
+	"dull-black-haired",
+	"oily-haired",
+	"midnight-haired",
+	"black-haired",
+	"ebon-haired",
+	"dark-haired",
+	"braided-haired",
+	"wiry-haired",
+	"stalwart",
+	"dull-haired",
+	"compact",
+	"angular",
+	"wizened",
+	"athletic",
+	"muscular",
+	"brawny",
+	"burly",
+	"strapping",
+	"robust",
+	"sturdy",
+	"hale",
+	"squat",
+	"sinewy",
+	"stooped",
+	"crook-backed",
+	"straight-limbed",
+	"sturdy-limbed",
+	"solid",
+	"swarthy",
+	"dark-skinned",
+	"tawny-skinned",
+	"thewy",
+	"thick-set",
+	"lean",
+	"taut-muscled",
+	"toned",
+	"swarthy-skinned",
+	"solidly-built",
+	"gangly",
+	"rangy",
+	"slinky",
+	"raw-boned",
+	"ropey",
+	"corded",
+	"worn",
+	"gaunt",
+	"bony",
+	"stocky",
+	"weathered",
+	"leathery-skinned",
+	"veiny",
+	"sturdy",
+	"weather-beaten",
+	"short",
+	"stout",
+	"ugly",
+	"handsome",
+	"\n"
+};
+
+const char *balchoth_adj2[] = {
+	"dull-eyed",
+	"dark-eyed",
+	"dusky-eyed",
+	"hard-eyed",
+	"stormy-eyed",
+	"hawk-browed",
+	"keen-eyed",
+	"dark-brown-eyed",
+	"sunken-eyed",
+	"glint-eyed",
+	"black-eyed",
+	"dark-eyed",
+	"obsidian-eyed",
+	"sharp-eyed",
+	"angular-featured",
+	"glassy-eyed",
+	"squint-eyed",
+	"narrow-eyed",
+	"one-eyed",
+	"bushy-eyebrowed",
+	"pinch-featured",
+	"broad-nosed",
+	"narrow-nosed",
+	"hook-nosed",
+	"beak-nosed",
+	"hawk-nosed",
+	"sharp-nosed",
+	"crook-nosed",
+	"gaunt-cheeked",
+	"thin-lipped",
+	"dry-lipped",
+	"thick-lipped",
+	"cleft-chinned",
+	"wide-jawed",
+	"square-jawed",
+	"long-faced",
+	"drawn-faced",
+	"magnificently-tattooed",
+	"tattoo-covered",
+	"tattooed",
+	"scar-faced",
+	"pox-scarred",
+	"heavily-scarred",
+	"facial-tattooed",
+	"stern-featured",
+	"broad-faced",
+	"intricately-tattooed",
+	"heavily-tattooed",
+	"tanned",
+	"\n"
+};
 
 const char *spider_adj1[] = {
 	"brown-striped",
@@ -1963,6 +2083,15 @@ return_adj2 (CHAR_DATA * mob)
 			sprintf (adj, "%s", frog_adj2[roll]);
 			return adj;
 		}
+		else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Balchoth"))
+		{
+			for (limit = 0; *balchoth_adj2[limit] != '\n'; limit++)
+				;
+			limit--;
+			roll = number (0, limit);
+			sprintf (adj, "%s", balchoth_adj2[roll]);
+			return adj;
+		}
 		else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Wolf"))
 		{
 			for (limit = 0; *wolf_adj2[limit] != '\n'; limit++)
@@ -2177,6 +2306,24 @@ return_adj1 (CHAR_DATA * mob)
 			sprintf (adj, "%s", wolf_adj1[roll]);
 			return adj;
 		}
+		else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Frog"))
+		{
+			for (limit = 0; *frog_adj1[limit] != '\n'; limit++)
+				;
+			limit--;
+			roll = number (0, limit);
+			sprintf (adj, "%s", frog_adj1[roll]);
+			return adj;
+		}
+		else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Balchoth"))
+		{
+			for (limit = 0; *balchoth_adj1[limit] != '\n'; limit++)
+				;
+			limit--;
+			roll = number (0, limit);
+			sprintf (adj, "%s", balchoth_adj1[roll]);
+			return adj;
+		}
 		else if (!str_cmp (lookup_race_variable (mob->race, RACE_NAME), "Noldo Elf")
 			|| !str_cmp (lookup_race_variable (mob->race, RACE_NAME),
 			"Sinda Elf")
@@ -2285,7 +2432,6 @@ return_adj1 (CHAR_DATA * mob)
 						return adj;
 					}
 				}
-
 				return "short";
 }
 
