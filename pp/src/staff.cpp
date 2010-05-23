@@ -774,10 +774,10 @@ do_roll (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				attr = ch->wil;
 			}
-			else if (strcasecmp (buf, "aur") == 0)
-			{
-				attr = ch->aur;
-			}
+			//else if (strcasecmp (buf, "aur") == 0) // Wrong scale for this to make sense
+			//{
+			//	attr = ch->aur;
+			//}
 			else if (strcasecmp (buf, "agi") == 0)
 			{
 				attr = ch->agi;
