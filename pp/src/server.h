@@ -53,8 +53,8 @@ namespace rpie
 		std::map<std::string,std::string> config_variables;
 
 		// checkpoint alarms
-		static const int BOOT_DB_ABORT_THRESHOLD = 15; ///< Infinite loop test.
-		static const int RUNNING_ABORT_THRESHOLD = 5; ///< Infinite loop test.
+		static const int BOOT_DB_ABORT_THRESHOLD = 30; ///< Infinite loop test.
+		static const int RUNNING_ABORT_THRESHOLD = 20; ///< Infinite loop test.
 		bool abort_threshold_enabled;
 		int abort_threshold;
 		int last_checkpoint;
@@ -68,7 +68,7 @@ namespace rpie
 
 	public:
 		static const size_t MAX_NAME_LENGTH = 15;	///< Username string length
-		static const int ALARM_FREQUENCY = 20; ///< ITimer frequency in seconds
+		static const int ALARM_FREQUENCY = 45; ///< ITimer frequency in seconds
 
 		server ();
 
