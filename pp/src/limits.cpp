@@ -1075,7 +1075,7 @@ skill_level (CHAR_DATA * ch, int skill, int diff_mod)
 		skill_lev -= af->a.spell.modifier;
 
 	if (get_affect(ch, AFF_SUNLIGHT_PEN) && sun_light
-		&& ch->room->sector_type != SECT_INSIDE && !IS_SET (ch->room->room_flags, INDOORS)) {
+		&& !(ch->room->sector_type == SECT_INSIDE || ch->room->sector_type == SECT_CAVE)  && !IS_SET (ch->room->room_flags, INDOORS)) {
 			int penalty = 0;
 
 			if (weather_info[ch->room->zone].clouds == CLEAR_SKY) {
@@ -1098,7 +1098,7 @@ skill_level (CHAR_DATA * ch, int skill, int diff_mod)
 				penalty *= 0.5;
 			}
 			else if (ch->room->sector_type == SECT_HILLS ||
-				ch->room->sector_type == SECT_FIELD ||
+				ch->room->sector_type == SECT_FIELD || ch->room->sector_type == SECT_HEATH ||
 				ch->room->sector_type == SECT_MOUNTAIN) {
 					penalty += 5;
 			}
