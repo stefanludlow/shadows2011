@@ -69,7 +69,7 @@ const char *attrs[] = {
 	"con",
 	"wil",
 	"int",
-	"aur",
+	"pow",
 	"agi",
 	"\n"
 };
@@ -1525,7 +1525,7 @@ add_to_default_list (DEFAULT_ITEM_DATA * items, char *flag_vnum)
 
 	if (*flag_vnum == '-')
 	{
-	  memset (items->items, 0, sizeof(int)*MAX_DEFAULT_ITEMS);
+		memset (items->items, 0, sizeof(int)*MAX_DEFAULT_ITEMS);
 		return;
 	}
 
@@ -1621,38 +1621,6 @@ read_item_list (DEFAULT_ITEM_DATA ** items, char *list, PHASE_DATA * phase)
 	return argument;
 }
 
-//PHASE_DATA *
-//new_phase ()
-//{
-//	PHASE_DATA *phase;
-//
-//	phase = new PHASE_DATA;
-//	phase->load_mob = -1;
-//	phase->move_cost = -1;
-//	phase->phase_seconds = -1;
-//	phase->power = 0;
-//	phase->req_skill = -1;
-//	phase->req_skill_value = -1;
-//	phase->self = "";
-//	phase->sides = -1;
-//	phase->attribute = -1;
-//	phase->next = NULL;
-//	phase->tool = NULL;
-//	phase->attribute = -1;
-//	phase->attr = -1;
-//	phase->dice = -1;
-//	phase->duration = -1;
-//	phase->flags = 0;
-//	phase->hit_cost = -1;
-//	phase->targets = -1;
-//	phase->skill = 0;
-//	phase->spell_type = -1;
-//	phase->fail_group_mess = NULL;
-//	phase->group_mess = NULL;
-//
-//	return phase;
-//}
-
 char *
 read_extended_text (FILE * fp, char *first_line)
 {
@@ -1730,20 +1698,20 @@ subcraft_line (FILE * fp_reg, char *line)
 	if (!str_cmp (buf, "craft"))
 	{
 
-	  subcraft = new SUBCRAFT_HEAD_DATA;
-	  memset (subcraft, 0, sizeof(SUBCRAFT_HEAD_DATA));
+		subcraft = new SUBCRAFT_HEAD_DATA;
+		memset (subcraft, 0, sizeof(SUBCRAFT_HEAD_DATA));
 
-	  
-	  if (!crafts)
-	    {
-	      tail_end = crafts = subcraft;
-	    }
-	  else
-	    {
-	      tail_end->next = subcraft;
-	      tail_end = subcraft;
 
-	    }
+		if (!crafts)
+		{
+			tail_end = crafts = subcraft;
+		}
+		else
+		{
+			tail_end->next = subcraft;
+			tail_end = subcraft;
+
+		}
 		argument = one_argument (argument, buf);
 		subcraft->craft_name = duplicateString (buf);
 
@@ -2039,9 +2007,9 @@ subcraft_line (FILE * fp_reg, char *line)
 		argument++;
 
 	if (!str_cmp (buf, "end"))
-	  {
-	    //do nothing - used to store ftell but this was not used anywhere
-	  }
+	{
+		//do nothing - used to store ftell but this was not used anywhere
+	}
 
 	else if (!str_cmp (buf, "1st:"))
 		phase->first = read_extended_text (fp_reg, argument);
@@ -2535,7 +2503,6 @@ bool inheritedObject (int objectVirtual, int objectToFind) {
 
 	return false;
 }
-
 
 OBJ_DATA *
 get_item_obj (CHAR_DATA * ch, DEFAULT_ITEM_DATA * item, PHASE_DATA * phase)
@@ -3560,7 +3527,6 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 		}
 	}
 
-
 	/* Removed USED items from wherever they are */
 	for (i = 0; i < MAX_ITEMS_PER_SUBCRAFT; i++)
 	{
@@ -3592,9 +3558,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 		/* Purge Consumed Craft Items */
 		nObjectTally = item->item_counts;
 		nObjectVnum = obj_list[i]->nVirtual;
-		if (nObjectTally && ch->right_hand
-			&& inheritedObject(ch->right_hand->nVirtual, nObjectVnum))
-		{
+		if (nObjectTally && ch->right_hand && inheritedObject(ch->right_hand->nVirtual, nObjectVnum)) {
 			if (ch->right_hand->count <= nObjectTally)
 			{
 				nObjectTally -= ch->right_hand->count;
@@ -3603,13 +3567,11 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 			else
 			{
 				ch->right_hand->count -= nObjectTally;
-				nObjectTally = 0;
+				//nObjectTally = 0;
 			}
 		}
 
-		if (nObjectTally && ch->left_hand
-			&& inheritedObject(ch->left_hand->nVirtual, nObjectVnum))
-		{
+		if (nObjectTally && ch->left_hand && inheritedObject(ch->left_hand->nVirtual, nObjectVnum)) {
 			if (ch->left_hand->count <= nObjectTally)
 			{
 				nObjectTally -= ch->left_hand->count;
@@ -3618,7 +3580,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 			else
 			{
 				ch->left_hand->count -= nObjectTally;
-				nObjectTally = 0;
+				//nObjectTally = 0;
 			}
 		}
 
@@ -3638,7 +3600,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 					else
 					{
 						ptrObj->count -= nObjectTally;
-						nObjectTally = 0;
+						//nObjectTally = 0;
 						ptrObj = ptrObj->next_content;
 					}
 				}
