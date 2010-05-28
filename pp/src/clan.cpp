@@ -1775,7 +1775,7 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		{
 			return "Squire-recruit";
 		}
-		if (!str_cmp (clan, "dalewatch"))
+		if (!str_cmp (clan, "cao_marsh"))
 		{
 			return "Dreng";
 		}
@@ -1854,7 +1854,7 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		{
 			return "Squire";
 		}
-		if (!str_cmp (clan, "dalewatch"))
+		if (!str_cmp (clan, "cao_marsh"))
 		{
 			return "Spjot";
 		}
@@ -1933,9 +1933,9 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		{
 			return "Warden";
 		}
-		if (!str_cmp (clan, "dalewatch"))
+		if (!str_cmp (clan, "cao_marsh"))
 		{
-			return "Brimskr";
+			return "Thain";
 		}
 		if (!str_cmp (clan, "bar_caged"))
 		{
@@ -2008,9 +2008,9 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		{
 			return "Warden-Sergeant";
 		}
-		if (!str_cmp (clan, "dalewatch"))
+		if (!str_cmp (clan, "cao_marsh"))
 		{
-			return "Hundredman";
+			return "Brimskr";
 		}
 		if (!str_cmp (clan, "bar_caged"))
 		{
@@ -2101,9 +2101,9 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		{
 			return "Warden-Lieutenant";
 		}
-		if (!str_cmp(clan, "dalewatch"))
+		if (!str_cmp(clan, "cao_marsh"))
 		{
-			return "Heafodman";
+			return "Hundredsman";
 		}
 		if (!str_cmp (clan, "bar_caged"))
 		{
@@ -2229,6 +2229,10 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 				return "Badikh";
 			}
 		}
+		if (!str_cmp (clan, "cao_marsh"))
+		  {
+		    return "Jarl";
+		  }
 		return "Captain";
 	}
 
@@ -2270,6 +2274,10 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 				return "Dahab'Jundi";
 			}
 		}
+		if (!str_cmp (clan,"cao_marsh"))
+		  {
+		    return "Heafodman";
+		  }
 		return "General";
 	}
 
@@ -2281,7 +2289,7 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		{
 			return "Chief Warden";
 		}
-		if (!str_cmp(clan,"dalewatch"))
+		if (!str_cmp(clan,"cao_marsh"))
 		{
 			return "Ealdorman";
 		}
