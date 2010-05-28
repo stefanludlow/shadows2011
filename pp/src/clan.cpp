@@ -273,12 +273,10 @@ clan_forum_remove (CHAR_DATA * ch, char *clan)
 		return;
 	}
 	sprintf (buf,
-		"DELETE FROM fug "
-		"USING phpbb3.phpbb_user_group fug "
-		"JOIN phpbb3.phpbb_users fu "
-		"ON fug.user_id = fu.user_id "
-		"WHERE group_id = %d and username = '%s';",
-		nGroupId, ch->pc->account_name);
+		"DELETE FROM phpbb3.phpbb_user_group WHERE user_id= "
+		 "(SELECT user_id FROM phpbb3.phpbb_users WHERE username = '%s')"
+		 "AND group_id = %d';",
+		 ch->pc->account_name, nGroupId);
 	mysql_safe_query (buf);
 }
 
@@ -289,12 +287,9 @@ clan_forum_remove_all (CHAR_DATA * ch)
 	if (!GET_TRUST (ch) && !IS_SET (ch->flags, FLAG_ISADMIN) && !IS_NPC (ch))
 	{
 		sprintf (buf,
-			"DELETE FROM fug "
-			"USING phpbb3.phpbb_user_group fug "
-			"JOIN phpbb3.phpbb_users fu "
-			"ON fug.user_id = fu.user_id "
-			"WHERE group_id in (15910,15911,15906,15863,15864,14214,15874,15872,15893,15296,11723,15897,14957,14181,15891,15877,14156,15297,15873,15905,15471,15907,15908) "
-			"AND username = '%s';", ch->pc->account_name);
+			"DELETE FROM phpbb3.phpbb_user_group WHERE user_id= "
+			"(SELECT user_id FROM phpbb3.phpbb_users WHERE username = '%s')"
+			"AND group_id in (15910,15911,15906,15863,15864,14214,15874,15872,15893,15296,11723,15897,14957,14181,15891,15877,14156,15297,15873,15905,15471,15907,15908);", ch->pc->account_name);
 		mysql_safe_query (buf);
 	}
 	return;
