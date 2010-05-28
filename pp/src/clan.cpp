@@ -2347,6 +2347,8 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 	{
 		if (!str_cmp (clan, "mordor_char"))
 			return "Kadar-Lai";
+		if (!str_cmp (clan, "cao_guild"))
+		  return "Foreman";
 		return "Apprentice";
 	}
 
@@ -2359,6 +2361,8 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		}
 		if (!str_cmp (clan, "mordor_char"))
 			return "Khor";
+		if (!str_cmp (clan, "cao_guild"))
+		  return "Overseer";
 		return "Journeyman";
 	}
 
@@ -2371,6 +2375,8 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		}
 		if (!str_cmp (clan, "mordor_char"))
 			return "Black Watchman";
+		if (!str_cmp(clan, "cao_guild"))
+		  return "Ealdorman";
 		return "Master";
 	}
 
@@ -2379,6 +2385,8 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 	{
 		if (!str_cmp (clan, "mordor_char"))
 			return "Freeman";
+		if (!str_cmp (clan, "cao_guild"))
+		  return "Novice";
 		return "Membership";
 	}
 
