@@ -1043,7 +1043,7 @@ can_order (OBJ_DATA * obj, CHAR_DATA * keeper)
 	  {
 	    int type = GET_ITEM_TYPE(temp);
 	    if (type == ITEM_ARMOR || type == ITEM_SHIELD || type == ITEM_WEAPON || type == ITEM_MISSILE)
-	      return (temp->instances < 5);
+	      return (temp->instances >= 5); // if there are fewer than 5, this will be false and thus can't order
 	  }
 
 
