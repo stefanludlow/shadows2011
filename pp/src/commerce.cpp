@@ -1035,9 +1035,17 @@ can_order (OBJ_DATA * obj, CHAR_DATA * keeper)
 	if (obj->nVirtual < 1000)
 		return false;
 
-	// Rare items (those with < 5 instances in-game) cannot be ordered.
-	if (vtoo (obj->nVirtual) && vtoo (obj->nVirtual)->instances < 5)
-		return false;
+	// Rare items (those with < 5 instances in-game) cannot be ordered, if they are weapons etc
+	// Weapons, armor, shields are likely to be uniques but often improperly flagged, thus
+	// Are still subject to the <5 rule.
+	OBJ_DATA *temp = vtoo(obj->nVirtual);
+	if (temp)
+	  {
+	    int type = GET_ITEM_TYPE(temp);
+	    if (type == ITEM_ARMOR || type == ITEM_SHIELD || type == ITEM_WEAPON || type == ITEM_MISSILE)
+	      return (temp->instances < 5);
+	  }
+
 
 	if (!obj->silver && !obj->farthings)
 		return false;
@@ -1057,7 +1065,13 @@ can_order (OBJ_DATA * obj, CHAR_DATA * keeper)
 	if (strstr (obj->name, "unique"))
 		return false;
 
-	if (strstr (obj->name, "IMM") || strstr (obj->name, "PC_"))
+	if (strstr (obj->name, "UNIQUE"))
+	        return false;
+
+	if (strstr (obj->name, "Unique"))
+	        return false;
+
+	if (strstr (obj->name, "IMM") || strstr (obj->name, "PC_") || strstr (obj->name, "PoF") || strstr (obj->name, "POF"))
 		return false;
 
 	if (keeper->shop && vtor (keeper->shop->shop_vnum) &&
