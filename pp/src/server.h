@@ -54,7 +54,7 @@ namespace rpie
 
 		// checkpoint alarms
 		static const int BOOT_DB_ABORT_THRESHOLD = 30; ///< Infinite loop test.
-		static const int RUNNING_ABORT_THRESHOLD = 20; ///< Infinite loop test.
+		static const int RUNNING_ABORT_THRESHOLD = 40; ///< Infinite loop test.
 		bool abort_threshold_enabled;
 		int abort_threshold;
 		int last_checkpoint;
