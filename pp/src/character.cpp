@@ -969,14 +969,18 @@ std::pair<int, std::string> char_data::reportWhere(bool checkClan, int RPP, std:
 
 	reportStream << "#" << characterNameColour;
 
-	int blankLineSize = 15 - strlen(tname); // 15 characters alloted to display the name, down from 17
+	int blankLineSize = 15;  // 15 characters alloted to display the name, down from 17
+	if (tname)
+	  {
+	    blankLineSize -= strlen(tname);
+	  }
 
 	if (blankLineSize < 1) {
-		std::string tempString = tname;
+	  std::string tempString = tname;  //never true on null string, as it would still be 15
 		reportStream << tempString.substr(0,15);
 	}
 	else {
-		reportStream << tname;
+	  reportStream << ((tname) ? tname : "(null)");
 		for (size_t i = 0; i < blankLineSize; i++) {
 			reportStream << " ";
 		}
