@@ -257,7 +257,11 @@ point_update (void)
 			continue;
 
 		if (!IS_NPC (ch) && ch->room)
+		  {
+		    int z = ch->room->zone;
+		    if (z>=0 && z<=99)
 			zone_table[ch->room->zone].player_in_zone++;
+		  }
 
 		//  room = ch->room;
 
