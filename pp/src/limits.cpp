@@ -594,8 +594,10 @@ point_update (void)
 						act ("#6To stop the bleeding before it's too late, type BIND.#0", false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 
 					// continue out of further updates for this char if died of bleeding
-					if (general_damage (ch, wound->bleeding))
-						continue;
+					if (general_damage (ch, wound->bleeding)) {
+						return; // Fix for crash on death? - Case
+						//continue;
+					}
 
 				} // end bleeding update
 
