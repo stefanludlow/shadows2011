@@ -4627,15 +4627,19 @@ r_trans_group (CHAR_DATA * ch, char * argument)
 	arg_splitter (3, argument, subject_arg, origin, destination);
 
 	subject_mnum = strtol (subject_arg, 0, 10);
-	if (!strcmp(origin, '\0'))
+	if (strtol(origin, 0, 10) == 0) {
 		origin_rnum = ch->room->nVirtual;
-	else
+	}
+	else {
 		origin_rnum = strtol (origin, 0, 10);
+	}
 
-	if (!strcmp(destination, '\0'))
+	if (strtol(destination, 0, 10) == 0) {
 		destination_rnum = ch->room->nVirtual;
-	else
+	}
+	else {
 		destination_rnum = strtol (destination, 0, 10);
+	}
 
 	// If origin_rnum doesn't exist, default to user's room
 	if (!vtor (origin_rnum))
