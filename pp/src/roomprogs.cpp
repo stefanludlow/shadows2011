@@ -4672,7 +4672,7 @@ r_trans_group (CHAR_DATA * ch, char * argument)
 			}
 		}
 	}
-	if (subject == 0) {
+	if (subject == NULL) {
 		return;
 	}
 	/// loop here
