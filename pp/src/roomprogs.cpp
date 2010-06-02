@@ -4672,6 +4672,9 @@ r_trans_group (CHAR_DATA * ch, char * argument)
 			}
 		}
 	}
+	if (subject == 0) {
+		return;
+	}
 	/// loop here
 
 	// if subdued we transfer the captor's group
