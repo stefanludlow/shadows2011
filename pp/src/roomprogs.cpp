@@ -4627,12 +4627,12 @@ r_trans_group (CHAR_DATA * ch, char * argument)
 	arg_splitter (3, argument, subject_arg, origin, destination);
 
 	subject_mnum = strtol (subject_arg, 0, 10);
-	if (!strcmp(origin, "-1"))
+	if (!strcmp(origin, '\0'))
 		origin_rnum = ch->room->nVirtual;
 	else
 		origin_rnum = strtol (origin, 0, 10);
 
-	if (!strcmp(destination, "-1"))
+	if (!strcmp(destination, '\0'))
 		destination_rnum = ch->room->nVirtual;
 	else
 		destination_rnum = strtol (destination, 0, 10);
@@ -4670,7 +4670,7 @@ r_trans_group (CHAR_DATA * ch, char * argument)
 	}
 	/// loop here
 
-	// if subdued we transfer the captors group
+	// if subdued we transfer the captor's group
 	if (IS_SUBDUEE (subject))
 		subject = subject->subdue;
 
