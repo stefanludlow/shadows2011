@@ -2885,7 +2885,6 @@ void
 	{
 		if (ch->race == 128) // 3RPP Balchoth race get special gear
 		{
-
 			/* AC3 bronze scale */
 			if ((obj = load_object (23089)))
 				equip_char(ch, obj, WEAR_HEAD);
@@ -2913,16 +2912,16 @@ void
 					equip_char(ch, obj, WEAR_SHOULDER_L);
 
 				// quiver and arrows
-				if ((tobj = obj = load_object (1762)))
+				if ((sobj = obj = load_object (1762)))
 				{
 					equip_char(ch, obj, WEAR_BELT_1);
 
 					if ((obj = load_object (23063)))
 					{
 						obj->count=15;
-						obj_to_obj (obj, tobj);
+						obj_to_obj (obj, sobj);
 					}
-					tobj=NULL; // Null out to reset state for if on satchel
+					sobj = NULL;
 				}
 			}
 			else if (ch->skills[SKILL_CROSSBOW])
@@ -2931,26 +2930,26 @@ void
 					equip_char(ch, obj, WEAR_SHOULDER_L);
 
 				// boltcase and bolts
-				if ((tobj = obj = load_object (1499)))
+				if ((sobj = obj = load_object (1499)))
 				{
 					equip_char(ch, obj, WEAR_BELT_1);
 
 					if ((obj = load_object (157)))
 					{
 						obj->count=15;
-						obj_to_obj (obj, tobj);
+						obj_to_obj (obj, sobj);
 					}
-					tobj=NULL; // Null out to reset state for if on satchel
+					sobj=NULL; // Null out to reset state
 				}
 			}
 			else if (ch->skills[SKILL_THROWN])
 			{
-				if ((tobj = obj = load_object (2260))) // shoulder strap
+				if ((sobj = obj = load_object (2260))) // shoulder strap
 				{	
 					equip_char(ch, obj, WEAR_SHOULDER_L);
 					if ((obj = load_object (23048)))  // Load Ballie Javelin and put it in the strap
-						obj_to_obj(obj,tobj);
-					tobj = NULL; // Null out to reset state for if on satchel
+						obj_to_obj(obj,sobj);
+					sobj = NULL; // Null out to reset state
 				}
 			}
 
@@ -2991,9 +2990,6 @@ void
 					obj->count = 10;
 					obj_to_obj (obj, tobj);
 				}
-				//special case items
-				if (ch->skills[SKILL_HEALING] && (obj = load_object (HEALER_KIT_VNUM)))
-					obj_to_obj (obj, tobj);
 			} //end Balchoth pack stuff
 
 			/* Iterate through melee weapon skills and select the one with the highest cap. */
@@ -3014,32 +3010,32 @@ void
 			switch (max_skill_id)
 			{
 			case SKILL_LIGHT_EDGE:
-				if ((tobj = obj = load_object (98))) // brown leather sheath
+				if ((sobj = obj = load_object (98))) // brown leather sheath
 				{	
 					equip_char(ch, obj, WEAR_BELT_2);
 					if ((obj = load_object (23051)))  // load weapon and place in sheath
-						obj_to_obj(obj,tobj);
-					tobj = NULL; // Null out to reset state for if on satchel
+						obj_to_obj(obj,sobj);
+					sobj = NULL; // Null out to reset state  
 				}
 				break;
 
 			case SKILL_MEDIUM_EDGE:
-				if ((tobj = obj = load_object (98))) // brown leather sheath
+				if ((sobj = obj = load_object (98))) // brown leather sheath
 				{	
 					equip_char(ch, obj, WEAR_BELT_2);
 					if ((obj = load_object (23054)))  // load weapon and place in sheath
-						obj_to_obj(obj,tobj);
-					tobj = NULL; // Null out to reset state for if on satchel
+						obj_to_obj(obj,sobj);
+					sobj = NULL; // Null out to reset state  
 				}
 				break;
 
 			case SKILL_HEAVY_EDGE:
-				if ((tobj = obj = load_object (98))) // brown leather sheath
+				if ((sobj = obj = load_object (98))) // brown leather sheath
 				{	
 					equip_char(ch, obj, WEAR_BELT_2);
 					if ((obj = load_object (23062)))  // load weapon and place in sheath
-						obj_to_obj(obj,tobj);
-					tobj = NULL; // Null out to reset state for if on satchel
+						obj_to_obj(obj,sobj);
+					sobj = NULL; // Null out to reset state  
 				}
 				break;
 
@@ -3048,32 +3044,32 @@ void
 				break;
 
 			case SKILL_MEDIUM_BLUNT:
-				if ((tobj = obj = load_object (98))) // brown leather sheath
+				if ((sobj = obj = load_object (98))) // brown leather sheath
 				{	
 					equip_char(ch, obj, WEAR_BELT_2);
 					if ((obj = load_object (23050)))  // load weapon and place in sheath
-						obj_to_obj(obj,tobj);
-					tobj = NULL; // Null out to reset state for if on satchel
+						obj_to_obj(obj,sobj);
+					sobj = NULL; // Null out to reset state  
 				}
 				break;
 
 			case SKILL_HEAVY_BLUNT:
-				if ((tobj = obj = load_object (98))) // brown leather sheath
+				if ((sobj = obj = load_object (98))) // brown leather sheath
 				{	
 					equip_char(ch, obj, WEAR_BELT_2);
 					if ((obj = load_object (23052)))  // load weapon and place in sheath
-						obj_to_obj(obj,tobj);
-					tobj = NULL; // Null out to reset state for if on satchel
+						obj_to_obj(obj,sobj);
+					sobj = NULL; // Null out to reset state  
 				}
 				break;
 
 			case SKILL_LIGHT_PIERCE: //(dagger)
-				if ((tobj = obj = load_object (98))) // brown leather sheath
+				if ((sobj = obj = load_object (98))) // brown leather sheath
 				{	
 					equip_char(ch, obj, WEAR_BELT_2);
 					if ((obj = load_object (23046)))  // load weapon and place in sheath
-						obj_to_obj(obj,tobj);
-					tobj = NULL; // Null out to reset state for if on satchel
+						obj_to_obj(obj,sobj);
+					sobj = NULL; // Null out to reset state  
 				}
 				break;
 
@@ -3089,13 +3085,13 @@ void
 				else
 				{
 					/* shoulder is free. Load up a strap */
-					if ((tobj = obj = load_object (2260))) // shoulder strap
+					if ((sobj = obj = load_object (2260))) // shoulder strap
 					{	
 						equip_char(ch, obj, WEAR_SHOULDER_L);
 
 						if ((obj = load_object (23058)))  // load weapon and place in strap
-							obj_to_obj(obj,tobj);
-						tobj = NULL; // Null out to reset state for if on satchel
+							obj_to_obj(obj,sobj);
+						sobj = NULL; // Null out to reset state  
 					}
 				}
 				break;
@@ -3111,13 +3107,13 @@ void
 				else
 				{
 					/* shoulder is free. Load up a strap */
-					if ((tobj = obj = load_object (2260))) // shoulder strap
+					if ((sobj = obj = load_object (2260))) // shoulder strap
 					{	
 						equip_char(ch, obj, WEAR_SHOULDER_L);
 
 						if ((obj = load_object (23056)))  // load weapon and place in strap
-							obj_to_obj(obj,tobj);
-						tobj = NULL; // Null out to reset state for if on satchel
+							obj_to_obj(obj,sobj);
+						sobj = NULL; // Null out to reset state  
 					}
 				}
 				break;
@@ -3125,6 +3121,7 @@ void
 				break;
 				//nothing
 			}// end weapon-loading switch
+			tobj = 
 		} // end race == 128 for 3RPP Balchoth
 		else if (ch->race == 130) // 1RPP Common Balchoth
 		{
@@ -3178,9 +3175,6 @@ void
 					obj->count = 10;
 					obj_to_obj (obj, tobj);
 				}
-				//special case items
-				if (ch->skills[SKILL_HEALING] && (obj = load_object (HEALER_KIT_VNUM)))
-					obj_to_obj (obj, tobj);
 			} //end Balchoth pack stuff - common balchoth modification
 		} // end else if race==130 common balchoth
 	} // end Balchoth start loc
