@@ -3126,7 +3126,7 @@ void
 				//nothing
 			}// end weapon-loading switch
 		} // end race == 128 for 3RPP Balchoth
-		else if (race == 130) // 1RPP Common Balchoth
+		else if (ch->race == 130) // 1RPP Common Balchoth
 		{
 			if ((obj = load_object (1010))) //tunic
 				equip_char (ch, obj, WEAR_BODY);
