@@ -3121,7 +3121,6 @@ void
 				break;
 				//nothing
 			}// end weapon-loading switch
-			tobj = 
 		} // end race == 128 for 3RPP Balchoth
 		else if (ch->race == 130) // 1RPP Common Balchoth
 		{
