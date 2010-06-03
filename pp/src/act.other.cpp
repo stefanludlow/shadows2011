@@ -162,7 +162,11 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 		char_from_room(ch);
 		char_to_room(ch, BALCHOTH_START_LOC);
 		ch->was_in_room = 0;
-		add_clan(ch, "balchoth_vanguard", CLAN_CORPORAL);
+		if (ch->race == 128)
+			add_clan(ch, "balchoth_vanguard", CLAN_CORPORAL);
+		else if (ch->race == 130)
+			add_clan(ch, "balchoth_vanguard", CLAN_RECRUIT);
+			
 		add_clan(ch, "mordor_char", CLAN_MEMBER);
 		commenced_in = 5;
 
