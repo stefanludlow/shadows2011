@@ -3856,6 +3856,13 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+	if (strlen(argument)>0)
+	{
+		send_to_char ("#6OOC:# Flee does not support a direction.\n\r", ch);
+		send_to_char ("Either 'flee' to go anywhere or use 'group retreat direction',\n\r", ch);
+		send_to_char ("e.g. 'group retreat north'.\n\r#0", ch);
+		return;
+	}
 	ch->flags |= FLAG_FLEE;
 
 	send_to_char ("You resolve to escape combat. . .\n\r", ch);
