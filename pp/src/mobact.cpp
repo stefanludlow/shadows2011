@@ -2455,7 +2455,15 @@ would_attack (CHAR_DATA * ch, CHAR_DATA * tch)
 		return 0;
 
 	if (IS_NPC (ch) && IS_NPC (tch)) {
-		if ((IS_SET (ch->act, ACT_WILDLIFE) || IS_SET (ch->act, ACT_SOLDIER)) && IS_SET (tch->act, ACT_WILDLIFE)) {
+
+		//soldiers should not attack wildlife
+		if(IS_SET (ch->act, ACT_SOLDIER) && IS_SET (tch->act, ACT_WILDLIFE))
+		{
+			return 0;
+		}
+	
+		//wildlife will not attach each other
+		if (IS_SET (ch->act, ACT_WILDLIFE) && IS_SET (tch->act, ACT_WILDLIFE)) {
 			return 0;
 		}
 	}
