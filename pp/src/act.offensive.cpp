@@ -2327,6 +2327,7 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 	char buf[MAX_STRING_LENGTH];
 	char buffer[MAX_STRING_LENGTH];
 	int ranged = 0, dir = 0;
+	bool woods=false; //true if the previous room was woods. This is used to prevent arrows from going beyond one room past a woods.
 
 	if (IS_SWIMMING (ch))
 	{
@@ -2480,6 +2481,7 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 
 		ch->delay_who = duplicateString (dirs[dir]);
 
+		// This points to the first adjacent room in the direction that is being aimed in.
 		room = vtor (EXIT (ch, dir)->to_room);
 
 		exit = EXIT (ch, dir);
@@ -2504,9 +2506,23 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
+		// If the target isn't in that room or hasn't been sighted, 
+		// fail if it is not possible to continue in that direction
 		if (!(target = get_char_room_vis2 (ch, room->nVirtual, arg2))
 			|| !has_been_sighted (ch, target))
 		{
+			//Grommit - new forest checking
+			if (room->sector_type == SECT_FOREST)
+			{
+				send_to_char ("You cannot shoot through a forest!\n", ch);
+				return;
+			}
+			else if (room->sector_type == SECT_WOODS)
+			{
+				//remember this, and stop the arrow at the next room
+				woods=true;
+			}
+			//This is duplicate code, but this time for one room away.
 			exit = room->dir_option[dir];
 			if (!exit)
 			{
@@ -2523,6 +2539,9 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 				room = vtor (room->dir_option[dir]->to_room);
 			else
 				room = NULL;
+
+			// room now points to the second room away.
+			// Here slings must stop.
 			if (bow->o.od.value[1] == 3 || !room)
 			{			/* Sling, eventually. */
 				send_to_char ("You don't see them within range.\n", ch);
@@ -2540,9 +2559,33 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 					ch);
 				return;
 			}
+
+			//If the target is not in the second room, fail unless there's an open path to the 3rd
 			if (!(target = get_char_room_vis2 (ch, room->nVirtual, arg2))
 				|| !has_been_sighted (ch, target))
 			{
+
+				//Grommit forest/woods addition
+				if (woods)
+				{
+					//If woods is true, the previous room was a woods. Now we have updated the room pointer
+					//and the target was not visible in this room.
+					send_to_char ("The woods hamper your ability to shoot through them at range.\n",ch);
+					return;
+				}
+
+				//Grommit forest/woods check
+				if (room->sector_type == SECT_FOREST)
+				{
+					send_to_char ("You cannot shoot through a forest!\n", ch);
+					return;
+				}
+				else if (room->sector_type == SECT_WOODS)
+				{
+					//remember this, and stop the arrow at the next room
+					woods=true;
+				}
+
 				exit = room->dir_option[dir];
 				if (!exit)
 				{
@@ -2559,6 +2602,9 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 					room = vtor (room->dir_option[dir]->to_room);
 				else
 					room = NULL;
+
+				// Room is now set to the 3rd room away
+				// Thus crossbows and shortbows fail
 				if (bow->o.od.value[1] == 2 || !room)
 				{		/* Crossbows and shortbows; two-room range. */
 					send_to_char ("You don't see them within range.\n", ch);
@@ -2579,6 +2625,28 @@ do_aim (CHAR_DATA * ch, char *argument, int cmd)
 				if (!(target = get_char_room_vis2 (ch, room->nVirtual, arg2))
 					|| !has_been_sighted (ch, target))
 				{
+					//Grommit forest/woods addition
+					if (woods)
+					{
+						//If woods is true, the previous room was a woods. Now we have updated the room pointer
+						//and the target was not visible in this room.
+						send_to_char ("The woods hamper your ability to shoot through them at range.\n",ch);
+						return;
+					}
+
+					//Grommit forest/woods check
+					if (room->sector_type == SECT_FOREST)
+					{
+						send_to_char ("You cannot shoot through a forest!\n", ch);
+						return;
+					}
+					else if (room->sector_type == SECT_WOODS)
+					{
+						//remember this, and stop the arrow at the next room
+						woods=true;
+
+						//unique for here -- this is unnecessary as there are no further rooms allowed, but left in case more are added
+					}
 					exit = room->dir_option[dir];
 					if (!exit)
 					{
