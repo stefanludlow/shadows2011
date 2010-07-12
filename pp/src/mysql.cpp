@@ -2393,6 +2393,8 @@ perform_pfile_update (CHAR_DATA * ch)
 		for (clanID = ch->clans; get_next_clan (&clanID, clan_name, &flags);) {
 			clan_forum_add (ch, clan_name, value_to_clan_flags (flags));
 		}
+		// clear cached permissions to force update
+		mysql_safe_query("UPDATE phpbb3.phpbb_users SET user_permissions=null WHERE username=\"%s\";",ch->pc->account_name);
 	}
 }
 
