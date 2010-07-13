@@ -556,11 +556,11 @@ post_body (DESCRIPTOR_DATA * d)
 
 	ch = d->character;
 
-	if (!*ch->pc->msg)
+	/*if (!*ch->pc->msg)
 	{
 		send_to_char ("Body update aborted.\n", ch);
 		return;
-	}
+	}*/
 
 	for (role = role_list; role; role = role->next)
 	{
@@ -568,7 +568,8 @@ post_body (DESCRIPTOR_DATA * d)
 			break;
 	}
 
-	role->body = duplicateString (ch->pc->msg);
+	//role->body = duplicateString (ch->pc->msg);
+	role->body = duplicateString (d->pending_message->message);
 
 	save_roles ();
 }
@@ -1218,11 +1219,11 @@ post_role (DESCRIPTOR_DATA * d)
 
 	ch = d->character;
 
-	if (!*ch->pc->msg)
+	/*if (!*ch->pc->msg)
 	{
 		send_to_char ("Role post aborted.\n", ch);
 		return;
-	}
+	}*/
 
 	if (!role_list)
 	{
@@ -1255,7 +1256,8 @@ post_role (DESCRIPTOR_DATA * d)
 
 		role->cost = ch->delay_info1;
 		role->summary = duplicateString (ch->delay_who);
-		role->body = duplicateString (ch->pc->msg);
+		//role->body = duplicateString (ch->pc->msg);
+		role->body = duplicateString (d->pending_message->message);
 		role->date = duplicateString (date);
 		role->poster = duplicateString (ch->pc->account_name);
 		role->timestamp = (int) time (0);
@@ -1306,6 +1308,9 @@ new_role (CHAR_DATA * ch, char *argument)
 		("\n#2Enter a detailed summary of the role you wish to post, to\n"
 		"give prospective players a better idea as to what sort of RP\n"
 		"will be required to successfully portray it.#0\n", ch);
+
+	free_mem(ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
 
 	make_quiet (ch);
 	ch->delay_info1 = cost;
@@ -1415,6 +1420,9 @@ update_role (CHAR_DATA * ch, char *argument)
 			("\n#2Enter a detailed summary of the role you wish to post, to\n"
 			"give prospective players a better idea as to what sort of RP\n"
 			"will be required to successfully portray it.#0\n", ch);
+
+		free_mem(ch->desc->pending_message);
+		ch->desc->pending_message = new MESSAGE_DATA;
 
 		make_quiet (ch);
 		ch->delay_info1 = role->id;
