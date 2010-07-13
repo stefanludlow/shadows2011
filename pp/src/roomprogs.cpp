@@ -6041,8 +6041,15 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 	}
 	else if (buf.find("ldesc") != std::string::npos)
 	{
-		free_mem(obj->description);
-		obj->description = duplicateString(argument.c_str());
+		if(argument.substr(0, 8).compare("reformat") == 0)
+		{
+				reformat_desc (obj->description, &obj->description);
+		}
+		else
+		{
+				free_mem(obj->description);
+				obj->description = duplicateString(argument.c_str());
+		}
 	}
 	else if (buf.find("desc") != std::string::npos)
 	{
@@ -6669,8 +6676,16 @@ r_setval (CHAR_DATA *ch, std::string argument)
 			}
 			else if (buf.find("ldesc") != std::string::npos)
 			{
-				free_mem(tch->long_descr);
-				tch->long_descr = duplicateString (argument.c_str());
+				if(argument.substr(0, 8).compare("reformat") == 0)
+				{
+					reformat_desc (tch->long_descr, &tch->long_descr);
+				}
+				else
+				{
+					free_mem(tch->long_descr);
+					tch->long_descr = duplicateString (argument.c_str());
+				}
+				
 			}
 			else if (buf.find("desc") != std::string::npos)
 			{
