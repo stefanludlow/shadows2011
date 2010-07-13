@@ -6041,20 +6041,21 @@ prog_object_properties (OBJ_DATA *obj, std::string argument)     // Overloaded v
 	}
 	else if (buf.find("ldesc") != std::string::npos)
 	{
-		if(argument.substr(0, 8).compare("reformat") == 0)
-		{
-				reformat_desc (obj->description, &obj->description);
-		}
-		else
-		{
-				free_mem(obj->description);
-				obj->description = duplicateString(argument.c_str());
-		}
+		free_mem(obj->description);
+		obj->description = duplicateString(argument.c_str());
 	}
 	else if (buf.find("desc") != std::string::npos)
 	{
-		free_mem(obj->full_description);
-		obj->full_description = duplicateString(argument.c_str());
+		if(argument.substr(0, 8).compare("reformat") == 0)
+		{
+				reformat_desc (obj->full_description, &obj->full_description);
+		}
+		else
+		{
+			free_mem(obj->full_description);
+			obj->full_description = duplicateString(argument.c_str());
+		}
+		
 	}
 	else if (buf.find("material") != std::string::npos)
 	{
@@ -6676,21 +6677,20 @@ r_setval (CHAR_DATA *ch, std::string argument)
 			}
 			else if (buf.find("ldesc") != std::string::npos)
 			{
-				if(argument.substr(0, 8).compare("reformat") == 0)
-				{
-					reformat_desc (tch->long_descr, &tch->long_descr);
-				}
-				else
-				{
 					free_mem(tch->long_descr);
-					tch->long_descr = duplicateString (argument.c_str());
-				}
-				
+					tch->long_descr = duplicateString (argument.c_str());			
 			}
 			else if (buf.find("desc") != std::string::npos)
 			{
-				free_mem(tch->description);
-				tch->description = duplicateString (argument.c_str());
+				if(argument.substr(0, 8).compare("reformat") == 0)
+				{
+					reformat_desc (tch->description, &tch->description);
+				}
+				else
+				{
+					free_mem(tch->description);
+					tch->description = duplicateString (argument.c_str());	
+				}
 			}
 			else if (buf.find("height") != std::string::npos)
 			{
