@@ -6612,7 +6612,7 @@ r_setval (CHAR_DATA *ch, std::string argument)
 		}
 		else if (buf.find("desc") != std::string::npos)
 		{
-			if(argument.substr(0, 9).compare("reformat") == 0)
+			if(argument.substr(0, 8).compare("reformat") == 0)
 			{
 				reformat_desc (room->description, &room->description);
 			}
