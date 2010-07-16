@@ -1,4 +1,5 @@
-/*------------------------------------------------------------------------\
+
+/*------------------------------------------------------------------------ \
 |  staff.c : Staff Command Module                     www.middle-earth.us |
 |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
 |  Derived under license from DIKU GAMMA (0.0).                           |
@@ -8668,23 +8669,23 @@ do_swap (CHAR_DATA * ch, char *argument, int cmd)
 				ch);
 			return;
 		}
-		if (z > 99)
+		if (z > 109)
 		{
-			send_to_char ("Please use a zone number between 1 and 99\n",
+			send_to_char ("Please use a zone number between 1 and 109\n",
 				ch);
 			return;
 		}
-		if (str_cmp (ch->tname, zone_table[z].lead)
+		if ((z<100) && str_cmp (ch->tname, zone_table[z].lead)
 			&& GET_TRUST (ch) < 4)
 		{
 			send_to_char ("You are not the lead for this building project.\n",
 				ch);
 			return;
 		}
-		if (z >= 0 && z <= 98)
+		if (z >= 0 && z <= 109)
 		{
 			sprintf (buf, "Transferring builders' changes to %s...\n",
-				zone_table[z].name);
+				 (z<100 ? zone_table[z].name: "(virtual objects zone)"));
 			send_to_char (buf, ch);
 			sprintf (buf,"*.%d ", z);
 
@@ -8696,12 +8697,12 @@ do_swap (CHAR_DATA * ch, char *argument, int cmd)
 
 			system (swap_command.c_str ());
 			sprintf (buf, "%s has just swapped over the changes to %s.\n",
-				ch->tname, zone_table[z].name);
+				 ch->tname, (z<100 ? zone_table[z].name : "(virtual objects zone)");
 			send_to_gods (buf);
 		}
 		else
 		{
-			send_to_char ("Please specify a number between 0 and 99.\n", ch);
+			send_to_char ("Please specify a number between 0 and 109.\n", ch);
 			return;
 		}
 	}
