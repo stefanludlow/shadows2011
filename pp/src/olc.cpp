@@ -1298,7 +1298,7 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 	if (!str_cmp (arg, "all"))
 	{
 		// Don't save zone 0 unless it is specifically targetted
-		for (i = 1; i <= 99; i++)
+		for (i = 0; i <= 99; i++)
 		{
 			if ((cmd != 226) && (IS_SET (zone_table[i].flags, Z_LOCKED)))
 				continue;
