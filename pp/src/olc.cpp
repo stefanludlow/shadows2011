@@ -1297,8 +1297,12 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 
 	if (!str_cmp (arg, "all"))
 	{
-		// Don't save zone 0 unless it is specifically targetted
-		for (i = 0; i <= 99; i++)
+	  //save objects only for zones 100-109
+	  for (i = 100; i<110;i++)
+	    {
+	      save_objs(ch,i);
+	    }
+		for (i = 0; i <=99; i++)
 		{
 			if ((cmd != 226) && (IS_SET (zone_table[i].flags, Z_LOCKED)))
 				continue;
@@ -1348,9 +1352,9 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 
 	num = atoi (arg);
 
-	if (num > 99 || num < 0)
+	if (num > 109 || num < 0)
 	{
-		send_to_char ("You must specify a zone between 0 and 99.\n", ch);
+		send_to_char ("You must specify a zone between 0 and 109.\n", ch);
 		return;
 	}
 
@@ -1367,9 +1371,9 @@ do_zsave (CHAR_DATA * ch, char *arg, int cmd)
 		return;
 	}
 
-	if (num < 0 || num > 99)
+	if (num < 0 || num > 109)
 	{
-		send_to_char ("The zone must be between 0 and 99.\n", ch);
+		send_to_char ("The zone must be between 0 and 109.\n", ch);
 		return;
 	}
 	save_mob_progs();
@@ -1418,10 +1422,33 @@ open_and_rename (CHAR_DATA * ch, char *name, int zone)
 }
 
 
-/* This inconveniently does rooms, objects, and resets all in one. We want to not save rooms above zone 99
- because this would cause constant accumulate of GL private rooms, but we do wish to save objects with a vnum
- in zones 100..110 
-*/
+
+int save_objs (CHAR_DATA * ch, int zone)
+{
+  OBJ_DATA *tobj;
+  int tmp;
+  FILE *fo;
+
+  if (!(fo = open_and_rename (ch, "objs", zone)))
+		return 1;
+
+  for (tobj = full_object_list; tobj; tobj = tobj->lnext)
+	if (tobj->zone == zone && tobj->nVirtual != -1 && tobj->nVirtual != 42)
+		if (!tobj->deleted || get_obj_in_list_num (tobj->nVirtual, object_list))
+		{
+			/* Remove clan information from extra flags before
+			   saving to disk...put it back afterwords */
+
+			tmp = tobj->obj_flags.extra_flags;
+			tobj->obj_flags.extra_flags &= ~(ITEM_LEADER | ITEM_MEMBER | ITEM_OMNI);
+			fwrite_object (tobj, fo);
+			tobj->obj_flags.extra_flags = tmp;
+		}
+
+  fprintf (fo, "$~\n");
+  fclose(fo);
+}
+
 int
 save_rooms (CHAR_DATA * ch, int zone)
 {
@@ -1432,7 +1459,6 @@ save_rooms (CHAR_DATA * ch, int zone)
 	FILE *magic;
 	FILE *fz;
 	FILE *fm;
-	FILE *fo;
 	FILE *fr;
 	int elemental = 0, znum = 0;
 	int shadow = 0, holy = 0, psychic = 0;
@@ -1446,6 +1472,11 @@ save_rooms (CHAR_DATA * ch, int zone)
 	system_log (buf, false);
 
 
+	//save objects only if above zone 99
+	if (zone>99)
+	  return save_objs(ch, zone);
+
+	
 	if (!(fr = open_and_rename (ch, "rooms", zone)))
 		return 1;
 
@@ -1454,11 +1485,10 @@ save_rooms (CHAR_DATA * ch, int zone)
 
 	if (!(fm = open_and_rename (ch, "mobs", zone)))
 		return 1;
+	
 
 
-	if (!(fo = open_and_rename (ch, "objs", zone)))
-		return 1;
-
+	
 	fprintf (fz, "#%d\nLead: %s~\n%s~\n%d %d %d %ld %d %d\n",
 		zone,
 		zone_table[zone].lead,
@@ -1497,10 +1527,7 @@ save_rooms (CHAR_DATA * ch, int zone)
 		fclose (magic);
 	}
 
-	//stop room saving for the higher zones -Grommit July 2010
-	if (zone < 100)
-	  {
-	    for (troom = full_room_list; troom; troom = troom->lnext)
+	for (troom = full_room_list; troom; troom = troom->lnext)
 		if (troom->zone == zone)
 		{
 
@@ -1542,31 +1569,19 @@ save_rooms (CHAR_DATA * ch, int zone)
 			if (tmob->mob->zone == zone && !tmob->deleted
 				&& !IS_SET (tmob->act, ACT_STAYPUT))
 				fwrite_mobile (tmob, fm);
-	  } //end room/mob save prevention for upper zones
+	 
 
-		for (tobj = full_object_list; tobj; tobj = tobj->lnext)
-			if (tobj->zone == zone && tobj->nVirtual != -1 && tobj->nVirtual != 42)
-				if (!tobj->deleted || get_obj_in_list_num (tobj->nVirtual, object_list))
-				{
-
-					/* Remove clan information from extra flags before
-					saving to disk...put it back afterwords */
-
-					tmp = tobj->obj_flags.extra_flags;
-					tobj->obj_flags.extra_flags &= ~(ITEM_LEADER | ITEM_MEMBER | ITEM_OMNI);
-					fwrite_object (tobj, fo);
-					tobj->obj_flags.extra_flags = tmp;
-				}
-
+		
 				fprintf (fr, "$~\n");
-				fprintf (fo, "$~\n");
 				fprintf (fm, "$~\n");
 				fprintf (fz, "S\n");
 
 				fclose (fr);
 				fclose (fz);
 				fclose (fm);
-				fclose (fo);
+				
+				//objects pieced out - July 2010 Grommit
+				save_objs(ch,zone);
 
 				return 0;
 }
@@ -4825,9 +4840,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	else
 		vnum = atol (arg);
-	if ((vnum < 0) || (vnum > 110000))
+	if ((vnum < 0) || (vnum > 109999))
 	{
-		send_to_char ("Vnum must be between 0 and 110000.\n", ch);
+		send_to_char ("Vnum must be between 0 and 109000.\n", ch);
 		return;
 	}
 
@@ -5156,7 +5171,9 @@ do_oinit (CHAR_DATA * ch, char *argument, int cmd)
 	if (GET_TRUST (ch) < 5)
 		newobj->obj_flags.extra_flags |= index_lookup (extra_bits, "ok");
 
-	newobj = load_object (vnum);
+	// do not auto-load virtual category objects 
+	if (vnum<100000)
+	  newobj = load_object (vnum);
 
 	obj_to_char (newobj, ch);
 

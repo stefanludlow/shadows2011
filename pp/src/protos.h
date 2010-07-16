@@ -973,6 +973,7 @@ void gain_condition (CHAR_DATA * ch, int condition, int value);
 void npc_evasion (CHAR_DATA * ch, int dir);
 void refresh_map (void);
 void page_string (struct descriptor_data *d, const char *str);
+int save_objs (CHAR_DATA * ch, int zone);
 int save_rooms (CHAR_DATA * ch, int zone);
 char *strgdup (char *source);
 void arg_splitter (int argc, char *fmt, ...);
