@@ -3301,6 +3301,10 @@ randomize_mobile (CHAR_DATA * mob)
 	
 	******************/
 
+	//Set power to 1. This is intended to be temporary till buidlers
+	//have updated mob prototypes
+	mob->aur = 1;
+
 	// Grommit ensure Westron for NPCs //
 	if (!mob->skills[SKILL_SPEAK_WESTRON] && IS_NPC(mob))
 		mob->skills[SKILL_SPEAK_WESTRON] = 20;
