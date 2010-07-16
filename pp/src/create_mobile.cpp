@@ -3125,6 +3125,18 @@ randomize_mobile (CHAR_DATA * mob)
 		type_bonus = 10;
 	}
 
+	/****************************************
+	DISABLED MOB RANDOMISING
+	
+	This entire block of code is being disabled because it currently applies combat
+	style mobile randomising to all variable mobiles which completely ruins a large
+	proportion of variable mobiles such as wildlife and mounts.
+	
+	This might be amended and adapted once staff have agreed on how to handle variable
+	mob randomising.
+	
+	- Valarauka
+	
 	if (mob->race >= 0) {
 		int statTotal = 0;
 		for (i = 0; i < 7; i++) {
@@ -3230,17 +3242,17 @@ randomize_mobile (CHAR_DATA * mob)
 		else
 			proto = vtom (1998);
 
-		/* Grommit changes to simplify language selection */
+		// Grommit changes to simplify language selection /
 		if (lookup_race_variable (mob->race, RACE_NATIVE_TONGUE))
 		{
 			mob->speaks = atoi (lookup_race_variable (mob->race, RACE_NATIVE_TONGUE));
-			if (mob->race!=0) /* ignore common humans whose native tongue variable is not accurate, since it's location dependent */
+			if (mob->race!=0) // ignore common humans whose native tongue variable is not accurate, since it's location dependent //
 			{
 				mob->skills[mob->speaks] = calc_lookup(mob,REG_CAP, mob->speaks);
 			}
 		}
 
-		/* Grommit ensure Westron for NPCs */
+		// Grommit ensure Westron for NPCs //
 		if (!mob->skills[SKILL_SPEAK_WESTRON] && IS_NPC(mob))
 			mob->skills[SKILL_SPEAK_WESTRON] = 20;
 
@@ -3282,6 +3294,16 @@ randomize_mobile (CHAR_DATA * mob)
 	//	make_height (mob);
 	//	make_frame (mob);
 	//}
+	
+	END DISABLED MOB RADOMISING
+	
+	- Valarauka
+	
+	******************/
+
+	// Grommit ensure Westron for NPCs //
+	if (!mob->skills[SKILL_SPEAK_WESTRON] && IS_NPC(mob))
+		mob->skills[SKILL_SPEAK_WESTRON] = 20;
 
 	if (mob->sex == SEX_NEUTRAL)
 	{
