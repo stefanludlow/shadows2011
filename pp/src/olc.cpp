@@ -1417,6 +1417,11 @@ open_and_rename (CHAR_DATA * ch, char *name, int zone)
 	return fp;
 }
 
+
+/* This inconveniently does rooms, objects, and resets all in one. We want to not save rooms above zone 99
+ because this would cause constant accumulate of GL private rooms, but we do wish to save objects with a vnum
+ in zones 100..110 
+*/
 int
 save_rooms (CHAR_DATA * ch, int zone)
 {
@@ -1440,6 +1445,7 @@ save_rooms (CHAR_DATA * ch, int zone)
 	sprintf (buf, "Saving rooms in zone %d.", zone);
 	system_log (buf, false);
 
+
 	if (!(fr = open_and_rename (ch, "rooms", zone)))
 		return 1;
 
@@ -1448,6 +1454,7 @@ save_rooms (CHAR_DATA * ch, int zone)
 
 	if (!(fm = open_and_rename (ch, "mobs", zone)))
 		return 1;
+
 
 	if (!(fo = open_and_rename (ch, "objs", zone)))
 		return 1;
@@ -1490,7 +1497,10 @@ save_rooms (CHAR_DATA * ch, int zone)
 		fclose (magic);
 	}
 
-	for (troom = full_room_list; troom; troom = troom->lnext)
+	//stop room saving for the higher zones -Grommit July 2010
+	if (zone < 100)
+	  {
+	    for (troom = full_room_list; troom; troom = troom->lnext)
 		if (troom->zone == zone)
 		{
 
@@ -1532,6 +1542,7 @@ save_rooms (CHAR_DATA * ch, int zone)
 			if (tmob->mob->zone == zone && !tmob->deleted
 				&& !IS_SET (tmob->act, ACT_STAYPUT))
 				fwrite_mobile (tmob, fm);
+	  } //end room/mob save prevention for upper zones
 
 		for (tobj = full_object_list; tobj; tobj = tobj->lnext)
 			if (tobj->zone == zone && tobj->nVirtual != -1 && tobj->nVirtual != 42)
