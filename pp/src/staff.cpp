@@ -8697,7 +8697,7 @@ do_swap (CHAR_DATA * ch, char *argument, int cmd)
 
 			system (swap_command.c_str ());
 			sprintf (buf, "%s has just swapped over the changes to %s.\n",
-				 ch->tname, (z<100 ? zone_table[z].name : "(virtual objects zone)");
+				 ch->tname, (z<100 ? zone_table[z].name : "(virtual objects zone)"));
 			send_to_gods (buf);
 		}
 		else
