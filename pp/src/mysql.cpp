@@ -426,8 +426,8 @@ lookup_race_variable (int id, int which_var)
 	// defines directly from updated versions in database.
 
 
-   	if (booting)
-	{
+   	//if (booting) -- always use this. MYSQL queries are too slow
+	//{
 		for (entry = race_table; entry; entry = entry->next)
 		{
 			if (entry->id != id)
@@ -459,8 +459,8 @@ lookup_race_variable (int id, int which_var)
 			}
 			break;
 		}
-	}
 
+		//}
 	*value = '\0';
 
 	mysql_safe_query ("SELECT * FROM races WHERE id = %d", id);
