@@ -366,9 +366,20 @@ lookup_race_id (const char *name)
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	static int id = -1;
+	RACE_TABLE_ENTRY* ent=NULL;
 
 	if (!name || !*name)
 		return -1;
+
+	for (ent=race_table; ent; ent = ent->next)
+	  {
+	    if (strcmp(ent->name,name)==STR_MATCH)
+	      {
+		return ent->id;
+	      }
+	  }
+	return -1;
+	/* far too slow 
 
 	mysql_safe_query ("SELECT * FROM races WHERE name = '%s'", name);
 	result = mysql_store_result (database);
@@ -387,6 +398,7 @@ lookup_race_id (const char *name)
 	mysql_free_result (result);
 
 	return id;
+	*/
 }
 
 // Returns the specified value for the specified race id
@@ -413,7 +425,8 @@ lookup_race_variable (int id, int which_var)
 	// Pull from race table on bootup for faster loading of NPCs; thereafter, pull race
 	// defines directly from updated versions in database.
 
-	if (booting)
+
+   	if (booting)
 	{
 		for (entry = race_table; entry; entry = entry->next)
 		{
