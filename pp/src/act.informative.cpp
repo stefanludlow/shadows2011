@@ -10703,10 +10703,18 @@ do_notes (CHAR_DATA * ch, char *argument, int cmd)
 
 	unload_pc (who);
 
-	messages = get_mysql_board_listing (ch, 2, name);
 
-	if (!messages)
-		send_to_char ("That player does not have any notes.\n", ch);
+	if (ch->pc && ch->pc->level < 3)
+	  {
+	    send_to_char("You are not permitted to read player notes.\n",ch);
+	  }
+	else
+	  {
+	    messages = get_mysql_board_listing (ch, 2, name);
+
+	    if (!messages)
+	      send_to_char ("That player does not have any notes.\n", ch);
+	  }
 }
 
 void
