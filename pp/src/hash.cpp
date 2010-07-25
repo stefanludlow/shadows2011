@@ -822,8 +822,7 @@ load_object_full (int vnum, bool newWritingID)
 	{
 		//Since this can be called on any type of writing object, generate the new ID inside the ifs
 		if (GET_ITEM_TYPE (new_obj) == ITEM_BOOK)
-		{
-			int newID = unused_writing_id(); // generate a new ID only once
+		{	
 			/* if there is no writing and it has more than 0 pages assigned to it */
 			if (!new_obj->writing && new_obj->o.od.value[0] > 0)
 			{
@@ -846,8 +845,9 @@ load_object_full (int vnum, bool newWritingID)
 						writing->next_page->next_page = NULL;
 						writing = writing->next_page;
 					}
-					new_obj->o.od.value[1] = newID; // apply to all pages -- the different page count differentiates
+					
 				}
+				new_obj->o.od.value[1] = unused_writing_id(); // generate a new ID only once, all pages indexed by page ID off the key
 				save_writing(new_obj);
 			}
 		} // if book
