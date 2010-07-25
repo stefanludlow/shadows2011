@@ -820,6 +820,8 @@ load_object_full (int vnum, bool newWritingID)
 	// by another means, referencing existing writing.
 	if (newWritingID)
 	{
+		int newID = unused_writing_id(); // generate a new ID only once
+
 		if (GET_ITEM_TYPE (new_obj) == ITEM_BOOK)
 		{
 			/* if there is no writing and it has more than 0 pages assigned to it */
@@ -844,7 +846,7 @@ load_object_full (int vnum, bool newWritingID)
 						writing->next_page->next_page = NULL;
 						writing = writing->next_page;
 					}
-					new_obj->o.od.value[1] = unused_writing_id ();
+					new_obj->o.od.value[1] = newID; // apply to all pages -- the different page count differentiates
 				}
 				save_writing(new_obj);
 			}
@@ -855,7 +857,7 @@ load_object_full (int vnum, bool newWritingID)
 			//std::ostringstream oss;
 			//oss << "#6Generating a new writing ID for parchment object vnum: " << new_obj->nVirtual << "#0\n";
 			//send_to_gods(oss.str().c_str());
-			new_obj->o.od.value[0] = unused_writing_id ();
+			new_obj->o.od.value[0] = newID;
 		}
 	} // end if new writing id section
 
