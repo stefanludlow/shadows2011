@@ -2309,6 +2309,7 @@ do_gstat (CHAR_DATA * ch, char *argument, int cmd)
 		next_mob_coldload_id);
 	send_to_char (buf, ch);
 	sprintf (buf, "#2Binary build date:              #0%s\n",__DATE__);
+	send_to_char (buf, ch);
 	send_to_char ("#6-----------------------#0\n", ch);
 }
 
