@@ -2308,7 +2308,7 @@ do_gstat (CHAR_DATA * ch, char *argument, int cmd)
 	sprintf (buf, "#2Next Mobile Coldload:           #0%d\n",
 		next_mob_coldload_id);
 	send_to_char (buf, ch);
-	sprintf (buf, "#2Binary build date:              #0%s\n",BUILD_DATE);
+	sprintf (buf, "#2Binary build date:              #0%s\n",__DATE__);
 	send_to_char ("#6-----------------------#0\n", ch);
 }
 
