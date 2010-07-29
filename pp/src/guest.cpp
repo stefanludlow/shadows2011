@@ -84,6 +84,8 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 
 	d->character->race = ch->race;
 
+	d->character->flags |= FLAG_GUEST;
+	
 	/* Bestow the random traits to the new guest avatar */
 
 	randomize_mobile (ch);
@@ -113,8 +115,6 @@ create_guest_avatar (DESCRIPTOR_DATA * d, char *argument)
 	ch->max_hit = 100;
 	ch->move = 100;
 	ch->max_move = 100;
-
-	d->character->flags |= FLAG_GUEST;
 
 	if (d->character->race >= 0 && d->character->race <= 120)
 	{

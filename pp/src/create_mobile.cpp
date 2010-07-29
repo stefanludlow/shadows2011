@@ -3134,10 +3134,17 @@ randomize_mobile (CHAR_DATA * mob)
 	
 	This might be amended and adapted once staff have agreed on how to handle variable
 	mob randomising.
+
+	The one exception to this is for guest logins, therefore the below block of code will
+	be processed for characters with the guest flag on.
 	
 	- Valarauka
-	
-	if (mob->race >= 0) {
+
+	*/
+
+	//if (mob->race >= 0) 
+	if (IS_SET (mob->flags, FLAG_GUEST))
+	{
 		int statTotal = 0;
 		for (i = 0; i < 7; i++) {
 			statTotal += attr_starters[i];
@@ -3294,6 +3301,8 @@ randomize_mobile (CHAR_DATA * mob)
 	//	make_height (mob);
 	//	make_frame (mob);
 	//}
+	
+	/**********************************
 	
 	END DISABLED MOB RADOMISING
 	
