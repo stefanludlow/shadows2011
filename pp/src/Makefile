@@ -6,6 +6,7 @@ CC=g++
 RESETDATE = `touch comm.cpp`
 #SVN_VERS = -D'SVN_REV="$(shell svnversion -n . && touch comm.cpp)"'
 CFLAGS = -DLINUX -ggdb -w -m32
+#-fstack-protector-all
 CXXFLAGS = $(CFLAGS)
 LFLAGS = -lm -lmysqlclient -lcrypt -lnsl -m32
 
