@@ -4116,6 +4116,37 @@ do_rappend (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 void
+post_redesc (DESCRIPTOR_DATA * d)
+{
+	CHAR_DATA *ch;
+	EXTRA_DESCR_DATA *redesc;
+
+	ch = d->character;
+	ROOM_DATA* r = vtor(ch->in_room);
+	
+	for (redesc = r->ex_description; redesc; redesc = redesc->next)
+	{
+		if (!strn_cmp (redesc->keyword, ch->delay_who, strlen (ch->delay_who)))
+		{
+			break;
+		}
+	}
+	
+	if(!redesc)
+	{
+		send_to_char("There was an error saving the redesc. Please report this to a coder.\n", ch);
+	}
+	else
+	{
+		r->ex_description->description = duplicateString(d->descStr);
+		send_to_char("Redesc installed.\n", ch);
+	}
+
+	ch->delay_who = NULL;
+	ch->delay_info1 = 0;
+}
+
+void
 do_redesc (CHAR_DATA * ch, char *argument, int cmd)
 {
 	EXTRA_DESCR_DATA *tmp;
@@ -4191,7 +4222,6 @@ do_redesc (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	free_mem(ch->desc->descStr);
-	ch->desc->descStr = duplicateString(newdesc->description);
 
 	if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
 		ve_setup_screen (ch->desc);
@@ -4204,6 +4234,8 @@ do_redesc (CHAR_DATA * ch, char *argument, int cmd)
 		make_quiet (ch);
 		newdesc->description = 0;
 		ch->desc->max_str = 2000;
+		ch->desc->proc = post_redesc;
+		ch->delay_who = duplicateString (buf);
 	}
 }
 
