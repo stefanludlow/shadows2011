@@ -2739,7 +2739,7 @@ load_char_mysql (const char *name)
 	int poison = 0, infection = 0, healerskill = 0, lasthealed = 0;
 	int lastbled = 0, bindskill = 0, lastbound = 0;
 	char wound_name[100], severity[100], type[100], location[100];
-	char buf[2*MAX_STRING_LENGTH], buf2[2*MAX_STRING_LENGTH]; //attempted expansion to fix problem with high-craft PCs
+	char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	CHAR_DATA *ch = NULL;
@@ -3197,7 +3197,7 @@ save_char_mysql (CHAR_DATA * ch)
 	WOUND_DATA *wound;
 	LODGED_OBJECT_INFO *lodged_obj;
 	MYSQL_RES *result;
-	char buf[MAX_STRING_LENGTH];
+	char buf[2*MAX_STRING_LENGTH]; //affects is accumulated here first
 	char wounds[MAX_STRING_LENGTH], lodged[MAX_STRING_LENGTH];
 	char skills_buf[MAX_STRING_LENGTH], affects[2*MAX_STRING_LENGTH]; // double size needed for huge crafts list
 	int i = 0, hooded = 0;
