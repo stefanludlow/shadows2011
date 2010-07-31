@@ -734,8 +734,15 @@ load_dwelling_rooms ()
 
 				else if (*chk == 'S')	/* end of current room */
 					break;
-			}
+			} //for loop
+		} // if flag
+		else
+		{
+			//the dynamic memory that temp points to is still used by room->name when the if is true,
+			//but is discarded without deletion otherwise. Now we delete it. Free_mem handles the null checking and setting, etc.
+			free_mem(temp); 
 		}
+
 	}
 	while (flag);
 

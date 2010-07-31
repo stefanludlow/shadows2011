@@ -1370,6 +1370,7 @@ fread_string (FILE * fp)
 			return duplicateString (string_space);
 		}
 	}
+	return NULL;
 }
 
 char *

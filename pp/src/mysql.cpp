@@ -2739,7 +2739,7 @@ load_char_mysql (const char *name)
 	int poison = 0, infection = 0, healerskill = 0, lasthealed = 0;
 	int lastbled = 0, bindskill = 0, lastbound = 0;
 	char wound_name[100], severity[100], type[100], location[100];
-	char buf[MAX_STRING_LENGTH], buf2[MAX_STRING_LENGTH];
+	char buf[2*MAX_STRING_LENGTH], buf2[2*MAX_STRING_LENGTH]; //attempted expansion to fix problem with high-craft PCs
 	MYSQL_RES *result;
 	MYSQL_ROW row;
 	CHAR_DATA *ch = NULL;
