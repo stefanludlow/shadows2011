@@ -2920,6 +2920,8 @@ branch_craft_backward (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft, int level)
 			continue;
 		if (!str_cmp (tcraft->subcraft_name, craft->subcraft_name))
 			continue;
+		if (IS_SET (tcraft->subcraft_flags, SCF_OBSCURE)) //do not branch obscured crafts - Val
+			continue;
 		for (i = 0; i < MAX_ITEMS_PER_SUBCRAFT; i++)
 		{
 			if (!craft->obj_items[i])
@@ -2962,6 +2964,8 @@ branch_craft_forward (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft, int level)
 		if (str_cmp (tcraft->craft_name, craft->craft_name))
 			continue;
 		if (!str_cmp (tcraft->subcraft_name, craft->subcraft_name))
+			continue;
+		if (IS_SET (tcraft->subcraft_flags, SCF_OBSCURE)) //do not branch obscured crafts - Val
 			continue;
 		for (i = 0; i < MAX_ITEMS_PER_SUBCRAFT; i++)
 		{
