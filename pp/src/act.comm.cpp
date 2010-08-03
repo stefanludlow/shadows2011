@@ -2458,12 +2458,12 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	/* there is no 'all' anymore. Check for match on all sphere names */
-	/* All is back, but implemented as the only entry in this list. Leave it thus
-	so it's easy to add more later if desired again - 4/23/10 Grommit */
+	/*Petitioning spheres is now disbled. The only option for a petition is
+	  now 'petition emergency'. These will not be logged but will be displayed
+	  to any available admins. - Val */
 
 	int sphereIndex = -1;
-	for (int i=0; i<SPHERE_COUNT; i++)
+	/*for (int i=0; i<SPHERE_COUNT; i++)
 	{
 		if (!strcasecmp(buf,spheres[i].name) && spheres[i].available)
 		{
@@ -2471,17 +2471,16 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			sphereName = spheres[i].name;
 			break;
 		}
-	}
+	}*/
 
-	/*if (!strcasecmp(buf,"emergency"))
+	if (!strcasecmp(buf,"emergency"))
 	{
 	sphereName="#1Emergency#0";
 	emergencyPetition = true;
 	}
-	*/
+	
 
-	/* check to see if the word matched a sphere. if so, go with it, otherwise check for admin name */
-	if (sphereIndex>=0 || emergencyPetition)  /* Leave this in in case we re-activate emergency -4/23/10 Grommit */
+	if (sphereIndex>=0 || emergencyPetition)  /* Left sphere index  */
 	{
 		std::stringstream petitionStream;
 		petitionStream << "#6[" << (ch->getNaughtyFlag() ? "#1!" : "#6_")
@@ -2607,7 +2606,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char (p, ch);
 		free_mem (p); // char*
 
-		if (!sent)
+		/*if (!sent)
 		{
 			if (emergencyPetition)
 			{
@@ -2619,7 +2618,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char("#1Your petition has been logged for review.\n#0",ch);
 			}
 
-		}
+		}*/
 
 		return;
 
@@ -2632,11 +2631,11 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 	if (!admin)
 	{
 		/* not an admin */
-		send_to_char("That is not a recognised sphere or admin name.\n", ch);
-		send_to_char("Please see HELP PETITION for information on how to use this command.\n",ch);
+		/*send_to_char("That is not a recognised sphere or admin name.\n", ch);
+		send_to_char("Please see HELP PETITION for information on how to use this command.\n",ch);*/
 
 		/* give them the info */
-		send_to_char("Current spheres:#5\n",ch);
+		/*send_to_char("Current spheres:#5\n",ch);
 		for (int j=0; j<SPHERE_COUNT; j++)
 		{
 			if (spheres[j].available)
@@ -2645,8 +2644,10 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char("\n",ch);
 			}
 		}
-		send_to_char("#0",ch);
+		send_to_char("#0",ch);*/
 		unload_pc(admin);
+		send_to_char("Unable to send your petition.\n", ch);
+		send_to_char("Please see HELP PETITION for information on how to use this command.\n",ch);
 		return;
 	}
 
