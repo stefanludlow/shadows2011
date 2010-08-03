@@ -2071,6 +2071,20 @@ struct room_extra_data
 {
 	char *alas[6];
 	char *weather_desc[WR_DESCRIPTIONS];
+
+	room_extra_data() {
+		alas[0] = 0;
+		alas[1] = 0;
+		alas[2] = 0;
+		alas[3] = 0;
+		alas[4] = 0;
+		alas[5] = 0;
+		
+		for(int i=0; i < WR_DESCRIPTIONS; i++)
+		{
+			weather_desc[i] = 0;
+		}
+	}
 };
 
 #define PC_TRACK	( 1 << 0 )

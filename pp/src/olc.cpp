@@ -12684,10 +12684,43 @@ do_mcopy (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 void
+post_alas (DESCRIPTOR_DATA * d)
+{
+	CHAR_DATA *ch;
+
+	ch = d->character;
+	
+	ch->room->extra->alas[ch->delay_info1] = duplicateString(d->descStr);
+	
+	send_to_char("Alas description set.\n", ch);
+
+	ch->delay_who = NULL;
+	ch->delay_info1 = 0;
+	ch->desc->proc = NULL;
+}
+
+void
+post_weather_desc (DESCRIPTOR_DATA * d)
+{
+	CHAR_DATA *ch;
+
+	ch = d->character;
+	
+	ch->room->extra->weather_desc[ch->delay_info1] = duplicateString(d->descStr);
+	
+	send_to_char("Description set.\n", ch);
+
+	ch->delay_who = NULL;
+	ch->delay_info1 = 0;
+	ch->desc->proc = NULL;
+}
+
+void
 do_rset (CHAR_DATA * ch, char *argument, int cmd)
 {
 	int ind;
 	char buf[MAX_STRING_LENGTH];
+	char str[MAX_STRING_LENGTH];
 
 	argument = one_argument (argument, buf);
 
@@ -12739,6 +12772,8 @@ do_rset (CHAR_DATA * ch, char *argument, int cmd)
 				ch);
 			ch->room->extra->alas[ind] = 0;
 			ch->desc->max_str = 2000;
+			ch->delay_info1 = ind;
+			ch->desc->proc = post_alas;
 		}
 
 		return;
@@ -12808,6 +12843,8 @@ do_rset (CHAR_DATA * ch, char *argument, int cmd)
 		make_quiet (ch);
 		ch->room->extra->weather_desc[ind] = 0;
 		ch->desc->max_str = 2000;
+		ch->delay_info1 = ind;
+		ch->desc->proc = post_weather_desc;
 	}
 }
 
