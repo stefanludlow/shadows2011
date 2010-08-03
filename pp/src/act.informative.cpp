@@ -9465,8 +9465,8 @@ post_track_response (DESCRIPTOR_DATA * d)
 	char buf[MAX_STRING_LENGTH] = { '\0' };
 
 	*buf = '\0';
-
-	if (strcasecmp (d->character->delay_who, "Typos") == STR_MATCH)
+	
+	if (!strncasecmp(d->character->delay_who, "Typos",5))
 		mysql_safe_query
 		("UPDATE newsletter_stats SET resolved_typos=resolved_typos+1");
 	else if (strcasecmp (d->character->delay_who, "Bugs") == STR_MATCH)
