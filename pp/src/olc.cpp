@@ -3728,6 +3728,29 @@ do_rlink (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 void
+post_rcret (DESCRIPTOR_DATA * d)
+{
+	CHAR_DATA *ch;
+	EXTRA_DESCR_DATA *redesc;
+
+	ch = d->character;
+	ROOM_DATA* r = vtor(ch->in_room);
+	
+	if(!r->secrets[ch->delay_info1])
+	{
+		send_to_char("There was an error saving the redesc. Please report this to a coder.\n", ch);
+	}
+	else
+	{
+		r->secrets[ch->delay_info1]->stext = duplicateString(d->descStr);
+		send_to_char("Rcret installed.\n", ch);
+	}
+
+	ch->delay_who = NULL;
+	ch->delay_info1 = 0;
+}
+
+void
 do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 {
 	char buf1[80], buf2[80];
@@ -3802,9 +3825,10 @@ do_rcret (CHAR_DATA * ch, char *argument, int cmd)
 	send_to_char ("Enter a new secret description.  Terminate with an '@'\n",
 		ch);
 	free_mem(ch->desc->descStr);
-	ch->desc->descStr = r_secret->stext;
 	r_secret->stext = 0;
 	ch->desc->max_str = 2000;
+	ch->delay_info1 = dir;
+	ch->desc->proc = post_rcret;
 
 	send_to_char ("Done.\n", ch);
 }
