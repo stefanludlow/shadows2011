@@ -2658,7 +2658,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (!is_he_somewhere (admin) || !IS_SET (admin->flags, FLAG_AVAILABLE)
+	if (!is_he_somewhere (admin) 
 		|| !admin->pc->level)
 	{
 		send_to_char ("Sorry, but that person is currently unavailable.\n", ch);
