@@ -438,12 +438,14 @@ fread_obj (FILE * fp)
 		}
 	}
 
-	/* Remove prototype affects */
-
-	while ((af = obj->xaffected))
+	/* Remove prototype affects - only if not the special combat types */
+	if (!(GET_ITEM_TYPE (obj) == ITEM_ARMOR || GET_ITEM_TYPE (obj) == ITEM_WEAPON || GET_ITEM_TYPE(obj) == ITEM_MISSILE || GET_ITEM_TYPE(obj) == ITEM_SHIELD))
 	{
-		obj->xaffected = af->next;
-		free_mem (af);
+		while ((af = obj->xaffected))
+		{
+			obj->xaffected = af->next;
+			free_mem (af);
+		}
 	}
 
 	fscanf (fp, "%d", &modifiers);
@@ -775,14 +777,23 @@ fread_obj (FILE * fp)
 			&af->a.spell.bitvector,
 			&af->a.spell.t, &af->a.spell.sn, &af->type);
 
-		if (!obj->xaffected)
-			obj->xaffected = af;
+		if (GET_ITEM_TYPE (obj) == ITEM_ARMOR || GET_ITEM_TYPE (obj) == ITEM_WEAPON || GET_ITEM_TYPE(obj) == ITEM_MISSILE || GET_ITEM_TYPE(obj) == ITEM_SHIELD)
+		{
+			//Let it load, and then get rid of it, if it has retained its prototype affects
+			free_mem(af);
+		}
 		else
 		{
-			taf = obj->xaffected;
-			while (taf->next)
-				taf = taf->next;
-			taf->next = af;
+			//Otherwise, load them into the object
+			if (!obj->xaffected)
+				obj->xaffected = af;
+			else
+			{
+				taf = obj->xaffected;
+				while (taf->next)
+					taf = taf->next;
+				taf->next = af;
+			}
 		}
 	}
 
