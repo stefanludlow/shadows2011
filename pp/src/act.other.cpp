@@ -1992,7 +1992,7 @@ void do_testjira (CHAR_DATA * ch, char *argument, int cmd)
 	subj+="] ";
 	subj+=argument;
 
-	send_jira_email(ch->acct,argument,"Test body");
+	send_jira_email(ch->desc->acct,argument,"Test body");
 }
 
 void
