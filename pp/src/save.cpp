@@ -438,14 +438,15 @@ fread_obj (FILE * fp)
 		}
 	}
 
-	/* Remove prototype affects */
-
-	while ((af = obj->xaffected))
+	/* Remove prototype affects unless it is a special combat type */
+	if (!(GET_ITEM_TYPE (obj) == ITEM_ARMOR || GET_ITEM_TYPE (obj) == ITEM_WEAPON || GET_ITEM_TYPE(obj) == ITEM_MISSILE || GET_ITEM_TYPE(obj) == ITEM_SHIELD))
 	{
-		obj->xaffected = af->next;
-		free_mem (af);
+		while ((af = obj->xaffected))
+		{
+			obj->xaffected = af->next;
+			free_mem (af);
+		}
 	}
-
 	fscanf (fp, "%d", &modifiers);
 
 	for (; modifiers; modifiers--)
@@ -755,34 +756,37 @@ fread_obj (FILE * fp)
 
 	/* read_object probably created associated some affects with the
 	new object.  Lets erase all those and put in saved affects */
-
-	for (i = 0; obj && i < affect_count; i++)
+	// Comment above unknown. Added skip for special items above, as these use prototype affects
+	if (!(GET_ITEM_TYPE (obj) == ITEM_ARMOR || GET_ITEM_TYPE (obj) == ITEM_WEAPON || GET_ITEM_TYPE(obj) == ITEM_MISSILE || GET_ITEM_TYPE(obj) == ITEM_SHIELD))
 	{
-
-		if (strcmp (fread_word (fp), "Afflocmod"))
+		for (i = 0; obj && i < affect_count; i++)
 		{
-			return (NULL);	/* Forfiet remainder of objects */
-		}
 
-		af = new AFFECTED_TYPE;
+			if (strcmp (fread_word (fp), "Afflocmod"))
+			{
+				return (NULL);	/* Forfiet remainder of objects */
+			}
 
-		af->next = NULL;
+			af = new AFFECTED_TYPE;
 
-		fscanf (fp, "%d %d %d %d %d %d %d\n",
-			&af->a.spell.location,
-			&af->a.spell.modifier,
-			&af->a.spell.duration,
-			&af->a.spell.bitvector,
-			&af->a.spell.t, &af->a.spell.sn, &af->type);
+			af->next = NULL;
 
-		if (!obj->xaffected)
-			obj->xaffected = af;
-		else
-		{
-			taf = obj->xaffected;
-			while (taf->next)
-				taf = taf->next;
-			taf->next = af;
+			fscanf (fp, "%d %d %d %d %d %d %d\n",
+				&af->a.spell.location,
+				&af->a.spell.modifier,
+				&af->a.spell.duration,
+				&af->a.spell.bitvector,
+				&af->a.spell.t, &af->a.spell.sn, &af->type);
+
+			if (!obj->xaffected)
+				obj->xaffected = af;
+			else
+			{
+				taf = obj->xaffected;
+				while (taf->next)
+					taf = taf->next;
+				taf->next = af;
+			}
 		}
 	}
 
@@ -800,9 +804,10 @@ fread_obj (FILE * fp)
 
 	if (GET_ITEM_TYPE (obj) == ITEM_ARMOR || GET_ITEM_TYPE (obj) == ITEM_WEAPON || GET_ITEM_TYPE(obj) == ITEM_MISSILE || GET_ITEM_TYPE(obj) == ITEM_SHIELD)
 	{
+		OBJ_DATA* proto = vtoo (obj->nVirtual);
 		for (int index = 0; index < 6; index++)
 		{
-			obj->o.od.value[index] = vtoo (obj->nVirtual)->o.od.value[index];
+			obj->o.od.value[index] = proto->o.od.value[index];
 		}
 	}
 
