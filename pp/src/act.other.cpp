@@ -1987,12 +1987,9 @@ post_typo (DESCRIPTOR_DATA * d)
 
 void do_testjira (CHAR_DATA * ch, char *argument, int cmd)
 {
-	std::string subj = "[";
-	subj+=(ch->in_room);
-	subj+="] ";
-	subj+=argument;
-
-	send_jira_email(ch->desc->acct, const_cast<char*> (subj.c_str()),"Test body");
+	std::ostringstream oss;
+	oss << "[" << ch->in_room << "] " << argument;
+	send_jira_email(ch->desc->acct, const_cast<char*> (oss.str().c_str()),"Test body");
 }
 
 void
