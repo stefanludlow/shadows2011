@@ -522,6 +522,7 @@ void do_teach (CHAR_DATA * ch, char *argument, int cmd);
 void do_tear (CHAR_DATA * ch, char *argument, int cmd);
 void do_tell (CHAR_DATA * ch, char *argument, int cmd);
 void do_te_pit (CHAR_DATA * ch, char *argument, int cmd);
+void do_testjira (CHAR_DATA * ch, char *argument, int cmd);
 void do_thaw (CHAR_DATA * ch, char *argument, int cmd);
 void do_think (CHAR_DATA * ch, char *argument, int cmd);
 void do_throw (CHAR_DATA * ch, char *argument, int cmd);
