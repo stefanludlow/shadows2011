@@ -1987,7 +1987,7 @@ post_typo (DESCRIPTOR_DATA * d)
 
 void do_testjira (CHAR_DATA * ch, char *argument, int cmd)
 {
-	string subj = "[";
+	std::string subj = "[";
 	subj+=(ch->in_room);
 	subj+="] ";
 	subj+=argument;
