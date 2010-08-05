@@ -725,7 +725,7 @@ send_jira_email (account * from_acct, char *subject, char *message)
 	fp = popen (buf, "w");
 	if (!fp)
 		return;
-	fprintf (fp, "From: %s\n", to_acct->email.c_str ());
+	fprintf (fp, "From: %s\n", from_acct->email.c_str ());
 	fprintf (fp, "To: jira@middle-earth.us\n");
 	fprintf (fp, "X-Sender: %s\n", MUD_EMAIL);
 	fprintf (fp, "Mime-Version: 1.0\n");
