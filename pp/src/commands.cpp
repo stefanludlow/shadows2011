@@ -349,8 +349,10 @@ const class command_data commands[] = {
 	{"stat", do_stat, DEAD, C_LV1},
 	{"tags", do_tags, DEAD, C_LV1},
 	{"tally", do_tally, DEAD, C_LV1},
+	{"testjira", do_testjira, DEAD, C_LV1},
 	{"users", do_users, DEAD, C_LV1},
 	{"zsave", do_zsave, DEAD, C_LV1},
+	
 
 
 	/*Advanced Builder Level 2:  (mobs and crafts) */

@@ -698,6 +698,45 @@ is_restricted_skill (CHAR_DATA * ch, int skill)
 	return 1;
 }
 
+
+void
+send_jira_email (account * from_acct, char *subject, char *message)
+{
+	FILE *fp;
+	char buf[MAX_STRING_LENGTH];
+
+	if (!from_acct)
+		return;
+
+	if (from_acct->email.empty ())
+		return;
+
+	if (!strchr (from_acct->email.c_str (), '@'))
+		return;
+
+	if (!*subject)
+		return;
+
+	if (!*message)
+		return;
+
+	sprintf (buf, "%s -t", PATH_TO_SENDMAIL);
+
+	fp = popen (buf, "w");
+	if (!fp)
+		return;
+	fprintf (fp, "From: %s\n", to_acct->email.c_str ());
+	fprintf (fp, "To: jira@middle-earth.us\n");
+	fprintf (fp, "X-Sender: %s\n", MUD_EMAIL);
+	fprintf (fp, "Mime-Version: 1.0\n");
+	fprintf (fp, "Content-type: text/plain;charset=\"us-ascii\"\n");
+	fprintf (fp, "Organization: %s\n", MUD_NAME);
+	fprintf (fp, "Subject: %s\n", subject);
+	fprintf (fp, "\n");
+	fprintf (fp, "%s", message);
+	pclose (fp);
+}
+
 void
 send_email (account * to_acct, const char *cc, char *from, char *subject,
 			char *message)

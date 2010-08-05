@@ -584,6 +584,8 @@ void setup_new_account (account * acct);
 void send_email (account * acct, const char *cc, char *from, char *subject,
 				 char *message);
 
+void send_jira_email (account * from_acct, char *subject, char *message);
+
 void save_hobbitmail_message (account * acct, MUDMAIL_DATA * message);
 
 

@@ -1985,6 +1985,16 @@ post_typo (DESCRIPTOR_DATA * d)
 	d->pending_message=NULL;
 }
 
+void do_testjira (CHAR_DATA * ch, char *argument, int cmd)
+{
+	string subj = "[";
+	subj+=(ch->in_room);
+	subj+="] ";
+	subj+=argument;
+
+	send_jira_email(ch->acct,argument,"Test body");
+}
+
 void
 do_typo (CHAR_DATA * ch, char *argument, int cmd)
 {
