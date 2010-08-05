@@ -535,7 +535,7 @@ save_dwelling_rooms ()
 	for (troom = full_room_list; troom; troom = troom->lnext)
 	{
 
-		if (troom->nVirtual >= 100000 && troom->nVirtual <= 200000)
+		if (troom->nVirtual >= 110000 && troom->nVirtual <= 200000)
 		{
 
 			room_good = 0;
