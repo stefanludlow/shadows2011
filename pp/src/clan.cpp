@@ -47,7 +47,8 @@ CHANGES:
 15908 Caolafon				caolafon-citizen
 cao_guild : 15911
 cao_marsh : 15910
-
+15917 cao_mw_officers
+*** MUST ADD TO THE REMOVE ALL FUNCTION'S IN() COMMAND ALSO ***
 */
 void
 clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
@@ -151,6 +152,10 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	else if (strcmp (clan, "cao_marsh") == STR_MATCH)
 	{
 		nGroupId = 15910;
+	}
+	else if (strcmp (clan, "cao_mw_officers") == STR_MATCH)
+	{
+		nGroupId = 15917;
 	}
 	// Avoid giving away ImmPCs in the Forums
 	if (nGroupId > 0 && !GET_TRUST (ch) && !IS_SET (ch->flags, FLAG_ISADMIN))
@@ -268,6 +273,10 @@ clan_forum_remove (CHAR_DATA * ch, char *clan)
 	{
 		nGroupId = 15910;
 	}
+	else if (strcmp (clan, "cao_mw_officers") == STR_MATCH)
+	{
+		nGroupId = 15910;
+	}
 	else
 	{
 		return;
@@ -289,7 +298,7 @@ clan_forum_remove_all (CHAR_DATA * ch)
 		sprintf (buf,
 			"DELETE FROM phpbb3.phpbb_user_group WHERE user_id= "
 			"(SELECT user_id FROM phpbb3.phpbb_users WHERE username = '%s')"
-			"AND group_id in (15910,15911,15906,15863,15864,14214,15874,15872,15893,15296,11723,15897,14957,14181,15891,15877,14156,15297,15873,15905,15471,15907,15908);", ch->pc->account_name);
+			"AND group_id in (15910,15911,15906,15863,15864,14214,15874,15872,15893,15296,11723,15897,14957,14181,15891,15877,14156,15297,15873,15905,15471,15907,15908,15910,15911,15917);", ch->pc->account_name);
 		mysql_safe_query (buf);
 	}
 	return;
@@ -1779,6 +1788,10 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		{
 			return "Dreng";
 		}
+		if (!str_cmp (clan, "cao_mw_officers"))
+		{
+			return "Dreng";
+		}
 		if (!str_cmp (clan, "bar_caged"))
 		{
 			return "Fightah";
@@ -1855,6 +1868,10 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 			return "Squire";
 		}
 		if (!str_cmp (clan, "cao_marsh"))
+		{
+			return "Spjot";
+		}
+		if (!str_cmp (clan, "cao_mw_officers"))
 		{
 			return "Spjot";
 		}
@@ -1937,6 +1954,10 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 		{
 			return "Thain";
 		}
+		if (!str_cmp (clan, "cao_mw_officers"))
+		{
+			return "Thain";
+		}
 		if (!str_cmp (clan, "bar_caged"))
 		{
 			return "Fist";
@@ -2009,6 +2030,10 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 			return "Warden-Sergeant";
 		}
 		if (!str_cmp (clan, "cao_marsh"))
+		{
+			return "Brimskr";
+		}
+		if (!str_cmp (clan, "cao_mw_officers"))
 		{
 			return "Brimskr";
 		}
@@ -2102,6 +2127,10 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 			return "Warden-Lieutenant";
 		}
 		if (!str_cmp(clan, "cao_marsh"))
+		{
+			return "Hundredsman";
+		}
+		if (!str_cmp(clan, "cao_mw_officers"))
 		{
 			return "Hundredsman";
 		}
@@ -2230,9 +2259,13 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 			}
 		}
 		if (!str_cmp (clan, "cao_marsh"))
-		  {
-		    return "Jarl";
-		  }
+		{
+			return "Jarl";
+		}
+		if (!str_cmp (clan, "cao_mw_officers"))
+		{
+			return "Jarl";
+		}
 		return "Captain";
 	}
 
@@ -2275,9 +2308,13 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 			}
 		}
 		if (!str_cmp (clan,"cao_marsh"))
-		  {
-		    return "Heafodman";
-		  }
+		{
+			return "Heafodman";
+		}
+		if (!str_cmp (clan,"cao_mw_officers"))
+		{
+			return "Heafodman";
+		}
 		return "General";
 	}
 
@@ -2290,6 +2327,10 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 			return "Chief Warden";
 		}
 		if (!str_cmp(clan,"cao_marsh"))
+		{
+			return "Ealdorman";
+		}
+		if (!str_cmp(clan,"cao_mw_officers"))
 		{
 			return "Ealdorman";
 		}
