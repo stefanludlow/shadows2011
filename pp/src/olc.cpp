@@ -3902,6 +3902,7 @@ do_rexit (CHAR_DATA * ch, char *argument, int cmd)
 	vtor (cha_rnum)->dir_option[dir]->exit_info = 0;
 	vtor (cha_rnum)->dir_option[dir]->key = -1;
 	vtor (cha_rnum)->dir_option[dir]->to_room = troom->nVirtual;
+	vtor (cha_rnum)->dir_option[dir]->pick_penalty = 0;
 
 	send_to_char ("Done.\n", ch);
 }

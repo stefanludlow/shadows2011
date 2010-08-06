@@ -6098,7 +6098,17 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 	}
 
 	// Link the new room to their current location
+	if (to_room->dir_option[0] != NULL)
+		free_mem(to_room->dir_option[0];
+
+	to_room->dir_option[0] = new room_direction_data;
+	to_room->dir_option[0]->pick_penalty = 0;
+	to_room->dir_option[0]->general_description = 0;
+	to_room->dir_option[0]->keyword = 0;
+	to_room->dir_option[0]->exit_info = 0;
+	to_room->dir_option[0]->key = -1;
 	to_room->dir_option[0]->to_room = tch->in_room;
+
 
 	// Transfer the admin into that private room
 	char_to_room(ch,to_room->nVirtual);
