@@ -6099,7 +6099,7 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 
 	// Link the new room to their current location
 	if (to_room->dir_option[0] != NULL)
-		free_mem(to_room->dir_option[0];
+		free_mem(to_room->dir_option[0]);
 
 	to_room->dir_option[0] = new room_direction_data;
 	to_room->dir_option[0]->pick_penalty = 0;
