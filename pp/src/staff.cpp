@@ -6082,7 +6082,15 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 	}
 
 	// Create a private room copy
-	ROOM_DATA* to_room = clone_contiguous_rblock (vtor (PREGAME_ROOM_PROTOTYPE), -1);
+	int new_room = -1;
+	
+	if ((new_room =clone_contiguous_rblock (vtor (PREGAME_ROOM_PROTOTYPE), -1)) < 0)
+	{
+		send_to_char ("Error creating a private room.\n", ch);
+		return;
+	}
+
+	ROOM_DATA* to_room = vtor(new_room);
 	if (to_room==NULL)
 	{
 		send_to_char ("Error creating a private room.\n", ch);
@@ -6090,7 +6098,7 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 	}
 
 	// Link the new room to their current location
-	to_room->dir_option[0] = vtor(tch->in_room);
+	to_room->dir_option[0]->to_room = tch->in_room;
 
 	// Transfer the admin into that private room
 	char_to_room(ch,to_room->nVirtual);
