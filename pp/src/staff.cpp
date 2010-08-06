@@ -6101,9 +6101,9 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 
 	// Inform the admin
 	std::ostringstream oss;
-	oss << "#6OOC: This room has been created for the use of " << tch->tname << "." << endl
-		<< "Load anything you wish for them to have into here, and they may follow the exit" << endl
-		<< "back to where they came from in the game world.#0" << endl;
+	oss << "#6OOC: This room has been created for the use of " << tch->tname << "." << std::endl
+		<< "Load anything you wish for them to have into here, and they may follow the exit" << std::endl
+		<< "back to where they came from in the game world.#0" << std::endl;
 	send_to_char(oss.str().c_str(),ch);
 
 }
