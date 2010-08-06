@@ -6061,6 +6061,52 @@ _do_load (CHAR_DATA * ch, char *argument, int cmd)
 
 }
 
+void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
+{
+	char buf[MAX_INPUT_LENGTH];
+	CHAR_DATA *tch;
+
+	if (IS_NPC (ch))
+	{
+		send_to_char ("This is a PC only command.\n", ch);
+		return;
+	}
+
+	
+	// Load the PC by proper name only
+	argument = one_argument (argument, buf);
+	if (!(tch = load_pc (buf)))
+	{
+		send_to_char ("That PC was not found.\n", ch);
+		return;
+	}
+
+	// Create a private room copy
+	ROOM_DATA* to_room = clone_contiguous_rblock (vtor (PREGAME_ROOM_PROTOTYPE), -1);
+	if (to_room==NULL)
+	{
+		send_to_char ("Error creating a private room.\n", ch);
+		return;
+	}
+
+	// Link the new room to their current location
+	to_room->dir_option[0] = vtor(tch->in_room);
+
+	// Transfer the admin into that private room
+	char_to_room(ch,to_room->nVirtual);
+
+	// Place the player's record in that room
+	tch->in_room = to_room->nVirtual;
+	unload_pc(tch);
+
+	// Inform the admin
+	std::ostringstream oss;
+	oss << "#6OOC: This room has been created for the use of " << tch->tname << "." << endl
+		<< "Load anything you wish for them to have into here, and they may follow the exit" << endl
+		<< "back to where they came from in the game world.#0" << endl;
+	send_to_char(oss.str().c_str(),ch);
+
+}
 
 /* clean a room of all mobiles and objects */
 void

@@ -413,6 +413,7 @@ const class command_data commands[] = {
 	{"echo", do_echo, DEAD, C_LV3},
 	{"job", do_job, DEAD, C_LV3},
 	{"last", do_last, DEAD, C_LV3},
+	{"makeprivate", do_makeprivate, DEAD, C_LV3},
 	{"openskill", do_openskill, DEAD, C_LV3},
 	{"pecho", do_pecho, DEAD, C_LV3},
 	{"register", do_register, DEAD, C_LV3},
