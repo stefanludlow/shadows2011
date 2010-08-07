@@ -6074,7 +6074,7 @@ void do_leaveprivate(CHAR_DATA* ch, char* argument, int cmd)
 	ROOM_DATA* currentRoom = vtor(ch->in_room);
 	if (currentRoom==NULL)
 	{
-		send_to_char ("Error accessing your current room.\n");
+		send_to_char ("Error accessing your current room.\n", ch);
 		return;
 	}
 

@@ -371,6 +371,7 @@ void do_opcmd (CHAR_DATA * ch, char *argument, int cmd);
 void do_opdel (CHAR_DATA * ch, char *argument, int cmd);
 void do_opstat (CHAR_DATA * ch, char *argument, int cmd);
 void do_optype (CHAR_DATA *ch, char *argument, int cmd);
+void do_leaveprivate(CHAR_DATA* ch, char* argument, int cmd);
 void do_makeprivate (CHAR_DATA *ch, char *argument, int cmd);
 void do_mset (CHAR_DATA * ch, char *argument, int cmd);
 void do_munused (CHAR_DATA * ch, char *argument, int cmd);
