@@ -721,39 +721,7 @@ char_to_room (CHAR_DATA * ch, int room_num)
 	char buf[MAX_STRING_LENGTH];
 	int curr = 0;
 
-	// Handle echoes/vNPC decloaking for portable dwellings, i.e. tents.
-
-	if (ch->in_room >= 100000)
-	{
-		room = vtor (ch->in_room);
-		if (room && room->dir_option[OUTSIDE]
-		&& (troom = vtor (room->dir_option[OUTSIDE]->to_room)))
-		{
-			load_save_room (troom);
-			for (obj = troom->contents; obj; obj = obj->next_content)
-			{
-				if (obj->deleted)
-					continue;
-				if (GET_ITEM_TYPE (obj) == ITEM_DWELLING &&
-					IS_SET (obj->obj_flags.extra_flags, ITEM_VNPC_DWELLING) &&
-					obj->o.od.value[0] == ch->in_room)
-				{
-					sprintf (buf, "#2%s#0 rustles as its occupants stir.",
-						obj_short_desc (obj));
-					buf[2] = toupper (buf[2]);
-					send_to_room (buf, obj->in_room);
-					obj->obj_flags.extra_flags &= ~ITEM_VNPC;
-					room->occupants++;
-					break;
-				}
-			} //for (obj = troom->contents
-		} //if (room &&
-
-		else if (!room)
-			room = vtor (0);
-	} //if (ch->in_room >= 100000)
-
-	else if (!(room = vtor (room_num)))
+	if (!(room = vtor (room_num)))
 	{
 		sprintf (buf, "Room %d doesn't exist in char_to_room()! (%s)", room_num,
 			ch->tname);

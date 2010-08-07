@@ -6061,6 +6061,60 @@ _do_load (CHAR_DATA * ch, char *argument, int cmd)
 
 }
 
+
+// This leaves a private room designed for staff to load things for an offline player. This special function is required, so that the room is deleted.
+void do_leaveprivate(CHAR_DATA* ch, char* argument, int cmd)
+{
+	if (ch->in_room < 100000)
+	{
+		send_to_char ("You are not in a private room.\n", ch);
+		return;
+	}
+
+	ROOM_DATA* currentRoom = vtor(ch->in_room);
+	if (currentRoom==NULL)
+	{
+		send_to_char ("Error accessing your current room.\n");
+		return;
+	}
+
+	if (currentRoom->dir_option[0]==NULL)
+	{
+		send_to_char ("You do not seem to have an exit storing your old location.\n", ch);
+		return;
+	}
+
+	int targetRoom = currentRoom->dir_option[0]->to_room;
+	if (targetRoom<0)
+	{
+		send_to_char ("Error loading the room to which you are to be restored.\n", ch);
+		return;
+	}
+
+	// Move the character to the room specified in the exit and 
+	char_from_room(ch);
+	char_to_room(ch, targetRoom);
+	act ("$n enters the area.", true, ch, 0, 0, TO_ROOM);
+
+	// Evict others from the room, taking them to wherever the player went
+	CHAR_DATA* tch = NULL, tch_next=NULL;
+	for (tch = currentRoom->people; tch; tch = tch_next)
+	{
+		tch_next = tch->next_in_room;
+		if (!IS_NPC (tch))
+		{
+			char_from_room (tch);
+			char_to_room (tch, targetRoom);
+		}
+	}
+
+	// Delete the room
+	delete_contiguous_rblock (currentRoom, -1, -1);
+}
+
+// This makes a private room for the player and stores their previous location. The intent is to run this on an offline player
+// and load things in this room for them. They can get them, and then leaveprivate to go back to where they came from. The exit
+// is blocked off so they have to use leaveprivate, which is necessary to get this temporary room to delete.
 void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 {
 	char buf[MAX_INPUT_LENGTH];
@@ -6105,13 +6159,26 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 	to_room->dir_option[0]->pick_penalty = 0;
 	to_room->dir_option[0]->general_description = 0;
 	to_room->dir_option[0]->keyword = 0;
-	to_room->dir_option[0]->exit_info = 0;
-	to_room->dir_option[0]->key = -1;
+	to_room->dir_option[0]->exit_info = EX_ISDOOR | EX_CLOSED | EX_LOCKED;  // start with the door closed and locked.
+																			// This is to allow the exit to save the room link but force them to use leaveprivate to leave the room
+																			// The purpose of that is to allow deletion of the room when they've left it.
+	to_room->dir_option[0]->key = -1;	// No possible key to circumvent this
 	to_room->dir_option[0]->to_room = tch->in_room;
 
 
 	// Transfer the admin into that private room
+	char_from_room(ch);
 	char_to_room(ch,to_room->nVirtual);
+
+	// Clear its contents
+	do_purge(ch,NULL,0);
+
+	// Turn OOC off, so they can get things
+	to_room->room_flags &= ~OOC;
+
+	// Replace desc
+	free_mem(to_room->description);
+	to_room->description = duplicateString("You were placed in this private room while you were offline so an admin could\nprovide you with the following item(s). Please take them and #6leaveprivate#0 when done.\n");
 
 	// Place the player's record in that room
 	tch->in_room = to_room->nVirtual;
@@ -6119,8 +6186,8 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 
 	// Inform the admin
 	std::ostringstream oss;
-	oss << "#6OOC: This room has been created for the use of " << tch->tname << "." << std::endl
-		<< "Load anything you wish for them to have into here, and they may follow the exit" << std::endl
+	oss << "#6OOC: This room has been created for the use of " << argument << "." << std::endl
+		<< "Load anything you wish for them to have into here, and they may use #2leaveprivate#1 to exit" << std::endl
 		<< "back to where they came from in the game world.#0" << std::endl;
 	send_to_char(oss.str().c_str(),ch);
 
