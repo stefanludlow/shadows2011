@@ -6097,7 +6097,7 @@ void do_leaveprivate(CHAR_DATA* ch, char* argument, int cmd)
 	act ("$n enters the area.", true, ch, 0, 0, TO_ROOM);
 
 	// Evict others from the room, taking them to wherever the player went
-	CHAR_DATA* tch = NULL, tch_next=NULL;
+	CHAR_DATA *tch = NULL, *tch_next=NULL;
 	for (tch = currentRoom->people; tch; tch = tch_next)
 	{
 		tch_next = tch->next_in_room;
