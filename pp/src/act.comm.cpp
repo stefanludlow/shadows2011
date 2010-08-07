@@ -2473,8 +2473,8 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!strcasecmp(buf,"emergency"))
 	{
-	sphereName="#1Emergency#0";
-	emergencyPetition = true;
+		sphereName="#1Emergency#0";
+		emergencyPetition = true;
 	}
 	
 
@@ -2527,7 +2527,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 
 			if (!admin->desc->idle)
 				sent = true;
-		}
+		} // end of loop over all characters
 
 		/* was it actually sent? log if not */
 		/* emergency petitions are not logged */
@@ -2594,7 +2594,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			}*/
 
 
-		} /* end of 'it wasn't sent' block */
+		//}/* end of 'it wasn't sent' block */
 
 		/* clean up and sent echo back to user */
 		free_mem (p); // char*
