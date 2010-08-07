@@ -150,7 +150,7 @@ const class command_data commands[] = {
 	{"knock", do_knock, STAND, C_BLD},
 	{"look", do_look, REST, C_DEL | C_HID | C_SUB | C_DOA | C_PAR},
 	{"leave", do_leave, STAND, C_WLK | C_BLD},
-	{"leaveprivate", do_leaveprivate, REST, C_HID}
+	{"leaveprivate", do_leaveprivate, REST, C_HID},
 	{"light", do_light, SIT, C_HID | C_DOA},
 	{"list", do_list, SIT, C_BLD},
 	{"load", do_load, FIGHT, C_WLK | C_HID | C_DOA}, //C_MNT 
