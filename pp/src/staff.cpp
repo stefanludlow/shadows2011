@@ -6201,7 +6201,7 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 	oss << "\n#6OOC: This room has been created for the use of " << buf << "." << std::endl
 		<< "Load anything you wish for them to have into here, and they may use" << std::endl
 		<< "#2leaveprivate#6 to exit back to where they came from" << std::endl
-		<< "in the game world.#0" << std::endl;
+		<< "in the game world.#0\n" << std::endl;
 	send_to_char(oss.str().c_str(),ch);
 
 	// Force them to look
