@@ -6192,6 +6192,10 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 	free_mem(to_room->description);
 	to_room->description = duplicateString("You were placed in this private room while you were offline so an admin could\nprovide you with the following item(s). Please take them and use\n#6leaveprivate#0 when done.\n");
 
+	// Replace title to avoid auto messages of "Welcome" and "look sign" etc
+	free_mem(to_room->name);
+	to_room->name = duplicateString("An offline loading room");
+
 	// Place the player's record in that room
 	tch->in_room = to_room->nVirtual;
 	unload_pc(tch);
