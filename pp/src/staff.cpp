@@ -6094,6 +6094,8 @@ void do_leaveprivate(CHAR_DATA* ch, char* argument, int cmd)
 	// Move the character to the room specified in the exit and 
 	char_from_room(ch);
 	char_to_room(ch, targetRoom);
+	// Force them to look
+	do_look(ch,NULL,0);
 	act ("$n enters the area.", true, ch, 0, 0, TO_ROOM);
 
 	// Evict others from the room, taking them to wherever the player went
@@ -6105,11 +6107,16 @@ void do_leaveprivate(CHAR_DATA* ch, char* argument, int cmd)
 		{
 			char_from_room (tch);
 			char_to_room (tch, targetRoom);
+			// Force them to look
+			do_look(tch,NULL,0);
 		}
 	}
 
-	// Delete the room
-	rdelete(vtor(targetRoom));
+	// Delete the room they came from (currentRoom)
+	rdelete(currentRoom);
+
+	//Update list immediately
+	save_dwelling_rooms();
 }
 
 // This makes a private room for the player and stores their previous location. The intent is to run this on an offline player
@@ -6191,12 +6198,17 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 
 	// Inform the admin
 	std::ostringstream oss;
-	oss << "#6OOC: This room has been created for the use of " << buf << "." << std::endl
+	oss << "\n#6OOC: This room has been created for the use of " << buf << "." << std::endl
 		<< "Load anything you wish for them to have into here, and they may use" << std::endl
 		<< "#2leaveprivate#6 to exit back to where they came from" << std::endl
 		<< "in the game world.#0" << std::endl;
 	send_to_char(oss.str().c_str(),ch);
 
+	// Force them to look
+	do_look(ch,NULL,0);
+
+	//Update list immediately
+	save_dwelling_rooms();
 }
 
 /* clean a room of all mobiles and objects */
