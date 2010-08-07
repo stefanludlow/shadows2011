@@ -169,23 +169,6 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 			
 		add_clan(ch, "mordor_char", CLAN_MEMBER);
 		commenced_in = 5;
-
-		/* All combat skills possessed boosted by 10 */
-		for (int i=SKILL_LIGHT_EDGE; i<=SKILL_PARRY; i++)
-		{
-			if (ch->skills[i]>0)
-			{
-				ch->skills[i]+=10;
-				ch->pc->skills[i] = ch->skills[i];
-			}
-		}
-
-		/* Special case for Dodge */
-		if (ch->skills[SKILL_DODGE]>0)
-		{
-				ch->skills[SKILL_DODGE]+=10;
-				ch->pc->skills[SKILL_DODGE] = ch->skills[SKILL_DODGE];
-		}
 	}
 	else
 	{
