@@ -2458,12 +2458,10 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	/*Petitioning spheres is now disbled. The only option for a petition is
-	  now 'petition emergency'. These will not be logged but will be displayed
-	  to any available admins. - Val */
+	// Spheres are back for sending petitions, but not for logging
 
 	int sphereIndex = -1;
-	/*for (int i=0; i<SPHERE_COUNT; i++)
+	for (int i=0; i<SPHERE_COUNT; i++)
 	{
 		if (!strcasecmp(buf,spheres[i].name) && spheres[i].available)
 		{
@@ -2471,7 +2469,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 			sphereName = spheres[i].name;
 			break;
 		}
-	}*/
+	}
 
 	if (!strcasecmp(buf,"emergency"))
 	{
@@ -2533,7 +2531,7 @@ do_petition (CHAR_DATA * ch, char *argument, int cmd)
 
 		/* was it actually sent? log if not */
 		/* emergency petitions are not logged */
-		if (!sent && !emergencyPetition)
+	/*	if (!sent && !emergencyPetition)  -- no logging anymore, Grommit Aug 7, 2010
 		{
 			std::stringstream boardName;
 			boardName << "Petitions-" << sphereName;
