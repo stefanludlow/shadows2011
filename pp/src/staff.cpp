@@ -6109,7 +6109,7 @@ void do_leaveprivate(CHAR_DATA* ch, char* argument, int cmd)
 	}
 
 	// Delete the room
-	delete_contiguous_rblock (currentRoom, -1, -1);
+	rdelete(vtor(targetRoom));
 }
 
 // This makes a private room for the player and stores their previous location. The intent is to run this on an offline player
@@ -6158,7 +6158,7 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 	to_room->dir_option[0] = new room_direction_data;
 	to_room->dir_option[0]->pick_penalty = 0;
 	to_room->dir_option[0]->general_description = 0;
-	to_room->dir_option[0]->keyword = 0;
+	to_room->dir_option[0]->keyword = duplicateString("door");
 	to_room->dir_option[0]->exit_info = EX_ISDOOR | EX_CLOSED | EX_LOCKED;  // start with the door closed and locked.
 																			// This is to allow the exit to save the room link but force them to use leaveprivate to leave the room
 																			// The purpose of that is to allow deletion of the room when they've left it.
@@ -6171,14 +6171,19 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 	char_to_room(ch,to_room->nVirtual);
 
 	// Clear its contents
-	do_purge(ch,NULL,0);
+	OBJ_DATA *obj=NULL, *next_o=NULL;
+	for (obj = to_room->contents; obj; obj = next_o)
+	{
+		next_o = obj->next_content;
+		extract_obj (obj);
+	}
 
 	// Turn OOC off, so they can get things
 	to_room->room_flags &= ~OOC;
 
 	// Replace desc
 	free_mem(to_room->description);
-	to_room->description = duplicateString("You were placed in this private room while you were offline so an admin could\nprovide you with the following item(s). Please take them and #6leaveprivate#0 when done.\n");
+	to_room->description = duplicateString("You were placed in this private room while you were offline so an admin could\nprovide you with the following item(s). Please take them and use\n#6leaveprivate#0 when done.\n");
 
 	// Place the player's record in that room
 	tch->in_room = to_room->nVirtual;
@@ -6186,9 +6191,10 @@ void do_makeprivate(CHAR_DATA* ch, char* argument, int cmd)
 
 	// Inform the admin
 	std::ostringstream oss;
-	oss << "#6OOC: This room has been created for the use of " << argument << "." << std::endl
-		<< "Load anything you wish for them to have into here, and they may use #2leaveprivate#1 to exit" << std::endl
-		<< "back to where they came from in the game world.#0" << std::endl;
+	oss << "#6OOC: This room has been created for the use of " << buf << "." << std::endl
+		<< "Load anything you wish for them to have into here, and they may use" << std::endl
+		<< "#2leaveprivate#6 to exit back to where they came from" << std::endl
+		<< "in the game world.#0" << std::endl;
 	send_to_char(oss.str().c_str(),ch);
 
 }
