@@ -70,7 +70,7 @@
 #define HARADRIM_START_LOC      66677
 #define CAOLAFON_START_LOC      45001
 #define EDEN_START_LOC			6120
-#define MORDOR_START_LOC		23040 /* orcs */
+#define MORDOR_START_LOC		24202 /* orcs */
 #define BALCHOTH_START_LOC		23198
 
 #define LEANTO_OBJ_VNUM			95
