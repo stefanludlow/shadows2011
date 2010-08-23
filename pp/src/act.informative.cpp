@@ -8093,17 +8093,17 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 			whoStream << "Lurking around the Mordorian Spire, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			break;
 		case 6:
-			whoStream << "The lands of Ithilien may hold any number of players";
+			whoStream << "The lands of Ithilien may hold any number of players."<< std::endl;
 			break;
 		default:
 			break;
 	}
 
 
-	if (sphere > 0 && clanCount != 1) {
+	if (sphere > 0 && clanCount != 1 && sphere != 6) {
 		whoStream << "s." << std::endl;
 	}
-	else if (sphere > 0) {
+	else if (sphere > 0 && sphere != 6) {
 		whoStream << "." << std::endl;
 	}
 
