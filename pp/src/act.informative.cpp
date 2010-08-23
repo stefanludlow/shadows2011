@@ -7932,7 +7932,9 @@ int kingdom_from_zone (CHAR_DATA *ch)
 	int zone = ch->in_room / 1000;
 	if (IS_SET(ch->flags, FLAG_GUEST))
 		return 0;
-	else if (zone == 23 || zone == 5 || zone == 6)
+	else if (zone == 4 || zone == 12 || zone == 51 || zone == 76)
+		return 6;
+	else if (zone == 23 || zone == 5 || zone == 6 || zone == 66 || zone == 9 || zone == 24)
 		return 5;
 	else if (zone == 41 || zone == 40)
 		return 4;
@@ -7940,14 +7942,14 @@ int kingdom_from_zone (CHAR_DATA *ch)
 		return 3;
 	else if (zone == 45)
 		return 2;
-	else if (zone == 1  || zone == 2  || zone == 3  || zone == 4  ||
-		zone == 8  || zone == 10 || zone == 11 || zone == 12 ||
+	else if (zone == 1  || zone == 2  || zone == 3  ||
+		zone == 8  || zone == 10 || zone == 11 ||
 		zone == 13 || zone == 14 || zone == 15 || zone == 18 ||
 		zone == 19 || zone == 21 || zone == 22 || zone == 38 ||
-		zone == 51 || zone == 54 || zone == 70 || zone == 71 ||
-		zone == 72 || zone == 74 || zone == 75 || zone == 76 ||
+		zone == 54 || zone == 70 || zone == 71 ||
+		zone == 72 || zone == 74 || zone == 75 ||
 		zone == 77 || zone == 78 || zone == 79 || zone == 96)
-		return 1;
+		return 1; 
 	else return -1;
 }
 
@@ -8020,7 +8022,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	availableAdminsStream << std::endl << "#2Available Staff#0:" << std::endl;
 	bool availableAdmins = false;
 
-	int sphere = kingdom_from_zone(ch); // 0 = Guest, 1 = Gondor, 2 = Northmen, 3 = Fahad Jafari, 4 = Orcs,  5 = Mordor
+	int sphere = kingdom_from_zone(ch); // 0 = Guest, 1 = Gondor, 2 = Northmen, 3 = Fahad Jafari, 4 = Orcs,  5 = Mordor, 6 = In Ithilien
 
 	for (d = descriptor_list; d; d = d->next)
 	{
@@ -8090,6 +8092,9 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		case 5:
 			whoStream << "Lurking around the Mordorian Spire, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			break;
+		case 6:
+			whoStream << "In Ithilien, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
+			break;
 		default:
 			break;
 	}
@@ -8147,7 +8152,9 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	else if (sphere == 5)
 	{
-		whoStream << gatheringPlace(23046, "The Spear's Thrust");
+		whoStream << gatheringPlace(24217, "The Sunken Arena");
+		whoStream << gatheringPlace(24212, "The Swill Hole");
+		whoStream << gatheringPlace(24119, "The Lodge");
 	}
 
 
