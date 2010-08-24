@@ -1719,6 +1719,7 @@ obj_to_obj (OBJ_DATA * obj, OBJ_DATA * container)
 				continue;
 
 			tobj->count += obj->count;
+			tobj->in_obj->contained_wt += OBJ_MASS(obj);
 			extract_obj (obj);
 			return;
 		}
