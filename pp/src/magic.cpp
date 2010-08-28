@@ -2977,10 +2977,9 @@ post_dream (DESCRIPTOR_DATA * d)
 	DREAM_DATA *dream;
 	CHAR_DATA *ch;
 
-	p = d->character->delay_who;
 	ch = d->character->delay_ch;
 
-	if (!p || !*p)
+	if (!d->pending_message->message)
 	{
 		send_to_char ("Dream aborted.\n\r", d->character);
 		unload_pc (d->character->delay_ch);
@@ -2988,15 +2987,10 @@ post_dream (DESCRIPTOR_DATA * d)
 	}
 
 	dream = new DREAM_DATA;
-	dream->dream = d->character->delay_who;
+	dream->dream = d->pending_message->message;
 	dream->next = ch->pc->dreams;
-
-	d->character->delay_who = NULL;
-
 	ch->pc->dreams = dream;
-
-	send_to_char ("Dream added.\n\r", d->character);
-
+	
 	current_time = time (0);
 
 	date = (char *) asctime (localtime (&current_time));
@@ -3011,11 +3005,8 @@ post_dream (DESCRIPTOR_DATA * d)
 		-2,		/* Virtual # */
 		GET_NAME (d->character),	/* Imm name */
 		date,
-		"Entry via GIVEDREAM command.", "", dream->dream, MF_DREAM);
+		"Entry via GIVEDREAM command.", "", ch->pc->dreams->dream, MF_DREAM);
 
-	unload_pc (ch);
-
-	free_mem (date);
 }
 
 void
@@ -3041,11 +3032,16 @@ do_givedream (CHAR_DATA * ch, char *argument, int cmd)
 
 	make_quiet (ch);
 
+	free_mem(ch->desc->descStr);
+	free_mem(ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
+	
+	ch->desc->descStr = ch->desc->pending_message->message;
+	ch->desc->max_str = MAX_STRING_LENGTH;
+	
 	ch->delay_who = NULL;
-
 	ch->delay_ch = who;
-	ch->desc->descStr = duplicateString(ch->delay_who);
-	ch->desc->max_str = MAX_INPUT_LENGTH;
+	
 	ch->desc->proc = post_dream;
 }
 
@@ -4146,7 +4142,11 @@ do_prescience (CHAR_DATA * ch, char *argument, int cmd)
 		("#6You begin spiralling downward into meditative contemplation, preparing to part the Veil of the future, and the mysteries of the Valar. At long last your mind is focused and tranquil; you begin to ponder your question:#0",
 		false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 
-	ch->desc->descStr = duplicateString(ch->delay_who);
+	free_mem(ch->desc->descStr);
+	free_mem(ch->desc->pending_message);
+	ch->desc->pending_message = new MESSAGE_DATA;
+	
+	ch->desc->descStr = ch->desc->pending_message->message;
 	ch->desc->proc = post_prescience;
 
 	if (IS_SET (ch->desc->edit_mode, MODE_VISEDIT))
@@ -4178,9 +4178,7 @@ post_prescience (DESCRIPTOR_DATA * d)
 		GET_NAME (ch), GET_AUR (ch), ch->skills[SKILL_PRESCIENCE]);
 
 	add_message (1, "Prescience", -5, GET_NAME (ch), date, buf, "",
-		ch->delay_who, MF_DREAM);
-
-	free_mem (date);
+		ch->desc->descStr, MF_DREAM);
 
 	ch->delay_who = NULL;
 }

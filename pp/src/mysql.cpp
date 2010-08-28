@@ -4557,11 +4557,12 @@ erase_mysql_board_post (CHAR_DATA * ch, char *name, int board_type,
 			send_to_char
 				("Enter the dream you'd like to give in response to this prescience request:\n",
 				ch);
-			ch->desc->descStr = duplicateString(ch->delay_who);
+			ch->desc->pending_message = new MESSAGE_DATA;
+			ch->desc->pending_message->message = NULL;
+			ch->desc->descStr = ch->desc->pending_message->message;
 			ch->desc->max_str = STR_MULTI_LINE;
 			ch->desc->proc = post_dream;
 			make_quiet (ch);
-			free_mem(message);
 		}
 		mysql_safe_query
 			("DELETE FROM virtual_boards WHERE post_number = %d AND board_name = '%s'",
