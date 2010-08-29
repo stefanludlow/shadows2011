@@ -3275,7 +3275,7 @@ void teach_skill (CHAR_DATA * student, int skill, CHAR_DATA * teacher)
 	learn_chance += (GET_INT (teacher) + GET_INT (student))/2;
 	learn_chance += (GET_WIL (teacher) + GET_WIL (student))/2;
 
-	roll = number (1, 80);
+	roll = number (1, 65);
 	if (roll > learn_chance)
 	{
 		send_to_char
