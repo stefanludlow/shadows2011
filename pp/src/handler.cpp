@@ -1561,9 +1561,10 @@ obj_to_room (OBJ_DATA * object, int room)	/* STACKing */
 
 		if (troom && troom->sector_type == SECT_UNDERWATER && SWIM_ONLY(r))
 		{
-
-			if (object->obj_flags.weight / 100 >= 1
-				|| GET_ITEM_TYPE (object) == ITEM_MONEY)
+//if the total_weight >=  0.01 pounds
+			if ((OBJ_MASS(object) >= 1)
+				|| (GET_ITEM_TYPE (object) == 
+ITEM_MONEY))
 			{
 				sprintf (buf,
 					"#2%s#0 slowly sinks from sight down into the water.",
