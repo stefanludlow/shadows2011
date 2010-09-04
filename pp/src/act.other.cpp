@@ -152,10 +152,21 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	else if (IS_SET (ch->plr_flags, START_MORDOR_ORC))
 	{
 		char_from_room(ch);
-		char_to_room(ch, MORDOR_START_LOC);
-		ch->was_in_room = 0;
-		add_clan (ch,"vadok_kraun",CLAN_MEMBER);
-		add_clan (ch,"mordor_char",CLAN_MEMBER);
+if (ch->race == 0)
+		{
+			char_to_room(ch, MINAS_MORGUL_START_LOC); 
+//slaves
+			ch->was_in_room = 0;
+			add_clan (ch,"mordor_char",CLAN_MEMBER);
+		}
+		else
+		{
+			char_to_room(ch, MORDOR_START_LOC);
+			ch->was_in_room = 0;
+			add_clan (ch,"vadok_kraun",CLAN_MEMBER);
+			add_clan (ch,"mordor_char",CLAN_MEMBER);
+		}
+
 		commenced_in = 4;
 	}
 	else if (IS_SET (ch->plr_flags, START_BALCHOTH)) {

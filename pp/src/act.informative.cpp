@@ -8090,7 +8090,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 			//	whoStream << "In the Mines Of Moria, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			//	break;
 		case 5:
-			whoStream << "Lurking around the Mordorian Spire, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
+			whoStream << "Currently in the Mordorian Spire, there " << (clanCount == 1 ? "is#2 " : "are#2 ") << clanCount << " #0player";
 			break;
 		case 6:
 			whoStream << "The lands of Ithilien may hold any number of players."<< std::endl;

@@ -2710,6 +2710,24 @@ void
 	/* set tobj at end of func for pack for money loading */
 	else if (IS_SET (ch->plr_flags, START_MORDOR_ORC))
 	{
+	if (ch->race == 0)
+		{
+			if ((obj = load_object (5181))) // slave collar 
+				equip_char (ch,obj, WEAR_NECK_1);
+			if (ch->sex == 1) //males get loin cloth
+			{
+				if ((obj = load_object (5090)))  
+					equip_char (ch,obj, WEAR_LEGS);
+	
+			}
+			else //females get rags
+			{
+				if ((obj = load_object (90882))) 
+					equip_char (ch,obj, WEAR_BODY);
+			}
+		}// end slaves
+		else 
+		{
 		if ((obj = load_object (5011))) //pants
 			equip_char (ch,obj, WEAR_LEGS);
 
@@ -2777,6 +2795,7 @@ void
 			obj_to_obj (obj, tobj);
 		}
 
+		}//end orcs
 	}//end Moria 
 
 	//start in Angost
