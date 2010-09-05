@@ -2710,7 +2710,7 @@ void
 	/* set tobj at end of func for pack for money loading */
 	else if (IS_SET (ch->plr_flags, START_MORDOR_ORC))
 	{
-	if (ch->race == 0)
+	if (ch->race == lookup_race_id("Common Human"))
 		{
 			if ((obj = load_object (5181))) // slave collar 
 				equip_char (ch,obj, WEAR_NECK_1);

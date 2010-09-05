@@ -152,7 +152,7 @@ do_commence (CHAR_DATA * ch, char *argument, int cmd)
 	else if (IS_SET (ch->plr_flags, START_MORDOR_ORC))
 	{
 		char_from_room(ch);
-if (ch->race == 0)
+		if (ch->race == lookup_race_id("Common Human"))
 		{
 			char_to_room(ch, MINAS_MORGUL_START_LOC); 
 //slaves
