@@ -5119,7 +5119,8 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
 
 	/* Detail */
 	int port = engine.get_port ();
-
+	/*this is a hack since server_logs is not part of the config 
+system*/
 	mysql_safe_query
 		("SELECT time, shopkeep, transaction, who, customer, vnum, "
 		"item, qty, cost, room, gametime, port, "
@@ -5129,7 +5130,7 @@ do_receipts (CHAR_DATA * ch, char *argument, int cmd)
 		"FROM %s.receipts "
 		"WHERE shopkeep = '%d' AND port = '%d' "
 		"ORDER BY time DESC;",
-		(engine.get_config ("player_log_db")).c_str (),
+		"server_logs",
 		keeper->mob->nVirtual, port);
 
 	if ((result = mysql_store_result (database)) == NULL)
