@@ -48,6 +48,7 @@ CHANGES:
 cao_guild : 15911
 cao_marsh : 15910
 15917 cao_mw_officers
+1487 mordor_char
 *** MUST ADD TO THE REMOVE ALL FUNCTION'S IN() COMMAND ALSO ***
 */
 void
@@ -68,6 +69,10 @@ clan_forum_add (CHAR_DATA * ch, char *clan, char *rank)
 	else if (strcmp (clan, "vadok_kraun") == STR_MATCH)
 	{
 		nGroupId = 15907;
+	}
+	else if (strcmp (clan, "mordor_char") == STR_MATCH)
+	{
+		nGroupId = 1487;
 	}
 	else if (strcmp (clan, "strongroom_eradan") == STR_MATCH)
 	{
@@ -188,6 +193,10 @@ clan_forum_remove (CHAR_DATA * ch, char *clan)
 	else if (strcmp (clan, "vadok_kraun") == STR_MATCH)
 	{
 		nGroupId = 15907;
+	}
+	else if (strcmp (clan, "mordor_char") == STR_MATCH)
+	{
+		nGroupId = 1487;
 	}
 	else if (strcmp (clan, "strongroom_eradan") == STR_MATCH)
 	{
