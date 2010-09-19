@@ -1227,10 +1227,11 @@ raw_kill (CHAR_DATA * ch)
 				tch = tch->next_fighting);
 				if (!tch)
 				{
-					system_log
+				/**	system_log
 						("Char fighting not found Error (fight.c, stop_fighting)",
 						true);
 					sigsegv (SIGSEGV);
+				**/
 				}
 				tch->next_fighting = ch->next_fighting;
 		}
