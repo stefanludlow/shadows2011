@@ -3945,12 +3945,17 @@ keeper_money_to_char (CHAR_DATA * keeper, CHAR_DATA * ch, int money)
 				for (obj = tobj->contains; obj; obj = obj->next_content)
 					if(money_found = (GET_ITEM_TYPE (obj) == ITEM_MONEY))
 						break;
+					else
+						tobj=NULL;
+
 
 	if (!tobj)
 		for (location = 0; location < MAX_WEAR; location++)
 			if (tobj = get_equip (ch, location))
 				if(GET_ITEM_TYPE (tobj) == ITEM_CONTAINER)
 					break;
+				else
+					tobj = NULL;
 
 	if (keeper->mob->currency_type == CURRENCY_NORTHMAN)
 		use_standard_currency = false;
