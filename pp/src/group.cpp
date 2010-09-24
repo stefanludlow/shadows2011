@@ -379,6 +379,8 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 {
 	CHAR_DATA *tch = NULL, *top_leader = NULL;
 	std::ostringstream buf;
+	char buf2[MAX_STRING_LENGTH] = { '\0' };  //added for speed
+
 	char arg[MAX_STRING_LENGTH];
 	bool found = false;
 
@@ -395,6 +397,14 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 			}
 			ch->plr_flags &= ~GROUP_CLOSED;
 			send_to_char ("You will now allow people to follow you.\n", ch);
+			return;
+		}
+
+//added for speed
+		else if (is_abbrev (arg, "speed"))
+		{
+			sprintf (buf2, "Your group travels at #2%s#0 when you travel.\n", speeds[speed_group(ch)]);
+			send_to_char (buf2, ch);
 			return;
 		}
 
@@ -660,3 +670,40 @@ int num_followers (CHAR_DATA * ch)
 	return (group_count);
 
 }
+
+int speed_group (CHAR_DATA * ch)
+{
+	CHAR_DATA		*top_leader = NULL;
+	CHAR_DATA		*tch = NULL;
+	int lowest_speed;  
+	
+	if (!(top_leader = ch->following))
+		top_leader = ch;
+	
+	lowest_speed = top_leader->speed;
+	
+	for (tch = top_leader->room->people; tch; tch = tch->next_in_room)
+	{
+		if (tch->following != top_leader)
+			continue;
+		
+		if (!CAN_SEE (ch, tch))
+			continue;
+	
+			//walk = 0, crawl = 1, ... sprint = 5
+			// 1...2...0...3...4...5
+	
+		if ((tch->speed < lowest_speed) && (tch->speed != 0) && (lowest_speed != 0))
+			lowest_speed = tch->speed;
+		else if ((lowest_speed == 0) && (tch->speed > 2))
+			lowest_speed = 0;
+		else if ((tch->speed == 0) && (lowest_speed > 2))
+			lowest_speed = 0;
+		else if ((tch->speed > lowest_speed) && (lowest_speed == 0))
+			lowest_speed = tch->speed;
+	}
+	 
+
+	return (lowest_speed);
+}
+

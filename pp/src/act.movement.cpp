@@ -1716,6 +1716,7 @@ calc_movement_charge (CHAR_DATA * ch, int dir, int wanted_time, int flags,
 	int needed_movement = 0;
 	float cost_modifier = 1.00;
 	float encumb_percent = 1.00;
+	int true_speed = 0;
 	float t;
 	AFFECTED_TYPE *dragger;
 	ROOM_DATA *target_room;
@@ -1778,13 +1779,22 @@ calc_movement_charge (CHAR_DATA * ch, int dir, int wanted_time, int flags,
 	}
 
 	/* 4 pulses per second.  5 seconds/room for a 13 agi N/PC */
+	//speed of a group is the speed of the slowest person
+	if (is_with_group (ch))
+	{
+	true_speed = speed_group(ch);
+	}
+	else
+	{
+		true_speed = ch->speed;
+	}
 
 	*walk_time = 0;
 
 	*walk_time = 2 * 13.0 * 5.0 / (GET_AGI (ch) ? GET_AGI (ch) : 13);
 
 	if (!wanted_time)
-		wanted_time = (int) round (*walk_time * move_speeds[ch->speed]);
+		wanted_time = (int) round (*walk_time * move_speeds[true_speed]);
 
 	if (*walk_time == 0)
 		*walk_time = 9.0;
