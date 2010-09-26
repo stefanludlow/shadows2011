@@ -223,6 +223,7 @@ point_update (void)
 	int roll, i;
 	char buf[MAX_STRING_LENGTH];
 	char buf2[MAX_STRING_LENGTH];
+	char buf3[MAX_STRING_LENGTH];
 	CHAR_DATA *ch;
 	CHAR_DATA *next_ch = NULL;
 	//  ROOM_DATA *room;
@@ -231,6 +232,9 @@ point_update (void)
 	struct time_info_data healing_time;
 	struct time_info_data bled_time;
 	struct time_info_data playing_time;
+	MESSAGE_DATA *deduct_message;
+	char date[32] = "";
+	time_t current_time = 0;
 
 	//static int reduceIntox = 0;
 
@@ -483,6 +487,28 @@ point_update (void)
 			if (playing_time.hour >= 10 && ch->desc->acct)
 			{
 				//restoring the deduction of rpp for races -- Huan
+				//writes a message to player notes when it happens
+				current_time = time (0);
+				ctime_r (&current_time, date);
+				if (strlen (date) > 1)
+					date[strlen (date) - 1] = '\0';
+				
+				deduct_message = new MESSAGE_DATA;
+				deduct_message->poster = "System";
+				deduct_message->subject = duplicateString ("AutoDeduct RPP.");
+				
+				if (ch->pc->app_cost == 1)
+					sprintf(buf3, "%d point was deducted for application cost", 
+ch->pc->app_cost );
+				else 
+					sprintf(buf3, "%d points were deducted for application cost", 
+ch->pc->app_cost );
+					
+
+				deduct_message->message = duplicateString (buf3);
+				deduct_message->date = duplicateString (date);
+				
+				add_message_to_mysql_player_notes (ch->tname, "System", deduct_message);		
 				ch->desc->acct->pay_application_cost (ch->pc->app_cost);
 				ch->pc->app_cost = 0;
 				save_char (ch, true);
