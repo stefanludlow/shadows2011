@@ -8589,6 +8589,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 	int sides;
 	int bonus;
 	int parms;
+	int loads = 0;
 	int magic_spell;
 	int error = 0;
 	int damage, typenum = 0;
@@ -10579,7 +10580,9 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 					"\n", ch);
 				break;
 			}
-
+			if (IS_NPC(edit_mob))
+			{
+				loads = 0;
 			//for (tch = character_list; tch; tch = tch->next)
 			for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 			{
@@ -10592,10 +10595,10 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 					continue;
 
 				if (tch->mob->nVirtual == edit_mob->mob->nVirtual)
-					break;
+					loads++;
 			}
-
-			if (tch)
+			}
+			if (loads > 0)
 			{
 				send_to_char ("Clear this mobile from the world first.\n", ch);
 				return;
