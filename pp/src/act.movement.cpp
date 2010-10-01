@@ -97,8 +97,8 @@ const char* const speeds[] = {
 };
 
 const char* const mount_speeds[] = {
-	"trot",
 	"walk",
+	"trot",
 	"canter",
 	"gallop",
 	"run",
@@ -109,8 +109,8 @@ const char* const mount_speeds[] = {
 };
 
 const char* const mount_speeds_ing[] = {
-	"trotting",
 	"walking",
+	"trotting",
 	"cantering",
 	"galloping",
 	"running",
@@ -1889,6 +1889,7 @@ initiate_move (CHAR_DATA * ch)
 	int speed;
 	int wanted_time;
 	int speed_name;
+	bool can_move;
 	CHAR_DATA *tch;
 	AFFECTED_TYPE *af;
 	MOVE_DATA *move;
@@ -2093,7 +2094,7 @@ initiate_move (CHAR_DATA * ch)
 		|| target_room->sector_type == SECT_MOUNTAIN
 		|| target_room->sector_type == SECT_FOREST))
 	{
-		bool can_move = false;
+		can_move = false;
 
 		for (OBJ_DATA *tobj = target_room->contents; tobj; tobj = tobj->next_content)
 		{
@@ -2121,7 +2122,46 @@ initiate_move (CHAR_DATA * ch)
 			return;
 		}
 	}
-
+		//mounts cannot travel faster than a trot or walk in certain terrain, without a trails
+	if ((target_room->sector_type == SECT_SWAMP
+		|| target_room->sector_type == SECT_MOUNTAIN
+		|| target_room->sector_type == SECT_FOREST) && IS_SET (ch->act, ACT_MOUNT))
+	{
+		can_move = false;
+		
+		for (OBJ_DATA *tobj = target_room->contents; tobj; tobj = tobj->next_content)
+		{
+			if (tobj->nVirtual == 91686 || tobj->nVirtual == 91687)
+			{
+				can_move = true;
+				break;
+			}
+		}
+		
+		int mnt_spd;
+		if ((ch->mount) && (ch->mount->pc))
+			mnt_spd = ch->mount->pc->mount_speed;
+		else 
+			mnt_spd = ch->speed;
+		
+		if ((!can_move) && (mnt_spd > 0))
+		{
+			act ("You can't go there at your current speed.", true, ch, 0, 0, TO_CHAR);
+			
+			if (IS_RIDEE(ch))
+				act ("$N can't go there at their current speed.", true, ch->mount, 0, ch, TO_CHAR);
+			
+			if (IS_HITCHEE (ch))
+			{
+				act ("$N can't go there at their current speed.", true, ch->hitcher, 0, ch, TO_CHAR);
+				clear_moves (ch->hitcher);
+			}
+			
+			clear_moves (ch);
+			return;
+		}
+	}
+	
 	if (isguarded (ch->room, dir) && (IS_MORTAL (ch) || IS_NPC (ch)))
 	{
 		for (tch = ch->room->people; tch; tch = tch->next_in_room)

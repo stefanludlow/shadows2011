@@ -7776,7 +7776,7 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		s ("\n   #6Movement:#0");
 		s ("   Walk speeds  - trudge, pace, walk, jog, run, sprint");
-		s ("   Mount speeds - walk, canter, trot, gallop, run");
+		s ("   Mount speeds - walk, trot, canter, gallop, run");
 		s ("");
 		s ("   #6Combat Modes:#0");
 		s ("   Frantic    - Offense, but no defense (no combat learning)");
