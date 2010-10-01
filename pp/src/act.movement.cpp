@@ -1847,12 +1847,17 @@ calc_movement_charge (CHAR_DATA * ch, int dir, int wanted_time, int flags,
 		*speed_name = SPEED_SWIM;
 	}
 
-	if (encumb_percent > .50 && encumb_percent <= .60)
+	if (encumb_percent > .30 && encumb_percent <= .40)
 		encumb_percent *= 1.25;
-	else if (encumb_percent > .60 && encumb_percent <= .75)
+	else if (encumb_percent > .40 && encumb_percent <= .50)
 		encumb_percent *= 2.0;
-	else if (encumb_percent > .75)
+	else if (encumb_percent > .50 && encumb_percent <= .60)
 		encumb_percent *= 3.75;
+	else if (encumb_percent > .60 && encumb_percent <= .75)
+		encumb_percent *= 6.0;
+	else if (encumb_percent > .75)
+		encumb_percent *= 11.25;
+
 
 	cost_modifier = cost_modifier / t;
 	cost_modifier = (int) cost_modifier *(1.0 + encumb_percent);
