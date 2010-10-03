@@ -15,7 +15,8 @@ default_item_data::default_item_data(const default_item_data &RHS) {
 	item_counts = RHS.item_counts;
 
 	if (RHS.phase != NULL) {
-		phase = new phase_data(*(RHS.phase));
+		phase = new phase_data();
+		phase = RHS.phase;
 	}
 	else {
 		phase = NULL;
@@ -125,7 +126,9 @@ phase_data::phase_data(const phase_data &RHS) {
 	nMobFlags = RHS.nMobFlags;
 	group_mess = duplicateString(RHS.group_mess);
 	fail_group_mess = duplicateString(RHS.fail_group_mess);
-	next = NULL;
+	next = RHS.next;
+	
+	
 }
 
 phase_data& phase_data::operator= (const phase_data &RHS) {
@@ -182,7 +185,7 @@ phase_data& phase_data::operator= (const phase_data &RHS) {
 
 		free_mem(fail_group_mess);
 		fail_group_mess = duplicateString(RHS.fail_group_mess);
-		next = NULL;
+		next = RHS.next;
 	}
 	return *this;
 }
@@ -217,8 +220,6 @@ subcraft_head_data::subcraft_head_data() {
 
 	memset(obj_items, 0, (MAX_ITEMS_PER_SUBCRAFT * sizeof(DEFAULT_ITEM_DATA*)));
 	memset(fails, 0, (MAX_ITEMS_PER_SUBCRAFT * sizeof(DEFAULT_ITEM_DATA*)));
-
-	// I don't like memsetting to magic numbers but I'm not adding yet more macros - Case
 	memset(sectors, 0, SECTORSMAX * sizeof(int));
 	memset(seasons, 0, SEASONSMAX * sizeof(int));
 	memset(opening, 0, OPENINGMAX * sizeof(int));
@@ -243,6 +244,7 @@ subcraft_head_data::subcraft_head_data(const subcraft_head_data &RHS) {
 	command = duplicateString(RHS.command);
 	failure = duplicateString(RHS.failure);
 	failobjs = duplicateString(RHS.failobjs);
+	failmobs = duplicateString(RHS.failmobs);
 	help = duplicateString(RHS.help);
 	clans = duplicateString(RHS.clans);
 
@@ -306,6 +308,9 @@ subcraft_head_data& subcraft_head_data::operator= (const subcraft_head_data &RHS
 		free_mem(failobjs);
 		failobjs = duplicateString(RHS.failobjs);
 
+		free_mem(failmobs);
+		failmobs = duplicateString(RHS.failmobs);
+
 		free_mem(help);
 		help = duplicateString(RHS.help);
 
@@ -352,11 +357,12 @@ subcraft_head_data& subcraft_head_data::operator= (const subcraft_head_data &RHS
 
 		subcraft_flags = RHS.subcraft_flags;
 
-		memcpy(sectors, RHS.sectors, 25 * sizeof(int));
-		memcpy(seasons, RHS.seasons, 7 * sizeof(int));
-		memcpy(opening, RHS.opening, 25 * sizeof(int));
-		memcpy(race, RHS.race, 25 * sizeof(int));
-		memcpy(weather, RHS.weather, 9 * sizeof(int));
+		memcpy(sectors, RHS.sectors, SECTORSMAX * sizeof(int));
+		memcpy(seasons, RHS.seasons, SEASONSMAX * sizeof(int));
+		memcpy(opening, RHS.opening, OPENINGMAX * sizeof(int));
+		memcpy(weather, RHS.weather, WEATHERMAX * sizeof(int));
+		memcpy(race, RHS.race, RACEMAX * sizeof(int));
+		
 
 		failmob = RHS.failmob;
 		delay = RHS.delay;

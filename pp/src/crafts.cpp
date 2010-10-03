@@ -945,41 +945,19 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 
 		tcraft = new SUBCRAFT_HEAD_DATA(*(ch->pc->edit_craft));
 		tcraft->next = NULL;
-
-		// Phases should be copied by the subcraft_head_data copy constructor
-		//tcraft->phases = new PHASE_DATA(ch->pc->edit_craft->phases);
-		//tcraft->phases->next = NULL;
-
-		// This should be handled in the copy constructor
-		//if (ch->pc->edit_craft->obj_items)
-		//{
-		//	for (i = 0; ch->pc->edit_craft->obj_items[i]; i++)
-		//	{
-		//		tcraft->obj_items[i] = new DEFAULT_ITEM_DATA;
-		//		tcraft->obj_items[i]->phase = NULL;
-		//		memset (tcraft->obj_items[i], 0,
-		//			sizeof (DEFAULT_ITEM_DATA));
-		//	}
-
-		//	memcpy (tcraft->obj_items, ch->pc->edit_craft->obj_items,
-		//		sizeof (DEFAULT_ITEM_DATA));
-		//}
-
 		ch->pc->edit_craft = NULL;
 		replaceString(tcraft->craft_name, craft_name);
 		replaceString(tcraft->subcraft_name, subcraft);
 		replaceString(tcraft->command, command);
-		//tcraft->next = NULL;
 
 		for (craft = crafts; craft; craft = craft->next)
 		{
 			if (!craft->next)
 			{
-				//craft->next = new SUBCRAFT_HEAD_DATA;
-				craft->next = tcraft;
-				craft->next->next = NULL;
-				ch->pc->edit_craft = tcraft;
-				send_to_char ("Craft cloned; new craft opened for editing.\n", ch);
+			craft->next = tcraft;
+			craft->next->next = NULL;
+			ch->pc->edit_craft = tcraft;
+			send_to_char ("Craft cloned.\n New craft opened for editing.\n", ch);
 
 				if (!IS_SET (tcraft->subcraft_flags, SCF_OBSCURE))
 					mysql_safe_query ("INSERT INTO new_crafts VALUES 									('%s', '%s', '%s', '%s')",
