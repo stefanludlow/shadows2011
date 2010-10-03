@@ -843,6 +843,17 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 
 		for (craft = crafts; craft; craft = craft->next)
 		{
+			if(!str_cmp (craft->subcraft_name, subcraft))
+			{
+				send_to_char
+				("Sorry, but that subcraft name is already in use.\n", ch);
+			return;
+			}
+		}
+
+
+		for (craft = crafts; craft; craft = craft->next)
+		{
 			if (!craft->next)
 			{
 				craft->next = new SUBCRAFT_HEAD_DATA;
@@ -910,6 +921,17 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 		}
 		else
 			sprintf (subcraft, "%s", buf);
+
+		for (craft = crafts; craft; craft = craft->next)
+		{
+			if(!str_cmp (craft->subcraft_name, subcraft))
+			{
+				send_to_char
+				("Sorry, but that subcraft name is already in use.\n", ch);
+				return;
+			}
+		}
+
 
 		argument = one_argument (argument, buf);
 		if (!*buf)
