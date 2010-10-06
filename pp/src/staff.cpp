@@ -57,7 +57,7 @@ SPHERE_INFO spheres[] = {  //ONLY ADD TO THE END OF THIS OR YOU WILL SCREW UP CU
 extern rpie::server engine;
 extern const char *skills[];
 extern const char *exit_bits[];
-
+extern const char *damage_severity[]; //ADDED FOR REPAIR
 #define IMOTE_OPCHAR '^'
 #define s(a) send_to_char (a "\n", ch);
 
@@ -4227,7 +4227,7 @@ objstat (CHAR_DATA * ch, char *name)
 			sprintf (buf + strlen (buf), " Bleeding");
 		sprintf (buf + strlen (buf), "\n");
 		break;
-
+				//TODO This was changed for repair/object damage
 	case ITEM_REPAIR_KIT:
 		sprintf (buf, "#2Oval 0 -  Uses Remaining:#0  %d\n", j->o.od.value[0]);
 		sprintf (buf + strlen (buf), "#2Oval 1 -  Mending Bonus:#0   %d\n",
@@ -4236,10 +4236,10 @@ objstat (CHAR_DATA * ch, char *name)
 			j->o.od.value[2]);
 		sprintf (buf + strlen (buf), "#2Skill needed to use kit:#0   %s\n",
 			(j->o.od.value[3] >
-			0) ? skills[(j->o.od.value[3])] : (j->o.od.value[3] <
-			0) ? "#1None#0" :
-			"#1Any#0");
-		sprintf (buf + strlen (buf), "#2Repairs This Item Types:#0   ");
+			0) ? skills[(j->o.od.value[3])] : "#1No Skill needed#0");
+		sprintf (buf + strlen (buf), "#2Max damage level:#0          %s\n",
+					 damage_severity[j->o.od.value[4]]);	
+		sprintf (buf + strlen (buf), "#2Repairs This Item Type:#0   ");
 		if (j->o.od.value[5] == 0)
 		{
 			sprintf (buf + strlen (buf), "#1All#0\n");

@@ -945,19 +945,22 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 
 		tcraft = new SUBCRAFT_HEAD_DATA(*(ch->pc->edit_craft));
 		tcraft->next = NULL;
-		ch->pc->edit_craft = NULL;
+
+		
 		replaceString(tcraft->craft_name, craft_name);
 		replaceString(tcraft->subcraft_name, subcraft);
 		replaceString(tcraft->command, command);
+		tcraft->next = NULL;  
 
 		for (craft = crafts; craft; craft = craft->next)
 		{
 			if (!craft->next)
 			{
+				craft->next = new SUBCRAFT_HEAD_DATA; //make this line live
 			craft->next = tcraft;
 			craft->next->next = NULL;
 			ch->pc->edit_craft = tcraft;
-			send_to_char ("Craft cloned.\n New craft opened for editing.\n", ch);
+				send_to_char ("Craft cloned.\n New craft opened for editing.\n", ch);//use this line
 
 				if (!IS_SET (tcraft->subcraft_flags, SCF_OBSCURE))
 					mysql_safe_query ("INSERT INTO new_crafts VALUES 									('%s', '%s', '%s', '%s')",

@@ -378,9 +378,8 @@ void
 do_group (CHAR_DATA * ch, char *argument, int cmd)
 {
 	CHAR_DATA *tch = NULL, *top_leader = NULL;
+	char buf2[MAX_STRING_LENGTH] = { '\0' };
 	std::ostringstream buf;
-	char buf2[MAX_STRING_LENGTH] = { '\0' };  //added for speed
-
 	char arg[MAX_STRING_LENGTH];
 	bool found = false;
 
@@ -400,7 +399,6 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
-//added for speed
 		else if (is_abbrev (arg, "speed"))
 		{
 			sprintf (buf2, "Your group travels at #2%s#0 when you travel.\n", speeds[speed_group(ch)]);
@@ -706,4 +704,3 @@ int speed_group (CHAR_DATA * ch)
 
 	return (lowest_speed);
 }
-

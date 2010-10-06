@@ -1931,6 +1931,7 @@ morph_obj (OBJ_DATA * obj)
 
 	char buf[MAX_STRING_LENGTH];
 	OBJ_DATA *newObj;
+	OBJ_DATA *tobj;
 
 	if (obj->deleted)
 		return;
@@ -1943,12 +1944,21 @@ morph_obj (OBJ_DATA * obj)
 	{
 		if (obj->morphto == 86)
 		{
+				//if (obj->equiped_by)
+				//unequip_char (obj->equiped_by, obj->location);
+			
 			extract_obj (obj);
+			
 			return;
 		}
 		else
 		{
 			newObj = load_object (obj->morphto);
+				//	if (obj->equiped_by)
+				//{
+				//tobj = unequip_char (obj->equiped_by, obj->location);
+				//equip_char(tobj->equiped_by, newObj, tobj->location);
+				//}
 		}
 	}
 	else
@@ -3168,6 +3178,9 @@ update_delays (void)
 		case DEL_TRACK:
 			delayed_track (ch);
 			break;
+		case DEL_MEND_OBJECT:  //to add for REPAIR
+			delayed_mend (ch);
+			break;
 		}
 	}
 }
@@ -3223,7 +3236,11 @@ break_delay (CHAR_DATA * ch)
 		ch->delay = 0;
 		send_to_char ("You cease your ministrations.\n", ch);
 		break;
-
+	//to add for REPAIR
+	case DEL_MEND_OBJECT:
+		ch->delay = 0;
+		send_to_char ("You cease your repairs.\n", ch);
+		break;
 		//case DEL_BACKSTAB:
 		//	ch->delay = 0;
 		//	send_to_char ("You abort your backstab attempt.\n\r", ch);

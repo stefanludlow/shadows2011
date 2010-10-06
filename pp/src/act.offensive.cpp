@@ -4213,7 +4213,15 @@ do_guard (CHAR_DATA * ch, char *argument, int cmd)
 			ch);
 		return;
 	}
-
+		//ch is your horse/warg
+		//ch->mount is the rider giving a command
+		//target is the one your mount is supposed to guard
+	if (ch->mount && !(target->mount == ch))  
+	{
+		send_to_char ("Your mount cannot guard anyone but you.\n", ch->mount);
+		return;
+	}
+	
 	//can't guard somone who is hidden
 	if(target && get_affect(target ,MAGIC_HIDDEN))
 	{

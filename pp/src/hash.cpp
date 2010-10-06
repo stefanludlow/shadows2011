@@ -470,7 +470,7 @@ load_mobile (int vnum)
 	if (!new_mobile->frame)
 		make_frame (new_mobile);
 
-	if (IS_SET (new_mobile->affected_by, AFF_HIDE)&& !get_affect (new_mobile, MAGIC_HIDDEN))
+	if (IS_SET (new_mobile->affected_by, AFF_HIDE) && !get_affect (new_mobile, MAGIC_HIDDEN))
 		magic_add_affect (new_mobile, MAGIC_HIDDEN, -1, 0, 0, 0, 0);
 
 	new_mobile->fight_mode = 2;

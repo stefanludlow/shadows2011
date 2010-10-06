@@ -5967,6 +5967,9 @@ do_mount (CHAR_DATA * ch, char *argument, int cmd)
 
 	mount->mount = ch;
 	ch->mount = mount;
+	
+	if (get_affect (mount, MAGIC_GUARD))
+		remove_affect_type (mount, MAGIC_GUARD);
 
 	unhitch_char (ch, mount);
 }

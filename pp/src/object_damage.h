@@ -165,5 +165,7 @@ OBJECT_DAMAGE *object_damage__new_init (DAMAGE_TYPE source, ushort impact,
 char *object_damage__get_sdesc (OBJECT_DAMAGE * thisPtr);
 int object_damage__write_to_file (OBJECT_DAMAGE * thisPtr, FILE * fp);
 OBJECT_DAMAGE *object_damage__read_from_file (FILE * fp);
+OBJECT_DAMAGE *object_damage__delete (OBJECT_DAMAGE * thisPtr);
+
 
 #endif // _rpie_object_damage_h_

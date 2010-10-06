@@ -22,6 +22,8 @@ extern rpie::server engine;
 const char *weapon_theme[] =
 { "stab", "pierce", "chop", "bludgeon", "slash", "lash" };
 
+void begin_repair (CHAR_DATA * ch, OBJ_DATA *obj, OBJ_DATA *kit, int mode);
+
 void obj_data::partial_deep_copy (OBJ_DATA *proto)
 {
 	if (!IS_SET (this->obj_flags.extra_flags, ITEM_VARIABLE))
@@ -185,20 +187,27 @@ do_mend (CHAR_DATA * ch, char *argument, int cmd)
 	OBJ_DATA *obj;
 	OBJ_DATA *kit;
 	OBJECT_DAMAGE *damage;
+	OBJECT_DAMAGE *targ;
 	bool blnCanMend = true;
 	int nItemType = 0;
 	char buf[AVG_STRING_LENGTH];
+	char buf2[AVG_STRING_LENGTH];
+	int targ_cnt = 0;
 
 	/* TODO: Remove this when we're ready to go live with damage */
-	if (!engine.in_test_mode ())
+		if (engine.in_play_mode ())
 		return;
 
+	if (ch->fighting) {
+		send_to_char ("You can't mend while you are fighting!\n", ch);
+		return;
+	}
 	if (!*argument || strlen (argument) > AVG_STRING_LENGTH)
 	{
 		send_to_char ("Mend what?\n", ch);
 		return;
 	}
-	argument = one_argument (argument, buf);
+	argument = one_argument (argument, buf); //item to mend
 
 	/* Are we holding what we wanted? */
 	if (!(obj = get_obj_in_dark (ch, buf, ch->right_hand))
@@ -209,73 +218,79 @@ do_mend (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	/* Get the kit from our other hand */
-	if (!(kit = (obj == ch->right_hand) ? ch->left_hand : ch->right_hand)
-		|| GET_ITEM_TYPE (kit) != ITEM_REPAIR_KIT)
+	kit = ((obj == ch->right_hand) ? ch->left_hand : ch->right_hand);
+	if (!kit || GET_ITEM_TYPE (kit) != ITEM_REPAIR_KIT)
 	{
 		act ("You're not holding anything that you can mend $p with.",
 			false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
 		return;
 	}
+
+	if (kit->o.od.value[0] == 0)
+	{
+		send_to_char ("That repair kit no longer contains any useful materials.\n",
+					  ch);
+		return;
+	}
+
+
+	argument = one_argument (argument, buf); //which damage to mend
+	targ_cnt = atoi(buf);
+
+	if (targ_cnt > 0)
+			{
+		ch->delay_info1 = targ_cnt; //repair single damage mode
+
+			}
+	else 
+		{
+			ch->delay_info1 = 0; //repair all damage mode
+		}
+
+
+	if (kit->o.od.value[3] > 0 && kit->o.od.value[2] > ch->skills[kit->o.od.value[3]])
+	{
+		send_to_char
+		("You do not have the skill required to use this repair kit.\n", ch);
+		return;
+	}
+
 
 
 	if ((nItemType = GET_ITEM_TYPE (obj)))
 	{
 
-		/* Check if the kit works with the item */
+	 // Check if the kit works with the item 
 
-		if (kit->o.repair.arrItemType[0] == 255	/* all items */
-			|| kit->o.repair.arrItemType[0] == nItemType
-			|| kit->o.repair.arrItemType[1] == nItemType
-			|| kit->o.repair.arrItemType[2] == nItemType
-			|| kit->o.repair.arrItemType[3] == nItemType)
+	 if (!(kit->o.od.value[5] == 0)	// all items 
+			&& !(kit->o.od.value[5] == nItemType))
 		{
+			act ("You're not holding anything that you can mend $p with.",
+				 false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
+			return;
 
-			/* Check if the kit works with the material */
-
-			for (damage = obj->damage; damage; damage = damage->next)
-			{
-
-			}
 		}
 
 	}
 
-	/* If we can't then exit */
-
-	if (!blnCanMend)
-	{
-		act ("You're not holding anything that you can mend $p with.",
-			false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
-		return;
-	}
-	/*
-	1. Can the kit mend the object?
-
-	This item may be used to mend _DAMAGE_TYPE_ damage to the _MATERIAL_TYPE parts of _ITEM_TYPE_ objects.
-
-
-	uchar filteritem1;
-	uchar filteritem2;
-	uchar filteritem3;
-	uchar filteritem4;
-
-
-
-	if the kit can repair 'Any' Item-Type
-
-
-
-	*/
 
 	act ("You're begin to mend $p with $P.", false, ch, obj, kit,
 		TO_CHAR | _ACT_FORMAT);
+
+	sprintf (buf2, "$n begins mending $p with $P.", obj, kit);
+	act (buf2, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+
+	/** set up a delay, and do the actual repair in another function **/
+	
+		begin_repair(ch, obj, kit, ch->delay_info1); 
+	
 
 }
 
 /*------------------------------------------------------------------------\
 |  do_rend()                                                              |
 |                                                                         |
-|  User command to tear into an object or player                          |
+|  User command to tear into an object                          |
 \------------------------------------------------------------------------*/
 void
 do_rend (CHAR_DATA * ch, char *argument, int cmd)
@@ -294,35 +309,25 @@ do_rend (CHAR_DATA * ch, char *argument, int cmd)
 	CHAR_DATA *victim = NULL;
 	char *error[] = {
 		"\n"
-		"Usage: rend [OPTIONS] object  or  rend [OPTIONS] victim\n"
+		"Usage: rend [OPTIONS] object\n"
 		"\n"
 		"  -d IMPACT         - 0-100 a percent of the target's total hits.\n"
 		"  -t TYPE           - See 'tag damage-types' for values.\n"
-		"  -b BODYLOC        - See 'tag woundlocs' for values.\n"
-		"  -o OBJECT         - Will insert OBJECT into the victim's wound.\n"
 		"  -c CHARACTER      - Will damage the specified object on CHARACTER.\n"
 		"\n"
 		"Examples:\n"
 		"  > rend tunic                             - Apply random damage to an obj\n"
 		"  > rend -d 12 -t stab vest                - Specific damage to an obj.\n"
-		"  > rend -t bloodstain -c traithe gloves   - Damage someone elses obj.\n"
-		"\n"
-		"  > rend dravage                           - Apply random wound to char.\n"
-		"  > rend -d 12 -t stab -b leye mirudus     - Specific damage to an char.\n"
-		"  > rend -b head -o arrow tusken           - Wound char with inserted item.\n",
-		"#1Please specify an object or character to rend.#0\n",
+		"  > rend -t bloodstain -c traithe gloves   - Damage someone elses obj.\n",
 		"#1Damage must be 1-100; a percentage of the target's total hits.#0\n",
-		"#1Unknown attack type, refer to 'tags object-damage' for a list of values.#0\n",
-		"#1Unknown wound location, refer to 'tags woundlocs' for a list of values.#0\n",
-		"#1You don't see the subject of the -o option.#0\n",
+		"#1Unknown attack type, refer to 'tags damage-types' for a list of values.#0\n",
 		"#1You don't see the subject of the -c option.#0\n",
 		"#1You don't see that target object or victim.#0\n",
-		"#1You can't use the -c option with a victim.#0\n",
-		"#1You can't use the -b option with a target object.#0\n"
+		"#1You can't use the -c option with a victim.#0\n"
 	};
 
 	/* TODO: Remove this when we're ready to go live with damage */
-	if (!engine.in_test_mode ())
+		if (engine.in_play_mode ())
 		return;
 
 	if (!GET_TRUST (ch))
@@ -345,7 +350,7 @@ do_rend (CHAR_DATA * ch, char *argument, int cmd)
 			if ((i == num_args - 1) || !sscanf (buf[i + 1], "%d", &impact)
 				|| impact < 0 || impact > 100)
 			{
-				send_to_char (error[2], ch);
+				send_to_char (error[1], ch);
 				send_to_char (error[0], ch);
 				return;
 			}
@@ -359,44 +364,8 @@ do_rend (CHAR_DATA * ch, char *argument, int cmd)
 			if ((i == num_args - 1)
 				|| (type = index_lookup (damage_type, buf[i + 1])) < 0)
 			{
-				send_to_char (error[3], ch);
+				send_to_char (error[2], ch);
 				send_to_char (error[0], ch);
-				return;
-			}
-			else
-			{
-				buf[++i][0] = '\0';
-			}
-		}
-		else if (strcmp (buf[i], "-b") == 0)
-		{
-			if ((i == num_args - 1)
-				|| (wound_loc = index_lookup (wound_locations, buf[i + 1])) < 0)
-			{
-				send_to_char (error[4], ch);
-				send_to_char (error[0], ch);
-				return;
-			}
-			else
-			{
-				buf[++i][0] = '\0';
-			}
-		}
-		else if (strcmp (buf[i], "-o") == 0)
-		{
-			if ((i == num_args - 1) || !*buf[i + 1]
-			||
-				!((insert_obj =
-				get_obj_in_dark (ch, buf[i + 1], ch->right_hand))
-				|| (insert_obj =
-				get_obj_in_dark (ch, buf[i + 1], ch->left_hand))
-				|| (insert_obj = get_obj_in_dark (ch, buf[i + 1], ch->equip))
-				|| (insert_obj =
-				get_obj_in_list_vis (ch, buf[i + 1],
-				ch->room->contents))))
-			{
-
-				send_to_char (error[5], ch);
 				return;
 			}
 			else
@@ -409,7 +378,7 @@ do_rend (CHAR_DATA * ch, char *argument, int cmd)
 			if ((i == num_args - 1) || !*buf[i + 1]
 			|| !(target_obj_ch = get_char_room_vis (ch, buf[i + 1])))
 			{
-				send_to_char (error[6], ch);
+				send_to_char (error[3], ch);
 				return;
 			}
 			else
@@ -434,52 +403,34 @@ do_rend (CHAR_DATA * ch, char *argument, int cmd)
 				get_obj_in_list_vis (target_obj_ch, buf[i],
 				target_obj_ch->room->contents))))
 			{
-				send_to_char (error[7], ch);
+				send_to_char (error[4], ch);
 				return;
 			}
 		}
 	}
 	if (!target_obj && !victim)
 	{
-		send_to_char (error[7], ch);
+		send_to_char (error[4], ch);
 		send_to_char (error[0], ch);
 		return;
 	}
 	else if (victim && target_obj_ch != ch)
 	{
-		send_to_char (error[8], ch);
-		send_to_char (error[0], ch);
-		return;
-	}
-	else if (target_obj && wound_loc >= 0)
-	{
-		send_to_char (error[9], ch);
+		send_to_char (error[5], ch);
 		send_to_char (error[0], ch);
 		return;
 	}
 
 
-	if (victim)
-	{
-		impact = (impact < 0) ? number (0, victim->hit) : impact;
-		type = (type < 0) ? number (0, 10) : type;
-		sprintf (buf[0],
-			"Dam: %d %% of %d hits\nType: %s\nBodyLoc: %s\nInsert: %s\nInto Victim: %s\n",
-			impact, victim->max_hit, damage_type[type],
-			(wound_loc >= 0) ? wound_locations[wound_loc] : "Random",
-			(insert_obj) ? insert_obj->short_description : "None",
-			victim->short_descr);
-		act (buf[0], false, ch, target_obj, 0, TO_CHAR | _ACT_FORMAT);
-	}
-	else
-	{
-		impact = (impact < 0) ? number (0, target_obj->item_wear) : impact;
-		type = (type < 0) ? number (0, 10) : type;
+		//random vaues for impact and type if they are not specified
+		impact = (impact <= 0) ? number (0, target_obj->item_wear) : impact;
+		type = (type <= 0) ? number (0, 10) : type;
+	
+		damage = object__add_damage (target_obj, (DAMAGE_TYPE) type,
+									 (unsigned int) impact);
+		str_damage_sdesc = object_damage__get_sdesc (damage);
 
-		if ((damage =
-			object__add_damage (target_obj, (DAMAGE_TYPE) type,
-			(unsigned int) impact))
-			&& (str_damage_sdesc = object_damage__get_sdesc (damage)))
+		if (damage && str_damage_sdesc)
 		{
 
 			sprintf (buf[0],
@@ -503,7 +454,7 @@ do_rend (CHAR_DATA * ch, char *argument, int cmd)
 		if ((target_obj_ch != ch) && buf[1][0])
 			act (buf[1], false, target_obj_ch, target_obj, 0,
 			TO_CHAR | _ACT_FORMAT);
-	}
+	
 
 }
 
@@ -574,17 +525,17 @@ object__drench (CHAR_DATA * ch, OBJ_DATA * _obj, bool isChEquip)
 |  Iterate through the damage list and show the sdesc of each instance.   |
 \------------------------------------------------------------------------*/
 char *
-object__examine_damage (OBJ_DATA * thisPtr)
+object__examine_damage (OBJ_DATA * thisPtr, CHAR_DATA * ch)
 {
 	OBJECT_DAMAGE *damage;
 	char *p, *str_damage_sdesc;
 	static char buf[MAX_STRING_LENGTH];
 
-	*buf = '\0';
-
 	/* TODO: Remove this when we're ready to go live with damage */
-	if (!engine.in_test_mode ())
+	if (engine.in_play_mode ())
 		return buf;
+
+	*buf = '\0';
 
 	/* Iterate through the damage instances attached to this object */
 	for (damage = thisPtr->damage; damage; damage = damage->next)
@@ -592,12 +543,24 @@ object__examine_damage (OBJ_DATA * thisPtr)
 
 		if ((str_damage_sdesc = object_damage__get_sdesc (damage)) != NULL)
 		{
-
-			sprintf (buf, "%s%s %s%s",
+			if(GET_TRUST(ch))
+			{
+				sprintf (buf, "%s%s %s (%d)%s ",
+						 (*buf) ? buf : "It bears ",
+						 ((!damage->next && damage != thisPtr->damage) ? "and" : ""),
+						 str_damage_sdesc,
+						 damage->impact,
+						 ((!damage->next) ? ".#0\n" : ", "));
+			}
+			else
+			{
+				sprintf (buf, "%s%s %s%s ",
 				(*buf) ? buf : "It bears ",
-				((!damage->next
-				&& damage != thisPtr->damage) ? "and" : ""),
-				str_damage_sdesc, ((!damage->next) ? ".#0\n" : ", "));
+						 ((!damage->next && damage != thisPtr->damage) ? "and" : ""),
+						 str_damage_sdesc,
+						 ((!damage->next) ? ".#0\n" : ", "));
+			}
+
 
 			free_mem (str_damage_sdesc);
 		}
@@ -677,8 +640,14 @@ object__add_damage (OBJ_DATA * thisPtr, DAMAGE_TYPE source,
 	OBJECT_DAMAGE *damage = NULL;
 
 	/* TODO: Remove this when we're ready to go live with damage */
-	if (!engine.in_test_mode ())
+		if (engine.in_play_mode ())
+			return NULL;
+	
+		//skip damage to NPC items
+		if ((thisPtr->equiped_by && IS_NPC(thisPtr->equiped_by)) ||
+			(thisPtr->carried_by && IS_NPC(thisPtr->carried_by)))
 		return NULL;
+	
 	extern std::map<e_material_type, int> material_armour;
 	std::map<e_material_type, int>::iterator it = material_armour.find((e_material_type) thisPtr->material);
 	if (it != material_armour.end())
@@ -6470,4 +6439,384 @@ int wieldHandCount(int race,int skill)
 	}
 	// wrong skill returns -1
 	return -1;
+}
+
+/****
+ mode = 0 repair all damage
+ mode = # repair just the one damage
+ ****/
+void
+begin_repair (CHAR_DATA * ch, OBJ_DATA *obj, OBJ_DATA *kit, int mode)
+{
+	OBJECT_DAMAGE *damage;
+	char buf[MAX_STRING_LENGTH];
+	char buf2[MAX_STRING_LENGTH];
+	int count = 1; 
+	
+	if ((mode==0) && (obj->damage)) //repairing all damage so we start with first available
+	{
+		damage = obj->damage;
+		sprintf (buf,
+				 "You turn your attention to %s.", object_damage__get_sdesc (damage));
+		sprintf (buf2, "$n turns $s attention to %s.", object_damage__get_sdesc (damage));
+		act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+		act (buf2, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+		ch->delay_who = duplicateString (obj->name);
+		ch->delay_type = DEL_MEND_OBJECT;
+		
+		if (kit->o.od.value[3] > 0)
+		{
+			ch->delay = 10 - (ch->skills[kit->o.od.value[3]] / 10);
+		}
+		else 
+		{
+			ch->delay = 10;
+		}
+		
+		ch->delay = MAX (ch->delay, 10);
+		ch->delay_info1 = mode;
+		return;
+	}
+	
+	else if (mode > 0)
+	{
+		for (damage = obj->damage; damage; damage = damage->next)
+		{
+			if (count == mode)
+			{
+				sprintf (buf,
+						 "You turn your attention to %s.", object_damage__get_sdesc (damage));
+				sprintf (buf2, "$n turns $s attention to %s.", object_damage__get_sdesc (damage));
+				act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+				act (buf2, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+				ch->delay_who = duplicateString (obj->name);
+				ch->delay_type = DEL_MEND_OBJECT;
+				
+				if (kit->o.od.value[3] > 0)
+				{
+					ch->delay = 10 - (ch->skills[kit->o.od.value[3]] / 10);
+				}
+				else 
+				{
+					ch->delay = 10;
+				}
+				
+				ch->delay = MAX (ch->delay, 10);
+				ch->delay_info1 = count;
+				return;
+			}
+			count ++;
+		}
+	}
+	sprintf (buf,
+			 "No other damage on this item can benefit from your attention.");
+	act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+	ch->delay = 0;
+	ch->delay_type = 0;
+	ch->delay_who = 0;
+	ch->delay_info1 = 0;
+	
+	
+	return;
+}
+
+void
+delayed_mend (CHAR_DATA * ch)
+{
+	OBJECT_DAMAGE *damage;
+	OBJ_DATA *obj;
+	OBJ_DATA *kit;
+	int roll = 0;
+	int treat_effect = 0;
+	int done_repair;
+	int num_needed = 0;
+	OBJECT_DAMAGE *temp_damage;
+	char buf[MAX_STRING_LENGTH];
+	char buf2[MAX_STRING_LENGTH];
+
+	/* Are we holding what we wanted? */
+	if (!(obj = get_obj_in_dark (ch, ch->delay_who, ch->right_hand))
+		&& !(obj = get_obj_in_dark (ch, ch->delay_who, ch->left_hand)))
+	{
+		send_to_char ("You're not holding anything like that.\n", ch);
+		return;
+	}
+	
+	
+	
+	/* Get the kit from our other hand */
+	kit = ((obj == ch->right_hand) ? ch->left_hand : ch->right_hand);
+	if (!kit || GET_ITEM_TYPE (kit) != ITEM_REPAIR_KIT)
+	{
+		act ("You're not holding anything that you can mend $p with.",
+			 false, ch, obj, 0, TO_CHAR | _ACT_FORMAT);
+		return;
+	}
+	
+	if (kit->o.od.value[0] == 0)
+	{
+		send_to_char ("That repair kit no longer contains any useful materials.\n",
+					  ch);
+		return;
+	}
+	
+	
+	if (kit->o.od.value[3] > 0 && kit->o.od.value[2] > ch->skills[kit->o.od.value[3]])
+	{
+		send_to_char
+		("You do not have the skill required to use this repair kit.\n", ch);
+		return;
+	}
+	
+		
+	/**
+	 A skill_use check is made to give the PC a chance to increase thier skill, although the result has no bearing on the code below.
+	 **/
+		//the actuall skill that they are using
+	if (kit->o.od.value[3] > 0)
+	{
+	int repairSkill = ch->skills[kit->o.od.value[3]];
+	
+	skill_use (ch, repairSkill, 0);
+	}
+	
+	int targ_cnt = ch->delay_info1;
+	int index = 1;
+	
+	if (targ_cnt == 0) //repairs first damage it finds as part of repairing all damage
+	{	
+		for (damage = obj->damage; damage; damage = damage->next)
+		{
+			if (skill_mend(ch, kit, damage))
+			{
+					//amount of kit uses depends on points of damage	
+				int num_needed = (int)(damage->impact/5) + 1;
+				
+				if ((kit->o.od.value[0] > 0) && (num_needed > kit->o.od.value[0]))
+				{
+					send_to_char
+					("You do not have enough in your kit to repair this damage, so you stop.\n", ch);
+					return;
+				}
+				else
+				{
+					kit->o.od.value[0] -= num_needed;
+					if (kit->o.od.value[0] < -1)
+						kit->o.od.value[0] = -1;
+				}
+				
+				if ((kit->o.od.value[4] < damage->severity))
+				{
+					send_to_char
+					("You cannot repair damage this severe with this kit.\n", ch);
+					return;
+						//return;
+				}
+				
+				obj->item_wear = obj->item_wear + damage->impact;
+				damage_from_obj(obj, damage);
+				
+				sprintf (buf,
+						 "You repair the damage carefully, making it look better.");
+				sprintf (buf2,
+						 "$n repairs the damage carefully, making it look better.");
+				act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+				act (buf2, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+				break;
+			}
+			else 
+			{
+				send_to_char
+				("You do not have the skill required to repair this damage, so you stop to reconsider.\n", ch);
+				return;
+				
+			}
+		}
+		
+	}
+	else if (targ_cnt > 0)//repairs only the specified damage
+	{
+		index = 1;
+		for (damage = obj->damage; damage; damage = damage->next)
+		{
+			if(index == targ_cnt)
+			{
+				if (skill_mend(ch, kit, damage))
+				{
+						//amount of kit uses depends on points of damage	
+					num_needed = (int)(damage->impact/5) + 1;
+					
+					if ((kit->o.od.value[0] > 0) && (num_needed > kit->o.od.value[0]))
+					{
+						send_to_char
+						("You do not have enough in your kit to repair this damage, so you stop.\n", ch);
+						return;
+					}
+					else
+					{
+						kit->o.od.value[0] -= num_needed;
+						if (kit->o.od.value[0] < -1)
+							kit->o.od.value[0] = -1;
+					}
+					
+					if ((kit->o.od.value[4] < damage->severity))
+					{
+						send_to_char
+						("You cannot repair damage this severe with this kit.\n", ch);
+						return;
+					}
+					
+					obj->item_wear = obj->item_wear + damage->impact;
+					damage_from_obj(obj, damage);
+					ch->delay_info1 = -1;
+					
+					sprintf (buf,
+							 "You repair the damage carefully, making it look better.");
+					sprintf (buf2,
+							 "$n repairs the damage carefully, making it look better.");
+					act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+					act (buf2, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+					done_repair = true;
+
+					break;
+				}
+				else
+				{
+					send_to_char
+					("You do not have the skill required to repair this damage, so you stop to reconsider.\n", ch);
+					return;
+				}
+
+			}
+			index ++;
+		}
+		
+	}
+	
+				
+		if (kit->o.od.value[0] == 0)
+		{
+			send_to_char
+			("Having used the last of the materials in your kit, you quickly discard it.\n",
+			 ch);
+			if (kit->count > 1)
+			{
+				kit->o.od.value[0] = vtoo (kit->nVirtual)->o.od.value[0];
+				kit->count -= 1;
+			}
+			else
+				extract_obj (kit);
+			return;
+		}
+	
+	begin_repair(ch, obj, kit, ch->delay_info1);
+}
+void
+damage_from_obj (OBJ_DATA * obj, OBJECT_DAMAGE * damage)
+{
+	OBJECT_DAMAGE *tempdamage;
+	
+	if (!obj || !damage)
+		return;
+	
+	if (obj->damage == damage)
+		obj->damage = obj->damage->next;
+	
+	else
+	{
+		for (tempdamage = obj->damage; tempdamage; tempdamage = tempdamage->next)
+			if (tempdamage->next == damage)
+				tempdamage->next = tempdamage->next->next;
+	}
+	
+	object_damage__delete(damage);
+}
+
+int
+skill_mend(CHAR_DATA * ch, OBJ_DATA *kit, OBJECT_DAMAGE * damage)
+{
+	int repair_skill;
+	int severity;
+	
+	
+	severity = damage->severity;
+	repair_skill = kit->o.od.value[3];
+	
+	if (repair_skill > 0)
+	{
+		switch (severity) {
+			case 1:
+				if (ch->skills[repair_skill] > 15)
+					return(true);
+				else
+					return(false);
+				break;
+				
+			case 2:
+				if (ch->skills[repair_skill] > 20)
+					return(true);
+				else
+					return(false);
+				break;
+				
+			case 3:
+				if (ch->skills[repair_skill] > 25)
+					return(true);
+				else
+					return(false);
+				break;
+				
+			case 4:
+				if (ch->skills[repair_skill] > 30)
+					return(true);
+				else
+					return(false);
+				break;
+				
+			case 5:
+				if (ch->skills[repair_skill] > 35)
+					return(true);
+				else
+					return(false);
+				break;
+				
+			case 6:
+				if (ch->skills[repair_skill] > 40)
+					return(true);
+				else
+					return(false);
+				break;
+				
+			case 7:
+				if (ch->skills[repair_skill] > 50)
+					return(true);
+				else
+					return(false);
+				break;
+				
+			case 8:
+				if (ch->skills[repair_skill] > 60)
+					return(true);
+				else
+					return(false);
+				break;
+				
+				
+			default:
+				return(false);
+				break;
+		}
+	}
+	
+	else if (repair_skill == 0) //any skill will work
+	{
+		return (true);
+	}
+	else 
+	{
+		return (false);
+	}
+
+
+	
 }

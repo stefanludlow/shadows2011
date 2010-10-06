@@ -2805,7 +2805,6 @@ load_char_mysql (const char *name)
 	ch->pc->app_cost = atoi (row[16]);
 	ch->pc->level = atoi (row[17]);
 	ch->sex = atoi (row[18]);
-	// Hack for row[19] because I don't know what Huan's code is putting in the field in the DB - Case : Dec 4, 09
 	ch->deity = 0; // row[19]
 
 	ch->race = atoi (row[20]);
@@ -3077,6 +3076,8 @@ load_char_mysql (const char *name)
 	if (row[88] && strlen (row[88]) > 1 && str_cmp (row[88], "(null)"))
 		ch->travel_str = duplicateString (row[88]);
 
+		//[89] is last_rpp
+	
 	ch->bmi = atoi (row[90]);
 
 	ch->guardian_mode = atoi (row[91]);
@@ -3094,6 +3095,8 @@ load_char_mysql (const char *name)
 		ch->goal = new std::string(row[95]);
 	}
 
+		//[96] is role_id
+	
 	// Code added by Vermonkey: 081021
 	// extracts three flags from row 97
 	// room for 5 more flags!
@@ -3111,6 +3114,8 @@ load_char_mysql (const char *name)
 	if (row[98] && strlen (row[98]) > 1 && str_cmp (row[98], "(null)"))
 		ch->dmote_str = duplicateString (row[98]);
 
+		//[99] and [100] are primaryalliance and alliedclans
+	
 	// Load our UID
 	ch->pc->char_num = atoi( row[101] );
 

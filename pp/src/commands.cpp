@@ -315,7 +315,7 @@ const class command_data commands[] = {
 	{"invis", do_invis, DEAD, C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL | C_NLG},
 	{"immcommands", do_immcommands, DEAD, C_LV1},
 	{"map", do_map, DEAD, C_LV1},	/* staff.c */
-	//{"mend", do_mend, DEAD, C_LV1},	/* object.c */
+	{"mend", do_mend, DEAD, C_LV1},	/* object.c */
 	{"object", do_object, DEAD, C_LV1},
 	{"oinit", do_oinit, DEAD, C_LV1},
 	{"olist", do_olist, DEAD, C_LV1},
@@ -332,7 +332,7 @@ const class command_data commands[] = {
 	{"rdflag", do_rdflag, DEAD, C_LV1},
 	{"rdoor", do_rdoor, DEAD, C_LV1},
 	{"redesc", do_redesc, DEAD, C_LV1},
-	//{"rend", do_rend, DEAD, C_LV1},	/* object.c */
+	{"rend", do_rend, DEAD, C_LV1},	/* object.c */ //enable this for REAPAIR
 	{"rexit", do_rexit, DEAD, C_LV1},
 	{"rexitrm", do_rexitrm, DEAD, C_LV1},
 	{"rflags", do_rflags, DEAD, C_LV1},

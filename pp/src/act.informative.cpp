@@ -30,6 +30,15 @@
 
 extern rpie::server engine;
 extern const char *skills[];
+//added fro REPAIR
+extern const char *unspecified_conditions[];
+extern const char *fabric_conditions[];
+extern const char *leather_conditions[];
+extern const char *wood_conditions[];
+extern const char *bone_conditions[];
+extern const char *damage_severity[]; 
+//end add for repair
+
 BOARD_DATA *full_board_list = NULL;
 
 #define LAST_STABLE_TICKET 1000
@@ -1506,8 +1515,19 @@ article (const char *string)
 		return "an ";
 	else
 		return "a ";
-}
-
+}//Add for REPAIR
+/************************************************************
+ * mode == 0 - general look, no tables or corpses
+ * mode == 1 - a container object that has contents
+ * mode == 2
+ * mode == 3
+ * mode == 4 
+ * mode == 5 - general look, all objects
+ * mode == 6 - invisible items
+ * mode == 7 - a container itself, tables will show illumination
+ * mode == 15 - examine, shows extra information
+ *
+ ***********************************************************/
 void
 show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 {
@@ -1528,6 +1548,8 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 	char buf[MAX_STRING_LENGTH] = { '\0' };
 	char buf2[MAX_STRING_LENGTH] = { '\0' };
 	int count;
+	int item_cond; //add for REPAIR
+
 
 	*buffer = '\0';
 
@@ -1762,7 +1784,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 
 			if (mode == 15)
 				sprintf (buffer + strlen (buffer), "%s",
-				object__examine_damage (obj));
+				object__examine_damage (obj, ch)); //change for REPAIR
 
 			if (IS_WEARABLE (obj) && obj->size && mode == 15)
 			{
@@ -1887,10 +1909,10 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 			}
 			else if (GET_ITEM_TYPE (obj) == ITEM_REPAIR_KIT && mode == 15)
 			{
-				if (obj->o.od.value[3] < 0 || obj->o.od.value[5] < 0)
+				if (obj->o.od.value[3] < 0 && obj->o.od.value[5] < 0)
 				{
 					sprintf (buffer + strlen (buffer),
-						" #1Error, No item type or skill associated with repair kit!#0");
+						" #1Error, This kit cannot repair anything!#0");
 				}
 				else if (obj->o.od.value[3]
 				&& (!ch->skills[(obj->o.od.value[3])]
@@ -1912,7 +1934,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 					else
 					{
 						sprintf (buffer + strlen (buffer),
-							" #6%s items#0 made with ",
+								 " #6%s #0items made with ",
 							item_types[(obj->o.od.value[5])]);
 					}
 					if (obj->o.od.value[3] == 0)
@@ -1924,9 +1946,27 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 						sprintf (buffer + strlen (buffer), "the #6%s skill#0.",
 							skills[(obj->o.od.value[3])]);
 					}
+					
+					if (obj->o.od.value[4] > 0)
+					{
+						sprintf (buffer + strlen (buffer),
+								 "\n   #6Maximum Damage that can be repaired:#0  %s\n",damage_severity[obj->o.od.value[4]]);
+					}
+					
+					if (obj->o.od.value[0] < 0)
+					{
+						sprintf (buffer + strlen (buffer),
+								 "\n   #6Uses Remaining:#0  Unlimited\n");
+					}
+					else 
+					{
 					sprintf (buffer + strlen (buffer),
 						"\n   #6Uses Remaining:#0  %d\n",
 						obj->o.od.value[0]);
+				}
+					
+					
+					
 				}
 			}
 
@@ -2016,6 +2056,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 				p = 0;
 			}
 
+			
 			if (obj->lodged)
 			{
 				sprintf (buf, "   It has ");
@@ -2082,12 +2123,65 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 				{
 				}
 			}
+			
 			if (obj->nVirtual != VNUM_CORPSE)
+			{			 //changed for REPAIR
+			if (obj->item_wear == 100 )
+				item_cond = 6;
+			else if (obj->item_wear < 100 && obj->item_wear >= 90)
+				item_cond = 5;
+			else if (obj->item_wear < 90 && obj->item_wear >= 70)
+				item_cond = 4;
+			else if (obj->item_wear < 70 && obj->item_wear >= 50)
+				item_cond = 3;	
+			else if (obj->item_wear < 50 && obj->item_wear >= 20)
+				item_cond = 2;
+			else if (obj->item_wear < 20 && obj->item_wear >= 0)
+				item_cond = 1;
+			else if (obj->item_wear < 0)
+				item_cond = 0;
+				
+			if (item_cond == 6)
 			{
-				/*
-				if ( obj->item_wear == 100 )
 				sprintf (buffer + strlen(buffer), "\n   It appears to be in flawless condition.\n");
-				*/
+			}//change for REPAIR
+			else 
+			{	
+				
+				switch GET_MATERIAL_TYPE(obj)
+				{
+				case (1 << 1): // TEXTILE
+					sprintf (buffer + strlen(buffer), "\n   %s\n", fabric_conditions[item_cond]);
+					break;
+					
+				case (1 << 2): // LEATHER
+					sprintf (buffer + strlen(buffer), "\n   %s\n", leather_conditions[item_cond]);
+					break;
+					
+				case (1 << 3): // WOOD
+					sprintf (buffer + strlen(buffer), "\n   %s\n", wood_conditions[item_cond]);
+					break;
+					
+				case (1 << 4): // METAL
+					sprintf (buffer + strlen(buffer), "\n   %s\n", unspecified_conditions[item_cond]);
+					break;
+					
+				case (1 << 5): // STONE
+				case (1 << 6): // GLASS
+				case (1 << 11): // OTHER
+					sprintf (buffer + strlen(buffer), "\n   %s\n", unspecified_conditions[item_cond]);
+					break;
+					
+				default:
+					sprintf (buffer + strlen(buffer), "\n   %s\n", unspecified_conditions[item_cond]);
+					break;
+				}
+				
+				
+			}
+			
+	
+				
 			}
 		}
 	}
@@ -4255,7 +4349,8 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 			page_string (ch->desc, ptr);
 			return;
 		}
-
+//added comment for REAPIR
+		/* look at a single object in the room or in your hand */
 		if (obj)
 		{
 			if (cmd == 2)
@@ -5313,6 +5408,13 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 			if (first)
 				send_to_char ("\n", ch);
 			act ("You are being guarded by $N.", false, ch, 0, rch, TO_CHAR);
+			first = false;
+		}
+		if ((af = get_affect (ch, MAGIC_GUARD)) && !af->a.spell.modifier && af->a.spell.t == (long int) rch)
+		{
+			if (first)
+				send_to_char ("\n", ch);
+			act ("You are guarding $N.", false, ch, 0, rch, TO_CHAR);
 			first = false;
 		}
 	}

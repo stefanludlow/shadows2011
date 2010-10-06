@@ -248,14 +248,17 @@ subcraft_head_data::subcraft_head_data(const subcraft_head_data &RHS) {
 	help = duplicateString(RHS.help);
 	clans = duplicateString(RHS.clans);
 
-	if (RHS.phases != NULL) {
+	if (RHS.phases != NULL)
+	{
 		phases = new phase_data(*(RHS.phases));
 	}
-	else {
+	else 
+	{
 		phases = new phase_data;
 	}
 
-	for (int i = 0; i < MAX_ITEMS_PER_SUBCRAFT; i++) {
+	for (int i = 0; i < MAX_ITEMS_PER_SUBCRAFT; i++)
+	{
 		if (RHS.obj_items[i] != NULL) {
 			obj_items[i] = new default_item_data(*(RHS.obj_items[i]));
 		}

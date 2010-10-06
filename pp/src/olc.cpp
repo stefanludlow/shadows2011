@@ -29,6 +29,7 @@
 
 extern rpie::server engine;
 extern const char *weather_states[];
+extern const char *damage_severity[];
 extern int free_mem(char *&ptr);
 extern int free_mem(void *ptr);
 
@@ -433,7 +434,7 @@ const struct constant_data constant_info[] = {
 	{"variable-races", "Variable Races           ", (void **) variable_races},
 	{"damage-types", "REND Damage Types        ", (void **) damage_type},
 	{"weather-states", "Weather states           ", (void **) weather_states},
-
+	{"damage-severity", "Damage severity          ", (void **) damage_severity},
 	{"", "", NULL}
 };
 
@@ -2196,7 +2197,7 @@ mlist_show (std::string *output_string, CHAR_DATA *mob, bool header)
 
 }
 
-// To do
+
 
 void
 
@@ -6051,11 +6052,10 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char ("That item is not a repair kit.\n", ch);
 				return;
 			}
-			if (!str_cmp (argument, "all"))
+			if (!str_cmp (argument, "noskill"))
 			{
 				edit_obj->o.od.value[3] = 0;
-				edit_obj->o.od.value[5] = 0;
-				send_to_char ("This repair kit will now mend all items.\n", ch);
+				send_to_char ("This repair kit requires no skill to use.\n", ch);
 				return;
 			}
 			else if (!str_cmp (argument, "none"))
@@ -6064,6 +6064,13 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 				edit_obj->o.od.value[5] = -1;
 				send_to_char
 					("This repair kit will no longer mend any items.\n", ch);
+				return;
+			}
+			else if (!str_cmp (argument, "all"))
+			{
+				edit_obj->o.od.value[5] = 0;
+				send_to_char
+				("This repair kit will repair all types of item.\n", ch);
 				return;
 			}
 			else if ((mend_type = parse_argument (item_types, argument)) > 0)
@@ -6162,8 +6169,40 @@ do_oset (CHAR_DATA * ch, char *argument, int cmd)
 					return;
 				}
 			}
+				//ADDED FOR REPAIR
+			else if ((mend_type = index_lookup (damage_severity, argument)) > 0)
+			{
+				if (mend_type >= 8)
+				{
+					edit_obj->o.od.value[4] = 8;
+					send_to_char
+					("This repair kit will mend any level of damage.\n",
+					 ch);
+				}
+				else
+				{
+					edit_obj->o.od.value[4] = mend_type;
+					sprintf (buf,
+							 "This repair kit will mend only items of '%s' damage or less.\n",
+							 damage_severity[mend_type]);
+					send_to_char (buf, ch);
+				}
+				return;
+			}
+				
 			send_to_char
-				("Please specify all or an item type (see tags item-types).\n",
+				("\n"
+				 "oset mends <item type>   - mending items of that type\n"
+				 "                           (see tags item-types)\n" 
+				 "oset mends all           - will repair all types of items\n"
+				 "oset mends none          - will mend no items\n"
+				 "\n"
+				 "oset mends <skill name>  - skill needed to use this kit\n"
+				 "oset mends noskill       - requires no skill to use\n"
+				 "\n"
+				 "oset mends <damage type> - items with this level of damage or less\n"
+				 "                           (see tags damage-severity)\n" 
+				 "\n",
 				ch);
 			return;
 		}
@@ -10580,6 +10619,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 					"\n", ch);
 				break;
 			}
+			
 			if (IS_NPC(edit_mob))
 			{
 				loads = 0;
@@ -10595,10 +10635,13 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 					continue;
 
 				if (tch->mob->nVirtual == edit_mob->mob->nVirtual)
+							//break;
 					loads++;
 			}
 			}
-			if (loads > 0)
+
+				//if (tch)
+			if(loads > 0)
 			{
 				send_to_char ("Clear this mobile from the world first.\n", ch);
 				return;

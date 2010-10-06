@@ -62,7 +62,7 @@ void stop_followers (CHAR_DATA * ch);
 void followers_follow (CHAR_DATA * ch, int dir, int leave_time, int arrive_time);
 void follower_catchup (CHAR_DATA * ch);
 int num_followers (CHAR_DATA * ch);
-int speed_group (CHAR_DATA * ch); //added for speed
+int speed_group (CHAR_DATA * ch);
 
 extern QE_DATA *quarter_event_list;
 #endif // _rpie_group_h_

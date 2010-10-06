@@ -247,9 +247,10 @@ object_damage__new ()
 	OBJECT_DAMAGE *thisPtr = NULL;
 
 	/* TODO: Remove this when we're ready to go live with damage */
-	if (!engine.in_test_mode ())
+		if (engine.in_play_mode())
 		return NULL;
 
+	
 	thisPtr = new OBJECT_DAMAGE;
 	thisPtr->next = NULL;
 	thisPtr->source = (DAMAGE_TYPE) 0;
@@ -269,7 +270,16 @@ object_damage__new ()
 |  new_init()                                                             |
 |                                                                         |
 |  Returns a pointer to the newly allocated and initialized instance of   |
-|  object damage.                                                         |
+|  object damage.
+	Severity	Impact
+	miniscule:	 1
+	small:		 2-3
+	minor:		 4-5
+	moderate:	 6-10
+	large:		 11-20
+	deep:		 21-30
+	massive:	 31-40
+	terrible:	 41 + 
 \------------------------------------------------------------------------*/
 OBJECT_DAMAGE *
 object_damage__new_init (DAMAGE_TYPE source, ushort impact,
@@ -295,13 +305,11 @@ object_damage__new_init (DAMAGE_TYPE source, ushort impact,
 
 	thisPtr->source = source;
 	thisPtr->material = material;
-	thisPtr->severity =
-		(DAMAGE_SEVERITY) ((impact >
-		5) ? (MIN (8,
-		((impact - 1) / 10) + 4)) : ((impact / 2) +
-		1));
+	thisPtr->severity = (DAMAGE_SEVERITY) ((impact > 8) ? 
+						(MIN (8, ((impact - 1) / 10) + 4)) :
+						((impact / 2) + 1));
 	thisPtr->impact = (source == DAMAGE_BLOOD) ? 0 : impact;
-	thisPtr->name = number (0, 3);
+	thisPtr->name = number (0, 3); //used to reference third index of damage_name[12][5][4]
 	thisPtr->lodged = lodged;
 	thisPtr->when = time (0);
 
@@ -334,6 +342,10 @@ object_damage__delete (OBJECT_DAMAGE * thisPtr)
 |                                                                         |
 |  Returns a short description of the damage instance.                    |
 \------------------------------------------------------------------------*/
+/**
+ broad_damage_type: cloth=0, leather=1, metals=2, ivoery/wood =3, ceramic/stone=4
+ str_desc: a small puncture 
+ **/
 char *
 object_damage__get_sdesc (OBJECT_DAMAGE * thisPtr)
 {
@@ -352,6 +364,7 @@ object_damage__get_sdesc (OBJECT_DAMAGE * thisPtr)
 		+
 		strlen (damage_name[thisPtr->source]
 	[(thisPtr->material < MATERIAL_IRON) ? 0 : 1][thisPtr->name]) + 5;
+	
 	str_sdesc = new char[n_sdesc_length];
 	sprintf (str_sdesc, "%s %s %s",
 		(isvowel (damage_severity[thisPtr->severity][0])) ? "an" : "a",

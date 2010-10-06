@@ -1329,6 +1329,7 @@ typedef signed char shortint;
 #define DEL_PLACE_BID		52
 #define DEL_PLACE_BUYOUT	53
 #define DEL_CANCEL_AUCTION	54
+#define DEL_MEND_OBJECT		55  //add for REPAIR
 
 /* Zone flags */
 

@@ -2245,6 +2245,17 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	eq1 = get_equip (tar, wear_loc1);
 	eq2 = get_equip (tar, wear_loc2);
 
+//add for REPAIR
+	int eq1_hit_points; 
+	int eq2_hit_points; 
+	
+	if (eq1)
+		eq1_hit_points = eq1->item_wear + eq1->quality;
+	
+	if (eq2)
+		eq2_hit_points = eq2->item_wear + eq2->quality;
+//end of add for REPAIR
+
 	if (eq2 && IS_SET (eq2->obj_flags.wear_flags, ITEM_WEAR_ABOUT)
 		&& (isname ("cloak", eq2->name) || isname ("cape", eq2->name))
 		&& number (0, 2))
@@ -2287,7 +2298,18 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	}
 
 	/* DA can occur only if defending a primary attacker */
+/** ADD FOR REPAIR
+hit points for attack_weapon, defense weapon, shield, armor is current item_wear + quality
+weapons and armor can go below (-item_wear) in hit points without being destroyed
+ if hit points < (- quality) then item breaks
+ 
+ ex:
+ item_wear = 24
+ quality = 30
+ When the items hit points < -30 the item will distinitgrate
+item_wear modifies damage so if item_wear = 0, the weapon will not do any damage, and armor will not offer any protection.
 
+ ***/
 	if (def_result == RESULT_ADV && tar->fighting != src)
 		def_result = RESULT_NONE;
 
@@ -2295,16 +2317,25 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 		&& (off_result == RESULT_BLOCK || off_result == RESULT_PARRY))
 	{
 
+//add for reapair
+		int attack_weapon_hit_points;
+		int defense_weapon_hit_points;
+		int shield_hit_points;
+		
+		if (attack_weapon)
+			attack_weapon_hit_points = attack_weapon->item_wear + attack_weapon->quality;
+
+		if (defense_weapon)
+			defense_weapon_hit_points = defense_weapon->item_wear + defense_weapon->quality;
+
+		if (shield)
+			shield_hit_points = shield->item_wear + shield->quality;
+//end of add for REPAIR
+		
 		if (attack_weapon
 			&&
-			((defense_weapon
-			&& attack_weapon->quality <= defense_weapon->quality) || (shield
-			&&
-			attack_weapon->
-			quality
-			<=
-			shield->
-			quality))
+			((defense_weapon && attack_weapon->quality <= defense_weapon->quality) 
+			|| (shield && attack_weapon->quality <= shield->quality))
 			&& number (1, 100) > attack_weapon->quality)
 		{
 			if (shield)
@@ -2314,9 +2345,10 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 				object__add_damage (attack_weapon,
 				(DAMAGE_TYPE) defense_weapon->o.weapon.
 				hit_type, number (1, MAX (damage, 5)));
+		//changed for REPAIR	
 			if ((number (1, 100) > attack_weapon->quality
-				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
-				|| attack_weapon->item_wear <= 0)
+				&& number (1, 100) > attack_weapon_hit_points && damage > 10)
+				|| attack_weapon_hit_points <= 0)
 				off_result = RESULT_WEAPON_BREAK;
 		}
 		else if (attack_weapon && defense_weapon
@@ -2324,18 +2356,20 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 		{
 			object__add_damage (defense_weapon, (DAMAGE_TYPE) hit_type,
 				number (1, MAX (damage, 5)));
+				//changed for REPAIR
 			if ((number (1, 100) > defense_weapon->quality
-				&& number (1, 100) > defense_weapon->item_wear && damage > 10)
-				|| defense_weapon->item_wear <= 0)
+				&& number (1, 100) > defense_weapon_hit_points && damage > 10)
+				|| defense_weapon_hit_points <= 0)
 				def_result = RESULT_WEAPON_BREAK;
 		}
 		else if (attack_weapon && shield && number (1, 100) > shield->quality)
 		{
 			object__add_damage (shield, (DAMAGE_TYPE) hit_type,
 				number (1, MAX (damage, 5)));
+				//changed for REPAIR
 			if ((number (1, 100) > shield->quality
-				&& number (1, 100) > shield->item_wear && damage > 10)
-				|| shield->item_wear <= 0)
+				&& number (1, 100) > shield_hit_points && damage > 10)
+				|| shield_hit_points <= 0)
 				def_result = RESULT_SHIELD_BREAK;
 		}
 		else if (attack_weapon
@@ -2353,9 +2387,10 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 				object__add_damage (attack_weapon,
 				(DAMAGE_TYPE) defense_weapon->o.weapon.
 				hit_type, number (1, MAX (damage, 5)));
+				//changed for REPAIR
 			if ((number (1, 100) > attack_weapon->quality
-				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
-				|| attack_weapon->item_wear <= 0)
+				&& number (1, 100) > attack_weapon_hit_points && damage > 10)
+				|| attack_weapon_hit_points <= 0)
 				off_result = RESULT_WEAPON_BREAK;
 		}
 	}
@@ -2364,15 +2399,19 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 		|| off_result == RESULT_HIT3 || off_result == RESULT_HIT4)
 		&& attack_weapon && (eq1 || eq2))
 	{
+	//added for REPAIR
+		int attack_weapon_hit_points = attack_weapon->item_wear + attack_weapon->quality;
+		
 		if (attack_weapon && eq1 && eq1->o.od.value[0] > 2
 			&& attack_weapon->quality <= eq1->quality
 			&& number (1, 100) > attack_weapon->quality)
 		{
 			object__add_damage (attack_weapon, DAMAGE_BLUNT,
 				number (1, MAX (damage, 5)));
+				//changed for REPAIR
 			if ((number (1, 100) > attack_weapon->quality
-				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
-				|| attack_weapon->item_wear <= 0)
+				&& number (1, 100) > attack_weapon_hit_points && damage > 10)
+				|| attack_weapon_hit_points <= 0)
 			{
 				off_result = RESULT_WEAPON_BREAK;
 				def_result = RESULT_ANY;
@@ -2384,9 +2423,10 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 		{
 			object__add_damage (attack_weapon, DAMAGE_BLUNT,
 				number (1, MAX (damage, 5)));
+				//changed for REPAIR
 			if ((number (1, 100) > attack_weapon->quality
-				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
-				|| attack_weapon->item_wear <= 0)
+				&& number (1, 100) > attack_weapon_hit_points && damage > 10)
+				|| attack_weapon_hit_points <= 0)
 			{
 				off_result = RESULT_WEAPON_BREAK;
 				def_result = RESULT_ANY;
@@ -2400,8 +2440,9 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 			else
 				object__add_damage (eq1, (DAMAGE_TYPE) hit_type,
 				number (1, MAX (damage, 5)));
+				//changed for REPAIR
 			if ((number (1, 100) > eq1->quality
-				&& number (1, 100) > eq1->item_wear && damage > 10) || eq1->item_wear <= 0)
+				&& number (1, 100) > eq1_hit_points && damage > 10) || eq1_hit_points <= 0)
 				broken_eq = eq1;
 		}
 		else if (attack_weapon && eq2 && number (1, 100) > eq2->quality)
@@ -2412,8 +2453,9 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 			else
 				object__add_damage (eq2, (DAMAGE_TYPE) hit_type,
 				number (1, MAX (damage, 5)));
+				//changed for REPAIR
 			if (number (1, 100) > eq2->quality
-				&& number (1, 100) > eq2->item_wear && damage > 10)
+				&& number (1, 100) > eq2_hit_points && damage > 10)
 				broken_eq = eq2;
 		}
 		else if (attack_weapon && eq1 && eq1->o.od.value[0] > 2
@@ -2422,8 +2464,9 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 		{
 			object__add_damage (attack_weapon, DAMAGE_BLUNT,
 				number (1, MAX (damage, 5)));
+				//changed for REPAIR
 			if ((number (1, 100) > attack_weapon->quality
-				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
+				&& number (1, 100) > attack_weapon_hit_points && damage > 10)
 				|| attack_weapon->item_wear <= 0)
 			{
 				off_result = RESULT_WEAPON_BREAK;
@@ -2436,8 +2479,9 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 		{
 			object__add_damage (attack_weapon, DAMAGE_BLUNT,
 				number (1, MAX (damage, 5)));
+				//changed for REPAIR
 			if ((number (1, 100) > attack_weapon->quality
-				&& number (1, 100) > attack_weapon->item_wear && damage > 10)
+				&& number (1, 100) > attack_weapon_hit_points && damage > 10)
 				|| attack_weapon->item_wear <= 0)
 			{
 				off_result = RESULT_WEAPON_BREAK;
@@ -3116,6 +3160,15 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 		src->secondary_delay = attack_delay;
 }
 
+/********** added for REPAIR
+ item wear penalty - 
+ Base Amount of damage is modified by item_wear
+ This applies to the attack weapon attack damage,
+ a shield used to block damage absorption,
+ or armor damage absorption
+ 
+ Weapon/armor combination modiefiers, hit location mods and critical strike mods come in later.
+ *************/
 void
 figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 			   int off_result, int *damage, int *location)
@@ -3213,6 +3266,9 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 			if (af->a.spell.location == APPLY_DAMROLL)
 				dam += af->a.spell.modifier;
 		}
+		//changed for REPAIR
+			//item wear penalty
+		dam = dam * (attack_weapon->item_wear/100);
 	}
 
 	/* For NPCs with no weapons, add natural attack */
@@ -3250,7 +3306,10 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 	if (off_result == RESULT_BLOCK)
 	{
 		OBJ_DATA *shield = get_equip(tar, WEAR_SHIELD); 
-		dam -= number(shield->o.od.value[0], shield->o.od.value[1]);
+		//changed for REPAIR
+			//with item wear penalty
+		dam = dam - (shield->item_wear/100) * number(shield->o.od.value[0], shield->o.od.value[1]);
+		
 		if (dam <= 0) {
 			*damage = 0;
 			return;
@@ -3263,7 +3322,13 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 
 		if (eq && eq->obj_flags.type_flag == ITEM_ARMOR)
 			if (attack_weapon || !shock)
-				dam -= eq->o.armor.armor_value;
+			//changed for REPAIR	
+				//with item wear penalty
+				if (eq)
+				{
+				dam = dam - (eq->item_wear/100) * eq->o.armor.armor_value;
+		
+				}
 
 		/* Mobs will have marmor, which is natural armor */
 
@@ -3283,7 +3348,12 @@ figure_damage (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 
 			if (eq && eq->obj_flags.type_flag == ITEM_ARMOR)
 				if (attack_weapon || !shock)
-					dam -= eq->o.armor.armor_value;
+				//changed for REPAIR
+						//with item wear penalty
+					if (eq)
+					{
+					dam = dam - (eq->item_wear/100) * eq->o.armor.armor_value;
+					}
 
 			if (attack_weapon && eq && eq->obj_flags.type_flag == ITEM_ARMOR)
 				dam += weapon_armor_table[attack_weapon->o.weapon.hit_type]
@@ -4697,8 +4767,8 @@ compete (CHAR_DATA * ch, CHAR_DATA * src, CHAR_DATA * tar, int iterations)
 
 	src->flags &= ~FLAG_COMPETE;
 	tar->flags &= ~FLAG_COMPETE;
-
-	free_mem(name);
+//changed for REPAIR -- not needed but allows the compete comamnd to be used again
+		//free_mem(name);
 
 	/*
 	for (obj = src->room->contents; obj; obj = next_obj)
