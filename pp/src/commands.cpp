@@ -332,7 +332,7 @@ const class command_data commands[] = {
 	{"rdflag", do_rdflag, DEAD, C_LV1},
 	{"rdoor", do_rdoor, DEAD, C_LV1},
 	{"redesc", do_redesc, DEAD, C_LV1},
-	{"rend", do_rend, DEAD, C_LV1},	/* object.c */ //enable this for REAPAIR
+	//{"rend", do_rend, DEAD, C_LV1},	/* object.c */ 
 	{"rexit", do_rexit, DEAD, C_LV1},
 	{"rexitrm", do_rexitrm, DEAD, C_LV1},
 	{"rflags", do_rflags, DEAD, C_LV1},
