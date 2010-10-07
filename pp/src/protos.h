@@ -688,7 +688,7 @@ int skill_mend(CHAR_DATA * ch, OBJ_DATA *kit, OBJECT_DAMAGE * damage);
 void object__drench (CHAR_DATA * ch, OBJ_DATA * _obj, bool isChEquip);	/* objects.c */
 //add this change for REPAIR too
 char *object__examine_damage (OBJ_DATA * thisPtr, CHAR_DATA * ch);	/* objects.c */
-OBJECT_DAMAGE *object__add_damage (OBJ_DATA * thisPtr, DAMAGE_TYPE source, unsigned int impact);	/* objects.c */
+OBJECT_DAMAGE *object__add_damage (OBJ_DATA * thisPtr, DAMAGE_TYPE source, unsigned int impact, CHAR_DATA * ch);	/* objects.c */
 //add this for REPAIR
 void damage_from_obj (OBJ_DATA * obj, OBJECT_DAMAGE * damage);
 void do_grip (CHAR_DATA * ch, char *argument, int cmd);	/* objects.c */
@@ -1400,6 +1400,7 @@ int get_size (CHAR_DATA * ch);
 int get_weight (CHAR_DATA * ch);
 struct descriptor_data *is_pc_attached (char *buf);
 int is_mounted (CHAR_DATA * ch);
+int can_mount (CHAR_DATA * ch, CHAR_DATA * mount);
 void rl_minute_affect_update (void);
 void export_who_list(void);
 void clear_watch (CHAR_DATA * ch);

@@ -2340,11 +2340,11 @@ item_wear modifies damage so if item_wear = 0, the weapon will not do any damage
 		{
 			if (shield)
 				object__add_damage (attack_weapon, DAMAGE_BLUNT,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 			else
 				object__add_damage (attack_weapon,
 				(DAMAGE_TYPE) defense_weapon->o.weapon.
-				hit_type, number (1, MAX (damage, 5)));
+				hit_type, number (1, MAX (damage, 5)), tar);
 		//changed for REPAIR	
 			if ((number (1, 100) > attack_weapon->quality
 				&& number (1, 100) > attack_weapon_hit_points && damage > 10)
@@ -2355,7 +2355,7 @@ item_wear modifies damage so if item_wear = 0, the weapon will not do any damage
 			&& number (1, 100) > defense_weapon->quality)
 		{
 			object__add_damage (defense_weapon, (DAMAGE_TYPE) hit_type,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 				//changed for REPAIR
 			if ((number (1, 100) > defense_weapon->quality
 				&& number (1, 100) > defense_weapon_hit_points && damage > 10)
@@ -2365,7 +2365,7 @@ item_wear modifies damage so if item_wear = 0, the weapon will not do any damage
 		else if (attack_weapon && shield && number (1, 100) > shield->quality)
 		{
 			object__add_damage (shield, (DAMAGE_TYPE) hit_type,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 				//changed for REPAIR
 			if ((number (1, 100) > shield->quality
 				&& number (1, 100) > shield_hit_points && damage > 10)
@@ -2382,11 +2382,11 @@ item_wear modifies damage so if item_wear = 0, the weapon will not do any damage
 		{
 			if (shield)
 				object__add_damage (attack_weapon, DAMAGE_BLUNT,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 			else
 				object__add_damage (attack_weapon,
 				(DAMAGE_TYPE) defense_weapon->o.weapon.
-				hit_type, number (1, MAX (damage, 5)));
+				hit_type, number (1, MAX (damage, 5)), tar);
 				//changed for REPAIR
 			if ((number (1, 100) > attack_weapon->quality
 				&& number (1, 100) > attack_weapon_hit_points && damage > 10)
@@ -2407,7 +2407,7 @@ item_wear modifies damage so if item_wear = 0, the weapon will not do any damage
 			&& number (1, 100) > attack_weapon->quality)
 		{
 			object__add_damage (attack_weapon, DAMAGE_BLUNT,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 				//changed for REPAIR
 			if ((number (1, 100) > attack_weapon->quality
 				&& number (1, 100) > attack_weapon_hit_points && damage > 10)
@@ -2422,7 +2422,7 @@ item_wear modifies damage so if item_wear = 0, the weapon will not do any damage
 			&& number (1, 100) > attack_weapon->quality)
 		{
 			object__add_damage (attack_weapon, DAMAGE_BLUNT,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 				//changed for REPAIR
 			if ((number (1, 100) > attack_weapon->quality
 				&& number (1, 100) > attack_weapon_hit_points && damage > 10)
@@ -2436,10 +2436,10 @@ item_wear modifies damage so if item_wear = 0, the weapon will not do any damage
 		{
 			if (GET_ITEM_TYPE (eq1) == ITEM_ARMOR)
 				object__add_damage (eq1, (DAMAGE_TYPE) hit_type,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 			else
 				object__add_damage (eq1, (DAMAGE_TYPE) hit_type,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 				//changed for REPAIR
 			if ((number (1, 100) > eq1->quality
 				&& number (1, 100) > eq1_hit_points && damage > 10) || eq1_hit_points <= 0)
@@ -2449,10 +2449,10 @@ item_wear modifies damage so if item_wear = 0, the weapon will not do any damage
 		{
 			if (GET_ITEM_TYPE (eq2) == ITEM_ARMOR)
 				object__add_damage (eq2, (DAMAGE_TYPE) hit_type,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 			else
 				object__add_damage (eq2, (DAMAGE_TYPE) hit_type,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 				//changed for REPAIR
 			if (number (1, 100) > eq2->quality
 				&& number (1, 100) > eq2_hit_points && damage > 10)
@@ -2463,7 +2463,7 @@ item_wear modifies damage so if item_wear = 0, the weapon will not do any damage
 			&& number (1, 100) > attack_weapon->quality)
 		{
 			object__add_damage (attack_weapon, DAMAGE_BLUNT,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 				//changed for REPAIR
 			if ((number (1, 100) > attack_weapon->quality
 				&& number (1, 100) > attack_weapon_hit_points && damage > 10)
@@ -2478,7 +2478,7 @@ item_wear modifies damage so if item_wear = 0, the weapon will not do any damage
 			&& number (1, 100) > attack_weapon->quality)
 		{
 			object__add_damage (attack_weapon, DAMAGE_BLUNT,
-				number (1, MAX (damage, 5)));
+				number (1, MAX (damage, 5)), tar);
 				//changed for REPAIR
 			if ((number (1, 100) > attack_weapon->quality
 				&& number (1, 100) > attack_weapon_hit_points && damage > 10)

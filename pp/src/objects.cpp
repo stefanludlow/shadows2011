@@ -311,15 +311,18 @@ do_rend (CHAR_DATA * ch, char *argument, int cmd)
 		"\n"
 		"Usage: rend [OPTIONS] object\n"
 		"\n"
-		"  -d IMPACT         - 0-100 a percent of the target's total hits.\n"
+		"  -d IMPACT         - points of damage\n"
 		"  -t TYPE           - See 'tag damage-types' for values.\n"
+		"If  IMPACT or TYPE is left blank, a random value will be used.\n"
+		"\n"
 		"  -c CHARACTER      - Will damage the specified object on CHARACTER.\n"
 		"\n"
 		"Examples:\n"
 		"  > rend tunic                             - Apply random damage to an obj\n"
 		"  > rend -d 12 -t stab vest                - Specific damage to an obj.\n"
 		"  > rend -t bloodstain -c traithe gloves   - Damage someone elses obj.\n",
-		"#1Damage must be 1-100; a percentage of the target's total hits.#0\n",
+		"#1Damage must be a number between 1 and the total hit points of the object.#0\n"
+		"Hit points for an object is the sum of the item's Wear and Quality\n",
 		"#1Unknown attack type, refer to 'tags damage-types' for a list of values.#0\n",
 		"#1You don't see the subject of the -c option.#0\n",
 		"#1You don't see that target object or victim.#0\n",
@@ -423,12 +426,19 @@ do_rend (CHAR_DATA * ch, char *argument, int cmd)
 
 
 		//random vaues for impact and type if they are not specified
-		impact = (impact <= 0) ? number (0, target_obj->item_wear) : impact;
+	
+		impact = (impact <= 0) ? number (1, (100 + target_obj->quality)) : impact;
+	
 		type = (type <= 0) ? number (0, 10) : type;
 	
 		damage = object__add_damage (target_obj, (DAMAGE_TYPE) type,
-									 (unsigned int) impact);
+									 (unsigned int) impact, ch);
+		
+		if (damage)
 		str_damage_sdesc = object_damage__get_sdesc (damage);
+		else 
+			return;
+
 
 		if (damage && str_damage_sdesc)
 		{
@@ -504,7 +514,7 @@ object__drench (CHAR_DATA * ch, OBJ_DATA * _obj, bool isChEquip)
 				|| strstr (obj->full_description, "steel")
 				|| strstr (obj->full_description, "iron")))
 			{
-				object__add_damage (obj, DAMAGE_WATER, 1);
+				object__add_damage (obj, DAMAGE_WATER, 1, ch);
 			}
 
 
@@ -635,9 +645,10 @@ object__get_material (OBJECT_DAMAGE * thisPtr)
 \------------------------------------------------------------------------*/
 OBJECT_DAMAGE *
 object__add_damage (OBJ_DATA * thisPtr, DAMAGE_TYPE source,
-					unsigned int impact)
+					unsigned int impact, CHAR_DATA * ch )
 {
 	OBJECT_DAMAGE *damage = NULL;
+	char buf[AVG_STRING_LENGTH];
 
 	/* TODO: Remove this when we're ready to go live with damage */
 		if (engine.in_play_mode ())
@@ -656,13 +667,29 @@ object__add_damage (OBJ_DATA * thisPtr, DAMAGE_TYPE source,
 	if (impact < 1)
 		return NULL;
 
-	if ((damage =
-		object_damage__new_init (source, impact,
-		(e_material_type) thisPtr->material, 0)))
+	damage = object_damage__new_init (source, impact, (e_material_type) thisPtr->material, 0);
+	
+	//damage can be null for Exemption List in object_damage__new_init
+	if (damage) 
 	{
 		damage->next = thisPtr->damage;
 		thisPtr->damage = damage;
 		thisPtr->item_wear -= damage->impact;
+		
+		if (thisPtr->item_wear < (-1 * thisPtr->quality))
+		{
+			sprintf (buf, "#2%s#0 was destroyed!", obj_short_desc(thisPtr));
+			buf[2] = toupper (buf[2]);
+			act (buf, false, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
+			extract_obj (thisPtr);
+			return NULL;
+		}
+	}
+	else 
+	{
+		if (GET_TRUST(ch))
+			send_to_char ("No damage was done!", ch);
+		return NULL;
 	}
 	return damage;
 }
