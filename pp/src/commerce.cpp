@@ -3932,28 +3932,50 @@ keeper_has_money (CHAR_DATA * keeper, int cost)
 void
 keeper_money_to_char (CHAR_DATA * keeper, CHAR_DATA * ch, int money)
 {
-	OBJ_DATA *obj, *tobj;
+	OBJ_DATA *obj, *tobj, *cont_obj;
 	char buf[MAX_STRING_LENGTH];
 	int coins[6] = { 0, 0, 0, 0, 0, 0, }, location;
 	bool money_found = false;
 	bool use_standard_currency = true;
 	std::string amount;
 
+	cont_obj = NULL;
+	
 	for (location = 0; location < MAX_WEAR; location++)
-		if (tobj = get_equip (ch, location))
+    {
+		if (!(tobj = get_equip (ch, location)))
+			continue;
 			if (GET_ITEM_TYPE (tobj) == ITEM_CONTAINER)
+		{
 				for (obj = tobj->contains; obj; obj = obj->next_content)
-					if(money_found = (GET_ITEM_TYPE (obj) == ITEM_MONEY))
+			{
+				if (GET_ITEM_TYPE (obj) == ITEM_MONEY)
+					money_found = true;
+			}
+			
+			cont_obj = tobj; //there is a container
+			
+			if (money_found) //and it has money
 						break;
-					else
-						tobj=NULL;
+		}
+    }
 
-
-	if (!tobj)
+	if (!cont_obj) //no container with money was found, look again for containers
+    {
 		for (location = 0; location < MAX_WEAR; location++)
-			if (tobj = get_equip (ch, location))
-				if(GET_ITEM_TYPE (tobj) == ITEM_CONTAINER)
+		{
+			if (!(tobj = get_equip (ch, location)))
+				continue;
+			if (GET_ITEM_TYPE (tobj) == ITEM_CONTAINER)
+			{
+				cont_obj = tobj; //this obj is a container
 					break;
+			}
+		}
+    }
+	
+	if (cont_obj)
+		tobj = cont_obj;
 				else
 					tobj = NULL;
 
