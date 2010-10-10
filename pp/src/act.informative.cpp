@@ -2140,11 +2140,12 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 				item_cond = 1;
 			else if (obj->item_wear < 0)
 				item_cond = 0;
-				
-			if (item_cond == 6)
-			{
+//actual displays commented out until bugs can be fixed	
+			//if (item_cond == 6)
+			//{
 				sprintf (buffer + strlen(buffer), "\n   It appears to be in flawless condition.\n");
-			}//change for REPAIR
+			//}
+/**
 			else 
 			{	
 				
@@ -2179,7 +2180,7 @@ show_obj_to_char (OBJ_DATA * obj, CHAR_DATA * ch, int mode)
 				
 				
 			}
-			
+*******/			
 	
 				
 			}
