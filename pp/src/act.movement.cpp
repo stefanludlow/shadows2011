@@ -1288,7 +1288,11 @@ enter_room (QE_DATA * qe)
 	{
 			//each wound will get worse, if moving faster than a walk
 			//but only once you are already badly wounded
-		
+		if (!str_cmp (wound->severity, "small")
+			|| !str_cmp (wound->severity, "minor"))
+			continue;
+		else
+		{
 			//3 stars or less, and you -will- take damage moving faster than trudge
 		if (((ch->speed > 1)|| (ch->speed == 0)) && (tot_damage > (.333 * ch->max_hit)))
 		{
@@ -1312,8 +1316,8 @@ enter_room (QE_DATA * qe)
 
 				//enable this at Kite's word
 				//adjust_wound(ch, wound, number(0, 2));	
+		}
 	}
-
 	}
 	
 	if (!IS_SET (qe->flags, MF_SNEAK) || (ch->skills[SKILL_SNEAK] < sneakRoll || sneakBleeding > 2))
