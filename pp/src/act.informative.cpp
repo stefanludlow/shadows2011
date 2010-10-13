@@ -8236,7 +8236,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 		}
 		if (is_clan_member(ch, "mt_lower_class"))
 		{
-			whoStream << gatheringPlace(21170, "the Commons of the Rancid Snakebite Tavern");
+			whoStream << gatheringPlace(21170, "the Commons of the Wayside Tavern");
 		}
 		if (is_clan_member(ch, "z3_astirian_wardens"))
 		{

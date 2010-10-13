@@ -2574,7 +2574,7 @@ void export_who_locations()
 	{3831,"the Copper Tankard Tavern"},
 	{8299,"the Hawk and Dove Barn"},
 	{8505,"the Pelennor Bastion Commons"},
-	{21170,"the Commons of the Rancid Snakebite Tavern"},
+	{21170,"the Commons of the Wayside Tavern"},
 	{42002,"Halburg's Rest Mead Hall"},
 	{54430,"the Mess Hall of Amdir"},
 	{54454,"the White Hart Tavern"},
