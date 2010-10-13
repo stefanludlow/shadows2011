@@ -23,6 +23,7 @@ const char *weapon_theme[] =
 { "stab", "pierce", "chop", "bludgeon", "slash", "lash" };
 
 void begin_repair (CHAR_DATA * ch, OBJ_DATA *obj, OBJ_DATA *kit, int mode);
+void npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument);
 
 void obj_data::partial_deep_copy (OBJ_DATA *proto)
 {
@@ -184,6 +185,7 @@ determine_material (OBJ_DATA * obj)
 void
 do_mend (CHAR_DATA * ch, char *argument, int cmd)
 {
+	CHAR_DATA * tch;
 	OBJ_DATA *obj;
 	OBJ_DATA *kit;
 	OBJECT_DAMAGE *damage;
@@ -209,14 +211,31 @@ do_mend (CHAR_DATA * ch, char *argument, int cmd)
 	}
 	argument = one_argument (argument, buf); //item to mend
 
-	/* Are we holding what we wanted? */
-	if (!(obj = get_obj_in_dark (ch, buf, ch->right_hand))
-		&& !(obj = get_obj_in_dark (ch, buf, ch->left_hand)))
+
+	/**REPAIR DUDE **/
+	if ((obj = get_obj_in_dark (ch, buf, ch->right_hand))
+		|| (obj = get_obj_in_dark (ch, buf, ch->left_hand)))
+	{
+		for (tch = ch->room->people; tch; tch = tch->next_in_room)
+		{
+			if (IS_NPC (tch) && IS_SET (tch->act, ACT_REPAIR))
+			{
+				npc_repair (ch, tch, obj, argument);
+				return;
+			}
+		}
+	}
+	else
 	{
 		send_to_char ("You're not holding anything like that.\n", ch);
 		return;
 	}
 
+	
+
+	
+	/**END REPAIR DUDE changes**/
+	
 	/* Get the kit from our other hand */
 	kit = ((obj == ch->right_hand) ? ch->left_hand : ch->right_hand);
 	if (!kit || GET_ITEM_TYPE (kit) != ITEM_REPAIR_KIT)
@@ -4330,7 +4349,7 @@ do_wear (CHAR_DATA * ch, char *argument, int cmd)
 		"about",
 		"waist",			/* 10 */
 		"wrist",
-		"HOLDER",			/* Someone miss something here?  - Rassilon */
+		"HOLDER",			/* weild? */
 		"HOLDER",
 		"shield",
 		"belt",			/* 15 */
@@ -6844,6 +6863,240 @@ skill_mend(CHAR_DATA * ch, OBJ_DATA *kit, OBJECT_DAMAGE * damage)
 		return (false);
 	}
 
+}
+
+void
+npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument)
+{
+	OBJECT_DAMAGE * damage;
+	char buf[MAX_STRING_LENGTH];
+	char buf2[MAX_STRING_LENGTH];
+	int count;
+	int item_num;
+	float cost = 0;
+	
+	if (!mob || !IS_SET (mob->act, ACT_REPAIR))
+	{
+		send_to_char ("I don't see a repairman here.\n", ch);
+		return;
+	}
+	
+	if (mob->delay)
+	{
+		act ("$n appears to be busy.", true, ch, 0, mob, TO_CHAR | _ACT_FORMAT);
+		return;
+	}
+	
+	name_to_ident (ch, buf2);
+	if (!obj->damage)
+	{
+		sprintf (buf, "whisper %s I don't see any damage on the item!",
+				 buf2);
+		command_interpreter (mob, buf);
+		return;
+	}
+	
+	
+	argument = one_argument (argument, buf);//mend sword -value/#-
+	
+	
+	if (!*buf)
+	{
+		send_to_char ("Do you want an estimate or do you want me to fix it?\n", ch);
+		return;
+	}
+	
+	if (!str_cmp (buf, "value"))
+	{
+		if (!*argument)  //mend sword value -#- (# is argument)
+		{
+			send_to_char
+			("Which damage did you wish to get an appraisal for?\n", ch);
+			return;
+		}
+		one_argument (argument, buf);
+
+		item_num = atoi(buf);
 
 	
+		if (!strn_cmp (buf, "all", strlen (buf)))
+		{
+			for (damage = obj->damage; damage; damage = damage->next)
+			{
+				if (obj->damage->next)
+				{
+					cost += damage->impact * 0.85;
+				}
+				else
+				{
+					cost += damage->impact * 0.95;
+				}
+			}
+			if (mob->shop)
+				cost *= mob->shop->markup;
+		}
+		else
+		{
+			count = 1;
+			for (damage = obj->damage; damage; damage = damage->next)
+			{
+				
+				if (count == item_num)
+				{
+					cost += damage->impact * 1.15;
+					if (mob->shop)
+						cost *= mob->shop->markup;
+					break;
+				}
+				count ++;
+			}
+			
+			if (!damage)
+			{
+				sprintf (buf, "whisper %s I don't see any damage there to repair.",
+						 buf2);
+				command_interpreter (mob, buf);
+				return;
+			}
+			
+		}
+		
+		if (cost < 1)
+			cost = 1;
+		
+		if (cost < 1)
+		{
+			sprintf (buf,
+					 "whisper %s There's nothing I can do about that damage.",
+					 buf2);
+			command_interpreter (mob, buf);
+			return;
+		}
+		
+		sprintf (buf,
+				 "whisper %s I'll fix it all up for a total of %d coppers.",
+				 buf2, (int) cost);
+		command_interpreter (mob, buf);
+		return;
+	}
+	
+	if (!strn_cmp (buf, "all", strlen (buf)))
+	{
+		item_num = -1;
+		for (damage = obj->damage; damage; damage = damage->next)
+		{
+			if (obj->damage->next)
+			{
+				cost += damage->impact * 0.85;
+			}
+			else
+			{
+				cost += damage->impact * 0.95;
+			}
+		}
+		if (mob->shop)
+			cost *= mob->shop->markup;
+	}
+	else 
+	{
+		item_num = atoi(buf);
+		count = 1;
+		for (damage = obj->damage; damage; damage = damage->next)
+		{
+			
+			if (count == item_num)
+			{
+				cost += damage->impact * 1.15;
+				if (mob->shop)
+					cost *= mob->shop->markup;
+				break;
+			}
+			count ++;
+		}
+		if (!damage)
+		{
+			sprintf (buf, "whisper %s I don't see any damage there to repair.",
+					 buf2);
+			command_interpreter (mob, buf);
+			return;
+		}
+		
+	}
+	
+	if (cost < 1)
+		cost = 1;
+	
+	if (cost < 1)
+	{
+		sprintf (buf,
+				 "whisper %s All of the damage has been taken care of - there's nothing I can do.",
+				 buf2);
+		command_interpreter (mob, buf);
+		return;
+	}
+	
+	if (!is_brother (ch, mob))
+	{
+		
+		if (!can_subtract_money (ch, (int) cost, mob->mob->currency_type))
+		{
+			sprintf (buf, "%s You seem to be a little short on coin.", buf2);
+			do_whisper (mob, buf, 83);
+			return;
+		}
+		
+		subtract_money (ch, (int) cost, mob->mob->currency_type);
+		if (mob->shop && mob->shop->store_vnum)
+			money_to_storeroom (mob, (int) cost);
+		
+		send_to_char ("\n", ch);
+	}
+	else
+	{
+		sprintf (buf, "whisper %s There is no cost to you for this treatment.",
+				 buf2);
+		command_interpreter (mob, buf);
+	}
+	
+	act ("$N promptly repairs the damage.", true, ch, 0, mob,
+		 TO_CHAR | _ACT_FORMAT);
+	act ("$N promptly repairs the damage to $n's item.", true, ch, 0, mob,
+		 TO_ROOM | _ACT_FORMAT);
+
+	/*** now to do the actually reapir stuff**/
+	if (obj->damage)
+	{
+		count = 1;
+		sprintf(buf, "start - count is %d num is %d\n", count, item_num);
+		send_to_char (buf,ch);
+		
+		for (damage = obj->damage; damage; damage = damage->next)
+		{
+			
+			if (item_num > 0) //repairs one specific damage
+			{
+				if (count == item_num)
+				{
+				sprintf(buf, "count is %d num is %d\n", count, item_num);
+				send_to_char (buf,ch);
+
+				obj->item_wear = obj->item_wear + damage->impact;
+				damage_from_obj(obj, damage);	
+				return;	
+				}
+								
+			}
+			else //repair all of it
+			{
+				sprintf(buf, "bing!\n", count, item_num);
+				send_to_char (buf,ch);
+				obj->item_wear = obj->item_wear + damage->impact;
+				damage_from_obj(obj, damage);
+			}
+			
+			count ++;
+			
+		}
+		//*******/
+	}	
 }

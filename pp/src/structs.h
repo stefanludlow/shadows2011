@@ -744,7 +744,7 @@ typedef signed char shortint;
 
 #define ACT_MEMORY	    ( 1 << 0 )
 #define ACT_SENTINEL    ( 1 << 1 )
-#define ACT_SCAVENGER   ( 1 << 2 )
+#define ACT_REPAIR      ( 1 << 2 )  /* was ACT_SCAVENGER */
 #define ACT_NOCOMMAND   ( 1 << 2 )
 #define ACT_ISNPC       ( 1 << 3 )
 #define ACT_NOVNPC	    ( 1 << 4 )	/* Shopkeep doesn't have vNPC buyers */

@@ -10496,6 +10496,20 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			}
 		}
 
+		else if (!str_cmp (subcmd, "repairman"))
+		{
+			if (IS_SET (edit_mob->act, ACT_REPAIR))
+			{
+				send_to_char ("This mobile will no longer repair items.\n", ch);
+				edit_mob->act &= ~ACT_REPAIR;
+			}
+			else
+			{
+				edit_mob->act |= ACT_REPAIR;
+				send_to_char ("This mobile will now repair items.\n", ch);
+			}
+		}
+
 		else if (!str_cmp (subcmd, "nobind"))
 		{
 			if (IS_SET (edit_mob->act, ACT_NOBIND))
@@ -14006,13 +14020,6 @@ do_instruct (CHAR_DATA * ch, char *argument, int cmd)
 				send_to_char ("  Sentinel:    No.   The mob will "
 				"wander.\n", ch);
 
-			if (IS_SET (mob->act, ACT_SCAVENGER))
-				send_to_char ("  Scavenger:   Yes.  The mob will tend to pick "
-				"things up.\n", ch);
-			else
-				send_to_char ("  Scavenger:   No.   The mob will not pick "
-				"things up.\n", ch);
-
 			if (IS_SET (mob->act, ACT_AGGRESSIVE))
 				send_to_char ("  Aggressive:  Yes.  The mob will attack "
 				"non-allies.\n", ch);
@@ -14107,7 +14114,6 @@ do_instruct (CHAR_DATA * ch, char *argument, int cmd)
 			if ((ind = index_lookup (action_bits, buf)) != -1 &&
 				(1 << ind == ACT_AGGRESSIVE ||
 				1 << ind == ACT_PURSUE ||
-				1 << ind == ACT_SCAVENGER ||
 				1 << ind == ACT_SENTINEL ||
 				1 << ind == ACT_WIMPY || 1 << ind == ACT_PASSIVE))
 			{
@@ -14122,7 +14128,7 @@ do_instruct (CHAR_DATA * ch, char *argument, int cmd)
 			else
 			{
 				send_to_char ("Expected a standing order of:\n\n"
-					"     Aggressive, Passive, Pursue, Scavenger, Sentinel, or Wimpy\n\n"
+					"     Aggressive, Passive, Pursue, Sentinel, or Wimpy\n\n"		  
 					"or a access flag (rooms the mob will wonder into):\n\n"
 					"     Dark, Ruins, Indoors, Lawful, Tunnel, Cave, Deep, "
 					"Fall, Temple,\n"

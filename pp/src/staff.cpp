@@ -2450,6 +2450,9 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	if (IS_SET (k->act, ACT_PHYSICIAN))
 		strcat (buf, " Physician");
 
+	if (IS_SET (k->act, ACT_REPAIR)) 
+		strcat (buf, " Repairman");
+
 	if (IS_SET (k->act, ACT_PHYSICIAN))
 		strcat (buf, " Auctioneer");
 
