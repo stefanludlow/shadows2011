@@ -7077,9 +7077,6 @@ npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument)
 			{
 				if (count == item_num)
 				{
-				sprintf(buf, "count is %d num is %d\n", count, item_num);
-				send_to_char (buf,ch);
-
 				obj->item_wear = obj->item_wear + damage->impact;
 				damage_from_obj(obj, damage);	
 				return;	
@@ -7088,8 +7085,6 @@ npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument)
 			}
 			else //repair all of it
 			{
-				sprintf(buf, "bing!\n", count, item_num);
-				send_to_char (buf,ch);
 				obj->item_wear = obj->item_wear + damage->impact;
 				damage_from_obj(obj, damage);
 			}
