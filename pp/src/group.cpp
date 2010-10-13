@@ -381,10 +381,16 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 	char buf2[MAX_STRING_LENGTH] = { '\0' };
 	std::ostringstream buf;
 	char arg[MAX_STRING_LENGTH];
+	char targ[MAX_STRING_LENGTH];
 	bool found = false;
 
 	argument = one_argument (argument, arg);
 
+	if (!(top_leader = ch->following))
+	{
+		top_leader = ch;
+	}
+	
 	if (*arg)
 	{
 		if (is_abbrev (arg, "open"))
@@ -418,6 +424,47 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
+			//TODO Add in group kick
+		else if (is_abbrev (arg, "kick"))
+		{
+			if (!(top_leader == ch))
+			{
+				send_to_char ("You are not the leader!\n", ch);
+				return;
+			}	
+			
+			argument = one_argument (argument, targ);
+			if (!targ)
+			{
+				send_to_char ("Who do you wish to kick out of your group.\n", ch);
+				return;
+			}
+			tch = get_char_room_vis (ch, targ);
+			
+			if (tch == ch)
+			{
+				send_to_char ("Sorry, you are stuck with being the leader.\n", ch);
+				return;
+			}
+			
+			if (!(is_with_group(tch)))
+			{
+				send_to_char ("You don't see them here.\n", ch);
+				return;
+			}
+			
+			
+			tch->following = 0;
+			sprintf (buf2, "You have removed $N from the group.");
+			act (buf2, false, ch, 0, tch, TO_CHAR);
+			
+			sprintf (buf2, "$N has removed you from the group.");
+			act (buf2, false, tch, 0, ch, TO_CHAR);
+			
+			return;
+			
+		}
+		
 		else if (is_abbrev (arg, "retreat"))
 		{
 			char direction_arg[AVG_STRING_LENGTH] = "";
@@ -430,7 +477,6 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 			}
 			else
 			{
-				CHAR_DATA* tch;
 				bool ordered = false;
 				for (tch = ch->room->people; tch; tch = tch->next_in_room)
 				{
@@ -454,10 +500,7 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 		}
 	}
 
-	if (!(top_leader = ch->following))
-	{
-		top_leader = ch;
-	}
+	
 
 	if (!top_leader)
 	{

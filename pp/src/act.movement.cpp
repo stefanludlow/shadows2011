@@ -2395,14 +2395,25 @@ initiate_move (CHAR_DATA * ch)
 	else
 		sprintf (suffix, "ward");
 
+	int true_speed;
+	if (is_with_group (ch))
+	{
+		true_speed = speed_group(ch);
+	}
+	else
+	{
+		true_speed = ch->speed;
+	}
+
+	
 	if ((ch->room->sector_type == SECT_INSIDE && !IS_SET (flags, MF_SNEAK)
 		&& ch->speed != SPEED_IMMORTAL) || (!IS_MORTAL (ch)
 		&& ch->speed != SPEED_IMMORTAL
 		&& !IS_SET (flags, MF_SNEAK)))
 	{
-		sprintf (buf, "You begin %s %s%s%s.\n", move_names[ch->speed],
+		sprintf (buf, "You begin %s %s%s%s.\n", move_names[true_speed],
 			dirs[dir], suffix, travel_str);
-		sprintf (buf1, "$n begins %s %s%s%s.", move_names[ch->speed], dirs[dir],
+		sprintf (buf1, "$n begins %s %s%s%s.", move_names[true_speed], dirs[dir],
 			suffix, travel_str);
 		send_to_char (buf, ch);
 		act (buf1, true, ch, 0, 0, TO_ROOM | _ACT_FORMAT);
@@ -2419,9 +2430,9 @@ initiate_move (CHAR_DATA * ch)
 			exit_speed += 2;
 			needed_movement = (int) round (((float) needed_movement) * 1.2);
 			sprintf (buf, "You %s %s%s through the light rain%s.\n",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			sprintf (buf1, "$n %ss %s%s through the light rain%s.",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			send_to_char (buf, ch);
 			act (buf1, true, ch, 0, 0, TO_ROOM);
 			break;
@@ -2429,9 +2440,9 @@ initiate_move (CHAR_DATA * ch)
 			exit_speed += 4;
 			needed_movement = (int) round (((float) needed_movement) * 1.5);
 			sprintf (buf, "You %s %s%s through the rain%s.\n",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			sprintf (buf1, "$n %ss %s%s through the rain%s.",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			send_to_char (buf, ch);
 			act (buf1, true, ch, 0, 0, TO_ROOM);
 			break;
@@ -2440,19 +2451,19 @@ initiate_move (CHAR_DATA * ch)
 			needed_movement *= 2;
 			sprintf (buf,
 				"You %s %s%s, struggling through the lashing rain%s.\n",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			sprintf (buf1,
 				"$n %ss %s%s, struggling through the lashing rain%s.",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			send_to_char (buf, ch);
 			act (buf1, true, ch, 0, 0, TO_ROOM);
 			break;
 		case LIGHT_SNOW:
 			needed_movement = (int) round (((float) needed_movement) * 1.5);
 			sprintf (buf, "You %s %s%s through the light snowfall%s.\n",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			sprintf (buf1, "$n %ss %s%s through the light snowfall%s.",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			send_to_char (buf, ch);
 			act (buf1, true, ch, 0, 0, TO_ROOM);
 			break;
@@ -2460,9 +2471,9 @@ initiate_move (CHAR_DATA * ch)
 			exit_speed += 8;
 			needed_movement *= 2;
 			sprintf (buf, "You %s %s%s through the steadily falling snow%s.\n",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			sprintf (buf1, "$n %ss %s%s through the steadily falling snow%s.",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			send_to_char (buf, ch);
 			act (buf1, true, ch, 0, 0, TO_ROOM);
 			break;
@@ -2471,17 +2482,17 @@ initiate_move (CHAR_DATA * ch)
 			needed_movement *= 4;
 			sprintf (buf,
 				"You %s %s%s, struggling through the shrieking snow%s.\n",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			sprintf (buf1,
 				"$n %ss %s%s, struggling through the shrieking snow%s.",
-				move_names2[ch->speed], dirs[dir], suffix, travel_str);
+				move_names2[true_speed], dirs[dir], suffix, travel_str);
 			send_to_char (buf, ch);
 			act (buf1, true, ch, 0, 0, TO_ROOM);
 			break;
 		default:
-			sprintf (buf, "You begin %s %s%s%s.\n", move_names[ch->speed],
+			sprintf (buf, "You begin %s %s%s%s.\n", move_names[true_speed],
 				dirs[dir], suffix, travel_str);
-			sprintf (buf1, "$n begins %s %s%s%s.", move_names[ch->speed],
+			sprintf (buf1, "$n begins %s %s%s%s.", move_names[true_speed],
 				dirs[dir], suffix, travel_str);
 			send_to_char (buf, ch);
 			act (buf1, true, ch, 0, 0, TO_ROOM);
@@ -2493,7 +2504,7 @@ initiate_move (CHAR_DATA * ch)
 	{
 		sprintf (buf, "%s", char_short (ch));
 		*buf = toupper (*buf);
-		sprintf (buf1, "#5%s#0 begins %s %s%s.\n", buf, move_names[ch->speed],
+		sprintf (buf1, "#5%s#0 begins %s %s%s.\n", buf, move_names[true_speed],
 			dirs[dir], suffix);
 		send_to_room (buf1, ch->mob->nVirtual);
 		needed_movement = 0;
