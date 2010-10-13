@@ -1859,11 +1859,11 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	/* 50% chance to lose a move if they would have lost no points */
 	if ((number (1, 100) > 50) && (movecost <= 1))
 		movecost = 1;
-
+/** removed per Kite
 	if (!isElf(src) && !isDwarf(src)) {
 		src->move = src->move - movecost;
 	}
-
+**/
 	if (src->move < 0)
 		src->move = 0;
 
@@ -3430,11 +3430,12 @@ weaken (CHAR_DATA * victim, uint16 hp_penalty, uint16 mp_penalty,
 	char buf[MAX_STRING_LENGTH];
 
 	/* dwarves and elves immune to endurance loss */
+/*** removed at Kite's request 
 	if (victim->race == 23 || (victim->race >=16 && victim->race <= 19)  || victim->race==93)
 	{
 		mp_penalty = 0;
 	}
-
+*****/
 
 	if (hp_penalty == 0 && mp_penalty == 0)
 		return 0;
