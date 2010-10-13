@@ -1859,11 +1859,9 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	/* 50% chance to lose a move if they would have lost no points */
 	if ((number (1, 100) > 50) && (movecost <= 1))
 		movecost = 1;
-/** removed per Kite
-	if (!isElf(src) && !isDwarf(src)) {
-		src->move = src->move - movecost;
-	}
-**/
+
+	src->move = src->move - movecost;
+
 	if (src->move < 0)
 		src->move = 0;
 
@@ -2087,9 +2085,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	if ((number (1, 100) > 50) && (movecost <= 1))
 		movecost = 1;
 
-	if (!isElf(tar) && !isDwarf(tar)) {
-		tar->move = tar->move - movecost;
-	}
+	tar->move = tar->move - movecost;
 
 	if (tar->move < 0)
 		tar->move = 0;
