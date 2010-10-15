@@ -1501,7 +1501,9 @@ do_order (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			if (!strstr (obj->name, "$color")
 				&& !strstr (obj->name, "$drabcolor")
-				&& !strstr (obj->name, "$finecolor"))
+				&& !strstr (obj->name, "$finecolor")
+				&& !strstr(obj->name, "$finegemcolor")
+				&& !strstr(obj->name, "$gemcolor"))
 			{
 				send_to_char
 					("That item cannot be ordered in a specific color.\n", ch);
@@ -1534,6 +1536,28 @@ do_order (CHAR_DATA * ch, char *argument, int cmd)
 					send_to_char
 						("That item cannot be ordered in this color. See ORDER DRABCOLORS for a list.\n",
 						ch);
+					return;
+				}
+			}
+			
+			else if ((i = index_lookup (fine_gem_colors, color)) != -1)
+			{
+				if (!strstr (obj->name, "$finegemcolor"))
+				{
+					send_to_char
+					("That item cannot be ordered in this color. See ORDER FINEGEMCOLORS for a list.\n",
+					 ch);
+					return;
+				}
+			}
+			
+			else if ((i = index_lookup (gem_colors, color)) != -1)
+			{
+				if (!strstr (obj->name, "$gemcolor"))
+				{
+					send_to_char
+					("That item cannot be ordered in this color. See ORDER GEMCOLORS for a list.\n",
+					 ch);
 					return;
 				}
 			}
