@@ -969,6 +969,10 @@ load_colored_object (int vnum, char *color)
 					writing = writing->next_page;
 				}
 			}
+			// generate a new ID only once, all pages indexed by page ID off the key
+			new_obj->o.od.value[1] = unused_writing_id(); 
+			save_writing(new_obj);
+
 		}
 	}
 
