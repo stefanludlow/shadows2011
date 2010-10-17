@@ -1103,8 +1103,8 @@ can_order (OBJ_DATA * obj, CHAR_DATA * keeper)
 // Markups for items ordered in specific colors.
 
 #define DRABCOLOR_MARKUP	.25
-#define COLOR_MARKUP		.45
-#define FINECOLOR_MARKUP	.65
+#define COLOR_MARKUP		.45  //also used for gemcolor
+#define FINECOLOR_MARKUP	.65 //also used for finegemcolor
 
 // Waiting period defines for specially-ordered items, in IC days.
 
@@ -1584,9 +1584,9 @@ do_order (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (*color && strstr (obj->name, "$drabcolor"))
 			color_markup = DRABCOLOR_MARKUP;
-		else if (*color && strstr (obj->name, "$color"))
+		else if (*color && (strstr (obj->name, "$color") || strstr (obj->name, "$gemcolor")))
 			color_markup = COLOR_MARKUP;
-		else if (*color && strstr (obj->name, "$finecolor"))
+		else if (*color && (strstr (obj->name, "$finecolor")|| strstr (obj->name, "$finegemcolor")))
 			color_markup = FINECOLOR_MARKUP;
 		else
 			color_markup = 0.0;
