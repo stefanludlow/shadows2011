@@ -2060,7 +2060,7 @@ predatory_mobile (CHAR_DATA * ch)
 {
 	ROOM_DATA *troom;
 	TRACK_DATA *track;
-
+	int chance = 0;
 	if (!ch->room->tracks)
 		return 0;
 
@@ -2071,6 +2071,11 @@ predatory_mobile (CHAR_DATA * ch)
 		return 0;
 	}
 
+		//they may see you, but just don't feel like chasing right now
+	chance = number(0, 3);
+	if (chance == 3)
+		return 0;
+	
 	for (track = ch->room->tracks; track; track = track->next)
 	{
 		if (track->hours_passed > 0)
@@ -2089,7 +2094,7 @@ predatory_mobile (CHAR_DATA * ch)
 			continue;
 		if (track->race >= 0 && track->race <= 29)
 		{
-			ch->speed = MIN (5, track->speed + 2);
+			ch->speed = MIN (4, track->speed + 2); //TODO drop this to a minimum of 4, not 5
 			do_move (ch, "", track->to_dir);
 			return 1;
 		}
@@ -2271,7 +2276,7 @@ target_acquisition (CHAR_DATA * ch)
 		}
 	}
 
-
+		//nerfed this to make homing missile wargs less dangerous
 	if ((IS_SET (ch->act, ACT_AGGRESSIVE) || IS_SET (ch->act, ACT_ENFORCER))
 		&& !IS_SET (ch->act, ACT_SENTINEL) && !morale_broken (ch))
 	{
@@ -2279,10 +2284,14 @@ target_acquisition (CHAR_DATA * ch)
 		{
 			if ((tch = acquire_distant_target (ch, i)))
 			{
+					//they may see you, but just don't feel like chasing right now
+				int chance = number(0, 3);
+				if (chance == 3)
+					return 0;
 
 				sprintf (buf, "%d", tch->in_room);
 				ch->speed = tch->speed + 2;
-				ch->speed = MIN (ch->speed, 4);
+				ch->speed = MIN (ch->speed, 4); //jog or faster -this is fine
 				do_track (ch, buf, 0);
 				return 1;
 			}
