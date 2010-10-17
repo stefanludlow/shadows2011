@@ -5602,17 +5602,70 @@ void r_teach (CHAR_DATA *ch, char * argument)
 {
 	std::string ArgumentList = argument, ThisArgument;
 	int index = 0;
+	int i;
+	SUBCRAFT_HEAD_DATA *craft;
+	AFFECTED_TYPE *af;
 	ArgumentList = one_argument (ArgumentList, ThisArgument);
-	if ((index = index_lookup(skills, ThisArgument.c_str())) == -1)
+	
+	index = index_lookup(skills, ThisArgument.c_str());
+	
+	if (index > 0) //it is a skill
+	{
+		if (real_skill(ch, index)) // they know it already
 	{
 		return;
 	}
-	if (real_skill(ch, index))
+		else
 	{
+			open_skill(ch, index); //they don't know, so learn it
 		return;
 	}
-	open_skill(ch, index);
 }
+
+	else if (index == -1) //it's not a skill so we continue and test for crafts
+
+	{	
+					
+		for (craft = crafts; craft; craft = craft->next)
+		{
+			if (!str_cmp (craft->subcraft_name, ThisArgument.c_str()))
+				break;
+			
+		}	
+		for (i = CRAFT_FIRST; i <= CRAFT_LAST; i++)
+		{
+			if (!get_affect (ch, i))
+				break;
+		}
+		
+		if (i > CRAFT_LAST)
+		{
+			return; //they have too many crafts already, so they can't learn this one
+		}
+		
+		if (!str_cmp (craft->subcraft_name, ThisArgument.c_str()))
+		{
+			magic_add_affect (ch, i, -1, 0, 0, 0, 0);
+			af = get_affect (ch, i);
+			af->a.craft = new affect_craft_type;
+			af->a.craft->phase = NULL;
+			af->a.craft->subcraft = NULL;
+			af->a.craft->target_ch = NULL;
+			af->a.craft->target_obj = NULL;
+			af->a.craft->skill_check = 0;
+			af->a.craft->timer = 0;
+			
+			af->a.craft->subcraft = craft;
+			return;
+		}
+	}
+	else 
+	{
+		return;
+	}
+	
+}
+
 
 void
 r_doitanyway (CHAR_DATA *ch, char *argument, char *command, char *keyword, char *player_args)
