@@ -424,7 +424,6 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
-			//TODO Add in group kick
 		else if (is_abbrev (arg, "kick"))
 		{
 			if (!(top_leader == ch))
@@ -441,17 +440,19 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 			}
 			tch = get_char_room_vis (ch, targ);
 			
+			if (!(tch) || !(is_with_group(tch)))
+			{
+				send_to_char ("You don't see them here.\n", ch);
+				return;
+			}
+			
 			if (tch == ch)
 			{
 				send_to_char ("Sorry, you are stuck with being the leader.\n", ch);
 				return;
 			}
 			
-			if (!(is_with_group(tch)))
-			{
-				send_to_char ("You don't see them here.\n", ch);
-				return;
-			}
+			
 			
 			
 			tch->following = 0;
