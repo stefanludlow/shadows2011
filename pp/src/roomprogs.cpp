@@ -3524,6 +3524,7 @@ void
 r_link (CHAR_DATA * ch, char *argument)
 {
 	char buf1[80], buf2[80], buf3[80];
+	char err_buf[MAX_STRING_LENGTH];
 	int dir;
 	int location, location2;
 	ROOM_DATA *source_room;
@@ -3533,7 +3534,8 @@ r_link (CHAR_DATA * ch, char *argument)
 
 	if (!*buf1 || !*buf2 || !*buf3)
 	{
-		system_log ("ERROR: Missing args in r_link", true);
+		sprintf(err_buf, "ERROR: Missing args in r_link in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -3564,7 +3566,8 @@ r_link (CHAR_DATA * ch, char *argument)
 
 	if (dir == -1)
 	{
-		system_log ("ERROR: Invalid direction in r_link", true);
+		sprintf(err_buf, "ERROR: Invalid direction in r_link in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -3580,13 +3583,15 @@ r_link (CHAR_DATA * ch, char *argument)
 
 	if (!(target_room = vtor (location2)))
 	{
-		system_log ("ERROR: tar room not found in r_link", true);
+		sprintf(err_buf, "ERROR: target room not found in r_link in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
 	if (!(source_room = vtor (location)))
 	{
-		system_log ("ERROR: cha room not found in r_link", true);
+		sprintf(err_buf, "ERROR: cha room not found in r_link in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -3613,6 +3618,7 @@ void
 r_exit (CHAR_DATA * ch, char *argument)
 {
 	char buf1[256], buf2[256], buf3[80];
+	char err_buf[MAX_STRING_LENGTH];
 	int dir;
 	int location, location2;
 	ROOM_DATA *source_room;
@@ -3622,7 +3628,8 @@ r_exit (CHAR_DATA * ch, char *argument)
 
 	if (!*buf1 || !*buf2 || !*buf3)
 	{
-		system_log ("ERROR: Missing args in r_link", true);
+		sprintf(err_buf, "ERROR: Missing args in r_exit in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -3653,7 +3660,8 @@ r_exit (CHAR_DATA * ch, char *argument)
 
 	if (dir == -1)
 	{
-		system_log ("ERROR: Invalid direction in r_link", true);
+		sprintf(err_buf, "ERROR: Invalid direction in r_exit in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -3669,13 +3677,15 @@ r_exit (CHAR_DATA * ch, char *argument)
 
 	if (!(target_room = vtor (location2)))
 	{
-		system_log ("ERROR: tar room not found in r_link", true);
+		sprintf(err_buf, "ERROR: tar room not found in r_exit in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
 	if (!(source_room = vtor (location)))
 	{
-		system_log ("ERROR: cha room not found in r_link", true);
+		sprintf(err_buf, "ERROR: cha room not found in r_exit in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -3694,6 +3704,7 @@ void
 r_atlook (CHAR_DATA * ch, char *argument)
 {
 	char loc_str[MAX_INPUT_LENGTH];
+	char err_buf[MAX_STRING_LENGTH];
 	int loc_nr, original_loc;
 	CHAR_DATA *target_mob;
 	ROOM_DATA *troom;
@@ -3707,7 +3718,8 @@ r_atlook (CHAR_DATA * ch, char *argument)
 
 	if (!(troom = vtor (loc_nr)))
 	{
-		system_log ("ERROR: Room not found in r_atlook", true);
+		sprintf(err_buf, "ERROR: Room not found in r_atlook in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -3936,6 +3948,7 @@ r_atecho(CHAR_DATA *ch, char *argument)
 {
 	char   loc_str[MAX_INPUT_LENGTH] = {'\0'};
 	char   loc_str1[MAX_INPUT_LENGTH] = {'\0'};
+	char err_buf[MAX_STRING_LENGTH];
 	char    *ploc_str;
 	char   *ploc_str1;
 	char   buf[MAX_INPUT_LENGTH] = {'\0'};
@@ -3971,8 +3984,10 @@ r_atecho(CHAR_DATA *ch, char *argument)
 			return;
 		}
 
-		if ( !vtor (strtol(loc_str1, NULL, 10)) ) {
-			system_log("ERROR: Room not found in r_atecho", true);
+		if ( !vtor (strtol(loc_str1, NULL, 10)) ) 
+		{
+			sprintf(err_buf, "ERROR: Room %d not found in r_atecho in room %d.", (strtol(loc_str1, NULL, 10)), ch->room->nVirtual);
+			system_log (err_buf, true);
 			//   return;
 		}
 		else {
@@ -4010,6 +4025,7 @@ void
 r_unlink (CHAR_DATA * ch, char *argument)
 {
 	char arg1[MAX_STRING_LENGTH], arg2[MAX_STRING_LENGTH];
+	char err_buf[MAX_STRING_LENGTH];
 	char buf[MAX_STRING_LENGTH];
 	int dir;
 	int old_rnum, location;
@@ -4049,13 +4065,15 @@ r_unlink (CHAR_DATA * ch, char *argument)
 
 	if (dir == -1)
 	{
-		system_log ("ERROR: Invalid direction in r_unlink", true);
+		sprintf(err_buf, "ERROR: Invalid direction in r_unlink in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
 	if (!(troom = vtor (location)))
 	{
-		system_log ("ERROR: cha room not found in r_unlink", true);
+		sprintf(err_buf, "ERROR: cha room not found in r_unlink in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -4079,6 +4097,7 @@ void
 r_unexit (CHAR_DATA * ch, char *argument)
 {
 	char arg1[80], arg2[80];
+	char err_buf[MAX_STRING_LENGTH];
 	int dir;
 	int location;
 	ROOM_DATA *troom;
@@ -4117,13 +4136,15 @@ r_unexit (CHAR_DATA * ch, char *argument)
 
 	if (dir == -1)
 	{
-		system_log ("ERROR: Invalid direction in r_unexit", true);
+		sprintf(err_buf, "ERROR: Invalid direction in r_unexit in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
 	if (!(troom = vtor (location)))
 	{
-		system_log ("ERROR: cha room not found in r_unexit", true);
+		sprintf(err_buf, "ERROR: cha room not found in r_unexit in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -4135,7 +4156,7 @@ r_give (CHAR_DATA * ch, char *argument)
 {
 	OBJ_DATA *obj;
 	char buf [AVG_STRING_LENGTH];
-
+	char err_buf[MAX_STRING_LENGTH];
 
 	argument = one_argument(argument, buf);
 	obj = load_object (atoi (buf));
@@ -4145,7 +4166,10 @@ r_give (CHAR_DATA * ch, char *argument)
 	if (obj)
 		obj_to_char (obj, ch);
 	else
-		system_log ("ERROR: Object does not exist in r_give", true);
+	{
+		sprintf(err_buf, "ERROR: Object does not exist in r_give in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
+	}
 }
 
 void
@@ -4153,6 +4177,7 @@ r_take (CHAR_DATA * ch, char *argument)
 {
 	OBJ_DATA *obj;
 	char buf [AVG_STRING_LENGTH];
+	char err_buf[MAX_STRING_LENGTH];
 
 	argument = one_argument(argument, buf);
 
@@ -4172,18 +4197,25 @@ r_take (CHAR_DATA * ch, char *argument)
 		}
 	}
 	else
-		system_log ("ERROR: Object not found in r_take", true);
+	{
+		sprintf(err_buf, "ERROR: Object not found in r_take in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
+	}
 }
 
 void
 r_put (CHAR_DATA * ch, char *argument)
 {
 	char arg1[80], arg2[80];
+	char err_buf[MAX_STRING_LENGTH];
 
 	half_chop (argument, arg1, arg2);
 
 	if (!vtor (atoi (arg2)) || !vtoo (atoi (arg1)))
-		system_log ("ERROR: Object does not exist in r_put", true);
+	{
+		sprintf(err_buf, "ERROR: Object does not exist in r_put in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
+	}
 	else
 		obj_to_room (load_object (atoi (arg1)), vtor (atoi (arg2))->nVirtual);
 }
@@ -4199,6 +4231,7 @@ r_load_clone (CHAR_DATA * ch, char *argument)
 	char *arg1 = new char [len];
 	char *arg2 = new char [len];
 	char *arg3 = new char [len];
+	
 	OBJ_DATA *obj = 0;
 	OBJ_DATA *clone = 0;
 
@@ -4266,6 +4299,7 @@ void
 r_get (CHAR_DATA * ch, char *argument)
 {
 	char arg1[80], arg2[80], arg3[80];
+	char err_buf[MAX_STRING_LENGTH];
 	OBJ_DATA *obj;
 	int virt;
 
@@ -4278,7 +4312,9 @@ r_get (CHAR_DATA * ch, char *argument)
 
 	if (!vtor (virt))
 	{
-		system_log ("ERROR: Object-room not found in r_get", true);
+		sprintf(err_buf, "ERROR: Object-room not found in r_get in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
+	
 		return;
 	}
 
@@ -4294,7 +4330,12 @@ r_get (CHAR_DATA * ch, char *argument)
 		}
 	}
 	else
-		system_log ("ERROR: Object not found in r_get", true);
+	{
+		sprintf(err_buf, "ERROR: Object not found in r_get in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
+		
+		return;
+	}
 }
 
 void
@@ -4303,6 +4344,8 @@ r_lock (CHAR_DATA * ch, char *argument)
 	long virt;
 	int dir;
 	char arg1[80], arg2[80];
+	char err_buf[MAX_STRING_LENGTH];
+
 
 	half_chop (argument, arg1, arg2);
 
@@ -4335,7 +4378,8 @@ r_lock (CHAR_DATA * ch, char *argument)
 
 	if (dir == -1)
 	{
-		system_log ("ERROR: Invalid direction in r_unexit", true);
+		sprintf(err_buf, "ERROR: Invalid direction in r_lock in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 }
@@ -4344,6 +4388,7 @@ void
 r_loadmob (CHAR_DATA * ch, char *argument)
 {
 	char arg1[80], arg2[80];
+	char err_buf[MAX_STRING_LENGTH];
 	int mob_vnum, room_vnum;
 
 	argument = one_argument(argument, arg1);
@@ -4366,7 +4411,8 @@ r_loadmob (CHAR_DATA * ch, char *argument)
 
 	if (!vtom (mob_vnum) || !vtor (room_vnum))
 	{
-		system_log ("ERROR: Mobile does not exist in r_loadmob", true);
+		sprintf(err_buf, "ERROR: Mobile does not exist in r_loadmob in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -4391,6 +4437,7 @@ r_exmob (CHAR_DATA * ch, char *argument)
 {
 	CHAR_DATA *ptrMob = NULL, *tmp_ch = NULL;
 	char arg1[80], arg2[80];
+	char err_buf[MAX_STRING_LENGTH];
 	int virt;
 	long nMobVnum = 0;
 
@@ -4403,7 +4450,8 @@ r_exmob (CHAR_DATA * ch, char *argument)
 
 	if (!vtor (virt))
 	{
-		system_log ("ERROR: Mobile-room does not exist in r_exmob", true);
+		sprintf(err_buf, "ERROR: Mobile-room does not exist in r_exmob in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -4420,13 +4468,15 @@ r_exmob (CHAR_DATA * ch, char *argument)
 		}
 		if (!ptrMob)
 		{
-			system_log ("ERROR: Mobile does not exist in r_exmob", true);
+			sprintf(err_buf, "ERROR: Mobile does not exist in r_exmob in room %d.", ch->room->nVirtual);
+			system_log (err_buf, true);
 			return;
 		}
 	}
 	else if (!(ptrMob = get_char_room (arg1, virt)))
 	{
-		system_log ("ERROR: Mobile does not exist in r_exmob", true);
+		sprintf(err_buf, "ERROR: Mobile does not exist in r_exmob in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -4438,6 +4488,7 @@ r_rftog (CHAR_DATA * ch, char *arg)
 {
 	int flag;
 	char buf[80], rbuf[80];
+	char err_buf[MAX_STRING_LENGTH];
 	ROOM_DATA *troom;
 
 	*buf = *rbuf = '\0';
@@ -4451,7 +4502,8 @@ r_rftog (CHAR_DATA * ch, char *arg)
 
 	if (!troom)
 	{
-		system_log ("ERROR: Unknown room in r_rftog.", true);
+		sprintf(err_buf, "ERROR: Unknown room in r_rftog in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -4467,6 +4519,7 @@ void
 r_force (CHAR_DATA * ch, char *argument)
 {
 	char arg1[80], arg2[80], arg3[256];
+	char err_buf[MAX_STRING_LENGTH];
 	CHAR_DATA *tmp_ch;
 	int room, mob;
 	char buf[1024];
@@ -4505,7 +4558,8 @@ r_force (CHAR_DATA * ch, char *argument)
 
 	if (!vtor (room))
 	{
-		system_log ("ERROR: unknown room in r_force.", true);
+		sprintf(err_buf, "ERROR: unknown room in r_force in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -4552,6 +4606,7 @@ void
 r_transmob (CHAR_DATA * ch, char *argument)
 {
 	char arg1[80], arg2[80], arg3[256];
+	char err_buf[MAX_STRING_LENGTH];
 	CHAR_DATA *ptrMob = NULL, *tmp_ch;
 	int nOriginRoom, nTargetRoom, nMobVnum;
 
@@ -4570,13 +4625,15 @@ r_transmob (CHAR_DATA * ch, char *argument)
 
 	if (!vtor (nOriginRoom))
 	{
-		system_log ("ERROR: unknown origin room in r_transmob.", true);
+		sprintf(err_buf, "ERROR: unknown origin room in r_transmob in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		nOriginRoom = ch->room->nVirtual;
 	}
 
 	if (!vtor (nTargetRoom))
 	{
-		system_log ("ERROR: unknown desination room in r_transmob.", true);
+		sprintf(err_buf, "ERROR: unknown desination room in r_transmob in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -4621,6 +4678,7 @@ r_trans_group (CHAR_DATA * ch, char * argument)
 	char subject_arg [80];
 	char origin [80];
 	char destination [256];
+	char err_buf[MAX_STRING_LENGTH];
 	int subject_mnum, origin_rnum, destination_rnum;
 
 	// Parse the arguments into parts (could probably just use strtol)
@@ -4644,14 +4702,16 @@ r_trans_group (CHAR_DATA * ch, char * argument)
 	// If origin_rnum doesn't exist, default to user's room
 	if (!vtor (origin_rnum))
 	{
-		system_log ("ERROR: unknown origin room in r_transmob.", true);
+		sprintf(err_buf, "ERROR: unknown origin room in r_trans_group in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		origin_rnum = ch->room->nVirtual;
 	}
 
 	// If the destination room doesn't exist, not need to continue
 	if (!vtor (destination_rnum))
 	{
-		system_log ("ERROR: unknown desination room in r_transmob.", true);
+		sprintf(err_buf,"ERROR: unknown desination room in r_trans_group in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 
@@ -5018,6 +5078,7 @@ void
 r_pain (CHAR_DATA * ch, char *argument)
 {
 	char arg1[80], arg2[80], arg3[80], arg4[80], arg5[80];
+	char err_buf[MAX_STRING_LENGTH];
 	int high, low, dam, type;
 	int room;
 	CHAR_DATA *victim;
@@ -5032,7 +5093,8 @@ r_pain (CHAR_DATA * ch, char *argument)
 
 	if (!vtor (room))
 	{
-		system_log ("ERROR: unknown room in r_pain.", true);
+		sprintf(err_buf,"ERROR: unknown room in r_pain in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 	low = atoi (arg2);
@@ -5091,6 +5153,7 @@ void
 r_atread (CHAR_DATA * ch, char *argument)
 {
 	char arg1[80], arg2[80], arg3[80], buf[80];
+	char err_buf[MAX_STRING_LENGTH];
 	int room, nMsgNum;
 	OBJ_DATA *ptrBoard = NULL;
 	ROOM_DATA *ptrRoom = NULL;
@@ -5105,7 +5168,8 @@ r_atread (CHAR_DATA * ch, char *argument)
 
 	if (!(ptrRoom = vtor (room)))
 	{
-		system_log ("ERROR: unknown room in r_atread.", true);
+		sprintf(err_buf,"ERROR: unknown room in r_atread in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 	else
@@ -5133,11 +5197,11 @@ void
 r_purge (CHAR_DATA * ch, char *argument)
 {
 	char arg1[80], arg2[80], arg3[80];
+	char err_buf[MAX_STRING_LENGTH];
 	int room;
 	OBJ_DATA *object = NULL;
 	OBJ_DATA *next_object = NULL;
 	ROOM_DATA *ptrRoom = NULL;
-	//      CHAR_DATA *victim = NULL;
 
 	arg_splitter (3, argument, arg1, arg2, arg3);
 
@@ -5148,7 +5212,8 @@ r_purge (CHAR_DATA * ch, char *argument)
 
 	if (!(ptrRoom = vtor (room)))
 	{
-		system_log ("ERROR: unknown room in r_purge.", true);
+		sprintf(err_buf,"ERROR: unknown room in r_purge in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		return;
 	}
 	else
@@ -5175,6 +5240,7 @@ void
 r_strip (CHAR_DATA *ch, char *argument)
 {
 	int drop_room = atoi(argument);
+	char err_buf[MAX_STRING_LENGTH];
 	OBJ_DATA *obj;
 	OBJ_DATA *bag = NULL;
 	char buf[MAX_STRING_LENGTH];
@@ -5184,7 +5250,10 @@ r_strip (CHAR_DATA *ch, char *argument)
 
 	if (!( vtor(drop_room)))
 	{
-		system_log("ERROR: Room does not exist in r_strip", true);
+		sprintf(err_buf,"ERROR: Room does not exist in r_strip in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
+		return;
+
 	}
 	else
 	{
@@ -5342,6 +5411,7 @@ r_load_obj (CHAR_DATA *ch, char *argument)
 	char *arg1 = new char [(int) len];
 	char *arg2 = new char [(int) len];
 	char *arg3 = new char [(int) len];
+	char err_buf[MAX_STRING_LENGTH];
 	bool exit = false;
 	OBJ_DATA *obj = NULL;
 	int rvnum = 0, ovnum = 0, count = 0;
@@ -5361,12 +5431,14 @@ r_load_obj (CHAR_DATA *ch, char *argument)
 
 	if (!( vtor(rvnum) ))
 	{
-		system_log("ERROR: Room does not exist in r_load_obj", true);
+		sprintf(err_buf,"ERROR: Room does not exist in r_load_obj in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		exit = true;
 	}
 	if (count < 1)
 	{
-		system_log("ERROR: Negative count specified in r_load_obj", true);
+		sprintf(err_buf,"ERROR: Negative count specified in r_load_obj in room %d.", ch->room->nVirtual);
+		system_log (err_buf, true);
 		exit = true;
 	}
 
@@ -5390,7 +5462,8 @@ r_load_obj (CHAR_DATA *ch, char *argument)
 	{
 		if (!exit && !(obj = load_colored_object (ovnum, (char *) color.c_str())))
 		{
-			system_log("ERROR: item does not exist in r_load_obj", true);
+			sprintf(err_buf,"ERROR: item does not exist in in r_load_obj in room %d.", ch->room->nVirtual);
+			system_log (err_buf, true);
 			exit = true;
 		}
 	}
@@ -5398,7 +5471,8 @@ r_load_obj (CHAR_DATA *ch, char *argument)
 	{
 		if (!exit && !(obj = load_object (ovnum)))
 		{
-			system_log("ERROR: Item does not exist in r_load_obj", true);
+			sprintf(err_buf,"ERROR: item does not exist in in r_load_obj in room %d.", ch->room->nVirtual);
+			system_log (err_buf, true);
 			exit = true;
 		}
 	}
@@ -5442,6 +5516,8 @@ void r_takemoney ( CHAR_DATA *ch, char * argument)
 {
 	std::string ArgumentList(argument);
 	std::string ThisArgument("");
+	char err_buf[MAX_STRING_LENGTH];
+
 	int TargetVnum = -1, Count = 0, Currency = 0;
 
 	ArgumentList = one_argument(ArgumentList, ThisArgument);
@@ -5472,13 +5548,15 @@ void r_takemoney ( CHAR_DATA *ch, char * argument)
 		}
 		else
 		{
-			send_to_gods("Error: Invalid amount argument in r_takemoney");
+			sprintf(err_buf,"ERROR: Invalid amount argument in r_takemoney in room %d.", ch->room->nVirtual);
+			system_log (err_buf, true);
 			return;
 		}
 	}
 	else
 	{
-		send_to_gods("Error: Missing amount argument in r_takemoney");
+		sprintf(err_buf,"ERROR: Missing amount argument in r_takemoney in room %d.", ch->room->nVirtual);
+		send_to_gods(err_buf);
 		return;
 	}
 
@@ -5497,13 +5575,15 @@ void r_takemoney ( CHAR_DATA *ch, char * argument)
 			Currency = 4;
 		else
 		{
-			send_to_gods("Error: Invalid currency type in r_takemoney");
+			sprintf(err_buf,"ERROR: Invalid currency type in r_takemoney in room %d.", ch->room->nVirtual);
+			send_to_gods(err_buf);
 			return;
 		}
 	}
 	else
 	{
-		send_to_gods("Error: Missing currency argument in r_takemoney");
+		sprintf(err_buf,"ERROR: Missing currency argument in r_takemoney in room %d.", ch->room->nVirtual);
+		send_to_gods(err_buf);
 		return;
 	}
 
