@@ -3574,7 +3574,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 			else
 			{
 				ch->right_hand->count -= nObjectTally;
-				//nObjectTally = 0;
+				nObjectTally = 0;
 			}
 		}
 
@@ -3587,7 +3587,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 			else
 			{
 				ch->left_hand->count -= nObjectTally;
-				//nObjectTally = 0;
+				nObjectTally = 0;
 			}
 		}
 
@@ -3607,7 +3607,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 					else
 					{
 						ptrObj->count -= nObjectTally;
-						//nObjectTally = 0;
+						nObjectTally = 0;
 						ptrObj = ptrObj->next_content;
 					}
 				}
