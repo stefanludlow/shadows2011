@@ -6864,7 +6864,18 @@ skill_mend(CHAR_DATA * ch, OBJ_DATA *kit, OBJECT_DAMAGE * damage)
 	}
 
 }
-
+/*******************
+ *
+ * Cost is per percentage point of damage times 10% of vaue of item times repeat discount
+ * Discount:
+ * Repair one thing - 15% higher
+ * Repair multiple items - first one is 15% off and each one after that 5% off
+ * 
+ * Entire item repaired X times =  cost of new item where X depends on quality of item
+ * Quality = 30, means the item can be repaired 3 times, before it equals cost of new item
+ * higher quality items are cheaper to repair, since they are easier to fix. They are
+ * also more expensive, so it is a balance for players choice.
+ *******************/
 void
 npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument)
 {
@@ -6874,6 +6885,10 @@ npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument)
 	int count;
 	int item_num;
 	float cost = 0;
+	float obj_cost = 0;
+	
+	
+	obj_cost = (obj->farthings/100) / (obj->quality/10); 
 	
 	if (!mob || !IS_SET (mob->act, ACT_REPAIR))
 	{
@@ -6925,11 +6940,11 @@ npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument)
 			{
 				if (obj->damage->next)
 				{
-					cost += damage->impact * 0.85;
+					cost += damage->impact  * obj_cost  * 0.85 ;
 				}
 				else
 				{
-					cost += damage->impact * 0.95;
+					cost += damage->impact  * obj_cost  * 0.95 ;
 				}
 			}
 			if (mob->shop)
@@ -6943,7 +6958,7 @@ npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument)
 				
 				if (count == item_num)
 				{
-					cost += damage->impact * 1.15;
+					cost += damage->impact  * 1.15 * obj_cost;
 					if (mob->shop)
 						cost *= mob->shop->markup;
 					break;
@@ -6987,11 +7002,11 @@ npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument)
 		{
 			if (obj->damage->next)
 			{
-				cost += damage->impact * 0.85;
+				cost += damage->impact * 0.85 * obj_cost ;
 			}
 			else
 			{
-				cost += damage->impact * 0.95;
+				cost += damage->impact  * 0.95 * obj_cost;
 			}
 		}
 		if (mob->shop)
@@ -7006,7 +7021,7 @@ npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument)
 			
 			if (count == item_num)
 			{
-				cost += damage->impact * 1.15;
+				cost += damage->impact  * 1.15 * obj_cost;
 				if (mob->shop)
 					cost *= mob->shop->markup;
 				break;
@@ -7063,7 +7078,7 @@ npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument)
 	act ("$N promptly repairs the damage to $n's item.", true, ch, 0, mob,
 		 TO_ROOM | _ACT_FORMAT);
 
-	/*** now to do the actually reapir stuff**/
+	/*** now to do the actually repair stuff**/
 	if (obj->damage)
 	{
 		count = 1;
@@ -7092,6 +7107,5 @@ npc_repair (CHAR_DATA * ch, CHAR_DATA * mob, OBJ_DATA *obj, char *argument)
 			count ++;
 			
 		}
-		//*******/
 	}	
 }
