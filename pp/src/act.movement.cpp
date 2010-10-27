@@ -1261,19 +1261,12 @@ enter_room (QE_DATA * qe)
 			start_bleed = number(10, 100); 						
 			if (start_bleed > wound->bindskill) 
 			{
-					//enable this at Kite's word
-					//wound->bleeding = number (1, 3);	
+				wound->bleeding = number (1, 3);	
 			}
 			if (IS_MORTAL (ch) && wound->bleeding)
 			{
-				/** changed to this when ready to live with real bleeding damage
 				sprintf (buf,
 				 "#1You wince as blood begins to flow again from a %s %s on your %s.#0\n",
-				wound->severity, wound->name,
-				expand_wound_loc (wound->location));
-				 **/
-				sprintf (buf,
-				"#1You think a %s %s on your %s is begining to bleed again.#0\n",
 				wound->severity, wound->name,
 				expand_wound_loc (wound->location));
 				send_to_char (buf, ch);
@@ -1293,32 +1286,44 @@ enter_room (QE_DATA * qe)
 			continue;
 		else
 		{
-			//3 stars or less, and you -will- take damage moving faster than trudge
-		if (((ch->speed > 1)|| (ch->speed == 0)) && (tot_damage > (.333 * ch->max_hit)))
-		{
+				/** trudge, pace, walk, jog -->> 1, 2, 0, 3 **/
+			
+//2 stars or less, and you -will- take damage moving faster than trudge (1)
+			if (((ch->speed > 1) || (ch->speed == 0)) 
+				&& (tot_damage > (.6667 * ch->max_hit)))
+			{
 			sprintf (buf,
 					 "#1The pain from a %s %s on your %s gets much worse.#0\n",
 					 wound->severity, wound->name,
 					 expand_wound_loc (wound->location));
 			send_to_char (buf, ch);
+				adjust_wound(ch, wound, number(1, 3));	
+			}
 
-				//enable this at Kite's word
-				//adjust_wound(ch, wound, number(1, 3));	
-		}
-			//four stars you -will- take small damage if move faster than walk
-		else if ((ch->speed > 2) && (tot_damage > (.1665 * ch->max_hit)))
-		{
+//3 stars or less, and you -will- take damage moving faster than pace (2)
+			else if (((ch->speed > 2)|| (ch->speed == 0)) 
+					&& (tot_damage > (.333 * ch->max_hit)))
+			{
+				sprintf (buf,
+						 "#1The pain from a %s %s on your %s gets much worse.#0\n",
+						 wound->severity, wound->name,
+						 expand_wound_loc (wound->location));
+				send_to_char (buf, ch);
+				adjust_wound(ch, wound, number(1, 3));	
+			}
+
+//four stars you -may- take some damage if move faster than walk (0)
+			else if ((ch->speed > 2) && (tot_damage > (.1667 * ch->max_hit)))
+			{
 			sprintf (buf,
 					 "#1The pain from a %s %s on your %s gets a little worse.#0\n",
 					 wound->severity, wound->name,
 					 expand_wound_loc (wound->location));
 			send_to_char (buf, ch);
-
-				//enable this at Kite's word
-				//adjust_wound(ch, wound, number(0, 2));	
-		}
-	}
-	}
+				adjust_wound(ch, wound, number(0, 2));	
+			}
+		} // end moderate and above wounds
+	}//end for wound_data
 	
 	if (!IS_SET (qe->flags, MF_SNEAK) || (ch->skills[SKILL_SNEAK] < sneakRoll || sneakBleeding > 2))
 	{
