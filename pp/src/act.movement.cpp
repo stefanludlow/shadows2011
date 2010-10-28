@@ -1252,6 +1252,8 @@ enter_room (QE_DATA * qe)
 	int tot_damage = 0;
 	int sneakBleeding = 0;
 	int sneakRoll = number(1, 100);
+
+	/*** TODO removed to track down a bug 
 	for (WOUND_DATA *wound = ch->wounds; wound; wound = wound->next)
 	{
 			//bound wounds will re-open when moving faster than trudge
@@ -1286,7 +1288,7 @@ enter_room (QE_DATA * qe)
 			continue;
 		else
 		{
-				/** trudge, pace, walk, jog -->> 1, 2, 0, 3 **/
+				// trudge, pace, walk, jog -->> 1, 2, 0, 3 
 			
 //2 stars or less, and you -will- take damage moving faster than trudge (1)
 			if (((ch->speed > 1) || (ch->speed == 0)) 
@@ -1324,7 +1326,8 @@ enter_room (QE_DATA * qe)
 			}
 		} // end moderate and above wounds
 	}//end for wound_data
-	
+******/	
+
 	if (!IS_SET (qe->flags, MF_SNEAK) || (ch->skills[SKILL_SNEAK] < sneakRoll || sneakBleeding > 2))
 	{
 		leave_tracks (ch, qe->dir, ch->from_dir);
