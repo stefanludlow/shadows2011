@@ -1253,7 +1253,7 @@ enter_room (QE_DATA * qe)
 	int sneakBleeding = 0;
 	int sneakRoll = number(1, 100);
 
-	/*** TODO removed to track down a bug 
+	/*** TODO removed to track down a bug**/ 
 	for (WOUND_DATA *wound = ch->wounds; wound; wound = wound->next)
 	{
 			//bound wounds will re-open when moving faster than trudge
@@ -1326,7 +1326,7 @@ enter_room (QE_DATA * qe)
 			}
 		} // end moderate and above wounds
 	}//end for wound_data
-******/	
+/******/	
 
 	if (!IS_SET (qe->flags, MF_SNEAK) || (ch->skills[SKILL_SNEAK] < sneakRoll || sneakBleeding > 2))
 	{
