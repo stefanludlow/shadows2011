@@ -4401,6 +4401,10 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 	else
 	{				/* General look */
 
+			//check for shadow objects in room and trigger the shadow flag
+		shadowtoken_object_exists(ch->room);
+		
+		
 		if (IS_MORTAL (ch))
 		{
 

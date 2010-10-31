@@ -1581,6 +1581,8 @@ void delete_ticket (CHAR_DATA * ch, int tick_num);
 void load_weather_obj(ROOM_DATA *troom);
 int weather_object_exists(OBJ_DATA * list, int vnum);
 
+void shadowtoken_object_exists(ROOM_DATA * troom);
+
 /* Magical effect functions for spellcasting */
 
 void creation_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,
