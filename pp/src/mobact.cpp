@@ -2557,7 +2557,8 @@ shadowtoken_object_exists(ROOM_DATA * troom)
 	std::string keywords;
 	int flag;
 	bool found = false;
-	
+return;
+//fix this later	
 	flag = index_lookup (room_bits, "Shadow");
 	
 	for (list = troom->contents; list; list = list->next_content)
@@ -2573,15 +2574,13 @@ shadowtoken_object_exists(ROOM_DATA * troom)
 	{
 			troom->room_flags |= (1 << flag);
 		
-		send_to_gods("shadowtoken was found!!\n");
 		return;
 	}	
 	
 	if (!found && IS_SET (troom->room_flags, (1 << flag)))
 		{
 			troom->room_flags &= ~(1 << flag);
-			send_to_gods("shadowtoken is gone, resetting flag!!\n");
-			return;
+		return;
 		}
 	
 	
