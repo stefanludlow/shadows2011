@@ -321,10 +321,6 @@ mob_wander (CHAR_DATA * ch)
 
 		room_exit_zone = room_exit->zone;
 
-			//check for shadow objects in room and trigger the shadow flag before mobs access room
-		shadowtoken_object_exists(room_exit);
-				
-		
 		if (room_exit_zone == 76)
 			room_exit_zone = 10;
 
@@ -2557,8 +2553,8 @@ shadowtoken_object_exists(ROOM_DATA * troom)
 	std::string keywords;
 	int flag;
 	bool found = false;
-return;
-//fix this later	
+	char buf[MAX_STRING_LENGTH];
+
 	flag = index_lookup (room_bits, "Shadow");
 	
 	for (list = troom->contents; list; list = list->next_content)
@@ -2570,14 +2566,15 @@ return;
 		
 	}	
 	
-	if (found && !IS_SET (troom->room_flags, (1 << flag)))
+	
+	if (found && !IS_SET (troom->room_flags, ROOM_SHADOW))
 	{
 			troom->room_flags |= (1 << flag);
-		
 		return;
 	}	
 	
-	if (!found && IS_SET (troom->room_flags, (1 << flag)))
+	if (!found && IS_SET (troom->room_flags, ROOM_SHADOW))
+
 		{
 			troom->room_flags &= ~(1 << flag);
 		return;

@@ -482,7 +482,7 @@ typedef signed char shortint;
 #define NO_MERCHANT	( 1 << 14 )
 #define CLIMB		( 1 << 15 )
 #define SAVE		( 1 << 16 )
-#define LAB		( 1 << 17 )
+#define ROOM_SHADOW	( 1 << 17 ) //was LAB
 #define ROAD		( 1 << 18 )
 #define WEALTHY		( 1 << 19 )
 #define POOR		( 1 << 20 )

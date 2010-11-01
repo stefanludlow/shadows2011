@@ -1550,6 +1550,7 @@ obj_to_room (OBJ_DATA * object, int room)	/* STACKing */
 	object->location = -1;
 
 	room_light (r);
+	shadowtoken_object_exists(r); //checks for shadowtoken and adjust flags if needed
 
 	exit = r->dir_option[DOWN];
 
@@ -1690,6 +1691,7 @@ obj_from_room (OBJ_DATA ** obj, int count)	/* STACKing */
 	(*obj)->next_content = NULL;
 
 	room_light (room);
+	shadowtoken_object_exists(room); //checks for shadowtoken and adjust room flags if needed
 
 	for (CHAR_DATA *tch = room->people; tch; tch = tch->next_in_room)
 	{
