@@ -293,7 +293,7 @@ clan_forum_remove (CHAR_DATA * ch, char *clan)
 	sprintf (buf,
 		"DELETE FROM phpbb3.phpbb_user_group WHERE user_id= "
 		 "(SELECT user_id FROM phpbb3.phpbb_users WHERE username = '%s')"
-		 "AND group_id = %d';",
+		 "AND group_id = %d;",
 		 ch->pc->account_name, nGroupId);
 	mysql_safe_query (buf);
 }
