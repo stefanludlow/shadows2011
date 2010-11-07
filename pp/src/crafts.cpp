@@ -950,7 +950,6 @@ do_crafts (CHAR_DATA * ch, char *argument, int cmd)
 		replaceString(tcraft->craft_name, craft_name);
 		replaceString(tcraft->subcraft_name, subcraft);
 		replaceString(tcraft->command, command);
-		tcraft->next = NULL;  
 
 		for (craft = crafts; craft; craft = craft->next)
 		{
@@ -2875,7 +2874,8 @@ craft_uses (SUBCRAFT_HEAD_DATA * craft, int vnum)
 			continue;
 		for (j = 0; j < MAX_DEFAULT_ITEMS; j++)
 		{
-			if (inheritedObject(craft->obj_items[i]->items[j], vnum)) {
+			if (inheritedObject(vnum, craft->obj_items[i]->items[j])) 
+			{
 				return 1;
 			}
 		}
@@ -3564,7 +3564,12 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 
 		/* Purge Consumed Craft Items */
 		nObjectTally = item->item_counts;
+		
+		if (obj_list[i]->super_vnum == 0)
 		nObjectVnum = obj_list[i]->nVirtual;
+		else 
+			nObjectVnum = obj_list[i]->super_vnum; 
+		
 		if (nObjectTally && ch->right_hand && inheritedObject(ch->right_hand->nVirtual, nObjectVnum)) {
 			if (ch->right_hand->count <= nObjectTally)
 			{
@@ -3593,7 +3598,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 
 		if (nObjectTally && ch->room->contents)
 		{
-			for (ptrObj = ch->room->contents; nObjectTally && ptrObj != NULL;)
+			for (ptrObj = ch->room->contents; nObjectTally != 0 && ptrObj != NULL;)
 			{
 				if (inheritedObject(ptrObj->nVirtual, nObjectVnum))
 				{

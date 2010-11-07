@@ -2888,6 +2888,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	if  (GET_TRUST (ch) < 2)
 	{
 		if (*buf1 != 'a' &&
+			*buf1 != 'i' &&
 			*buf1 != 'o' &&
 			*buf1 != 'q' &&
 			*buf1 != 'r' &&
@@ -2897,6 +2898,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 
 		{
 			s ("   a           per zone stats");
+			s ("   i           object inheritance");
 			s ("   o           objects");
 			s ("   q           objects with ok flag");
 			s ("   r           rooms");
@@ -2910,6 +2912,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	if  (GET_TRUST (ch) < 3)
 	{
 		if (*buf1 != 'a' &&
+			*buf1 != 'i' &&
 			*buf1 != 'k' &&
 			*buf1 != 'o' &&
 			*buf1 != 'm' &&
@@ -2921,6 +2924,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 
 		{
 			s ("   a           per zone stats");
+			s ("   i           object inheritance");
 			s ("   k           shopkeepers");
 			s ("   o           objects");
 			s ("   m           mobiles");
@@ -2937,6 +2941,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (*buf1 != 'a' &&
 			*buf1 != 'c' &&
+			*buf1 != 'i' &&
 			*buf1 != 'k' &&
 			*buf1 != 'l' &&
 			*buf1 != 'm' &&
@@ -2951,6 +2956,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			s ("   a           per zone stats");
 			s ("   c           characters matching search");
+			s ("   i           object inheritance");
 			s ("   k           shopkeepers");
 			s ("   l           applications");
 			s ("   o           objects");
@@ -2969,6 +2975,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		s ("   a           per zone stats");
 		s ("   c           characters matching search");
+		s ("   i           object inheritance");
 		s ("   k           shopkeepers");
 		s ("   l           applications");
 		s ("   m           mobiles");
@@ -3258,6 +3265,27 @@ nVirtual : 0);
 		page_string (ch->desc, tmp);
 		break;
 
+		case 'i':			/* object inheritance - show i 100008*/
+			
+			if (!isdigit (*buf2))
+			{
+				send_to_char ("Please specify a vnum.\n", ch);
+				return;
+			}
+			
+			sprintf (tmp, "Vnum       Name(s)           Short desc\n\n");
+			for (k = full_object_list; k; k = k->lnext)
+			{
+				if (k->super_vnum == atoi(buf2))
+					sprintf (tmp + strlen (tmp),
+							 "%.5d  %-20.20s  %-32.32s#0\n",
+							 k->nVirtual, k->name, k->short_description);
+				
+				
+			}
+			page_string (ch->desc, tmp);
+			break;
+			
 	case 'c':
 		if (!str_cmp (buf2, "keyword"))
 			search_type = SEARCH_KEYWORD;
