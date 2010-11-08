@@ -5203,10 +5203,16 @@ craftstat (CHAR_DATA * ch, char *argument)
 }
 
 //list the crafts of a PC
+/** 
+ craftspc <name> - lists all of <name>'s crafts
+ craftspc <name> sets - lists the craft sets only
+ craftspc <name> <craftset> - lsits the individual crafts in <craftset>.
+ **/
 void
 do_craftspc (CHAR_DATA * ch, char *argument, int cmd)
 {
 	CHAR_DATA *tch;
+	int i, j;
 	char buf[MAX_STRING_LENGTH];
 	char buf2[MAX_STRING_LENGTH];
 	std::string output;
@@ -5214,11 +5220,69 @@ do_craftspc (CHAR_DATA * ch, char *argument, int cmd)
 
 	argument = one_argument(argument, buf);
 
+	if (!strcmp(argument, "?") || (!*buf))
+	{
+		s("\nThe syntax is as follows:");
+		s("  craftspc <name>              lists all of <name>'s crafts");
+		s("  craftspc <name> sets         lists the craft sets only");
+		s("  craftspc <name> <craftset>   lists the individual crafts in <craftset>.");
+		
+	}
+	
 	tch = load_pc(buf);
-	if (tch)
+	if (tch == NULL)
+		return;
+		
+	if (!strcmp(argument, "sets"))
+	{
+		sprintf(buf2, "#5%s#0 currently has crafts in the following areas:\n\n", tch->tname);
+		output.assign(buf2);
+		for (i = CRAFT_FIRST; i <= CRAFT_LAST; i++)
+		{
+			if ((af = get_affect (tch, i)))
+			{
+				sprintf(buf2, "  #6%-24s#0",
+						af->a.craft->subcraft->craft_name);
+				
+				if (output.find(buf2, 0, strlen(buf2)) == std::string::npos)
+				{
+					j++;
+					output.append(buf2);
+					
+					if (!(j % 3))
+						output.append("\n");
+				}
+			}
+		}
+		
+	}
+	
+	else if (*argument) 
 	{
 		sprintf (buf2,
-			"\n#6%s#0 has the following crafts on %s pfile:\n\n",
+				 "\n#5%s#0 has the following crafts in #6%s#0:\n\n",
+				 tch->tname, argument);
+		
+		output.assign(buf2);
+		
+			
+		for (af = tch->hour_affects; af; af = af->next)
+		{
+			if (af->type >= CRAFT_FIRST && af->type <= CRAFT_LAST)
+			{
+				if (!strcmp(argument, af->a.craft->subcraft->craft_name))
+				{
+					sprintf(buf2, "  %-20s\n",
+							af->a.craft->subcraft->subcraft_name);
+					output.append(buf2);
+				}
+			}
+		}
+	}
+	else 
+	{
+		sprintf (buf2,
+				 "\n#5%s#0 has the following crafts on %s pfile:\n\n",
 			tch->tname,
 			HSHR (tch));
 
@@ -5229,19 +5293,18 @@ do_craftspc (CHAR_DATA * ch, char *argument, int cmd)
 			if (af->type >= CRAFT_FIRST && af->type <= CRAFT_LAST)
 			{
 				sprintf (buf2,
-					"  #6Craft:#0 %-20s #6Subcraft:#0 %-12s #6Command:#0 %-10s\n",
+						 "  #6Craft:#0 %-24s #6Subcraft:#0 %-20s\n",
 					af->a.craft->subcraft->craft_name,
-					af->a.craft->subcraft->subcraft_name,
-					af->a.craft->subcraft->command);
+						 af->a.craft->subcraft->subcraft_name);
 
 				output.append(buf2);
 			}
 		}
+	}
 
 		unload_pc (tch);
 		page_string (ch->desc, output.c_str());
-		return;
-	}
+
 	return;
 }
 
