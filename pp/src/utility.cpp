@@ -2926,11 +2926,6 @@ can_see_obj (CHAR_DATA * ch, OBJ_DATA * obj)
 		!get_affect (ch, MAGIC_AFFECT_SEE_INVISIBLE))
 		return 0;
 
-	if ((weather_info[ch->room->zone].state == HEAVY_SNOW
-		&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
-		&& !IS_SET (ch->affected_by, AFF_INFRAVIS)))
-		&& !IS_SET (ch->room->room_flags, INDOORS))
-		return 0;
 
 	return 1;
 }

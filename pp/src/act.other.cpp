@@ -1896,17 +1896,7 @@ do_idea (CHAR_DATA * ch, char *argument, int cmd)
 const char *
 get_room_desc_tag (CHAR_DATA * ch, ROOM_DATA * room)
 {
-	if (IS_MORTAL (ch)
-		&& weather_info[room->zone].state == HEAVY_SNOW
-		&& !get_affect (ch, MAGIC_AFFECT_INFRAVISION)
-		&& !IS_SET (ch->affected_by, AFF_INFRAVIS)
-		&& !IS_SET (room->room_flags, INDOORS))
-	{
-
-		return NULL;
-
-	}
-	else if (!room->extra
+	if (!room->extra
 		|| desc_weather[room->zone] == WR_NORMAL
 		|| !room->extra->weather_desc[desc_weather[room->zone]])
 	{
