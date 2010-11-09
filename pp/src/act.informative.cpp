@@ -2278,11 +2278,7 @@ list_obj_to_char (OBJ_DATA * list, CHAR_DATA * ch, int mode, int show)
 
 	found = false;
 
-	if (!list || (weather_info[ch->room->zone].state == HEAVY_SNOW
-		&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
-		&& !IS_SET (ch->affected_by, AFF_INFRAVIS))
-		&& IS_MORTAL (ch)
-		&& !IS_SET (ch->room->room_flags, INDOORS)))
+	if (!list)
 	{
 		if (show)
 			send_to_char ("Nothing.\n", ch);
@@ -2380,11 +2376,6 @@ list_char_to_char (CHAR_DATA * list, CHAR_DATA * ch, int mode)
 	char buf[MAX_STRING_LENGTH] = { '\0' };
 	int count = 0, j = 0;
 
-	if (IS_MORTAL (ch) && weather_info[ch->room->zone].state == HEAVY_SNOW
-		&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
-		&& !IS_SET (ch->affected_by, AFF_INFRAVIS))
-		&& !IS_SET (ch->room->room_flags, INDOORS))
-		return;
 
 	for (i = list; i; i = i->next_in_room)
 	{
@@ -3925,7 +3916,7 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 	bool change = false, again = true, abrt = false;
 
 	char * blizzard_description =
-		"   A howling blanket of white completely obscures your vision.\n";
+		"\n   A howling blanket of wind-driven snow almost obscures your vision.\n";
 
 	const char *e_dirs[] =
 	{ "the north", "the east", "the south", "the west", "above", "below" };
@@ -3952,6 +3943,7 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 	if (!ch->room)
 		ch->room = vtor (ch->in_room);
 
+	
 	argument = one_argument (argument, arg1);
 
 	/** Arena **/
@@ -4234,18 +4226,20 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			sprintf (buf, "#6%s#0\n", ch->vehicle->room->name);
 			send_to_char (buf, ch);
+			
 			if (weather_info[ch->vehicle->room->zone].state == HEAVY_SNOW
-				&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
-				&& !IS_SET (ch->affected_by, AFF_INFRAVIS))
 				&& !IS_SET (ch->vehicle->room->room_flags, INDOORS)
 				&& IS_MORTAL (ch))
 			{
+					//added one line for HEAVY_SNOW appearance
+				send_to_char (room__get_description (ch->vehicle->room), ch);
 				send_to_char (blizzard_description, ch);
 			}
 			else
 			{
 				send_to_char (room__get_description (ch->vehicle->room), ch);
 			}
+			 
 		}
 
 		if (ch->vehicle && IS_OUTSIDE (ch))
@@ -4468,11 +4462,13 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 			send_to_char (buf, ch);
 		}
 
+		/**  if it is snowing, they can't see the exits **/
 		if (((weather_info[ch->room->zone].state != HEAVY_SNOW
 			|| get_affect (ch, MAGIC_AFFECT_INFRAVISION)
 			|| IS_SET (ch->affected_by, AFF_INFRAVIS))
 			|| IS_SET (ch->room->room_flags, INDOORS))
 			|| !IS_MORTAL (ch))
+		
 		{
 			sprintf (buf, "#6Exits:#0 ");
 
@@ -4526,12 +4522,15 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 			send_to_char ("\n", ch);
 		}
 
+		
 		if (weather_info[ch->room->zone].state == HEAVY_SNOW
 			&& !IS_SET (ch->room->room_flags, INDOORS)
 			&& IS_MORTAL (ch)
 			&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
 			&& !IS_SET (ch->affected_by, AFF_INFRAVIS)))
 		{
+				//added one line for HEAY_SNOW chagnes
+			send_to_char (room__get_description (ch->room), ch);
 			send_to_char (blizzard_description, ch);
 		}
 		else
@@ -4854,14 +4853,6 @@ do_exits (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (weather_info[ch->room->zone].state == HEAVY_SNOW
-		&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
-		&& !IS_SET (ch->affected_by, AFF_INFRAVIS))
-		&& !IS_SET (ch->room->room_flags, INDOORS) && IS_MORTAL (ch))
-	{
-		send_to_char ("You can't see a thing!\n", ch);
-		return;
-	}
 
 	*s_buf = '\0';
 
@@ -4943,6 +4934,17 @@ do_exits (CHAR_DATA * ch, char *argument, int cmd)
 		}
 	}
 
+	
+
+	/** add a line if it is snowing hard **/
+	if (weather_info[ch->room->zone].state == HEAVY_SNOW
+		&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
+			&& !IS_SET (ch->affected_by, AFF_INFRAVIS))
+		&& !IS_SET (ch->room->room_flags, INDOORS) && IS_MORTAL (ch))
+	{
+		send_to_char("The blowing snow makes it difficult to see anything!\n", ch);
+		
+	}
 	send_to_char ("Obvious exits:\n", ch);
 
 	if (*s_buf)
@@ -8310,16 +8312,14 @@ do_scan (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+	
 	if (IS_MORTAL (ch)
 		&& weather_info[ch->room->zone].state == HEAVY_SNOW
 		&& !IS_SET (ch->room->room_flags, INDOORS)
 		&& (!get_affect (ch, MAGIC_AFFECT_INFRAVISION)
 		&& !IS_SET (ch->affected_by, AFF_INFRAVIS)))
 	{
-
-		send_to_char ("The onslaught of snow prevents any such attempt.\n", ch);
-		return;
-
+		act ("The onslaught of blowing snow severely inhibits your scanning.", false, ch, 0, 0, TO_CHAR);
 	}
 
 
@@ -8642,7 +8642,7 @@ delayed_quick_scan_diag (CHAR_DATA * ch)
 	else if (weather_info[ch->room->zone].state == STEADY_SNOW)
 		nPenalty += 20;
 	else if (weather_info[ch->room->zone].state == HEAVY_SNOW)
-		nPenalty += 25;
+		nPenalty += 35;
 
 	nSkillLevel = skill_level (ch, SKILL_SCAN, nPenalty);
 
@@ -8731,7 +8731,7 @@ delayed_quick_scan (CHAR_DATA * ch)
 	else if (weather_info[ch->room->zone].state == STEADY_SNOW)
 		nPenalty += 20;
 	else if (weather_info[ch->room->zone].state == HEAVY_SNOW)
-		nPenalty += 25;
+		nPenalty += 35;
 
 	nSkillLevel = skill_level (ch, SKILL_SCAN, nPenalty);
 
@@ -8829,7 +8829,7 @@ delayed_scan (CHAR_DATA * ch)
 	if (weather_info[ch->room->zone].state == STEADY_SNOW)
 		penalty += 20;
 	if (weather_info[ch->room->zone].state == HEAVY_SNOW)
-		penalty += 25;
+		penalty += 35;
 
 	if (!next_room->psave_loaded)
 		load_save_room (next_room);
