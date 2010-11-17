@@ -717,7 +717,7 @@ int speed_group (CHAR_DATA * ch)
 {
 	CHAR_DATA		*top_leader = NULL;
 	CHAR_DATA		*tch = NULL;
-	int lowest_speed;  
+	int lowest_speed = 1;  //trudge
 	
 	if (!(top_leader = ch->following))
 		top_leader = ch;

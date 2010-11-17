@@ -7731,6 +7731,8 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
 		ch->pc->imm_leave = duplicateString (argument);
 	}
 
+		/** since mount speed is checked first, choosing 'walk' or 'run' will apply to the mount and not the player **/
+	
 	else if (ch->pc &&
 		IS_RIDER (ch) && (ind = index_lookup (mount_speeds, subcmd)) != -1)
 	{
@@ -7749,6 +7751,33 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
 		}
 
 		ch->pc->mount_speed = ind;
+		 switch (ind)
+		{
+			case 0: //mount walking = trudging
+				ch->speed = 1;
+				break;
+			
+			case 1: //trotting = pace
+				ch->speed = 2;
+				break;
+				
+			case 2: //canter = walk
+				ch->speed = 0;
+				break;
+				
+			case 3: //gallop = jog
+				ch->speed = 3;
+				break;
+				
+			case 4: //mount run = run 
+				ch->speed = 4;
+				break;
+				
+			case 5: //raceing = sprint
+				ch->speed = 5;
+				break;
+		}
+		
 	}
 
 	else if ((ind = index_lookup (speeds, subcmd)) != -1 && *subcmd)
@@ -7779,7 +7808,7 @@ do_set (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		s ("\n   #6Movement:#0");
 		s ("   Walk speeds  - trudge, pace, walk, jog, run, sprint");
-		s ("   Mount speeds - walk, trot, canter, gallop, run");
+		s ("   Mount speeds - walk, trot, canter, gallop, run, race");
 		s ("");
 		s ("   #6Combat Modes:#0");
 		s ("   Frantic    - Offense, but no defense (no combat learning)");
