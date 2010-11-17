@@ -1252,8 +1252,6 @@ enter_room (QE_DATA * qe)
 	int tot_damage = 0;
 	int sneakBleeding = 0;
 	int sneakRoll = number(1, 100);
-
-	/*** TODO removed to track down a bug**/ 
 	for (WOUND_DATA *wound = ch->wounds; wound; wound = wound->next)
 	{
 			//bound wounds will re-open when moving faster than trudge
@@ -1281,52 +1279,61 @@ enter_room (QE_DATA * qe)
 	
 	for (WOUND_DATA *wound = ch->wounds; wound; wound = wound->next)
 	{
+			//stuns do not get worse
+		if (!strn_cmp(wound->type, "stun", 4))
+		{
+			continue;
+		}
 			//each wound will get worse, if moving faster than a walk
 			//but only once you are already badly wounded
-		if (!str_cmp (wound->severity, "small")
+		else if (!str_cmp (wound->severity, "small")
 			|| !str_cmp (wound->severity, "minor"))
+		{
 			continue;
+		}
+
 		else
 		{
-				// trudge, pace, walk, jog -->> 1, 2, 0, 3 
+				//They take damage at current speed, then changed speed automatically to avoid future damage.
+				/** trudge, pace, walk, jog -->> 1, 2, 0, 3 **/
 			
 //2 stars or less, and you -will- take damage moving faster than trudge (1)
-			if (((ch->speed > 1) || (ch->speed == 0)) 
-				&& (tot_damage > (.6667 * ch->max_hit)))
+			if (((ch->speed > 1) || (ch->speed == 0)) && (tot_damage > (.6667 * ch->max_hit)))
 			{
 			sprintf (buf,
-					 "#1The pain from a %s %s on your %s gets much worse.#0\n",
+						 "#1The pain from a %s %s on your %s gets much worse, so you slow down.#0\n",
 					 wound->severity, wound->name,
 					 expand_wound_loc (wound->location));
 			send_to_char (buf, ch);
 				adjust_wound(ch, wound, number(1, 3));	
+				ch->speed = 1;
 			}
 
 //3 stars or less, and you -will- take damage moving faster than pace (2)
-			else if (((ch->speed > 2)|| (ch->speed == 0)) 
-					&& (tot_damage > (.333 * ch->max_hit)))
+			else if (((ch->speed > 2)|| (ch->speed == 0)) && (tot_damage > (.333 * ch->max_hit)))
 			{
 				sprintf (buf,
-						 "#1The pain from a %s %s on your %s gets much worse.#0\n",
+						 "#1The pain from a %s %s on your %s gets much worse, so you slow down.#0\n",
 						 wound->severity, wound->name,
 						 expand_wound_loc (wound->location));
 				send_to_char (buf, ch);
 				adjust_wound(ch, wound, number(1, 3));	
+				ch->speed = 2;
 			}
-
 //four stars you -may- take some damage if move faster than walk (0)
 			else if ((ch->speed > 2) && (tot_damage > (.1667 * ch->max_hit)))
 			{
 			sprintf (buf,
-					 "#1The pain from a %s %s on your %s gets a little worse.#0\n",
+						 "#1The pain from a %s %s on your %s gets a little worse, so you slow down.#0\n",
 					 wound->severity, wound->name,
 					 expand_wound_loc (wound->location));
 			send_to_char (buf, ch);
 				adjust_wound(ch, wound, number(0, 2));	
+				ch->speed = 0;
 			}
-		} // end moderate and above wounds
-	}//end for wound_data
-/******/	
+			
+		}
+	}
 
 	if (!IS_SET (qe->flags, MF_SNEAK) || (ch->skills[SKILL_SNEAK] < sneakRoll || sneakBleeding > 2))
 	{
@@ -2417,6 +2424,7 @@ initiate_move (CHAR_DATA * ch)
 	if ((ch->room->sector_type == SECT_INSIDE && !IS_SET (flags, MF_SNEAK)
 		&& ch->speed != SPEED_IMMORTAL) || (!IS_MORTAL (ch)
 		&& ch->speed != SPEED_IMMORTAL
+		&& !IS_RIDER(ch)									
 		&& !IS_SET (flags, MF_SNEAK)))
 	{
 		sprintf (buf, "You begin %s %s%s%s.\n", move_names[true_speed],
