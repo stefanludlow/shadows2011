@@ -58,6 +58,7 @@ extern rpie::server engine;
 extern const char *skills[];
 extern const char *exit_bits[];
 extern const char *damage_severity[]; //ADDED FOR REPAIR
+extern std::list<second_affect> second_affect_list;
 #define IMOTE_OPCHAR '^'
 #define s(a) send_to_char (a "\n", ch);
 
@@ -2073,6 +2074,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	POISON_DATA *poison;
 	char buf[MAX_STRING_LENGTH];
 	char buf2[MAX_STRING_LENGTH];
+	std::list<second_affect>::iterator sa;
 
 	if (name == NULL || !*name)
 	{
@@ -2417,7 +2419,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	else if (!GET_FLAG (k, FLAG_KILL) && k->fighting)
 		strcat (buf, " Hitting");
 
-	if (GET_FLAG (k, FLAG_FLEE))
+	if (get_second_affect (ch, SA_FLEE, NULL))
 		strcat (buf, " Fleeing");
 
 	if (GET_FLAG (k, FLAG_BINDING))
@@ -2926,6 +2928,9 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 		if (!p)
 			p = lookup_string (af->type, REG_CRAFT_MAGIC);
 
+		if (!p)
+			p = lookup_string (af->type, REG_AFFECT);
+
 		sprintf (buf, "#2%5d#0   %s affects you by %d for %d hours%s.\n",
 			af->type,
 			p == NULL ? "Unknown" : p,
@@ -2935,6 +2940,18 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 		send_to_char (buf, ch);
 	}
 
+	
+	for (sa = second_affect_list.begin(); sa != second_affect_list.end(); sa++)
+	{
+		if (sa->ch == ch)
+		{
+			
+			sprintf (buf, "%s: Time remaining: %d seconds\n", lookup_string (sa->type, REG_AFFECT), sa->seconds);
+			
+		}
+		send_to_char (buf, ch);
+	}
+	
 	send_to_char ("\n", ch);
 
 	/**** morphing mobs ******/
@@ -8998,7 +9015,8 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if ((affect_no = lookup_value (buf, REG_MAGIC_SPELLS)) == -1 &&
 			(affect_no = lookup_value (buf, REG_CRAFT_MAGIC)) == -1 &&
-			(affect_no = lookup_value (buf, REG_SPELLS)) == -1)
+			(affect_no = lookup_value (buf, REG_SPELLS)) == -1 &&
+			(affect_no = lookup_value (buf, REG_AFFECT)) == -1)
 		{
 			send_to_char ("No such affect or spell.\n", ch);
 			return;
@@ -9079,7 +9097,7 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 
 	/* Affect already exist? */
 
-	if (ch)
+	if (tch)
 		af = get_affect (tch, affect_no);
 	else if (obj)
 		af = get_obj_affect (obj, affect_no);
@@ -9141,8 +9159,9 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 			affect_to_obj (obj, af);
 		else
 		{
-			af->next = room->affects;
-			room->affects = af;
+			add_room_affect (&room->affects, af->type, duration);
+				//af->next = room->affects;
+				//room->affects = af;
 		}
 	}
 	send_to_char ("Affect created.\n", ch);

@@ -2119,6 +2119,12 @@ do_compact (CHAR_DATA * ch, char *argument, int cmd)
 }
 
 void
+sa_flee (SECOND_AFFECT * sa)
+{
+	send_to_char ("You feel more in control now, and are no longer running away.", sa->ch);
+}
+
+void
 sa_stand (SECOND_AFFECT * sa)
 {
 	if (!is_he_somewhere (sa->ch))
@@ -2366,6 +2372,9 @@ second_affect_update (void)
 			break;
 		case SA_COMMAND:
 			sa_command (sa);
+			break;
+		case SA_FLEE:
+			sa_flee (sa);
 			break;
 		}
 

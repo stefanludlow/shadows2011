@@ -4306,7 +4306,8 @@ setup_registry (void)
 	add_registry (REG_MAGIC_SPELLS, MAGIC_FRESH_LINEN, "Fresh Linen");
 	add_registry (REG_MAGIC_SPELLS, MAGIC_INCENSE_SMOKE, "Incense Smoke");
 	add_registry (REG_MAGIC_SPELLS, MAGIC_WOOD_SMOKE, "Wood Smoke");
-
+	
+	add_registry (REG_AFFECT, SA_FLEE, "Fleeing");
 	read_registry ();
 }
 

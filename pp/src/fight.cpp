@@ -647,7 +647,8 @@ set_fighting (CHAR_DATA * ch, CHAR_DATA * vict)
 	{
 		send_to_char ("You try to escape!\n\r", ch);
 		act ("$n tries to escape!", false, ch, 0, 0, TO_ROOM);
-		ch->flags |= FLAG_FLEE;
+		do_flee (ch, "", 0);
+		return;
 	}
 
 	if ((IS_SET (vict->act, ACT_PURSUE) ||
@@ -1474,14 +1475,6 @@ hit_char (CHAR_DATA * ch, CHAR_DATA * victim, int strike_parm)
 	if (!ch || !victim)
 		return;
 
-	if (GET_FLAG (ch, FLAG_FLEE))
-	{
-		if (!ch->primary_delay && !flee_attempt(ch))
-			ch->primary_delay=25;
-
-		return;
-	}
-
 
 	if (IS_SET (victim->act, ACT_FLYING)
 		&& !IS_SET (ch->act, ACT_FLYING)
@@ -1524,17 +1517,6 @@ hit_char (CHAR_DATA * ch, CHAR_DATA * victim, int strike_parm)
 			stop_fighting (ch);
 		return;
 	}
-
-	/*
-	if (GET_FLAG (ch, FLAG_FLEE))
-	{
-
-	if (!ch->primary_delay && !flee_attempt (ch))
-	ch->primary_delay = 16;
-
-	return;
-	}
-	*/
 
 	guard_check (victim);
 
@@ -2087,6 +2069,7 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 
 	tar->move = tar->move - movecost;
 
+	
 	if (tar->move < 0)
 		tar->move = 0;
 	/* Fatigue penalty */
@@ -2855,8 +2838,9 @@ combat_results (CHAR_DATA * src, CHAR_DATA * tar, OBJ_DATA * attack_weapon,
 		GET_POS (src) = SIT;
 		add_second_affect (SA_STAND, ((MAX(25,GET_AGI(src))-GET_AGI(src))+number(1,3)), src, NULL, NULL, 0);
 
-		if (IS_SET (tar->flags, FLAG_FLEE))
-			flee_attempt (tar);
+			//fleeing is automatic now
+			//if (IS_SET (tar->flags, FLAG_FLEE))
+			//flee_attempt (tar);
 	}
 
 	else if (off_result == RESULT_FUMBLE)
@@ -3664,7 +3648,7 @@ perform_violence (void)
 			act ("$n reveals $mself.", true, ch, 0, 0, TO_ROOM);
 		}
 
-		if (IS_NPC (ch) && !IS_SET (ch->flags, FLAG_FLEE)
+		if (IS_NPC (ch) && !get_second_affect (ch, SA_FLEE, NULL)
 			&& (IS_SET (ch->flags, FLAG_AUTOFLEE) || morale_broken (ch)))
 		{
 			ch->speed = 4;
@@ -3829,7 +3813,7 @@ do_stop (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (ch->fighting->fighting != ch || GET_FLAG (ch->fighting, FLAG_FLEE))
+	if (ch->fighting->fighting != ch || get_second_affect (ch->fighting, SA_FLEE, NULL))
 	{
 		send_to_char ("You stop fighting.\n\r", ch);
 		stop_fighting (ch);
@@ -5408,10 +5392,9 @@ do_aide (CHAR_DATA *ch, char * argument, int cmd)
 		return;
 	}
 
-	if (IS_SET (ch->flags, FLAG_FLEE))
+	if (get_second_affect (ch, SA_FLEE, NULL))
 	{
-		send_to_char ("You stop trying to flee.\n\r", ch);
-		ch->flags &= ~FLAG_FLEE;
+		send_to_char ("You are no longer fleeing, but you are still traumatized to help anyone.\n\r", ch);
 		return;
 	}
 

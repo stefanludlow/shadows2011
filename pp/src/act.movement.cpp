@@ -2061,9 +2061,9 @@ initiate_move (CHAR_DATA * ch)
 			|| (!morale_broken (ch)
 			&& (IS_SET (ch->act, ACT_AGGRESSIVE)
 			|| (IS_SET (ch->act, ACT_ENFORCER)
-			&& !IS_SET (ch->act, ACT_SENTINEL))))) && ch->following
-			&& is_he_here (ch, ch->following, true)
-			&& GET_FLAG (ch->following, FLAG_FLEE))
+			&& !IS_SET (ch->act, ACT_SENTINEL))))) 
+			&& ch->following
+			&& is_he_here (ch, ch->following, true))
 		{
 
 			stop_fighting (ch);

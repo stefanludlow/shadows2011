@@ -148,6 +148,7 @@ typedef signed char shortint;
 #define SA_DOANYWAY	26
 #define SA_GFOLLOW 27
 #define SA_LEAD 28
+#define SA_FLEE 29
 
 #define VNUM_PENNY		40
 #define VNUM_FARTHING		41
@@ -219,6 +220,7 @@ typedef signed char shortint;
 #define REG_MAGIC_SPELLS_D	12	/* Linked to MAGIC_SPELLS */
 #define REG_MAX_RATES		13	/* Learning rates table skill vs formula */
 #define REG_CRAFT_MAGIC		14
+#define REG_AFFECT          15 /* misc affect values */
 
 #define MISC_DELAY_OFFSET	0
 #define MISC_MAX_CARRY_N	1
@@ -869,6 +871,7 @@ typedef signed char shortint;
 
 /* End magic defines */
 
+/** Affects defines range from 600 to 20000+ **/
 #define JOB_1					600
 #define JOB_2					601
 #define JOB_3					602
@@ -947,6 +950,7 @@ typedef signed char shortint;
 #define MAGIC_WOOD_SMOKE		3312
 #define MAGIC_SMELL_LAST		3399
 
+/** 3400 - 4999 reserved for MAGIC_EFFECTs **/
 #define MAGIC_AFFECT_FIRST			3400
 
 #define MAGIC_AFFECT_DMG			3400
@@ -974,6 +978,7 @@ typedef signed char shortint;
 
 #define MAGIC_AFFECT_LAST			4999
 
+/** 5000 - 5399 reserved for Room/world special effects **/
 #define MAGIC_ROOM_CALM			5000
 #define MAGIC_ROOM_LIGHT		5001
 #define MAGIC_ROOM_DARK			5002
@@ -1007,6 +1012,7 @@ typedef signed char shortint;
 #define CRAFT_FIRST			8000	/* Crafts can be assigned in the */
 #define CRAFT_LAST			18000	/*  range CRAFT_FIRST..CRAFT_LAST */
 
+/** 20000 and up for SOMA effects **/
 #define MAGIC_FIRST_SOMA                20000	/* SOMATIC EFFECTS TBA */
 #define SOMA_MUSCULAR_CRAMP             MAGIC_FIRST_SOMA + 1	/* pain echo */
 #define SOMA_MUSCULAR_TWITCHING         MAGIC_FIRST_SOMA + 2

@@ -2373,8 +2373,9 @@ mobile_routines (int pulse)
 			|| GET_FLAG (ch->mount, FLAG_LEAVING)))
 			continue;
 
-		if (GET_FLAG (ch, FLAG_FLEE))
+		if (get_second_affect (ch, SA_FLEE, NULL))
 			continue;
+
 
 		if (ch->delay)
 			continue;

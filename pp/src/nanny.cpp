@@ -3306,6 +3306,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	CHAR_DATA *ch;
 	ROOM_DATA *troom;
 	OBJ_DATA *obj;
+	SECOND_AFFECT *sa;
 	time_t current_time;
 	char date[AVG_STRING_LENGTH];
 	char buf[MAX_STRING_LENGTH];
@@ -3574,10 +3575,10 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		ch->act &= ~PLR_QUIET;
 		d->connected = CON_PLYNG;
 
-		if (IS_SET (ch->flags, FLAG_FLEE))
+		if (sa = get_second_affect (ch, SA_FLEE, NULL))
 		{
 			send_to_char ("You stop trying to flee.\n\r", ch);
-			ch->flags &= ~FLAG_FLEE;
+			remove_second_affect (sa);
 		}
 
 		ch->desc = d;
@@ -3613,7 +3614,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	d->connected = CON_PLYNG;
 	d->character->desc = d;
 
-	d->character->flags &= ~(FLAG_FLEE | FLAG_ENTERING | FLAG_LEAVING | FLAG_SUBDUER | FLAG_SUBDUING | FLAG_SUBDUEE);
+	d->character->flags &= ~(FLAG_ENTERING | FLAG_LEAVING | FLAG_SUBDUER | FLAG_SUBDUING | FLAG_SUBDUEE);
 	if (GET_TRUST (d->character))
 	{
 		d->character->flags &= ~FLAG_AVAILABLE;
