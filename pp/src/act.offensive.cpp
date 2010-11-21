@@ -3778,7 +3778,7 @@ do_command (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (victim->mob)
 		{
-			send_to_char ("Ok.\n", ch);
+			send_to_char ("You give the command.\n", ch);
 			command_interpreter (victim, command);
 		}
 		else
@@ -3808,7 +3808,7 @@ do_command (CHAR_DATA * ch, char *argument, int cmd)
 			command_interpreter (tch, command);
 	}
 
-	send_to_char ("Ok.\n", ch);
+	send_to_char ("You give the command.\n", ch);
 }
 
 
@@ -3980,6 +3980,7 @@ void directed_flee (CHAR_DATA * ch, int direction)
 	SECOND_AFFECT *sa;
 	CHAR_DATA * tch;
 	int enemies;
+	bool super_escape = false;
 	
 	if (sa = get_second_affect (ch, SA_FLEE, NULL))
 	{
@@ -4011,7 +4012,15 @@ void directed_flee (CHAR_DATA * ch, int direction)
 		enemies++;
 	}
 	
-	if (enemies && number (0, enemies))
+		//high power makes it easier to overwhelm enemies,
+		//high wil to overcome all odds to escape
+		//sometimes you are just lucky
+	if ((number(1, 25) < ch->aur) 
+		|| (number(1, 25) < ch->wil)
+		|| (number(1, 100) < 50))
+		super_escape = true;
+	
+	if (enemies && number (0, enemies) && !super_escape)
 	{
 		switch (number (1, 3))
 		{
