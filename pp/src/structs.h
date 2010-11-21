@@ -934,21 +934,20 @@ typedef signed char shortint;
 
 #define MAGIC_SENT			3250	/* Used with the emote system. */
 
-#define MAGIC_SMELL_FIRST		3300
-#define MAGIC_AKLASH_ODOR		3300
-#define MAGIC_ROSE_SCENT		3301
-#define MAGIC_JASMINE_SCENT		3302
-#define MAGIC_SEWER_STENCH		3303
-#define MAGIC_SOAP_AROMA		3304
-#define MAGIC_CINNAMON_SCENT		3305
-#define MAGIC_LEORTEVALD_STENCH		3306
-#define MAGIC_YULPRIS_ODOR		3307
-#define MAGIC_FRESH_BREAD		3308
-#define MAGIC_MOWN_HAY			3309
-#define MAGIC_FRESH_LINEN		3310
-#define MAGIC_INCENSE_SMOKE		3311
-#define MAGIC_WOOD_SMOKE		3312
-#define MAGIC_SMELL_LAST		3399
+/* 3300 - 3399 reserved for Smells **/
+#define SMELL_FIRST				3300
+#define SMELL_ROSE_SCENT		3300
+#define SMELL_JASMINE_SCENT		3301
+#define SMELL_SEWER_STENCH		3302
+#define SMELL_SOAP_AROMA		3303
+#define SMELL_CINNAMON_SCENT	3304
+#define SMELL_FRESH_BREAD		3305
+#define SMELL_MOWN_HAY			3306
+#define SMELL_FRESH_LINEN		3307
+#define SMELL_INCENSE_SMOKE		3308
+#define SMELL_WOOD_SMOKE		3309
+#define SMELL_CORPSE			3310
+#define SMELL_LAST				3399
 
 /** 3400 - 4999 reserved for MAGIC_EFFECTs **/
 #define MAGIC_AFFECT_FIRST			3400
@@ -987,6 +986,7 @@ typedef signed char shortint;
 #define MAGIC_WORLD_CLOUDS		5005	/* Blocks the sun */
 #define MAGIC_WORLD_SOLAR_FLARE	5006	/* Creates an artificial sun */
 #define MAGIC_WORLD_MOON		5006	/* Moonlight in all rooms */
+#define MAGIC_ROOM_SHADOW       5007    /* creepy shadow affect in room */
 
 #define MAGIC_BUY_ITEM			5400
 
@@ -2312,7 +2312,7 @@ struct affect_toll_type
 struct affect_room_type
 {
 	int duration;
-	int uu2;
+	int intensity;
 	int uu3;
 	int uu4;
 	int uu5;

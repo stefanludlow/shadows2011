@@ -30,6 +30,8 @@
 extern rpie::server engine;
 extern const char *weather_states[];
 extern const char *damage_severity[];
+extern const char *room_smells[];
+
 extern int free_mem(char *&ptr);
 extern int free_mem(void *ptr);
 
@@ -435,6 +437,7 @@ const struct constant_data constant_info[] = {
 	{"damage-types", "REND Damage Types        ", (void **) damage_type},
 	{"weather-states", "Weather states           ", (void **) weather_states},
 	{"damage-severity", "Damage severity          ", (void **) damage_severity},
+	{"room_smells", "Room Smells              ", (void **) room_smells},
 	{"", "", NULL}
 };
 

@@ -270,7 +270,7 @@ affect_modify (CHAR_DATA * ch, int type, int loc, int mod, int bitv,
 	if (type >= CRAFT_FIRST && type <= CRAFT_LAST)
 		return;
 
-	if (type >= MAGIC_SMELL_FIRST && type <= MAGIC_SMELL_LAST)
+	if (type >= SMELL_FIRST && type <= SMELL_LAST)
 		return;
 
 	if (type >= MAGIC_FIRST_SOMA && type <= MAGIC_LAST_SOMA)
@@ -3472,20 +3472,47 @@ is_room_affected (AFFECTED_TYPE * af, int type)
 }
 
 void
-add_room_affect (AFFECTED_TYPE ** af, int type, int duration)
+increase_room_affect (AFFECTED_TYPE ** af, int type, int intensity)
 {
 	AFFECTED_TYPE *raffect;
 
 	if ((raffect = is_room_affected (*af, type)))
 	{
-		raffect->a.room.duration += duration;
+		raffect->a.room.intensity += intensity;
 		return;
 	}
+}
+
+void
+add_room_affect (AFFECTED_TYPE ** af, int type, int duration, int intensity)
+{
+	AFFECTED_TYPE *raffect;
+
+	if (raffect = is_room_affected (*af, type))
+	{
+		if (duration)
+		raffect->a.room.duration += duration;
+		
+		if (intensity)
+			raffect->a.room.intensity += intensity;
+		return;
+	}
+
 
 	raffect = new AFFECTED_TYPE;
 
 	raffect->type = type;
+		
+	if (duration > 1)
 	raffect->a.room.duration = duration;
+	else
+		raffect->a.room.duration = 1;
+		
+	if (intensity > 1)
+		raffect->a.room.intensity = intensity;
+	else
+		raffect->a.room.intensity = 1;
+		
 	raffect->next = *af;
 
 	*af = raffect;
@@ -4130,23 +4157,23 @@ setup_registry (void)
 	add_registry (REG_REGISTRY, REG_MAX_RATES, "Rates");
 	add_registry (REG_REGISTRY, REG_CRAFT_MAGIC, "Craftmagic");
 
-	add_registry (REG_CRAFT_MAGIC, MAGIC_AKLASH_ODOR, "Aklash Odor");
+	/**
+		//add_registry (REG_CRAFT_MAGIC, MAGIC_AKLASH_ODOR, "Aklash Odor");
 	add_registry (REG_CRAFT_MAGIC, MAGIC_ROSE_SCENT, "Rose Scent");
 	add_registry (REG_CRAFT_MAGIC, MAGIC_JASMINE_SCENT, "Jasmine Scent");
 	add_registry (REG_CRAFT_MAGIC, MAGIC_SEWER_STENCH, "Sewer Stench");
 	add_registry (REG_CRAFT_MAGIC, MAGIC_SOAP_AROMA, "Soap Aroma");
 
 	add_registry (REG_CRAFT_MAGIC, MAGIC_CINNAMON_SCENT, "Cinnamon Scent");
-	add_registry (REG_CRAFT_MAGIC, MAGIC_LEORTEVALD_STENCH,
-		"Leortevald Stench");
-	add_registry (REG_CRAFT_MAGIC, MAGIC_YULPRIS_ODOR, "Yulpris Odor");
+		//add_registry (REG_CRAFT_MAGIC, MAGIC_LEORTEVALD_STENCH, "Leortevald Stench");
+		//add_registry (REG_CRAFT_MAGIC, MAGIC_YULPRIS_ODOR, "Yulpris Odor");
 	add_registry (REG_CRAFT_MAGIC, MAGIC_FRESH_BREAD, "Fresh Bread");
 	add_registry (REG_CRAFT_MAGIC, MAGIC_MOWN_HAY, "Mown Hay");
 
 	add_registry (REG_CRAFT_MAGIC, MAGIC_FRESH_LINEN, "Fresh Linen");
 	add_registry (REG_CRAFT_MAGIC, MAGIC_INCENSE_SMOKE, "Incense Smoke");
 	add_registry (REG_CRAFT_MAGIC, MAGIC_WOOD_SMOKE, "Wood Smoke");
-
+**/
 	/* Add in all skills to craft magic */
 
 	for (i = 1; i < LAST_SKILL; i++)
@@ -4292,22 +4319,21 @@ setup_registry (void)
 
 	add_registry (REG_MAGIC_SPELLS, POISON_LETHARGY, "Lethargy");
 
-	add_registry (REG_MAGIC_SPELLS, MAGIC_AKLASH_ODOR, "Aklash Odor");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_ROSE_SCENT, "Rose Scent");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_JASMINE_SCENT, "Jasmine Scent");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_SEWER_STENCH, "Sewer Stench");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_SOAP_AROMA, "Soap Aroma");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_CINNAMON_SCENT, "Cinnamon Scent");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_LEORTEVALD_STENCH,
-		"Leortevald Stench");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_YULPRIS_ODOR, "Yulpris Odor");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_FRESH_BREAD, "Fresh Bread");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_MOWN_HAY, "Mown Hay");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_FRESH_LINEN, "Fresh Linen");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_INCENSE_SMOKE, "Incense Smoke");
-	add_registry (REG_MAGIC_SPELLS, MAGIC_WOOD_SMOKE, "Wood Smoke");
+	add_registry (REG_MAGIC_SPELLS, SMELL_ROSE_SCENT, "Rose Scent");
+	add_registry (REG_MAGIC_SPELLS, SMELL_JASMINE_SCENT, "Jasmine Scent");
+	add_registry (REG_MAGIC_SPELLS, SMELL_SEWER_STENCH, "Sewer Stench");
+	add_registry (REG_MAGIC_SPELLS, SMELL_SOAP_AROMA, "Soap Aroma");
+	add_registry (REG_MAGIC_SPELLS, SMELL_CINNAMON_SCENT, "Cinnamon Scent");
+	add_registry (REG_MAGIC_SPELLS, SMELL_FRESH_BREAD, "Fresh Bread");
+	add_registry (REG_MAGIC_SPELLS, SMELL_MOWN_HAY, "Mown Hay");
+	add_registry (REG_MAGIC_SPELLS, SMELL_FRESH_LINEN, "Fresh Linen");
+	add_registry (REG_MAGIC_SPELLS, SMELL_INCENSE_SMOKE, "Incense Smoke");
+	add_registry (REG_MAGIC_SPELLS, SMELL_WOOD_SMOKE, "Wood Smoke");
 	
 	add_registry (REG_AFFECT, SA_FLEE, "Fleeing");
+	add_registry (REG_AFFECT, MAGIC_ROOM_SHADOW, "Shadow");
+
+	
 	read_registry ();
 }
 

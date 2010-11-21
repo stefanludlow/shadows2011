@@ -92,6 +92,7 @@ extern rpie::server engine;
 #define RP_NOOP2 59
 #define RP_COPPER_TO_SHILLINGS 60
 #define RP_MCOPY 61
+#define RP_AFFECT 62
 
 extern std::multimap<int, room_prog> mob_prog_list;
 extern std::multimap<int, room_prog> obj_prog_list;
@@ -158,7 +159,7 @@ void r_setval (CHAR_DATA *, std::string);
 void r_concat (CHAR_DATA *, std::string, room_prog_var *&);
 void r_mftog (CHAR_DATA *, std::string);
 void r_coppertoshillings (std::string, room_prog_var *&);
-
+void r_rmaffect (CHAR_DATA *, char *argument);
 
 #define MAX_RPRG_NEST 30
 bool ifin[MAX_RPRG_NEST];
@@ -229,9 +230,77 @@ const char *rfuncs[] = {
 	"//",
 	"copper_to_shillings",
 	"mcopy",
+	"rmaffect",
 	"\n"
 };
 
+/** 
+ * rmaffect <room-num>, <affect string>, duration, intensity
+ * will add the affect to the specidifed room lasting duration at itensity
+ * room-num = -1 is the current room
+ * duration = 1 hour by default
+ * instensity = 1 by default
+ *
+ */
+void
+r_rmaffect (CHAR_DATA * ch, char *argument)
+{
+	char arg1[80], arg2[80], arg3[80], arg4[80];
+	char bufarg[MAX_STRING_LENGTH] = {'\0'};
+	char err_buf[MAX_STRING_LENGTH];
+	ROOM_DATA *troom;
+	int room;
+	int virt;
+	int duration;
+	int intensity;
+	int nFlag;
+	
+	argument = one_argument(argument, arg1);
+	
+	if (!strcmp(arg1, "-1"))
+		virt = ch->room->nVirtual;
+	else
+		virt = strtol(arg1, NULL, 10);
+	
+	if (!(troom = vtor (virt)))
+	{
+		send_to_char ("Error: rmaffect: No such room.\n", ch);
+		return;
+	}
+	
+	argument = one_argument(argument, arg2);
+	nFlag = lookup_value(arg2, REG_AFFECT);
+	
+	if (nFlag == -1)
+	{
+		send_to_char ("Error: rmaffect: No such room-affect.\n", ch);
+		return;
+	}
+	
+	argument = one_argument(argument, arg3);
+	
+	if (!strcmp(arg3, "delete"))
+	{
+		remove_room_affect (troom, nFlag);
+		return;
+	}
+	
+	if (!arg3)
+		duration = 1;
+	else 
+		duration = atoi(arg3);
+	
+	
+	argument = one_argument(argument, arg4);
+	if (!arg4)
+		intensity = 1;
+	else
+		intensity = atoi(arg4);
+	
+	add_room_affect (&troom->affects, nFlag, duration, intensity);
+		
+
+}	
 bool
 is_variable_in_list (room_prog_var *& variable_list, std::string variable_name)
 {
@@ -1270,6 +1339,41 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 		return;
 	}
 
+	/* Check to see if an affect exists in the given room */
+	/* Usage: if raffect(room-affect,roomvnum)            */
+	/* if raffect (Shadow, -1) */
+	else if (!strncmp (sarg, "raffect", 7))
+	{
+		nFlag = lookup_value(rbuf, REG_AFFECT);
+				 
+		if (nFlag == -1)
+		{
+			send_to_char ("Error: if raffect: No such room-affect.\n", ch);
+			ifin[nNest] = 1;
+			return;
+		}
+		
+		if (!strcmp(dbuf, "-1"))
+			virt = ch->room->nVirtual;
+		else
+			virt = strtol (dbuf, NULL, 10);
+		
+		if (!(troom = vtor (virt)))
+		{
+			send_to_char ("Error: if raffect: No such room.\n", ch);
+			ifin[nNest] = 1;
+			return;
+		}
+		
+		if (!is_room_affected (troom->affects, nFlag))
+		
+		{
+			ifin[nNest] = 1;
+			return;
+		}
+		return;
+	}
+	
 	/* Check to see if person is in a group. */
 	/* Usage: if in_group()   					  */
 
@@ -2189,6 +2293,11 @@ doit (CHAR_DATA *ch, const char *func, char *arg, char *command, char *keyword, 
 
 		return 1;
 
+	case RP_AFFECT:
+		if (!ifin[nNest])
+			r_rmaffect (ch, arg);
+			
+			return 1;
 	case RP_FORCE:
 		if (!ifin[nNest])
 			r_force (ch, arg);

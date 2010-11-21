@@ -1077,7 +1077,7 @@ void free_lodged (LODGED_OBJECT_INFO * lodged);
 void free_wound (WOUND_DATA * wound);
 void free_char (CHAR_DATA *&ch);
 OBJ_DATA *find_dwelling_obj (int dwelling_room);
-void add_room_affect (AFFECTED_TYPE ** af, int type, int duration);
+void add_room_affect (AFFECTED_TYPE ** af, int type, int duration, int intensity);
 void cleanup_the_dead (int mode);
 int calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
 							  CHAR_DATA * target, int def_modifier,
