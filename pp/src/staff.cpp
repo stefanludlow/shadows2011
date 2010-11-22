@@ -58,9 +58,7 @@ extern rpie::server engine;
 extern const char *skills[];
 extern const char *exit_bits[];
 extern const char *damage_severity[]; //ADDED FOR REPAIR
-extern const char *room_smells[];
 extern std::list<second_affect> second_affect_list;
-
 #define IMOTE_OPCHAR '^'
 #define s(a) send_to_char (a "\n", ch);
 
@@ -3386,7 +3384,7 @@ roomstat (CHAR_DATA * ch, char *name)
 	OBJ_DATA *j;
 	EXTRA_DESCR_DATA *desc;
 	int i;
-	AFFECTED_TYPE *herbed, *room_affect, *next_room_affect;
+	AFFECTED_TYPE *herbed;
 
 
 	rm = vtor (ch->in_room);
@@ -3422,33 +3420,6 @@ roomstat (CHAR_DATA * ch, char *name)
 		send_to_char ("\n", ch);
 	}
 
-	send_to_char ("------- Affects on room -------\n", ch);
-	 for ( room_affect = rm->affects; room_affect; room_affect = next_room_affect )
-	 {
-		 
-		 next_room_affect = room_affect->next;
-		 
-		 if ( room_affect->type >= SMELL_FIRST &&
-			 room_affect->type <= SMELL_LAST )
-		 {
-			 sprintf(buf, "This room has a %s smell, lasting for %d hour(s).\n",
-					 room_smells[room_affect->type - SMELL_FIRST],
-					 room_affect->a.room.duration);
-			 send_to_char (buf, ch);
-		 }
-		 
-		 if ( room_affect->type == MAGIC_ROOM_FIGHT_NOISE )
-			 send_to_char ("There is fighting noise in this room.\n", ch);
-		 
-		 if ( room_affect->type == MAGIC_ROOM_SHADOW )
-		 {
-			 sprintf (buf, "There is a feeling of Shadow here lasting %d hours at %d intensity.\n", room_affect->a.room.duration, room_affect->a.room.intensity);
-			 send_to_char (buf, ch);
-		 }
-		 
-	 }
-	 
-	 
 	herbed = is_room_affected (rm->affects, HERBED_COUNT);
 
 	if (!herbed)
@@ -8985,7 +8956,7 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 
 		send_to_char ("           char <mob> <affect no/name>   delete\n"
 			"   affect  obj  <obj> <affect no/name>   <duration> [power]\n"
-			"           room       <affect no/name> <duration> [intensity]\n"
+			"           room       <affect no/name>\n"
 			"\n"
 			"Example:\n\n"
 			"   affect room 'aklash odor' delete\n"
@@ -9116,7 +9087,7 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (!just_a_number (buf))
 		{
-			send_to_char ("Power or intentsity should be a number.\n", ch);
+			send_to_char ("Power should be a number.\n", ch);
 			return;
 		}
 
@@ -9188,11 +9159,9 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 			affect_to_obj (obj, af);
 		else
 		{
-			if (power_specified)
-				add_room_affect (&room->affects, af->type, duration, power );
-			else
-				add_room_affect (&room->affects, af->type, duration, 1);
-
+			add_room_affect (&room->affects, af->type, duration);
+				//af->next = room->affects;
+				//room->affects = af;
 		}
 	}
 	send_to_char ("Affect created.\n", ch);

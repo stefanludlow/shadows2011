@@ -41,20 +41,6 @@ void magic_invulnerability (CHAR_DATA * ch, CHAR_DATA * victim);
 
 #define NUM_NIGHTMARES		0
 
-const char *room_smells[] = {
-	"Rose",
-	"Jasmine",
-	"Sewer",
-	"Soap", 
-	"Cinnamon", 
-	"Fresh Bread", 
-	"New Mown Hay",
-	"Freshly Washed Linen",
-	"Incense Smoke",
-	"Wood Smoke",
-	"\n"	
-};
-
 const char *magnitudes[] = {
 	"Not Found",
 	"Subtle",
@@ -3239,7 +3225,7 @@ apply_affect (CHAR_DATA * ch, int type, int duration, int power)
 		if (af->a.spell.duration < duration)
 			af->a.spell.duration = duration;
 
-		if (type >= SMELL_FIRST && type <= SMELL_LAST)
+		if (type >= MAGIC_SMELL_FIRST && type <= MAGIC_SMELL_LAST)
 			af->a.smell.aroma_strength = power;
 
 		return 1;

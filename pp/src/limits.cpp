@@ -1009,21 +1009,6 @@ room_affect_wearoff (ROOM_DATA * room, int type)
 
 	switch (type)
 	{
-	case SMELL_ROSE_SCENT:
-		if (room)
-			send_to_room
-			("Slowly, the scent of roses dissipates.\n",
-			 room->nVirtual);
-		break;
-	
-	case SMELL_JASMINE_SCENT:
-		if (room)
-			send_to_room
-			("Slowly, the scent of jasmine dissipates.\n",
-			 room->nVirtual);
-		break;
-
-			
 	case MAGIC_ROOM_CALM:
 		if (room)
 			send_to_room
@@ -1063,36 +1048,30 @@ room_affect_wearoff (ROOM_DATA * room, int type)
 void
 room_update (void)
 {
-	ROOM_DATA * room;
-	AFFECTED_TYPE *room_affect;
-	AFFECTED_TYPE *next_room_affect;
-	
 	/* Expire affects on rooms */
-	
-	
-	for ( room = full_room_list; room; room = room->lnext )
-	{
-		if (room->affects)
-		{
+	/*
+	for ( room = full_room_list; room; room = room->lnext ) {
 	for ( room_affect = room->affects;
 	room_affect;
-			 room_affect = room_affect->next )
+	room_affect = next_room_affect ) {
 
-			{
-				//room noise does not expire on the hours
+	next_room_affect = room_affect->next;
+
+	if ( room_affect->type >= MAGIC_SMELL_FIRST &&
+	room_affect->type <= MAGIC_SMELL_LAST )
+	continue;
+
 	if ( room_affect->type == MAGIC_ROOM_FIGHT_NOISE )
 	continue;
 
-			if (room_affect->a.room.duration > 0 )
+	if ( room_affect->a.room.duration > 0 )
 	room_affect->a.room.duration--;
 
-			//duration = -1 means it will never expire naturally
-			if (room_affect->a.room.duration == 0 )
+	if ( !room_affect->a.room.duration )
 	room_affect_wearoff (room, room_affect->type);
 	}
 	}
-	}
-	
+	*/
 }
 
 

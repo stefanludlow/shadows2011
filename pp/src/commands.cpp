@@ -481,7 +481,7 @@ const class command_data commands[] = {
 	{"mhack", do_materialhack, DEAD, C_IMP},
 	{"mysql", do_mysql, DEAD, C_IMP},
 	{"nuke", do_nuke, DEAD, C_IMP},
-	{"affect", do_affect, DEAD, C_IMP},
+
 	{"rmove", do_rmove, DEAD, C_IMP},
 	{"zlife", do_zlife, DEAD, C_IMP},
 	{"zlock", do_zlock, DEAD, C_IMP},

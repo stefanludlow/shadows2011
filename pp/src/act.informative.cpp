@@ -30,7 +30,6 @@
 
 extern rpie::server engine;
 extern const char *skills[];
-extern const char *room_smells[];
 //added fro REPAIR
 extern const char *unspecified_conditions[];
 extern const char *fabric_conditions[];
@@ -3860,65 +3859,6 @@ delayed_search (CHAR_DATA * ch)
 	send_to_char (ch->room->secrets[dir]->stext, ch);
 }
 
-char *
-room_smell_desc (int smell_no)
-{
-	char buf[MAX_STRING_LENGTH] = "\0";
-	
-	switch (smell_no)
-	{
-		case SMELL_ROSE_SCENT:
-			sprintf(buf, "The heady scent of roses fills the air.\n");
-			break;
-		
-		case SMELL_JASMINE_SCENT:
-			sprintf(buf, "The faint scent of jasmine is in the air.\n");
-			break;
-			
-		case SMELL_SEWER_STENCH:
-			sprintf(buf, "The air is filled with the stench of sewage.\n");
-			break;
-			
-		case SMELL_SOAP_AROMA:
-			sprintf(buf, "The aroma of soap is strong.\n");
-			break;
-			
-		case SMELL_CINNAMON_SCENT:
-			sprintf(buf, "The sweet smell of spices and cinammon is here.\n");
-			break;
-			
-		case SMELL_FRESH_BREAD:
-			sprintf(buf, "The smell of newly baked bread fills the air.\n");
-			break;
-			
-		case SMELL_MOWN_HAY:
-			sprintf(buf, "The heady smell of newly mown hay fills the air.\n");
-			break;
-			
-		case SMELL_FRESH_LINEN:
-			sprintf(buf, "The faint scent of freshly cleaned linen fills the air.\n");
-			break;
-			
-		case SMELL_INCENSE_SMOKE:
-			sprintf(buf, "The heady scent of rich incense fills the air.\n");
-			break;
-			
-		case SMELL_WOOD_SMOKE:
-			sprintf(buf, "There is a smell of wood smoke in the air.\n");
-			break;
-			
-		case SMELL_CORPSE:
-			sprintf(buf, "The stench of decaying corpses fills the air.\n");
-			break;
-			
-		default:
-			sprintf(buf, "There is an unidentifable smell in the air.\n");
-			break;
-			
-	}
-	return (buf);
-}
-
 //////////////////////////////////////////////////////////////////////////////
 // room__get_description ()
 //////////////////////////////////////////////////////////////////////////////
@@ -3939,52 +3879,21 @@ room_smell_desc (int smell_no)
 char *
 room__get_description (ROOM_DATA * room)
 {
-	int weather_room;
-	char buf[MAX_STRING_LENGTH] = "\0";
-	char * description;
-	ROOM_EXTRA_DATA * room_extra;
-	AFFECTED_TYPE *rm_affect;
-	char * extra_description = "\0";
-	
-	description = room->description;
-	room_extra = room->extra;
-		//rm_affect = room->affects;
-	
+	char * description = room->description;
+	ROOM_EXTRA_DATA * room_extra = room->extra;
 	if (room_extra)
 	{
-		weather_room = desc_weather[room->zone];
+		int weather_room = desc_weather[room->zone];
+		char * extra_description = 0;
 		if ((weather_room != WR_NORMAL
 			&& (extra_description = room_extra->weather_desc[weather_room]))
 			|| (!sun_light
 			&& (extra_description = room_extra->weather_desc[WR_NIGHT])))
 		{
-			sprintf(buf, "%s", extra_description);
+			description = extra_description;
 		}
 	}
-	else 
-	{
-		sprintf(buf, "%s", description);
-
-	}
-
-	sprintf(buf +strlen(buf), "\n");
-	
-	 for ( rm_affect = room->affects; rm_affect; rm_affect = rm_affect->next )
-	 {
-		 
-		 if ( rm_affect->type >= SMELL_FIRST &&
-			 rm_affect->type <= SMELL_LAST )
-		 {
-			 sprintf(buf +strlen(buf), "%s",
-					 room_smell_desc(rm_affect->type));
-		 }
-		 
-		 if ( rm_affect->type == MAGIC_ROOM_FIGHT_NOISE )
-			 sprintf(buf +strlen(buf), "There is fighting noise in this room.\n");
-		 
-	 }
-	 
-	return buf;
+	return description;
 }
 
 

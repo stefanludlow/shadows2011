@@ -3036,7 +3036,7 @@ hour_affect_update (void)
 			if (af->type >= MAGIC_AFFECT_FIRST && af->type <= MAGIC_AFFECT_LAST)
 				continue;
 
-			if (af->type >= SMELL_FIRST && af->type <= SMELL_LAST)
+			if (af->type >= MAGIC_SMELL_FIRST && af->type <= MAGIC_SMELL_LAST)
 				continue;
 
 			if (af->type >= MAGIC_SKILL_GAIN_STOP &&
