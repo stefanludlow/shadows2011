@@ -3950,13 +3950,16 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 		if (dir == -1)
 	{
 			send_to_char ("There is no place to run!\n\r", ch);
-		return;
+			add_second_affect (SA_FLEE, 30, ch, NULL, NULL, 
+0);
+			return;
 	}
 	}
 
 	if (!CAN_GO (ch, dir))
 	{
 		send_to_char ("You can't escape that way!\n\r", ch);
+		add_second_affect (SA_FLEE, 30, ch, NULL, NULL, 0);
 		return;
 	}
 
@@ -4058,8 +4061,8 @@ void directed_flee (CHAR_DATA * ch, int direction)
 	send_to_char (message, ch);
 	sprintf (message, "$n flees to the %s.", dirs[direction]);
 	act (message, false, ch, 0, 0, TO_ROOM);
-		//flee effect for 2 minutes RL
-	add_second_affect (SA_FLEE, 120, ch, NULL, NULL, direction);
+		//flee effect for 1.5 minutes RL
+	add_second_affect (SA_FLEE, 90, ch, NULL, NULL, direction);
 	
 	do_move (ch, "", direction);
 
