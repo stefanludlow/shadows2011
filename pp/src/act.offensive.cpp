@@ -3950,9 +3950,8 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 		if (dir == -1)
 	{
 			send_to_char ("There is no place to run!\n\r", ch);
-			add_second_affect (SA_FLEE, 30, ch, NULL, NULL, 
-0);
-			return;
+			add_second_affect (SA_FLEE, 30, ch, NULL, NULL, 0);
+		return;
 	}
 	}
 
@@ -3973,6 +3972,20 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 	act ("$n's eyes dart about looking for an escape path!",
 		false, ch, 0, 0, TO_ROOM);
 	
+		//mobs might do something when they flee
+	typedef std::multimap<mob_cue,std::string>::const_iterator N;
+	if (IS_NPC(ch))
+	{
+		std::pair<N,N> range = ch->mob->cues->equal_range (cue_on_flee);
+		for (N n = range.first; n != range.second; n++)
+		{
+			std::string cue = n->second;
+			if (!cue.empty())
+			{
+				command_interpreter(ch, (char *) cue.c_str());
+			}
+		}
+	}
 	
 	return;
 }
@@ -4039,7 +4052,7 @@ void directed_flee (CHAR_DATA * ch, int direction)
 		}
 		
 		act ("$n nearly flees!", true, ch, 0, 0, TO_ROOM);
-		
+		add_second_affect (SA_FLEE, 30, ch, NULL, NULL, direction);
 		return;
 	}
 	
@@ -4061,7 +4074,7 @@ void directed_flee (CHAR_DATA * ch, int direction)
 	send_to_char (message, ch);
 	sprintf (message, "$n flees to the %s.", dirs[direction]);
 	act (message, false, ch, 0, 0, TO_ROOM);
-		//flee effect for 1.5 minutes RL
+		//flee effect for minute and a half RL
 	add_second_affect (SA_FLEE, 90, ch, NULL, NULL, direction);
 	
 	do_move (ch, "", direction);
