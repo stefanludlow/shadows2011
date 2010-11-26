@@ -643,7 +643,7 @@ set_fighting (CHAR_DATA * ch, CHAR_DATA * vict)
 	if ((af = get_affect (ch, MAGIC_AFFECT_SLEEP)))
 		affect_remove (ch, af);
 
-	if (GET_FLAG (ch, FLAG_AUTOFLEE) && AWAKE (ch))
+	if (GET_FLAG (ch, FLAG_AUTOFLEE) && AWAKE (ch) && !get_second_affect (ch, SA_FLEE, NULL))
 	{
 		send_to_char ("You try to escape!\n\r", ch);
 		act ("$n tries to escape!", false, ch, 0, 0, TO_ROOM);
@@ -4227,7 +4227,7 @@ do_escape (CHAR_DATA * ch, char *argument, int cmd)
 	if (!IS_SUBDUEE (ch))
 	{
 
-		if (ch->fighting)
+		if (ch->fighting && !get_second_affect (ch, SA_FLEE, NULL))
 			do_flee (ch, "", 0);
 		else
 			send_to_char ("You are not currently subdued.\n", ch);

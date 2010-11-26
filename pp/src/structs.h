@@ -868,7 +868,6 @@ typedef signed char shortint;
 #define TARGET_REMOTE_OTHER	7
 
 /* See MAGIC_AFFECT_X for various specific effects */
-
 /* End magic defines */
 
 /** Affects defines range from 600 to 20000+ **/
@@ -987,6 +986,7 @@ typedef signed char shortint;
 #define MAGIC_WORLD_CLOUDS		5005	/* Blocks the sun */
 #define MAGIC_WORLD_SOLAR_FLARE	5006	/* Creates an artificial sun */
 #define MAGIC_WORLD_MOON		5006	/* Moonlight in all rooms */
+#define MAGIC_ROOM_SHADOW       5007    /* creepy shadow affect in room */
 
 #define MAGIC_BUY_ITEM			5400
 
@@ -2312,7 +2312,7 @@ struct affect_toll_type
 struct affect_room_type
 {
 	int duration;
-	int uu2;
+	int intensity;
 	int uu3;
 	int uu4;
 	int uu5;

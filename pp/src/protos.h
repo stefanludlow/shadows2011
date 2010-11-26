@@ -1077,7 +1077,7 @@ void free_lodged (LODGED_OBJECT_INFO * lodged);
 void free_wound (WOUND_DATA * wound);
 void free_char (CHAR_DATA *&ch);
 OBJ_DATA *find_dwelling_obj (int dwelling_room);
-void add_room_affect (AFFECTED_TYPE ** af, int type, int duration);
+void add_room_affect (AFFECTED_TYPE ** af, int type, int duration, int intensity);
 void cleanup_the_dead (int mode);
 int calculate_missile_result (CHAR_DATA * ch, int ch_skill, int att_modifier,
 							  CHAR_DATA * target, int def_modifier,
@@ -1581,8 +1581,7 @@ void delete_ticket (CHAR_DATA * ch, int tick_num);
 void load_weather_obj(ROOM_DATA *troom);
 int weather_object_exists(OBJ_DATA * list, int vnum);
 
-void shadowtoken_object_exists(ROOM_DATA * troom);
-
+int save_room_affects (int zone);
 /* Magical effect functions for spellcasting */
 
 void creation_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,

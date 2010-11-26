@@ -2074,6 +2074,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	POISON_DATA *poison;
 	char buf[MAX_STRING_LENGTH];
 	char buf2[MAX_STRING_LENGTH];
+	char tbuf[MAX_STRING_LENGTH];
 	std::list<second_affect>::iterator sa;
 
 	if (name == NULL || !*name)
@@ -2945,8 +2946,12 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	{
 		if (sa->ch == ch)
 		{
+			sprintf (tbuf, lookup_string(sa->type, REG_AFFECT));
+			if (tbuf)
+				sprintf (buf, "%s: Time remaining: %d seconds\n", tbuf, sa->seconds);
+			else
+				sprintf (buf, "%d: Time remaining: %d seconds\n", sa->type, sa->seconds);
 			
-			sprintf (buf, "%s: Time remaining: %d seconds\n", lookup_string (sa->type, REG_AFFECT), sa->seconds);
 			
 		}
 		send_to_char (buf, ch);
@@ -3384,7 +3389,7 @@ roomstat (CHAR_DATA * ch, char *name)
 	OBJ_DATA *j;
 	EXTRA_DESCR_DATA *desc;
 	int i;
-	AFFECTED_TYPE *herbed;
+	AFFECTED_TYPE *herbed, *room_affect, *next_room_affect;
 
 
 	rm = vtor (ch->in_room);
@@ -3420,6 +3425,31 @@ roomstat (CHAR_DATA * ch, char *name)
 		send_to_char ("\n", ch);
 	}
 
+	send_to_char ("------- Affects on room -------\n", ch);
+	 for ( room_affect = rm->affects; room_affect; room_affect = next_room_affect )
+	 {
+		 
+		 next_room_affect = room_affect->next;
+		 		 
+		 if ( room_affect->type == MAGIC_ROOM_FIGHT_NOISE )
+			 send_to_char ("There is fighting noise in this room.\n", ch);
+		 
+		 if ( room_affect->type == MAGIC_ROOM_SHADOW )
+		 {
+			 int temp = room_affect->a.room.duration;
+			 if (temp == 0)
+				 sprintf (buf, "There is a feeling of Shadow lasting less than an hour at %d intensity.\n", room_affect->a.room.intensity);
+			 else if (temp == 1)
+				 sprintf (buf, "There is a feeling of Shadow lasting more than an hour at %d intensity.\n", room_affect->a.room.intensity);
+			 else 
+				 sprintf (buf, "There is a feeling of Shadow lasting %d hours at %d intensity.\n", room_affect->a.room.duration, room_affect->a.room.intensity);
+				 
+			 send_to_char (buf, ch);
+		 }
+		 
+	 }
+	 
+	 
 	herbed = is_room_affected (rm->affects, HERBED_COUNT);
 
 	if (!herbed)
@@ -8956,7 +8986,7 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 
 		send_to_char ("           char <mob> <affect no/name>   delete\n"
 			"   affect  obj  <obj> <affect no/name>   <duration> [power]\n"
-			"           room       <affect no/name>\n"
+			"           room       <affect no/name> <duration> [intensity]\n"
 			"\n"
 			"Example:\n\n"
 			"   affect room 'aklash odor' delete\n"
@@ -9087,7 +9117,7 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 	{
 		if (!just_a_number (buf))
 		{
-			send_to_char ("Power should be a number.\n", ch);
+			send_to_char ("Power or intentsity should be a number.\n", ch);
 			return;
 		}
 
@@ -9159,9 +9189,12 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 			affect_to_obj (obj, af);
 		else
 		{
-			add_room_affect (&room->affects, af->type, duration);
-				//af->next = room->affects;
-				//room->affects = af;
+			if (power_specified)
+				add_room_affect (&room->affects, af->type, duration, power );
+			else
+				add_room_affect (&room->affects, af->type, duration, 1);
+			
+			save_room_affects (room->zone);
 		}
 	}
 	send_to_char ("Affect created.\n", ch);

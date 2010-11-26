@@ -739,6 +739,7 @@ load_rooms (void)
 	struct secret *r_secret;
 	struct stat fstatus;
 	ROOM_DATA *room;
+	AFFECTED_TYPE *af;
 	int i;
 
 	for (i = 0; i < ZONE_SIZE; i++)
@@ -928,6 +929,19 @@ load_rooms (void)
 						}
 					}//else if (*chk == 'A')
 
+					else if (*chk == 'F')
+					{ //room aFfects
+						af = new AFFECTED_TYPE;
+						fscanf (fl, "%d %d %d\n",
+								&af->type, &af->a.room.duration,
+								&af->a.room.intensity);						
+						if (room->affects)
+							af->next = room->affects;
+						else
+							af->next = NULL;
+						room->affects = af;
+					}
+					
 					else if (*chk == 'C')
 					{	/* Capacity of room */
 						fscanf (fl, "%d\n", &tmp);

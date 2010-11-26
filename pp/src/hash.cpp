@@ -972,7 +972,6 @@ load_colored_object (int vnum, char *color)
 			// generate a new ID only once, all pages indexed by page ID off the key
 			new_obj->o.od.value[1] = unused_writing_id(); 
 			save_writing(new_obj);
-
 		}
 	}
 
@@ -1422,8 +1421,8 @@ reset_zone (int zone)
 			continue;
 		}
 
-		else if (ZCMD.command == 'A' ||	/* Affect on char */
-			ZCMD.command == 'r')
+		else if (ZCMD.command == 'A') /* Affect on char */
+			
 		{			/* Affect on room */
 
 			if (!ZCMD.arg1)
@@ -1462,6 +1461,10 @@ reset_zone (int zone)
 			continue;
 		}
 
+		else if (ZCMD.command == 'r') /* affect on room */
+		{
+			
+		}
 		else if (ZCMD.command == 'm')
 		{
 

@@ -966,6 +966,7 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 {
 	EXTRA_DESCR_DATA *exptr;
 	struct room_prog *rp;
+	AFFECTED_TYPE *af;
 	int j;
 
 	if (!troom->description)
@@ -1099,6 +1100,18 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 		fprintf (fp, "%d\n", troom->capacity);
 	}
 
+		//F for aFfects, since A is used for extra descriptions
+	if (troom->affects)
+	{
+		for (af = troom->affects; af; af = af->next)
+		{
+			fprintf(fp, "F\n");
+			fprintf (fp, "%d %d %d\n", 
+					 af->type,
+					 af->a.room.duration,
+					 af->a.room.intensity);
+		}
+	}
 	fprintf (fp, "S\n");
 }
 
@@ -1136,6 +1149,14 @@ save_affect_reset (FILE * fp, CHAR_DATA * tmp_mob, AFFECTED_TYPE * af)
 	if (af->type == MAGIC_HIDDEN && IS_SET (tmp_mob->affected_by, AFF_HIDE))
 		return;
 
+	if (af->type == MAGIC_ROOM_SHADOW)
+	{
+		fprintf(fp, "r %d %d %d\n", 
+					 af->type,
+					 af->a.room.duration,
+					 af->a.room.intensity);
+	}
+	
 	fprintf (fp, "A %d %d %d %d %d %d %d 0 0 0 0 0 0\n",
 		af->type,
 		af->a.spell.duration,
@@ -1158,18 +1179,29 @@ fwrite_resets (ROOM_DATA * troom, FILE * fp)
 	/* Write room header information if we need to write room affects */
 
 	if (troom->affects)
-		fprintf (fp, "R %d 0 0 0 0 0 0 0 0 0\n", troom->nVirtual);
+		fprintf (fp, "R %d \n", troom->nVirtual);
 
 	for (af = troom->affects; af; af = af->next)
 	{
 		if (af->type == MAGIC_ROOM_FIGHT_NOISE)
 			continue;
-		fprintf (fp, "r %d %d %d %d %d %d %d 0 0 0 0 0 0\n",
+		
+		if (af->type == MAGIC_ROOM_SHADOW)
+		{
+			fprintf(fp, "r %d %d %d\n", 
+					af->type,
+					af->a.room.duration,
+					af->a.room.intensity);
+		}
+		else
+		{
+			fprintf (fp, "r %d %d %d %d %d %d %d \n",
 			af->type,
 			af->a.spell.duration,
 			af->a.spell.modifier,
 			af->a.spell.location,
 			af->a.spell.bitvector, af->a.spell.sn, af->a.spell.t);
+	}
 	}
 
 	for (j = 0; j <= LAST_DIR; j++)
@@ -1450,6 +1482,43 @@ int save_objs (CHAR_DATA * ch, int zone)
   fclose(fo);
 }
 
+int save_room_affects (int zone)
+{
+	FILE *fr;
+	int room_good;
+	int index;
+	ROOM_DATA *troom;
+	
+	if (!(fr = open_and_rename (NULL, "rooms", zone)))
+		return 1;
+	
+	for (troom = full_room_list; troom; troom = troom->lnext)
+		if (troom->zone == zone)
+		{
+			
+			room_good = 0;
+			
+			for (index = 0; index <= LAST_DIR; index++)
+				if (troom->dir_option[index] && troom->dir_option[index]->to_room > 0)
+					room_good = 1;
+			
+			if (troom->contents || troom->people)
+				room_good = 1;
+			
+			if (strncmp (troom->description, "No Description Set", 18))
+				room_good = 1;
+			
+			if (room_good)
+			{
+				fwrite_room (troom, fr);
+			}
+			
+		}
+	
+	fprintf (fr, "$~\n");
+	fclose (fr);
+	
+}
 int
 save_rooms (CHAR_DATA * ch, int zone)
 {

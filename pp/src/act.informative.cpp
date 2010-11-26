@@ -4395,8 +4395,6 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 	else
 	{				/* General look */
 
-			//check for shadow objects in room and trigger the shadow flag
-		shadowtoken_object_exists(ch->room);
 		
 		
 		if (IS_MORTAL (ch))
@@ -4502,10 +4500,8 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 					&& !IS_SET (obj->o.od.value[2], CONT_CLOSEABLE)))
 					continue;
 				sprintf (buf + strlen (buf), "(%s %s) ",
-					IS_SET (EXIT (ch, dir)->exit_info,
-					EX_CLOSED) ? "closed" : "open", EXIT (ch,
-					dir)->
-					keyword);
+						 IS_SET (EXIT (ch, dir)->exit_info, EX_CLOSED) 
+						 ? "closed" : "open", EXIT (ch, dir)->keyword);
 			}
 
 			send_to_char ("\n", ch);

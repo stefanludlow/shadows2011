@@ -3472,23 +3472,55 @@ is_room_affected (AFFECTED_TYPE * af, int type)
 }
 
 void
-add_room_affect (AFFECTED_TYPE ** af, int type, int duration)
+increase_room_affect (AFFECTED_TYPE ** af, int type, int intensity)
 {
 	AFFECTED_TYPE *raffect;
 
 	if ((raffect = is_room_affected (*af, type)))
 	{
-		raffect->a.room.duration += duration;
+		raffect->a.room.intensity += intensity;
 		return;
 	}
+}
+
+void
+add_room_affect (AFFECTED_TYPE ** af, int type, int duration, int intensity)
+{
+	AFFECTED_TYPE *raffect;
+
+	if (raffect = is_room_affected (*af, type))
+	{
+		if (duration)
+		raffect->a.room.duration += duration;
+		
+		if (intensity)
+			raffect->a.room.intensity += intensity;
+		return;
+	}
+
 
 	raffect = new AFFECTED_TYPE;
 
 	raffect->type = type;
+		
+	if (duration > 1)
 	raffect->a.room.duration = duration;
+	else
+		raffect->a.room.duration = 1;
+		
+	if (intensity > 1)
+		raffect->a.room.intensity = intensity;
+	else
+		raffect->a.room.intensity = 1;
+	
+	if (*af)
 	raffect->next = *af;
+	else 
+		raffect->next = NULL;
+
 
 	*af = raffect;
+	
 }
 
 int
@@ -4308,6 +4340,9 @@ setup_registry (void)
 	add_registry (REG_MAGIC_SPELLS, MAGIC_WOOD_SMOKE, "Wood Smoke");
 	
 	add_registry (REG_AFFECT, SA_FLEE, "Fleeing");
+	add_registry (REG_AFFECT, MAGIC_ROOM_SHADOW, "Shadow");
+
+	
 	read_registry ();
 }
 

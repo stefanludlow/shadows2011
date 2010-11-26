@@ -986,29 +986,38 @@ remove_room_affect (ROOM_DATA * room, int type)
 		free_af = room->affects;
 		room->affects = free_af->next;
 		free_mem (free_af);
+		save_room_affects (room->zone);
 		return 1;
 	}
 
 	for (af = room->affects; af->next; af = af->next)
+	{
 		if (af->next->type == type)
 		{
 			free_af = af->next;
 			af->next = free_af->next;
 			free_mem (free_af);
+			
+			save_room_affects (room->zone);
 			return 1;
 		}
-
+	}
 		return 0;
 }
 
 void
 room_affect_wearoff (ROOM_DATA * room, int type)
 {
-	if (!remove_room_affect (room, type))
+	if (remove_room_affect (room, type) == 0)
 		return;
 
 	switch (type)
 	{
+	case MAGIC_ROOM_SHADOW:
+		//if (room)
+		//send_to_room("Shadow has lessened - debug statement");
+		break;
+				
 	case MAGIC_ROOM_CALM:
 		if (room)
 			send_to_room
@@ -1044,34 +1053,43 @@ room_affect_wearoff (ROOM_DATA * room, int type)
 		break;
 	}
 }
-
+/*******************************************************
+ * duration = -1 means it will never expire naturally
+ * duration = 0 means it expires now
+ * duration greater than 0 means it checks for wear-off
+ * on the next tick
+ *****************************************************/
 void
 room_update (void)
 {
+	ROOM_DATA * room;
+	AFFECTED_TYPE *room_affect;
+	AFFECTED_TYPE *next_room_affect;
+	
 	/* Expire affects on rooms */
-	/*
-	for ( room = full_room_list; room; room = room->lnext ) {
-	for ( room_affect = room->affects;
-	room_affect;
-	room_affect = next_room_affect ) {
 
-	next_room_affect = room_affect->next;
+	for ( room = full_room_list; room; room = room->lnext )
+	{
+		for (room_affect = room->affects;
+			 room_affect;
+			 room_affect = room_affect->next )
 
-	if ( room_affect->type >= MAGIC_SMELL_FIRST &&
-	room_affect->type <= MAGIC_SMELL_LAST )
-	continue;
+		{
+			if ((room->affects == NULL) || room_affect== NULL)
+				break;
 
-	if ( room_affect->type == MAGIC_ROOM_FIGHT_NOISE )
-	continue;
+			if (room_affect->a.room.duration == 0 )
+				room_affect_wearoff (room, room_affect->type);
 
-	if ( room_affect->a.room.duration > 0 )
+			else if (room_affect->a.room.duration > 0 )
 	room_affect->a.room.duration--;
 
-	if ( !room_affect->a.room.duration )
-	room_affect_wearoff (room, room_affect->type);
+			else 
+				continue;
+			
 	}
 	}
-	*/
+	
 }
 
 

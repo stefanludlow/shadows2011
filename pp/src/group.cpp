@@ -744,7 +744,5 @@ int speed_group (CHAR_DATA * ch)
 		else if ((tch->speed > lowest_speed) && (lowest_speed == 0))
 			lowest_speed = tch->speed;
 	}
-	 
-
 	return (lowest_speed);
 }
