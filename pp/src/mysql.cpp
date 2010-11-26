@@ -3133,14 +3133,14 @@ load_char_mysql (const char *name)
 	if (!ch->coldload_id)
 		ch->coldload_id = get_next_coldload_id (1);
 
-	if (ch->race == 28)
+	if (ch->race == 28) //trolls - NPC
 	{
 		ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
-		ch->armor = 3;
-	}
-	else if (ch->race == 86) {
-		ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
 		ch->armor = 2;
+	}
+	else if (ch->race == 86) {//olog-hai - PC
+		ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
+		ch->armor = 3;
 	}
 	else
 	{

@@ -863,6 +863,8 @@ add_threat (CHAR_DATA * victim, CHAR_DATA * threat, int amount)
 
 	if (!IS_NPC (victim))
 		return;
+	if (get_second_affect (victim, SA_FLEE, NULL))
+		return;
 
 	if (!victim->threats)
 	{

@@ -2758,11 +2758,16 @@ copyover_recovery (void)
 			if (IS_SET (d->character->flags, FLAG_GUEST))
 				d->character->color++;
 
-			if (d->character->race == 86)
+			if (d->character->race == 86)//olog-hai - PC
 			{
 				d->character->armor = 3;
 			}
 
+			if (d->character->race == 28) //trolls - NPC
+			{
+				d->character->armor = 2;
+			}
+			
 			d->character->flags &= ~(FLAG_ENTERING | FLAG_LEAVING);
 
 			pc_to_game (d->character);

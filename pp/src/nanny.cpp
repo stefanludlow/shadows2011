@@ -3804,7 +3804,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		d->character->hit = d->character->max_hit;	// in terms of wound-endurance.
 	}
 
-	if (d->character->race == 28)
+	if (d->character->race == 28)//trolls - NPC
 	{
 		if (d->character->race == 28)
 			d->character->max_hit =
@@ -3813,7 +3813,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		d->character->armor = 2;
 	}
 
-	if (d->character->race == 86)//Olog-hai
+	if (d->character->race == 86)//Olog-hai - PC
 	{
 		d->character->max_hit =
 			200 + (d->character->con * CONSTITUTION_MULTIPLIER) + (MIN(d->character->aur, 25) * 4);
