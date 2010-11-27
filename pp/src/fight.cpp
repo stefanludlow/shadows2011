@@ -3648,8 +3648,9 @@ perform_violence (void)
 			act ("$n reveals $mself.", true, ch, 0, 0, TO_ROOM);
 		}
 
-		if (IS_NPC (ch) && !get_second_affect (ch, SA_FLEE, NULL)
-			&& (IS_SET (ch->flags, FLAG_AUTOFLEE) || morale_broken (ch)))
+		if (IS_NPC (ch)	&& !get_second_affect (ch, SA_FLEE, NULL)
+			&& ((IS_SET (ch->flags, FLAG_AUTOFLEE))
+				 || morale_broken (ch)))
 		{
 			ch->speed = 4;
 			do_flee (ch, "", 0);
