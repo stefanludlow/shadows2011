@@ -1386,6 +1386,59 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 		return;
 	}
 
+	/* Check to see if mob/player are in same group as the second mob */
+	/* Usage: if is_grouped_with(first,second)                        */
+	/* Only checks in current room. To denote player use -1   */
+		
+	else if (!strncmp (sarg, "is_grouped_with", 6))
+	{
+		who = atol (rbuf);
+		if (who == -1)
+		{
+			tch1 = ch;
+		}
+		else
+		{
+			for (tch1 = vtor (ch->in_room)->people; tch1;
+				 tch1 = tch1->next_in_room)
+			{
+				if (tch1->mob && tch1->mob->nVirtual == who)
+					break;
+			}
+			if (!tch1)
+			{
+				ifin[nNest] = 1;
+				return;
+			}
+		}
+		who = atol (dbuf);
+		if (who == -1)
+		{
+			tch2 = ch;
+		}
+		else
+		{
+			for (tch2 = vtor (ch->in_room)->people; tch2;
+				 tch2 = tch2->next_in_room)
+			{
+				if (tch2->mob && tch2->mob->nVirtual == who)
+					break;
+			}
+			if (!tch2)
+			{
+				ifin[nNest] = 1;
+				return;
+			}
+		}
+		if (!are_grouped(tch1, tch2))
+		{
+			ifin[nNest] = 1;
+			return;
+		}
+		return;
+	}
+	
+	
 	else if (!strncmp (sarg, "(count", 6))
 	{
 		bool digit_yes = false;
