@@ -3220,13 +3220,20 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 		mob_name = buf3;
 		zone_str = NULL;
 
-		if (!isdigit (*buf2))
+		if (*buf2 && !isdigit (*buf2))
 			mob_name = duplicateString (buf2);
-		else
+		else if (*buf2)
 			zone_str = buf2;
+		else
+		{
+			s("  You must specify a zone, keyword or both.");
+			s("  'show m 3' to show mobiles in zone 3");
+			s("  'show m zombie' to show all mobiles with zombie as a keyword");
+			s("  'show m 3 zombie' to show all zombies in zone 3");
+			return;
+			}
 
-		sprintf (tmp, "Vnum  K    Name(s)           Short desc"
-			"              Clones\t\tIn Room\n\n");
+		sprintf (tmp, "Vnum  K    Name(s)                            Short desc\n\n");
 		for (j = full_mobile_list; j; j = j->mob->lnext)
 		{
 
@@ -3246,15 +3253,20 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				if (IS_SET (j->hmflags, HM_KEEPER))
 					sprintf (tmp + strlen (tmp),
-					"%.5d * %-16.16s  %-28.28s  %.3d\t\t%.5d\n",
-					j->mob->nVirtual, j->name, j->short_descr,
-					999, j->in_room);
+					"%.5d * %-30.30s  %-28.28s\n",
+					j->mob->nVirtual, j->name, j->short_descr);
 				else
 				{
 					sprintf (tmp + strlen (tmp),
-						"%.5d   %-16.16s  %-28.28s  %.3d\t\t%.5d\n",
-						j->mob->nVirtual, j->name, j->short_descr,
-						999, j->in_room);
+						"%.5d   %-30.30s  %-28.28s\n",
+						j->mob->nVirtual, j->name, j->short_descr);
+				}
+				if (strlen (tmp) >= (MAX_STRING_LENGTH - 80)) //only 1 more line of room left
+				{
+					send_to_char
+					("Too many matches found - please use a more selective criterion!\n",
+					 ch);
+					return;
 				}
 			}
 		}
@@ -3281,7 +3293,7 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 			zone_str = buf2;
 
 		sprintf (tmp, "Vnum       Name(s)           Short desc"
-			"               Clones\tLocation\n\n");
+			"               \tLocation\n\n");
 		for (k = full_object_list; k; k = k->lnext)
 		{
 
@@ -3306,29 +3318,35 @@ do_show (CHAR_DATA * ch, char *argument, int cmd)
 					continue;
 				if (k->in_obj)
 					sprintf (tmp + strlen (tmp),
-					"%.5d  %-16.16s  %-28.28s#0  %.3d\t(I)%.5d\n",
-					k->nVirtual, k->name, k->short_description, 999,
+					"%.5d  %-21.21s  %-28.28s#0  \t(I)%.5d\n",
+					k->nVirtual, k->name, k->short_description,
 					k->in_obj->nVirtual);
 
 				else if (k->carried_by)
 					sprintf (tmp + strlen (tmp),
-					"%.5d  %-16.16s  %-28.28s#0  %.3d\t(C)%.5d\n",
-					k->nVirtual, k->name, k->short_description, 999,
-					k->carried_by->mob ? k->carried_by->mob->
-nVirtual : 0);
+					"%.5d  %-21.21s  %-28.28s#0  \t(C)%.5d\n",
+					k->nVirtual, k->name, k->short_description,
+					k->carried_by->mob ? k->carried_by->mob->nVirtual : 0);
 
 				else if (k->equiped_by)
 					sprintf (tmp + strlen (tmp),
-					"%.5d  %-16.16s  %-28.28s#0  %.3d\t(E)%.5d\n",
-					k->nVirtual, k->name, k->short_description, 999,
-					k->equiped_by->mob ? k->equiped_by->mob->
-nVirtual : 0);
+					"%.5d  %-21.21s  %-28.28s#0  \t(E)%.5d\n",
+					k->nVirtual, k->name, k->short_description, 
+					k->equiped_by->mob ? k->equiped_by->mob->nVirtual : 0);
 
 				else
 					sprintf (tmp + strlen (tmp),
-					"%.5d  %-16.16s  %-28.28s#0  %.3d\t(R) %05d\n",
-					k->nVirtual, k->name, k->short_description, 999,
+					"%.5d  %-21.21s  %-28.28s#0  \t(R) %05d\n",
+					k->nVirtual, k->name, k->short_description, 
 					k->in_room);
+				
+				if (strlen (tmp) >= (MAX_STRING_LENGTH - 80)) //only 1 more line of room left
+				{
+					send_to_char
+					("Too many matches found - please use a more selective criterion!\n",
+					 ch);
+					return;
+				}
 			}
 		}
 		page_string (ch->desc, tmp);
@@ -3350,6 +3368,13 @@ nVirtual : 0);
 							 "%.5d  %-20.20s  %-32.32s#0\n",
 							 k->nVirtual, k->name, k->short_description);
 				
+				if (strlen (tmp) >= (MAX_STRING_LENGTH - 80)) //only 1 more line of room left
+				{
+					send_to_char
+					("Too many matches found - please use a more selective criterion!\n",
+					 ch);
+					return;
+				}
 				
 			}
 			page_string (ch->desc, tmp);
@@ -3448,6 +3473,14 @@ nVirtual : 0);
 			else
 				sprintf (buf + strlen (buf), "%s", buf2);
 			i++;
+			
+			if (strlen (buf) >= (MAX_STRING_LENGTH - 80)) //only 1 more line of room left
+			{
+				send_to_char
+				("Too many matches found - please use a more selective criterion!\n",
+				 ch);
+				return;
+			}
 		}
 		page_string (ch->desc, buf);
 		mysql_free_result (result);
@@ -3573,6 +3606,13 @@ nVirtual : 0);
 				}
 			}
 			sprintf (tmp + strlen (tmp), "\n");
+			if (strlen (tmp) >= (MAX_STRING_LENGTH - 80)) //only 1 more line of room left
+			{
+				send_to_char
+				("Too many matches found - please use a more selective criterion!\n",
+				 ch);
+				return;
+			}
 		}
 		page_string (ch->desc, tmp);
 		return;
