@@ -3918,7 +3918,7 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!ch->fighting)
 	{
-		send_to_char ("You're not fighting.\n\r", ch);
+		send_to_char ("You're not fighting. But you might want to run for it!\n\r", ch);
 		return;
 	}
 

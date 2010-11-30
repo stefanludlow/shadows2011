@@ -645,7 +645,7 @@ set_fighting (CHAR_DATA * ch, CHAR_DATA * vict)
 
 	if (GET_FLAG (ch, FLAG_AUTOFLEE) && AWAKE (ch) && !get_second_affect (ch, SA_FLEE, NULL))
 	{
-		send_to_char ("You try to escape!\n\r", ch);
+		//send_to_char ("You try to escape!\n\r", ch);
 		act ("$n tries to escape!", false, ch, 0, 0, TO_ROOM);
 		do_flee (ch, "", 0);
 		return;
