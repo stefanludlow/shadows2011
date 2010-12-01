@@ -3607,7 +3607,27 @@ do_wound (CHAR_DATA *ch, char * arg, int cmd)
 
 	if (buffer[0] == '?')
 	{
-		command_interpreter(ch, "help staff wound");
+		std::string help_mess;
+		help_mess = "Syntax: wound <char> <damage> <type> [options]\n\n";
+		help_mess = help_mess + "damage - points or XdY format\n";
+		help_mess = help_mess + "type - stab, chop, blunt, slash, frost, fire, bite, claw, fist, or stun\n\n";
+		
+		help_mess = help_mess + "Options:\n";
+		help_mess = help_mess + "location <location> - to specify a location for the damage.\n\n";
+		help_mess = help_mess + "Level <value> - allows you to take armor, and other adjustments to damage into account. level 1 is a normal hit, up to level 4 for a double critical hit.\n";
+		help_mess = help_mess + "Normal damage will ignore armor and can be at any location you specify. If you use the level option, you can must use head, neck, body, arms, or leg for locations\n\n";
+		help_mess = help_mess + "bleeding <value> - to specify points of  bleeding with the wound\n\n";
+		help_mess = help_mess + "lodge <vnum> - lodge an object in the wound\n\n";
+		help_mess = help_mess + "infected - makes the wound infected\n\n";
+		help_mess = help_mess + "echo  - will echo the result of this command to the player\n\n";
+	
+		help_mess = help_mess + "Examples:\n";
+		help_mess = help_mess + "#3wound traithe 4 stab#0 - will give Traithe 4 points of damage in a random location\n\n";
+		help_mess = help_mess + "#3wound traithe 2d6 stab#0 - will give Traithe 2d6 of damage in random location\n\n";
+		help_mess = help_mess + "#3wound traithe 4 stab location nose#0 - will give Traithe 4 points of damage to his nose\n\n";
+		help_mess = help_mess + "#3wound traithe 4 stab location body level 4 echo#0 -  Will give Traithe 4 points of damage, adjusted to account for armor on his body, level 4 (double critcal) damage bonus, location bonus and brutality bonus for an accurate wound, and tell him he received a massive wound.\n";
+		
+		send_to_char (help_mess.c_str(), ch);
 		return;
 	}
 
@@ -3745,6 +3765,7 @@ do_wound (CHAR_DATA *ch, char * arg, int cmd)
 	std::string location;
 	int bleeding = 0, lodged = 0;
 	bool infected = false, echo = false;
+	int hit_type = 0;
 
 	argument = one_argument(argument, buffer);
 	if (!buffer.empty())
@@ -3795,6 +3816,18 @@ do_wound (CHAR_DATA *ch, char * arg, int cmd)
 			{
 				echo = true;
 			}
+			else if (!buffer.compare("level"))
+			{
+				argument = one_argument(argument, buffer);
+				if (!is_number(buffer.c_str()) || buffer.empty())
+				{
+					send_to_char("If you are want to include armor, you must specify type of hit\n", ch);
+					send_to_char("1 - hit, 2 - hard hit, 3 - critical hit, 4 - double critical hit.\n", ch);
+					return;
+				}
+				
+				hit_type = atoi(buffer.c_str());
+			}
 			else
 			{
 				break;
@@ -3814,6 +3847,116 @@ do_wound (CHAR_DATA *ch, char * arg, int cmd)
 		location = figure_location(target, location_number);
 	}
 
+		//adjust damage by armor worn - does not damage the armor!!
+	if (hit_type > 0)
+	{
+		int wear_loc1;
+		int wear_loc2;
+		int dam_mult = 1;
+		int dam_div = 1;
+		OBJ_DATA *eq;
+		char locbuf[AVG_STRING_LENGTH] = "\0";		
+				
+			//body_type = 0 is the only one supported
+			//body_type = target->body_type;
+		
+		if (!str_cmp (location.c_str(), "body"))
+			{
+				wear_loc1 = body_tab[0][0].wear_loc1;
+				wear_loc2 = body_tab[0][0].wear_loc2;
+				dam_mult = body_tab[0][0].damage_mult;
+				dam_div = body_tab[0][0].damage_div;
+				
+			}
+		else if (!str_cmp (location.c_str(), "leg"))
+			{
+				wear_loc1 = body_tab[0][1].wear_loc1;
+				wear_loc2 = body_tab[0][1].wear_loc2;
+				dam_mult = body_tab[0][1].damage_mult;
+				dam_div = body_tab[0][1].damage_div;
+			}
+		else if (!str_cmp (location.c_str(), "arms"))
+			{
+				wear_loc1 = body_tab[0][2].wear_loc1;
+				wear_loc2 = body_tab[0][2].wear_loc2;
+				dam_mult = body_tab[0][2].damage_mult;
+				dam_div = body_tab[0][2].damage_div;
+			}
+		else if (!str_cmp (location.c_str(), "head"))
+
+			{
+				wear_loc1 = body_tab[0][3].wear_loc1;
+				wear_loc2 = body_tab[0][3].wear_loc2;
+				dam_mult = body_tab[0][3].damage_mult;
+				dam_div = body_tab[0][3].damage_div;
+			}
+		else if (!str_cmp (location.c_str(), "neck"))
+
+			{
+				wear_loc1 = body_tab[0][4].wear_loc1;
+				wear_loc2 = body_tab[0][4].wear_loc2;
+				dam_mult = body_tab[0][4].damage_mult;
+				dam_div = body_tab[0][4].damage_div;
+			}
+				
+
+		
+		/* Subtract the armor protection at the hit location */
+			//first armor bit
+		eq = get_equip (target, wear_loc1);
+		
+		if (eq && eq->obj_flags.type_flag == ITEM_ARMOR)
+			damage = damage - (eq->item_wear/100) * eq->o.armor.armor_value;
+		else if (target->armor) /* Mobs will have marmor, which is natural armor */
+			damage -= (target->armor);
+		
+			//second armor bit
+		eq = get_equip (target, wear_loc2);
+		
+		if (eq && eq->obj_flags.type_flag == ITEM_ARMOR)
+			damage = damage - (eq->item_wear/100) * eq->o.armor.armor_value;
+		
+		/* Multiply by hit location multiplier */
+		
+		damage *= (dam_mult * 1.0) / (dam_div * 1.0);
+		
+		/* Multiply in critical strike bonus */
+		int off_result;
+		off_result = hit_type + 4; //mapping hit_type to RESULT_HIT
+		if (off_result == RESULT_HIT)
+			damage *= 1;
+		else if (off_result == RESULT_HIT1)
+			damage *= 1.3;
+		else if (off_result == RESULT_HIT2)
+			damage *= 1.5;
+		else if (off_result == RESULT_HIT3)
+		{
+			damage += 2;
+			damage *= 1.7;
+		}
+		else if (off_result == RESULT_HIT4)
+		{
+			damage += 3;
+			damage *= 2;
+		}
+
+		
+		if (get_affect (target, MAGIC_AFFECT_CURSE)
+			&& !get_affect (target, MAGIC_AFFECT_BLESS))
+			damage += damage / 4 + 1;
+		
+		else if (get_affect (target, MAGIC_AFFECT_BLESS) &&
+				 !get_affect (target, MAGIC_AFFECT_CURSE))
+			damage = damage * 3 / 4;
+		
+		damage *= COMBAT_BRUTALITY;
+		
+		damage = (int) damage;
+		
+		
+	}
+
+	
 	std::string output;
 	std::ostringstream conversion;
 	conversion << damage;
