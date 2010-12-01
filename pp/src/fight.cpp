@@ -643,11 +643,23 @@ set_fighting (CHAR_DATA * ch, CHAR_DATA * vict)
 	if ((af = get_affect (ch, MAGIC_AFFECT_SLEEP)))
 		affect_remove (ch, af);
 
-	if (GET_FLAG (ch, FLAG_AUTOFLEE) && AWAKE (ch) && !get_second_affect (ch, SA_FLEE, NULL))
+//attacker runs away, even if they start the fight
+	if (GET_FLAG (ch, FLAG_AUTOFLEE) 
+		&& AWAKE (ch) 
+		&& !get_second_affect (ch, SA_FLEE, NULL))
 	{
-		//send_to_char ("You try to escape!\n\r", ch);
+		send_to_char ("You try to escape the fight you started!\n\r", ch);
 		act ("$n tries to escape!", false, ch, 0, 0, TO_ROOM);
 		do_flee (ch, "", 0);
+		return;
+	}
+		//victim gets to run away!
+	if (GET_FLAG (vict, FLAG_AUTOFLEE) 
+		&& AWAKE (vict) 
+		&& !get_second_affect (vict, SA_FLEE, NULL))
+	{
+		act ("$n tries to escape!", false, vict, 0, 0, TO_ROOM);
+		do_flee (vict, "", 0);
 		return;
 	}
 

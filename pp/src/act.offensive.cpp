@@ -3916,11 +3916,12 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 	if (!can_move(ch))
 		return;
 
-	if (!ch->fighting)
-	{
-		send_to_char ("You're not fighting. But you might want to run for it!\n\r", ch);
-		return;
-	}
+//allow them to flee even if they are not fighting - tweak for autoflee
+//	if (!ch->fighting)
+//	{
+//		send_to_char ("You're not fighting!\n\r", ch);
+//		return;
+//	}
 
 	if (get_affect (ch, MAGIC_AFFECT_PARALYSIS))
 	{
