@@ -3027,6 +3027,12 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+	if (get_second_affect (ch, SA_FLEE, NULL))
+	{
+		send_to_char ("You are still traumatized by your flight.\n", ch);
+		return;
+	}
+	
 	if (IS_SET (ch->flags, FLAG_PACIFIST))
 	{
 		send_to_char ("Remove your pacifist flag, first...\n", ch);
@@ -3199,12 +3205,19 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
 			criminalize (ch, victim, vtor (victim->in_room)->zone, CRIME_KILL);
 
 		set_fighting (ch, victim);
-		if (!victim->fighting)
+		if (!victim->fighting && !get_second_affect (victim, SA_FLEE, NULL))
 		{
 			set_fighting (victim, ch);
 			notify_guardians (ch, victim, cmd);
 			act ("$N engages $n in combat.", false,
 				victim, 0, ch, TO_NOTVICT | _ACT_FORMAT);
+		}
+		else if (get_second_affect (victim, SA_FLEE, NULL))
+		{
+			act ("You can't hit $N because they are dodging out of your way!", false, ch, 0, victim, TO_CHAR);
+			ch->act &= ~PLR_STOP;
+			return;
+
 		}
 
 		hit_char (ch, victim, 0);
@@ -3539,6 +3552,12 @@ do_kill (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+	if (get_second_affect (ch, SA_FLEE, NULL))
+	{
+		act ("You are still traumatized by your fleeing.", false, ch, 0, NULL, TO_CHAR);
+		return;
+	}	
+	
 	if (IS_SET (ch->flags, FLAG_PACIFIST))
 	{
 		send_to_char ("Remove your pacifist flag, first...\n", ch);
@@ -4065,7 +4084,8 @@ void directed_flee (CHAR_DATA * ch, int direction)
 		if (tch->fighting == ch)
 		{		
 			act ("You stop fighting $N as they run from the battle!",
-					 true, tch, 0, ch, TO_CHAR);
+					 true, ch, 0, tch, TO_CHAR);
+			stop_fighting (tch);
 			stop_fighting (ch);
 		}
 		

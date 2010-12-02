@@ -629,6 +629,9 @@ set_fighting (CHAR_DATA * ch, CHAR_DATA * vict)
 	if (IS_SET (ch->flags, FLAG_COMPETE) || IS_SET (vict->flags, FLAG_COMPETE))
 		return;
 
+	if (get_second_affect (vict, SA_FLEE, NULL))
+		return;
+	
 	if (ch->fighting)
 	{
 		return;

@@ -2420,7 +2420,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	else if (!GET_FLAG (k, FLAG_KILL) && k->fighting)
 		strcat (buf, " Hitting");
 
-	if (get_second_affect (ch, SA_FLEE, NULL))
+	if (get_second_affect (k, SA_FLEE, NULL))
 		strcat (buf, " Fleeing");
 
 	if (GET_FLAG (k, FLAG_BINDING))
