@@ -20,8 +20,6 @@
 #include "group.h"
 #include "utility.h"
 
-void directed_flee (CHAR_DATA * ch, int direction);
-
 /* ch here is the victim mob or PC */
 void
 notify_guardians (CHAR_DATA * ch, CHAR_DATA * tch, int cmd)
@@ -2171,8 +2169,7 @@ npc_ranged_retaliation (CHAR_DATA * target, CHAR_DATA * ch)
 		else if (!IS_SET (target->act, ACT_MOUNT) && !target->fighting &&
 			!IS_SET (target->flags, FLAG_ENTERING) &&
 			!IS_SET (target->flags, FLAG_LEAVING) &&
-			!get_second_affect (target, SA_FLEE, NULL) &&
-			!(target->following))
+			!IS_SET (target->flags, FLAG_FLEE) && !(target->following))
 		{
 			do_stand (target, "", 0);
 			target->speed = 4;
@@ -2184,7 +2181,7 @@ npc_ranged_retaliation (CHAR_DATA * target, CHAR_DATA * ch)
 			&& !target->fighting
 			&& !IS_SET (target->flags, FLAG_ENTERING)
 			&& !IS_SET (target->flags, FLAG_LEAVING)
-			&& !get_second_affect (target, SA_FLEE, NULL)
+			&& !IS_SET (target->flags, FLAG_FLEE)
 			// todo: add wildness factor to mob based on race and mod penalty
 			&& !skill_use (target->mount, SKILL_RIDE, 15))
 		{
@@ -3006,8 +3003,6 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
 	/* cmd = 0 if hit,
 	cmd = 1 if kill */
 
-	argument = one_argument (argument, buf);
-	
 	if (IS_SWIMMING (ch))
 	{
 		send_to_char ("You can't do that while swimming!\n", ch);
@@ -3027,25 +3022,19 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (get_second_affect (ch, SA_FLEE, NULL))
-	{
-		send_to_char ("You are still traumatized by your flight.\n", ch);
-		return;
-	}
-	
 	if (IS_SET (ch->flags, FLAG_PACIFIST))
 	{
 		send_to_char ("Remove your pacifist flag, first...\n", ch);
 		return;
 	}
 
-	if (IS_SET (ch->flags, FLAG_AUTOFLEE) && !get_second_affect (ch, SA_FLEE, NULL))
+	if (IS_SET (ch->flags, FLAG_AUTOFLEE))
 	{
 		send_to_char ("You throw yourself into combat, forgetting your vow to flee.\n", ch);
 		ch->flags &= ~FLAG_AUTOFLEE;
 	}
 
-	
+	argument = one_argument (argument, buf);
 
 	if ((obj = get_equip (ch, WEAR_BOTH)))
 	{
@@ -3098,6 +3087,13 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (!*buf)
 	{
+
+		if (IS_SET (ch->flags, FLAG_FLEE))
+		{
+			send_to_char ("You stop trying to flee.\n\r", ch);
+			ch->flags &= ~FLAG_FLEE;
+			return;
+		}
 		send_to_char ("Hit whom?\n\r", ch);
 		return;
 	}
@@ -3169,21 +3165,7 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (get_second_affect (ch, SA_FLEE, NULL))
-	{
-		int roll = (number(1, 25));
-		if (roll > ch->wil)
-		{		
-			act ("You are still traumatized by your fleeing.", false, ch, 0, NULL, TO_CHAR);
-			return;
-		}
-		else 
-		{
-			remove_second_affect(get_second_affect(ch, SA_FLEE, NULL));
-		}
-
-	}	
-	
+	ch->flags &= ~FLAG_FLEE;
 	ch->act &= ~PLR_STOP;
 
 	if (GET_POS (ch) == POSITION_STANDING &&
@@ -3205,19 +3187,12 @@ do_hit (CHAR_DATA * ch, char *argument, int cmd)
 			criminalize (ch, victim, vtor (victim->in_room)->zone, CRIME_KILL);
 
 		set_fighting (ch, victim);
-		if (!victim->fighting && !get_second_affect (victim, SA_FLEE, NULL))
+		if (!victim->fighting)
 		{
 			set_fighting (victim, ch);
 			notify_guardians (ch, victim, cmd);
 			act ("$N engages $n in combat.", false,
 				victim, 0, ch, TO_NOTVICT | _ACT_FORMAT);
-		}
-		else if (get_second_affect (victim, SA_FLEE, NULL))
-		{
-			act ("You can't hit $N because they are dodging out of your way!", false, ch, 0, victim, TO_CHAR);
-			ch->act &= ~PLR_STOP;
-			return;
-
 		}
 
 		hit_char (ch, victim, 0);
@@ -3377,12 +3352,6 @@ do_strike (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (get_second_affect (ch, SA_FLEE, NULL))
-	{
-		act ("You are still traumatized by your fleeing.", false, ch, 0, NULL, TO_CHAR);
-		return;
-	}	
-	
 	argument = one_argument (argument, buf);
 
 	if ((obj = get_equip (ch, WEAR_BOTH)))
@@ -3431,9 +3400,10 @@ do_strike (CHAR_DATA * ch, char *argument, int cmd)
 	if (!*buf)
 	{
 
-		if (get_second_affect (ch, SA_FLEE, NULL))
+		if (IS_SET (ch->flags, FLAG_FLEE))
 		{
-			send_to_char ("You are still reeling from fleeing.\n\r", ch);
+			send_to_char ("You stop trying to flee.\n\r", ch);
+			ch->flags &= ~FLAG_FLEE;
 			return;
 		}
 
@@ -3477,6 +3447,7 @@ do_strike (CHAR_DATA * ch, char *argument, int cmd)
 		}
 	}
 
+	ch->flags &= ~FLAG_FLEE;
 	ch->act &= ~PLR_STOP;
 
 	if (GET_POS (ch) == POSITION_STANDING && !ch->fighting)
@@ -3552,12 +3523,6 @@ do_kill (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (get_second_affect (ch, SA_FLEE, NULL))
-	{
-		act ("You are still traumatized by your fleeing.", false, ch, 0, NULL, TO_CHAR);
-		return;
-	}	
-	
 	if (IS_SET (ch->flags, FLAG_PACIFIST))
 	{
 		send_to_char ("Remove your pacifist flag, first...\n", ch);
@@ -3926,21 +3891,18 @@ retreat (CHAR_DATA* ch, int direction, CHAR_DATA* leader)
 void
 do_flee (CHAR_DATA * ch, char *argument, int cmd)
 {
-	char buf[MAX_STRING_LENGTH];
-	int dir = -1;
-	int tdir = -1;
-	char direction_arg[AVG_STRING_LENGTH] = "";
-	
+	int dir;
+	char direction_arg[MAX_STRING_LENGTH];
+	int tdir;
 
 	if (!can_move(ch))
 		return;
 
-//allow them to flee even if they are not fighting - tweak for autoflee
-//	if (!ch->fighting)
-//	{
-//		send_to_char ("You're not fighting!\n\r", ch);
-//		return;
-//	}
+	if (!ch->fighting)
+	{
+		send_to_char ("You're not fighting.\n\r", ch);
+		return;
+	}
 
 	if (get_affect (ch, MAGIC_AFFECT_PARALYSIS))
 	{
@@ -3948,7 +3910,7 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (get_second_affect (ch, SA_FLEE, NULL))
+	if (IS_SET (ch->flags, FLAG_FLEE))
 	{
 		send_to_char ("You are already trying to escape!\n\r", ch);
 		return;
@@ -3970,7 +3932,6 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 		if (dir == -1)
 	{
 			send_to_char ("There is no place to run!\n\r", ch);
-			add_second_affect (SA_FLEE, 30, ch, NULL, NULL, 0);
 		return;
 	}
 	}
@@ -3978,19 +3939,14 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 	if (!CAN_GO (ch, dir))
 	{
 		send_to_char ("You can't escape that way!\n\r", ch);
-		add_second_affect (SA_FLEE, 30, ch, NULL, NULL, 0);
 		return;
 	}
-
-	
-	ch->following = ch;
-	if (!IS_SET (ch->plr_flags, GROUP_CLOSED))
-		ch->plr_flags &= ~GROUP_CLOSED;
-	
-	directed_flee (ch, dir);
+	ch->flags |= FLAG_FLEE;
 
 	act ("$n's eyes dart about looking for an escape path!",
 		false, ch, 0, 0, TO_ROOM);
+	
+	flee_attempt (ch, dir);
 	
 		//mobs might do something when they flee
 	typedef std::multimap<mob_cue,std::string>::const_iterator N;
@@ -4005,107 +3961,14 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 				command_interpreter(ch, (char *) cue.c_str());
 			}
 		}
-	}
-	
-	return;
 }
-
-void directed_flee (CHAR_DATA * ch, int direction)
-{
-	char message[AVG_STRING_LENGTH];
-	SECOND_AFFECT *sa;
-	CHAR_DATA * tch;
-	int enemies;
-	bool super_escape = false;
-	
-	if (sa = get_second_affect (ch, SA_FLEE, NULL))
-	{
-		if (sa->info2 == direction)
-		{
-			send_to_char ("You are already fleeing in that direction!\n", ch);
-			return;
-		}
-		else
-		{
-			remove_second_affect (sa);
-		}
-	}
-	
-	/** add in complications and dealys for fleeing **/
-	/** counts the number of people you are fighting **/
-	for (tch = ch->room->people; tch; tch = tch->next_in_room)
-	{
-		
-		if (tch->fighting != ch)
-			continue;
-		
-		if (GET_POS (tch) != FIGHT && GET_POS (tch) != STAND)
-			continue;
-		
-		if (!CAN_SEE (tch, ch))
-			continue;
-		
-		enemies++;
-	}
-	
-		//high power makes it easier to overwhelm enemies,
-		//high wil to overcome all odds to escape
-		//sometimes you are just lucky
-	if ((number(1, 25) < ch->aur) 
-		|| (number(1, 25) < ch->wil)
-		|| (number(1, 100) < 50))
-		super_escape = true;
-	
-	if (enemies && number (0, enemies) && !super_escape)
-	{
-		switch (number (1, 3))
-		{
-			case 1:
-				send_to_char ("You attempt escape, but fail . . .\n\r", ch);
-				break;
-			case 2:
-				send_to_char ("You nearly escape, but are blocked . . .\n\r", ch);
-				break;
-			case 3:
-				send_to_char ("One of your opponents barely stops your escape . . .\n\r", ch);
-				break;
-		}
-		
-		act ("$n nearly flees!", true, ch, 0, 0, TO_ROOM);
-		add_second_affect (SA_FLEE, 30, ch, NULL, NULL, direction);
-		return;
-	}
-	
-		
-	
-	/** now they can flee **/
-	for (tch = ch->room->people; tch; tch = tch->next_in_room)
-	{
-		if (tch->fighting == ch)
-		{		
-			act ("You stop fighting $N as they run from the battle!",
-					 true, ch, 0, tch, TO_CHAR);
-			stop_fighting (tch);
-			stop_fighting (ch);
-		}
-		
-	}
-		
-	sprintf(message, "You flee %sward!\n", dirs[direction]);
-	send_to_char (message, ch);
-	sprintf (message, "$n flees to the %s.", dirs[direction]);
-	act (message, false, ch, 0, 0, TO_ROOM);
-		//flee effect for minute and a half RL
-	add_second_affect (SA_FLEE, 90, ch, NULL, NULL, direction);
-	
-	do_move (ch, "", direction);
 
 	return;
 }
 
 
 int
-flee_attempt (CHAR_DATA * ch)
+flee_attempt (CHAR_DATA * ch, int direction)
 {
 	int dir;
 	int enemies = 0;
@@ -4117,7 +3980,7 @@ flee_attempt (CHAR_DATA * ch)
 	char buf[MAX_STRING_LENGTH];
 	ROOM_DATA *troom;
 	
-	return 0;
+	
 	
 	
 	if (GET_POS (ch) < FIGHT)
@@ -4138,6 +4001,7 @@ flee_attempt (CHAR_DATA * ch)
 		enemies++;
 	}
 
+	
 	for (dir = 0; dir <= LAST_DIR; dir++)
 	{
 
@@ -4150,6 +4014,8 @@ flee_attempt (CHAR_DATA * ch)
 			mobless_dirs[mobless_count++] = dir;
 	}
 
+	
+	
 	if (!mobbed_count && !mobless_count)
 	{
 		send_to_char ("There is nowhere to go!  You continue fighting!\n\r",
@@ -4163,10 +4029,10 @@ flee_attempt (CHAR_DATA * ch)
 		switch (number (1, 3))
 		{
 		case 1:
-			send_to_char ("You attempt escape, but fail . . .\n\r", ch);
+				send_to_char ("You attempt escape, but fail this time . . .\n\r", ch);
 			break;
 		case 2:
-			send_to_char ("You nearly escape, but are blocked . . .\n\r", ch);
+				send_to_char ("You nearly escape, but are blocked this time . . .\n\r", ch);
 			break;
 		case 3:
 			send_to_char ("You continue seeking escape . . .\n\r", ch);
@@ -4178,15 +4044,24 @@ flee_attempt (CHAR_DATA * ch)
 		return 0;
 	}
 
+	if (direction == 0)
+	{
 	if (mobless_count)
 		dir = mobless_dirs[number (0, mobless_count - 1)];
 	else
 		dir = mobbed_dirs[number (0, mobbed_count - 1)];
+	}
+	else
+		dir = direction;
 
 	troom = ch->room;
 
 	/* stop_fighting_sounds (ch, troom); */
 	stop_followers (ch);
+	ch->following = ch;
+	if (!IS_SET (ch->plr_flags, GROUP_CLOSED))
+		ch->plr_flags |= GROUP_CLOSED;
+	
 	if (ch->fighting)
 	{
 		stop_fighting (ch);
