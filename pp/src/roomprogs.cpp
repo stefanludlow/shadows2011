@@ -1339,11 +1339,25 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 		return;
 	}
 
-	/* Check to see if an affect exists in the given room */
-	/* Usage: if raffect(room-affect,roomvnum)            */
-	/* if raffect (Shadow, -1) */
+	/* Check to see if an affect exists in the given room at a certain level*/
+	/* Usage: if raffect(room-affect,roomvnum,level)            */
+	/* if raffect (Shadow, -1, 4) */
 	else if (!strncmp (sarg, "raffect", 7))
 	{
+		
+		char * room_str;
+		char * check_str;
+		int check_level;
+		room_str = strtok (dbuf," ,");
+		check_str = strtok (NULL, " ,");
+		sprintf(dbuf, "%s", room_str);
+		
+		if (check_str)
+			check_level = atoi(check_str);
+		else 
+			check_level = 0;
+		
+		
 		nFlag = lookup_value(rbuf, REG_AFFECT);
 				 
 		if (nFlag == -1)
@@ -1365,12 +1379,21 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 			return;
 		}
 		
-		if (!is_room_affected (troom->affects, nFlag))
 		
+		if (!is_room_affected (troom->affects, nFlag))
 		{
 			ifin[nNest] = 1;
 			return;
+		
 		}
+		if (is_room_affected (troom->affects, nFlag) 
+			&& !(troom->affects->a.room.intensity == check_level))
+		{
+			ifin[nNest] = 1;
+			return;
+			
+		}
+		
 		return;
 	}
 	

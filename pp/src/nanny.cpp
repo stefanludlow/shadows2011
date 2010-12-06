@@ -3575,10 +3575,10 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		ch->act &= ~PLR_QUIET;
 		d->connected = CON_PLYNG;
 
-		if (sa = get_second_affect (ch, SA_FLEE, NULL))
+		if (IS_SET (ch->flags, FLAG_FLEE))
 		{
 			send_to_char ("You stop trying to flee.\n\r", ch);
-			remove_second_affect (sa);
+			ch->flags &= ~FLAG_FLEE;
 		}
 
 		ch->desc = d;
@@ -3614,7 +3614,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 	d->connected = CON_PLYNG;
 	d->character->desc = d;
 
-	d->character->flags &= ~(FLAG_ENTERING | FLAG_LEAVING | FLAG_SUBDUER | FLAG_SUBDUING | FLAG_SUBDUEE);
+	d->character->flags &= ~(FLAG_FLEE | FLAG_ENTERING | FLAG_LEAVING | FLAG_SUBDUER | FLAG_SUBDUING | FLAG_SUBDUEE);
 	if (GET_TRUST (d->character))
 	{
 		d->character->flags &= ~FLAG_AVAILABLE;

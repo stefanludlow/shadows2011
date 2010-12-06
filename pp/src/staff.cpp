@@ -2420,7 +2420,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	else if (!GET_FLAG (k, FLAG_KILL) && k->fighting)
 		strcat (buf, " Hitting");
 
-	if (get_second_affect (k, SA_FLEE, NULL))
+	if (GET_FLAG (k, FLAG_FLEE))
 		strcat (buf, " Fleeing");
 
 	if (GET_FLAG (k, FLAG_BINDING))
@@ -2928,9 +2928,6 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 
 		if (!p)
 			p = lookup_string (af->type, REG_CRAFT_MAGIC);
-
-		if (!p)
-			p = lookup_string (af->type, REG_AFFECT);
 
 		sprintf (buf, "#2%5d#0   %s affects you by %d for %d hours%s.\n",
 			af->type,
