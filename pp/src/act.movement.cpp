@@ -1305,7 +1305,13 @@ enter_room (QE_DATA * qe)
 					 wound->severity, wound->name,
 					 expand_wound_loc (wound->location));
 			send_to_char (buf, ch);
-				adjust_wound(ch, wound, number(1, 3));	
+					//Make the wound worse, but not enough to kill the player 1-3 points
+				if ((ch->damage + 4) >= ch->max_hit)
+					adjust_wound (ch, wound, number(1, 3));
+				else if ((ch->damage + 3) >= ch->max_hit)
+					adjust_wound (ch, wound, number(1, 2));	
+				else if ((ch->damage + 2) >= ch->max_hit)
+					adjust_wound (ch, wound, 1);				  
 				ch->speed = 1;
 			}
 
@@ -1317,7 +1323,13 @@ enter_room (QE_DATA * qe)
 						 wound->severity, wound->name,
 						 expand_wound_loc (wound->location));
 				send_to_char (buf, ch);
-				adjust_wound(ch, wound, number(1, 3));	
+				//Make the wound worse, but not enough to kill the player 1-3 points
+				if ((ch->damage + 4) >= ch->max_hit)
+					adjust_wound (ch, wound, number(1, 3));
+				else if ((ch->damage + 3) >= ch->max_hit)
+					adjust_wound (ch, wound, number(1, 2));	
+				else if ((ch->damage + 2) >= ch->max_hit)
+					adjust_wound (ch, wound, 1);	
 				ch->speed = 2;
 			}
 //four stars you -may- take some damage if move faster than walk (0)
@@ -1328,7 +1340,11 @@ enter_room (QE_DATA * qe)
 					 wound->severity, wound->name,
 					 expand_wound_loc (wound->location));
 			send_to_char (buf, ch);
-				adjust_wound(ch, wound, number(0, 2));	
+					//Make the wound worse, but not enough to kill the player 0-2 points
+				if ((ch->damage + 3) >= ch->max_hit)
+					adjust_wound (ch, wound, number(0, 2));	
+				else if ((ch->damage + 2) >= ch->max_hit)
+					adjust_wound (ch, wound, number(0,1));
 				ch->speed = 0;
 			}
 			
