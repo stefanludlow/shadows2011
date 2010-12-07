@@ -1324,7 +1324,7 @@ void refresh_zone (void);
 int is_leader (CHAR_DATA * src, CHAR_DATA * tar);
 void invite_accept (CHAR_DATA * ch, char *argument);
 void tashal_prisoner_release (CHAR_DATA * ch);
-int flee_attempt (CHAR_DATA * ch, int direction);
+int flee_attempt (CHAR_DATA * ch, int dir_flag);
 SECOND_AFFECT *get_second_affect (CHAR_DATA * ch, int type, OBJ_DATA * obj);
 void clear_player_from_second_affects (CHAR_DATA *ch);
 void remove_second_affect (SECOND_AFFECT * sa);

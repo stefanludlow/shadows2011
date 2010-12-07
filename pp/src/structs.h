@@ -924,6 +924,15 @@ typedef signed char shortint;
 #define AFFECT_COVER_UP			2104
 #define AFFECT_COVER_DOWN		2105
 
+#define AFFECT_FLEE_NORTH		2106	//fleeing to the north
+#define AFFECT_FLEE_EAST		2107
+#define AFFECT_FLEE_SOUTH		2108
+#define AFFECT_FLEE_WEST		2109
+#define AFFECT_FLEE_UP			2110
+#define AFFECT_FLEE_DOWN		2111
+#define AFFECT_FLEE_ANY 		2112
+
+
 #define MAGIC_CRIM_HOODED		2600	/* Hooded criminal observed in zone .. */
 
 #define MAGIC_STARED			2700	/* Don't stare again until this expires */

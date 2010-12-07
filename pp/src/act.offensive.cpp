@@ -3894,6 +3894,7 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 	int dir;
 	char direction_arg[MAX_STRING_LENGTH];
 	int tdir;
+	int aff_type = 0;
 
 	if (!can_move(ch))
 		return;
@@ -3917,36 +3918,70 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 
+	dir = -1;
 	argument = one_argument (argument, direction_arg);
-	
-	if (!*direction_arg || (dir = index_lookup (dirs, direction_arg)) == -1 )
+		//step 1 choose a direction to flee and remember if we are panic fleeing
+	if (!*direction_arg)
 	{
+		magic_add_affect (ch, AFFECT_FLEE_ANY, -1, 0, 0, 0, 0);
+
 		for (tdir = 0; tdir <= LAST_DIR; tdir++)
 		{
 			if (!CAN_GO (ch, tdir))
 				continue;
 			else
 				dir =tdir;
-			
 		}
+	}
+	else 
+		dir = index_lookup (dirs, direction_arg);
+	
+		//step 2 - can they go that way, and if they can add affect
 		if (dir == -1)
 	{
-			send_to_char ("There is no place to run!\n\r", ch);
+			send_to_char ("There is no such direction to run!\n\r", ch);
 		return;
 	}
-	}
 
-	if (!CAN_GO (ch, dir))
+	else if (!CAN_GO (ch, dir))
 	{
 		send_to_char ("You can't escape that way!\n\r", ch);
 		return;
 	}
+	
+	else 
+	{
+		switch (dir)
+		{
+			case 0:
+				aff_type = AFFECT_FLEE_NORTH;
+				break;
+			case 1:
+				aff_type = AFFECT_FLEE_EAST;
+				break;
+			case 2:
+				aff_type = AFFECT_FLEE_SOUTH;
+				break;
+			case 3:
+				aff_type = AFFECT_FLEE_WEST;
+				break;
+			case 4:
+				aff_type = AFFECT_FLEE_UP;
+				break;
+			case 5:
+				aff_type = AFFECT_FLEE_DOWN;
+				break;
+		}
+		magic_add_affect (ch, aff_type, -1, 0, 0, 0, 0);
+	}
+
 	ch->flags |= FLAG_FLEE;
 
 	act ("$n's eyes dart about looking for an escape path!",
 		false, ch, 0, 0, TO_ROOM);
 	
-	flee_attempt (ch, dir);
+	flee_attempt (ch, 1); //1 for first attempt, 0 for later attempts
+	
 	
 		//mobs might do something when they flee
 	typedef std::multimap<mob_cue,std::string>::const_iterator N;
@@ -3966,11 +4001,19 @@ do_flee (CHAR_DATA * ch, char *argument, int cmd)
 	return;
 }
 
-
+/* dir_flag is to seperate first flee attempt 
+ * from additional ones called from fight.cpp
+ * do_flee assigns and checks a direction for the first attempt
+ * if AFFECT_FLEE_ANY is used, then dirction will change in later 
+ * calls to flee_attempt
+ * affects are added to remember the direction if one is choosen
+ * and this direction is used in later calls to flee_attempt
+ */
 int
-flee_attempt (CHAR_DATA * ch, int direction)
+flee_attempt (CHAR_DATA * ch, int dir_flag)
 {
 	int dir;
+	int index;
 	int enemies = 0;
 	int mobless_count = 0;
 	int mobbed_count = 0;
@@ -3979,9 +4022,6 @@ flee_attempt (CHAR_DATA * ch, int direction)
 	CHAR_DATA *tch;
 	char buf[MAX_STRING_LENGTH];
 	ROOM_DATA *troom;
-	
-	
-	
 	
 	if (GET_POS (ch) < FIGHT)
 		return 0;
@@ -4044,7 +4084,7 @@ flee_attempt (CHAR_DATA * ch, int direction)
 		return 0;
 	}
 
-	if (direction == 0)
+	if (dir_flag == 0 && get_affect (ch, AFFECT_FLEE_ANY))
 	{
 	if (mobless_count)
 		dir = mobless_dirs[number (0, mobless_count - 1)];
@@ -4052,7 +4092,15 @@ flee_attempt (CHAR_DATA * ch, int direction)
 		dir = mobbed_dirs[number (0, mobbed_count - 1)];
 	}
 	else
-		dir = direction;
+	{
+		for(index = AFFECT_FLEE_NORTH;
+			index <= AFFECT_FLEE_DOWN;
+			index ++)
+		{
+			if (get_affect (ch, index))
+				dir = index - 2100;
+		}
+	}
 
 	troom = ch->room;
 
@@ -4082,8 +4130,18 @@ flee_attempt (CHAR_DATA * ch, int direction)
 	if (ch->room != troom)
 		send_to_char (buf, ch);
 
+		//quit fleeing
 	ch->flags &= ~FLAG_FLEE;
 
+		//forget all directions we are trying to flee and forget panic flee
+	for(index = AFFECT_FLEE_NORTH;
+		index <= AFFECT_FLEE_ANY;
+		index ++)
+	{
+		remove_affect_type (ch, index);
+			
+	}
+	
 	typedef std::multimap<mob_cue,std::string>::const_iterator N;
 	if (IS_NPC(ch))
 	{
