@@ -4098,7 +4098,7 @@ flee_attempt (CHAR_DATA * ch, int dir_flag)
 			index ++)
 		{
 			if (get_affect (ch, index))
-				dir = index - 2100;
+				dir = index - 2106;
 		}
 	}
 
