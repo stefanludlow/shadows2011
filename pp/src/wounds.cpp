@@ -346,7 +346,9 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 			wound->name = duplicateString (name);
 			wound->severity = duplicateString (severity);
 
-			if (!str_cmp (severity, "severe") && !bleeding && str_cmp(wound->type, "stun"))
+			if (bleeding == -1)
+				wound->bleeding = 0;
+			else if (!str_cmp (severity, "severe") && !bleeding && str_cmp(wound->type, "stun"))
 				wound->bleeding = number (2, 3);
 			else if (!str_cmp (severity, "grievous") && !bleeding && str_cmp(wound->type, "stun"))
 				wound->bleeding = number (3, 5);
@@ -356,6 +358,7 @@ wound_to_char (CHAR_DATA * ch, char *location, int impact, int type,
 				wound->bleeding = number (10, 20);
 			else if (bleeding)
 				wound->bleeding = bleeding;
+			
 			if (IS_SET (ch->act, ACT_NOBLEED))
 				wound->bleeding = 0;
 
@@ -3610,7 +3613,7 @@ do_wound (CHAR_DATA *ch, char * arg, int cmd)
 		std::string help_mess;
 		help_mess = "Syntax: wound <char> <damage> <type> [options]\n\n";
 		help_mess = help_mess + "damage - points or XdY format\n";
-		help_mess = help_mess + "type - stab, chop, blunt, slash, frost, fire, bite, claw, fist, or stun\n\n";
+		help_mess = help_mess + "type - stab, pierce, chop, blunt, slash, frost, fire, punch, bite, claw,  or stun\n\n";
 		
 		help_mess = help_mess + "Options:\n";
 		help_mess = help_mess + "location <location> - to specify a location for the damage.\n\n";
@@ -3733,9 +3736,9 @@ do_wound (CHAR_DATA *ch, char * arg, int cmd)
 
 	int type = -1;
 	std::string verbose_type = buffer;
-	if (!buffer.compare("pierce"))
+	if (!buffer.compare("stab"))
 		type = 0;
-	else if (!buffer.compare("stab"))
+	else if (!buffer.compare("pierce"))
 		type = 1;
 	else if (!buffer.compare("chop"))
 		type = 2;
@@ -3791,6 +3794,8 @@ do_wound (CHAR_DATA *ch, char * arg, int cmd)
 				}
 
 				bleeding = atoi(buffer.c_str());
+				if (bleeding == 0)
+					bleeding = -1;
 			}
 			else if (!buffer.compare("lodged"))
 			{
@@ -3906,7 +3911,10 @@ do_wound (CHAR_DATA *ch, char * arg, int cmd)
 		eq = get_equip (target, wear_loc1);
 		
 		if (eq && eq->obj_flags.type_flag == ITEM_ARMOR)
+		{
 			damage = damage - (eq->item_wear/100) * eq->o.armor.armor_value;
+			damage += weapon_armor_table[type][eq->o.armor.armor_type];	
+		}
 		else if (target->armor) /* Mobs will have marmor, which is natural armor */
 			damage -= (target->armor);
 		
@@ -3914,7 +3922,10 @@ do_wound (CHAR_DATA *ch, char * arg, int cmd)
 		eq = get_equip (target, wear_loc2);
 		
 		if (eq && eq->obj_flags.type_flag == ITEM_ARMOR)
+		{
 			damage = damage - (eq->item_wear/100) * eq->o.armor.armor_value;
+			damage += weapon_armor_table[type][eq->o.armor.armor_type];
+		}			
 		
 		/* Multiply by hit location multiplier */
 		
@@ -3964,7 +3975,7 @@ do_wound (CHAR_DATA *ch, char * arg, int cmd)
 	if (infected)
 		output = output + "n infected";
 	output = output + " [#6" + verbose_type + "#0] wound of damage [#1" + conversion.str() + "#0] on the #6" + expand_wound_loc((char *) location.c_str()) + "#0 to #5" + char_short(target) + "#0";
-	if (bleeding)
+	if (bleeding > 0)
 	{
 		std::stringstream secondconv;
 		secondconv << bleeding;
