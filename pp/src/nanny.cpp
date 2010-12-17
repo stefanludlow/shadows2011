@@ -3769,13 +3769,16 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 		&& !IS_SET (d->acct->flags, ACCOUNT_NOVOTE))
 	{
 		mysql_safe_query
-			("SELECT last_tms_vote,last_mm_vote,last_tmc_vote FROM forum_users WHERE username = '%s'",
-			d->acct->name.c_str ());
-		if ((result = mysql_store_result (database)) != NULL)
+			("SELECT tms_time, mc_time FROM voting WHERE ip = '%s'",
+			d->strClientIpAddr);
+		result = mysql_store_result (database);
+	}	
+		if (result->row_count != 0)
 		{
 			row = mysql_fetch_row (result);
-			if (((time (0) - ((60 * 60 * 24) + (60 * 5))) >= atoi (row[1]))
-				|| ((time (0) - ((60 * 60 * 24) + (60 * 6))) >= atoi (row[2])))
+			
+			if (((time (0) - ((60 * 60 * 24))) >= atoi (row[0]))
+				|| ((time (0) - ((60 * 60 * 12))) >= atoi (row[1])))
 			{
 				send_to_char
 					("\n#6Have you voted recently? If not, and you wish to support Shadows\n"
@@ -3784,13 +3787,19 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 			}
 			mysql_free_result (result);
 		}
+		else if (result->row_count == 0)
+		{
+			send_to_char
+			("\n#6Have you voted recently? If not, and you wish to support Shadows\n"
+			 "of Isildur, please see HELP VOTE for details. Thank you.#0\n",
+			 d->character);
+		}
 		else
 		{
 			sprintf (buf, "Warning: nanny_choose_pc(): %s",
 				mysql_error (database));
 			system_log (buf, true);
 		}
-	}
 
 
 	show_waiting_prisoners (d->character);

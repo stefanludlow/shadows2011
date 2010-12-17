@@ -663,7 +663,6 @@ game_loop (int s)
 		{
 			check_maintenance ();
 			update_website ();
-			vote_notifications ();
 		}
 
 		if (!(pulse % (PULSES_PER_SEC * 60)))
@@ -761,6 +760,12 @@ game_loop (int s)
 				morgul_arena_time = (int) time (0);
 				arena_matches++;
 			}
+		}
+
+		if (!(pulse % (SECOND_PULSE * 60 * 15 * 4))) //every RL hour
+		{
+			vote_notifications ();
+
 		}
 
 		///** TE PIT **
@@ -1094,8 +1099,11 @@ vote_notifications (void)
 	if (!engine.in_play_mode ())
 		return;
 
-	mysql_safe_query ("SELECT * FROM vote_notifications");
-	if ((result = mysql_store_result (database)) != NULL)
+	mysql_safe_query ("SELECT ip, tms_time, mc_time FROM voting");
+	result = mysql_store_result (database);
+	
+	
+	if (result->row_count != 0)
 	{
 
 		while ((row = mysql_fetch_row (result)))
@@ -1107,10 +1115,18 @@ vote_notifications (void)
 					continue;
 				if (IS_SET (d->acct->flags, ACCOUNT_NOVOTE))
 					continue;
+				
 				if (!str_cmp (d->strClientIpAddr, row[0]))
+				{
+					if (((time (0) - ((60 * 60 * 24))) >= atoi (row[1]))
+						|| ((time (0) - ((60 * 60 * 12))) >= atoi (row[2])))
+					{
 					send_to_char
-					("#6Your vote has been recorded. Thank you for supporting our community!#0\n",
+						("\n#6It's time to vote again! If you wish to support Shadows\n"
+						 "of Isildur, please see HELP VOTE for details. Thank you.#0\n",
 					d->character);
+			}
+		}
 			}
 		}
 		mysql_free_result (result);
@@ -1119,7 +1135,6 @@ vote_notifications (void)
 	{
 		fprintf (stderr, "vote_notifications: %s\n", mysql_error (database));
 	}
-	mysql_safe_query ("DELETE FROM vote_notifications");
 }
 
 void
