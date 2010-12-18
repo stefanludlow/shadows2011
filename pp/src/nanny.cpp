@@ -3772,7 +3772,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 			("SELECT tms_time, mc_time FROM voting WHERE ip = '%s'",
 			d->strClientIpAddr);
 		result = mysql_store_result (database);
-	}	
+		
 		if (result->row_count != 0)
 		{
 			row = mysql_fetch_row (result);
@@ -3801,7 +3801,7 @@ nanny_choose_pc (DESCRIPTOR_DATA * d, char *argument)
 			system_log (buf, true);
 		}
 
-
+	}
 	show_waiting_prisoners (d->character);
 	notify_captors (d->character);
 
