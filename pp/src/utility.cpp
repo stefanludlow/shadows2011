@@ -1614,6 +1614,24 @@ name_to_ident (CHAR_DATA * ch, char *ident)
 	else
 		sprintf (ident, "%d.%s", i, buf);
 }
+	//used by Macro GET_TRUST
+int get_trust (CHAR_DATA * ch) {
+	if (!ch || !ch->desc || (ch->flags & FLAG_GUEST)) {
+		return 0;
+	}
+	
+	ch = ch->desc->original != NULL ? ch->desc->original : ch->desc->character;
+	
+	if (!ch || !ch->pc || ch->pc->mortal_mode) {
+		return 0;
+	}
+	
+		//if (ch->isLevelFivePC()) {
+		//	return 5;
+		//}
+	
+	return ch->pc->level;
+}
 
 int
 real_trust (CHAR_DATA * ch)

@@ -1331,24 +1331,7 @@ void remove_second_affect (SECOND_AFFECT * sa);
 void map_next_step (CHAR_DATA * ch);
 void open_skill (CHAR_DATA * ch, int skill);
 
-
-inline int get_trust (CHAR_DATA * ch) {
-	if (!ch || !ch->desc || (ch->flags & FLAG_GUEST)) {
-		return 0;
-	}
-
-	ch = ch->desc->original != NULL ? ch->desc->original : ch->desc->character;
-
-	if (!ch || !ch->pc || ch->pc->mortal_mode) {
-		return 0;
-	}
-
-	//if (ch->isLevelFivePC()) {
-	//	return 5;
-	//}
-
-	return ch->pc->level;
-}
+int get_trust (CHAR_DATA * ch);
 
 void add_memory (CHAR_DATA * add, CHAR_DATA * mob);
 int real_trust (CHAR_DATA * ch);
