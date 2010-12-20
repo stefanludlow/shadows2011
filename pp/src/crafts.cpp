@@ -3564,13 +3564,47 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 
 		/* Purge Consumed Craft Items */
 		nObjectTally = item->item_counts;
+		if (nObjectTally == 0)
+			nObjectTally = 1;
+		nObjectVnum = obj_list[i]->nVirtual;
 		
+			//first we remove normal items from hands
+		if (nObjectTally && ch->right_hand && ch->right_hand->nVirtual == nObjectVnum)
+		{
+			if (ch->right_hand->count <= nObjectTally)
+			{
+				nObjectTally -= ch->right_hand->count;
+				extract_obj (ch->right_hand);
+			}
+			else
+			{
+				ch->right_hand->count -= nObjectTally;
+				nObjectTally = 0;
+			}
+		}
+		
+		if (nObjectTally && ch->left_hand && ch->left_hand->nVirtual == nObjectVnum)
+		{
+			if (ch->left_hand->count <= nObjectTally)
+			{
+				nObjectTally -= ch->left_hand->count;
+				extract_obj (ch->left_hand);
+			}
+			else
+			{
+				ch->left_hand->count -= nObjectTally;
+				nObjectTally = 0;
+			}
+		}
+		
+			//now we check for inherited and additional normal items in the hands
 		if (obj_list[i]->super_vnum == 0)
 		nObjectVnum = obj_list[i]->nVirtual;
 		else 
 			nObjectVnum = obj_list[i]->super_vnum; 
 		
-		if (nObjectTally && ch->right_hand && inheritedObject(ch->right_hand->nVirtual, nObjectVnum)) {
+		if (nObjectTally && ch->right_hand && inheritedObject(ch->right_hand->nVirtual, nObjectVnum))
+		{
 			if (ch->right_hand->count <= nObjectTally)
 			{
 				nObjectTally -= ch->right_hand->count;
@@ -3583,7 +3617,8 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 			}
 		}
 
-		if (nObjectTally && ch->left_hand && inheritedObject(ch->left_hand->nVirtual, nObjectVnum)) {
+		if (nObjectTally && ch->left_hand && inheritedObject(ch->left_hand->nVirtual, nObjectVnum))
+		{
 			if (ch->left_hand->count <= nObjectTally)
 			{
 				nObjectTally -= ch->left_hand->count;
@@ -3596,8 +3631,35 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 			}
 		}
 
+			//finally we check the room for normal and inherited
 		if (nObjectTally && ch->room->contents)
 		{
+				//first test for normal objects
+			for (ptrObj = ch->room->contents; nObjectTally && ptrObj != NULL;)
+			{
+				if (ptrObj->nVirtual == nObjectVnum)
+				{
+					if (ptrObj->count <= nObjectTally)
+					{
+						nObjectTally -= ptrObj->count;
+						ptrObjNext = ptrObj->next_content;
+						extract_obj (ptrObj);
+						ptrObj = ptrObjNext;
+					}
+					else
+					{
+						ptrObj->count -= nObjectTally;
+						nObjectTally = 0;
+						ptrObj = ptrObj->next_content;
+					}
+				}
+				else
+				{
+					ptrObj = ptrObj->next_content;
+				}
+			}
+			
+				//next we check for inherited objects
 			for (ptrObj = ch->room->contents; nObjectTally != 0 && ptrObj != NULL;)
 			{
 				if (inheritedObject(ptrObj->nVirtual, nObjectVnum))
@@ -3620,7 +3682,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 				{
 					ptrObj = ptrObj->next_content;
 				}
-			}//for (ptrObj = ch->room->contents
+			}
 		}//if (nObjectTally
 	}//if (!obj_list[i])
 
