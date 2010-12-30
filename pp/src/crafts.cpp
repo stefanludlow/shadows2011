@@ -3634,6 +3634,7 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 			//finally we check the room for normal and inherited
 		if (nObjectTally && ch->room->contents)
 		{
+			nObjectVnum = obj_list[i]->nVirtual; //look for normal items first
 				//first test for normal objects
 			for (ptrObj = ch->room->contents; nObjectTally && ptrObj != NULL;)
 			{
@@ -3662,6 +3663,11 @@ activate_phase (CHAR_DATA * ch, AFFECTED_TYPE * af)
 				//next we check for inherited objects
 			for (ptrObj = ch->room->contents; nObjectTally != 0 && ptrObj != NULL;)
 			{
+				if (obj_list[i]->super_vnum == 0)
+					nObjectVnum = obj_list[i]->nVirtual;
+				else 
+					nObjectVnum = obj_list[i]->super_vnum;
+				
 				if (inheritedObject(ptrObj->nVirtual, nObjectVnum))
 				{
 					if (ptrObj->count <= nObjectTally)
