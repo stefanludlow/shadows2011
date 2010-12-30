@@ -768,6 +768,12 @@ game_loop (int s)
 
 		}
 
+		if (!(pulse % (SECOND_PULSE * 60 * 15 * 4 * 24))) //once every RL day
+		{
+			daily_shadow_room();
+			
+		}
+		
 		///** TE PIT **
 		//* Runs on the 1 and 15 of each month, for 1 day, every half hour RL
 		//*/

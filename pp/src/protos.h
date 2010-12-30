@@ -1565,6 +1565,13 @@ void load_weather_obj(ROOM_DATA *troom);
 int weather_object_exists(OBJ_DATA * list, int vnum);
 
 int save_room_affects (int zone);
+void daily_shadow_room();
+int shadow_spread (ROOM_DATA * room);
+void do_spread (CHAR_DATA * ch, char *argument, int cmd); //level 3 for now BP only
+void clear_shadow_objects (ROOM_DATA * room);
+void update_shadow_objects (ROOM_DATA * room);
+bool is_shadow_obj_here(ROOM_DATA * room);
+
 /* Magical effect functions for spellcasting */
 
 void creation_animal_spell (CHAR_DATA * ch, AFFECTED_TYPE * spell,

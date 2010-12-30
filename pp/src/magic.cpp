@@ -16,6 +16,7 @@
 #include <ctype.h>
 #include <unistd.h>
 
+#include "server.h"
 #include "structs.h"
 #include "net_link.h"
 #include "account.h"
@@ -25,6 +26,10 @@
 #include "utility.h"
 
 #define s(a) send_to_char (a "\n\r", ch);
+
+extern rpie::server engine;
+extern char *exits[];
+extern bool oexist (int nVirtual, OBJ_DATA * ptrContents, bool bNest);
 
 int spell_blend (CHAR_DATA * ch, CHAR_DATA * victim, int sn);
 int spell_infravision (CHAR_DATA * ch, CHAR_DATA * victim, int sn);
@@ -40,6 +45,22 @@ void magic_invulnerability (CHAR_DATA * ch, CHAR_DATA * victim);
 #define FRIEND_CHURCH		16
 
 #define NUM_NIGHTMARES		0
+
+#define MAX_SHADOW_OBJECTS	11
+
+const int shadow_stream[MAX_SHADOW_OBJECTS] = {
+	54112, //thornbush objects
+	54114, 
+	54115, 
+	54116, 
+	54117, 
+	54118, 
+	54119, 
+	54120, 
+	54121, 
+	54122, 
+	54123
+};
 
 const char *magnitudes[] = {
 	"Not Found",
@@ -4251,4 +4272,262 @@ do_reach (CHAR_DATA * ch, char *argument, int cmd)
 	send_to_char (buf, target);
 
 	weaken (ch, 0, 10, "Reach (succeeded)");
+}
+
+/********************************
+ * Check room for shadow seeds
+ * Increase shadow level
+ * spread shadow
+ * decrease shadow
+ ********************************/
+ 
+void daily_shadow_room()
+{
+	
+	ROOM_DATA * room;
+	OBJ_DATA * shadow_obj;
+	OBJ_DATA * nobj;
+	AFFECTED_TYPE *room_shadow;
+	AFFECTED_TYPE *room_seeded;
+	char buf[MAX_STRING_LENGTH];
+	bool shadow_seed = false;
+	int fight_chance;
+	int index;
+	
+		// don't want shadow spread active on pp yet
+	if (engine.in_play_mode ())
+		return;
+	
+	
+	sprintf (buf, "Shadow has been spread\n\n");
+	send_to_gods(buf);
+	
+		//shadow grows and spreads, or starts from seeds
+	for ( room = full_room_list; room; room = room->lnext )
+	{
+		room_seeded = is_room_affected(room->affects, MAGIC_ROOM_SHADOW_SEED);
+		room_shadow = is_room_affected(room->affects, MAGIC_ROOM_SHADOW);
+		shadow_obj = get_obj_in_list_num (shadow_stream[0], room->contents);
+		
+			// does a shadow seed exist in empty room
+		if (shadow_obj && !room_seeded && !room_shadow)
+		{
+			add_room_affect (&room->affects, MAGIC_ROOM_SHADOW_SEED, -1, 1);
+			save_room_affects (room->zone);
+			continue;
+		}
+		
+		
+			//shadow grows up to level 6, but only if a shadow stream object is in the room
+		if (is_shadow_obj_here(room))
+		{
+			for (index=0; index < MAX_SHADOW_OBJECTS; index ++)
+			{
+				
+				if (room_shadow 
+					&& room_shadow->a.room.intensity < 6
+					&& oexist (shadow_stream[index], room->contents, true))
+				{
+					room_shadow->a.room.intensity += 1;
+					break;
+				}
+				
+			}
+		}
+		
+			//shadow spreads and diminishes if over level 2
+			//shadow stream object is not needed for spreading
+		if (room_shadow 
+			&& room_shadow->a.room.intensity > 2 
+			&& shadow_spread (room))
+		{
+				//loses it's growth this cycle and loses for the spread
+			room_shadow->a.room.intensity -= 2 ;
+		}
+		update_shadow_objects(room);
+		
+	}
+		//seeds sprout into full shadows
+	for ( room = full_room_list; room; room = room->lnext )
+	{
+		if (!room->affects)
+			continue;
+		
+		room_seeded = is_room_affected(room->affects, MAGIC_ROOM_SHADOW_SEED);
+		room_shadow = is_room_affected(room->affects, MAGIC_ROOM_SHADOW);
+		
+		if (room_seeded && !room_shadow)
+		{
+				//remove seed and add a real shadow and it's object
+			remove_room_affect (room, MAGIC_ROOM_SHADOW_SEED);
+			add_room_affect (&room->affects, MAGIC_ROOM_SHADOW, -1, 1);
+			save_room_affects (room->zone);
+			
+			clear_shadow_objects (room);
+			nobj = load_object(shadow_stream[0]);
+			obj_to_room (nobj, room->nVirtual);
+			
+			continue;
+		}
+		
+	}	
+	
+		//Terrain fights back with or without shadow stream objects
+		//TODO - aided by future Light stream objects
+	for ( room = full_room_list; room; room = room->lnext )
+	{
+		if (!room->affects)
+			continue;
+		
+		room_shadow = is_room_affected(room->affects, MAGIC_ROOM_SHADOW);
+		fight_chance = number(1, 100);
+		
+		if (room_shadow)
+		{
+				//add 10% per level of Shadow to make it harder to fight back
+			fight_chance = fight_chance + (10 * room_shadow->a.room.intensity);
+			
+			if ((room->sector_type == SECT_FOREST && fight_chance <= 50)
+				|| (room->sector_type == SECT_WOODS && fight_chance <= 30))
+			{
+				if (room_shadow && room_shadow->a.room.intensity > 1)
+				{
+					room_shadow->a.room.intensity -= 1;
+				}
+				else if (room_shadow && room_shadow->a.room.intensity == 1)
+				{
+					remove_room_affect (room, MAGIC_ROOM_SHADOW);
+					clear_shadow_objects(room);
+				}
+			}
+		}
+		update_shadow_objects(room);
+		
+	}	
+}
+/********
+ * direction of preferred spread
+ * west, down, north, south, east,  up
+ ************/
+
+int
+shadow_spread (ROOM_DATA * room)
+{
+	int dir;
+	int resist_chance;
+	ROOM_DIRECTION_DATA *exit;
+	OBJ_DATA * tobj;
+	ROOM_DATA * next_room;
+	AFFECTED_TYPE *room_shadow;
+	AFFECTED_TYPE *room_seeded;
+	char buf[MAX_STRING_LENGTH] = { '\0' };
+	int index;
+	int pref_order[6] = {3, 5, 0, 2, 1, 4};
+	
+	
+	resist_chance = number(1, 100);
+	
+	
+	for (index = 0; index <6; index ++)
+	{
+		dir = pref_order[index];
+		exit = room->dir_option[dir];
+		
+		if (!exit || exit->to_room == NOWHERE)
+			continue;
+		
+		next_room = vtor (exit->to_room);
+		
+		if (next_room)
+		{
+				//will not spread into water rooms
+			if ((next_room->sector_type == SECT_LAKE)
+				|| (next_room->sector_type == SECT_RIVER)
+				|| (next_room->sector_type == SECT_OCEAN)
+				|| (next_room->sector_type == SECT_UNDERWATER))
+				continue;
+			
+				//terrains can resist Shadow
+			if ((next_room->sector_type == SECT_FOREST && resist_chance <= 90)
+				|| (next_room->sector_type == SECT_WOODS && resist_chance <= 70)
+				|| (next_room->sector_type == SECT_TRAIL && resist_chance <= 70)
+				|| (next_room->sector_type == SECT_MOUNTAIN && resist_chance <= 50)
+				|| (next_room->sector_type == SECT_HILLS && resist_chance <= 40)
+				|| (next_room->sector_type == SECT_SWAMP && resist_chance <= 30)
+				|| (next_room->sector_type == SECT_CAVE && resist_chance <= 20)
+				|| (next_room->sector_type == SECT_ROAD && resist_chance <= 10))
+				continue;
+			
+			room_shadow = is_room_affected(next_room->affects, MAGIC_ROOM_SHADOW);
+			room_seeded = is_room_affected(next_room->affects, MAGIC_ROOM_SHADOW_SEED);
+			
+			if (!room_shadow && !room_seeded && dir)
+			{
+				add_room_affect (&next_room->affects, MAGIC_ROOM_SHADOW_SEED, -1, 1);
+				save_room_affects (room->zone);
+				return (1);
+			}
+		}
+	}
+	return (0);
+	
+}
+
+void
+clear_shadow_objects (ROOM_DATA * room)
+{
+	int index;
+	OBJ_DATA * tobj;
+	
+	for (index = 0; index < MAX_SHADOW_OBJECTS; index++)
+	{
+		tobj = 	get_obj_in_list_num (shadow_stream[index], room->contents);
+		if (tobj)
+			extract_obj(tobj);
+	}
+}
+
+	//TO DO decide which objects get update, and how they are updated
+void
+update_shadow_objects (ROOM_DATA * room)
+{
+	int index;
+	AFFECTED_TYPE *room_shadow;
+	OBJ_DATA * tobj;
+	OBJ_DATA * nobj;
+	
+	room_shadow = is_room_affected(room->affects, MAGIC_ROOM_SHADOW);
+	
+	if (!room_shadow)
+		return;
+	
+	if (!is_shadow_obj_here(room))
+		return;
+	
+	/********** one potential option  
+	 //force morph clocks to change at next tick.
+	 for (tobj = room->contents;
+	 tobj->next_content;
+	 tobj = tobj->next_content)
+	 if (tobj->morphTime && tobj->morphTime > 0)
+	 {
+	 tobj->morphTime = time(NULL);
+	 }
+	 **********/
+}
+
+bool
+is_shadow_obj_here(ROOM_DATA * room)
+{
+	int index;
+	
+	for (index = 0; index < MAX_SHADOW_OBJECTS; index ++)
+	{
+		if(get_obj_in_list_num (shadow_stream[index], room->contents))
+		{
+			return (true);
+		}
+	}
+	
+	return (false);
 }

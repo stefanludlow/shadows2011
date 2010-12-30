@@ -3443,6 +3443,18 @@ roomstat (CHAR_DATA * ch, char *name)
 				 
 			 send_to_char (buf, ch);
 		 }
+		 if ( room_affect->type == MAGIC_ROOM_SHADOW_SEED )
+		 {
+			 int temp = room_affect->a.room.duration;
+			 if (temp == 0)
+				 sprintf (buf, "There is a Shadow seed waiting less than an hour at %d intensity.\n", room_affect->a.room.intensity);
+			 else if (temp == 1)
+				 sprintf (buf, "There is a Shadow seed waiting more than an hour at %d intensity.\n", room_affect->a.room.intensity);
+			 else 
+				 sprintf (buf, "There is a Shadow seed waiting %d hours at %d intensity.\n", room_affect->a.room.duration, room_affect->a.room.intensity);
+			 
+			 send_to_char (buf, ch);
+		 }
 		 
 	 }
 	 
@@ -11174,7 +11186,16 @@ write_dynamic_registry (CHAR_DATA * ch)
 
 #define MAP_MAX_RADIUS 3
 #define MAP_GRID_WIDTH ((MAP_MAX_RADIUS * 2) + 1)
-#define MAP_GRID_DEPTH 5
+#define MAP_GRID_DEPTH 6
+/******
+ map[0][x][y]	room number
+ map[1][x][y]	sector type
+ map[2][x][y]	doors on east wall
+ map[3][x][y]	doors on south wall
+ map[4][x][y]	doors up/down
+ map[5][x][y]	shadow affect
+ 
+ ******/
 
 void
 fill_map (ROOM_DATA * ptrRoom, int x, int y,
@@ -11194,25 +11215,33 @@ fill_map (ROOM_DATA * ptrRoom, int x, int y,
 	{
 		map[0][x][y] = ptrRoom->nVirtual;
 	}
+	
 	map[1][x][y] = (ptrRoom->sector_type >= 0
 		&& ptrRoom->sector_type < 21) ? ptrRoom->sector_type : 21;
 	if ((ptrEExit = ptrRoom->dir_option[1]) != NULL)
 	{
 		map[2][x][y] = (IS_SET (ptrEExit->exit_info, (EX_ISDOOR || EX_ISGATE))) ? 2 : 1;
 	}
+	
 	if ((ptrSExit = ptrRoom->dir_option[2]) != NULL)
 	{
 		map[3][x][y] = (IS_SET (ptrSExit->exit_info, (EX_ISDOOR || EX_ISGATE))) ? 2 : 1;
 	}
+	
 	if ((ptrRoom->dir_option[4]) != NULL)
 	{
 		map[4][x][y] = 1;
 	}
+	
 	if ((ptrRoom->dir_option[5]) != NULL)
 	{
 		map[4][x][y] = (map[4][x][y]) ? 3 : 2;
 	}
 
+	if (is_room_affected(ptrRoom->affects, MAGIC_ROOM_SHADOW))
+		map[5][x][y] = 1;
+	else 
+		map[5][x][y] = 0;
 
 	if ((y > 0) && !map[0][x][y - 1] && (ptrNExit = ptrRoom->dir_option[0]))
 	{
@@ -11294,6 +11323,9 @@ do_map (CHAR_DATA * ch, char *argument, int cmd)
 		"", "#4", "#4", "#4", "#6",
 		"#c", "#9"
 	};
+	const char *strShadow[] = {
+		"", "#1"
+	};
 	unsigned char i = 0, j = 0, x = 0, y = 0, nInRoom = 0, bSearch = 0;
 	int r = 0;
 	CHAR_DATA *rch;
@@ -11314,6 +11346,8 @@ do_map (CHAR_DATA * ch, char *argument, int cmd)
 			map[2][i][j] = 0;	/* e links */
 			map[3][i][j] = 0;	/* s links */
 			map[4][i][j] = 0;	/* u/d links */
+			map[5][i][j] = 0;	/* shadow presence */
+			
 		}
 	}
 	x = MAP_MAX_RADIUS;
@@ -11330,7 +11364,8 @@ do_map (CHAR_DATA * ch, char *argument, int cmd)
 			{
 				if ((room = vtor (r)))
 				{
-
+					if (str_cmp (arg1, "shadow"))
+						{
 					if (i == MAP_MAX_RADIUS && j == MAP_MAX_RADIUS)
 					{
 						sprintf (buf + strlen (buf), " #d<#0%s%6d#d>#0%s%s",
@@ -11372,6 +11407,27 @@ do_map (CHAR_DATA * ch, char *argument, int cmd)
 							strEWall[map[2][i][j]]);
 					}
 				}
+					else
+						{
+							if (i == MAP_MAX_RADIUS && j == MAP_MAX_RADIUS)
+							{
+								sprintf (buf + strlen (buf), " #d<#0%s%6d#d>#0%s%s",
+										 strShadow[map[5][i][j]],
+										 r,
+										 strVExit[map[4][i][j]],
+										 strEWall[map[2][i][j]]);
+							}
+							else
+							{
+								
+								sprintf (buf + strlen (buf), " %s%8d#0%s%s",
+										 strShadow[map[5][i][j]],
+										 r,
+										 strVExit[map[4][i][j]],
+										 strEWall[map[2][i][j]]);
+							}
+						}
+				}
 				strcat (buf2, strSWall[map[3][i][j]]);
 
 			}
@@ -11402,6 +11458,8 @@ do_map (CHAR_DATA * ch, char *argument, int cmd)
 		buf[2] = '\0';
 	}
 
+	if (str_cmp (arg1, "shadow"))
+		{
 	strcpy (buf, "\n  #6'#0 Up       #6,#0 Down     #6%#0 Up/Down\n  ");
 
 	for (i = 0; sector_types[i][0] != '\n'; i++)
@@ -11410,7 +11468,11 @@ do_map (CHAR_DATA * ch, char *argument, int cmd)
 		if (!((i + 1) % 7))
 			strcat (buf, "\n  ");
 	}
-
+		}
+	else 
+		{
+			sprintf (buf + strlen (buf), "#1Rooms infected with Shadow#0\nNormal rooms\n ");
+		}
 	send_to_char (buf, ch);
 }
 
