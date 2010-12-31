@@ -4368,9 +4368,9 @@ do_compete (CHAR_DATA * ch, char *argument, int cmd)
 
 	argument = one_argument (argument, buf);
 
-	if (!IS_IMPLEMENTOR (ch))
+	if (!engine.in_test_mode () || !IS_IMPLEMENTOR (ch))
 	{
-		send_to_char ("This command is for the implementor only.\n", ch);
+		send_to_char ("This command is for the implementor  use, or TP only.\n", ch);
 		return;
 	}
 
