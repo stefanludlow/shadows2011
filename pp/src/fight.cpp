@@ -4368,12 +4368,12 @@ do_compete (CHAR_DATA * ch, char *argument, int cmd)
 
 	argument = one_argument (argument, buf);
 
-	if (!engine.in_test_mode () || !IS_IMPLEMENTOR (ch))
+/**	if (!engine.in_test_mode () || !IS_IMPLEMENTOR (ch))
 	{
 		send_to_char ("This command is for the implementor  use, or TP only.\n", ch);
 		return;
 	}
-
+***/
 	if (!(src = get_char_room_vis (ch, buf)))
 	{
 		send_to_char ("First combatant isn't here.\n\r", ch);
