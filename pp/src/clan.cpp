@@ -307,7 +307,8 @@ clan_forum_remove_all (CHAR_DATA * ch)
 		sprintf (buf,
 			"DELETE FROM phpbb3.phpbb_user_group WHERE user_id= "
 			"(SELECT user_id FROM phpbb3.phpbb_users WHERE username = '%s')"
-			"AND group_id in (15910,15911,15906,15863,15864,14214,15874,15872,15893,15296,11723,15897,14957,14181,15891,15877,14156,15297,15873,15905,15471,15907,15908,15910,15911,15917);", ch->pc->account_name);
+			"AND group_id in (1487,15910,15911,15906,15863,15864,14214,15874,15872,15893,15296,11723,15897,14957,14181,15891,15877,14156,15297,15873,15905,15471,15907,15908,15910,15911,15917);", 
+ch->pc->account_name);
 		mysql_safe_query (buf);
 	}
 	return;
