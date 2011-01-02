@@ -1355,7 +1355,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 		if (check_str)
 			check_level = atoi(check_str);
 		else 
-			check_level = 0;
+			check_level = -1;
 		
 		
 		nFlag = lookup_value(rbuf, REG_AFFECT);
@@ -1386,6 +1386,15 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 			return;
 		
 		}
+		
+		if (is_room_affected (troom->affects, nFlag) 
+			&& !(check_level < 0))
+		{
+			ifin[nNest] = 1;
+			return;
+			
+		}	
+		
 		if (is_room_affected (troom->affects, nFlag) 
 			&& !(troom->affects->a.room.intensity == check_level))
 		{
