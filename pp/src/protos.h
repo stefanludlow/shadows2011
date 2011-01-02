@@ -1568,7 +1568,7 @@ int save_room_affects (int zone);
 void daily_shadow_room();
 int shadow_spread (ROOM_DATA * room);
 void do_spread (CHAR_DATA * ch, char *argument, int cmd); //level 3 for now BP only
-void clear_shadow_objects (ROOM_DATA * room);
+void clear_shadow_objects (ROOM_DATA * room, int flag);
 void update_shadow_objects (ROOM_DATA * room);
 bool is_shadow_obj_here(ROOM_DATA * room);
 

@@ -1018,6 +1018,11 @@ room_affect_wearoff (ROOM_DATA * room, int type)
 		//send_to_room("Shadow has lessened - debug statement");
 		break;
 				
+	case MAGIC_ROOM_ILUVATAR:
+		//if (room)
+		//send_to_room("Iluvatar has lessened - debug statement");
+		break;
+			
 	case MAGIC_ROOM_CALM:
 		if (room)
 			send_to_room

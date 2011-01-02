@@ -1149,7 +1149,7 @@ save_affect_reset (FILE * fp, CHAR_DATA * tmp_mob, AFFECTED_TYPE * af)
 	if (af->type == MAGIC_HIDDEN && IS_SET (tmp_mob->affected_by, AFF_HIDE))
 		return;
 
-	if (af->type == MAGIC_ROOM_SHADOW)
+	if ((af->type == MAGIC_ROOM_SHADOW) || (af->type == MAGIC_ROOM_ILUVATAR))
 	{
 		fprintf(fp, "r %d %d %d\n", 
 					 af->type,
@@ -1186,7 +1186,7 @@ fwrite_resets (ROOM_DATA * troom, FILE * fp)
 		if (af->type == MAGIC_ROOM_FIGHT_NOISE)
 			continue;
 		
-		if (af->type == MAGIC_ROOM_SHADOW)
+		if ((af->type == MAGIC_ROOM_SHADOW) || (af->type == MAGIC_ROOM_ILUVATAR))
 		{
 			fprintf(fp, "r %d %d %d\n", 
 					af->type,

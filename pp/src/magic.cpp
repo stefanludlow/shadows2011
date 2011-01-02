@@ -49,17 +49,17 @@ void magic_invulnerability (CHAR_DATA * ch, CHAR_DATA * victim);
 #define MAX_SHADOW_OBJECTS	11
 
 const int shadow_stream[MAX_SHADOW_OBJECTS] = {
-	54112, //thornbush objects
-	54114, 
-	54115, 
-	54116, 
-	54117, 
-	54118, 
-	54119, 
-	54120, 
-	54121, 
-	54122, 
-	54123
+	54112, //thornbush objects - level 1
+	54121, // level 2
+	54122, // level 3
+	54123, // level 4
+	54114, // level 5
+	54115, // level 6 - east wall 
+	54116, // level 6 - west wall
+	54117, // level 6 - north wall
+	54118, // level 6 - south wall
+	54119, // level 6 - up wall
+	54120  // level 6 - down wall
 };
 
 const char *magnitudes[] = {
@@ -4289,13 +4289,14 @@ void daily_shadow_room()
 	OBJ_DATA * nobj;
 	AFFECTED_TYPE *room_shadow;
 	AFFECTED_TYPE *room_seeded;
+	AFFECTED_TYPE *room_iluvatar;
 	char buf[MAX_STRING_LENGTH];
 	bool shadow_seed = false;
 	int fight_chance;
 	int index;
 	
-		// don't want shadow spread active on pp yet
-	if (engine.in_play_mode ())
+		// don't want spreads active on bp
+	if (engine.in_build_mode ())
 		return;
 	
 	
@@ -4363,7 +4364,7 @@ void daily_shadow_room()
 			add_room_affect (&room->affects, MAGIC_ROOM_SHADOW, -1, 1);
 			save_room_affects (room->zone);
 			
-			clear_shadow_objects (room);
+			clear_shadow_objects (room,0); //clears all
 			nobj = load_object(shadow_stream[0]);
 			obj_to_room (nobj, room->nVirtual);
 			
@@ -4380,6 +4381,7 @@ void daily_shadow_room()
 			continue;
 		
 		room_shadow = is_room_affected(room->affects, MAGIC_ROOM_SHADOW);
+		room_iluvatar = is_room_affected(room->affects, MAGIC_ROOM_ILUVATAR);
 		fight_chance = number(1, 100);
 		
 		if (room_shadow)
@@ -4387,7 +4389,9 @@ void daily_shadow_room()
 				//add 10% per level of Shadow to make it harder to fight back
 			fight_chance = fight_chance + (10 * room_shadow->a.room.intensity);
 			
-			if ((room->sector_type == SECT_FOREST && fight_chance <= 50)
+			if ((room_iluvatar
+				&& room_iluvatar->a.room.intensity >= room_shadow->a.room.intensity)
+				|| (room->sector_type == SECT_FOREST && fight_chance <= 50)
 				|| (room->sector_type == SECT_WOODS && fight_chance <= 30))
 			{
 				if (room_shadow && room_shadow->a.room.intensity > 1)
@@ -4397,7 +4401,7 @@ void daily_shadow_room()
 				else if (room_shadow && room_shadow->a.room.intensity == 1)
 				{
 					remove_room_affect (room, MAGIC_ROOM_SHADOW);
-					clear_shadow_objects(room);
+					clear_shadow_objects(room, 0);
 				}
 			}
 		}
@@ -4418,15 +4422,17 @@ shadow_spread (ROOM_DATA * room)
 	ROOM_DIRECTION_DATA *exit;
 	OBJ_DATA * tobj;
 	ROOM_DATA * next_room;
-	AFFECTED_TYPE *room_shadow;
-	AFFECTED_TYPE *room_seeded;
+	AFFECTED_TYPE *next_room_shadow;
+	AFFECTED_TYPE *curr_room_shadow;
+	AFFECTED_TYPE *next_room_seeded;
+	AFFECTED_TYPE *next_room_iluvatar;
 	char buf[MAX_STRING_LENGTH] = { '\0' };
 	int index;
 	int pref_order[6] = {3, 5, 0, 2, 1, 4};
 	
 	
 	resist_chance = number(1, 100);
-	
+	curr_room_shadow = is_room_affected(room->affects, MAGIC_ROOM_SHADOW);
 	
 	for (index = 0; index <6; index ++)
 	{
@@ -4440,12 +4446,21 @@ shadow_spread (ROOM_DATA * room)
 		
 		if (next_room)
 		{
+			next_room_shadow = is_room_affected(next_room->affects, MAGIC_ROOM_SHADOW);
+			next_room_seeded = is_room_affected(next_room->affects, MAGIC_ROOM_SHADOW_SEED);
+			next_room_iluvatar = is_room_affected(next_room->affects, MAGIC_ROOM_ILUVATAR);
+			
 				//will not spread into water rooms
 			if ((next_room->sector_type == SECT_LAKE)
 				|| (next_room->sector_type == SECT_RIVER)
 				|| (next_room->sector_type == SECT_OCEAN)
 				|| (next_room->sector_type == SECT_UNDERWATER))
 				continue;
+			
+				//will not spread into areas where iluvatar is stronger than current room shadow
+			if (next_room_iluvatar 
+				&& next_room_iluvatar->a.room.intensity >= curr_room_shadow->a.room.intensity)
+					continue;	
 			
 				//terrains can resist Shadow
 			if ((next_room->sector_type == SECT_FOREST && resist_chance <= 90)
@@ -4458,13 +4473,12 @@ shadow_spread (ROOM_DATA * room)
 				|| (next_room->sector_type == SECT_ROAD && resist_chance <= 10))
 				continue;
 			
-			room_shadow = is_room_affected(next_room->affects, MAGIC_ROOM_SHADOW);
-			room_seeded = is_room_affected(next_room->affects, MAGIC_ROOM_SHADOW_SEED);
 			
-			if (!room_shadow && !room_seeded && dir)
+			
+			if (!next_room_shadow && !next_room_seeded)
 			{
 				add_room_affect (&next_room->affects, MAGIC_ROOM_SHADOW_SEED, -1, 1);
-				save_room_affects (room->zone);
+				save_room_affects (next_room->zone);
 				return (1);
 			}
 		}
@@ -4473,8 +4487,12 @@ shadow_spread (ROOM_DATA * room)
 	
 }
 
+/************
+ * flag = 0 - clears all shdow objects
+ * flag = 1 - clear all EXCEPT level 6
+ ***********/
 void
-clear_shadow_objects (ROOM_DATA * room)
+clear_shadow_objects (ROOM_DATA * room, int flag)
 {
 	int index;
 	OBJ_DATA * tobj;
@@ -4482,21 +4500,47 @@ clear_shadow_objects (ROOM_DATA * room)
 	for (index = 0; index < MAX_SHADOW_OBJECTS; index++)
 	{
 		tobj = 	get_obj_in_list_num (shadow_stream[index], room->contents);
+		
+		if (!flag)
+		{
 		if (tobj)
 			extract_obj(tobj);
 	}
+		else
+		{//leaving the wall objects
+		if (tobj 
+			&& tobj->nVirtual != 54115
+			&& tobj->nVirtual != 54116
+			&& tobj->nVirtual != 54117
+			&& tobj->nVirtual != 54118
+			&& tobj->nVirtual != 54119
+			&& tobj->nVirtual != 54120)
+			extract_obj(tobj);
 }
 
-	//TO DO decide which objects get update, and how they are updated
+	}
+}
+
+/********
+ * direction of preferred exit blocking
+ * west, down, north, south, east,  up
+ ************/	
 void
 update_shadow_objects (ROOM_DATA * room)
 {
 	int index;
+	int dir;
+	int shad_level;
+	int iluv_level;
 	AFFECTED_TYPE *room_shadow;
+	AFFECTED_TYPE *room_iluv;
+	ROOM_DIRECTION_DATA *exit = NULL;
+	ROOM_DATA * next_room;
 	OBJ_DATA * tobj;
-	OBJ_DATA * nobj;
+	int pref_order[6] = {3, 5, 0, 2, 1, 4};
 	
 	room_shadow = is_room_affected(room->affects, MAGIC_ROOM_SHADOW);
+	room_iluv = is_room_affected(room->affects, MAGIC_ROOM_ILUVATAR);
 	
 	if (!room_shadow)
 		return;
@@ -4504,16 +4548,148 @@ update_shadow_objects (ROOM_DATA * room)
 	if (!is_shadow_obj_here(room))
 		return;
 	
-	/********** one potential option  
-	 //force morph clocks to change at next tick.
-	 for (tobj = room->contents;
-	 tobj->next_content;
-	 tobj = tobj->next_content)
-	 if (tobj->morphTime && tobj->morphTime > 0)
+	shad_level = room_shadow->a.room.intensity;
+	
+	if (room_iluv)
+		iluv_level = room_iluv->a.room.intensity;
+	else 
+		iluv_level = 0;
+
+	if (iluv_level >= shad_level)
 	 {
-	 tobj->morphTime = time(NULL);
+		clear_shadow_objects(room, 0); //clears all shadow objects
+		return;
 	 }
-	 **********/
+		
+	
+	
+	if ((shad_level < 6) && (iluv_level < shad_level)) //add the level dependant objects
+	{
+		clear_shadow_objects(room, 0);
+		tobj = load_object(shadow_stream[shad_level-1]);
+		obj_to_room (tobj, room->nVirtual);
+		return;
+	}
+	
+	
+	if (shad_level >= 6)
+		//add the walls on both sides of exit
+	{
+		for (index = 0; index <6; index ++)
+		{
+			dir = pref_order[index];		
+			exit = room->dir_option[dir];
+			
+			if (!exit || exit->to_room == NOWHERE)
+				continue;
+			else 
+			{
+				next_room = vtor (exit->to_room);
+				break;	
+			}
+
+		}
+		
+		clear_shadow_objects(room, 1); //clears all non-wall objects
+		
+		switch (dir)
+		{
+			case 0: //north wall
+				if (!oexist (54117, room->contents, true))
+				{
+					tobj = load_object(54117);
+					obj_to_room (tobj, room->nVirtual);
+				}
+				
+				if (!oexist (54118, next_room->contents, true))
+				{
+					tobj = load_object(54118);
+					obj_to_room (tobj, next_room->nVirtual);
+				}
+				
+				break;
+				
+			case 1: //east wall
+				if (!oexist (54115, room->contents, true))
+				{
+					tobj = load_object(54115);
+					obj_to_room (tobj, room->nVirtual);
+				}
+				
+				if (!oexist (54116, next_room->contents, true))
+				{
+					tobj = load_object(54116);
+					obj_to_room (tobj, next_room->nVirtual);
+				}
+				
+				break;
+				
+			case 2: //south wall
+				if (!oexist (54118, room->contents, true))
+				{
+					tobj = load_object(54118);
+					obj_to_room (tobj, room->nVirtual);
+				}
+				
+				if (!oexist (54117, next_room->contents, true))
+				{
+					tobj = load_object(54117);
+					obj_to_room (tobj, next_room->nVirtual);
+				}
+				
+				break;
+				
+			case 3: //west
+				if (!oexist (54116, room->contents, true))
+				{
+					tobj = load_object(54116);
+					obj_to_room (tobj, room->nVirtual);
+				}
+				
+				if (!oexist (54115, next_room->contents, true))
+				{
+					tobj = load_object(54115);
+					obj_to_room (tobj, next_room->nVirtual);
+				}
+				
+				break;
+				
+			case 4: //up wall
+				if (!oexist (54119, room->contents, true))
+				{
+					tobj = load_object(54119);
+					obj_to_room (tobj, room->nVirtual);
+				}
+				
+				if (!oexist (54120, next_room->contents, true))
+				{
+					tobj = load_object(54120);
+					obj_to_room (tobj, next_room->nVirtual);
+				}
+				
+				break;
+				
+			case 5: //down wall
+				if (!oexist (54120, room->contents, true))
+				{
+					tobj = load_object(54120);
+					obj_to_room (tobj, room->nVirtual);
+				}
+				
+				if (!oexist (54119, next_room->contents, true))
+				{
+					tobj = load_object(54119);
+					obj_to_room (tobj, next_room->nVirtual);
+				}
+				
+				break;
+				
+			default:
+				break;
+		}
+		
+	}
+	
 }
 
 bool

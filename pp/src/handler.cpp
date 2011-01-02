@@ -285,14 +285,13 @@ affect_modify (CHAR_DATA * ch, int type, int loc, int mod, int bitv,
 	if (type == MUTE_EAVESDROP)
 		return;
 
-	if (add && bitv)
+	if (bitv)
 		ch->affected_by |= bitv;
-
-	else if (bitv)
-	{
+	else
 		ch->affected_by &= ~bitv;
+		
+	if (!add)
 		mod = -mod;
-	}
 
 	/*
 	switch (type) {
@@ -3503,7 +3502,7 @@ add_room_affect (AFFECTED_TYPE ** af, int type, int duration, int intensity)
 
 	raffect->type = type;
 		
-	if (duration > 1)
+	if (duration != 0)
 	raffect->a.room.duration = duration;
 	else
 		raffect->a.room.duration = 1;
@@ -4340,6 +4339,7 @@ setup_registry (void)
 	add_registry (REG_MAGIC_SPELLS, MAGIC_WOOD_SMOKE, "Wood Smoke");
 	
 	add_registry (REG_AFFECT, MAGIC_ROOM_SHADOW, "Shadow");
+	add_registry (REG_AFFECT, MAGIC_ROOM_ILUVATAR, "Iluvatar");
 
 	
 	read_registry ();

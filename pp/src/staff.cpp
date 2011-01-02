@@ -3455,6 +3455,18 @@ roomstat (CHAR_DATA * ch, char *name)
 			 
 			 send_to_char (buf, ch);
 		 }
+		 if ( room_affect->type == MAGIC_ROOM_ILUVATAR )
+		 {
+			 int temp = room_affect->a.room.duration;
+			 if (temp == 0)
+				 sprintf (buf, "The force of Iluvatar lasting less than an hour at %d intensity.\n", room_affect->a.room.intensity);
+			 else if (temp == 1)
+				 sprintf (buf, "The force of Iluvatar lasting more than an hour at %d intensity.\n", room_affect->a.room.intensity);
+			 else 
+				 sprintf (buf, "The force of Iluvatar lasting %d hours at %d intensity.\n", room_affect->a.room.duration, room_affect->a.room.intensity);
+			 
+			 send_to_char (buf, ch);
+		 }
 		 
 	 }
 	 
@@ -9083,14 +9095,14 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (tch)
 		{
-			af = get_affect (ch, affect_no);
+			af = get_affect (tch, affect_no);
 			if (!af)
 			{
 				send_to_char ("No such affect on that character.\n", ch);
 				return;
 			}
 
-			affect_remove (ch, af);
+			affect_remove (tch, af);
 			send_to_char ("Affect deleted from character.\n", ch);
 			return;
 		}
@@ -9112,13 +9124,11 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 	can either update an affect or create a new one.
 	*/
 
-	if (!just_a_number (buf))
+	if (!(duration = atoi (buf)))
 	{
 		send_to_char ("Duration expected.\n", ch);
 		return;
 	}
-
-	duration = atoi (buf);
 
 	argument = one_argument (argument, buf);
 
@@ -11193,7 +11203,7 @@ write_dynamic_registry (CHAR_DATA * ch)
  map[2][x][y]	doors on east wall
  map[3][x][y]	doors on south wall
  map[4][x][y]	doors up/down
- map[5][x][y]	shadow affect
+ map[5][x][y]	shadow/iluvatar affect
  
  ******/
 
@@ -11240,6 +11250,8 @@ fill_map (ROOM_DATA * ptrRoom, int x, int y,
 
 	if (is_room_affected(ptrRoom->affects, MAGIC_ROOM_SHADOW))
 		map[5][x][y] = 1;
+	else if (is_room_affected(ptrRoom->affects, MAGIC_ROOM_ILUVATAR))
+		map[5][x][y] = 2;
 	else 
 		map[5][x][y] = 0;
 
@@ -11324,7 +11336,7 @@ do_map (CHAR_DATA * ch, char *argument, int cmd)
 		"#c", "#9"
 	};
 	const char *strShadow[] = {
-		"", "#1"
+		"", "#1", "#2"
 	};
 	unsigned char i = 0, j = 0, x = 0, y = 0, nInRoom = 0, bSearch = 0;
 	int r = 0;
@@ -11471,7 +11483,7 @@ do_map (CHAR_DATA * ch, char *argument, int cmd)
 		}
 	else 
 		{
-			sprintf (buf + strlen (buf), "#1Rooms infected with Shadow#0\nNormal rooms\n ");
+			sprintf (buf + strlen (buf), "#1Rooms infected with Shadow\n#2Rooms with Iluvatar\n#0\nNormal rooms\n ");
 		}
 	send_to_char (buf, ch);
 }

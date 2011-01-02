@@ -997,6 +997,7 @@ typedef signed char shortint;
 #define MAGIC_WORLD_MOON		5006	/* Moonlight in all rooms */
 #define MAGIC_ROOM_SHADOW       5007    /* creepy shadow affect in room */
 #define MAGIC_ROOM_SHADOW_SEED	5008	/* shadow is dormant and seeded */
+#define MAGIC_ROOM_ILUVATAR		5009	/* good side */
 
 #define MAGIC_BUY_ITEM			5400
 
