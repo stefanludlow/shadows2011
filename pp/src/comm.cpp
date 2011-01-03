@@ -601,6 +601,7 @@ game_loop (int s)
 
 		pulse++;
 
+		//every RL second
 		if (!(pulse % SECOND_PULSE))
 		{
 			second_affect_update ();
@@ -614,6 +615,7 @@ game_loop (int s)
 			knockout = 0;
 		}
 
+		//every RL second with 1/4 sec offset
 		if (!((pulse + 1) % 4))
 			delayed_trigger_activity ();
 
@@ -623,6 +625,7 @@ game_loop (int s)
 			knockout = 0;
 		}
 
+		//every RL second with 3/4 sec offset
 		if (!((pulse + 3) % PULSE_DELAY))
 			update_delays ();
 
@@ -632,6 +635,7 @@ game_loop (int s)
 			knockout = 0;
 		}
 
+		// every RL second with 1/4 sec offset
 		if (!((pulse + 1) % PULSE_SMART_MOBS) && !engine.in_build_mode ())
 			mobile_routines (pulse);
 
@@ -641,6 +645,7 @@ game_loop (int s)
 			knockout = 0;
 		}
 
+		// every 4 RL second with 2/4 sec offset
 		if (!((pulse + 2) % UPDATE_PULSE))
 			point_update ();
 
@@ -650,6 +655,7 @@ game_loop (int s)
 			knockout = 0;
 		}
 
+		// every 10 RL second
 		if (!(pulse % (10 * SECOND_PULSE)))
 			ten_second_update ();
 
@@ -659,12 +665,14 @@ game_loop (int s)
 			knockout = 0;
 		}
 
+		// every 10 RL second with 5/4 sec offset
 		if (!((pulse + 5) % (10 * SECOND_PULSE)))
 		{
 			check_maintenance ();
 			update_website ();
 		}
 
+		//every RL minute
 		if (!(pulse % (PULSES_PER_SEC * 60)))
 		{
 			check_idlers ();
@@ -679,38 +687,49 @@ game_loop (int s)
 			knockout = 0;
 		}
 
+		// every RL minute with 5/4 sec offset
 		if (!((pulse + 5) % PULSE_AUTOSAVE * 1))
 		{
 			autosave ();
 		}
 
+		// every 12 RL minute with 5/4 sec offset
 		if (!((pulse + 5) % PULSE_AUTOSAVE * 12) && (engine.in_play_mode () || engine.in_test_mode()))
 		{
 			save_stayput_mobiles ();
 		}
 
+		// every 13 RL minute with 5/4 sec offset
 		if (!((pulse + 5) % PULSE_AUTOSAVE * 13))
 		{
 			save_tracks ();
 		}
+		
+		// every 14 RL minute with 5/4 sec offset
 		if (!((pulse + 5) % PULSE_AUTOSAVE * 14))
 		{
 			save_banned_sites ();
 		}
+		
+		// every 15 RL minute with 5/4 sec offset
 		if (!((pulse + 5) % PULSE_AUTOSAVE * 15))
 		{
 			save_player_rooms ();
 			//save_dwelling_rooms ();
 		}
+		
+		// every 2 RL minute
 		if (!(pulse % (120 * SECOND_PULSE)))
 		{
 			newbie_hints ();
 			save_dwelling_rooms();
 		}
 
+		// every 3 RL minute with 5/4 sec offset
 		if (!((pulse + 5) % (PULSE_ZONE * 3)))
 			refresh_zone ();
 
+		// every 5 RL minute with 9/4 sec offset
 		if (!((pulse + 9) % (PULSE_AUTOSAVE * 5)))
 		{
 			if (!engine.in_build_mode ())
@@ -726,21 +745,6 @@ game_loop (int s)
 						morgul_arena_wargs ();
 					}
 				}
-				///** TE PIT
-				//* 1 chance in 20 for automatic troll or wargs
-				//**/
-				//	      if (te_pit_fight)
-				//		{
-				//		  if (!number (0, 19) && is_te_pit_clear ())
-				//		    {
-				//		      te_pit_troll ();
-				//		    }
-				//		  if (!number (0, 19) && is_te_pit_clear ())
-				//		    {
-				//		      te_pit_wargs ();
-				//		    }
-				//		}
-				///*** end te Pit **/
 			}
 			else  // if (engine.in_build_mode ())
 			{
@@ -750,7 +754,8 @@ game_loop (int s)
 			update_website_statistics ();
 		}
 
-		if (!(pulse % (SECOND_PULSE * 60 * 15))) //every IG hour
+		// every 15 RL minute = every IG hour
+		if (!(pulse % (SECOND_PULSE * 60 * 15))) 
 		{
 			if (!morgul_arena_fight
 				&& engine.in_play_mode ()
@@ -762,45 +767,15 @@ game_loop (int s)
 			}
 		}
 
-		if (!(pulse % (SECOND_PULSE * 60 * 15 * 4))) //every RL hour
+		// every RL hour = every 4 IG hour
+		if (!(pulse % (SECOND_PULSE * 60 * 15 * 4))) 
 		{
 			vote_notifications ();
 
 		}
 
-		if (!(pulse % (SECOND_PULSE * 60 * 15 * 4 * 24))) //once every RL day
-		{
-			daily_shadow_room();
-			
-		}
-		
-		///** TE PIT **
-		//* Runs on the 1 and 15 of each month, for 1 day, every half hour RL
-		//*/
-		//      ///\TODO Uh... lets not calc this every pulse, mmkay?
-		//      time_t t = time(NULL);
-		//      struct tm* tp = localtime(&t);
-		//      int daymonth;
-		//
-		//      daymonth = tp->tm_mday;
-		//
-		//      if (daymonth == 1 || daymonth == 15)
-		//	{
-		//	  if (!(pulse % (SECOND_PULSE * 60 * 30))) //every 30 RL miuntes
-		//	    {
-		//	      if (!te_pit_fight
-		//		  && engine.in_play_mode ()
-		//		  && is_te_pit_clear ())
-		//	    	{
-		//	    	  te_pit_first ();
-		//	    	  te_pit_time = (int) time (0);
-		//	    	}
-		//	    }
-		//	}
-		///* end te minute update pit **/
-
-
-		if (!(pulse % (SECOND_PULSE * 60 * 15))) /* every fifteen minutes */
+		// every 15 RL minute = every IG hour
+		if (!(pulse % (SECOND_PULSE * 60 * 15)))
 		{
 			if (!engine.in_build_mode ())
 			{
@@ -842,7 +817,8 @@ game_loop (int s)
 			} // isn't build mode
 		} // sales pulse
 
-		if (time (0) >= next_minute_update)	/* 1 RL minute */
+		// every RL minute
+		if (time (0) >= next_minute_update)
 			rl_minute_affect_update ();
 
 
@@ -852,6 +828,7 @@ game_loop (int s)
 			knockout = 0;
 		}
 
+			// every RL hour 
 		if (time (0) >= next_hour_update)
 		{
 			hourly_update ();
@@ -867,6 +844,7 @@ game_loop (int s)
 			knockout = 0;
 		}
 
+		// every 2 RL seconds with 2/4 second offset
 		if (!((pulse + 2) % pulse_violence))
 		{
 			perform_violence ();
@@ -878,11 +856,13 @@ game_loop (int s)
 			}
 		}
 
+		// every 10 RL seconds with 1/4 second offset
 		if (!((pulse + 1) % PULSE_MOBILE))
 		{
 			cleanup_the_dead (0);
 		}
 
+		// every 6 RL hours - total reset of pulse clock
 		if (pulse > 86400)
 		{
 			pulse = 0;

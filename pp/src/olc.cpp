@@ -4049,6 +4049,13 @@ void
 do_rname (CHAR_DATA * ch, char *argument, int cmd)
 {
 
+	if (!IS_SET (ch->affected_by, AFF_LEADER_COMMAND)
+		|| GET_TRUST (ch) < 1)
+	{
+		send_to_char ("You do not have approval for leadership commands", ch);
+		return;
+	}
+	
 	for (; isspace (*argument); argument++);	/* Get rid of whitespaces */
 
 	vtor (ch->in_room)->name = duplicateString (argument);
@@ -4205,6 +4212,12 @@ do_rdesc (CHAR_DATA * ch, char *argument, int cmd)
 
 	room = ch->room;
 
+	if (!IS_SET (ch->affected_by, AFF_LEADER_COMMAND)
+		|| GET_TRUST (ch) < 1)
+	{
+		send_to_char ("You do not have approval for leadership commands", ch);
+		return;
+	}
 	argument = one_argument (argument, buf);
 
 	if (!str_cmp (buf, "reformat"))
@@ -11427,10 +11440,26 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 
 		else if ((ind = index_lookup (affected_bits, subcmd)) != -1)
 		{
+			if(GET_TRUST(ch) > 3)
+			{
 			if (IS_SET (edit_mob->affected_by, 1 << ind))
+				{
+					send_to_char ("Affect has been removed.\n", ch);
 				edit_mob->affected_by &= ~(1 << ind);
+				}
 			else
+				{
+					send_to_char ("Affect has been added.\n", ch);
 				edit_mob->affected_by |= (1 << ind);
+		}
+			}
+			else
+			{
+				send_to_char ("You need to be level 4 or higher to set Affects.\n", ch);
+				return;
+
+			}
+
 		}
 
 		else if ((ind = index_lookup (speeds, subcmd)) != -1)
@@ -11681,6 +11710,13 @@ do_outfit (CHAR_DATA * ch, char *argument, int cmd)
 	OBJ_DATA *next_obj;
 	OBJ_DATA *tobj;
 
+	if (!IS_SET(ch->affected_by, AFF_LEADER_COMMAND)
+		|| GET_TRUST (ch) < 2)
+	{
+		send_to_char ("You do not have approval for leadership commands", ch);
+		return;
+	}
+	
 	argument = one_argument (argument, buf);
 
 	if (!*buf)

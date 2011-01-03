@@ -750,6 +750,18 @@ hourly_update (void)
 
 	current_time = time (NULL);
 
+	/*****  change hourday test to the proper hour, so this only happens once a RL day.
+	 struct tm* tp = localtime(&current_time);
+	 int hourday;
+	 
+	 hourday = tp->tm_hour;
+	 
+	 if (hourday == 1)
+	 {
+	 daily_shadow_update();
+	 }  
+	 
+	 ****/
 	//for (ch = character_list; ch; ch = next_ch)
 	for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{

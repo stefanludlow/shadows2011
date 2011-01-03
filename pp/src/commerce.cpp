@@ -7136,7 +7136,37 @@ econ_markup (CHAR_DATA * keeper, OBJ_DATA * obj)
 	return markup;
 }
 
+void
+leader_tally(OBJ_DATA * obj, char *buffer, int depth)
+{
+	int count = 0;
+	char format[AVG_STRING_LENGTH] = "";
+	OBJ_DATA *tobj = NULL;
+	
+	if (!obj || (strlen (buffer) > MAX_STRING_LENGTH - 256))
+		return;
+	
+	count = (obj->count) ? obj->count : 1;
+	sprintf (format, " %%%dc#2%%s#0", 2 * depth);
+	sprintf (buffer + strlen (buffer), format, ' ',
+			 obj->short_description);
+	
+	if (count > 1)
+	{
+		sprintf (buffer + strlen (buffer), " (x%d)\n", count);
+	}
+	else
+	{
+		strcat (buffer, "\n");
+	}
+	
+	for (tobj = obj->contains; tobj; tobj = tobj->next_content)
+	{
+		leader_tally (tobj, buffer, depth + 1);
+	}
+	return;
 
+}
 
 float
 tally (OBJ_DATA * obj, char *buffer, int depth)
@@ -7148,6 +7178,8 @@ tally (OBJ_DATA * obj, char *buffer, int depth)
 
 	if (!obj || (strlen (buffer) > MAX_STRING_LENGTH - 256))
 		return 0.00;
+
+		
 
 	count = (obj->count) ? obj->count : 1;
 	cost = (obj->farthings + obj->silver * 4) * count;
@@ -7179,15 +7211,29 @@ do_tally (CHAR_DATA * ch, char *argument, int cmd)
 	int location = 0;
 	float subtotal = 0.0, total = 0.0;
 	bool bTallyAll = true;
+	bool leaderTally = false;
 	char arg1[AVG_STRING_LENGTH] = "";
 	char buffer[MAX_STRING_LENGTH] = "";
 
-	if (!GET_TRUST (ch))
+	if (!IS_SET(ch->affected_by, AFF_LEADER_COMMAND)
+		&& !GET_TRUST (ch))
 	{
-		send_to_char ("Huh?\n", ch);
+		send_to_char ("You do not have approval for leadership commands", ch);
 		return;
 	}
 
+	if (IS_SET(ch->affected_by, AFF_LEADER_COMMAND))
+		{
+			bTallyAll = false;
+			leaderTally = true;
+		}
+
+		
+	if (GET_TRUST(ch))
+	{
+		bTallyAll = true;
+		leaderTally = false;
+		
 	if (argument && *argument)
 	{
 		argument = one_argument (argument, arg1);
@@ -7198,8 +7244,9 @@ do_tally (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 	}
+	}
 
-	if (bTallyAll)
+	if (bTallyAll && !leaderTally)
 	{
 		strcpy (buffer, "\n#6Tally in Room:#0\n");
 		for (obj = ch->room->contents; obj; obj = obj->next_content)
@@ -7212,6 +7259,8 @@ do_tally (CHAR_DATA * ch, char *argument, int cmd)
 		total += subtotal;
 	}
 
+	if (!leaderTally)
+	{
 	for (tch = ch->room->people; tch; tch = tch->next_in_room)
 	{
 
@@ -7249,8 +7298,9 @@ do_tally (CHAR_DATA * ch, char *argument, int cmd)
 
 		total += subtotal;
 	}
+	}
 
-	if (bTallyAll)
+	if (bTallyAll && !leaderTally)
 	{
 
 		sprintf (buffer + strlen (buffer),
@@ -7259,6 +7309,14 @@ do_tally (CHAR_DATA * ch, char *argument, int cmd)
 
 	}
 
+	if (!bTallyAll && leaderTally)
+	{
+		strcpy (buffer, "\n#6Tally in Room:#0\n");
+		for (obj = ch->room->contents; obj; obj = obj->next_content)
+		{
+			leader_tally (obj, buffer, 1);
+		}
+	}
 	page_string (ch->desc, buffer);
 }
 

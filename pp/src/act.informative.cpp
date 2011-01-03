@@ -5640,6 +5640,10 @@ do_score (CHAR_DATA * ch, char *argument, int cmd)
 	if (IS_SET (ch->affected_by, AFF_HOODED))
 		send_to_char ("You are currently cloaked and hooded.\n", ch);
 
+	if (IS_SET (ch->affected_by, AFF_LEADER_COMMAND))
+		send_to_char ("You are allowed to use special leadership commands.\n", ch);
+
+
 	if (ch->voice_str)
 	{
 		send_to_char ("\nYour current voice string: (#2", ch);

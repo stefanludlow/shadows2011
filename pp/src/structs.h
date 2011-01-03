@@ -632,7 +632,7 @@ typedef signed char shortint;
 #define AFF_DETECT_INVISIBLE 	( 1 << 3 )
 #define AFF_DETECT_MAGIC     	( 1 << 4 )
 #define AFF_SENSE_LIFE       	( 1 << 5 )
-/* define AFF_HOLD???		( 1 << 6 ) ????? */
+#define AFF_LEADER_COMMAND		( 1 << 6 ) /* approval to use special leadership commands */
 #define AFF_SANCTUARY		( 1 << 7 )	/* 7. */
 #define AFF_GROUP            	( 1 << 8 )
 #define AFF_CURSE            	( 1 << 9 )

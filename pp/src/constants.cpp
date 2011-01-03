@@ -490,7 +490,7 @@ const char *affected_bits[] = {
 	"Detect-Invisible",
 	"Detect-Magic",
 	"Sense-Life",			/* 5 */
-	"Hold",
+	"Leader-command",
 	"Sanctuary",
 	"Group",
 	"Curse",
