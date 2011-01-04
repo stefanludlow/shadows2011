@@ -1257,6 +1257,7 @@ update_crafts (CHAR_DATA * ch)
 			(!strcmp (craft->craft_name, "general-food")) ||
 			(!strcmp (craft->craft_name, "general-recreation")) ||
 			(!strcmp (craft->craft_name, "general-serving")) ||
+			(!strcmp (craft->craft_name, "general-cleaning")) ||
 			(!strcmp (craft->craft_name, "general")))
 			&& !has_craft (ch, craft)
 			&& has_required_crafting_skills (ch, craft))
@@ -3065,6 +3066,7 @@ branch_craft (CHAR_DATA * ch, SUBCRAFT_HEAD_DATA * craft)
 		(!strcmp (craft->craft_name, "general-food")) ||
 		(!strcmp (craft->craft_name, "general-recreation")) ||
 		(!strcmp (craft->craft_name, "general-serving")) ||
+		(!strcmp (craft->craft_name, "general-cleaning")) ||
 		(!strcmp (craft->craft_name, "general")))
 		return;
 

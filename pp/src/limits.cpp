@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <sys/time.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
@@ -745,23 +746,33 @@ hourly_update (void)
 	char room_buf[MAX_STRING_LENGTH];
 	char room_msg_buf[MAX_STRING_LENGTH];
 
+	time_t test_time;
+	
 	int admin_time = 0, admin_time_absoloute = 0, admin_pc_time = 0;
 	bool admin_found = false, admin_found_absoloute = false;
 
 	current_time = time (NULL);
+	test_time = current_time;
 
-	/*****  change hourday test to the proper hour, so this only happens once a RL day.
-	 struct tm* tp = localtime(&current_time);
+		//  tests hourday to the proper hour, so this only happens once a RL day.
+	
+	struct tm* tp = localtime(&test_time);
 	 int hourday;
 	 
 	 hourday = tp->tm_hour;
 	 
-	 if (hourday == 1)
+	if (hourday == 11) //11am - server time (GMT)
 	 {
-	 daily_shadow_update();
+			 daily_shadow_room();
 	 }  
 	 
-	 ****/
+	/***	 
+	 if (hourday == 12) //12 noon GMT or 6am EST
+	 {
+	 //some call for the auto-reboot
+	 }
+	 ***/
+	 
 	//for (ch = character_list; ch; ch = next_ch)
 	for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
