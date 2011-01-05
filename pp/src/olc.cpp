@@ -4050,7 +4050,7 @@ do_rname (CHAR_DATA * ch, char *argument, int cmd)
 {
 
 	if (!IS_SET (ch->affected_by, AFF_LEADER_COMMAND)
-		|| GET_TRUST (ch) < 1)
+		&& GET_TRUST (ch) < 1)
 	{
 		send_to_char ("You do not have approval for leadership commands", ch);
 		return;
@@ -4213,7 +4213,7 @@ do_rdesc (CHAR_DATA * ch, char *argument, int cmd)
 	room = ch->room;
 
 	if (!IS_SET (ch->affected_by, AFF_LEADER_COMMAND)
-		|| GET_TRUST (ch) < 1)
+		&& GET_TRUST (ch) < 1)
 	{
 		send_to_char ("You do not have approval for leadership commands", ch);
 		return;
@@ -11710,8 +11710,8 @@ do_outfit (CHAR_DATA * ch, char *argument, int cmd)
 	OBJ_DATA *next_obj;
 	OBJ_DATA *tobj;
 
-	if (!IS_SET(ch->affected_by, AFF_LEADER_COMMAND)
-		|| GET_TRUST (ch) < 2)
+	if (!IS_SET (ch->affected_by, AFF_LEADER_COMMAND)
+		&& GET_TRUST (ch) < 2)
 	{
 		send_to_char ("You do not have approval for leadership commands", ch);
 		return;
