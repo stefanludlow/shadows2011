@@ -6946,6 +6946,11 @@ do_debug (CHAR_DATA * ch, char *argument, int cmd)
 
 	argument = one_argument (argument, buf);
 
+	if (!str_cmp(buf, "shadowroom"))
+	{
+		daily_shadow_room();
+		return;
+	}
 	if (!str_cmp (buf, "writefarthings"))
 	{
 		write_obj_silver_farthing_values (ch);
@@ -8986,7 +8991,9 @@ do_swap (CHAR_DATA * ch, char *argument, int cmd)
 		send_to_char ("The server binary on this port has been updated.\n", ch);
 	}
 }
-
+/***********
+Affects for Characters and objects are commented out, until they can be fully evaluated and de-bugged.
+ ************/
 void
 do_affect (CHAR_DATA * ch, char *argument, int cmd)
 {
@@ -9015,7 +9022,8 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 			"If an affect doesn't already exist, one is created by this "
 			"command.\n\n"
 			"   affect char 2311 4000        (Only modify duration)\n\n"
-			"Most affect durations are in mud hours, some are in RL seconds.\n",
+			"Most affect durations are in mud hours, some are in RL seconds.\n"
+			"CAUTION: Room affects are the only ones functional at this time!",
 			ch);
 
 		return;
@@ -9078,7 +9086,7 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (is_abbrev (buf, "delete"))
 	{
-
+/*******
 		if (obj)
 		{
 			af = get_obj_affect (obj, affect_no);
@@ -9106,7 +9114,7 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 			send_to_char ("Affect deleted from character.\n", ch);
 			return;
 		}
-
+********/
 		/* It must be a room affect */
 
 		if (!(af = is_room_affected (room->affects, affect_no)))
@@ -9145,12 +9153,13 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	/* Affect already exist? */
-
+/********
 	if (tch)
 		af = get_affect (tch, affect_no);
 	else if (obj)
 		af = get_obj_affect (obj, affect_no);
 	else
+ ********/
 		af = is_room_affected (room->affects, affect_no);
 
 	if (af)
@@ -9173,6 +9182,9 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (affect_no >= MAGIC_FIRST_SOMA && affect_no <= MAGIC_LAST_SOMA)
 	{
+		send_to_char
+		("Somatic effects are not functional.\n", ch);
+		/**
 		af->a.spell.duration = 4 * duration;
 		af->a.soma.latency = 0;
 		af->a.soma.minute = 0;
@@ -9193,6 +9205,7 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 			send_to_char
 				("Somatic effects may only be applied to characters.\n", ch);
 		}
+		 ***/
 	}
 	else
 	{
@@ -9202,19 +9215,23 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			af->a.spell.modifier = power;
 		}
+		/******
 		if (tch)
 			affect_to_char (tch, af);
 		else if (obj)
 			affect_to_obj (obj, af);
 		else
 		{
+		 *******/
 			if (power_specified)
 				add_room_affect (&room->affects, af->type, duration, power );
 			else
 				add_room_affect (&room->affects, af->type, duration, 1);
 			
 			save_room_affects (room->zone);
+		/******
 		}
+		 ********/
 	}
 	send_to_char ("Affect created.\n", ch);
 }

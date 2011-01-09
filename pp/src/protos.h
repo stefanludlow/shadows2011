@@ -1565,6 +1565,9 @@ void load_weather_obj(ROOM_DATA *troom);
 int weather_object_exists(OBJ_DATA * list, int vnum);
 
 int save_room_affects (int zone);
+void fwrite_room_affects (ROOM_DATA * troom, FILE * fp);
+void boot_zones_raffects (void);
+
 void daily_shadow_room();
 int shadow_spread (ROOM_DATA * room);
 void do_spread (CHAR_DATA * ch, char *argument, int cmd); //level 3 for now BP only

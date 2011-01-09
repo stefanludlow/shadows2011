@@ -581,9 +581,15 @@ get_affect (const CHAR_DATA * ch, int affect_type)
 {
 	AFFECTED_TYPE *af;
 
-	for (af = ch->hour_affects; af && af->type != affect_type; af = af->next);
-
+	for (af = ch->hour_affects; af; af = af->next)
+	{
+		if (af->type != affect_type)
+			continue;
+		else 
 	return af;
+
+	}
+	return NULL;
 }
 
 
@@ -601,6 +607,7 @@ affect_to_char (CHAR_DATA * ch, AFFECTED_TYPE * af)
 	af->next = ch->hour_affects;
 	ch->hour_affects = af;
 
+	
 	affect_modify (ch, af->type, af->a.spell.location, af->a.spell.modifier,
 		af->a.spell.bitvector, true, af->a.spell.sn);
 }
@@ -627,8 +634,8 @@ affect_remove (CHAR_DATA * ch, AFFECTED_TYPE * af)
 	affect_modify (ch, af->type, af->a.spell.location, af->a.spell.modifier,
 		af->a.spell.bitvector, false, af->a.spell.sn);
 
-	/* remove structure *af from linked list */
 
+		/* remove structure *af from linked list */
 	if (ch->hour_affects == af)
 		ch->hour_affects = af->next;
 
@@ -649,6 +656,7 @@ affect_remove (CHAR_DATA * ch, AFFECTED_TYPE * af)
 		free_mem (af->a.craft);
 
 	free_mem (af);
+	
 }
 
 void
@@ -2132,6 +2140,7 @@ extract_char (CHAR_DATA * ch)
 	if (!IS_NPC (ch))
 		clear_watch (ch);
 
+	
 	/* Clear out guarders */
 
 	//for (k = character_list; k; k = k->next)
@@ -2145,6 +2154,7 @@ extract_char (CHAR_DATA * ch)
 			affect_remove (k, af);
 	}
 
+	
 	//for (k = character_list; k; k = k->next)
 	for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{

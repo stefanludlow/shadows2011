@@ -4301,6 +4301,7 @@ void daily_shadow_room()
 	
 	
 	sprintf (buf, "Shadow has been spread\n\n");
+	system_log (buf, true);
 	send_to_gods(buf);
 	
 		//shadow grows and spreads, or starts from seeds

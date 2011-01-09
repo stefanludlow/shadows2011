@@ -1100,18 +1100,19 @@ fwrite_room (ROOM_DATA * troom, FILE * fp)
 		fprintf (fp, "%d\n", troom->capacity);
 	}
 
-		//F for aFfects, since A is used for extra descriptions
+		//r for affects, since it is written to a separate file for resets
 	if (troom->affects)
 	{
 		for (af = troom->affects; af; af = af->next)
 		{
-			fprintf(fp, "F\n");
+			fprintf(fp, "r\n");
 			fprintf (fp, "%d %d %d\n", 
 					 af->type,
 					 af->a.room.duration,
 					 af->a.room.intensity);
 		}
 	}
+ 
 	fprintf (fp, "S\n");
 }
 
@@ -1188,7 +1189,7 @@ fwrite_resets (ROOM_DATA * troom, FILE * fp)
 		
 		if ((af->type == MAGIC_ROOM_SHADOW) || (af->type == MAGIC_ROOM_ILUVATAR))
 		{
-			fprintf(fp, "r %d %d %d\n", 
+			fprintf(fp, "r %d %d %d 0 0 0 0\n", 
 					af->type,
 					af->a.room.duration,
 					af->a.room.intensity);
@@ -1482,43 +1483,6 @@ int save_objs (CHAR_DATA * ch, int zone)
   fclose(fo);
 }
 
-int save_room_affects (int zone)
-{
-	FILE *fr;
-	int room_good;
-	int index;
-	ROOM_DATA *troom;
-	
-	if (!(fr = open_and_rename (NULL, "rooms", zone)))
-		return 1;
-	
-	for (troom = full_room_list; troom; troom = troom->lnext)
-		if (troom->zone == zone)
-		{
-			
-			room_good = 0;
-			
-			for (index = 0; index <= LAST_DIR; index++)
-				if (troom->dir_option[index] && troom->dir_option[index]->to_room > 0)
-					room_good = 1;
-			
-			if (troom->contents || troom->people)
-				room_good = 1;
-			
-			if (strncmp (troom->description, "No Description Set", 18))
-				room_good = 1;
-			
-			if (room_good)
-			{
-				fwrite_room (troom, fr);
-			}
-			
-		}
-	
-	fprintf (fr, "$~\n");
-	fclose (fr);
-	
-}
 int
 save_rooms (CHAR_DATA * ch, int zone)
 {
@@ -8878,7 +8842,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 				("This admin is no longer authorised to use cset.\n",ch);
 			return;
 		}
-
+/**
 		else if (!str_cmp (subcmd, "spell")) {
 			argument = one_argument (argument, buf);
 			if (!*buf)
@@ -8919,7 +8883,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 				set_spell_proficiency (edit_mob, ind, atoi (buf));
 			}
 		}
-
+**/
 		else if (!str_cmp (subcmd, "currency"))
 		{
 			if (!IS_NPC (edit_mob))
@@ -14749,4 +14713,61 @@ do_name (CHAR_DATA *ch, char *argument, int cmd)
 		send_to_char("Do you wish to add, delete, or view names?\n", ch);
 		return;
 	}
+}
+
+int
+save_room_affects (int zone)
+{
+	char buf[MAX_INPUT_LENGTH];
+	char rafile[MAX_STRING_LENGTH];
+	ROOM_DATA *troom;
+	FILE *fr;
+	int room_good;
+	int n;
+	int tmp;
+	int empty_rooms = 0;
+	static int total_empty_rooms = 0;
+	
+	sprintf (buf, "Saving rooms affects in zone %d.", zone);
+	system_log (buf, false);
+	
+	sprintf (buf, "%s/raffects/resets.%d", SAVE_DIR, zone);	
+	
+	
+	if ((fr = fopen (buf, "w+")) == NULL)
+		return NULL;
+		
+		
+	for (troom = full_room_list; troom; troom = troom->lnext)
+		if ((troom->zone == zone) && (troom->affects))
+		{
+			fwrite_room_affects (troom, fr);
+		}
+	
+	fprintf (fr, "$~\n");
+	fclose (fr);
+	
+	
+	return 0;
+}
+
+void
+fwrite_room_affects (ROOM_DATA * troom, FILE * fp)
+{
+	
+	AFFECTED_TYPE *af;
+	
+	if (troom->affects)
+	{
+		fprintf (fp, "#%d\n", troom->nVirtual );
+		for (af = troom->affects; af; af = af->next)
+		{
+			fprintf (fp, "r %d %d %d\n", 
+					 af->type,
+					 af->a.room.duration,
+					 af->a.room.intensity);
+		}
+	}
+	
+	fprintf (fp, "S\n");
 }

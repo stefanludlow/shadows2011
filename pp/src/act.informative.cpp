@@ -3859,6 +3859,232 @@ delayed_search (CHAR_DATA * ch)
 	send_to_char (ch->room->secrets[dir]->stext, ch);
 }
 
+/**
+ * Adds a racial and POW realted descriptive sentence for rooms with Shadow or Iluavatar affect
+ * Can be used for other room affect as needed
+ *
+ */
+
+void
+affected_desciption(ROOM_DATA * room, CHAR_DATA * ch)
+{
+	int shadow_level;
+	int iluvatar_level;
+	bool elfness = false;
+	bool orcness = false;
+	int pow_level;
+	char buf[MAX_STRING_LENGTH] = { '\0' };
+	AFFECTED_TYPE *room_shadow;
+	AFFECTED_TYPE *room_iluvatar;
+	
+	room_shadow = is_room_affected(room->affects, MAGIC_ROOM_SHADOW);
+	room_iluvatar = is_room_affected(room->affects, MAGIC_ROOM_ILUVATAR);
+	
+	if (ch->race >= 16 && ch->race <= 19 || ch->race == 93)
+		elfness = true;
+	
+	if (ch->race == lookup_race_id("Orc"))
+		orcness = true;
+	
+	if(room_shadow)
+		shadow_level = room_shadow->a.room.intensity;
+	if (room_iluvatar)
+		iluvatar_level = room_iluvatar->a.room.intensity;
+	
+	switch (shadow_level)
+	{
+		case 1:
+			if (elfness)
+				act ("  A faint sense of taint lingers in the air.",
+				 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  A comfortable gloom has begun to spread here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  The air is heavy and there is an unsettling gloom that lingers here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  The air is heavy and thick here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+
+		case 2:
+			if (elfness)
+				act ("  Here a winding darkness surfaces that remains invisible to the eye, but clear to the senses; an impending potential.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  The shadows begin to grow thick here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  Shadows cling where they shouldn't, creating an oozing sense of gloom.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  A heaviness seems to weigh upon the region.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+			
+		case 3:
+			if (elfness)
+				act ("  An unsettling darkness falls upon the region like a dark and oily film coating everything.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  Shadows ooze from the crevices and cracks, gloomy and dark.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  An eerie darkness seems to have infiltrated this place, creeping out to shade more than is natural.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  The area seems strangely gloomy.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+			
+		case 4:
+			if (elfness)
+				act ("  Dripping with taint, the sense of foul shadow growing infests, winding around to infect this area and all that reside here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  Like a blanket of dark fog the shadows rise in this area.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  The shadows grow and move like a living thing, dark and twisted.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  Creeping over the region, an unsettling shadow seems to spread.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+			
+		case 5:
+			if (elfness)
+				act ("  Writhing and undulating like a living creature, the darkness encroaches on everything here, destroying and twisting what it can.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  The darkness rises from the ground, seeking to obscure and extinguish light.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  Like a foul fog, the shadows rise to wrap tendrils of darkness around everything here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  An eerie shadow grows, dimming vision and obscuring light.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+			
+		case 6:
+			if (elfness)
+				act ("  An overwhelming sense of unnatural darkness pervades the region and seems to drain life and light like a foul siphon leaving nothing untainted.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  A heavy and pervading sense of foul darkness has completely overtaken this region.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  A sense of taint accompanies the overwhelming shadow that has completely over here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  The strange darkness that surrounds this area is most unsettling.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+		
+		default:
+			break;
+	}
+	
+	switch (iluvatar_level)
+	{
+		case 1:
+			if (elfness)
+				act ("  A faint sense of well being lingers in places.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  An uncomfortable light has begun to spread here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  The air is light and there is a sense of well being that lingers here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  The air is light and fresh here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+			
+		case 2:
+			if (elfness)
+				act ("  Here a breath of fresh air remains invisible to the eye, but clear to the senses; an impending potential.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  The light begin to grow brighter here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  Well being clings to everything, creating an bright sense of life.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  A feeling of health seems to brightens the region.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+			
+		case 3:
+			if (elfness)
+				act ("  A feeling of warmth falls upon the region like the hand of a loving caretaker.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  Brightness ooze from the crevices and cracks, fresh and light.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  A soft warmth seems to have infiltrated this place, reaching out to brighten more than is natural.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  The area seems strangely warm and conforting.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+			
+		case 4:
+			if (elfness)
+				act ("  Dripping with light, the sense of well being grows, winding around to protect this area and all that reside here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  Like a blanket of warm water, the feeling of health rise in this area.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  The warmth grows and moves like a living thing, bright and caring.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  Spreading over the region, a comforting warmth seems to spread.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+			
+		case 5:
+			if (elfness)
+				act ("  The faint sound of songs can be heard, growing and undulating like a living creature, protecting what it can.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  The warmth rises from the ground, seeking to brighten what light already exists.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  Like a bird, the sound of song rise to wrap tendrils of warmth around everything here.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  An eerie yet pleasant song grows, bringing cheer to your heart.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+			
+		case 6:
+			if (elfness)
+				act ("  An overwhelming sense of protection and comfort pervades the region like a song unheard since the First Age.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (orcness)
+				act ("  A rich sense of protection has completely overtaken this region.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else if (GET_AUR(ch) > 7)
+				act ("  A sense of warmth accompanies a song that is felt more than it is heard.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			else
+				act ("  The comfort that surrounds this area is very protective.",
+					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			break;
+			
+		default:
+			break;
+	}
+	
+	return;	
+}
 //////////////////////////////////////////////////////////////////////////////
 // room__get_description ()
 //////////////////////////////////////////////////////////////////////////////
@@ -4234,10 +4460,12 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 					//added one line for HEAVY_SNOW appearance
 				send_to_char (room__get_description (ch->vehicle->room), ch);
 				send_to_char (blizzard_description, ch);
+				affected_desciption(ch->vehicle->room, ch);
 			}
 			else
 			{
 				send_to_char (room__get_description (ch->vehicle->room), ch);
+				affected_desciption(ch->vehicle->room, ch);
 			}
 			 
 		}
@@ -4528,10 +4756,12 @@ do_look (CHAR_DATA * ch, char *argument, int cmd)
 				//added one line for HEAY_SNOW chagnes
 			send_to_char (room__get_description (ch->room), ch);
 			send_to_char (blizzard_description, ch);
+			affected_desciption(ch->room, ch);
 		}
 		else
 		{
 			send_to_char (room__get_description (ch->room), ch);
+			affected_desciption(ch->room, ch);
 		}
 
 

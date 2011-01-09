@@ -414,6 +414,11 @@ boot_db (void)
 
 	mm ("post load_rooms");
 
+	system_log("Loading room affects.", false);
+	boot_zones_raffects();
+	
+	mm ("post boot_zones_raffects");
+	
 	system_log ("Loading auto-generated dwellings.", false);
 	load_dwelling_rooms ();
 
@@ -1067,6 +1072,7 @@ boot_zones (void)
 	char *p;
 	char buf[MAX_STRING_LENGTH];
 	char zfile[MAX_STRING_LENGTH];
+	char rafile[MAX_STRING_LENGTH];
 	struct stat fstatus;
 	RESET_AFFECT *ra;
 
@@ -1091,6 +1097,7 @@ boot_zones (void)
 			break;
 		}
 
+		
 		fscanf (fl, " #%*d\n");
 		fread_string (fl);
 
@@ -1206,7 +1213,7 @@ boot_zones (void)
 
 				continue;
 			}
-
+/**
 			if (zone_table[zon].cmd[cmd_no].command == 'A' ||
 				zone_table[zon].cmd[cmd_no].command == 'r')
 			{
@@ -1219,9 +1226,9 @@ boot_zones (void)
 					&ra->modifier,
 					&ra->location, &ra->bitvector, &ra->sn, &ra->t);
 
-				/* putting ra into an in will most certainly create
-				a migration problem.  A migrator should create a
-				new element in zone_table for ra, and not use arg1 */
+ // putting ra into an in will most certainly create
+ //				a migration problem.  A migrator should create a
+ //				new element in zone_table for ra, and not use arg1 
 
 				zone_table[zon].cmd[cmd_no].arg1 = (long int) ra;
 
@@ -1231,7 +1238,7 @@ boot_zones (void)
 
 				continue;
 			}
-
+**/
 			if (zone_table[zon].cmd[cmd_no].command == 'S')
 				break;
 
@@ -1270,8 +1277,11 @@ boot_zones (void)
 
 			cmd_no++;
 		}
+		
 		fclose (fl);
 	}
+		//boot_zones_raffects();
+
 }
 
 /*************************************************************************
@@ -2490,3 +2500,91 @@ struct hash_data
 	char *string;
 	struct hash_data *next;
 };
+
+void
+boot_zones_raffects (void)
+{
+	FILE *fl;
+	int zon;
+	bool flag;
+	int room_num;
+	char c;
+	char zfile[MAX_STRING_LENGTH];
+	struct stat fstatus;
+	char buf[MAX_STRING_LENGTH];
+	AFFECTED_TYPE *af;
+	ROOM_DATA * troom;
+	
+	
+	for (zon = 0; zon < MAX_ZONE; zon++)
+	{
+		
+		sprintf (zfile, "%s/raffects/resets.%d", SAVE_DIR, zon);
+		
+		if (!(fl = fopen (zfile, "r")))
+		{
+			continue;
+		}
+		
+		fscanf (fl, "%c", &c);
+		
+		if (c == '$')
+		{
+			fclose (fl);
+			continue;
+		}
+		
+		for (;;)
+		{
+			if (c == '#')
+			{
+				fscanf (fl, "%d\n", &room_num); //room number				
+				if (!(troom = vtor (room_num))) //if the room doesn't exist
+				{
+					flag = false;
+					sprintf (buf, "Room %d does not exist.", room_num);
+					system_log (buf, true);
+				}
+				else {
+					flag = true;
+				}
+
+			}
+			
+			fscanf (fl, "%c", &c);
+			
+			if (c == 'r' && flag)
+			{
+				
+				af = new AFFECTED_TYPE;
+				
+				fscanf (fl, "%d %d %d",
+						&af->type,
+						&af->a.room.duration,
+						&af->a.room.intensity);
+				if (flag)
+					add_room_affect (&troom->affects, af->type, af->a.room.duration, af->a.room.intensity);
+				
+			}
+			
+			if (c == 'S')
+			{
+				flag = true;
+				continue;
+			}
+			
+			if (c == '$')
+			{
+				fclose (fl);
+				break;
+			}
+			
+		}
+		
+		
+	}
+	
+	return;
+	
+}
+
