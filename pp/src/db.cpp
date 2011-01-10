@@ -1213,9 +1213,8 @@ boot_zones (void)
 
 				continue;
 			}
-/**
-			if (zone_table[zon].cmd[cmd_no].command == 'A' ||
-				zone_table[zon].cmd[cmd_no].command == 'r')
+
+			if (zone_table[zon].cmd[cmd_no].command == 'A')
 			{
 
 				ra = new RESET_AFFECT;
@@ -1238,7 +1237,7 @@ boot_zones (void)
 
 				continue;
 			}
-**/
+
 			if (zone_table[zon].cmd[cmd_no].command == 'S')
 				break;
 
