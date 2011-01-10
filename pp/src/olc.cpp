@@ -1158,7 +1158,7 @@ save_affect_reset (FILE * fp, CHAR_DATA * tmp_mob, AFFECTED_TYPE * af)
 					 af->a.room.intensity);
 	}
 	
-	fprintf (fp, "A %d %d %d %d %d %d %d 0 0 0 0 0 0\n",
+	fprintf (fp, "A %d %d %d %d %d %d %d\n",
 		af->type,
 		af->a.spell.duration,
 		af->a.spell.modifier,
@@ -1178,7 +1178,7 @@ fwrite_resets (ROOM_DATA * troom, FILE * fp)
 	int w;
 
 	/* Write room header information if we need to write room affects */
-
+/****  saved in another function
 	if (troom->affects)
 		fprintf (fp, "R %d \n", troom->nVirtual);
 
@@ -1204,7 +1204,7 @@ fwrite_resets (ROOM_DATA * troom, FILE * fp)
 			af->a.spell.bitvector, af->a.spell.sn, af->a.spell.t);
 	}
 	}
-
+***************/
 	for (j = 0; j <= LAST_DIR; j++)
 	{
 
