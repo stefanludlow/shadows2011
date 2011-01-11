@@ -3868,8 +3868,8 @@ delayed_search (CHAR_DATA * ch)
 void
 affected_desciption(ROOM_DATA * room, CHAR_DATA * ch)
 {
-	int shadow_level;
-	int iluvatar_level;
+	int shadow_level = 0;
+	int iluvatar_level = 0;
 	bool elfness = false;
 	bool orcness = false;
 	int pow_level;
