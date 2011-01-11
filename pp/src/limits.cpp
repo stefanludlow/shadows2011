@@ -754,14 +754,16 @@ hourly_update (void)
 	current_time = time (NULL);
 	test_time = current_time;
 
-		//  tests hourday to the proper hour, so this only happens once a RL day.
+//  tests hourday to the proper hour, so this only happens once a RL day.
 	
 	struct tm* tp = localtime(&test_time);
 	 int hourday;
+	int minday;
 	 
 	 hourday = tp->tm_hour;
+	minday = tp->tm_min;
 	 
-	if (hourday == 11) //11am - server time (GMT)
+	if ((hourday == 11)&& (minday <=15)) //11:00 to 11:15am - server time (GMT)
 	 {
 			 daily_shadow_room();
 	 }  
