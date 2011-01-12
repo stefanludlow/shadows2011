@@ -1387,20 +1387,17 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 		
 		}
 		
-		if (is_room_affected (troom->affects, nFlag) 
-			&& !(check_level < 0))
+	//yes it is reveresed, but progs are stupid in this respect
+		if ((troom->affects->a.room.intensity == check_level))
 		{
-			ifin[nNest] = 1;
+			ifin[nNest] = 0;
 			return;
-			
 		}	
 		
-		if (is_room_affected (troom->affects, nFlag) 
-			&& !(troom->affects->a.room.intensity == check_level))
+		if (check_level > 0)
 		{
 			ifin[nNest] = 1;
 			return;
-			
 		}
 		
 		return;
