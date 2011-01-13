@@ -763,18 +763,27 @@ hourly_update (void)
 	 hourday = tp->tm_hour;
 	minday = tp->tm_min;
 	 
-	if ((hourday == 11)&& (minday <=15)) //11:00 to 11:15am - server time (GMT)
+	if ((hourday == 11)&& (minday < 15)) //11:00 to 11:15am - server 
+time (GMT)
 	 {
 			 daily_shadow_room();
 	 }  
 	 
-	/***	 
-	 if (hourday == 12) //12 noon GMT or 6am EST
+	 //12:00 noon to 12:15pm GMT or 6am EST
+	if ((hourday == 12) && (minday <= 15) && (minday > 0))
 	 {
-	 //some call for the auto-reboot
+		for (d = descriptor_list; d; d = d->next)
+			SEND_TO_Q ("\n#2Staff Announcement:#0: The daily rebooot for the server is scheduled in 15 minutes.\n\n" , d);
+		
+	}
+	
+	//12:15pm to 12:30pm GMT or 6am EST
+	 if ((hourday == 12) && (minday <= 30) && (minday > 15))
+	 {
+		 
+		 shutdown_request (SIGUSR2);
 	 }
-	 ***/
-	 
+		 
 	//for (ch = character_list; ch; ch = next_ch)
 	for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{

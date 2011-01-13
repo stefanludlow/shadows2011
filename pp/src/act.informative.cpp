@@ -4030,7 +4030,7 @@ affected_desciption(ROOM_DATA * room, CHAR_DATA * ch)
 				act ("  A soft warmth seems to have infiltrated this place, reaching out to brighten more than is natural.",
 					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 			else
-				act ("  The area seems strangely warm and conforting.",
+				act ("  The area seems strangely warm and comforting.",
 					 false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 			break;
 			
