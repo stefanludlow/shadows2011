@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
 
 #include "structs.h"
 #include "account.h"
@@ -733,6 +734,7 @@ hourly_update (void)
 	int current_time;
 	int hours;
 	int nomsg = 0;
+	DESCRIPTOR_DATA *d;
 	CHAR_DATA *ch, *next_ch;
 	OBJ_DATA *obj;
 	OBJ_DATA *objj;
@@ -763,8 +765,8 @@ hourly_update (void)
 	 hourday = tp->tm_hour;
 	minday = tp->tm_min;
 	 
-	if ((hourday == 11)&& (minday < 15)) //11:00 to 11:15am - server 
-time (GMT)
+	//11:00 - 11:15am - server time (GMT)
+	if ((hourday == 11)&& (minday < 15)) 
 	 {
 			 daily_shadow_room();
 	 }  
