@@ -455,6 +455,7 @@ do_quit (CHAR_DATA * ch, char *argument, int cmd)
 
 	clear_player_from_second_affects(ch);
 	remove_affect_type (ch, MAGIC_SIT_TABLE);
+	remove_clan_follow_bonus (ch->following, ch);
 
 	//for (CHAR_DATA *tch = vtor(ch->in_room)->people; tch; tch = tch->next_in_room)
 	for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)

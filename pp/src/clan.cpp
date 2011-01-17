@@ -537,6 +537,7 @@ add_clan_id (CHAR_DATA * ch, char *clan_name, const char *clan_flags)
 	ch->clans = duplicateString (buf);
 }
 
+	//is he a member of the given clan?
 int
 is_clan_member (CHAR_DATA * ch, char *clan_name)
 {
@@ -904,6 +905,7 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 			send_to_char (buf, ch);
 		}
 
+		give_clan_bonus(edit_mob); //adjsut clan bonuses
 		return;			/* Return from n/pc specific uses of clan */
 	}
 
@@ -932,6 +934,7 @@ do_clan (CHAR_DATA * ch, char *argument, int cmd)
 
 		remove_clan (edit_mob, clan_name);
 
+		give_clan_bonus(edit_mob); //adjust clan bonuses
 		return;			/* Return from n/pc specific uses of clan */
 	}
 
@@ -1602,6 +1605,11 @@ remove_clan (CHAR_DATA * ch, char *old_clan_name)
 		free_mem (ch->clans);
 
 	ch->clans = duplicateString (buf);
+		//remove any special affects that might aply to this removed clan
+		//let the clan_bonus see set waht is active and what isn't 
+		//check to see if remaianing clans give any boosts
+	give_clan_bonus(ch);
+	
 	clan_forum_remove (ch, old_clan_name);
 }
 
@@ -1645,6 +1653,9 @@ add_clan (CHAR_DATA * ch, char *new_clan_name, int clan_flags)
 		free_mem (ch->clans);
 
 	ch->clans = duplicateString (buf);
+	
+		//is it a special clan
+	give_clan_bonus(ch);
 }
 
 int
@@ -2448,7 +2459,7 @@ char *get_clan_rank_name (CHAR_DATA *ch, char * clan, int flags)
 	return NULL;
 }
 
-
+	//tests if the given string is a clan and if it is, does the rank exist
 int
 get_clan_in_string (char *string, char *clan, int *clan_flags)
 {
@@ -2470,7 +2481,7 @@ get_clan_in_string (char *string, char *clan, int *clan_flags)
 
 	return 0;
 }
-
+	//tests if the character has the given clan and clan flags
 int
 get_clan (CHAR_DATA * ch, const char *clan, int *clan_flags)
 {
@@ -2496,6 +2507,7 @@ get_clan (CHAR_DATA * ch, const char *clan, int *clan_flags)
 	return 0;
 }
 
+	//test if the given clan name exist as a clan long name, and if that clan has the given flag value
 int
 get_clan_long (CHAR_DATA * ch, char *clan_name, int *clan_flags)
 {
@@ -2510,6 +2522,7 @@ get_clan_long (CHAR_DATA * ch, char *clan_name, int *clan_flags)
 	return 1;
 }
 
+	//tests if the given name and flags are from a clan with the anme as a long clan name
 int
 get_clan_long_short (CHAR_DATA * ch, char *clan_name, int *clan_flags)
 {
@@ -2545,7 +2558,7 @@ get_next_leader (char **p, char *clan_name, int *clan_flags)
 
 	return 1;
 }
-
+	//Returns a clan struct for a clan with the given name
 CLAN_DATA *
 get_clandef (const char *clan_name)
 {
@@ -2558,6 +2571,7 @@ get_clandef (const char *clan_name)
 	return NULL;
 }
 
+	//Returns a clan struct for a clan with a given long name
 CLAN_DATA *
 get_clandef_long (char *clan_long_name)
 {
@@ -3228,6 +3242,7 @@ do_disband (CHAR_DATA * ch, char *argument, int cmd)
 				act ("$n falls out of step.", false, pal, 0, ch,
 					TO_ROOM | _ACT_FORMAT);
 				pal->following = 0;
+				remove_clan_follow_bonus(ch,pal);
 				// ch->group->erase (pal);
 			}
 		}
@@ -3260,6 +3275,7 @@ do_disband (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	pal->following = 0;
+	remove_clan_follow_bonus(ch, pal);
 	// ch->group->erase (pal);
 
 	act ("You motion to $N.", false, ch, 0, pal, TO_CHAR | _ACT_FORMAT);
@@ -4125,4 +4141,183 @@ void do_checkPay (CHAR_DATA * ch, char *argument, int cmd)
 	mysql_free_result (result);
 	mysql_free_result (p_result);
 	return;
+}
+
+/**********
+ * will loop through clan_power_boost table
+ * test if character has one of those clans
+ * give pow bonus and comabt bonus as approproiate
+ * if multiple bonus, use best of each
+ 
+ struct affect_attribute_type attr_aff
+ {
+ int duration;
+ int intensity;
+ int attrib; //index to const char *attrs[]
+ **************/
+int
+give_clan_bonus (CHAR_DATA * ch)
+{
+	MYSQL_RES *result;
+	MYSQL_ROW row;
+	AFFECTED_TYPE *af;
+	char * clan_name;
+	char * clan_rank;
+	char * his_rank;
+	int clan_rank_flags;
+	int his_rank_flags;
+	int pow_boost = 0;
+	int combat_boost = 0;
+	bool pow_flag;
+	bool com_flag;
+	
+	
+	mysql_safe_query ("SELECT clan, rank, pow_boost, combat_boost FROM %s.clan_power_boost", engine.get_config ("player_db").c_str ());
+	result = mysql_store_result (database);
+	
+	if (!result)
+		return (0);
+	
+	
+		//remove existing clan bonuses
+	if (get_affect(ch, AFFECT_CLAN_POWER))
+		remove_affect_type (ch, AFFECT_CLAN_POWER); 
+		
+	if (get_affect(ch, AFFECT_CLAN_COMBAT))
+		remove_affect_type (ch, AFFECT_CLAN_COMBAT);
+		
+	while ((row = mysql_fetch_row (result)))
+	{
+		clan_name = duplicateString(row[0]);
+		clan_rank = duplicateString(row[1]);
+		pow_boost = atoi(row[2]);
+		combat_boost = atoi(row[3]);
+		
+		clan_rank_flags = clan_flags_to_value (clan_rank);
+				
+		if (get_clan (ch, clan_name, &his_rank_flags))
+		{
+			his_rank = value_to_clan_flags(his_rank_flags);
+			
+			if (his_rank_flags == clan_rank_flags)
+			{
+				pow_flag = true;
+				com_flag = true;
+				
+					//use the highest value if there is a choice
+				if (af = get_affect(ch, AFFECT_CLAN_POWER)) 
+				{
+					if (af->a.attr_aff.intensity >= pow_boost)
+						pow_flag = false;
+				}
+				
+				if (af = get_affect(ch, AFFECT_CLAN_COMBAT)) 
+				{
+					if (af->a.attr_aff.intensity >= combat_boost)
+						com_flag = false;
+				}
+				
+				if (pow_flag)
+				{
+					if (af = get_affect(ch, AFFECT_CLAN_POWER))
+						remove_affect_type (ch, AFFECT_CLAN_POWER);
+					
+					
+					af = new AFFECTED_TYPE;
+					af->type = AFFECT_CLAN_POWER;
+					af->a.attr_aff.duration = -1;
+					af->a.attr_aff.intensity = pow_boost;
+					af->a.attr_aff.attrib = 5; //attrs[5] = pow
+					
+					af->next = ch->hour_affects;
+					ch->hour_affects = af;
+					
+					ch->aur += pow_boost;
+					ch->tmp_aur = ch->aur;
+					
+					if (!IS_NPC (ch))
+						assign_hit_points(ch);
+					
+				}
+				
+				if (com_flag)
+				{
+					if (get_affect(ch, AFFECT_CLAN_COMBAT))
+						remove_affect_type (ch, AFFECT_CLAN_COMBAT);
+										
+					af = new AFFECTED_TYPE;
+					af->type = AFFECT_CLAN_COMBAT;
+					af->a.attr_aff.duration = -1;
+					af->a.attr_aff.intensity = combat_boost;
+					af->a.attr_aff.attrib = -1; //attrs[] => null?
+					
+					af->next = ch->hour_affects;
+					ch->hour_affects = af;
+					
+					ch->ppoints = combat_boost;
+				}
+				
+			}
+		}
+	}
+	
+	save_char (ch, true);
+	mysql_free_result (result);
+	result = NULL;
+	return (0);
+}
+
+	//lead_ch is the leader
+	//follow_ch is the follower
+int
+give_clan_follow_bonus (CHAR_DATA * lead_ch, CHAR_DATA * follow_ch )
+{
+	
+	AFFECTED_TYPE *af;
+	char buf[MAX_STRING_LENGTH];
+	int combat_boost = 0;
+	
+	
+	combat_boost = clan_combat_follow_bonus(lead_ch);
+	
+	if (af = get_affect(follow_ch, AFFECT_CLAN_FOLLOW_COMBAT))
+	{
+		remove_affect_type (follow_ch, AFFECT_CLAN_FOLLOW_COMBAT);
+		
+	}
+	
+	af = new AFFECTED_TYPE;
+	af->type = AFFECT_CLAN_FOLLOW_COMBAT;
+	af->a.attr_aff.duration = -1;
+	af->a.attr_aff.intensity = combat_boost;
+	
+	af->next = follow_ch->hour_affects;
+	follow_ch->hour_affects = af;
+	
+	if (follow_ch->ppoints <= combat_boost)
+		follow_ch->ppoints = combat_boost;
+	
+	save_char (follow_ch, true);
+	
+	return (0);
+}
+
+int
+remove_clan_follow_bonus (CHAR_DATA * lead_ch, CHAR_DATA * follow_ch )
+{
+	
+	AFFECTED_TYPE *af;
+	char buf[MAX_STRING_LENGTH];
+	
+	if (!lead_ch)
+		return 0;
+		
+	if (af = get_affect(follow_ch, AFFECT_CLAN_FOLLOW_COMBAT))
+	{
+		remove_affect_type(follow_ch, AFFECT_CLAN_FOLLOW_COMBAT);	
+	}
+	
+	save_char (follow_ch, true);
+	
+	return (0);
 }

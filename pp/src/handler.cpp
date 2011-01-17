@@ -341,7 +341,17 @@ affect_modify (CHAR_DATA * ch, int type, int loc, int mod, int bitv,
 			GET_INT (ch) += mod;
 			break;
 		case APPLY_AUR:
-			GET_AUR (ch) += mod;
+			GET_AUR (ch) += mod; //change is made to tmp_aur (shown in score but not charstat)
+								 //ch->aur += mod; //to show it in charstat
+			if (!IS_NPC (ch))
+			{
+				assign_hit_points(ch);
+			}
+			else
+			{
+				ch->max_hit += mod * 6;
+			}
+			
 			break;
 		case APPLY_WIL:
 			GET_WIL (ch) += mod;
@@ -350,7 +360,9 @@ affect_modify (CHAR_DATA * ch, int type, int loc, int mod, int bitv,
 		case APPLY_CON:
 			GET_CON (ch) += mod;
 			if (!IS_NPC (ch))
-				ch->max_hit = 50 + CONSTITUTION_MULTIPLIER * GET_CON (ch) + (MIN(GET_AUR(ch),25) * 4); // Arbitrary power HP boost - Case
+			{
+				assign_hit_points(ch);
+			}
 			else
 			{
 				ch->max_hit += mod * 6;
@@ -631,10 +643,46 @@ affect_remove (CHAR_DATA * ch, AFFECTED_TYPE * af)
 {
 	AFFECTED_TYPE *taf;
 
+	if (af->type != AFFECT_CLAN_POWER 
+		&& af->type !=AFFECT_CLAN_FOLLOW_COMBAT
+		&& af->type != AFFECT_CLAN_COMBAT)
+	{
 	affect_modify (ch, af->type, af->a.spell.location, af->a.spell.modifier,
 		af->a.spell.bitvector, false, af->a.spell.sn);
+	}
+	else if (af->type == AFFECT_CLAN_POWER)
+	{
+		
+		ch->aur -= af->a.attr_aff.intensity;
+		ch->tmp_aur = ch->aur;
+		
+	}
+	else if (af->type == AFFECT_CLAN_FOLLOW_COMBAT)
+	{
+		
+		if (taf = get_affect(ch, AFFECT_CLAN_COMBAT))
+			ch->ppoints = taf->a.attr_aff.intensity; //keeps his own bonus
+		else
+			ch->ppoints = ch->ppoints - af->a.attr_aff.intensity;
+		
+		if (ch->ppoints < 0)
+			ch->ppoints = 0;
 
 
+	}
+	else if (af->type == AFFECT_CLAN_COMBAT)
+	{
+		//keeps his follow bonus
+		if (taf = get_affect(ch, AFFECT_CLAN_FOLLOW_COMBAT))
+			ch->ppoints = taf->a.attr_aff.intensity; 
+		else 
+			ch->ppoints = ch->ppoints - af->a.attr_aff.intensity;
+		
+		if (ch->ppoints < 0)
+			ch->ppoints = 0;
+		
+	}
+	
 		/* remove structure *af from linked list */
 	if (ch->hour_affects == af)
 		ch->hour_affects = af->next;
@@ -2188,8 +2236,6 @@ extract_char (CHAR_DATA * ch)
 	if (!IS_NPC (ch) && ch->pc->edit_player)
 		unload_pc (ch->pc->edit_player);
 
-	if (!IS_NPC (ch))
-		save_char (ch, true);
 
 	if (!IS_NPC (ch) && !ch->desc)
 	{
@@ -4682,4 +4728,24 @@ can_learn (CHAR_DATA * ch)
 		}
 	}
 	return 0;
+}
+
+void
+assign_hit_points(CHAR_DATA * ch)
+{
+	if (ch->race == 28) //trolls - NPC
+	{
+		ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
+	}
+	else if (ch->race == 86) {//olog-hai - PC
+		ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
+	}
+	else
+	{
+		ch->max_hit = 50 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
+	}
+	
+	
+	return;
+	
 }
