@@ -1146,7 +1146,7 @@ death_email (CHAR_DATA * ch)
 		("SELECT * FROM player_journals WHERE name = \'%s\' ORDER BY post_number ASC",
 		ch->tname);
 	result = mysql_store_result (database);
-	if (result && mysql_num_rows (result))
+	if (mysql_num_rows (result))
 	{
 		fprintf (fp, "Journal Entries:\n\n");
 		while ((row = mysql_fetch_row (result)))
@@ -1164,7 +1164,7 @@ death_email (CHAR_DATA * ch)
 		("SELECT * FROM boards WHERE author = \'%s\' ORDER BY board_name,post_number ASC",
 		ch->tname);
 	result = mysql_store_result (database);
-	if (result && mysql_num_rows (result))
+	if (mysql_num_rows (result))
 	{
 		fprintf (fp, "In-Game Board Posts:\n\n");
 		while ((row = mysql_fetch_row (result)))
@@ -1182,7 +1182,7 @@ death_email (CHAR_DATA * ch)
 		("SELECT * FROM player_writing WHERE author = \'%s\' ORDER BY db_key,page ASC",
 		ch->tname);
 	result = mysql_store_result (database);
-	if (result && mysql_num_rows (result))
+	if (mysql_num_rows (result))
 	{
 		fprintf (fp, "In-Character Writings:\n\n");
 		while ((row = mysql_fetch_row (result)))
@@ -1446,7 +1446,6 @@ die (CHAR_DATA * ch)
 
 		ch->pc->create_state = STATE_DIED;
 		ch->pc->last_died = time (0);
-		remove_clan_follow_bonus (ch->following, ch);
 
 		save_char (ch, true);
 
@@ -1787,8 +1786,8 @@ strike (CHAR_DATA * src, CHAR_DATA * tar, int attack_num)
 	//	GET_NAME (src), GET_HIT (src), GET_MOVE (src), attack_num,
 	//	GET_NAME (tar), GET_HIT (tar), GET_MOVE (tar));
 
-	attack_modifier = src->fight_percentage + src->ppoints;
-	defense_modifier = tar->fight_percentage + tar->ppoints;
+	attack_modifier = src->fight_percentage;
+	defense_modifier = tar->fight_percentage;
 
 	if (src->in_room != tar->in_room)
 		return 0;

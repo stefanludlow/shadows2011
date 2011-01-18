@@ -1178,7 +1178,7 @@ fwrite_resets (ROOM_DATA * troom, FILE * fp)
 	int w;
 
 	/* Write room header information if we need to write room affects */
-
+/****  saved in another function
 	if (troom->affects)
 		fprintf (fp, "R %d \n", troom->nVirtual);
 
@@ -1204,7 +1204,7 @@ fwrite_resets (ROOM_DATA * troom, FILE * fp)
 			af->a.spell.bitvector, af->a.spell.sn, af->a.spell.t);
 	}
 	}
-
+***************/
 	for (j = 0; j <= LAST_DIR; j++)
 	{
 
@@ -7233,9 +7233,7 @@ post_mdesc (DESCRIPTOR_DATA * d)
 		mob = vtom (ch->delay_info1);
 	else
 		mob = load_pc (ch->delay_who);
-	
 	ch->delay_info1 = 0;
-	
 	if (ch->delay_who)
 		free_mem (ch->delay_who);
 

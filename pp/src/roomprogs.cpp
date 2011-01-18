@@ -1386,6 +1386,7 @@ reval (CHAR_DATA * ch, char *arg, room_prog_var *& variable_list)
 			return;
 		
 		}
+		
 	//yes it is reveresed, but progs are stupid in this respect
 		if ((troom->affects->a.room.intensity == check_level))
 		{

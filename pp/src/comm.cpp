@@ -2634,8 +2634,6 @@ prepare_copyover (int cmd)
 			}
 			if (!obj_recorded)
 				fprintf (fp, " 0none~\n");
-			
-			remove_clan_follow_bonus (d->character->following, d->character);
 			save_char (d->character, true);
 		}
 		obj_recorded = false;

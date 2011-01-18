@@ -1,26 +1,13 @@
-
-/*------------------------------------------------------------------------\
- |  group.cpp - Character Group Utility Functions                          |			
- |  www.middle-earth.us                                                    |
- |  Copyright (C) 2004, Shadows of Isildur: Traithe                        |
- |  Derived under license from DIKU GAMMA (0.0).                           |
- \------------------------------------------------------------------------*/
-
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <unistd.h>
 
-#include "server.h"
 #include "structs.h"
 #include "utils.h"
 #include "utility.h"
 #include "group.h"
 #include "protos.h"
-
-extern rpie::server engine;
 
 bool
 is_with_group (CHAR_DATA * ch)
@@ -85,7 +72,6 @@ do_follow (CHAR_DATA * ch, char *argument, int cmd)
 		orig_leader = leader;
 		while (leader->following)
 			leader = leader->following;
-		
 		if (IS_MORTAL (ch) && leader != ch
 			&& IS_SET (leader->plr_flags, GROUP_CLOSED))
 		{
@@ -97,10 +83,6 @@ do_follow (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 		ch->following = leader;
-		
-			//special combat bonus when following certain leaders
-		give_clan_follow_bonus (leader, ch);
-		
 		for (tch = ch->room->people; tch; tch = tch->next_in_room)
 		{
 			if (tch->following == ch)
@@ -150,8 +132,6 @@ do_follow (CHAR_DATA * ch, char *argument, int cmd)
 		if (!IS_SET (ch->flags, FLAG_WIZINVIS)
 			&& ch->room == ch->following->room)
 			act (buf, false, ch, 0, ch->following, TO_NOTVICT | _ACT_FORMAT);
-		
-		remove_clan_follow_bonus(ch->following, ch);
 		ch->following = 0;
 		return;
 	}
@@ -481,7 +461,6 @@ do_group (CHAR_DATA * ch, char *argument, int cmd)
 			
 			sprintf (buf2, "$N has removed you from the group.");
 			act (buf2, false, tch, 0, ch, TO_CHAR);
-			remove_clan_follow_bonus(ch, tch);
 			
 			return;
 			
@@ -703,11 +682,7 @@ stop_followers (CHAR_DATA * ch)
 			continue;
 
 		if (tch->following == ch)
-		{
 			tch->following = 0;
-			remove_clan_follow_bonus(ch,tch);
-			
-		}
 	}
 	//  if (ch->group)
 	//    {
@@ -771,45 +746,3 @@ int speed_group (CHAR_DATA * ch)
 	}
 	return (lowest_speed);
 }
-
-/********
- * calculates and saves the clan based power/combat bonus
- * use ch->ppoint to save the value if desired
- * return value is the modifier added for combat bonus 
- ************/
-
-int
-clan_combat_follow_bonus(CHAR_DATA * ch)
-{
-	AFFECTED_TYPE *af;
-	float pow_mult;
-	int mod = 0;
-	int combat_bonus;
-	char buf[MAX_STRING_LENGTH];
-
-		
-	if (!get_affect(ch, AFFECT_CLAN_POWER) 
-		|| !get_affect(ch, AFFECT_CLAN_COMBAT))
-	{
-		return 0;
-	
-	}	
-	if (af = get_affect(ch, AFFECT_CLAN_COMBAT)) 
-	{
-		mod = af->a.attr_aff.intensity;
-		
-	}
-	sprintf(buf, "mod is %d, intel is %d, wil is %d \n", mod, ch->intel, ch->wil);
-	send_to_gods(buf);
-	
-		//Adjust the attributes to percentage scale, and then average them in.
-	pow_mult = float (((ch->intel*5) + (ch->wil*5) + mod) / 3)/100;
-	
-	combat_bonus = (int)(pow_mult * ch->aur);
-	
-	sprintf(buf, "multi is %f and bonus is %d\n", pow_mult, combat_bonus);
-	send_to_gods(buf);
-	
-	return (combat_bonus);
-}
-

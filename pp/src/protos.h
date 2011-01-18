@@ -959,7 +959,6 @@ void add_shop (int vnum);
 void save_shop (FILE * fs, int vnum);
 void reset_zone (int zone);
 int hit_gain (CHAR_DATA * ch, int poisons_only);
-void assign_hit_points(CHAR_DATA * ch);
 int move_gain (CHAR_DATA * ch);
 void sprinttype (int type, const char *names[], char *result);
 void list_all_crafts (CHAR_DATA * ch);
@@ -1331,10 +1330,6 @@ void clear_player_from_second_affects (CHAR_DATA *ch);
 void remove_second_affect (SECOND_AFFECT * sa);
 void map_next_step (CHAR_DATA * ch);
 void open_skill (CHAR_DATA * ch, int skill);
-int give_clan_bonus (CHAR_DATA * ch);
-int clan_combat_follow_bonus(CHAR_DATA * ch);
-int give_clan_follow_bonus (CHAR_DATA * lead_ch, CHAR_DATA * follow_ch);
-int remove_clan_follow_bonus (CHAR_DATA * lead_ch, CHAR_DATA * follow_ch);
 
 int get_trust (CHAR_DATA * ch);
 
