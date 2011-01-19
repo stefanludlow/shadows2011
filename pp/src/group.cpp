@@ -799,16 +799,12 @@ clan_combat_follow_bonus(CHAR_DATA * ch)
 		mod = af->a.attr_aff.intensity;
 		
 	}
-	sprintf(buf, "mod is %d, intel is %d, wil is %d \n", mod, ch->intel, ch->wil);
-	send_to_gods(buf);
 	
 		//Adjust the attributes to percentage scale, and then average them in.
 	pow_mult = float (((ch->intel*5) + (ch->wil*5) + mod) / 3)/100;
 	
 	combat_bonus = (int)(pow_mult * ch->aur);
 	
-	sprintf(buf, "multi is %f and bonus is %d\n", pow_mult, combat_bonus);
-	send_to_gods(buf);
 	
 	return (combat_bonus);
 }
