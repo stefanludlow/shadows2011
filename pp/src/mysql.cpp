@@ -2908,9 +2908,16 @@ load_char_mysql (const char *name)
 					&af->a.spell.location,
 					&af->a.spell.bitvector,
 					&af->a.spell.sn, &af->a.spell.t);
-				if (af->type == 3416)
+				if (af->type == MAGIC_AFFECT_CURSE)
 				{
 					free_mem (af);
+				}
+				else if ((af->type == AFFECT_CLAN_COMBAT)
+						 || (af->type ==AFFECT_CLAN_POWER))
+				{
+					af->next = ch->hour_affects;
+					ch->hour_affects = af;
+					
 				}
 				else
 				{
@@ -3133,20 +3140,16 @@ load_char_mysql (const char *name)
 	if (!ch->coldload_id)
 		ch->coldload_id = get_next_coldload_id (1);
 
+	give_clan_bonus (ch); //test for this later in process??
+	assign_hit_points(ch);
+	
 	if (ch->race == 28) //trolls - NPC
-	{
-		ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
 		ch->armor = 2;
-	}
-	else if (ch->race == 86) {//olog-hai - PC
-		ch->max_hit = 200 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
+	else if (ch->race == 86) //olog-hai - PC
 		ch->armor = 3;
-	}
 	else
-	{
-		ch->max_hit = 50 + GET_CON (ch) * CONSTITUTION_MULTIPLIER + (MIN(GET_AUR(ch),25) * 4);
 		ch->armor = 0;
-	}
+
 
 	if (!ch->max_mana
 		&& (ch->skills[SKILL_BLACK_WISE] || ch->skills[SKILL_WHITE_WISE]
@@ -3244,22 +3247,28 @@ save_char_mysql (CHAR_DATA * ch)
 	*buf = '\0';
 	for (af = ch->hour_affects; af; af = af->next)
 	{
-		if ((af->type < MAGIC_CLAN_MEMBER_BASE ||
-			af->type > MAGIC_CLAN_OMNI_BASE + MAX_CLANS) &&
-			(af->type < CRAFT_FIRST ||
-			af->type > CRAFT_LAST) &&
-			af->type != MAGIC_CLAN_NOTIFY &&
-			af->type != MAGIC_NOTIFY &&
-			af->type != MAGIC_WATCH1 &&
-			af->type != MAGIC_WATCH2 &&
-			af->type != MAGIC_WATCH3 &&
-			af->type != MAGIC_GUARD &&
-			af->type != AFFECT_SHADOW &&
-			(af->type > CRAFT_LAST || af->type < CRAFT_FIRST))
+		if (
+			//skip 1200 - 1499
+			(af->type < MAGIC_CLAN_MEMBER_BASE || af->type > MAGIC_CLAN_OMNI_BASE + MAX_CLANS)
+			
+			//skip 8000 - 18000
+			&& (af->type < CRAFT_FIRST || af->type > CRAFT_LAST)
+			
+			//skip special cases
+			&& af->type != MAGIC_CLAN_NOTIFY 
+			&& af->type != MAGIC_NOTIFY 
+			&& af->type != MAGIC_WATCH1 
+			&& af->type != MAGIC_WATCH2 
+			&& af->type != MAGIC_WATCH3 
+			&& af->type != MAGIC_GUARD 
+			&& af->type != AFFECT_SHADOW 			
+			)
+			
 			sprintf (buf + strlen (buf), "Affect	%d %d %d %d %d %d %d\n",
 			af->type, af->a.spell.duration, af->a.spell.modifier,
 			af->a.spell.location, af->a.spell.bitvector,
 			af->a.spell.sn, af->a.spell.t);
+		
 		else if (af->type >= CRAFT_FIRST && af->type <= CRAFT_LAST)
 			sprintf (buf + strlen (buf), "Subcraft     '%s'\n",
 			af->a.craft->subcraft->subcraft_name);

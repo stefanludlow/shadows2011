@@ -2266,7 +2266,7 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	send_to_char (buf, ch);
 
 	if (IS_NPC (k))
-	{
+	{//true, unchanged aura
 		*buf = '\0';
 		sprintf (buf, "#2Pow:#0 %d", k->aur);
 		pad_buffer (buf, 25);
@@ -2895,6 +2895,59 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 			continue;
 		}
 
+		if (af->type == AFFECT_CLAN_POWER)
+		{
+			if (GET_TRUST(ch) > 4)
+			{
+				sprintf (buf, "#2%5d#0   Power bonus: %d from clan membership.\n",
+						 af->type, af->a.attr_aff.intensity);
+				send_to_char (buf, ch);
+				continue;	
+			}
+			else
+			{
+			sprintf (buf, "#2%5d#0   Power bonus from clan membership.\n");
+			send_to_char (buf, ch);
+			continue;
+			}
+		}
+		
+		if (af->type == AFFECT_CLAN_FOLLOW_COMBAT)
+		{
+			if (GET_TRUST(ch) > 4)
+			{
+			sprintf (buf, "#2%5d#0   Combat bonus: %d from following a great Leader.\n",
+					 af->type, af->a.attr_aff.intensity);
+			send_to_char (buf, ch);
+			continue;
+			}
+			else
+			{
+				sprintf (buf, "#2%5d#0   Combat bonus from following a great Leader.\n");
+				send_to_char (buf, ch);
+				continue;
+			}
+
+		}
+		
+		if (af->type == AFFECT_CLAN_COMBAT)
+		{
+			if (GET_TRUST(ch) > 4)
+			{
+			sprintf (buf, "#2%5d#0   Combat bonus: %d from clan membership.\n",
+					 af->type, af->a.attr_aff.intensity);
+			send_to_char (buf, ch);
+			continue;
+			}
+			else
+			{
+				sprintf (buf, "#2%5d#0   Combat bonus from clan membership.\n");
+				send_to_char (buf, ch);
+				continue;
+			}
+
+		}
+		
 		if (af->type >= MAGIC_AFFECT_FIRST && af->type <= MAGIC_AFFECT_LAST)
 		{
 			sprintf (buf, "#2%5d#0   Spell effect, %d RL minutes remaining.\n",
@@ -3311,6 +3364,12 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 		}
 	}
 
+	if (GET_TRUST(ch) > 4)
+	{
+	sprintf(buf, "#2Combat bonus:#0 %d\n", k->ppoints);
+	send_to_char (buf, ch);
+	}
+	
 	i2 = 1;
 	sprintf (buf, "#2%8.8s:#0 %03d/%03d  %s", "Offense", k->offense,
 		k->offense, i2 % 4 ? "" : "\n");
@@ -9086,7 +9145,6 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 
 	if (is_abbrev (buf, "delete"))
 	{
-/*******
 		if (obj)
 		{
 			af = get_obj_affect (obj, affect_no);
@@ -9114,7 +9172,6 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 			send_to_char ("Affect deleted from character.\n", ch);
 			return;
 		}
-********/
 		/* It must be a room affect */
 
 		if (!(af = is_room_affected (room->affects, affect_no)))
@@ -9153,13 +9210,11 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 	}
 
 	/* Affect already exist? */
-/********
 	if (tch)
 		af = get_affect (tch, affect_no);
 	else if (obj)
 		af = get_obj_affect (obj, affect_no);
 	else
- ********/
 		af = is_room_affected (room->affects, affect_no);
 
 	if (af)
@@ -9215,23 +9270,19 @@ do_affect (CHAR_DATA * ch, char *argument, int cmd)
 		{
 			af->a.spell.modifier = power;
 		}
-		/******
 		if (tch)
 			affect_to_char (tch, af);
 		else if (obj)
 			affect_to_obj (obj, af);
 		else
 		{
-		 *******/
 			if (power_specified)
 				add_room_affect (&room->affects, af->type, duration, power );
 			else
 				add_room_affect (&room->affects, af->type, duration, 1);
 			
 			save_room_affects (room->zone);
-		/******
 		}
-		 ********/
 	}
 	send_to_char ("Affect created.\n", ch);
 }

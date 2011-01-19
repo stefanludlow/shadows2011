@@ -932,6 +932,10 @@ typedef signed char shortint;
 #define AFFECT_FLEE_DOWN		2111
 #define AFFECT_FLEE_ANY 		2112
 
+#define AFFECT_CLAN_POWER		2113
+#define AFFECT_CLAN_COMBAT		2114
+#define AFFECT_CLAN_FOLLOW_COMBAT	2115 //combat bonus given to followers
+
 
 #define MAGIC_CRIM_HOODED		2600	/* Hooded criminal observed in zone .. */
 
@@ -983,7 +987,6 @@ typedef signed char shortint;
 #define MAGIC_AFFECT_INVULNERABILITY		3419
 #define MAGIC_AFFECT_ARMOR			3420
 #define MAGIC_AFFECT_BLESS			3421
-
 #define MAGIC_AFFECT_LAST			4999
 
 /** 5000 - 5399 reserved for Room/world special effects **/
@@ -2229,6 +2232,18 @@ struct known_spell_data
 	struct known_spell_data *next;
 };
 
+
+struct affect_attribute_type
+{
+	int duration;
+	int intensity;
+	int attrib; //index to const char *attrs[]
+	int uu4;
+	int uu5;
+	int uu6;
+};
+
+
 struct affect_spell_type
 {
 	int duration;			/* For how long its effects will last           */
@@ -2403,6 +2418,7 @@ struct affect_soma_type
 
 union affected_union
 {
+	struct affect_attribute_type attr_aff;
 	struct affect_spell_type spell;
 	struct affect_job_type job;
 	struct affect_table_type table;

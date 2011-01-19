@@ -281,7 +281,7 @@ public:
 	int trigger_delay;		/* Not saved. */
 	int trigger_line;		/* Used with trigger_delay */
 	int trigger_id;		/* Used with trigger_delay */
-	int ppoints; // What? - Case
+	int ppoints; // used for clan-power-boosted combat bonuses
 	int position;
 	int default_pos;
 	int delay_type;

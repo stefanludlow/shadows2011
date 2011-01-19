@@ -3872,7 +3872,7 @@ affected_desciption(ROOM_DATA * room, CHAR_DATA * ch)
 	int iluvatar_level = 0;
 	bool elfness = false;
 	bool orcness = false;
-	int pow_level;
+	int pow_level = 0;
 	char buf[MAX_STRING_LENGTH] = { '\0' };
 	AFFECTED_TYPE *room_shadow;
 	AFFECTED_TYPE *room_iluvatar;

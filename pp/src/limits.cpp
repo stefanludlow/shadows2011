@@ -21,6 +21,8 @@
 #include "math.h"
 #include "utility.h"
 
+extern bool pending_reboot;
+
 int
 move_gain (CHAR_DATA * ch)
 {
@@ -766,7 +768,7 @@ hourly_update (void)
 	minday = tp->tm_min;
 	 
 	//11:00 - 11:15am - server time (GMT)
-	if ((hourday == 11)&& (minday < 15)) 
+	if ((hourday == 11) && (minday < 15)) 
 	 {
 			 daily_shadow_room();
 	 }  
@@ -784,7 +786,7 @@ hourly_update (void)
 	 if ((hourday == 12) && (minday <= 30) && (minday > 15))
 	 {
 		 
-		 shutdown_request (SIGUSR2);
+		 pending_reboot = true;
 	 }
 		 
 	 
