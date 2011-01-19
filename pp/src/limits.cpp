@@ -772,7 +772,7 @@ hourly_update (void)
 	 }  
 	 
 	 //12:00 noon to 12:15pm GMT or 6am EST
-/*****
+
 	if ((hourday == 12) && (minday <= 15) && (minday > 0))
 	 {
 		for (d = descriptor_list; d; d = d->next)
@@ -787,7 +787,7 @@ hourly_update (void)
 		 shutdown_request (SIGUSR2);
 	 }
 		 
-******/	 
+	 
 	//for (ch = character_list; ch; ch = next_ch)
 	for (std::list<char_data*>::iterator tch_iterator = character_list.begin(); tch_iterator != character_list.end(); tch_iterator++)
 	{
