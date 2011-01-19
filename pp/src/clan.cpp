@@ -4261,7 +4261,6 @@ give_clan_bonus (CHAR_DATA * ch)
 		}
 	}
 	
-	save_char (ch, true);
 	mysql_free_result (result);
 	result = NULL;
 	return (0);
