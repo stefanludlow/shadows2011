@@ -1450,7 +1450,7 @@ void replaceString(char *&destination, const char *source) {
 }
 
 int free_mem (char *&ptr) {
-	if (ptr != NULL && strcmp(ptr, "") != STR_MATCH) {
+	if (ptr != NULL && (strcmp(ptr, "") != STR_MATCH)) {
 		delete [] ptr;
 		ptr = (char *)NULL;
 		return 1;
