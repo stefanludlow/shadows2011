@@ -2236,6 +2236,8 @@ extract_char (CHAR_DATA * ch)
 	if (!IS_NPC (ch) && ch->pc->edit_player)
 		unload_pc (ch->pc->edit_player);
 
+	if (!IS_NPC (ch))
+	    save_char (ch, true);
 
 	if (!IS_NPC (ch) && !ch->desc)
 	{
