@@ -1808,7 +1808,10 @@ free_obj (OBJ_DATA * obj)
 	OBJ_DATA *tobj;
 	WRITING_DATA *writing;
 
-	tobj = vtoo (obj->nVirtual);
+	if (obj->nVirtual == 0)
+		return;
+	else
+		tobj = vtoo (obj->nVirtual);
 
 	/* Make sure these arn't duplicate fields of the prototype */
 
