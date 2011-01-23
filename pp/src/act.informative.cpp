@@ -11927,9 +11927,10 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 	if (!*buf)
 	{
 		send_to_char ("ticket read <number>\n", ch);
-		send_to_char ("ticket browse <first number> <last number>\n\n", ch);
-		send_to_char ("Finally you may delete a ticket\n\n", ch);
+		send_to_char ("ticket browse <first number> <last number>\n", ch);
 		send_to_char ("ticket delete <ticket number>\n", ch);
+		send_to_char ("ticket search <value> owner | mount | room\n", ch);
+		send_to_char ("To search by owner's name, mount's name or ostler's room number.\n", ch);
 		return;
 	}
 
@@ -11962,9 +11963,9 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
-		//No more than 100 tickets to be checked at a time, instead of the whole 10 million (9,999,999). May need to adjust if there really are more tickets
+		//No more than 1000 tickets to be checked at a time, instead of the whole 10 million (9,999,999). May need to adjust if there really are more tickets
 		first_tick = atoi(f_tick);
-		last_tick = MIN(500, atoi(l_tick));
+		last_tick = MIN(1000, atoi(l_tick));
 
 		if (first_tick >= last_tick)
 		{
@@ -11975,7 +11976,7 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 		//browse_ticket(ch, first_tick, last_tick);
 		for (tick_num = first_tick; tick_num <= last_tick; tick_num ++)
 		{
-			read_ticket(ch, tick_num);
+			read_ticket(ch, tick_num, 0);
 		};
 
 	} //if browse
@@ -11999,7 +12000,7 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
-		read_ticket(ch, tick_num);
+		read_ticket(ch, tick_num, 1);
 	}//read
 
 
@@ -12025,14 +12026,68 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 		delete_ticket(ch, tick_num);
 	}//delete
 
+	if (!strcmp(buf, "search"))
+	{
+		argument = one_argument (argument, buf2);
+		
+		if (!strncmp(argument, "owner", 5)) //case 1
+		{
+			if (!*buf2)
+			{
+				send_to_char("Whose tickets did you wish to read?\n", ch);
+				return;
+			}
+			
+			sprintf(buf, "#2Mounts owned by#0 %s\n\n", CAP(buf2));
+			send_to_char (buf, ch);
+			search_ticket(ch, buf2, 1);
+		}//owner
+		
+		if (!strncmp(argument, "mount", 5)) //case 2
+		{
+				//argument = one_argument (argument, buf2);
+			if (!*buf2)
+			{
+				send_to_char("What is the name of the mount you wish to find?\n", ch);
+				return;
+			}
+			
+			sprintf(buf, "#2Mount named#0 %s\n\n", (buf2));
+			send_to_char (buf, ch);
+			search_ticket(ch, CAP(buf2), 2);
+		}//mount name
+		
+		if (!strncmp(argument, "room", 4)) //case 3
+		{
+				//argument = one_argument (argument, buf2);
+			if (!*buf2)
+			{
+				send_to_char("What is the room number of the stable you wish to search?\n", ch);
+				return;
+			}
+			if (!is_number(buf2))
+			{
+				send_to_char("What is the room number of the stable you wish to search?\n", ch);
+				return;
+			}
+			
+			roomnum = atoi(buf2);
+			sprintf(buf, "#2Mounts in stable named#0 %s\n\n", vtor(roomnum)->name);
+			send_to_char (buf, ch);
+			search_ticket(ch, buf2, 3);
+		}//mount name
+	} //end search			
+	
+	
 	return;
 }
 
 void
-read_ticket (CHAR_DATA * ch, int tick_num)
+read_ticket (CHAR_DATA * ch, int tick_num, int cmd)
 {
 
 	int nVirtual;
+	int loaded;
 	CHAR_DATA *mob;
 	FILE *fp;
 	char buf[AVG_STRING_LENGTH];
@@ -12070,8 +12125,15 @@ read_ticket (CHAR_DATA * ch, int tick_num)
 
 		if (mob)
 		{
+			loaded = 1;
 			sprintf(buf2 + strlen(buf2), "Vnum: %d \nNamed: %s \nClans: %s \nOwner: %s \nStabled at: %s (%d) \n", mob->mob->nVirtual, mob->name, mob->clans, mob->mob->owner, vtor(mob->in_room)->name, mob->in_room);
 
+			if ((mob->equip) && (cmd == 1))
+			{
+				show_char_to_char (mob, ch, 1); //shows description and gear
+			}
+			
+			if (loaded)
 			save_mobile (mob, fp, "HITCH", 1);	/* Extracts the mobile */
 		}
 
@@ -12114,6 +12176,113 @@ delete_ticket (CHAR_DATA * ch, int tick_num)
 	send_to_char(buf2, ch);
 	return;
 }
+
+void
+search_ticket (CHAR_DATA * ch, char * chkvalue, int searchtype)
+{
+	
+	int nVirtual;
+	int index;
+	CHAR_DATA *mob;
+	char name[AVG_STRING_LENGTH];
+	char hookup[AVG_STRING_LENGTH];
+	FILE *fp;
+	char buf[AVG_STRING_LENGTH] = {'\0'};
+	char buf2[MAX_STRING_LENGTH] = {'\0'};
+	int roomchk;
+	int loaded = 0;  
+	
+	for (index = 1; index < LAST_STABLE_TICKET; index ++)
+  	{
+  		sprintf (name, TICKET_DIR "/%07d", index);
+  		
+  		if (!(fp = fopen (name, "r")))
+		{
+			continue;
+		}
+    	while (fgets (buf, 256, fp))
+		{
+				//skip lines with blank space at start or blank lines
+			if (*buf == ' ' || *buf == '\n')
+				fgets (buf, 255, fp);
+			
+			if (sscanf (buf, "%d %s", &nVirtual, hookup) != 2)
+			{
+				continue;
+			}	
+			else
+			{
+				mob = load_a_saved_mobile (nVirtual, fp, true);
+				if (mob)
+				{
+					loaded = 1;
+					switch (searchtype)
+					{
+						case 1: //by owner
+							if(mob->mob->owner && strcmp (mob->mob->owner, CAP(chkvalue)) == 0)
+							{
+							sprintf(buf2 + strlen(buf2), "#2Ticket: %d#0\nVnum: %d \nNamed: %s \nClans: %s nOwner: %s \nStabled at: %s (%d) \n\n",
+										index,
+										mob->mob->nVirtual,
+										mob->name,
+										mob->clans,
+										mob->mob->owner,
+										vtor(mob->in_room)->name,
+										mob->in_room);		
+							}
+							
+							break;
+							
+						case 2: //mount name
+							if (isname(chkvalue, mob->name))											
+							{
+								sprintf(buf2 + strlen(buf2), "#2Ticket: %d#0\nVnum: %d \nNamed: %s \nClans: %s \nOwner: %s \nStabled at: %s (%d) \n\n",
+										index,
+										mob->mob->nVirtual,
+										mob->name,
+										mob->clans,
+										mob->mob->owner,
+										vtor(mob->in_room)->name,
+										mob->in_room);		
+							}
+							break;
+							
+						case 3: //stable
+							roomchk = atoi(chkvalue);
+							
+							if (!roomchk)
+								break;
+							
+							if(roomchk == mob->in_room)
+							{
+								sprintf(buf2 + strlen(buf2), "#2Ticket: %d#0\nVnum: %d \nNamed: %s \nClans: %s \nOwner: %s \nStabled at: %s (%d) \n\n",
+										index,
+										mob->mob->nVirtual,
+										mob->name,
+										mob->clans,
+										mob->mob->owner,
+										vtor(mob->in_room)->name,
+										mob->in_room);		
+							}
+							break;
+							
+						default:
+							break;
+					}//switch
+					if (loaded)
+						save_mobile (mob, fp, "HITCH", 1);	/* Extracts the mobile */
+				} //if (mob)
+			}
+		}//while    
+		fclose (fp);
+  	} //for
+	
+ 	page_string (ch->desc, buf2); 
+	
+	
+	return;
+}
+
 
 /***
 do_evaluate
