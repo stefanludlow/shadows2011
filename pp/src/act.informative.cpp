@@ -11969,7 +11969,7 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 
 		if (first_tick >= last_tick)
 		{
-			send_to_char ("The last number must be larger than the first number.\n", ch);
+			send_to_char ("The last number must be larger than the first number, and cannot exceed 1000.\n", ch);
 			return;
 		}
 
@@ -12138,13 +12138,12 @@ read_ticket (CHAR_DATA * ch, int tick_num, int cmd)
 		}
 
 		fclose (fp);
-		send_to_char(buf2, ch);
+		page_string (ch->desc, buf2);
 		return;
 	}
 
 	fclose (fp);
-
-	send_to_char(buf2, ch);
+	page_string (ch->desc, buf2);
 	return;
 }
 
