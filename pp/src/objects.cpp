@@ -97,6 +97,8 @@ void obj_data::partial_deep_copy (OBJ_DATA *proto)
 
 	this->obj_flags.extra_flags |= ITEM_NEWSKILLS;
 
+	this->item_wear = proto->item_wear;
+
 }
 
 void obj_data::deep_copy (OBJ_DATA *copy_from)
