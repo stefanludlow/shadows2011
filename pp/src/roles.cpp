@@ -249,13 +249,21 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
 		while ( (row = mysql_fetch_row(result)) )
 		{
 			sprintf (craft_name, "%s", row[16]);
+			
+				//check for required race if present			
+			if ( strlen(row[13]) > 0 && (ind = lookup_race_id (row[13])) != -1 )
+			{
+				if ( ch->race != ind )
+					continue;
+			}	
+			
 			for (craft = crafts; craft; craft = craft->next)
 			{
 				if (!str_cmp (craft->subcraft_name, craft_name))
 					break;
 			}
 
-			if (craft)
+			if (craft && !has_craft(ch, craft))
 			{
 				//find an empty affect location
 				for (index = CRAFT_FIRST; index <= CRAFT_LAST; index++)
@@ -274,6 +282,7 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
 				send_to_char ("Craft added.\n", ch);
 				continue;
 			}
+			
 		}//end while
 	}
 
@@ -281,7 +290,27 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
 		mysql_free_result (result);
 
 	//Add Skills
-	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND skill_string != '' ORDER BY skill_string ASC", role->id);
+/*****************************************
+ * skill_level < 0		skill set at value.
+ *							If they do not have the skill, no bonus 
+ * skill_level == 999	skill given at opening skill value
+ *							If they already have it, nothing is done
+ * skill_level > 0		bonus points to skill
+ *							If they don't have skill, no bonus 
+ * skill == 999 is needed to allow skills levels to be sorted, 
+ *				with opening value given first
+ *				then any bonuses awarded beyond that
+ *
+ *  ride 999
+ *	ride +10
+ *	ride - 40
+ *	Will give the player the ride skill at opening value, 
+ *	give him 10 more points in it
+ *	and if he still has less than 40, he is boosted to 40
+******************************************/	 
+	 
+	 
+	sprintf (buf, "SELECT * FROM special_roles_outfit WHERE role_id = %d AND skill_string != '' ORDER BY skill_string ASC, skill_value DESC", role->id);
 	mysql_safe_query (buf);
 
 	result = mysql_store_result (database);
@@ -293,12 +322,47 @@ outfit_new_char (CHAR_DATA *ch, ROLE_DATA *role)
 			sprintf(skill_name, row[14]);
 			skill_level = atoi(row[15]);
 
+				//check for required race if present			
+			if ( strlen(row[13]) > 0 && (ind = lookup_race_id (row[13])) != -1 )
+			{
+				if ( ch->race != ind )
+					continue;
+			}	
+			
 			if ( (ind = index_lookup (skills, skill_name)) != -1 )
 			{
+				if (skill_level < 0)
+				{
+					skill_level = (-1 * skill_level);
+					if (ch->skills[ind] > 0) //they have the skill
+					{
 				if (ch->skills[ind] < skill_level) //they need the boost
 					ch->skills[ind] = skill_level;
+						continue;
 
+					}
+				}
+				else if (skill_level == 999)
+				{
+					if (ch->skills[ind] == 0) //they don't have the skill
+					{
+						open_skill (ch, ind);  //give them opening values only
 				continue;
+						
+					}
+				}
+				else if (skill_level > 0)
+				{
+					if (ch->skills[ind] > 0) //they have the skill
+					{
+						ch->skills[ind] += skill_level;  //they get a boost
+						continue;
+						
+					}
+				}
+				
+				
+				
 			}
 		}//end while
 
@@ -333,9 +397,11 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 	CLAN_DATA	*clan;
 	SUBCRAFT_HEAD_DATA *craft;
 	char	skill_name[AVG_STRING_LENGTH];
+	int		skill_level;
 	char	buf[MAX_STRING_LENGTH];
 	char	output[MAX_STRING_LENGTH];
 	char	skills_buf[MAX_STRING_LENGTH];
+	char	races_buf[MAX_STRING_LENGTH];
 	int 	ind = -1;
 
 	sprintf (output, "\n#6%s:#0\n"
@@ -444,12 +510,41 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 		sprintf (buf, "#6Starting Skill Boosts:#0\n");
 		while ( (row = mysql_fetch_row(result)) )
 		{
+			if (strlen(row[13]) > 0)
+				sprintf(races_buf, row[13]);
+			else 
+				sprintf(races_buf, "");
+			
 			sprintf(skill_name, row[14]);
+			skill_level = atoi(row[15]);
+			
 
 			if ( (ind = index_lookup (skills, skill_name)) != -1 )
 			{
-				sprintf (buf + strlen(buf), "  - #B%s#0 boosted to #B%d#0\n", skill_name, atoi(row[15]));
-				continue;
+				if (skill_level == 999)
+				{
+					sprintf (buf + strlen(buf), "  - #B%s#0 at opening value", skill_name);
+				}
+				
+				else if ((skill_level > 0) && (skill_level != 999))
+				{
+					sprintf (buf + strlen(buf), "  - #B%s#0 boosted by #B%d#0 points", skill_name, skill_level);
+				}
+				else 
+				{
+					sprintf (buf + strlen(buf), "  - #B%s#0 set at #B%d#0", skill_name, abs(skill_level));
+				}
+				
+				if (strlen(row[13]) > 0)
+				{
+					sprintf (buf + strlen(buf), " (%s).\n", races_buf);
+					
+				}
+				else
+				{
+					sprintf (buf + strlen(buf), ".\n");
+				}
+				
 			}
 		}//end while
 
@@ -475,6 +570,11 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 		sprintf (buf, "#6Starting Crafts:#0\n");
 		while ( (row = mysql_fetch_row(result)) )
 		{
+			if (strlen(row[13]) > 0)
+				sprintf(races_buf, row[13]);
+			else 
+				sprintf(races_buf, "");
+			
 			for (craft = crafts; craft; craft = craft->next)
 			{
 				if (!str_cmp (craft->subcraft_name, row[16]))
@@ -483,8 +583,17 @@ display_outfitting_table (CHAR_DATA *ch, ROLE_DATA *role)
 
 			if (craft)
 			{
-				sprintf (buf + strlen(buf), "  - #B%s#0\n", row[16]);
-				continue;
+				sprintf (buf + strlen(buf), "  - #B%s#0", row[16]);
+			}
+			
+			if (strlen(row[13]) > 0)
+			{
+				sprintf (buf + strlen(buf), " (%s).\n", races_buf);
+				
+			}
+			else
+			{
+				sprintf (buf + strlen(buf), ".\n");
 			}
 		}
 
@@ -809,9 +918,9 @@ outfit_role (CHAR_DATA * ch, char *argument)
 		if ( *buf )
 		{
 			if ( (ind = index_lookup (skills, buf)) != -1 )
-				sprintf (skills_buf, "%s", buf);
+				sprintf (skills_buf, buf);
 			else if ( (ind = lookup_race_id (buf)) != -1 )
-				sprintf (races_buf, "%s", buf);
+				sprintf (races_buf, buf);
 		}
 
 		if ( remove )
@@ -907,28 +1016,43 @@ outfit_role (CHAR_DATA * ch, char *argument)
 		argument = one_argument (argument, skill_name); //skillname
 		if ( !*skill_name || is_number(skill_name) )
 		{
-			send_to_char ("Usage:  role outfit X skill <skillname> <value> \n", ch);
+			send_to_char ("Usage:  role outfit X skill <skillname> [\"racename\"] \n", ch);
+			send_to_char ("Usage:  role outfit X skill <skillname> [value] [\"racename\"] \n", ch);
 			send_to_char ("Usage:  role outfit X skill <skillname> remove \n", ch);
+			send_to_char ("No value or value = 0, will give skill at opening value \n", ch);
+			send_to_char ("[value] will give a boost, if they already have the skill  \n", ch);
+			send_to_char ("-[value] will set the skill at that level, if they already have the skill, and it is lower.\n", ch);
+			send_to_char ("[racename] to specify a race that is need to receive this skill.\n", ch);
 			return;
 		}
 
-		argument = one_argument (argument, level_buf);//skill_level or remove
-		if ( *level_buf )
+		argument = one_argument (argument, buf);//skill_level, race name or remove
+		if ( *buf )
 		{
-			if ( is_number(level_buf) )
-				skill_level = atoi(level_buf);
+			if ( is_number(buf) )
+		{
+				skill_level = atoi(buf);
+				argument = one_argument (argument, buf);//skill_level & race name
+				if ((ind = lookup_race_id (buf)) != -1 )
+					sprintf (races_buf, buf);
+				else 
+					sprintf (races_buf, "");
 
-			else if ( !str_cmp (level_buf, "remove") )
+			}
+			else if ((ind = lookup_race_id (buf)) != -1 ) //no skill level, just a race
+				sprintf (races_buf, buf);
+			
+			else if ( !str_cmp (buf, "remove") )
 				remove = true;
 			else
 			{
-				send_to_char ("You must specify a skill name, and either a level or REMOVE.\n", ch);
+				send_to_char ("You must specify a skill name, and either a level, race or REMOVE.\n", ch);
 				return;
 			}
 		}
 
 		if ( (ind = index_lookup (skills, skill_name)) != -1 )
-			sprintf (skills_buf, "%s", skill_name);
+			sprintf (skills_buf, skill_name);
 		else
 		{
 			send_to_char ("That skill is not in out database.\n", ch);
@@ -948,10 +1072,32 @@ outfit_role (CHAR_DATA * ch, char *argument)
 		}
 		else
 		{
-			sprintf (buf,   "INSERT INTO special_roles_outfit (role_id, skill_string, skill_value) VALUES (%d, '%s', %d)", role->id, skills_buf, skill_level);
+			if (skill_level == 0)
+				skill_level = 999;
+			
+			sprintf (buf,   "INSERT INTO special_roles_outfit (role_id, skill_string, skill_value, req_race) VALUES (%d, '%s', %d, '%s')", role->id, skills_buf, skill_level, races_buf);
 			mysql_safe_query (buf);
 
-			sprintf (buf, "'%s' boosted to a level of %d has been added to the outfitting tables for the role of #6'%s'#0.",                   skills_buf, skill_level, role->summary);
+			if (skill_level == 999)
+			{
+				sprintf (buf, "'%s' will be given at opening values for the role of #6'%s'#0", skills_buf, role->summary);
+			}
+			else if (skill_level > 0)
+			{
+				sprintf (buf, "'%s' will be boosted by %d points, if they already have the skill, for the role of #6'%s'#0", skills_buf, skill_level, role->summary);
+			}
+			else if (skill_level < 0)
+			{
+				sprintf (buf, "'%s' will be set at %d, if they already have the skill and it is lower, for the role of #6'%s'#0", skills_buf, abs(skill_level), role->summary);
+			}
+			
+			if ( *races_buf )
+			{
+				sprintf (buf + strlen(buf), ", for all  #B%s#0 characters", races_buf);
+			}
+			
+			sprintf (buf + strlen(buf), ".\n");
+			
 			act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 			return;
 		}
@@ -959,28 +1105,34 @@ outfit_role (CHAR_DATA * ch, char *argument)
 
 	//Crafts
 	//role outfit X craft <craftname>
+	//role outfit X craft <craftname> <race>
 	//role outfit X craft <craftname> remove
 	if ( !str_cmp (cmd, "craft") )
 	{
 		*craft_buf = '\0';
+		*races_buf = '\0';
 
 		argument = one_argument (argument, craft_name); //subcraft name
-		if ( !*craft_name || is_number(craft_name) )
+		if ( !*craft_name )
 		{
 			send_to_char ("Usage:  role outfit X craft <craftname>\n", ch);
+			send_to_char ("Usage:  role outfit X craft <craftname> <racename>\n", ch);
 			send_to_char ("Usage:  role outfit X craft <craftname> remove \n", ch);
 			return;
 		}
 
-		argument = one_argument (argument, buf);// remove
+		argument = one_argument (argument, buf); //race or remove
+		
 		if (!str_cmp (buf, "remove"))
-			remove = true;
-		else if (*buf)
 		{
-			send_to_char ("Usage:  role outfit X craft <craftname>\n", ch);
-			send_to_char ("Usage:  role outfit X craft <craftname> remove \n", ch);
-			return;
+			remove = true;
 		}
+		else if ( *buf )
+		{
+			if ( (ind = lookup_race_id (buf)) != -1 )
+				sprintf (races_buf, buf);
+		}
+
 
 
 		for (craft = crafts; craft; craft = craft->next)
@@ -1009,10 +1161,20 @@ outfit_role (CHAR_DATA * ch, char *argument)
 		}
 		else
 		{
-			sprintf (buf,   "INSERT INTO special_roles_outfit (role_id, craft) VALUES (%d, '%s')", role->id, craft_name);
+			sprintf (buf,   "INSERT INTO special_roles_outfit (role_id, craft, req_race) VALUES (%d, '%s', '%s')", role->id, craft_name, races_buf);
 			mysql_safe_query (buf);
 
-			sprintf (buf, "'%s' has been added to the outfitting tables for the role of #6'%s'#0.", craft_name, role->summary);
+			sprintf (buf, "'%s' has been added to the outfitting tables for the role of #6'%s'#0", craft_name, role->summary);
+			
+			if ( *races_buf )
+			{
+				sprintf (buf + strlen(buf), ", for all");
+				if ( *races_buf )
+					sprintf (buf + strlen(buf), " #B%s#0 characters", races_buf);
+				
+			}
+			sprintf (buf + strlen(buf), ".");
+			
 			act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
 			return;
 		}
