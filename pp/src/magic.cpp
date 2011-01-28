@@ -4323,6 +4323,36 @@ void daily_shadow_room()
 			//shadow grows up to level 6, but only if a shadow stream object is in the room
 		if (is_shadow_obj_here(room))
 		{
+			int shadow_str = room_shadow->a.room.intensity;
+			int spread_chance = number(1, 100);
+
+				//chance to grow based on shadow strength
+				//strong shadow has more chance to grow
+			switch (shadow_str) {
+				case 1: //1 in 20 chance for level 1 to grow
+					if (spread_chance > 5)
+						continue;
+					break;
+				case 2:
+					if (spread_chance > 8)
+						continue;
+					break;
+				case 3:
+					if (spread_chance > 12)
+						continue;
+					break;
+				case 4:
+					if (spread_chance > 15)
+						continue;
+					break;
+				case 5: //1 in 5 chance for level 5 to grow
+					if (spread_chance > 20)
+						continue;
+					break;
+				default:
+					break;
+			}
+			
 			for (index=0; index < MAX_SHADOW_OBJECTS; index ++)
 			{
 				
