@@ -12100,6 +12100,8 @@ read_ticket (CHAR_DATA * ch, int tick_num, int cmd)
 
 	if (!(fp = fopen (name, "r")))
 	{
+		sprintf(buf, "Ticket %d not found or mount has been unstabled.\n", tick_num);
+		send_to_char(buf, ch);
 		return;
 	}
 
@@ -12136,6 +12138,11 @@ read_ticket (CHAR_DATA * ch, int tick_num, int cmd)
 			if (loaded)
 			save_mobile (mob, fp, "HITCH", 1);	/* Extracts the mobile */
 		}
+		else
+		{
+			sprintf(buf2 + strlen(buf2), "Mount not found - Ticket data has been removed\n");
+		}
+
 
 		fclose (fp);
 		page_string (ch->desc, buf2);

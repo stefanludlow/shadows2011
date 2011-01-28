@@ -5364,7 +5364,7 @@ get_uniq_ticket (void)
 	return tn;
 }
 
-void unhitch_char (CHAR_DATA * ch, CHAR_DATA * hitch);
+
 void
 do_stable (CHAR_DATA * ch, char *argument, int cmd)
 {

@@ -11940,3 +11940,79 @@ void do_unsubscribe (CHAR_DATA * ch, char *argument, int cmd)
 	ch->petition_flags = twiddlechar->petition_flags;
 }
 
+/*****
+ * To laod a mount, with gear for a player, when you have the ticket number
+ * You need to be in the same room as the PC getting the mount
+ *
+ * syntax: loadmount <ticket number> <pc name>
+ ***********/
+void
+do_loadmount (CHAR_DATA * ch, char *argument, int cmd)
+{
+	char target_name[MAX_INPUT_LENGTH];
+	CHAR_DATA *target;
+	int ticket_num;
+	FILE *fp;
+	CHAR_DATA *back_hitch = NULL;
+	CHAR_DATA *animal;
+	char buf[MAX_STRING_LENGTH];
+	char ticket_file[MAX_STRING_LENGTH];
+	
+	argument = one_argument(argument, buf);
+	
+	if (!isdigit (*buf))
+	{
+		send_to_char ("Syntax: loadmount <ticket number> <pc name>\n", ch);
+		return;
+	}		
+	ticket_num = atoi(buf);
+	
+	
+	argument = one_argument (argument, buf);
+	
+	if (!(target =  get_char_room_vis (ch, buf)))
+	{
+		send_to_char ("No one by that name around here.\n", ch);
+		return;
+	}
+	
+	sprintf (ticket_file, TICKET_DIR "/%07d", ticket_num);
+	
+	if (!(fp = fopen (ticket_file, "r")))
+	{
+		send_to_char("That ticket does not exist. Did they already use it?", ch);
+		return;
+	}
+	
+	
+	if (is_he_here (target, target->hitchee, 0))
+	{
+		back_hitch = target->hitchee;
+		unhitch_char (target, back_hitch);
+	}
+
+	animal = load_saved_mobiles (target, ticket_file);
+	char_from_room (animal);
+	char_to_room (animal, target->in_room);
+	
+	if (!animal)
+	{
+		if (back_hitch)
+			hitch_char (target, back_hitch);
+		system_log("The animal not found in loadmount", true);
+		return;
+	}
+	
+		
+	if (back_hitch && !target->hitchee)
+		hitch_char (target, back_hitch);
+	else if (back_hitch)
+		hitch_char (target->hitchee, back_hitch);
+	
+	save_char (target, true);
+	unlink (ticket_file);
+	
+	act ("$N is now hitched to you.", false, target, 0, animal, TO_CHAR);
+		
+	return;
+}

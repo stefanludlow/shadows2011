@@ -372,6 +372,7 @@ void do_opdel (CHAR_DATA * ch, char *argument, int cmd);
 void do_opstat (CHAR_DATA * ch, char *argument, int cmd);
 void do_optype (CHAR_DATA *ch, char *argument, int cmd);
 void do_leaveprivate(CHAR_DATA* ch, char* argument, int cmd);
+void do_loadmount (CHAR_DATA * ch, char *argument, int cmd);
 void do_makeprivate (CHAR_DATA *ch, char *argument, int cmd);
 void do_mset (CHAR_DATA * ch, char *argument, int cmd);
 void do_munused (CHAR_DATA * ch, char *argument, int cmd);
@@ -1410,6 +1411,7 @@ void save_mobile (CHAR_DATA * mob, FILE * fp, char *save_reason, int extract);
 void save_attached_mobiles (CHAR_DATA * ch, int extract);
 CHAR_DATA *load_a_saved_mobile (int nVirtual, FILE * fp, bool stable);
 int hitch_char (CHAR_DATA * ch, CHAR_DATA * hitch);
+void unhitch_char (CHAR_DATA * ch, CHAR_DATA * hitch);
 void load_rooms (void);
 void job_add_affect (CHAR_DATA * ch, int type, int days, int pay_date,
 					 int cash, int count, int object_vnum, int employer);

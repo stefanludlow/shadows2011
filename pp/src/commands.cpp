@@ -440,6 +440,7 @@ const class command_data commands[] = {
 	{"givedream", do_givedream, DEAD, C_LV4},
 	{"hedit", do_hedit, DEAD, C_LV4},
 	{"hour", do_hour, DEAD, C_LV4},
+	{"loadmount", do_loadmount, DEAD, C_LV4},
 	{"log", do_log, DEAD, C_LV4},
 	{"passwd", do_passwd, DEAD, C_LV4},
 	{"plog", do_plog, DEAD, C_LV4},
