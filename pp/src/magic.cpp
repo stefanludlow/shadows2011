@@ -4420,6 +4420,8 @@ shadow_spread (ROOM_DATA * room)
 {
 	int dir;
 	int resist_chance;
+	int spread_chance;
+	int shadow_str;
 	ROOM_DIRECTION_DATA *exit;
 	OBJ_DATA * tobj;
 	ROOM_DATA * next_room;
@@ -4434,6 +4436,35 @@ shadow_spread (ROOM_DATA * room)
 	
 	resist_chance = number(1, 100);
 	curr_room_shadow = is_room_affected(room->affects, MAGIC_ROOM_SHADOW);
+	shadow_str = curr_room_shadow->a.room.intensity;
+	spread_chance = number(1, 100);
+	
+		//chance to spread based on shadow strength
+		//strong shadow has more chance to spread
+	switch (shadow_str) {
+		case 1: //1 in 20 chance for level 1 to spread
+			if (spread_chance > 5)
+				return(0);
+			break;
+		case 2:
+			if (spread_chance > 8)
+				return(0);
+			break;
+		case 3:
+			if (spread_chance > 12)
+				return(0);
+			break;
+		case 4:
+			if (spread_chance > 15)
+				return(0);
+			break;
+		case 5: //1 in 5 chance for level 5 to spread
+			if (spread_chance > 20)
+				return(0);
+			break;
+		default:
+			break;
+	}
 	
 	for (index = 0; index <6; index ++)
 	{
