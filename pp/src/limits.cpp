@@ -775,7 +775,7 @@ hourly_update (void)
 	 
 	 //12:00 noon to 12:15pm GMT or 6am EST
 
-	if ((hourday == 12) && (minday <= 15) && (minday > 0))
+	if ((hourday == 12) && (minday < 15) && (minday > 0))
 	 {
 		for (d = descriptor_list; d; d = d->next)
 			SEND_TO_Q ("\n#2Staff Announcement:#0: The daily rebooot for the server is scheduled in 15 minutes.\n\n" , d);
@@ -783,7 +783,7 @@ hourly_update (void)
 	}
 	
 	//12:15pm to 12:30pm GMT or 6am EST
-	 if ((hourday == 12) && (minday <= 30) && (minday > 15))
+	 if ((hourday == 12) && (minday < 30) && (minday > 20))
 	 {
 		 
 		 pending_reboot = true;
