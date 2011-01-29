@@ -1287,9 +1287,10 @@ skill_use (CHAR_DATA * ch, int skill, int diff_mod)
 			max = 40 + ch->skills[skill] + number (1, 60);
 			max = MIN (180, max);
 
+			//18 to 32 offline hours for INT of 10
 			if (skill <= SKILL_PARRY || skill == SKILL_DODGE) {
-				min = 2040 - (GET_INT(ch) * 50);
-				max = 3000 - (GET_INT(ch) * 60);
+				min = 1580 - (GET_INT(ch) * 50);
+				max = 2520 - (GET_INT(ch) * 60);
 			}
 
 			magic_add_affect (ch, MAGIC_SKILL_GAIN_STOP + skill,
