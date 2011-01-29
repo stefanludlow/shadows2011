@@ -2146,7 +2146,7 @@ email_acceptance (DESCRIPTOR_DATA * d)
 		return;
 	}
 
-	if (!*d->character->pc->msg)
+	if (!*d->descStr)
 	{
 		send_to_char ("No email sent!\n", d->character);
 		free_mem (date);
@@ -2180,7 +2180,7 @@ email_acceptance (DESCRIPTOR_DATA * d)
 				"\n"
 				"%s left the following comments regarding your application:\n"
 				"\n%s", MUD_NAME, tch->tname, d->character->pc->account_name,
-				d->character->pc->msg);
+				d->descStr);
 			// acct = new account (tch->pc->account_name); // redundant?
 			sprintf (email, "%s Player Guide <%s>", MUD_NAME,
 				d->acct->email.c_str ());
@@ -2198,7 +2198,7 @@ email_acceptance (DESCRIPTOR_DATA * d)
 				"\n"
 				"%s left the following comments regarding your application:\n"
 				"\n%s", MUD_NAME, tch->tname, d->character->tname,
-				d->character->pc->msg);
+				d->descStr);
 			sprintf (email, "%s <%s>", MUD_NAME, APP_EMAIL);
 			send_email (acct, NULL, email, "Your Character Application",
 				buf);
@@ -2209,7 +2209,7 @@ email_acceptance (DESCRIPTOR_DATA * d)
 		d->pending_message->info = duplicateString ("");
 		sprintf (buf, "#2Accepted:#0 %s: %s", tch->pc->account_name, tch->tname);
 		d->pending_message->subject = duplicateString (buf);
-		d->pending_message->message = duplicateString (d->character->pc->msg);
+		d->pending_message->message = duplicateString (d->descStr);
 
 		add_message (1, "Applications",
 			-5,
@@ -2229,9 +2229,9 @@ email_acceptance (DESCRIPTOR_DATA * d)
 
 		free_mem(d->pending_message);
 		d->pending_message = NULL;
-		if (d->character->pc->msg)
+		if (d->descStr)
 		{
-			free_mem (d->character->pc->msg);
+			free_mem (d->descStr);
 			d->character->pc->msg = NULL;
 		}
 		d->pending_message = NULL;
@@ -2309,7 +2309,7 @@ email_rejection (DESCRIPTOR_DATA * d)
 		return;
 	}
 
-	if (!*d->character->pc->msg)
+	if (!*d->descStr)
 	{
 		delete acct;
 		send_to_char ("No email sent!\n", d->character);
@@ -2351,7 +2351,7 @@ email_rejection (DESCRIPTOR_DATA * d)
 				"contact them - remember, they volunteer their free time to help you!\n\n"
 				"%s left the following comments regarding your application:\n"
 				"\n%s", MUD_NAME, tch->tname, d->character->pc->account_name,
-				d->character->pc->msg);
+				d->descStr);
 			sprintf (email, "%s Player Guide <%s>", MUD_NAME,
 				d->acct->email.c_str ());
 			send_email (acct, NULL, email, "Your Character Application",
@@ -2372,7 +2372,7 @@ email_rejection (DESCRIPTOR_DATA * d)
 				"\n"
 				"%s left the following comments regarding your application:\n"
 				"\n%s", MUD_NAME, tch->tname, d->character->tname,
-				d->character->pc->msg);
+				d->descStr);
 			sprintf (email, "%s <%s>", MUD_NAME, APP_EMAIL);
 			send_email (acct, NULL, email, "Your Character Application",
 				buf);
@@ -2384,7 +2384,7 @@ email_rejection (DESCRIPTOR_DATA * d)
 		d->pending_message->info = duplicateString ("");
 		sprintf (buf, "#1Declined:#0 %s: %s", tch->pc->account_name, tch->tname);
 		d->pending_message->subject = duplicateString (buf);
-		d->pending_message->message = duplicateString (d->character->pc->msg);
+		d->pending_message->message = duplicateString (d->descStr);
 
 		add_message (1, "Applications",
 			-5,
@@ -2397,9 +2397,16 @@ email_rejection (DESCRIPTOR_DATA * d)
 		free_mem(d->pending_message);
 		d->pending_message = NULL;
 
+		if (d->descStr)
+		{
+			free_mem (d->descStr);
+			d->character->pc->msg = NULL;
+		}
+		d->pending_message = NULL;
+
 		sprintf (buf,
 			"\n#6Unfortunately, your application was declined on its most recent review.\n\n%s left the following comment(s) explaining why:#0\n"
-			"\n%s", d->acct->name.c_str (), d->character->pc->msg);
+			"\n%s", d->acct->name.c_str (), d->descStr);
 		if (buf[strlen (buf) - 1] != '\n')
 			strcat (buf, "\n");
 
