@@ -8483,6 +8483,8 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 	else if (sphere == 2)
 	{
 		whoStream << gatheringPlace(45001, "The Boar's Head Inn");
+		whoStream << gatheringPlace(45280, "An Expansive Marshaling Yard");
+		whoStream << gatheringPlace(45000, "Intersection at the Boar's Head Tavern");
 	}
 	else if (sphere == 3)
 	{
