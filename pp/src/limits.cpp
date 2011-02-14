@@ -1143,19 +1143,29 @@ int
 skill_level (CHAR_DATA * ch, int skill, int diff_mod)
 {
 	int skill_lev;
+	int shadow_level;
+	int iluvatar_level;
+	int modifier;
 	OBJ_DATA *obj;
+	ROOM_DATA *room;
+	AFFECTED_TYPE *room_shadow;
+	AFFECTED_TYPE *room_iluvatar;
 	AFFECTED_TYPE *af;
 
-	if (skill >= 0) {
-		if (!(ch->skills[skill])) {
+	if (skill >= 0)
+	{
+		if (!(ch->skills[skill]))
+		{
 			return 0;
 		}
 		skill_lev = ch->skills[skill];
 	}
-	else if (skill == SKILL_OFFENSE) {
+	else if (skill == SKILL_OFFENSE)
+	{
 		skill_lev = ch->offense;
 	}
-	else {
+	else
+	{
 		throw std::runtime_error("BAD SKILL VALUE PASSED TO skill_level()");
 	}
 
@@ -1169,20 +1179,99 @@ skill_level (CHAR_DATA * ch, int skill, int diff_mod)
 	if ((af = get_affect (ch, MAGIC_AFFECT_CURSE)))
 		skill_lev -= af->a.spell.modifier;
 
-	if (get_affect(ch, AFF_SUNLIGHT_PEN) && sun_light
-		&& !(ch->room->sector_type == SECT_INSIDE || ch->room->sector_type == SECT_CAVE)  && !IS_SET (ch->room->room_flags, INDOORS)) {
+	/**
+	 * If a room has Shadow:
+	 *		there is a penalty to all non-blackbloods
+	 *
+	 * If a room has Iluvatar
+	 *		there is a bonus to Pure races
+	 *		a penalty to blackbloods
+	 *
+	 **/
+	
+	room = vtor(ch->in_room);
+	room_shadow = is_room_affected(room->affects, MAGIC_ROOM_SHADOW);
+	room_iluvatar = is_room_affected(room->affects, MAGIC_ROOM_ILUVATAR);
+	
+	if (room_shadow)
+		shadow_level = room_shadow->a.room.intensity;
+	
+	if (room_iluvatar)
+		iluvatar_level = room_iluvatar->a.room.intensity;
+	
+	if (room_shadow)
+	{
+		if (ch->race == lookup_race_id("Mountain Orc")
+			|| ch->race == lookup_race_id("Mirkwood Orc")
+			|| ch->race == lookup_race_id("Mordorian Orc")
+			|| ch->race == lookup_race_id("Troll")
+			|| ch->race == lookup_race_id("Olog-hai"))
+		{
+			skill_lev = skill_lev;  //no change
+		}
+		else //everyone else takes a penalty
+		{
+			skill_lev = skill_lev - (3 * shadow_level); 	
+		}
+	}
+	
+	
+	if (room_iluvatar)
+	{
+		if (ch->race == lookup_race_id("Mountain Orc")
+			|| ch->race == lookup_race_id("Mirkwood Orc")
+			|| ch->race == lookup_race_id("Mordorian Orc")
+			|| ch->race == lookup_race_id("Troll")
+			|| ch->race == lookup_race_id("Olog-hai"))
+		{
+			skill_lev = skill_lev - (3 * shadow_level);  //penalty
+		}
+		else if (ch->race == lookup_race_id("Avar Elf")
+				 || ch->race == lookup_race_id("Noldo Elf")
+				 || ch->race == lookup_race_id("Silvan Elf")
+				 || ch->race == lookup_race_id("Sinda Elf")
+				 || ch->race == lookup_race_id("Dwarf")
+				 || ch->race == lookup_race_id("Gondorian Dunadan")
+				 || ch->race == lookup_race_id("Arnorian Dunadan"))
+		{
+			skill_lev = skill_lev + (3 * shadow_level);  //bonus
+		}
+		
+		else //nobody else get penalties or bonuses
+		{
+			skill_lev = skill_lev;
+		}
+		
+	}
+	
+	/**
+	 * Sunlight penalty applies 
+	 *		if there is sunlight, outdoors and the room doesn't have Shadow
+	 *		If indoors, or no sunlgiht, or the room has Shadow, then there is no penalty
+	 *			(outdoors, in a Shadow room there is no penalty)
+	 **/
+	if (get_affect(ch, AFF_SUNLIGHT_PEN) 
+		&& sun_light
+		&& !(room_shadow)
+		&& !(ch->room->sector_type == SECT_INSIDE || ch->room->sector_type == SECT_CAVE)
+		&& !IS_SET (ch->room->room_flags, INDOORS))
+	{
 			int penalty = 0;
 
-			if (weather_info[ch->room->zone].clouds == CLEAR_SKY) {
+		if (weather_info[ch->room->zone].clouds == CLEAR_SKY)
+		{
 				penalty = 30;
 			}
-			else if (weather_info[ch->room->zone].clouds == LIGHT_CLOUDS) {
+		else if (weather_info[ch->room->zone].clouds == LIGHT_CLOUDS)
+		{
 				penalty = 15;
 			}
-			else if (weather_info[ch->room->zone].clouds == HEAVY_CLOUDS) {
+		else if (weather_info[ch->room->zone].clouds == HEAVY_CLOUDS)
+		{
 				penalty = 10;
 			}
-			else if (weather_info[ch->room->zone].clouds == OVERCAST) {
+		else if (weather_info[ch->room->zone].clouds == OVERCAST)
+		{
 				penalty = 5;
 			}
 

@@ -419,13 +419,22 @@ bool is_overcast (ROOM_DATA * room)
 }
 // is_sunlight_restricted
 // returns true if the character is currently suffering due to the sun.
+// changed to allow blackbloods to scan in rooms with Shadow
 // TODO: move to char.h
 bool
 is_sunlight_restricted (CHAR_DATA * ch, ROOM_DATA * room)
 {
 	bool result = false;
+	int shadow_level = 0;
+	AFFECTED_TYPE *room_shadow;
 
-	if (sun_light && (ch->affected_by & AFF_SUNLIGHT_PEN))
+	room_shadow = is_room_affected(room->affects, MAGIC_ROOM_SHADOW);
+	if (room_shadow)
+		shadow_level = room_shadow->a.room.intensity;
+	
+	if (sun_light 
+		&& get_affect(ch, AFF_SUNLIGHT_PEN)
+		&& (shadow_level > 3))
 	{
 		if (!is_overcast (ch->room)
 			|| (room && !is_overcast (room)))
