@@ -349,13 +349,14 @@ nanny_ask_password (DESCRIPTOR_DATA * d, char *argument)
 	char buf[MAX_STRING_LENGTH];
 	bool bIsBanned = false;
 
-	delete d->acct;
 
 	if (!*argument)
 	{
 		close_socket (d);
 		return;
 	}
+
+	delete d->acct;
 
 	if (strstr (argument, " "))
 	{
