@@ -5452,6 +5452,12 @@ do_stable (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+	if ((ticket_num = get_uniq_ticket ()) == -1)
+	{
+		send_to_char ("OOC:  The ticket system is broken.  Sorry.\n", ch);
+		return;
+	}
+	
 	if (!paid_for)
 	{
 		af = new AFFECTED_TYPE;
@@ -5459,16 +5465,13 @@ do_stable (CHAR_DATA * ch, char *argument, int cmd)
 		af->type = i;
 		af->a.spell.sn = animal->coldload_id;
 		af->a.spell.duration = 168;
+		af->a.spell.location = ticket_num;
 		affect_to_char (ch, af);
 		if (!is_brother (ch, keeper))
 			subtract_money (ch, 20, keeper->mob->currency_type);
 	}
 
-	if ((ticket_num = get_uniq_ticket ()) == -1)
-	{
-		send_to_char ("OOC:  The ticket system is broken.  Sorry.\n", ch);
-		return;
-	}
+	
 
 	unhitch_char (ch, animal);
 

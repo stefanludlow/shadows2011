@@ -2617,8 +2617,8 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 			&& af->type <= MAGIC_STABLING_LAST)
 		{
 			sprintf (buf,
-				"#2%5d#0   Stabling paid for ID %d, %d IC hours remaining.\n",
-				af->type, af->a.spell.sn, af->a.spell.duration);
+					 "#2%5d#0   Stabled a mount with ticket number %d, %d IC hours remaining.\n",
+					 af->type, af->a.spell.location, af->a.spell.duration);
 			send_to_char (buf, ch);
 			continue;
 		}

@@ -276,6 +276,9 @@ affect_modify (CHAR_DATA * ch, int type, int loc, int mod, int bitv,
 	if (type >= MAGIC_FIRST_SOMA && type <= MAGIC_LAST_SOMA)
 		return;
 
+	if (type >= MAGIC_STABLING_PAID && type <= MAGIC_STABLING_LAST)
+		return;
+			
 	if (type == MAGIC_GUARD)
 		return;
 
