@@ -8454,7 +8454,7 @@ void do_who (CHAR_DATA * ch, char *argument, int cmd)
 
 		whoStream << gatheringPlace(3271, "the Wardog Commons");
 		whoStream << gatheringPlace(1108, "the Battered Shield");
-		whoStream << gatheringPlace(1111, "the Gilded Lily");
+		whoStream << gatheringPlace(1111, "the Fox and Lily");
 		whoStream << gatheringPlace(3831, "the Copper Tankard Tavern");
 		whoStream << gatheringPlace(54454, "the White Hart Tavern");
 
