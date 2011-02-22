@@ -3750,6 +3750,12 @@ do_command (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
+		if (!IS_NPC(victim)) //cannot command PC - keeps them guessing who is PC and who is animated NPC
+		{
+			act ("$N is not accepting orders at the moment.", false, ch, 0, victim, TO_CHAR);
+			return;
+		}
+		
 		sprintf (buf, "#5%s#0 commands you to '%s'.\n", char_short (ch),
 			command);
 		buf[2] = toupper (buf[2]);
