@@ -4729,7 +4729,7 @@ post_to_mysql_virtual_board (DESCRIPTOR_DATA * d)
 		d->pending_message->poster);
 	result = mysql_store_result (database);
 
-	if (!result|| !mysql_num_rows (result))
+	if (!result || !mysql_num_rows (result))
 	{
 		send_to_char
 			("There seems to be a problem with the database listing.\n",

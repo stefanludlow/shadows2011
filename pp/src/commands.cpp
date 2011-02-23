@@ -272,6 +272,7 @@ const class command_data commands[] = {
 	{"typo", do_typo, DEAD,
 	C_DEL | C_HID | C_SUB | C_DOA | C_BLD | C_PAR | C_SPL},
 	{"up", do_up, FIGHT, C_HID | C_DOA | C_BLD},
+	{"unbridle", do_unbridle, STAND, 0},
 	{"unload", do_unload, SIT, C_WLK | C_HID | C_DOA}, //C_MNT |
 	{"unlock", do_unlock, SIT, C_MNT},
 	{"unhitch", do_unhitch, STAND, 0},

@@ -2582,47 +2582,9 @@ move (CHAR_DATA * ch, char *argument, int dir, int speed)
 	if (get_affect (ch, MAGIC_TOLL))
 		stop_tolls (ch);
 
-	if (*argument == '(')
-	{
-		tmp = new char[strlen(argument) + 1];
-		sprintf (buf, "%s", argument);
-		i = 1;
-		j = 0;
-		tmp[j] = '\0';
-		while (buf[i] != ')')
-		{
-			if (buf[i] == '\0')
-			{
-				send_to_char
-					("Exactly how is it that you are trying to move?\n", ch);
-				clear_moves (ch);
-				return;
-			}
-			if (buf[i] == '*')
-			{
-				send_to_char
-					("Unfortunately, the use of *object references is not allowed while moving.\n",
-					ch);
-				clear_moves (ch);
-				return;
-			}
-			if (buf[i] == '~')
-			{
-				send_to_char
-					("Unfortunately, the use of ~character references is not allowed while moving.\n",
-					ch);
-				clear_moves (ch);
-				return;
-			}
-			tmp[j++] = buf[i++];
-			tmp[j] = '\0';
-		}
-		buf[i] = '\0';
-	}
-	else
-	{
+	
 		argument = one_argument (argument, buf);
-	}
+	
 
 	move = new MOVE_DATA;
 	move->next = NULL;
@@ -2826,8 +2788,92 @@ do_move (CHAR_DATA * ch, char *argument, int dir)
 	}
 
 	if (IS_RIDER (ch))
-		ch = ch->mount;
+	{
+			//poorly trained mount 
+		if (real_skill(ch->mount, SKILL_RIDE) < 33)
+		{
+				//untrained rider - no riding at all
+				//they should not even be mounted
+			if (real_skill (ch, SKILL_RIDE) == 0)
+			{
+				sprintf (buf,
+						 "You are not sure how you mounted, but you can't make your mount move.");
+				act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+				dump_rider (ch,true);
+				return;	
+			}
+				//trained rider - 
+				//first fail means a chance to get bucked off
+				//first success - can move easily
+				//second failure means they do get dumped
+				//success on second check means reistance from mount but they can move
+			else if (!skill_use (ch, SKILL_RIDE, 0))
+			{
+				if (number(1, 100) > 50)
+				{
+					dump_rider (ch,false); //they get a skill check here
+					return;	
+				}
+				sprintf (buf,
+						 "Your mount fails to heed your signals at first, but eventually you force them in the direction  you want.");
+				act (buf, false, ch, 0, 0, TO_CHAR | _ACT_FORMAT);
+			}
+			
+		}
+			//moderatly trained mount
+		else if ((real_skill(ch->mount, SKILL_RIDE) >= 33)
+				 && (real_skill(ch->mount, SKILL_RIDE) < 50))
+		{
+			//untrained rider - can walk only, and only in safe terrain
+			if (real_skill (ch, SKILL_RIDE) == 0)
+			{
+							
+				if ((ch->pc->mount_speed > 0)  
+					|| (ch->room->sector_type == SECT_WOODS)
+					|| (ch->room->sector_type == SECT_FOREST)
+					|| (ch->room->sector_type == SECT_HILLS)
+					|| (ch->room->sector_type == SECT_MOUNTAIN)
+					|| (ch->room->sector_type == SECT_SWAMP)
+					|| (ch->room->sector_type == SECT_HEATH))
+				{
+					dump_rider (ch,true);
+					return;
+				}
 
+			}
+				//trained rider - skill learning for move -faster- than walk or difficult terrain
+			else if ((ch->pc->mount_speed > 1)
+					 || (ch->room->sector_type == SECT_WOODS)
+					 || (ch->room->sector_type == SECT_FOREST)
+					 || (ch->room->sector_type == SECT_HILLS)
+					 || (ch->room->sector_type == SECT_MOUNTAIN)
+					 || (ch->room->sector_type == SECT_SWAMP)
+					 || (ch->room->sector_type == SECT_HEATH))
+			{
+				skill_use (ch, SKILL_RIDE, 0);
+			}
+			
+			
+		}
+		
+			//well trained mount - no skill learning for trained riders
+		else if (real_skill(ch->mount, SKILL_RIDE) >= 50)
+		{
+				//untrained rider - can walk only - any terrain
+			if (real_skill (ch, SKILL_RIDE) == 0)
+			{
+				if (ch->pc->mount_speed > 0)
+				{
+					dump_rider (ch,true);
+					return;
+				}
+			}
+				
+			
+		}
+		
+		ch = ch->mount;
+	}
 	move (ch, argument, dir, 0);
 
 
@@ -6045,14 +6091,8 @@ do_mount (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (!real_skill (ch, SKILL_RIDE) && mount->skills[SKILL_RIDE] < 33)
-	{
-		act ("$N is too wild for you to even try.",
-			false, ch, 0, mount, TO_CHAR);
-		return;
-	}
-
-	if (real_skill (mount, SKILL_RIDE) < 33 && !skill_use (ch, SKILL_RIDE, 0))
+		//poorly trained mount - untrained rider - no mounting at all
+	if ((real_skill (ch, SKILL_RIDE) == 0) && (real_skill(mount, SKILL_RIDE) < 33))
 	{
 		act ("$N backs away just as you attempt to mount it.",
 			false, ch, 0, mount, TO_CHAR);
@@ -6063,7 +6103,8 @@ do_mount (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
-	if (mount->skills[SKILL_RIDE] < 90 && !skill_use (mount, SKILL_RIDE, 0))
+		//poorly trained mount - trained rider - fail skill means no mounting
+	if (!skill_use (ch, SKILL_RIDE, 0) && (real_skill(mount, SKILL_RIDE) < 33))
 	{
 		act ("You manage to straddle $N, but it quickly throws you off.",
 			false, ch, 0, mount, TO_CHAR);
@@ -6074,6 +6115,8 @@ do_mount (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+	
+	
 	act ("$n perches $mself on top of $N.", false, ch, 0, mount, TO_NOTVICT);
 	act ("You mount $N.", false, ch, 0, mount, TO_CHAR);
 	act ("$N mounts you.", false, mount, 0, ch, TO_CHAR);
@@ -6113,27 +6156,6 @@ do_dismount (CHAR_DATA * ch, char *argument, int cmd)
 	ch->mount = NULL;
 }
 
-/*
-Character          Skill       Meaning
-----------         --------    -------------------------------------
-PC               Tame        No meaning
-PC               Ride        If the mount bucks, the rider falls if his
-RIDE skill check fails.
-If RIDE skill is 0 for PC, he cannot attempt
-to mount a horse with RIDE skill < 33
-PC               Break       If PC tries to bridle a mount with no TAME:
-If PC's BREAK < 50, mount shies away, else
-If PC passes BREAK skill check:
-TAME is opened on mount, and is bridled
-else
-PC gets kicked for 2d12 and fails bridle
-NOTE:  I intended to create a break command, but
-never did, so BREAK skill isn't complete.
-mob              Tame        If mount has TAME >= 33, PC can always mount.
-If mount has 0 < TAME < 33, mount will shy bridle
-1d100 < mount's TAME * 3
-mob              Ride        If
-*/
 
 void
 do_bridle (CHAR_DATA * ch, char *argument, int cmd)
@@ -6189,11 +6211,13 @@ do_bridle (CHAR_DATA * ch, char *argument, int cmd)
 		return;
 	}
 
+		//bridling an untrained mount
 	if (!real_skill (mount, SKILL_RIDE))
 	{
 
 		if (ch->skills[SKILL_RIDE] < 30)
 		{
+			skill_use (ch, SKILL_RIDE, 0); //they learn from it
 			act ("$N shies away as attempt to slip $o onto $M.",
 				false, ch, bridle, mount, TO_CHAR);
 			return;
@@ -6212,19 +6236,35 @@ do_bridle (CHAR_DATA * ch, char *argument, int cmd)
 
 			return;
 		}
-
-		open_skill (mount, SKILL_TAME);
 	}
-
+		//anyone can try to bridle a poorly trained mount but they may take damage
 	else if (mount->skills[SKILL_RIDE] < 33)
 	{
-
+			//does mount resist for random reason?
 		if (number (1, 100) < mount->skills[SKILL_RIDE] * 3)
 		{
+			//poorly skilled or unskilled PC will take some damage
+			if (ch->skills[SKILL_RIDE] < 30)  
+			{
+				act ("$N kicks you as you attempt to bridle $M!",
+					 false, ch, 0, mount, TO_CHAR);
+				act ("You kick $N when $E tries to bridle you.",
+					 false, mount, 0, ch, TO_CHAR);
+				act ("$N kicks $n as $E attempts to bridle $M.",
+					 false, ch, 0, mount, TO_NOTVICT);
+				wound_to_char (ch, figure_location (ch, 0), dice (2, 6), 3, 0, 0,
+							   0);
+				skill_use (ch, SKILL_RIDE, 0);//chance to learn
+				return;
+			}
+			else
+			{
 			act ("$N shies away as attempt to slip $p onto $M.", false, ch,
 				bridle, mount, TO_CHAR);
+			skill_use (ch, SKILL_RIDE, 0);//chance to learn
 			return;
 		}
+	}
 	}
 
 	act ("You slip $p onto $N.", false, ch, bridle, mount, TO_CHAR);
@@ -6236,6 +6276,107 @@ do_bridle (CHAR_DATA * ch, char *argument, int cmd)
 	equip_char (mount, bridle, WEAR_NECK_1);
 
 	hitch_char (ch, mount);
+}
+void
+do_unbridle (CHAR_DATA * ch, char *argument, int cmd)
+{
+	CHAR_DATA *mount;
+	OBJ_DATA *obj;
+	OBJ_DATA *bridle;
+	char buf[MAX_STRING_LENGTH];
+	
+	argument = one_argument (argument, buf);
+	
+	if (!IS_HITCHER (ch))
+	{
+		send_to_char ("You must be hitched to the mount you want to unbridle.\n", ch);
+		return;
+	}
+	
+	if (!*buf)
+	{
+		send_to_char ("What mount do you want to unbridle?\n", ch);
+		return;
+	}
+	
+	if (!(mount = get_char_room_vis (ch, buf)))
+	{
+		send_to_char ("You don't see that animal here.\n", ch);
+		return;
+	}
+	
+	bridle = get_equip (mount, WEAR_NECK_1);
+	if (!bridle)
+	{
+		act ("$N doesn't have anything around its neck.",
+			 false, ch, bridle, mount, TO_CHAR);
+		return;
+	}
+	
+		//unbridling an untrained mount
+	if (!real_skill (mount, SKILL_RIDE))
+	{
+		
+		if (ch->skills[SKILL_RIDE] < 30)
+		{
+			skill_use (ch, SKILL_RIDE, 0); //they learn from it
+			act ("$N shies away as attempt to remove the bridle.",
+				 false, ch, 0, mount, TO_CHAR);
+			return;
+		}
+		
+		if (!skill_use (ch, SKILL_RIDE, 0))
+		{
+			act ("$N kicks you as you attempt to unbridle $M!",
+				 false, ch, 0, mount, TO_CHAR);
+			act ("You kick $N when $E tries to unbridle you.",
+				 false, mount, 0, ch, TO_CHAR);
+			act ("$N kicks $n as $E attempts to unbridle $M.",
+				 false, ch, 0, mount, TO_NOTVICT);
+			wound_to_char (ch, figure_location (ch, 0), dice (2, 12), 3, 0, 0,
+						   0);
+			
+			return;
+		}
+	}
+		//anyone can try to unbridle a poorly trained mount
+	else if (mount->skills[SKILL_RIDE] < 33)
+	{
+			//does mount resist for random reason?
+		if (number (1, 100) < mount->skills[SKILL_RIDE] * 3)
+		{
+				//poorly skilled or unskilled PC will take some damage
+			if (ch->skills[SKILL_RIDE] < 30)  
+			{
+				act ("$N kicks you as you attempt to unbridle $M!",
+					 false, ch, 0, mount, TO_CHAR);
+				act ("You kick $N when $E tries to unbridle you.",
+					 false, mount, 0, ch, TO_CHAR);
+				act ("$N kicks $n as $E attempts to unbridle $M.",
+					 false, ch, 0, mount, TO_NOTVICT);
+				wound_to_char (ch, figure_location (ch, 0), dice (2, 6), 3, 0, 0,
+							   0);
+				skill_use (ch, SKILL_RIDE, 0);//chance to learn
+				return;
+			}
+			else
+			{
+				act ("$N shies away as attempt to slip $p off $M.", false, ch,
+					 bridle, mount, TO_CHAR);
+				skill_use (ch, SKILL_RIDE, 0);//chance to learn
+				return;
+			}
+		}
+	}
+	
+	act ("You slip $p off of $N.", false, ch, bridle, mount, TO_CHAR);
+	act ("$N slips $p off of your neck.", false, mount, bridle, ch, TO_CHAR);
+	act ("$n slips $p off of $N's neck.", false, ch, bridle, mount, TO_NOTVICT);
+	
+	unequip_char (mount, bridle->location);
+	obj_to_char (bridle, ch);
+	
+	unhitch_char (ch, mount);
 }
 
 void
@@ -6255,6 +6396,7 @@ dump_rider (CHAR_DATA * rider, int forced)
 		act ("$N bucks $n off its back.",
 			true, rider, 0, rider->mount, TO_NOTVICT);
 
+		rider->mount->speed = 0;
 		rider->mount->mount = NULL;
 		rider->mount = NULL;
 

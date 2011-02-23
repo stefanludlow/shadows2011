@@ -543,6 +543,7 @@ void do_travel (CHAR_DATA * ch, char *argument, int cmd);	/* act.comm.c */
 void do_treat (CHAR_DATA * ch, char *argument, int cmd);
 void do_typo (CHAR_DATA * ch, char *argument, int cmd);
 void do_unban (CHAR_DATA * ch, char *argument, int cmd);
+void do_unbridle (CHAR_DATA * ch, char *argument, int cmd);
 void do_unlock (CHAR_DATA * ch, char *argument, int cmd);
 void do_unload (CHAR_DATA * ch, char *argument, int cmd);
 void do_unhitch (CHAR_DATA * ch, char *argument, int cmd);
@@ -1564,7 +1565,7 @@ int room_avail(ROOM_DATA *troom, OBJ_DATA *tobj, CHAR_DATA *tch);
 int force_enter (CHAR_DATA *tch, ROOM_DATA *troom);
 std::string get_date( );
 
-void read_ticket (CHAR_DATA * ch, int tick_num, int cmd);
+char *read_ticket (CHAR_DATA * ch, int tick_num, int cmd);
 void search_ticket (CHAR_DATA * ch, char * chkvalue, int searchtype);
 void delete_ticket (CHAR_DATA * ch, int tick_num);
 

@@ -11917,6 +11917,7 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 {
 	char buf[AVG_STRING_LENGTH];
 	char buf2[AVG_STRING_LENGTH];
+	char read_buf[AVG_STRING_LENGTH];
 	char f_tick[AVG_STRING_LENGTH];
 	char l_tick[AVG_STRING_LENGTH];
 	int first_tick;
@@ -11978,8 +11979,16 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 		//browse_ticket(ch, first_tick, last_tick);
 		for (tick_num = first_tick; tick_num <= last_tick; tick_num ++)
 		{
-			read_ticket(ch, tick_num, 0);
+			sprintf(read_buf + strlen(read_buf),"%s \n", read_ticket(ch, tick_num,0));
+			if (strlen (read_buf) > MAX_STRING_LENGTH - 512)
+			{
+				strcat (read_buf,
+						"\n#1There were more tickets than could be displayed.#0\n\n");
+				break;
+			}
 		};
+		page_string (ch->desc, read_buf);
+		return;
 
 	} //if browse
 
@@ -12002,7 +12011,11 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 			return;
 		}
 
-		read_ticket(ch, tick_num, 1);
+		sprintf(read_buf + strlen(read_buf),"%s \n", read_ticket(ch, tick_num,1));
+		page_string (ch->desc, read_buf);
+		return;
+
+		
 	}//read
 
 
@@ -12084,7 +12097,7 @@ do_ticket (CHAR_DATA * ch, char *argument, int cmd)
 	return;
 }
 
-void
+char *  
 read_ticket (CHAR_DATA * ch, int tick_num, int cmd)
 {
 
@@ -12103,8 +12116,7 @@ read_ticket (CHAR_DATA * ch, int tick_num, int cmd)
 	if (!(fp = fopen (name, "r")))
 	{
 		sprintf(buf, "Ticket %d not found or mount has been unstabled.\n", tick_num);
-		send_to_char(buf, ch);
-		return;
+		return(buf);
 	}
 
 	sprintf(buf2, "\nTicket number: %d\n", tick_num);
@@ -12121,8 +12133,7 @@ read_ticket (CHAR_DATA * ch, int tick_num, int cmd)
 			fclose (fp);
 			system_log ("The ticket system is broken, read_ticket() - mob", true);
 			sprintf(buf2 + strlen(buf2), "Bad file format-mob\n");
-			send_to_char(buf2, ch);
-			return;
+			return(buf2);
 		}
 
 		mob = load_a_saved_mobile (nVirtual, fp, true);
@@ -12132,7 +12143,7 @@ read_ticket (CHAR_DATA * ch, int tick_num, int cmd)
 			loaded = 1;
 			sprintf(buf2 + strlen(buf2), "Vnum: %d \nNamed: %s \nClans: %s \nOwner: %s \nStabled at: %s (%d) \n", mob->mob->nVirtual, mob->name, mob->clans, mob->mob->owner, vtor(mob->in_room)->name, mob->in_room);
 
-			if ((mob->equip) && (cmd == 1))
+			if (mob->equip && cmd == 1)
 			{
 				show_char_to_char (mob, ch, 1); //shows description and gear
 			}
@@ -12147,13 +12158,12 @@ read_ticket (CHAR_DATA * ch, int tick_num, int cmd)
 
 
 		fclose (fp);
-		page_string (ch->desc, buf2);
-		return;
+		return (buf2);
+		
 	}
 
 	fclose (fp);
-	page_string (ch->desc, buf2);
-	return;
+	return (buf2);
 }
 
 
