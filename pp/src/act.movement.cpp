@@ -1779,6 +1779,8 @@ exit_room (CHAR_DATA * ch, int dir, int flags, int leave_time,
 			sprintf (buf, "$n starts %s $N %s.",
 				mount_speeds_ing[speed], dirs[dir]);
 			act (buf, false, rider, 0, mount, TO_NOTVICT);
+			hitches_follow (ch->mount, dir, leave_time, arrive_time);
+			followers_follow (ch->mount, dir, leave_time, arrive_time);
 		}
 
 		if (IS_SET (flags, MF_SNEAK))
