@@ -6241,7 +6241,7 @@ do_bridle (CHAR_DATA * ch, char *argument, int cmd)
 	else if (mount->skills[SKILL_RIDE] < 33)
 	{
 			//does mount resist for random reason?
-		if (number (1, 100) < mount->skills[SKILL_RIDE] * 3)
+		if (number (1, 100) > mount->skills[SKILL_RIDE] * 3)
 		{
 			//poorly skilled or unskilled PC will take some damage
 			if (ch->skills[SKILL_RIDE] < 30)  
@@ -6343,7 +6343,7 @@ do_unbridle (CHAR_DATA * ch, char *argument, int cmd)
 	else if (mount->skills[SKILL_RIDE] < 33)
 	{
 			//does mount resist for random reason?
-		if (number (1, 100) < mount->skills[SKILL_RIDE] * 3)
+		if (number (1, 100) > mount->skills[SKILL_RIDE] * 3)
 		{
 				//poorly skilled or unskilled PC will take some damage
 			if (ch->skills[SKILL_RIDE] < 30)  
