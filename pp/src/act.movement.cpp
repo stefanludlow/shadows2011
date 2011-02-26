@@ -1779,6 +1779,7 @@ exit_room (CHAR_DATA * ch, int dir, int flags, int leave_time,
 			sprintf (buf, "$n starts %s $N %s.",
 				mount_speeds_ing[speed], dirs[dir]);
 			act (buf, false, rider, 0, mount, TO_NOTVICT);
+			
 			hitches_follow (ch->mount, dir, leave_time, arrive_time);
 			followers_follow (ch->mount, dir, leave_time, arrive_time);
 		}
@@ -2585,8 +2586,47 @@ move (CHAR_DATA * ch, char *argument, int dir, int speed)
 		stop_tolls (ch);
 
 	
+	if (*argument == '(')
+	{
+		tmp = new char[strlen(argument) + 1];
+		sprintf (buf, "%s", argument);
+		i = 1;
+		j = 0;
+		tmp[j] = '\0';
+		while (buf[i] != ')')
+		{
+			if (buf[i] == '\0')
+			{
+				send_to_char
+				("Exactly how is it that you are trying to move?\n", ch);
+				clear_moves (ch);
+				return;
+			}
+			if (buf[i] == '*')
+			{
+				send_to_char
+				("Unfortunately, the use of *object references is not allowed while moving.\n",
+				 ch);
+				clear_moves (ch);
+				return;
+			}
+			if (buf[i] == '~')
+			{
+				send_to_char
+				("Unfortunately, the use of ~character references is not allowed while moving.\n",
+				 ch);
+				clear_moves (ch);
+				return;
+			}
+			tmp[j++] = buf[i++];
+			tmp[j] = '\0';
+		}
+		buf[i] = '\0';
+	}
+	else
+	{
 		argument = one_argument (argument, buf);
-	
+	}
 
 	move = new MOVE_DATA;
 	move->next = NULL;
