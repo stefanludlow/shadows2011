@@ -1233,7 +1233,10 @@ raw_kill (CHAR_DATA * ch)
 					sigsegv (SIGSEGV);
 				**/
 				}
+				else
+				{
 				tch->next_fighting = ch->next_fighting;
+				}
 		}
 
 		ch->next_fighting = 0;
