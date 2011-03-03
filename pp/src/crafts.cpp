@@ -1238,6 +1238,8 @@ do_addcraft (CHAR_DATA * ch, char *argument, int cmd)
 		af->a.craft->phase = NULL;
 		af->a.craft->target_ch = NULL;
 		af->a.craft->target_obj = NULL;
+		af->a.craft->skill_check = 0;
+		af->a.craft->timer = 0;
 	}
 
 	send_to_char ("Craft(s) added.\n", ch);
