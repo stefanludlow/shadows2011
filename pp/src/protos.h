@@ -984,6 +984,7 @@ OBJ_DATA *get_object_in_equip_vis (CHAR_DATA * ch, char *arg,
 void gain_condition (CHAR_DATA * ch, int condition, int value);
 void npc_evasion (CHAR_DATA * ch, int dir);
 void refresh_map (void);
+void string_add (DESCRIPTOR_DATA * d, char *str);
 void page_string (struct descriptor_data *d, const char *str);
 int save_objs (CHAR_DATA * ch, int zone);
 int save_rooms (CHAR_DATA * ch, int zone);
