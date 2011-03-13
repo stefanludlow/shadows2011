@@ -1607,71 +1607,103 @@ display_hobbitmail_inbox (DESCRIPTOR_DATA * d, account  *acct)
 }
 
 void
-nanny_composing_message (DESCRIPTOR_DATA * d, char *argument)
+	nanny_composing_message (DESCRIPTOR_DATA * d, char *argument)
 {
 	DESCRIPTOR_DATA *td;
 	MUDMAIL_DATA *message;
 	account *acct = NULL;
 	time_t current_time;
 	char date[AVG_STRING_LENGTH];
+	bool terminate=false;
 
-	current_time = time (0);
-	ctime_r (&current_time, date);
-	if (strlen (date) > 1)
-		date[strlen (date) - 1] = '\0';
-
-	message = new MUDMAIL_DATA;
-	message->from = duplicateString (d->pending_message->poster);
-	message->subject = duplicateString (d->pending_message->subject);
-	message->message = duplicateString (argument);
-	message->from_account = duplicateString (d->acct->name.c_str ());
-	message->date = duplicateString (date);
-	message->flags = 0;
-	message->target = duplicateString (d->pending_message->target);
-
-	acct = new account (d->stored);
-
-	save_hobbitmail_message (acct, message);
-
-	free_mem (message->from);
-	free_mem (message->subject);
-	free_mem (message->message);
-	free_mem (message->from_account);
-	free_mem (message->date);
-	free_mem (message); // MUDMAIL_DATA*
-
-	free_mem(d->pending_message);
-	d->pending_message = NULL;
-
-	if (!acct->is_registered ())
+	//check for termination and send if so
+	if ((strncmp(argument,"@",1)==0) && strlen(argument)==1)
 	{
-		SEND_TO_Q
-			("#1Your message was not delivered; there was an error.#0\n\n", d);
+		current_time = time (0);
+		ctime_r (&current_time, date);
+		if (strlen (date) > 1)
+			date[strlen (date) - 1] = '\0';
+
+		message = new MUDMAIL_DATA;
+		message->from = duplicateString (d->pending_message->poster);
+		message->subject = duplicateString (d->pending_message->subject);
+		message->message = duplicateString (argument);
+		message->from_account = duplicateString (d->acct->name.c_str ());
+		message->date = duplicateString (date);
+		message->flags = 0;
+		message->target = duplicateString (d->pending_message->target);
+
+		acct = new account (d->stored);
+
+		save_hobbitmail_message (acct, message);
+
+		free_mem (message->from);
+		free_mem (message->subject);
+		free_mem (message->message);
+		free_mem (message->from_account);
+		free_mem (message->date);
+		free_mem (message); // MUDMAIL_DATA*
+
+		free_mem(d->pending_message);
+		d->pending_message = NULL;
+
+		if (!acct->is_registered ())
+		{
+			SEND_TO_Q
+				("#1Your message was not delivered; there was an error.#0\n\n", d);
+		}
+		else
+		{
+			SEND_TO_Q
+				("#2Thanks! Your Hobbit-Mail has been delivered to the specified account.#0\n\n",
+				d);
+			for (td = descriptor_list; td; td = td->next)
+			{
+				if (!td->acct || td->acct->name.empty () || !td->character
+					|| td->connected != CON_PLYNG)
+					continue;
+				if (str_cmp (td->acct->name.c_str (), acct->name.c_str ()) == 0)
+					SEND_TO_Q
+					("#6\nA new Hobbit-Mail has arrived for your account!#0\n", td);
+			}
+		}
+
+		delete acct;
+
+		d->stored = duplicateString ("");
+
+		display_hobbitmail_inbox (d, d->acct);
+
+		d->connected = CON_MAIL_MENU;
 	}
 	else
 	{
-		SEND_TO_Q
-			("#2Thanks! Your Hobbit-Mail has been delivered to the specified account.#0\n\n",
-			d);
-		for (td = descriptor_list; td; td = td->next)
-		{
-			if (!td->acct || td->acct->name.empty () || !td->character
-				|| td->connected != CON_PLYNG)
-				continue;
-			if (str_cmp (td->acct->name.c_str (), acct->name.c_str ()) == 0)
-				SEND_TO_Q
-				("#6\nA new Hobbit-Mail has arrived for your account!#0\n", td);
-		}
+		//otherwise append the line and keep going.
+		string_add(d, argument);
+	}
+}
+
+void
+post_hmail (DESCRIPTOR_DATA * d)
+{
+	CHAR_DATA *ch;
+	ROOM_DATA *room;
+
+	ch = d->character;
+	room = vtor (ch->delay_info1);
+	ch->delay_info1 = 0;
+
+	if (!d->pending_message->message)
+	{
+		send_to_char ("No room description posted.\n", ch);
+		return;
 	}
 
-	delete acct;
-
-	d->stored = duplicateString ("");
-
-	display_hobbitmail_inbox (d, d->acct);
-
-	d->connected = CON_MAIL_MENU;
+	room->description = duplicateString (d->pending_message->message);
+	free_mem(d->pending_message);
+	d->pending_message = NULL;
 }
+
 
 void
 nanny_compose_message (DESCRIPTOR_DATA * d, char *argument)
@@ -1707,6 +1739,7 @@ nanny_compose_message (DESCRIPTOR_DATA * d, char *argument)
 	d->max_str = MAX_STRING_LENGTH;
 	d->connected = CON_COMPOSING_MESSAGE;
 }
+
 
 void
 nanny_compose_subject (DESCRIPTOR_DATA * d, char *argument)
