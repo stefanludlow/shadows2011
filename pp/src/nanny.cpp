@@ -1627,7 +1627,7 @@ void
 		message = new MUDMAIL_DATA;
 		message->from = duplicateString (d->pending_message->poster);
 		message->subject = duplicateString (d->pending_message->subject);
-		message->message = duplicateString (argument);
+		message->message = duplicateString (d->pending_message->message);
 		message->from_account = duplicateString (d->acct->name.c_str ());
 		message->date = duplicateString (date);
 		message->flags = 0;
