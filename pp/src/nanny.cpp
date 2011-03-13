@@ -1680,6 +1680,9 @@ void
 	{
 		//otherwise append the line and keep going.
 		string_add(d, argument);
+
+		//indicate that it was received by sending another prompt
+		SEND_TO_Q("]\n",d);
 	}
 }
 
@@ -1733,6 +1736,7 @@ nanny_compose_message (DESCRIPTOR_DATA * d, char *argument)
 	SEND_TO_Q
 		("hit ENTER again to send and return to the main Hobbit-Mail menu.#0\n\n",
 		d);
+	SEND_TO_Q ("1-------10--------20--------30--------40--------50--------60--------70--------80\n]\n", d)
 
 	d->pending_message->message = NULL;
 	d->descStr = d->pending_message->message;
