@@ -3048,6 +3048,9 @@ charstat (CHAR_DATA * ch, char *name, bool bPCsOnly)
 	/**************************/
 	if (k->shop && IS_SET (k->flags, FLAG_KEEPER))
 	{
+	  sprintf (buf, "  #2Currency#0: %d\n", k->mob->currency_type);
+	  send_to_char(buf, ch);
+
 		sprintf (buf, "  #2Shop Rm:#0  %5d\n", k->shop->shop_vnum);
 		send_to_char (buf, ch);
 

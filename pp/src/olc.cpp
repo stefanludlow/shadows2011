@@ -8898,7 +8898,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			if (!*buf)
 			{
 				send_to_char
-					("Which currency type should they deal in? (black, copper, engren)\n",
+					("Which currency type should they deal in? (black, copper, engren, harad, northman)\n",
 					ch);
 				return;
 			}
@@ -8941,7 +8941,7 @@ do_mset (CHAR_DATA * ch, char *argument, int cmd)
 			else
 			{
 				send_to_char
-					("Specify Orcish, Gondorian, Haradaic or Numenorean currency.\n", ch);
+					("Specify Orcish, Gondorian, Haradaic, Numenorean, or Northman currency.\n", ch);
 				return;
 			}
 		}
